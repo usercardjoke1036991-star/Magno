@@ -23,11 +23,15 @@
       "edgeToEdgeEnabled": true,
       "package": "com.magnotechnologies.magno"
     },
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "extra": {
       "eas": {
-        "projectId": "snack-b5941bc9-5bb9-4661-98b6-d9948ed34341"
+        "projectId": "0a9b20f0-900a-4d35-8541-14b6202d84f5"
       }
-    }
+    },
+    "owner": "magnotechnologies"
   }
 }
