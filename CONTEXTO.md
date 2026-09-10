@@ -61,19 +61,22 @@ Magno/
 
 ---
 
-## Niveles de crédito (contrato)
-| Nivel | Principal | Plazo | Tasa base |
-|------:|----------:|------:|----------:|
-| 1 | 100 USDT | 7 días | 5% |
-| 2 | 250 USDT | 14 días | 8% |
-| 3 | 500 USDT | 21 días | 10% |
-| 4 | 1.000 USDT | 30 días | 12% |
-| 5 | 2.500 USDT | 30 días | 12% |
-| 6 | 5.000 USDT | 45 días | 15% |
-| 7 | 10.000 USDT | 45 días | 15% |
-| 8 | 25.000 USDT | 50 días | 15% |
-| 9 | 50.000 USDT | 50 días | 15% |
-| 10 | 100.000 USDT | 50 días | 15% |
+## Niveles de crédito (fuente: `constants/loanTiers.ts`)
+| Nivel | Nombre | Principal | Plazo | Interés (bps) | Cuotas | Préstamos previos |
+|------:|:-------|----------:|------:|--------------:|:------:|:-----------------:|
+| 1 | Semilla | **$1 USDT** | 7 días | 10 000 bps (100%) | 1 | — |
+| 2 | Inicial | **$2 USDT** | 10 días | 10 000 bps (100%) | 1 | 3 pagados |
+| 3 | Micro | **$5 USDT** | 15 días | 8 000 bps (80%) | 1 | 5 pagados |
+| 4 | Plus | **$10 USDT** | 20 días | 7 000 bps (70%) | 1 | 5 pagados |
+| 5 | Avance | **$20 USDT** | 25 días | 5 000 bps (50%) | 1 | 5 pagados |
+| 6 | Crecimiento | **$35 USDT** | 30 días | 5 714 bps (~57%) | 1 | 5 pagados |
+| 7 | Escala | **$50 USDT** | 35 días | 4 000 bps (40%) | 2 | 5 pagados |
+| 8 | Avanzado | **$60 USDT** | 40 días | 5 000 bps (50%) | 3 | 5 pagados |
+| 9 | Elite | **$80 USDT** | 45 días | 5 000 bps (50%) | 3 | 5 pagados |
+| 10 | Máximo | **$100 USDT** | 50 días | 5 000 bps (50%) | 3 | — (nivel final) |
+
+> Los bps son tasa plana sobre el principal por el plazo del préstamo (no APR anual).
+> Niveles 7–10 se pagan en cuotas. A partir del nivel 7 se habilitan automáticamente 2 o 3 pagos.
 
 ---
 
