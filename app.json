@@ -1,28 +1,75 @@
 {
   "expo": {
-    "name": "Magno",
+    "name": "Quatrivium Credit",
     "slug": "magno",
-    "version": "1.0.0",
+    "scheme": "quatrivium",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#07150F"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.quatrivium.credit",
+      "associatedDomains": ["applinks:quatriviumcredit.app", "applinks:www.quatriviumcredit.app"]
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#07150F"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.magnotechnologies.magno"
+      "package": "com.quatrivium.credit",
+      "allowBackup": false,
+      "usesCleartextTraffic": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "category": ["BROWSABLE", "DEFAULT"],
+          "data": [
+            {
+              "scheme": "https",
+              "host": "quatriviumcredit.app",
+              "pathPrefix": "/invite"
+            },
+            {
+              "scheme": "https",
+              "host": "www.quatriviumcredit.app",
+              "pathPrefix": "/invite"
+            }
+          ]
+        }
+      ]
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Quatrivium Credit usa su foto para el perfil de referidos.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#146C2E",
+          "defaultChannel": "quatrivium-debt"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Quatrivium Credit usa Face ID o la huella para desbloquear la aplicación."
+        }
+      ]
+    ],
     "platforms": [
       "ios",
       "android"
@@ -30,7 +77,8 @@
     "extra": {
       "eas": {
         "projectId": "0a9b20f0-900a-4d35-8541-14b6202d84f5"
-      }
+      },
+      "supportsRTL": true
     },
     "owner": "magnotechnologies"
   }

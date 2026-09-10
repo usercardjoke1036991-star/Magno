@@ -1,0 +1,268 @@
+---
+description: Detector automático de contexto de proyecto - Se activa en cada mensaje para adaptar respuestas al tipo de proyecto
+alwaysApply: true
+---
+
+# 🎯 DETECTOR DE CONTEXTO DE PROYECTO
+
+## ACTIVACIÓN: Primero en cada mensaje del usuario
+
+Antes de responder cualquier cosa, detecta silenciosamente el contexto leyendo los archivos del workspace.
+
+---
+
+## ALGORITMO DE DETECCIÓN (ejecutar en orden)
+
+### Nivel 1: Detección por archivos indicadores
+```
+SI existe build.gradle O AndroidManifest.xml:
+    → CONTEXTO = "Android App"
+    → LENGUAJE = "Kotlin/Java"
+    → HERRAMIENTAS = [Gradle, ADB, Android Studio]
+
+SI existe *.mq5 O *.mq4 O *.mqh:
+    → CONTEXTO = "Bot de Trading MQL"
+    → LENGUAJE = "MQL4/MQL5"
+    → HERRAMIENTAS = [MetaTrader 5, MetaEditor]
+    → RIESGO_ESPECIAL = true  # Dinero real involucrado
+
+SI existe package.json:
+    → leer package.json
+    → SI dependencies incluye "react-native": CONTEXTO = "React Native App"
+    → SI dependencies incluye "next": CONTEXTO = "Next.js Web App"
+    → SI dependencies incluye "react": CONTEXTO = "React Web App"
+    → SI dependencies incluye "express"/"fastify": CONTEXTO = "Node.js API"
+    → SINO: CONTEXTO = "Node.js Project"
+
+SI existe requirements.txt O pyproject.toml O setup.py:
+    → leer requirements.txt
+    → SI contiene "django"/"flask"/"fastapi": CONTEXTO = "Python Web API"
+    → SI contiene "tensorflow"/"torch"/"sklearn": CONTEXTO = "ML/AI Project"
+    → SI contiene "ccxt"/"binance"/"alpaca": CONTEXTO = "Python Trading Bot"
+    → SI contiene "selenium"/"playwright": CONTEXTO = "Python Automation/Scraper"
+    → SINO: CONTEXTO = "Python Script/App"
+
+SI existe Cargo.toml: CONTEXTO = "Rust Project"
+SI existe go.mod: CONTEXTO = "Go Project"
+SI existe *.sln O *.csproj: CONTEXTO = "C#/.NET Project"
+```
+
+### Nivel 2: Detección por estructura de carpetas
+```
+SI existe /app/src/main/java/ O /app/src/main/kotlin/:
+    → Confirma CONTEXTO = Android
+
+SI existe /src/components/ O /pages/ O /app/:
+    → Confirma CONTEXTO = Web Frontend
+
+SI existe /tests/ O /test/ O /__tests__/:
+    → TIENE_TESTS = true (informar si los tests pasan)
+
+SI existe /.github/workflows/:
+    → TIENE_CI = true (verificar que el workflow esté correcto)
+```
+
+### Nivel 3: Detección por mensajes del usuario
+```
+Si el usuario menciona palabras clave, ajusta el contexto:
+- "APK", "Android", "Activity", "Fragment", "Gradle" → Android
+- "EA", "Expert Advisor", "MetaTrader", "MT5", "OnTick", "OrderSend" → MQL5
+- "componente", "página", "hook de React", "useState" → React/Web
+- "endpoint", "API REST", "FastAPI", "Django" → Python Web
+- "modelo", "entrenamiento", "dataset", "accuracy" → ML/AI
+- "bot", "trading", "backtest", "estrategia" → Trading Bot
+```
+
+---
+
+## COMPORTAMIENTO ADAPTADO POR CONTEXTO
+
+### 🤖 Contexto MQL5/Trading Bot
+- **SIEMPRE** verificar lógica de riesgo antes de aplicar cambios
+- Advertir si se detecta ausencia de StopLoss
+- Verificar NormalizeDouble() en cálculos de volumen
+- Recordar que los errores aquí tienen **impacto financiero real**
+- Sugerir backtesting antes de usar en cuenta real
+
+### 📱 Contexto Android
+- Verificar compatibilidad de API level
+- Detectar operations en UI thread que deberían ser asíncronas
+- Validar permisos en AndroidManifest
+- Verificar que el Gradle sync esté correcto
+
+### 🌐 Contexto Web (React/Next/Node)
+- Verificar que las llamadas fetch/axios tengan try/catch
+- Detectar re-renders innecesarios en React
+- Validar tipos de TypeScript si tsconfig.json existe
+- Verificar variables de entorno en .env.example
+
+### 🐍 Contexto Python
+- Detectar imports no utilizados
+- Verificar manejo de excepciones en código I/O
+- Validar que credenciales NO estén hardcodeadas
+- Verificar compatibilidad de versión Python (3.9+)
+
+### 🤖 Contexto ML/AI
+- Verificar que el dataset esté correctamente dividido (train/val/test)
+- Detectar data leakage potencial
+- Verificar que el modelo se guarde/cargue correctamente
+- Alertar sobre overfitting obvio
+
+---
+
+## INFORME DE CONTEXTO (mostrar solo cuando es útil)
+
+Cuando el contexto detectado sea relevante para la tarea, informar brevemente:
+```
+📍 Contexto detectado: [TIPO_PROYECTO]
+   Stack: [tecnologías detectadas]
+   Protocolo QA activo: [verificaciones específicas del tipo]
+```
+
+No mostrar esto en cada mensaje - solo cuando sea la primera vez en la sesión o cuando cambie el contexto.
+
+---
+
+## INTEGRACIÓN CON QA AUTÓNOMO
+
+Tras detectar el contexto, el sistema de QA autónomo sabe:
+1. Qué archivos son críticos para monitorear
+2. Qué errores son específicos del stack
+3. Qué herramientas usar para verificar el código
+4. El nivel de riesgo del proyecto (trading = máximo riesgo)
+
+---
+
+## 🚀 CREACIÓN AUTOMÁTICA DE PROYECTOS (sin especificar --tipo)
+
+### ACTIVACIÓN: Cuando el usuario describa una idea en lenguaje natural
+
+Detecta frases de intención de creación:
+```
+"quiero hacer", "voy a crear", "necesito un", "hazme un", "crea un proyecto",
+"nuevo proyecto", "quiero empezar", "necesito crear", "quiero construir"
+```
+
+### ALGORITMO DE DETECCIÓN DE TIPO POR DESCRIPCIÓN
+
+Cuando se detecte una intención de creación, mapea la descripción al tipo de proyecto:
+
+| Si el usuario menciona... | → Tipo | → Flag |
+|---|---|---|
+| APK / app móvil / Android / iOS / Swift / Flutter / Activity | `android` | `--tipo android` |
+| Sitio web / landing page / tienda online / e-commerce / dashboard / frontend / React / Vue / Angular / Next.js / Nuxt / Svelte / Electron | `node` | `--tipo node` |
+| Bot de trading / Expert Advisor / MetaTrader / MT5 / MQL / forex / estrategia de trading | `mql5` | `--tipo mql5` |
+| API REST / GraphQL / backend / servidor / FastAPI / Flask / Django / bot de Telegram / bot de Discord / scraper / crawler / análisis de datos / IA / ML / dataset / modelo / automatización / game / juego / Unity | `python` | `--tipo python` |
+| Cualquier otra cosa no clasificada | `python` | `--tipo python` |
+
+### COMPORTAMIENTO OBLIGATORIO DEL AGENTE
+
+1. **DETECTA el tipo** automáticamente a partir de la descripción del usuario.
+2. **GENERA el nombre** del proyecto si el usuario no lo ha indicado (usa PascalCase, sin espacios, en inglés o español).
+3. **SUGIERE o EJECUTA** el comando exacto:
+   ```powershell
+   python crear_proyecto.py NombreProyecto --tipo TIPO
+   ```
+4. **NUNCA preguntes el tipo** al usuario. Solo pregunta el nombre si es completamente ambiguo.
+5. Si el nombre ya indica el tipo (ej. "BotTrading"), usa `auto` (omite `--tipo`):
+   ```powershell
+   python crear_proyecto.py BotTrading
+   ```
+
+### EJEMPLOS DE COMPORTAMIENTO ESPERADO
+
+```
+Usuario: "quiero hacer una tienda online"
+Agente:  Tipo detectado → node
+         Comando: python crear_proyecto.py TiendaOnline --tipo node
+
+Usuario: "necesito un bot para MT5 que opere en oro"
+Agente:  Tipo detectado → mql5
+         Comando: python crear_proyecto.py BotOroMT5 --tipo mql5
+
+Usuario: "hazme un script para analizar datos de ventas"
+Agente:  Tipo detectado → python
+         Comando: python crear_proyecto.py AnalizadorVentas --tipo python
+
+Usuario: "voy a crear una app móvil para delivery"
+Agente:  Tipo detectado → android
+         Comando: python crear_proyecto.py AppDelivery --tipo android
+
+Usuario: "crea el proyecto MiBotForex"
+Agente:  El nombre contiene "Forex" → auto-detect detectará mql5
+         Comando: python crear_proyecto.py MiBotForex
+
+Usuario: "quiero hacer un bot de Discord"
+Agente:  "discord" → detecta python (bot no-trading)
+         Comando: python crear_proyecto.py BotDiscord --tipo python
+
+Usuario: "necesito un scraper para analizar precios"
+Agente:  "scraper"/"analisis" → detecta python
+         Comando: python crear_proyecto.py ScraperPrecios --tipo python
+
+Usuario: "quiero una API REST con FastAPI"
+Agente:  "api"/"fastapi"/"rest" → detecta python
+         Comando: python crear_proyecto.py ApiRest --tipo python
+
+Usuario: "quiero hacer un dashboard con Vue"
+Agente:  "vue"/"dashboard" → detecta node
+         Comando: python crear_proyecto.py DashboardVue --tipo node
+```
+
+---
+
+## 🌐 MANEJO DE TIPOS NO ESTÁNDAR
+
+### ACTIVACIÓN: Cuando el usuario describe algo completamente diferente
+
+Proyectos que no encajan perfectamente en ningún tipo (videojuego 3D, firmware Arduino, extensión de Chrome, etc.):
+
+### ALGORITMO DE FALLBACK INTELIGENTE
+
+```
+SI el usuario describe un videojuego 3D / motor de juego / shader:
+    → Tipo más cercano: python (scripts de herramientas, pipelines de assets)
+    → Explicación: "Usaré Python como base para scripts y herramientas del juego"
+    → QA adaptado: verificar estructura de carpetas assets/, src/, tools/
+
+SI el usuario describe una extensión de Chrome / Firefox / VSCode:
+    → Tipo más cercano: node (JavaScript/TypeScript es el lenguaje nativo)
+    → Explicación: "Las extensiones de navegador usan JS/TS, usaré node como base"
+    → QA adaptado: verificar manifest.json, background scripts
+
+SI el usuario describe firmware de Arduino / microcontrolador / embebido:
+    → Tipo más cercano: python (para scripts de build y flasheo, no el firmware en sí)
+    → Explicación: "El firmware es C++, pero gestiono el proyecto con Python"
+    → QA adaptado: verificar Makefile, scripts de build
+
+SI el usuario describe un proyecto Rust / Go / C# / .NET:
+    → Tipo más cercano: python (fallback genérico para CI/CD)
+    → Explicación: "No hay tipo nativo para [lenguaje], creo estructura base con Python"
+    → QA adaptado: solo verificaciones universales (gitignore, CI/CD)
+
+SI el usuario describe algo completamente irreconocible:
+    → Tipo: python (más versátil como fallback universal)
+    → Explicación obligatoria al usuario
+```
+
+### COMPORTAMIENTO OBLIGATORIO PARA TIPOS NO ESTÁNDAR
+
+1. **ELIGE el tipo más cercano** sin preguntar al usuario
+2. **EXPLICA brevemente** qué tipo elegiste y por qué (1 línea)
+3. **ADAPTA el protocolo QA** al contexto real aunque el tipo no sea perfecto:
+   - Omite verificaciones que no apliquen (ej: no verificar StopLoss en un juego)
+   - Añade verificaciones contextuales si las conoces
+4. **SUGIERE** qué estructura de carpetas sería apropiada para ese tipo de proyecto
+
+### EJEMPLO DE RESPUESTA PARA TIPO NO ESTÁNDAR
+
+```
+Usuario: "quiero hacer un firmware para un ESP32"
+Agente:
+  📍 Tipo no estándar detectado: Firmware ESP32 (C++/Arduino)
+  → Tipo base elegido: python (scripts de build y automatización)
+  → Razón: No existe tipo 'arduino' nativo, pero Python gestiona CI/CD y flasheo
+  → Comando: python crear_proyecto.py FirmwareESP32 --tipo python
+  → Nota: El código C++ del firmware irá en src/; Python solo para herramientas
+  → QA adaptado: verificará estructura de carpetas y scripts de build
+```

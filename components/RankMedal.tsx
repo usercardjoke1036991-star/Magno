@@ -1,0 +1,60 @@
+import React from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { getRankForLevel, type RankStyle } from '../constants/ranks';
+
+const RANK_LOGOS = {
+  1: require('../assets/ranks/1.png'),
+  2: require('../assets/ranks/2.png'),
+  3: require('../assets/ranks/3.png'),
+  4: require('../assets/ranks/4.png'),
+  5: require('../assets/ranks/5.png'),
+  6: require('../assets/ranks/6.png'),
+  7: require('../assets/ranks/7.png'),
+  8: require('../assets/ranks/8.png'),
+  9: require('../assets/ranks/9.png'),
+  10: require('../assets/ranks/10.png'),
+} as const;
+
+interface RankMedalProps {
+  level: number;
+  size?: number;
+  rank?: RankStyle;
+  dimmed?: boolean;
+  showLabel?: boolean;
+  label?: string;
+}
+
+export const RankMedal: React.FC<RankMedalProps> = ({
+  level,
+  size = 44,
+  rank,
+  dimmed = false,
+  showLabel = false,
+  label,
+}) => {
+  const style = rank || getRankForLevel(level);
+  const clamped = Math.min(10, Math.max(1, Math.floor(style.level) || 1)) as keyof typeof RANK_LOGOS;
+  return (
+    <View style={[styles.wrap, { opacity: dimmed ? 0.38 : 1 }]}>
+      <Image source={RANK_LOGOS[clamped]} style={{ width: size, height: size }} resizeMode="contain" />
+      {showLabel && label ? (
+        <Text style={[styles.label, { color: style.text }]} numberOfLines={1}>
+          {label}
+        </Text>
+      ) : null}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  wrap: {
+    alignItems: 'center',
+  },
+  label: {
+    marginTop: 4,
+    fontSize: 10,
+    fontWeight: '800',
+    maxWidth: 64,
+    textAlign: 'center',
+  },
+});

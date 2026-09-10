@@ -1,0 +1,280 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { useI18n } from '../i18n/LanguageContext';
+import { useTheme } from '../theme/ThemeContext';
+import { AppIcon } from './icons';
+import {
+  formatKycFingerprint,
+  isValidKyc,
+  loadKycDeclaration,
+  saveKycDeclaration,
+  type KycDocType,
+} from '../services/kycDeclaration';
+
+interface KycSectionProps {
+  walletAddress: string;
+  isRegistered: boolean;
+  kycDeclarado: boolean;
+  isLoading: boolean;
+  paused?: boolean;
+  onDeclare: () => Promise<boolean>;
+}
+
+const DOC_TYPES: KycDocType[] = ['nationalId', 'passport', 'other'];
+
+export const KycSection: React.FC<KycSectionProps> = ({
+  walletAddress,
+  isRegistered,
+  kycDeclarado,
+  isLoading,
+  paused = false,
+  onDeclare,
+}) => {
+  const { t } = useI18n();
+  const { colors } = useTheme();
+  const [legalName, setLegalName] = useState('');
+  const [country, setCountry] = useState('');
+  const [city, setCity] = useState('');
+  const [region, setRegion] = useState('');
+  const [docType, setDocType] = useState<KycDocType>('nationalId');
+  const [accepted, setAccepted] = useState(false);
+  const [fingerprint, setFingerprint] = useState('');
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    loadKycDeclaration(walletAddress).then((saved) => {
+      if (!saved) return;
+      setLegalName(saved.legalName);
+      setCountry(saved.country);
+      setCity(saved.city || '');
+      setRegion(saved.region || '');
+      setDocType(saved.docType);
+      setAccepted(true);
+      setFingerprint(formatKycFingerprint(saved.identityFingerprint));
+    }).catch(() => {});
+  }, [walletAddress]);
+
+  const done = kycDeclarado && !editing;
+  const blocked = isLoading || paused || !isRegistered || !walletAddress;
+
+  const submit = async () => {
+    if (!isValidKyc({ legalName, country, city, docType }) || !accepted) return;
+    const saved = await saveKycDeclaration(walletAddress, {
+      legalName,
+      country,
+      city,
+      region,
+      docType,
+    });
+    setFingerprint(formatKycFingerprint(saved.identityFingerprint));
+    if (!kycDeclarado) {
+      await onDeclare();
+    }
+    setEditing(false);
+  };
+
+  const docLabel = (type: KycDocType) => {
+    if (type === 'passport') return t('kycDocPassport');
+    if (type === 'other') return t('kycDocOther');
+    return t('kycDocNationalId');
+  };
+
+  return (
+    <View>
+      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('kycLead')}</Text>
+      <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycNotGov')}</Text>
+      <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycLocationPrivate')}</Text>
+      <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycBoundNote')}</Text>
+      {fingerprint ? (
+        <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycFingerprint', { fingerprint })}</Text>
+      ) : null}
+
+      {done ? (
+        <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <AppIcon name="check" size={16} color={colors.success} />
+          <Text style={[styles.doneText, { color: colors.text }]}>{t('kycDone')}</Text>
+          <TouchableOpacity onPress={() => setEditing(true)}>
+            <Text style={[styles.change, { color: colors.primary }]}>{t('kycEdit')}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View>
+          {!isRegistered ? (
+            <Text style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</Text>
+          ) : null}
+          <Text style={[styles.label, { color: colors.text }]}>{t('kycLegalName')}</Text>
+          <TextInput
+            value={legalName}
+            onChangeText={setLegalName}
+            editable={!blocked}
+            placeholder={t('kycLegalName')}
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="words"
+            style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+          />
+          <Text style={[styles.label, { color: colors.text }]}>{t('kycCountry')}</Text>
+          <TextInput
+            value={country}
+            onChangeText={setCountry}
+            editable={!blocked}
+            placeholder={t('kycCountry')}
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="words"
+            style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+          />
+          <Text style={[styles.label, { color: colors.text }]}>{t('kycCity')}</Text>
+          <TextInput
+            value={city}
+            onChangeText={setCity}
+            editable={!blocked}
+            placeholder={t('kycCity')}
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="words"
+            style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+          />
+          <Text style={[styles.label, { color: colors.text }]}>{t('kycRegion')}</Text>
+          <TextInput
+            value={region}
+            onChangeText={setRegion}
+            editable={!blocked}
+            placeholder={t('kycRegion')}
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="words"
+            style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+          />
+          <Text style={[styles.label, { color: colors.text }]}>{t('kycDocType')}</Text>
+          <View style={styles.types}>
+            {DOC_TYPES.map((type) => (
+              <TouchableOpacity
+                key={type}
+                onPress={() => setDocType(type)}
+                style={[
+                  styles.typeChip,
+                  { borderColor: colors.border, backgroundColor: colors.surface },
+                  docType === type && { borderColor: colors.primary, backgroundColor: colors.chip },
+                ]}
+              >
+                <Text style={[styles.typeText, { color: colors.text }]}>{docLabel(type)}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <TouchableOpacity onPress={() => setAccepted((value) => !value)} style={styles.checkRow}>
+            <View style={[styles.box, { borderColor: colors.border }, accepted && { backgroundColor: colors.primary, borderColor: colors.primary }]} />
+            <Text style={[styles.checkText, { color: colors.text }]}>{t('kycDeclare')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={blocked || !accepted || !isValidKyc({ legalName, country, city, docType })}
+            onPress={submit}
+            style={[
+              styles.button,
+              { backgroundColor: colors.connect },
+              (blocked || !accepted || !isValidKyc({ legalName, country, city, docType })) && { backgroundColor: colors.chip },
+            ]}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={[styles.buttonText, (blocked || !accepted) && { color: colors.textMuted }]}>
+                {paused ? t('actionPaused') : t('kycSubmit')}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  lead: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  note: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: 12,
+  },
+  warn: {
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10,
+    fontSize: 14,
+  },
+  types: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  typeChip: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  typeText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 12,
+  },
+  box: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1,
+    marginTop: 2,
+  },
+  checkText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  button: {
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  done: {
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  doneText: {
+    fontSize: 15,
+    fontWeight: '500',
+    flex: 1,
+  },
+  change: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+});

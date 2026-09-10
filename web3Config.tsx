@@ -1,73 +1,98 @@
-import { createConfig, http } from 'wagmi';
-import { bsc } from 'wagmi/chains';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReownAppKitProvider } from '@reown/appkit-react-native';
-import { setWalletSigner } from './app/_layout';
-import { ethers } from 'ethers';
+import '@walletconnect/react-native-compat';
 
-// Project ID de WalletConnect
-const PROJECT_ID = 'cdfc21e1934207c7e7caa09412168a4c';
+import React, { type ReactNode } from 'react';
+import { createAppKit, AppKitProvider, type AppKitNetwork } from '@reown/appkit-react-native';
+import { EthersAdapter } from '@reown/appkit-ethers-react-native';
+import { BrowserProvider, type Eip1193Provider, type Signer } from 'ethers';
+import { appKitStorage } from './utils/appKitStorage';
+import { NETWORK_CONFIG, RPC_URLS, getRuntimeMode } from './constants/rpcConfig';
+import { BSC_MAINNET, BSC_TESTNET } from './constants/bsc';
 
-// Configuración de Wagmi para BSC - Configuración estricta para React Native
-const wagmiConfig = createConfig({
-  chains: [bsc],
-  transports: {
-    [bsc.id]: http('https://bsc-dataseed.binance.org/'),
-  },
-  ssr: true,
-  multiInjectedProvider: false,
-  syncConnectedChain: false,
-});
+const PROJECT_ID = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
 
-// Configuración de QueryClient
-const queryClient = new QueryClient();
-
-// Metadatos de la aplicación
-const metadata = {
-  name: 'Magno',
-  description: 'Decentralized credit platform',
-  url: 'https://magnocredi.com',
-  icons: ['https://avatars.githubusercontent.com/u/37784886'],
-};
-
-// Configuración de Reown AppKit
-const appKitConfig = {
-  projectId: PROJECT_ID,
-  metadata,
-  themeMode: 'light' as const,
-  themeVariables: {
-    '--w3m-z-index': '999',
-  },
-};
-
-// Provider que envuelve la aplicación con la configuración de Web3
-export function Web3Provider({ children }: { children: React.ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ReownAppKitProvider 
-        {...appKitConfig}
-        wagmiConfig={wagmiConfig}
-      >
-        {children}
-      </ReownAppKitProvider>
-    </QueryClientProvider>
+if (!PROJECT_ID && __DEV__) {
+  console.warn(
+    'Falta EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID en .env. La conexión de billetera no funcionará hasta configurarlo.'
   );
 }
 
-// Función para convertir cualquier provider a ethers signer (sin dependencia de wagmi)
-export function wagmiToEthersProvider(provider: any) {
-  return new ethers.providers.Web3Provider(provider);
-}
-
-// El modal de Reown AppKit se maneja internamente por la librería
-// No es necesario exportar un componente de modal explícito
-
-// Hook personalizado para obtener el signer de ethers
-export function useEthersSigner() {
-  // Este es un wrapper simple - en producción necesitarías
-  // integrar más profundamente con la librería
+function bscAppKitNetwork(live: boolean): AppKitNetwork {
+  const chain = live ? BSC_MAINNET : BSC_TESTNET;
+  const rpc = live ? BSC_MAINNET.rpc[0] : BSC_TESTNET.rpc[0];
   return {
-    signer: null, // Se implementará en el componente
-    setSigner: setWalletSigner,
+    id: chain.chainId,
+    name: live ? 'BNB Smart Chain' : 'BNB Smart Chain Testnet',
+    nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+    rpcUrls: {
+      default: { http: [rpc] as readonly string[] },
+    },
+    blockExplorers: {
+      default: {
+        name: live ? 'BscScan' : 'BscScan Testnet',
+        url: live ? 'https://bscscan.com' : 'https://testnet.bscscan.com',
+      },
+    },
+    chainNamespace: 'eip155',
+    caipNetworkId: `eip155:${chain.chainId}`,
   };
 }
+
+const bscMainnetNetwork = bscAppKitNetwork(true);
+const bscTestnetNetwork = bscAppKitNetwork(false);
+const defaultNetwork = getRuntimeMode() === 'live' ? bscMainnetNetwork : bscTestnetNetwork;
+
+const metadata = {
+  name: 'Quatrivium Credit',
+  description: 'Unsecured on-chain credit. Pay on time and raise your limit.',
+  url: 'https://quatriviumcredit.app',
+  icons: ['https://quatriviumcredit.app/icon.png'],
+  redirect: {
+    native: 'quatrivium://',
+    universal: 'https://quatriviumcredit.app',
+  },
+};
+
+export const appKit = createAppKit({
+  projectId: PROJECT_ID || (__DEV__ ? 'missing-project-id' : ''),
+  metadata,
+  networks: [bscTestnetNetwork, bscMainnetNetwork],
+  defaultNetwork,
+  adapters: [new EthersAdapter()],
+  storage: appKitStorage,
+  themeMode: 'light',
+  themeVariables: {
+    accent: '#007AFF',
+  },
+  enableAnalytics: false,
+  debug: __DEV__,
+  features: {
+    swaps: false,
+    onramp: false,
+    socials: false,
+  },
+});
+
+export function Web3Provider({ children }: { children: ReactNode }) {
+  return <AppKitProvider instance={appKit}>{children}</AppKitProvider>;
+}
+
+export function toEthersWeb3Provider(eip1193Provider: Eip1193Provider) {
+  return new BrowserProvider(eip1193Provider, NETWORK_CONFIG.chainId);
+}
+
+export async function getEthersSignerFromProvider(
+  eip1193Provider: Eip1193Provider
+): Promise<Signer | null> {
+  try {
+    return await toEthersWeb3Provider(eip1193Provider).getSigner();
+  } catch (error) {
+    console.error('Error getting signer from provider:', error);
+    return null;
+  }
+}
+
+export const web3ConfigDebug = {
+  projectId: PROJECT_ID,
+  rpcUrls: RPC_URLS,
+  chainId: NETWORK_CONFIG.chainId,
+};

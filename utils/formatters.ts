@@ -1,0 +1,63 @@
+/**
+ * Formats cooldown time in seconds to human-readable format
+ * @param seconds - Cooldown time in seconds
+ * @returns Formatted string (e.g., "2d 3h 15m")
+ */
+export const formatCooldown = (seconds: number, availableLabel = 'Disponible'): string => {
+  if (seconds <= 0) return availableLabel;
+
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0) parts.push(`${secs}s`);
+
+  return parts.length > 0 ? parts.join(' ') : '0s';
+};
+
+/**
+ * Formats wallet address to shortened version
+ * @param address - Full wallet address
+ * @returns Shortened address (e.g., "0x1234...5678")
+ */
+export const formatAddress = (address: string): string => {
+  if (!address || address.length < 10) return address;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
+/**
+ * Formats number to USD currency format
+ * @param amount - Amount to format
+ * @returns Formatted USD string
+ */
+export const formatUSD = (amount: number): string => {
+  return `$${amount.toFixed(2)}`;
+};
+
+export const formatDueDate = (unixSeconds: number): string => {
+  if (!unixSeconds) return '—';
+  return new Date(unixSeconds * 1000).toLocaleString();
+};
+
+export const parsePositiveDecimal = (input: string): string | null => {
+  const normalized = input.replace(',', '.').trim();
+  if (!normalized) return null;
+  if (!/^\d+(\.\d+)?$/.test(normalized)) return null;
+  if (Number(normalized) <= 0) return null;
+  return normalized;
+};
+
+/**
+ * Calculates loan amount with interest
+ * @param principal - Original loan amount
+ * @param interestRate - Interest rate as decimal (e.g., 0.3 for 30%)
+ * @returns Total amount with interest
+ */
+export const calculateLoanWithInterest = (principal: number, interestRate: number = 0.3): number => {
+  return principal * (1 + interestRate);
+};

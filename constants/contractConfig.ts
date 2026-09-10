@@ -1,521 +1,110 @@
-export const CONTRACT_ADDRESS = "0xA6Aac9CE4923789a4095fBC0504db9A697F8A46D";
-// Direcciones de stablecoins en BSC Mainnet
-export const USDT_ADDRESS = "0x55d398326f99059ff775485246999027b3197955";
-export const USDC_ADDRESS = "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d";
-export const DAI_ADDRESS = "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3";
+import { BSC_MAINNET, BSC_TESTNET, isTestnetOnlyToken } from './bsc';
+import { DEPLOYED_TESTNET } from './deployedAddresses';
+import { getContractAddress, getRuntimeMode } from './rpcConfig';
 
-// ABI estándar para interactuar con stablecoins ERC20 (aprobar gastos y ver balances)
+export { getContractAddress };
+
+export function getUsdtAddress(): string {
+  if (getRuntimeMode() === 'live') return BSC_MAINNET.usdt;
+  const fromEnv = (process.env.EXPO_PUBLIC_USDT_ADDRESS || '').toLowerCase();
+  if (fromEnv && isTestnetOnlyToken(fromEnv)) return fromEnv;
+  if (fromEnv && fromEnv.startsWith('0x') && fromEnv !== BSC_MAINNET.usdt.toLowerCase()) {
+    return fromEnv;
+  }
+  return DEPLOYED_TESTNET.usdt || BSC_TESTNET.usdt;
+}
+
 export const ERC20_ABI = [
-  "function balanceOf(address owner) view returns (uint256)",
-  "function allowance(address owner, address spender) view returns (uint256)",
-  "function approve(address spender, uint256 amount) returns (bool)",
-  "function decimals() view returns (uint8)",
-  "function transfer(address to, uint256 amount) returns (bool)",
-  "function transferFrom(address from, address to, uint256 amount) returns (bool)"
+  'function balanceOf(address owner) view returns (uint256)',
+  'function allowance(address owner, address spender) view returns (uint256)',
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function decimals() view returns (uint8)',
+  'function transfer(address to, uint256 amount) returns (bool)',
+  'function transferFrom(address from, address to, uint256 amount) returns (bool)',
 ];
 
 export const CONTRACT_ABI = [
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_usdtAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "address payable",
-                "name": "_feeCollector",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_feeBP",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            }
-        ],
-        "name": "HumanoVerificado",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "proveedor",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "monto",
-                "type": "uint256"
-            }
-        ],
-        "name": "LiquidezAportada",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "monto",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "vencimiento",
-                "type": "uint256"
-            }
-        ],
-        "name": "PrestamoEmitido",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "monto",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "nuevoNivel",
-                "type": "uint256"
-            }
-        ],
-        "name": "PrestamoPagado",
-        "type": "event"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_monto",
-                "type": "uint256"
-            }
-        ],
-        "name": "depositarLiquidez",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "feeCollector",
-        "outputs": [
-            {
-                "internalType": "address payable",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "humanosVerificados",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "niveles",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "montoPrestamo",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "plazo",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tasaInteres",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_montoConInteres",
-                "type": "uint256"
-            }
-        ],
-        "name": "pagarPrestamo",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_usuario",
-                "type": "address"
-            }
-        ],
-        "name": "registrarHumanoZK",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            }
-        ],
-        "name": "solicitarPrestamo",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "usdtToken",
-        "outputs": [
-            {
-                "internalType": "contract IERC20",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "usuarios",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "nivelActual",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "montoActivo",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "vencimiento",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "enMora",
-                "type": "bool"
-            },
-            {
-                "internalType": "address",
-                "name": "monedaActivo",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tasaAplicadaBP",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            }
-        ],
-        "name": "obtenerHistorialUsuario",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "puntosReputacion",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "moroso",
-                "type": "bool"
-            },
-            {
-                "internalType": "uint256",
-                "name": "pagadosATiempo",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "morosos",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalPenalizaciones",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            }
-        ],
-        "name": "obtenerProgresoUsuario",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "nivelActual",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "solicitudesCompletadas",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "ultimoPrestamoTimestamp",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            }
-        ],
-        "name": "obtenerCooldownRestante",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "segundosRestantes",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [
-            {
-                "internalType": "address payable",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "retirarComisiones",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            }
-        ],
-        "name": "retirarComisionesToken",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            }
-        ],
-        "name": "obtenerProgresoUsuario",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "nivelActual",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "solicitudesCompletadas",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "ultimoPrestamoTimestamp",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            }
-        ],
-        "name": "obtenerCooldownRestante",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "segundosRestantes",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "usuario",
-                "type": "address"
-            }
-        ],
-        "name": "obtenerHistorialUsuario",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "puntosReputacion",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "moroso",
-                "type": "bool"
-            },
-            {
-                "internalType": "uint256",
-                "name": "pagadosATiempo",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "morosos",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalPenalizaciones",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    }
+  'function depositarLiquidez(address token, uint256 _monto)',
+  'function retirarLiquidez(address token, uint256 amount)',
+  'function solicitarPrestamo(address token, uint256 nivel)',
+  'function pagarPrestamo(address token, uint256 _montoConInteres)',
+  'function registrarHumanoConPadre(address _padre)',
+  'function declararKyc()',
+  'function setKycExigido(bool exigido)',
+  'function kycDeclarado(address) view returns (bool)',
+  'function kycExigido() view returns (bool)',
+  'function proposeAdminAction(bytes data) returns (uint256 id)',
+  'function confirmAdminAction(uint256 id)',
+  'function executeAdminAction(uint256 id)',
+  'function proposalCount() view returns (uint256)',
+  'function proposals(uint256) view returns (address proposer, uint256 eta, bytes data, uint256 confirms, bool executed, bool cancelled)',
+  'function ownerList(uint256) view returns (address)',
+  'function requiredConfirmations() view returns (uint256)',
+  'function addAdmin(address newAdmin)',
+  'function removeAdmin(address admin)',
+  'function setFeeCollector(address newCollector)',
+  'function setRequiredConfirmations(uint256 _required)',
+  'function setTokenConfig(address token, address feed, bool enabled)',
+  'function setOwner(address newOwner)',
+  'function setFundador(address next)',
+  'function vincularIdentidad(bytes32 phoneHash, bytes32 deviceHash, uint256 deadline, uint8 v, bytes32 r, bytes32 s)',
+  'function setIdentidadExigida(bool exigido)',
+  'function setAttester(address next)',
+  'function phoneHashOf(address) view returns (bytes32)',
+  'function deviceHashOf(address) view returns (bytes32)',
+  'function walletOfPhone(bytes32) view returns (address)',
+  'function walletOfDevice(bytes32) view returns (address)',
+  'function identidadExigida() view returns (bool)',
+  'function attester() view returns (address)',
+  'function cuentaDestruida(address) view returns (bool)',
+  'function destruirCuenta(address token)',
+  'function feeCollector() view returns (address)',
+  'function fundador() view returns (address)',
+  'function humanosVerificados(address) view returns (bool)',
+  'function redGenealogica(address) view returns (address padre, bool bonoActivacionCobrado)',
+  'function prestamosCerrados(address) view returns (uint256)',
+  'function dispersionCongelada(address deudor) view returns (bool)',
+  'function usuarios(address) view returns (uint256 nivelActual, uint256 montoActivo, uint256 vencimiento, bool enMora, address monedaActivo, uint256 tasaAplicadaBP)',
+  'function obtenerHistorialUsuario(address usuario) view returns (uint256 puntosReputacion, bool moroso, uint256 pagadosATiempo, uint256 morosos, uint256 totalPenalizaciones)',
+  'function obtenerRedReputacion(address usuario) view returns (uint256 puntos, uint256 bonosCobrados, uint256 umbral, uint256 bono, uint256 puntosPorReferido)',
+  'function puntosRed(address) view returns (uint256)',
+  'function PUNTOS_POR_REFERIDO() view returns (uint256)',
+  'function UMBRAL_BONO_RED() view returns (uint256)',
+  'function BONO_RED_USDT() view returns (uint256)',
+  'function obtenerProgresoUsuario(address usuario) view returns (uint256 nivelActual, uint256 solicitudesCompletadas, uint256 ultimoPrestamoTimestamp)',
+  'function obtenerCooldownRestante(address usuario) view returns (uint256 segundosRestantes)',
+  'function obtenerDeuda(address usuario) view returns (uint256 principal, uint256 interes, uint256 total, address token)',
+  'function planPago(address) view returns (uint128 pagado, uint64 venceCuota, uint8 totales, uint8 pagadas, bool enPlazo)',
+  'function obtenerLiquidezUsuario(address user) view returns (uint256)',
+  'function valorLp(address user, address token) view returns (uint256)',
+  'function owner() view returns (address)',
+  'function admins(address) view returns (bool)',
+  'function paused() view returns (bool)',
+  'function pausarContrato()',
+  'function niveles(uint256 id) view returns (uint256, uint256, uint256)',
+  'function isSupportedToken(address token) view returns (bool)',
+  'function obtenerTasaInteresActual(address tokenAddress) view returns (uint256)',
+  'function totalLiquidity(address) view returns (uint256)',
+  'function outstandingLoans(address) view returns (uint256)',
+  'function collectedFees(address) view returns (uint256)',
+  'function retirarComisiones()',
+  'function retirarComisionesToken(address token)',
+  'function marcarMorosoSiVencido(address usuario)',
+  'function liquidate(address deudor, address tokenAddress)',
+  'event AfiliadoRegistrado(address indexed usuario, address indexed padre)',
+  'event BonoRedPagado(address indexed usuario, uint256 umbral, uint256 monto, address indexed token)',
+  'event PuntosRed(address indexed usuario, uint256 puntos)',
+  'event ComisionGeneracional(address indexed beneficiario, address indexed deudor, uint8 generacion, uint256 monto, address indexed token)',
+  'event KycDeclarado(address indexed usuario)',
+  'event KycExigidoUpdated(bool exigido)',
+  'event IdentidadVinculada(address indexed usuario, bytes32 phoneHash, bytes32 deviceHash)',
+  'event CuentaDestruida(address indexed usuario, address indexed token, uint256 confiscado)',
+  'event PrestamoEmitido(address indexed usuario, uint256 monto, uint256 vencimiento, address indexed token)',
+  'event PrestamoPagado(address indexed usuario, uint256 montoPrincipal, uint256 fee, address indexed token)',
+  'event AdminActionProposed(uint256 indexed id, address indexed proposer, bytes4 selector, uint256 eta)',
+  'event AdminActionExecuted(uint256 indexed id, bytes4 selector)',
+  'event OwnerTransferred(address indexed previousOwner, address indexed newOwner)',
+  'event FundadorUpdated(address indexed previous, address indexed next)',
+  'event Paused(address account)',
+  'event Unpaused(address account)',
 ];

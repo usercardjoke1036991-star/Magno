@@ -6,13 +6,38 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_CHAIN_ID": "97",
+        "EXPO_PUBLIC_CHAIN_NAME": "bscTestnet",
+        "EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET": "0x5eB6c65f3e3b7DC555e690A83d61205F66700cC2",
+        "EXPO_PUBLIC_USDT_ADDRESS": "0x2d4AE5E6984D98777a24473F196326ff2604F5A6",
+        "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID": "546043cd7fbfac1902ccbbbe5b3d3fec"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_CHAIN_ID": "97",
+        "EXPO_PUBLIC_CHAIN_NAME": "bscTestnet",
+        "EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET": "0x5eB6c65f3e3b7DC555e690A83d61205F66700cC2",
+        "EXPO_PUBLIC_USDT_ADDRESS": "0x2d4AE5E6984D98777a24473F196326ff2604F5A6",
+        "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID": "546043cd7fbfac1902ccbbbe5b3d3fec"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_CHAIN_ID": "56",
+        "EXPO_PUBLIC_CHAIN_NAME": "bsc",
+        "EXPO_PUBLIC_USDT_ADDRESS": "0x55d398326f99059ff775485246999027b3197955",
+        "EXPO_PUBLIC_INVITE_WEB_BASE": "https://quatriviumcredit.app",
+        "EXPO_PUBLIC_PLAY_STORE_URL": "https://play.google.com/store/apps/details?id=com.quatrivium.credit",
+        "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID": "546043cd7fbfac1902ccbbbe5b3d3fec"
+      }
     }
   },
   "submit": {

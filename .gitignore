@@ -32,7 +32,9 @@ yarn-error.*
 
 # local env files
 .env
+.env.worker
 .env*.local
+.notify-data.json
 
 # typescript
 *.tsbuildinfo
@@ -40,3 +42,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Hardhat
+artifacts/
+cache/
+typechain-types/

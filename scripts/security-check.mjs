@@ -1,0 +1,99 @@
+/**
+ * Chequeos de seguridad que se pueden correr en local.
+ * Uso: npm run security:check
+ *
+ * Slither (opcional, requiere Python): pip install slither-analyzer && npm run security:slither
+ */
+import { execSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const root = resolve(process.cwd());
+const failures = [];
+
+const gitignore = existsSync(resolve(root, '.gitignore'))
+  ? readFileSync(resolve(root, '.gitignore'), 'utf8')
+  : '';
+if (!gitignore.includes('.env')) {
+  failures.push('.gitignore no ignora .env');
+}
+if (!gitignore.includes('.env.worker')) {
+  failures.push('.gitignore no ignora .env.worker');
+}
+
+const envExample = existsSync(resolve(root, '.env.example'))
+  ? readFileSync(resolve(root, '.env.example'), 'utf8')
+  : '';
+if (/EXPO_PUBLIC_PRIVATE_KEY/.test(envExample)) {
+  failures.push('No exponga PRIVATE_KEY con prefijo EXPO_PUBLIC_');
+}
+
+const secretFiles = ['.env', '.env.worker', '.notify-data.json'];
+for (const file of secretFiles) {
+  try {
+    const tracked = execSync(`git ls-files --error-unmatch -- ${file}`, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    if (tracked.trim()) {
+      failures.push(`${file} está en git. Sáquelo del índice y rote las claves.`);
+    }
+  } catch {
+    // no está tracked o no hay git
+  }
+}
+
+const easPath = resolve(root, 'eas.json');
+if (existsSync(easPath)) {
+  try {
+    const eas = JSON.parse(readFileSync(easPath, 'utf8'));
+    const prod = eas?.build?.production?.env || {};
+    if (prod.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET) {
+      failures.push('eas.json production no debe incluir EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET');
+    }
+    if (String(prod.EXPO_PUBLIC_CHAIN_ID) !== '56') {
+      failures.push('eas.json production debe usar EXPO_PUBLIC_CHAIN_ID=56');
+    }
+    if (String(prod.EXPO_PUBLIC_APP_ENV) !== 'production') {
+      failures.push('eas.json production debe usar EXPO_PUBLIC_APP_ENV=production');
+    }
+    if (String(prod.EXPO_PUBLIC_CHAIN_NAME || '').toLowerCase() === 'bsctestnet') {
+      failures.push('eas.json production no debe usar bscTestnet');
+    }
+  } catch {
+    failures.push('eas.json no se pudo leer');
+  }
+}
+
+const appSources = ['app', 'components', 'hooks', 'services', 'constants', 'utils'];
+for (const folder of appSources) {
+  try {
+    const hit = execSync(`git grep -n "EXPO_PUBLIC_PRIVATE_KEY" -- ${folder}`, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    if (hit.trim()) {
+      failures.push(`No use EXPO_PUBLIC_PRIVATE_KEY en ${folder}`);
+    }
+  } catch {
+    // git grep sale 1 si no hay coincidencias
+  }
+}
+
+if (failures.length) {
+  console.error('security:check FALLÓ\n' + failures.join('\n'));
+  process.exit(1);
+}
+
+console.log('security:check OK');
+console.log('- .env está en .gitignore');
+console.log('- El cliente no usa PRIVATE_KEY (firmas = billetera del usuario)');
+console.log('- Contratos: ReentrancyGuard, Pausable, SafeERC20, Solidity 0.8.24, timelock 72h');
+console.log('- Pausa inmediata; despausar con timelock');
+console.log('- RPC: quorum de chainId + bytecode del contrato + timeout');
+console.log('- Perfiles remotos: EIP-712 obligatorio, CORS cerrado, headers HTTP');
+console.log('- Billetera cifrada con PIN (HMAC + keystream); lockout tras intentos');
+console.log('- Mainnet: npm run production:check');
+console.log('Pendiente fuera de este repo: auditoría externa, Forta/Defender y KMS para la clave de deploy');

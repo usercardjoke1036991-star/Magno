@@ -1,36 +1,26 @@
-# Magno
+# Quatrivium Credit
 
-Magno es una plataforma de crédito descentralizado construida en React Native con integración Web3.
+Quatrivium Credit es crédito on-chain **sin colateral**: pides un préstamo, lo pagas dentro del plazo y subes de nivel para pedir más.
 
-## Características
+## Qué lo hace distinto
 
-- **Integración Web3**: Conexión de billeteras usando Reown AppKit (WalletConnect)
-- **Blockchain**: BSC Mainnet
-- **Smart Contracts**: Contratos de crédito descentralizado en Solidity
-- **Multi-token**: Soporte para USDT, USDC, DAI
+- No bloqueas tokens para pedir.
+- Un préstamo activo a la vez.
+- Si pagas a tiempo, subes de nivel (más monto, más plazo).
+- Si no pagas, quedas en mora y no puedes pedir otro hasta regularizar.
 
-## Instalación
+## App
+
+React Native (Expo) + WalletConnect/Reown en BNB Smart Chain.
 
 ```bash
 npm install
+npx expo run:android
 ```
 
-## Desarrollo
+## Contratos
 
 ```bash
-npm start
+npx hardhat test
+npx hardhat run scripts/deploy.cjs --network bscMainnet
 ```
-
-## Construcción
-
-- **Android**: `npm run android`
-- **iOS**: `npm run ios`
-- **Web**: `npm run web`
-
-## Stack Tecnológico
-
-- React Native
-- Expo
-- Web3 (Reown AppKit, Wagmi, Viem)
-- Hardhat (para smart contracts)
-- TypeScript

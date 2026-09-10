@@ -1,0 +1,109 @@
+import type { Lang } from '../i18n/languages';
+import { translations, type TranslationKey } from '../i18n/translations';
+
+function extractRawError(error: unknown): string {
+  const err = error as {
+    shortMessage?: string;
+    reason?: string;
+    message?: string;
+    info?: { error?: { message?: string } };
+  };
+
+  return String(
+    err?.shortMessage ||
+      err?.reason ||
+      err?.info?.error?.message ||
+      err?.message ||
+      ''
+  );
+}
+
+const REVERT_KEYS: Array<[string, TranslationKey]> = [
+  ['kyc required', 'errKycRequired'],
+  ['identity required', 'errIdentityRequired'],
+  ['phone taken', 'errPhoneTaken'],
+  ['device taken', 'errDeviceTaken'],
+  ['device-bound', 'errDeviceBound'],
+  ['already bound', 'errAlreadyBound'],
+  ['bad attest', 'errBadAttest'],
+  ['expired', 'errExpired'],
+  ['daily origination cap', 'errDailyCap'],
+  ['utilization cap', 'errUtilizationCap'],
+  ['no price feed', 'errNoPriceFeed'],
+  ['no contracts', 'errNoContracts'],
+  ['only timelock', 'errOnlyTimelock'],
+  ['timelock', 'errTimelock'],
+  ['confirmations', 'errConfirmations'],
+  ['selector not allowed', 'errSelector'],
+  ['usuario moroso', 'errDelinquent'],
+  ['active loan', 'errActiveLoanDestroy'],
+  ['dead', 'errDead'],
+  ['founder', 'errFounderDestroy'],
+  ['cooldown 48h', 'errCooldown48h'],
+  ['insufficient liquidity', 'errInsufficientLiquidity'],
+  ['peg lost', 'errPegLost'],
+  ['price data too stale', 'errStalePrice'],
+  ['unsupported token', 'errUnsupportedToken'],
+  ['token mismatch', 'errTokenMismatch'],
+  ['insufficient amount', 'errInsufficientAmount'],
+  ['no active loan', 'errNoActiveLoan'],
+  ['exceeds lp share', 'errExceedsLp'],
+  ['liquidity in use', 'errLiquidityInUse'],
+  ['insufficient cash', 'errInsufficientCash'],
+  ['insufficient pool', 'errInsufficientPool'],
+  ['can only self-register', 'errSelfRegister'],
+  ['blacklisted', 'errBlacklisted'],
+  ['only owner', 'errOnlyOwner'],
+  ['only admin', 'errOnlyAdmin'],
+  ['no token fees', 'errNoTokenFees'],
+  ['no native balance', 'errNoNative'],
+  ['EnforcedPause', 'errPaused'],
+  ['RPC chain mismatch', 'errRpcMismatch'],
+  ['El RPC no ve el contrato', 'errRpcNoContract'],
+  ['wrong-network', 'errWrongNetwork'],
+  ['La billetera está en otra red', 'errWrongNetwork'],
+  ['La billetera no reporta red', 'errWrongNetwork'],
+  ['platform-fee-bnb', 'errNeedGas'],
+  ['internal-wallet-only', 'errInternalOnly'],
+  ['no-admin-proposal', 'errNoAdminProposal'],
+  ['user rejected', 'errRejected'],
+  ['ACTION_REJECTED', 'errRejected'],
+  ['4001', 'errRejected'],
+  ['no-wallet', 'errNoWallet'],
+  ['No hay billetera conectada', 'errNoWallet'],
+  ['invalid-amount', 'errInvalidAmount'],
+  ['Monto inválido', 'errInvalidAmount'],
+  ['token-not-in-app', 'errTokenNotInApp'],
+  ['Este token no está habilitado en la aplicación', 'errTokenNotInApp'],
+  ['invalid-level', 'errInvalidLevel'],
+  ['Nivel inválido', 'errInvalidLevel'],
+  ['Cuotas inválidas', 'errInvalidAmount'],
+  ['invalid address', 'adminInvalidAddress'],
+  ['invalid feed', 'adminInvalidAddress'],
+  ['pool locked', 'poolLockedNote'],
+  ['weak-pin', 'lockPinWeak'],
+  ['weak-password', 'lockPasswordWeak'],
+  ['password-key', 'lockPasswordPrivateKey'],
+  ['wrong-pin', 'lockPinWrong'],
+  ['appWalletNotReady', 'appWalletNotReady'],
+  ['appWalletBadAddress', 'appWalletBadAddress'],
+  ['notify', 'otpNeedApi'],
+  ['Contrato no configurado', 'configureContract'],
+];
+
+let errorLang: Lang = 'es';
+
+export function setTxErrorLang(lang: Lang) {
+  errorLang = lang;
+}
+
+export function humanizeTxError(error: unknown): string {
+  const raw = extractRawError(error);
+  const table = translations[errorLang] || translations.es;
+  const match = REVERT_KEYS.find(([needle]) => raw.includes(needle));
+  if (match) {
+    return table[match[1]];
+  }
+  const trimmed = raw.replace(/^Error:\s*/i, '').trim();
+  return trimmed.slice(0, 280) || table.txFailed;
+}

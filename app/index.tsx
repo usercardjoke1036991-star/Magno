@@ -1,496 +1,783 @@
-import { ethers } from 'ethers';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { formatUnits, parseUnits, type Eip1193Provider } from 'ethers';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, ERC20_ABI } from '../constants/contractConfig';
-import { MagnocrediService, setWalletSigner } from './_layout';
-import { useAppKit, useAccount, useDisconnect, useAppKitProvider } from '@reown/appkit-react-native';
-import { wagmiToEthersProvider } from '../web3Config';
-
-// Configuración de Red y Contratos en BSC Mainnet
-const BSC_MAINNET_RPC = 'https://bsc-dataseed.binance.org/';
-
-interface Token {
-  symbol: string;
-  address: string;
-  decimals: number;
-  priceUSD: number;
-  color: string;
-}
-
-interface LoanTier {
-  id: number;
-  name: string;
-  usdAmount: number;
-  term: string;
-  requiredCount: number;
-}
-
-const SUPPORTED_TOKENS: Token[] = [
-  { symbol: 'USDT', address: '0x55d398326f99059ff775485246999027b3197955'.toLowerCase(), decimals: 18, priceUSD: 1.0, color: '#26A17B' },
-  { symbol: 'USDC', address: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d'.toLowerCase(), decimals: 18, priceUSD: 1.0, color: '#2775CA' },
-  { symbol: 'DAI', address: '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3'.toLowerCase(), decimals: 18, priceUSD: 1.0, color: '#ffb347' },
-];
- 
-const LOAN_TIERS: LoanTier[] = [
-  { id: 1, name: "Semilla", usdAmount: 1, term: "7 días (1 cuota)", requiredCount: 3 },
-  { id: 2, name: "Inicial", usdAmount: 2, term: "10 días (1 cuota)", requiredCount: 5 },
-  { id: 3, name: "Micro", usdAmount: 5, term: "15 días (1 cuota)", requiredCount: 5 },
-  { id: 4, name: "Plus", usdAmount: 10, term: "20 días (1 cuota)", requiredCount: 5 },
-  { id: 5, name: "Avance", usdAmount: 20, term: "25 días (2 cuotas)", requiredCount: 5 },
-  { id: 6, name: "Crecimiento", usdAmount: 35, term: "30 días (2 cuotas)", requiredCount: 5 },
-  { id: 7, name: "Escala", usdAmount: 50, term: "35 días (2 cuotas)", requiredCount: 5 },
-  { id: 8, name: "Avanzado", usdAmount: 65, term: "40 días (3 cuotas)", requiredCount: 5 },
-  { id: 9, name: "Elite", usdAmount: 80, term: "45 días (3 cuotas)", requiredCount: 5 },
-  { id: 10, name: "Máximo", usdAmount: 100, term: "50 días (3 cuotas)", requiredCount: 5 },
-];
+import { StatusBar } from 'expo-status-bar';
+import * as Linking from 'expo-linking';
+import { AppKit, useAccount, useProvider } from '@reown/appkit-react-native';
+import { getEthersSignerFromProvider } from '../web3Config';
+import { setWalletSigner } from '../services/quatriviumCreditService';
+import { useWeb3Balances, type LoanTier } from '../hooks/useWeb3Balances';
+import { useWeb3Transactions } from '../hooks/useWeb3Transactions';
+import { WalletSection } from '../components/WalletSection';
+import { TokenSelector } from '../components/TokenSelector';
+import { BalanceDisplay } from '../components/BalanceDisplay';
+import { UserMetrics } from '../components/UserMetrics';
+import { RankLadder } from '../components/RankLadder';
+import { LoanTierCard } from '../components/LoanTierCard';
+import { AdminPanel } from '../components/AdminPanel';
+import { ActivateCreditSection } from '../components/ActivateCreditSection';
+import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
+import { DemoModeBanner } from '../components/DemoModeBanner';
+import { AccountOnboarding } from '../components/AccountOnboarding';
+import { KycAccessBanner } from '../components/KycAccessBanner';
+import { BrandLogo } from '../components/BrandLogo';
+import { ReferralSection } from '../components/ReferralSection';
+import { SettingsButton } from '../components/SettingsButton';
+import { AppSubsection } from '../components/AppSection';
+import { AppWindow } from '../components/AppWindow';
+import { HomeHub, type HomeRoom } from '../components/HomeHub';
+import { PoolSupportSection } from '../components/PoolSupportSection';
+import { NotificationChannels } from '../components/NotificationChannels';
+import { ReferralHistory } from '../components/ReferralHistory';
+import { LOAN_TIERS } from '../constants/loanTiers';
+import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
+import { isContractConfigured } from '../constants/rpcConfig';
+import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
+import { useI18n } from '../i18n/LanguageContext';
+import { useTheme } from '../theme/ThemeContext';
+import { usePendingInvite } from '../hooks/usePendingInvite';
+import { useUserProfile } from '../profile/ProfileContext';
+import { useLoanPaymentReminders } from '../hooks/useLoanPaymentReminders';
+import { useAppWallet } from '../wallet/AppWalletContext';
+import { useAppMode } from '../wallet/AppModeContext';
+import { useFundsConfirm } from '../components/FundsConfirmHost';
+import type { TranslationKey } from '../i18n/translations';
 
 export default function HomeScreen() {
-  return (
-    <HomeScreenContent />
-  );
-}
-
-// Componente wrapper para manejar el error de contexto de AppKit
-function HomeScreenContent() {
-  const [isReady, setIsReady] = useState(false);
-  
-  // Esperar a que el contexto de AppKit esté disponible
-  useEffect(() => {
-    // Pequeño delay para asegurar que el provider esté inicializado
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (!isReady) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Inicializando Web3...</Text>
-      </View>
-    );
-  }
-  
   return <HomeScreenWithHooks />;
 }
 
-// Componente que contiene los hooks de AppKit
 function HomeScreenWithHooks() {
-  const { open } = useAppKit();
-  const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
-  const { walletProvider } = useAppKitProvider();
-  
-  const [walletAddress, setWalletAddress] = useState('');
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const { t, rtl } = useI18n();
+  const { colors, isDark } = useTheme();
+  const { pendingInviteCode, clearPendingInvite } = usePendingInvite();
+  const { profile } = useUserProfile();
+  const { address: appAddress, signer: appSigner, ready: walletReady, failed: walletFailed, retry: retryWallet } = useAppWallet();
+  const { address: adminAddress, isConnected: adminConnected } = useAccount();
+  const { provider: adminProvider } = useProvider();
 
-  const [selectedToken, setSelectedToken] = useState<Token>(SUPPORTED_TOKENS[0]);
-  const [tokenBalance, setTokenBalance] = useState<string>('0.00');
-  const [poolBalance, setPoolBalance] = useState<string>('0.00');
-  const [bnbBalance, setBnbBalance] = useState<string>('0.00');
-
-  const [userLevel, setUserLevel] = useState<number>(1);
-  const [isRegisteredZK, setIsRegisteredZK] = useState<boolean>(false);
-  const [hasActiveLoan, setHasActiveLoan] = useState<boolean>(false);
-  const [reputation, setReputation] = useState<number>(0);
-  const [creditHistory, setCreditHistory] = useState<{ paidOnTime: number; missedLoans: number; penalties: number }>({ paidOnTime: 0, missedLoans: 0, penalties: 0 });
-  const [isDelinquent, setIsDelinquent] = useState<boolean>(false);
-  const [userProgress, setUserProgress] = useState<{ nivelActual: number; solicitudesCompletadas: number; ultimoPrestamoTimestamp: number; cooldownRestante: number }>({ nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0 });
-  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const { mode } = useAppMode();
+  const { confirmFunds } = useFundsConfirm();
+  const tokens = useMemo(() => getSupportedTokens(), [mode]);
+  const extraStables = useMemo(() => getConfigurableStables(), [mode]);
+  const [selectedToken, setSelectedToken] = useState(tokens[0]);
+  const [room, setRoom] = useState<HomeRoom | null>(null);
 
   useEffect(() => {
-    if (address) {
-      setWalletAddress(address.toLowerCase());
-      
-      // Configurar el signer de ethers cuando el provider de Wagmi está disponible
-      if (walletProvider) {
-        const ethersProvider = wagmiToEthersProvider(walletProvider);
-        const signer = ethersProvider.getSigner();
-        setWalletSigner(signer);
-      }
-      
-      fetchBalances();
-    } else {
-      setWalletAddress('');
-      setWalletSigner(null);
+    const allowed: HomeRoom[] = ['wallet', 'credit', 'loans', 'network', 'pool', 'admin'];
+    const apply = (url?: string | null) => {
+      if (!url) return;
+      const parsed = Linking.parse(url);
+      const parts = String(parsed.path || '').replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+      const fromQuery = String(parsed.queryParams?.room || '');
+      const fromPath = parts[0] === 'room' ? parts[1] || '' : parts[0] || '';
+      const candidate = (fromQuery || fromPath) as HomeRoom;
+      if (allowed.includes(candidate)) setRoom(candidate);
+    };
+    Linking.getInitialURL().then(apply).catch(() => {});
+    const sub = Linking.addEventListener('url', ({ url }) => apply(url));
+    return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    setSelectedToken(tokens[0]);
+  }, [tokens]);
+
+  const walletAddress = appAddress;
+  const isConnected = Boolean(walletAddress);
+
+  const { balances, userInfo, loanTiers, refetch } = useWeb3Balances(walletAddress, selectedToken);
+  const { userInfo: adminInfo } = useWeb3Balances(
+    adminConnected && adminAddress ? adminAddress.toLowerCase() : '',
+    selectedToken
+  );
+  const debtReminder = useLoanPaymentReminders(userInfo);
+
+  const {
+    isLoading: txLoading,
+    registrarHumano,
+    solicitarPrestamo,
+    pagarPrestamo,
+    pagarCuotas,
+    depositarLiquidez,
+    retirarComisiones,
+    retirarComisionesToken,
+    pausarContrato,
+    declararKyc,
+    executeAdminAction,
+    confirmAdminAction,
+    proposeAddAdmin,
+    proposeRemoveAdmin,
+    proposeFeeCollector,
+    proposeRequiredConfirmations,
+    proposeSetTokenConfig,
+    proposeFundador,
+    proposeOwner,
+  } = useWeb3Transactions();
+
+  useEffect(() => {
+    if (appSigner) {
+      setWalletSigner(appSigner);
     }
-  }, [address, walletProvider, selectedToken]);
+  }, [appSigner]);
 
-  const fetchBalances = async () => {
-    try {
-      if (!ethers.utils.isAddress(walletAddress)) return;
-      const provider = new ethers.providers.JsonRpcProvider(BSC_MAINNET_RPC);
-
-      // BNB balance
-      try {
-        const bnb = await provider.getBalance(walletAddress);
-        setBnbBalance(Number(ethers.utils.formatEther(bnb)).toFixed(4));
-      } catch (e) { setBnbBalance('0.00'); }
-
-      // Token balances
-      try {
-        const tokenContract = new ethers.Contract(selectedToken.address, ERC20_ABI, provider);
-        let decimals = selectedToken.decimals;
-        try { decimals = Number(await tokenContract.decimals()); } catch (e) {}
-
-        const bal = await tokenContract.balanceOf(walletAddress);
-        setTokenBalance(Number(ethers.utils.formatUnits(bal, decimals)).toFixed(4));
-
-        const pool = await tokenContract.balanceOf(CONTRACT_ADDRESS);
-        setPoolBalance(Number(ethers.utils.formatUnits(pool, decimals)).toFixed(2));
-      } catch (e) {
-        setTokenBalance('0.00');
-        setPoolBalance('0.00');
-      }
-
-      // User & protocol info (read-only)
-      try {
-        const magnocrediContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-        try {
-          const userInfo = await magnocrediContract.usuarios(walletAddress);
-          setHasActiveLoan(Number(userInfo.montoActivo) > 0 || Boolean(userInfo.enMora));
-        } catch (e) {}
-
-        try {
-          const zk = await magnocrediContract.humanosVerificados(walletAddress);
-          setIsRegisteredZK(Boolean(zk));
-        } catch (e) { setIsRegisteredZK(false); }
-
-        try {
-          const history = await magnocrediContract.obtenerHistorialUsuario(walletAddress);
-          setReputation(Number(history.puntosReputacion));
-          setIsDelinquent(Boolean(history.moroso));
-          setCreditHistory({
-            paidOnTime: Number(history.pagadosATiempo),
-            missedLoans: Number(history.morosos),
-            penalties: Number(history.totalPenalizaciones),
-          });
-        } catch (e) {
-          setReputation(0);
-          setIsDelinquent(false);
-          setCreditHistory({ paidOnTime: 0, missedLoans: 0, penalties: 0 });
-        }
-
-        try {
-          const progress = await MagnocrediService.obtenerProgresoUsuario(walletAddress);
-          const cooldown = await MagnocrediService.obtenerCooldownRestante(walletAddress);
-          const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
-          setUserLevel(currentLevel);
-          setUserProgress({
-            nivelActual: currentLevel,
-            solicitudesCompletadas: Number(progress.solicitudesCompletadas),
-            ultimoPrestamoTimestamp: Number(progress.ultimoPrestamoTimestamp),
-            cooldownRestante: Number(cooldown),
-          });
-        } catch (e) {
-          setUserProgress({ nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0 });
-        }
-
-        try {
-          const ownerAddress = await MagnocrediService.obtenerOwner();
-          setIsOwner(walletAddress.toLowerCase() === ownerAddress.toLowerCase());
-        } catch (e) {
-          setIsOwner(false);
-        }
-      } catch (e) {}
-
-    } catch (error) {
-      console.warn('Fetch balances failed', error);
+  const runAsAdmin = async (fn: () => Promise<void>) => {
+    if (!adminConnected || !adminProvider) {
+      Alert.alert(t('admin'), t('appWalletAdminConnect'));
+      return;
     }
-  };
-
-  const handleConnect = async () => {
-    setIsConnecting(true);
     try {
-      await open();
-      // La dirección se maneja automáticamente por el hook useAccount
-    } catch (e) {
-      Alert.alert('Error', (e as any)?.message || 'No se pudo conectar');
-    } finally { setIsConnecting(false); }
-  };
-
-  const handleDisconnect = async () => {
-    await disconnect();
-    await MagnocrediService.disconnect();
-    setWalletAddress('');
-    setTokenBalance('0.00');
-    setPoolBalance('0.00');
-    setBnbBalance('0.00');
-  };
-
-  const runTx = async (name: string, fn: () => Promise<any>, onSuccess?: () => void) => {
-    setLoadingAction(name);
-    try {
+      const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
+      if (!signer) throw new Error('admin');
+      setWalletSigner(signer);
       await fn();
-      if (onSuccess) onSuccess();
-      Alert.alert('✅ Éxito', `${name} confirmada en la blockchain.`);
-    } catch (e: any) {
-      console.error(e);
-      if (e?.code === 4001 || (e?.message || '').includes('user rejected')) {
-        Alert.alert('Operación Cancelada', 'Rechazaste la transacción.');
-      } else {
-        Alert.alert('Error', e?.reason || e?.message || 'Fallo en la transacción.');
-      }
     } finally {
-      setLoadingAction(null);
-      fetchBalances();
+      if (appSigner) setWalletSigner(appSigner);
     }
   };
 
-  const registrarHumano = () => {
-    if (!walletAddress) return Alert.alert('Conectar', 'Conecta tu billetera primero.');
-    runTx('registrarHumanoZK', () => MagnocrediService.registrarHumano(walletAddress), () => setIsRegisteredZK(true));
+  const handleRegistrarHumano = async (padre?: string) => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (userInfo.paused) {
+      Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    const result = await registrarHumano(walletAddress, padre);
+    if (result.success) {
+      await clearPendingInvite();
+      refetch();
+    }
   };
 
-  const solicitarCredito = (tier: LoanTier) => {
-    if (!isRegisteredZK) return Alert.alert('Registro ZK', 'Registra tu identidad ZK antes de solicitar.');
-    runTx('solicitarPrestamo', () => MagnocrediService.solicitar(selectedToken.address), () => setHasActiveLoan(true));
+  const handleSolicitarCredito = async (tier: LoanTier) => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    if (!isContractConfigured()) {
+      Alert.alert(t('contract'), t('configureContract'));
+      return;
+    }
+    if (!userInfo.isRegistered) {
+      Alert.alert(t('register'), t('activateBeforeLoan'));
+      return;
+    }
+    if (!userInfo.kycDeclarado) {
+      Alert.alert(t('kycTitle'), t('kycNeedBeforeLoan'));
+      return;
+    }
+    if (!userInfo.identityBound) {
+      Alert.alert(t('otpTitle'), t('otpNeedBeforeLoan'));
+      return;
+    }
+    if (userInfo.hasActiveLoan) {
+      Alert.alert(t('activeLoan'), t('loanBusy'));
+      return;
+    }
+    if (tier.id > userInfo.userProgress.nivelActual) {
+      Alert.alert(t('loanLockedTitle'), t('loanLockedBody'));
+      return;
+    }
+    if (userInfo.paused) {
+      Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    if (userInfo.isDelinquent) {
+      Alert.alert(t('delinquent'), t('moraBlocked'));
+      return;
+    }
+    if (!userInfo.isTokenSupported) {
+      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
+      return;
+    }
+    if (userInfo.userProgress.cooldownRestante > 0) {
+      Alert.alert(
+        t('cooldownTitle'),
+        t('cooldownWait', {
+          time: formatCooldown(userInfo.userProgress.cooldownRestante, t('available')),
+        })
+      );
+      return;
+    }
+
+    const result = await solicitarPrestamo(selectedToken.address, tier.id);
+    if (result.success) {
+      refetch();
+    }
   };
 
-  const pagarCuota = (tier: LoanTier) => {
-    if (!walletAddress) return Alert.alert('Conectar', 'Conecta tu billetera primero.');
-    const montoUSD = tier.usdAmount * 1.3;
-    const amountWei = ethers.utils.parseUnits(montoUSD.toString(), selectedToken.decimals).toString();
-    runTx('pagarPrestamo', () => MagnocrediService.pagar(amountWei, selectedToken.address), () => setHasActiveLoan(false));
-  };
+  const handlePagar = async (kind: 'installment' | 'all' | number) => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!(await confirmFunds())) return;
 
-  const formatCooldown = (seconds: number) => {
-    if (seconds <= 0) return 'Disponible';
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    const parts = [];
-    if (days) parts.push(`${days}d`);
-    if (hours) parts.push(`${hours}h`);
-    if (minutes) parts.push(`${minutes}m`);
-    if (secs) parts.push(`${secs}s`);
-    return parts.join(' ');
-  };
+    if (!userInfo.activeLoan || userInfo.activeLoan.totalDueWei === '0') {
+      Alert.alert(t('noDebt'), t('noActiveLoan'));
+      return;
+    }
 
-  const depositarPool = async () => {
-    if (!walletAddress) return Alert.alert('Conectar', 'Conecta tu billetera primero.');
-    const amountWei = ethers.utils.parseUnits('10', selectedToken.decimals).toString();
-    runTx('depositarLiquidez', () => MagnocrediService.depositar(amountWei, selectedToken.address));
-  };
-
-  const retirarComisiones = async () => {
-    runTx('retirarComisiones', () => MagnocrediService.retirarComisiones());
-  };
-
-  const retirarComisionesToken = async () => {
-    runTx('retirarComisionesToken', () => MagnocrediService.retirarComisionesToken(selectedToken.address));
-  };
-
-  const TierCard = ({ tier }: { tier: LoanTier }) => {
-    const locked = tier.id > userLevel;
-    return (
-      <View style={[styles.tierCard, locked && styles.tierCardLocked]}>
-        <View style={styles.tierRow}>
-          <Text style={styles.tierTitle}>{tier.name}</Text>
-          {locked ? <Text style={styles.lock}>🔒</Text> : <View style={styles.greenDot} />}
-        </View>
-        <Text style={styles.tierAmount}>${tier.usdAmount.toFixed(2)}</Text>
-        <Text style={styles.tierMeta}>Plazo: {tier.term}</Text>
-        <Text style={styles.tierMeta}>Requisitos: {tier.requiredCount} usuarios</Text>
-        <View style={styles.tierActions}>
-          <TouchableOpacity disabled={locked || !!loadingAction} onPress={() => solicitarCredito(tier)} style={[styles.btn, styles.btnPrimary]}>
-            {loadingAction === 'solicitarPrestamo' ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Solicitar</Text>}
-          </TouchableOpacity>
-          <TouchableOpacity disabled={locked || !!loadingAction || !hasActiveLoan} onPress={() => pagarCuota(tier)} style={[styles.btn, styles.btnGhost]}>
-            {loadingAction === 'pagarPrestamo' ? <ActivityIndicator color="#38bdf8" /> : <Text style={[styles.btnText, styles.btnGhostText]}>Pagar</Text>}
-          </TouchableOpacity>
-        </View>
-      </View>
+    const loanToken = userInfo.activeLoan.token;
+    const left = Math.max(
+      1,
+      (userInfo.activeLoan.cuotasTotales || 1) - (userInfo.activeLoan.cuotasPagadas || 0)
     );
+    const count = kind === 'all' ? left : kind === 'installment' ? 1 : kind;
+
+    if (count >= left) {
+      const amountWei = userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
+      if (loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
+        const needed = Number(formatUnits(amountWei, selectedToken.decimals));
+        if (needed > Number(balances.tokenBalance) + 1e-8) {
+          Alert.alert(t('amount'), t('amountExceedsBalance'));
+          return;
+        }
+      }
+      const result = await pagarPrestamo(amountWei, loanToken);
+      if (result.success) refetch();
+      return;
+    }
+
+    if (count <= 1) {
+      const amountWei =
+        userInfo.activeLoan.cuotaWei || userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
+      if (loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
+        const needed = Number(formatUnits(amountWei, selectedToken.decimals));
+        if (needed > Number(balances.tokenBalance) + 1e-8) {
+          Alert.alert(t('amount'), t('amountExceedsBalance'));
+          return;
+        }
+      }
+      const result = await pagarPrestamo(amountWei, loanToken);
+      if (result.success) refetch();
+      return;
+    }
+
+    const result = await pagarCuotas(count, loanToken);
+    if (result.success) refetch();
   };
+
+  const handleDepositarPool = async (amountHuman: string) => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    if (userInfo.paused) {
+      Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    if (!userInfo.isTokenSupported) {
+      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
+      return;
+    }
+
+    const parsed = parsePositiveDecimal(amountHuman);
+    if (!parsed) {
+      Alert.alert(t('amount'), t('amountGreaterZero'));
+      return;
+    }
+    if (Number(parsed) > Number(balances.tokenBalance)) {
+      Alert.alert(t('amount'), t('poolNeedInternalFunds'));
+      return;
+    }
+
+    try {
+      const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
+      const result = await depositarLiquidez(amountWei, selectedToken.address);
+      if (result.success) {
+        refetch();
+      }
+    } catch {
+      Alert.alert(t('amount'), t('invalidAmount'));
+    }
+  };
+
+  const handleRetirarComisiones = async () => {
+    await runAsAdmin(async () => {
+      const result = await retirarComisiones();
+      if (result.success) refetch();
+    });
+  };
+
+  const handleRetirarComisionesToken = async () => {
+    await runAsAdmin(async () => {
+      const result = await retirarComisionesToken(selectedToken.address);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleDeclararKyc = async () => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return false;
+    }
+    if (!userInfo.isRegistered) {
+      Alert.alert(t('register'), t('activateBeforeLoan'));
+      return false;
+    }
+    const result = await declararKyc();
+    if (result.success) refetch();
+    return result.success;
+  };
+
+  const handleExecuteProposal = async (id: number) => {
+    await runAsAdmin(async () => {
+      const result = await executeAdminAction(id);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleConfirmProposal = async (id: number) => {
+    await runAsAdmin(async () => {
+      const result = await confirmAdminAction(id);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleProposeAddAdmin = async (address: string) => {
+    await runAsAdmin(async () => {
+      const result = await proposeAddAdmin(address);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleProposeRemoveAdmin = async (address: string) => {
+    await runAsAdmin(async () => {
+      const result = await proposeRemoveAdmin(address);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleProposeFeeCollector = async (address: string) => {
+    await runAsAdmin(async () => {
+      const result = await proposeFeeCollector(address);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleProposeConfirmations = async (required: number) => {
+    await runAsAdmin(async () => {
+      const result = await proposeRequiredConfirmations(required);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleProposeFundador = async (address: string) => {
+    await runAsAdmin(async () => {
+      const result = await proposeFundador(address);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleProposeOwner = async (address: string) => {
+    await runAsAdmin(async () => {
+      const result = await proposeOwner(address);
+      if (result.success) refetch();
+    });
+  };
+
+  const handleProposeSetTokenConfig = async (token: string, feed: string, enabled: boolean) => {
+    await runAsAdmin(async () => {
+      const result = await proposeSetTokenConfig(token, feed, enabled);
+      if (result.success) refetch();
+    });
+  };
+
+  const handlePausarProtocolo = async () => {
+    await runAsAdmin(async () => {
+      const result = await pausarContrato();
+      if (result.success) refetch();
+    });
+  };
+
+  useEffect(() => {
+    if (room === 'admin' && !adminInfo.isAdmin && !adminInfo.isOwner) {
+      setRoom(null);
+    }
+  }, [room, adminInfo.isAdmin, adminInfo.isOwner]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.topBar}>
-        <Text style={styles.appTitle}>Magnocredi</Text>
-        <View style={styles.topRight}>
-          {isConnected && address ? (
-            <TouchableOpacity style={styles.walletBtn} onPress={handleDisconnect}>
-              <Text style={styles.walletText}>{`🔗 ${address.substring(0,6)}...${address.substring(address.length-4)}`}</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.connectBtn} onPress={handleConnect} disabled={isConnecting}>
-              {isConnecting ? <ActivityIndicator color="#fff" /> : <Text style={styles.connectText}>Conectar</Text>}
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Token</Text>
-          <View style={styles.tokenRow}>
-            {SUPPORTED_TOKENS.map((t) => (
-              <TouchableOpacity key={t.symbol} style={[styles.tokenPill, selectedToken.symbol === t.symbol && styles.tokenPillActive]} onPress={() => setSelectedToken(t)}>
-                <Text style={[styles.tokenPillText, selectedToken.symbol === t.symbol && styles.tokenPillTextActive]}>{t.symbol}</Text>
-              </TouchableOpacity>
-            ))}
+    <AccountOnboarding
+      walletAddress={walletAddress}
+      walletReady={walletReady}
+      isRegistered={userInfo.isRegistered}
+      kycDeclarado={userInfo.kycDeclarado}
+      identityBound={userInfo.identityBound}
+      isLoading={txLoading}
+      paused={userInfo.paused}
+      inviteCode={pendingInviteCode}
+      onRegister={(padre) => void handleRegistrarHumano(padre)}
+      onDeclareKyc={handleDeclararKyc}
+      onPhoneBound={refetch}
+    >
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.topBar}>
+          <BrandLogo size={44} />
+          <View style={styles.topBarText}>
+            <Text style={[styles.title, { color: colors.text }]}>Quatrivium Credit</Text>
+            <Text style={[styles.subtitle, rtl && styles.rtlText, { color: colors.textMuted }]}>
+              {profile.displayName ? t('helloName', { name: profile.displayName }) : t('subtitle')}
+            </Text>
           </View>
-
-          <View style={styles.balancesRow}>
-            <View style={styles.balanceCol}>
-              <Text style={styles.balanceLabel}>Tu saldo</Text>
-              <Text style={styles.balanceValue}>{tokenBalance} {selectedToken.symbol}</Text>
-            </View>
-            <View style={styles.balanceCol}>
-              <Text style={styles.balanceLabel}>Pool</Text>
-              <Text style={styles.balanceValue}>{poolBalance} {selectedToken.symbol}</Text>
-            </View>
-            <View style={styles.balanceCol}>
-              <Text style={styles.balanceLabel}>Gas</Text>
-              <Text style={styles.balanceValue}>{bnbBalance} BNB</Text>
-            </View>
-          </View>
-
-          <View style={styles.userMetricsRow}>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Reputación</Text>
-              <Text style={styles.metricValue}>{reputation}</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Morosidad</Text>
-              <Text style={[styles.metricValue, isDelinquent ? styles.delinquentText : styles.onTimeText]}>{isDelinquent ? 'Sí' : 'No'}</Text>
-            </View>
-          </View>
-
-          <View style={styles.userMetricsRow}>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Pagos a tiempo</Text>
-              <Text style={styles.metricValue}>{creditHistory.paidOnTime}</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Préstamos morosos</Text>
-              <Text style={styles.metricValue}>{creditHistory.missedLoans}</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Penalizaciones</Text>
-              <Text style={styles.metricValue}>{creditHistory.penalties}</Text>
-            </View>
-          </View>
-
-          <View style={styles.userMetricsRow}>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Nivel actual</Text>
-              <Text style={styles.metricValue}>{userProgress.nivelActual}</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Solicitudes</Text>
-              <Text style={styles.metricValue}>{userProgress.solicitudesCompletadas}/{userProgress.nivelActual === 1 ? 3 : 5}</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricLabel}>Cooldown</Text>
-              <Text style={styles.metricValue}>{formatCooldown(userProgress.cooldownRestante)}</Text>
-            </View>
-          </View>
+          <SettingsButton />
         </View>
 
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Niveles de Préstamo</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tiersScroll}>
-            {LOAN_TIERS.map((tier) => (
-              <TierCard key={tier.id} tier={tier} />
-            ))}
-          </ScrollView>
-        </View>
-
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Acciones</Text>
-          <View style={styles.actionsGrid}>
-            <TouchableOpacity style={styles.actionBtn} onPress={registrarHumano} disabled={!!loadingAction}>
-              {loadingAction === 'registrarHumanoZK' ? <ActivityIndicator color="#38bdf8" /> : <Text style={styles.actionText}>🛡️ Registrar Humano</Text>}
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionBtn} onPress={() => solicitarCredito(LOAN_TIERS[0])} disabled={!!loadingAction}>
-              {loadingAction === 'solicitarPrestamo' ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>💳 Solicitar Crédito</Text>}
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionBtn} onPress={() => pagarCuota(LOAN_TIERS[0])} disabled={!!loadingAction || !hasActiveLoan}>
-              {loadingAction === 'pagarPrestamo' ? <ActivityIndicator color="#38bdf8" /> : <Text style={styles.actionText}>🧾 Pagar Cuota</Text>}
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionBtn} onPress={depositarPool} disabled={!!loadingAction}>
-              {loadingAction === 'depositarLiquidez' ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>💧 Depositar Liquidez</Text>}
-            </TouchableOpacity>
-            {isOwner && (
-              <>
-                <TouchableOpacity style={[styles.actionBtn, styles.adminBtn]} onPress={retirarComisiones} disabled={!!loadingAction}>
-                  {loadingAction === 'retirarComisiones' ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>🏦 Retirar Comisiones BNB</Text>}
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.actionBtn, styles.adminBtn]} onPress={retirarComisionesToken} disabled={!!loadingAction}>
-                  {loadingAction === 'retirarComisionesToken' ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>🏦 Retirar Token</Text>}
-                </TouchableOpacity>
-              </>
-            )}
+        {walletReady && (walletFailed || !walletAddress) ? (
+          <View style={[styles.configWarn, { backgroundColor: colors.warnBg }]}>
+            <Text style={{ color: colors.warnText }}>{t('appWalletFailed')}</Text>
+            <Text style={{ color: colors.primary, marginTop: 8 }} onPress={() => retryWallet()}>
+              {t('appWalletRetry')}
+            </Text>
           </View>
-        </View>
+        ) : null}
+
+        <KycAccessBanner
+          kycDone={userInfo.kycDeclarado}
+          phoneDone={userInfo.identityBound}
+          walletAddress={walletAddress}
+          isRegistered={userInfo.isRegistered}
+          kycDeclarado={userInfo.kycDeclarado}
+          identityBound={userInfo.identityBound}
+          isLoading={txLoading}
+          paused={userInfo.paused}
+          onDeclare={handleDeclararKyc}
+          onPhoneBound={refetch}
+        />
+
+        <DemoModeBanner />
+        <NetworkStatusBanner />
+        {!isContractConfigured() && (
+          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>{t('configWarn')}</Text>
+        )}
+        {userInfo.paused && (
+          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+            {t('securityPausedBanner')}
+          </Text>
+        )}
+
+        <Text style={[styles.hubTitle, { color: colors.text }]}>{t('hubChoose')}</Text>
+        <HomeHub
+          onOpen={setRoom}
+          tiles={[
+            { id: 'wallet', title: t('sectionAccount'), lead: t('hubWalletLead'), icon: 'wallet' },
+            { id: 'credit', title: t('sectionCreditLine'), lead: t('hubCreditLead'), icon: 'id' },
+            { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
+            { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
+            { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' },
+            ...(adminInfo.isOwner || adminInfo.isAdmin
+              ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const }]
+              : []),
+          ]}
+        />
       </ScrollView>
+
+      <AppWindow
+        visible={room === 'wallet'}
+        title={t('sectionAccount')}
+        lead={t('sectionAccountLead')}
+        onClose={() => setRoom(null)}
+      >
+        <AppSubsection title={t('subsectionWallet')} icon="plug">
+          <WalletSection
+            walletAddress={walletAddress}
+            bnbBalance={balances.bnbBalance}
+            tokenBalance={balances.tokenBalance}
+            selectedToken={selectedToken}
+            isLoading={txLoading}
+            onSent={refetch}
+          />
+        </AppSubsection>
+        {isConnected ? (
+          <AppSubsection title={t('subsectionBalances')} icon="wallet">
+            {tokens.length > 1 ? (
+              <TokenSelector
+                tokens={tokens}
+                selectedToken={selectedToken}
+                onSelectToken={setSelectedToken}
+              />
+            ) : null}
+            <BalanceDisplay
+              balances={balances}
+              selectedTokenSymbol={selectedToken.symbol}
+            />
+          </AppSubsection>
+        ) : null}
+        {isConnected ? (
+          <AppSubsection title={t('notificationTitle')} defaultOpen={false} icon="bell">
+            <NotificationChannels walletAddress={walletAddress} />
+          </AppSubsection>
+        ) : null}
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'credit'}
+        title={t('sectionCreditLine')}
+        lead={t('sectionCreditLineLead')}
+        onClose={() => setRoom(null)}
+      >
+        <AppSubsection title={t('subsectionActivate')} icon="id">
+          <ActivateCreditSection
+            isRegistered={userInfo.isRegistered}
+            onRegister={handleRegistrarHumano}
+            isLoading={txLoading}
+            initialInviteCode={pendingInviteCode}
+            paused={userInfo.paused}
+          />
+        </AppSubsection>
+        <AppSubsection title={t('subsectionRank')} icon="star">
+          <UserMetrics userInfo={userInfo} reminder={debtReminder} showDebt={false} />
+        </AppSubsection>
+        {userInfo.activeLoan ? (
+          <AppSubsection title={t('subsectionDebt')} icon="warning">
+            <UserMetrics
+              userInfo={userInfo}
+              reminder={debtReminder}
+              showRank={false}
+              showDebt
+              onPayLoan={() => handlePagar('installment')}
+              onPayAll={() => handlePagar('all')}
+              onPayCount={(count) => handlePagar(count)}
+              isPaying={txLoading}
+            />
+          </AppSubsection>
+        ) : null}
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'loans'}
+        title={t('loanLevels')}
+        lead={t('sectionLoansLead')}
+        onClose={() => setRoom(null)}
+      >
+        {tokens.length > 1 ? (
+          <TokenSelector
+            tokens={tokens}
+            selectedToken={selectedToken}
+            onSelectToken={setSelectedToken}
+          />
+        ) : null}
+        <AppSubsection title={t('subsectionLadder')} icon="chart">
+          <RankLadder userLevel={userInfo.userProgress.nivelActual} />
+        </AppSubsection>
+        <AppSubsection title={t('subsectionUnlocked')} icon="bank">
+          {loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual).map((tier) => (
+            <LoanTierCard
+              key={tier.id}
+              tier={{
+                ...tier,
+                name: t(`tier${tier.id}` as TranslationKey),
+                term: t(`term${tier.id}` as TranslationKey),
+              }}
+              userLevel={userInfo.userProgress.nivelActual}
+              hasActiveLoan={userInfo.hasActiveLoan}
+              isDelinquent={userInfo.isDelinquent}
+              paused={userInfo.paused}
+              isActiveTier={
+                Boolean(userInfo.activeLoan)
+                && parseUnits(
+                  String(LOAN_TIERS.find((item) => item.id === tier.id)?.usdAmount ?? 0),
+                  18
+                ).toString() === userInfo.activeLoan?.principalWei
+              }
+              dueLabel={userInfo.activeLoan?.totalDueLabel}
+              cuotaLabel={userInfo.activeLoan?.cuotaLabel}
+              cuotasPagadas={userInfo.activeLoan?.cuotasPagadas}
+              cuotasTotales={userInfo.activeLoan?.cuotasTotales}
+              remainingLabel={userInfo.activeLoan?.remainingLabel}
+              isLoading={txLoading}
+              curveRateBps={userInfo.curveRateBps}
+              onRequestLoan={handleSolicitarCredito}
+              onPayLoan={() => handlePagar('installment')}
+              onPayAll={() => handlePagar('all')}
+              onPayCount={(count) => handlePagar(count)}
+            />
+          ))}
+        </AppSubsection>
+        {loanTiers.some((tier) => tier.id > userInfo.userProgress.nivelActual) ? (
+          <AppSubsection title={t('subsectionLocked')} icon="lock">
+            {loanTiers.filter((tier) => tier.id > userInfo.userProgress.nivelActual).map((tier) => (
+              <LoanTierCard
+                key={tier.id}
+                tier={{
+                  ...tier,
+                  name: t(`tier${tier.id}` as TranslationKey),
+                  term: t(`term${tier.id}` as TranslationKey),
+                }}
+                userLevel={userInfo.userProgress.nivelActual}
+                hasActiveLoan={userInfo.hasActiveLoan}
+                isDelinquent={userInfo.isDelinquent}
+                paused={userInfo.paused}
+                isActiveTier={false}
+                isLoading={txLoading}
+                curveRateBps={userInfo.curveRateBps}
+                onRequestLoan={handleSolicitarCredito}
+                onPayLoan={() => handlePagar('installment')}
+              onPayAll={() => handlePagar('all')}
+              onPayCount={(count) => handlePagar(count)}
+              />
+            ))}
+          </AppSubsection>
+        ) : null}
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'network'}
+        title={t('referralNetwork')}
+        lead={t('sectionInviteLead')}
+        onClose={() => setRoom(null)}
+      >
+        <ReferralSection
+          walletAddress={walletAddress}
+          isRegistered={userInfo.isRegistered}
+          isRestricted={userInfo.isDelinquent}
+          curveRateBps={userInfo.curveRateBps}
+          referral={userInfo.referral ?? {
+            padre: '',
+            fundador: '',
+            isFundador: false,
+            bonoActivacionCobrado: false,
+            royaltiesCongeladas: false,
+          }}
+          reputation={userInfo.reputation}
+          networkPoints={userInfo.networkPoints}
+          networkBonusThreshold={userInfo.networkBonusThreshold}
+        >
+          {isConnected ? (
+            <AppSubsection title={t('referralHistoryTitle')} defaultOpen={false} icon="history">
+              <ReferralHistory walletAddress={walletAddress} enabled={userInfo.isRegistered} />
+            </AppSubsection>
+          ) : null}
+        </ReferralSection>
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'pool'}
+        title={t('sectionPool')}
+        lead={t('sectionPoolLead')}
+        onClose={() => setRoom(null)}
+      >
+        {tokens.length > 1 ? (
+          <TokenSelector
+            tokens={tokens}
+            selectedToken={selectedToken}
+            onSelectToken={setSelectedToken}
+          />
+        ) : null}
+        <PoolSupportSection
+          isLoading={txLoading}
+          tokenSymbol={selectedToken.symbol}
+          tokenSupported={userInfo.isTokenSupported}
+          poolBalance={balances.poolBalance}
+          poolOutstanding={balances.poolOutstanding}
+          poolCash={balances.poolCash}
+          walletConnected={Boolean(walletAddress)}
+          paused={userInfo.paused}
+          onDepositPool={handleDepositarPool}
+        />
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'admin'}
+        title={t('admin')}
+        lead={t('adminLead')}
+        onClose={() => setRoom(null)}
+      >
+        {tokens.length > 1 ? (
+          <TokenSelector
+            tokens={tokens}
+            selectedToken={selectedToken}
+            onSelectToken={setSelectedToken}
+          />
+        ) : null}
+        <AdminPanel
+          isOwner={adminInfo.isOwner}
+          isAdmin={adminInfo.isAdmin}
+          isLoading={txLoading}
+          paused={userInfo.paused}
+          tokenSymbol={selectedToken.symbol}
+          onWithdrawFees={handleRetirarComisiones}
+          onWithdrawTokenFees={handleRetirarComisionesToken}
+          onPause={handlePausarProtocolo}
+          onExecuteProposal={handleExecuteProposal}
+          onConfirmProposal={handleConfirmProposal}
+          onProposeAddAdmin={handleProposeAddAdmin}
+          onProposeRemoveAdmin={handleProposeRemoveAdmin}
+          onProposeFeeCollector={handleProposeFeeCollector}
+          onProposeConfirmations={handleProposeConfirmations}
+          onProposeFundador={handleProposeFundador}
+          onProposeOwner={handleProposeOwner}
+          extraStables={extraStables}
+          onProposeSetTokenConfig={handleProposeSetTokenConfig}
+          adminRoster={adminInfo.adminRoster.length ? adminInfo.adminRoster : userInfo.adminRoster}
+          requiredConfirmations={adminInfo.requiredConfirmations || userInfo.requiredConfirmations}
+          proposalCount={adminInfo.proposalCount || userInfo.proposalCount}
+          openProposal={adminInfo.openProposal || userInfo.openProposal}
+          founderAddress={adminInfo.founderAddress || userInfo.founderAddress}
+        />
+      </AppWindow>
+      <AppKit />
     </SafeAreaView>
+    </AccountOnboarding>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
-  topBar: { height: 72, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#0b1220' },
-  appTitle: { color: '#38bdf8', fontSize: 20, fontWeight: '700' },
-  topRight: { flexDirection: 'row', alignItems: 'center' },
-  connectBtn: { backgroundColor: '#0ea5e9', paddingVertical: 8, paddingHorizontal: 14, borderRadius: 10 },
-  connectText: { color: '#fff', fontWeight: '700' },
-  walletBtn: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#22303b', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12 },
-  walletText: { color: '#38bdf8', fontWeight: '700' },
-
-  scroll: { padding: 20, paddingBottom: 40 },
-  sectionCard: { backgroundColor: '#0f172a', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#13202a' },
-  sectionTitle: { color: '#cfeffd', fontSize: 16, fontWeight: '700', marginBottom: 12 },
-
-  tokenRow: { flexDirection: 'row', gap: 8 },
-  tokenPill: { paddingVertical: 8, paddingHorizontal: 12, backgroundColor: '#12202a', borderRadius: 10, marginRight: 8 },
-  tokenPillActive: { backgroundColor: '#0ea5e9', borderWidth: 0 },
-  tokenPillText: { color: '#94a3b8', fontWeight: '700' },
-  tokenPillTextActive: { color: '#fff' },
-
-  balancesRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
-  balanceCol: { flex: 1, alignItems: 'center' },
-  balanceLabel: { color: '#94a3b8', fontSize: 12 },
-  balanceValue: { color: '#fff', fontSize: 16, fontWeight: '700', marginTop: 6 },
-
-  tiersScroll: { marginTop: 8 },
-  tierCard: { width: 220, backgroundColor: '#162433', padding: 14, borderRadius: 12, marginRight: 12, borderWidth: 1, borderColor: '#21343d' },
-  tierCardLocked: { opacity: 0.6 },
-  tierRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  tierTitle: { color: '#cfeffd', fontWeight: '800' },
-  lock: { color: '#94a3b8' },
-  greenDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#10b981' },
-  tierAmount: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 6 },
-  tierMeta: { color: '#94a3b8', fontSize: 12, marginBottom: 4 },
-  tierActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-
-  userMetricsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, gap: 8 },
-  metricCard: { flex: 1, backgroundColor: '#12202a', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#21343d', alignItems: 'center' },
-  metricLabel: { color: '#94a3b8', fontSize: 12, marginBottom: 6 },
-  metricValue: { color: '#fff', fontSize: 18, fontWeight: '700' },
-  delinquentText: { color: '#f87171' },
-  onTimeText: { color: '#34d399' },
-
-  btn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center', marginHorizontal: 4 },
-  btnPrimary: { backgroundColor: '#0ea5e9' },
-  btnGhost: { backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#21343d' },
-  btnText: { color: '#0f172a', fontWeight: '800' },
-  btnGhostText: { color: '#38bdf8' },
-
-  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 },
-  actionBtn: { backgroundColor: '#12202a', padding: 14, borderRadius: 12, width: '48%', alignItems: 'center', marginBottom: 8 },
-  adminBtn: { backgroundColor: '#9333ea', borderColor: '#a855f7', borderWidth: 1 },
-  actionText: { color: '#cfeffd', fontWeight: '700' },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' },
-  loadingText: { color: '#fff', marginTop: 16, fontSize: 16 },
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 10,
+  },
+  topBarText: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  subtitle: {
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  configWarn: {
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 12,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  rtlText: {
+    textAlign: 'right',
+  },
+  hubTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
 });

@@ -1,0 +1,243 @@
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useI18n } from '../i18n/LanguageContext';
+import { useTheme } from '../theme/ThemeContext';
+import { useUserProfile } from '../profile/ProfileContext';
+import {
+  AVATAR_PRESETS,
+  persistPickedPhoto,
+  type UserProfile,
+} from '../services/userProfile';
+import { AppIcon } from './icons';
+import { ProfileAvatar } from './ProfileAvatar';
+import { UsernameSection } from './UsernameSection';
+import { EmailOtpSection } from './EmailOtpSection';
+import { useWalletLevel } from '../hooks/useWalletLevel';
+import { getRankForLevel } from '../constants/ranks';
+import { loadVerifiedEmail } from '../services/accountEmail';
+import { loadClaimedUsername } from '../services/accountUsername';
+
+export const ProfileSettings: React.FC = () => {
+  const { t } = useI18n();
+  const { colors } = useTheme();
+  const { profile, walletAddress, saveProfile } = useUserProfile();
+  const level = useWalletLevel(walletAddress);
+  const [draft, setDraft] = useState<UserProfile>(profile);
+  const [saving, setSaving] = useState(false);
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    setDraft(profile);
+  }, [profile]);
+
+  useEffect(() => {
+    loadVerifiedEmail().then(setEmail).catch(() => {});
+    loadClaimedUsername().then(setUsername).catch(() => {});
+  }, [walletAddress]);
+
+  const apply = (patch: Partial<UserProfile>) => {
+    setDraft((prev) => ({ ...prev, ...patch }));
+  };
+
+  const pickPhoto = async () => {
+    try {
+      const ImagePicker = await import('expo-image-picker');
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(t('profilePhoto'), t('profilePhotoDenied'));
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.45,
+        base64: true,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      const uri = await persistPickedPhoto(result.assets[0]);
+      if (!uri) {
+        Alert.alert(t('profilePhoto'), t('profilePhotoUnavailable'));
+        return;
+      }
+      apply({ photoUri: uri, avatarId: draft.avatarId });
+    } catch {
+      Alert.alert(t('profilePhoto'), t('profilePhotoUnavailable'));
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveProfile({ ...draft, displayName: username || draft.displayName });
+      Alert.alert(t('ready'), t('profileSaved'));
+    } catch {
+      Alert.alert(t('error'), t('profileSaveError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.hero}>
+        <ProfileAvatar
+          profile={draft}
+          wallet={walletAddress}
+          size={72}
+          level={walletAddress ? level : undefined}
+          rankName={t(getRankForLevel(level).nameKey)}
+          showRankLabel={Boolean(walletAddress)}
+        />
+        <View style={styles.heroText}>
+          <Text style={[styles.heroName, { color: colors.text }]}>
+            {username ? `@${username}` : draft.displayName || t('profileNamePlaceholder')}
+          </Text>
+          <Text style={[styles.heroHint, { color: colors.textMuted }]}>{t('profileLead')}</Text>
+          <Text style={[styles.heroHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity style={[styles.photoBtn, { borderColor: colors.primary }]} onPress={pickPhoto}>
+        <AppIcon name="id" size={16} color={colors.primary} />
+        <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('profilePickPhoto')}</Text>
+      </TouchableOpacity>
+      {draft.photoUri ? (
+        <TouchableOpacity onPress={() => apply({ photoUri: '' })}>
+          <Text style={[styles.remove, { color: colors.textMuted }]}>{t('profileRemovePhoto')}</Text>
+        </TouchableOpacity>
+      ) : null}
+
+      <Text style={[styles.label, { color: colors.primary }]}>{t('profileChooseAvatar')}</Text>
+      <View style={styles.presets}>
+        {AVATAR_PRESETS.map((item) => {
+          const active = draft.avatarId === item.id && !draft.photoUri;
+          return (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => apply({ avatarId: item.id, photoUri: '' })}
+              style={[
+                styles.preset,
+                { backgroundColor: item.bg, borderColor: active ? colors.text : 'transparent' },
+              ]}
+            />
+          );
+        })}
+      </View>
+
+      <UsernameSection
+        walletAddress={walletAddress}
+        claimedUsername={username}
+        onClaimed={async (value) => {
+          setUsername(value);
+          await saveProfile({ ...draft, displayName: value });
+        }}
+      />
+      <EmailOtpSection
+        walletAddress={walletAddress}
+        verifiedEmail={email}
+        onVerified={setEmail}
+      />
+
+      <TouchableOpacity
+        style={[styles.save, { backgroundColor: colors.primary }, saving && styles.disabled]}
+        onPress={handleSave}
+        disabled={saving}
+      >
+        <AppIcon name="save" size={16} color="#fff" />
+        <Text style={styles.saveText}>{t('profileSave')}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  wrap: {
+    marginBottom: 12,
+  },
+  hero: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
+  },
+  heroText: {
+    flex: 1,
+  },
+  heroName: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  heroHint: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 2,
+  },
+  photoBtn: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  photoBtnText: {
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  remove: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  presets: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  preset: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  save: {
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  saveText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+});

@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.24;
 
 contract ERC20Mock {
-    string public name = "MockToken";
-    string public symbol = "MCK";
+    string public name = "Tether USD";
+    string public symbol = "USDT";
     uint8 public decimals = 18;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
-
-    constructor() {}
 
     function mint(address to, uint256 amount) external {
         balanceOf[to] += amount;

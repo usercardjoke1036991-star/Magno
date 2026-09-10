@@ -1,27 +1,50 @@
 require('dotenv').config();
+require('@nomicfoundation/hardhat-ethers');
+require('@nomicfoundation/hardhat-chai-matchers');
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY || '';
+function accountsFromEnv() {
+  const key = process.env.PRIVATE_KEY || '';
+  const hex = key.startsWith('0x') ? key.slice(2) : key;
+  if (/^[0-9a-fA-F]{64}$/.test(hex)) {
+    return ['0x' + hex];
+  }
+  return [];
+}
+
+const testnetRpc =
+  process.env.BSC_TESTNET_RPC_URL ||
+  process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY ||
+  'https://bsc-testnet.publicnode.com';
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    version: '0.8.17',
+    version: '0.8.24',
     settings: {
-      optimizer: { enabled: true, runs: 200 }
-    }
+      optimizer: { enabled: true, runs: 1 },
+      viaIR: true,
+      metadata: { bytecodeHash: 'none' },
+      // Quita los strings de require() del bytecode para caber en EIP-170.
+      // Los tests no pueden usar revertedWith('mensaje'); sí custom errors de OZ.
+      debug: { revertStrings: 'strip' },
+    },
   },
   networks: {
-    hardhat: {},
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     bscTestnet: {
-      url: process.env.BSC_TESTNET_RPC_URL || '',
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : []
+      url: testnetRpc,
+      chainId: 97,
+      accounts: accountsFromEnv(),
     },
     bscMainnet: {
-      url: process.env.BSC_MAINNET_RPC_URL || '',
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : []
-    }
+      url: process.env.BSC_MAINNET_RPC_URL || 'https://bsc-dataseed.binance.org/',
+      chainId: 56,
+      accounts: accountsFromEnv(),
+    },
   },
   paths: {
-    sources: './contracts'
-  }
+    sources: './contracts',
+  },
 };

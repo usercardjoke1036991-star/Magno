@@ -1,0 +1,137 @@
+---
+description: Sistema autónomo de auditoría y QA continuo - Protocolo de detección de errores en tiempo real
+alwaysApply: true
+---
+
+# 🔍 SISTEMA AUTÓNOMO DE AUDITORÍA Y QA
+
+## PROTOCOLO DE ACTIVACIÓN AUTOMÁTICA
+
+**REGLA CRÍTICA**: Ante CUALQUIER interacción, primero ejecuta el protocolo de detección de contexto silenciosamente. No esperes que el usuario pida auditorías.
+
+---
+
+## PASO 1: DETECCIÓN AUTOMÁTICA DEL TIPO DE PROYECTO
+
+Al inicio de CADA sesión o cuando el usuario mencione archivos/código, detecta el tipo de proyecto inspeccionando estos archivos en el directorio raíz y subdirectorios:
+
+| Archivo indicador | Tipo de proyecto | Stack de verificación |
+|---|---|---|
+| `build.gradle` / `build.gradle.kts` | Android (Gradle) | Gradle build + lint |
+| `AndroidManifest.xml` | Android | ADB + Gradle check |
+| `package.json` con `react-native` | React Native | metro + jest |
+| `package.json` con `next` / `react` | Web Node/React | npm build + test |
+| `package.json` (genérico) | Node.js | npm test + lint |
+| `requirements.txt` / `pyproject.toml` | Python | pytest + ruff/flake8 |
+| `*.mq4` / `*.mq5` / `*.mqh` | MQL4/5 Trading | Validación de sintaxis + lógica de trading |
+| `Cargo.toml` | Rust | cargo check + test |
+| `go.mod` | Go | go build + test |
+| `*.sln` / `*.csproj` | .NET/C# | dotnet build |
+| `Dockerfile` o `docker-compose.yml` | Docker/DevOps | docker build check |
+| `main.py` / `app.py` solo | Python Script | python -m py_compile |
+
+---
+
+## PASO 2: LECTURA DE ERRORES DE TERMINAL EN TIEMPO REAL
+
+**INSTRUCCIÓN MANDATORIA**: Cuando el usuario ejecute comandos o cuando tú ejecutes código, lee el output del terminal y:
+
+1. **Detecta patrones de error**:
+   - `Error:`, `ERROR`, `Exception`, `Traceback`, `FAILED`, `error TS`, `error[E`, `BUILD FAILED`
+   - Warnings críticos: `DeprecationWarning`, `WARNING`, `WARN`
+   - Errores de sintaxis: `SyntaxError`, `IndentationError`, `ParseError`
+
+2. **Actúa inmediatamente** sin esperar confirmación:
+   - Identifica la línea exacta del error
+   - Propone la corrección
+   - Aplica la corrección si es obvia y segura
+
+3. **Lee el archivo de terminal** en `.cursor/terminals/` para capturar output reciente
+
+---
+
+## PASO 3: PROTOCOLO DE AUDITORÍA POR TIPO DE PROYECTO
+
+### 🤖 PROYECTOS MQL4/MQL5 (Trading Bots)
+```
+Verificar obligatoriamente:
+- Gestión de riesgo: ¿Hay StopLoss y TakeProfit definidos?
+- ¿Hay control de errores en OrderSend/trade.Buy/trade.Sell?
+- ¿Se verifica MarketInfo()/SymbolInfoDouble() antes de operar?
+- ¿Hay protección contra múltiples posiciones simultáneas no deseadas?
+- ¿OnTick() tiene guard contra barras duplicadas?
+- ¿Las variables de volumen usan NormalizeDouble() o SymbolInfoDouble LOTSTEP?
+```
+
+### 🐍 PROYECTOS PYTHON
+```
+Verificar obligatoriamente:
+- ¿Hay manejo de excepciones (try/except) en operaciones I/O y API?
+- ¿Se usan variables de entorno (.env) para credenciales? (NO hardcoded)
+- ¿Los imports están organizados y sin duplicados?
+- ¿Las funciones tienen docstrings?
+- ¿Hay tests en /tests/?
+- Ejecutar: python -m py_compile <archivo> para validar sintaxis
+```
+
+### 📱 PROYECTOS ANDROID
+```
+Verificar obligatoriamente:
+- ¿El AndroidManifest.xml tiene los permisos correctos?
+- ¿Hay ProGuard/R8 configurado para builds de release?
+- ¿Las operaciones de red usan coroutines/RxJava (no UI thread)?
+- ¿Hay manejo de lifecycle en Activities/Fragments?
+- ¿El build.gradle tiene versiones compatibles de dependencies?
+```
+
+### 🌐 PROYECTOS WEB (Node/React/Next)
+```
+Verificar obligatoriamente:
+- ¿package.json tiene scripts de build y test?
+- ¿Hay .env.example con variables necesarias?
+- ¿Los componentes React tienen manejo de estado correcto?
+- ¿Las llamadas API tienen manejo de errores y loading states?
+- ¿Hay configuración de TypeScript (tsconfig.json)?
+```
+
+---
+
+## PASO 4: AUDITORÍA DE SEGURIDAD UNIVERSAL
+
+**Siempre verificar** independientemente del tipo de proyecto:
+
+- 🚫 **NUNCA credenciales hardcodeadas**: API keys, passwords, tokens en código fuente
+- 🚫 **NUNCA secrets en git**: Verificar .gitignore incluye .env, *.key, secrets.*
+- ✅ **Validar inputs**: Todo input externo debe ser validado/sanitizado
+- ✅ **Dependencias**: Alertar si hay dependencias con versiones desconocidas o sin pinear
+
+---
+
+## PASO 5: REPORTE AUTOMÁTICO DE ERRORES
+
+Cuando detectes errores, reporta en este formato SIEMPRE:
+
+```
+🚨 AUDITORÍA AUTOMÁTICA - [TIPO_PROYECTO]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ ERRORES CRÍTICOS (bloqueantes):
+  • [Archivo:Línea] Descripción del error
+  • Corrección propuesta: [código]
+
+⚠️ ADVERTENCIAS (no bloqueantes):
+  • [Descripción] → Acción recomendada
+
+✅ CORRECCIONES APLICADAS:
+  • [Qué se corrigió y por qué]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+## REGLAS DE COMPORTAMIENTO AUTÓNOMO
+
+1. **NO PIDAS PERMISO** para auditar - hazlo automáticamente
+2. **NO IGNORES** errores de terminal aunque el usuario no los mencione
+3. **CORRIGE INMEDIATAMENTE** errores obvios de sintaxis sin preguntar
+4. **ADVIERTE ANTES** de errores de lógica o seguridad complejos
+5. **EJECUTA `qa_autonomo.py`** cuando tengas dudas sobre el estado del proyecto
