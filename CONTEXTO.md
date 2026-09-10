@@ -163,19 +163,25 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Ownable, Pausable, Reentranc
 
 ---
 
-## Estado de verificaciones (última auditoría: 2026-09-10)
+## Estado de verificaciones (última auditoría: 2026-09-10 — FINAL)
 
 | Verificación | Estado | Detalle |
 |---|---|---|
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
-| `check-i18n.mjs` | ✅ OK | 611 claves en 16 locales, sin discrepancias |
-| `security-check.mjs` | ✅ OK | .env fuera de git, sin credenciales hardcodeadas |
-| `hardhat test` | ✅ 68/68 pasan | accounting, circuitBreaker, cuotas, identity, kyc, liquidation, mlm, morosity, peg, security |
-| `npm audit` (runtime) | ✅ OK | Vulns ws GHSA-58qx/96hv corregidas con override ws^8.21.0 |
-| `npm audit` (devDeps) | ⚠️ 66 vulns | En hardhat/solidity-coverage/expo SDK — devDeps, no en bundle de la app |
-| `production:check` | 🟡 9/14 | 5 faltantes son acciones manuales de deploy |
-| Imports rotos | ✅ 0 | Todos los módulos resuelven correctamente |
-| console sin __DEV__ | ✅ 0 | Sin logging de producción sin guardia |
+| `check-i18n.mjs` | ✅ OK | 611 claves · 16 locales · sin BOM · sin discrepancias |
+| `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
+| `hardhat test` | ✅ 68/68 pasan | accounting · circuitBreaker · cuotas · identity · kyc · liquidation · mlm · morosity · peg · security |
+| `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
+| `npm audit` (devDeps) | ⚠️ 66 vulns | hardhat/solidity-coverage/expo SDK — no van al bundle de la app |
+| `production:check` | 🟡 **12/14** | 2 faltantes son acciones manuales (deploy mainnet + Twilio) |
+| Imports rotos | ✅ 0 | Todos los módulos resuelven |
+| console sin __DEV__ | ✅ 0 | Sin logging expuesto en producción |
+| `.env.worker` en git | ✅ 0 | No trackeado · claves privadas seguras |
+| ProGuard (APK release) | ✅ ON | `enableProguardInReleaseBuilds: true` |
+| expo-updates (OTA) | ✅ OK | canal dev/preview/production · url EAS configurada |
+| ngrok túnel dev | ✅ OK | `rundown-shelf-mongoose.ngrok-free.dev` · `npm run tunnel:ngrok` |
+| ATTESTER_PRIVATE_KEY | ✅ Generada | Clave criptográfica real · no en git |
+| RESEND_API_KEY | ✅ Configurada | En `.env.worker` · no en git |
 
 ---
 
@@ -189,3 +195,6 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Ownable, Pausable, Reentranc
 | 2026-09-10 | Claves i18n de liquidación añadidas (16 locales) | 611 claves, soporte multiidioma para nueva función |
 | 2026-09-10 | `package.json` override `ws: ^8.21.0` | Corregir GHSA-58qx-3vcg-4xpx y GHSA-96hv-2xvq-fx4p |
 | 2026-09-10 | Auditoría profunda final — 0 errores TS, 68/68 tests | Proyecto listo para deploy en producción |
+| 2026-09-10 | expo-updates + ProGuard + eas channels | OTA parcheado sin Play Store, APK ofuscado |
+| 2026-09-10 | ngrok v3.39.11 + dominio estático + ATTESTER_PRIVATE_KEY | Túnel dev HTTPS + clave attester generada |
+| 2026-09-10 | RESEND_API_KEY + production:check 12/14 | Email configurado, máximo listo sin deploy mainnet |
