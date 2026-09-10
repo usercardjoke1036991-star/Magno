@@ -8,6 +8,15 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 3000,
+      "url": "https://u.expo.dev/0a9b20f0-900a-4d35-8541-14b6202d84f5"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -27,6 +36,8 @@
       "package": "com.quatrivium.credit",
       "allowBackup": false,
       "usesCleartextTraffic": false,
+      "enableProguardInReleaseBuilds": true,
+      "enableShrinkResourcesInReleaseBuilds": true,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -68,7 +79,8 @@
         {
           "faceIDPermission": "Quatrivium Credit usa Face ID o la huella para desbloquear la aplicación."
         }
-      ]
+      ],
+      "expo-updates"
     ],
     "platforms": [
       "ios",
