@@ -356,6 +356,29 @@ export const QuatriviumCreditService = {
     return tx.wait();
   },
 
+  liquidar: async (debtorAddress: string, tokenAddress: string) => {
+    if (!isAddress(debtorAddress)) throw new Error('invalid address');
+    assertToken(tokenAddress);
+    const { signer } = await requireSigner();
+    const credit = contractWith(signer);
+    const userAddress = await signer.getAddress();
+    // Obtener la deuda total del deudor para aprobar el monto exacto
+    const deuda = await credit.obtenerDeuda(debtorAddress);
+    const totalDue = deuda[2] as bigint;
+    if (totalDue <= 0n) throw new Error('no-active-debt');
+    // Aprobar el monto total de la deuda del deudor al contrato
+    await asegurarAprobacionToken(signer, userAddress, tokenAddress, totalDue.toString());
+    const tx = await credit.liquidate(debtorAddress, tokenAddress);
+    return tx.wait();
+  },
+
+  marcarMorosoSiVencido: async (debtorAddress: string) => {
+    if (!isAddress(debtorAddress)) throw new Error('invalid address');
+    const { signer } = await requireSigner();
+    const tx = await contractWith(signer).marcarMorosoSiVencido(debtorAddress);
+    return tx.wait();
+  },
+
   prepareDeposit: async (tokenAddress: string, amountInWei: string) => {
     assertContractConfigured();
     const iface = new Interface(CONTRACT_ABI);

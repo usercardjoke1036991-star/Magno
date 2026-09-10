@@ -601,5 +601,13 @@
   "referralRepLead": "Mỗi người giới thiệu cộng {points} điểm uy tín. Khi họ trả cấp đầu, bạn được {network} điểm mạng. Mỗi {threshold} điểm mạng, quỹ gửi {bonus}.",
   "referralRepScore": "Uy tín {score} · mạng {network}",
   "referralRepScoreShort": "Mạng {network}",
-  "referralRepNext": "Còn thiếu {left} điểm mạng để nhận thưởng {bonus} tiếp theo."
+  "referralRepNext": "Còn thiếu {left} điểm mạng để nhận thưởng {bonus} tiếp theo.",
+  "liquidarTitle": "Liquidate overdue debtor",
+  "liquidarLead": "If a debtor has an overdue loan, you can liquidate it by paying their debt. You will receive a 5% prize of the principal from the pool. You need to hold the token in your admin wallet.",
+  "liquidarAddressPlaceholder": "Address of the debtor to liquidate",
+  "liquidarConfirm": "You will pay this user's debt from your own wallet and receive the 5% prize. This action cannot be undone. Continue?",
+  "liquidarDone": "Debtor liquidated. Prize sent to your wallet.",
+  "liquidarBtn": "Liquidate debtor",
+  "marcarMorosoConfirm": "This will mark the user as delinquent if their loan is already overdue. It does not pay the debt, only changes the status. Continue?",
+  "marcarMorosoBtn": "Mark as delinquent"
 }

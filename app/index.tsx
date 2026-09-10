@@ -1,14 +1,13 @@
-import { formatUnits, parseUnits, type Eip1193Provider } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import { AppKit, useAccount, useProvider } from '@reown/appkit-react-native';
-import { getEthersSignerFromProvider } from '../web3Config';
+import { parseUnits } from 'ethers';
 import { setWalletSigner } from '../services/quatriviumCreditService';
-import { useWeb3Balances, type LoanTier } from '../hooks/useWeb3Balances';
-import { useWeb3Transactions } from '../hooks/useWeb3Transactions';
+import { useWeb3Balances } from '../hooks/useWeb3Balances';
+import { useHomeHandlers } from '../hooks/useHomeHandlers';
 import { WalletSection } from '../components/WalletSection';
 import { TokenSelector } from '../components/TokenSelector';
 import { BalanceDisplay } from '../components/BalanceDisplay';
@@ -33,7 +32,6 @@ import { ReferralHistory } from '../components/ReferralHistory';
 import { LOAN_TIERS } from '../constants/loanTiers';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isContractConfigured } from '../constants/rpcConfig';
-import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { usePendingInvite } from '../hooks/usePendingInvite';
@@ -95,307 +93,44 @@ function HomeScreenWithHooks() {
   const debtReminder = useLoanPaymentReminders(userInfo);
 
   const {
-    isLoading: txLoading,
-    registrarHumano,
-    solicitarPrestamo,
-    pagarPrestamo,
-    pagarCuotas,
-    depositarLiquidez,
-    retirarComisiones,
-    retirarComisionesToken,
-    pausarContrato,
-    declararKyc,
-    executeAdminAction,
-    confirmAdminAction,
-    proposeAddAdmin,
-    proposeRemoveAdmin,
-    proposeFeeCollector,
-    proposeRequiredConfirmations,
-    proposeSetTokenConfig,
-    proposeFundador,
-    proposeOwner,
-  } = useWeb3Transactions();
+    txLoading,
+    handleRegistrarHumano,
+    handleSolicitarCredito,
+    handlePagar,
+    handleDepositarPool,
+    handleRetirarComisiones,
+    handleRetirarComisionesToken,
+    handleDeclararKyc,
+    handleExecuteProposal,
+    handleConfirmProposal,
+    handleProposeAddAdmin,
+    handleProposeRemoveAdmin,
+    handleProposeFeeCollector,
+    handleProposeConfirmations,
+    handleProposeFundador,
+    handleProposeOwner,
+    handleProposeSetTokenConfig,
+    handlePausarProtocolo,
+    handleLiquidarDeudor,
+    handleMarcarMorosoSiVencido,
+  } = useHomeHandlers({
+    walletAddress,
+    userInfo,
+    balances,
+    selectedToken,
+    appSigner,
+    adminConnected,
+    adminProvider,
+    confirmFunds,
+    refetch,
+    clearPendingInvite,
+  });
 
   useEffect(() => {
     if (appSigner) {
       setWalletSigner(appSigner);
     }
   }, [appSigner]);
-
-  const runAsAdmin = async (fn: () => Promise<void>) => {
-    if (!adminConnected || !adminProvider) {
-      Alert.alert(t('admin'), t('appWalletAdminConnect'));
-      return;
-    }
-    try {
-      const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
-      if (!signer) throw new Error('admin');
-      setWalletSigner(signer);
-      await fn();
-    } finally {
-      if (appSigner) setWalletSigner(appSigner);
-    }
-  };
-
-  const handleRegistrarHumano = async (padre?: string) => {
-    if (!walletAddress) {
-      Alert.alert(t('connect'), t('appWalletNotReady'));
-      return;
-    }
-    if (userInfo.paused) {
-      Alert.alert(t('admin'), t('protocolPaused'));
-      return;
-    }
-    const result = await registrarHumano(walletAddress, padre);
-    if (result.success) {
-      await clearPendingInvite();
-      refetch();
-    }
-  };
-
-  const handleSolicitarCredito = async (tier: LoanTier) => {
-    if (!walletAddress) {
-      Alert.alert(t('connect'), t('appWalletNotReady'));
-      return;
-    }
-    if (!(await confirmFunds())) return;
-    if (!isContractConfigured()) {
-      Alert.alert(t('contract'), t('configureContract'));
-      return;
-    }
-    if (!userInfo.isRegistered) {
-      Alert.alert(t('register'), t('activateBeforeLoan'));
-      return;
-    }
-    if (!userInfo.kycDeclarado) {
-      Alert.alert(t('kycTitle'), t('kycNeedBeforeLoan'));
-      return;
-    }
-    if (!userInfo.identityBound) {
-      Alert.alert(t('otpTitle'), t('otpNeedBeforeLoan'));
-      return;
-    }
-    if (userInfo.hasActiveLoan) {
-      Alert.alert(t('activeLoan'), t('loanBusy'));
-      return;
-    }
-    if (tier.id > userInfo.userProgress.nivelActual) {
-      Alert.alert(t('loanLockedTitle'), t('loanLockedBody'));
-      return;
-    }
-    if (userInfo.paused) {
-      Alert.alert(t('admin'), t('protocolPaused'));
-      return;
-    }
-    if (userInfo.isDelinquent) {
-      Alert.alert(t('delinquent'), t('moraBlocked'));
-      return;
-    }
-    if (!userInfo.isTokenSupported) {
-      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
-      return;
-    }
-    if (userInfo.userProgress.cooldownRestante > 0) {
-      Alert.alert(
-        t('cooldownTitle'),
-        t('cooldownWait', {
-          time: formatCooldown(userInfo.userProgress.cooldownRestante, t('available')),
-        })
-      );
-      return;
-    }
-
-    const result = await solicitarPrestamo(selectedToken.address, tier.id);
-    if (result.success) {
-      refetch();
-    }
-  };
-
-  const handlePagar = async (kind: 'installment' | 'all' | number) => {
-    if (!walletAddress) {
-      Alert.alert(t('connect'), t('appWalletNotReady'));
-      return;
-    }
-    if (!(await confirmFunds())) return;
-
-    if (!userInfo.activeLoan || userInfo.activeLoan.totalDueWei === '0') {
-      Alert.alert(t('noDebt'), t('noActiveLoan'));
-      return;
-    }
-
-    const loanToken = userInfo.activeLoan.token;
-    const left = Math.max(
-      1,
-      (userInfo.activeLoan.cuotasTotales || 1) - (userInfo.activeLoan.cuotasPagadas || 0)
-    );
-    const count = kind === 'all' ? left : kind === 'installment' ? 1 : kind;
-
-    if (count >= left) {
-      const amountWei = userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
-      if (loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
-        const needed = Number(formatUnits(amountWei, selectedToken.decimals));
-        if (needed > Number(balances.tokenBalance) + 1e-8) {
-          Alert.alert(t('amount'), t('amountExceedsBalance'));
-          return;
-        }
-      }
-      const result = await pagarPrestamo(amountWei, loanToken);
-      if (result.success) refetch();
-      return;
-    }
-
-    if (count <= 1) {
-      const amountWei =
-        userInfo.activeLoan.cuotaWei || userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
-      if (loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
-        const needed = Number(formatUnits(amountWei, selectedToken.decimals));
-        if (needed > Number(balances.tokenBalance) + 1e-8) {
-          Alert.alert(t('amount'), t('amountExceedsBalance'));
-          return;
-        }
-      }
-      const result = await pagarPrestamo(amountWei, loanToken);
-      if (result.success) refetch();
-      return;
-    }
-
-    const result = await pagarCuotas(count, loanToken);
-    if (result.success) refetch();
-  };
-
-  const handleDepositarPool = async (amountHuman: string) => {
-    if (!walletAddress) {
-      Alert.alert(t('connect'), t('appWalletNotReady'));
-      return;
-    }
-    if (!(await confirmFunds())) return;
-    if (userInfo.paused) {
-      Alert.alert(t('admin'), t('protocolPaused'));
-      return;
-    }
-    if (!userInfo.isTokenSupported) {
-      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
-      return;
-    }
-
-    const parsed = parsePositiveDecimal(amountHuman);
-    if (!parsed) {
-      Alert.alert(t('amount'), t('amountGreaterZero'));
-      return;
-    }
-    if (Number(parsed) > Number(balances.tokenBalance)) {
-      Alert.alert(t('amount'), t('poolNeedInternalFunds'));
-      return;
-    }
-
-    try {
-      const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
-      const result = await depositarLiquidez(amountWei, selectedToken.address);
-      if (result.success) {
-        refetch();
-      }
-    } catch {
-      Alert.alert(t('amount'), t('invalidAmount'));
-    }
-  };
-
-  const handleRetirarComisiones = async () => {
-    await runAsAdmin(async () => {
-      const result = await retirarComisiones();
-      if (result.success) refetch();
-    });
-  };
-
-  const handleRetirarComisionesToken = async () => {
-    await runAsAdmin(async () => {
-      const result = await retirarComisionesToken(selectedToken.address);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleDeclararKyc = async () => {
-    if (!walletAddress) {
-      Alert.alert(t('connect'), t('appWalletNotReady'));
-      return false;
-    }
-    if (!userInfo.isRegistered) {
-      Alert.alert(t('register'), t('activateBeforeLoan'));
-      return false;
-    }
-    const result = await declararKyc();
-    if (result.success) refetch();
-    return result.success;
-  };
-
-  const handleExecuteProposal = async (id: number) => {
-    await runAsAdmin(async () => {
-      const result = await executeAdminAction(id);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleConfirmProposal = async (id: number) => {
-    await runAsAdmin(async () => {
-      const result = await confirmAdminAction(id);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleProposeAddAdmin = async (address: string) => {
-    await runAsAdmin(async () => {
-      const result = await proposeAddAdmin(address);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleProposeRemoveAdmin = async (address: string) => {
-    await runAsAdmin(async () => {
-      const result = await proposeRemoveAdmin(address);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleProposeFeeCollector = async (address: string) => {
-    await runAsAdmin(async () => {
-      const result = await proposeFeeCollector(address);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleProposeConfirmations = async (required: number) => {
-    await runAsAdmin(async () => {
-      const result = await proposeRequiredConfirmations(required);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleProposeFundador = async (address: string) => {
-    await runAsAdmin(async () => {
-      const result = await proposeFundador(address);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleProposeOwner = async (address: string) => {
-    await runAsAdmin(async () => {
-      const result = await proposeOwner(address);
-      if (result.success) refetch();
-    });
-  };
-
-  const handleProposeSetTokenConfig = async (token: string, feed: string, enabled: boolean) => {
-    await runAsAdmin(async () => {
-      const result = await proposeSetTokenConfig(token, feed, enabled);
-      if (result.success) refetch();
-    });
-  };
-
-  const handlePausarProtocolo = async () => {
-    await runAsAdmin(async () => {
-      const result = await pausarContrato();
-      if (result.success) refetch();
-    });
-  };
 
   useEffect(() => {
     if (room === 'admin' && !adminInfo.isAdmin && !adminInfo.isOwner) {
@@ -707,6 +442,7 @@ function HomeScreenWithHooks() {
           isLoading={txLoading}
           paused={userInfo.paused}
           tokenSymbol={selectedToken.symbol}
+          tokenAddress={selectedToken.address}
           onWithdrawFees={handleRetirarComisiones}
           onWithdrawTokenFees={handleRetirarComisionesToken}
           onPause={handlePausarProtocolo}
@@ -720,6 +456,8 @@ function HomeScreenWithHooks() {
           onProposeOwner={handleProposeOwner}
           extraStables={extraStables}
           onProposeSetTokenConfig={handleProposeSetTokenConfig}
+          onLiquidar={handleLiquidarDeudor}
+          onMarcarMoroso={handleMarcarMorosoSiVencido}
           adminRoster={adminInfo.adminRoster.length ? adminInfo.adminRoster : userInfo.adminRoster}
           requiredConfirmations={adminInfo.requiredConfirmations || userInfo.requiredConfirmations}
           proposalCount={adminInfo.proposalCount || userInfo.proposalCount}

@@ -601,5 +601,13 @@
   "referralRepLead": "Cada referido le suma {points} puntos de reputación. Cuando ese referido paga su primer nivel, suma {network} puntos de red. Cada {threshold} puntos de red el pool le envía {bonus}.",
   "referralRepScore": "Reputación {score} · puntos de red {network}",
   "referralRepScoreShort": "Red {network}",
-  "referralRepNext": "Le faltan {left} puntos de red para el próximo bono de {bonus}."
+  "referralRepNext": "Le faltan {left} puntos de red para el próximo bono de {bonus}.",
+  "liquidarTitle": "Liquidar deudor vencido",
+  "liquidarLead": "Si un deudor tiene el préstamo vencido, puede liquidarlo pagando su deuda. Recibirá un premio del 5 % del principal desde el pool. Necesita tener el token en su billetera admin.",
+  "liquidarAddressPlaceholder": "Dirección del deudor a liquidar",
+  "liquidarConfirm": "Pagará la deuda de este usuario con su propia billetera y recibirá el premio del 5 %. Esta acción no se puede deshacer. ¿Continuar?",
+  "liquidarDone": "Deudor liquidado. Premio enviado a su billetera.",
+  "liquidarBtn": "Liquidar deudor",
+  "marcarMorosoConfirm": "Marcará al usuario como moroso si su préstamo ya venció. No paga la deuda, solo cambia el estado. ¿Continuar?",
+  "marcarMorosoBtn": "Marcar como moroso"
 }

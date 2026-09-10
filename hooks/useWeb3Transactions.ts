@@ -226,6 +226,22 @@ export const useWeb3Transactions = () => {
     );
   };
 
+  const liquidarDeudor = async (debtorAddress: string, tokenAddress: string) => {
+    return executeTransaction(
+      'liquidarDeudor',
+      () => QuatriviumCreditService.liquidar(debtorAddress, tokenAddress),
+      t('liquidarDone')
+    );
+  };
+
+  const marcarMorosoSiVencido = async (debtorAddress: string) => {
+    return executeTransaction(
+      'marcarMorosoSiVencido',
+      () => QuatriviumCreditService.marcarMorosoSiVencido(debtorAddress),
+      t('adminTimelockProposed')
+    );
+  };
+
   return {
     isLoading,
     currentAction,
@@ -251,5 +267,7 @@ export const useWeb3Transactions = () => {
     proposeSetTokenConfig,
     proposeFundador,
     proposeOwner,
+    liquidarDeudor,
+    marcarMorosoSiVencido,
   };
 };

@@ -601,5 +601,13 @@
   "referralRepLead": "كل إحالة تضيف {points} نقطة سمعة. عندما يسدد المُحال مستواه الأول تكسب {network} نقطة شبكة. كل {threshold} نقطة شبكة يرسل المجمع {bonus}.",
   "referralRepScore": "السمعة {score} · نقاط الشبكة {network}",
   "referralRepScoreShort": "الشبكة {network}",
-  "referralRepNext": "تحتاج {left} نقطة شبكة إضافية للمكافأة التالية البالغة {bonus}."
+  "referralRepNext": "تحتاج {left} نقطة شبكة إضافية للمكافأة التالية البالغة {bonus}.",
+  "liquidarTitle": "Liquidate overdue debtor",
+  "liquidarLead": "If a debtor has an overdue loan, you can liquidate it by paying their debt. You will receive a 5% prize of the principal from the pool. You need to hold the token in your admin wallet.",
+  "liquidarAddressPlaceholder": "Address of the debtor to liquidate",
+  "liquidarConfirm": "You will pay this user's debt from your own wallet and receive the 5% prize. This action cannot be undone. Continue?",
+  "liquidarDone": "Debtor liquidated. Prize sent to your wallet.",
+  "liquidarBtn": "Liquidate debtor",
+  "marcarMorosoConfirm": "This will mark the user as delinquent if their loan is already overdue. It does not pay the debt, only changes the status. Continue?",
+  "marcarMorosoBtn": "Mark as delinquent"
 }

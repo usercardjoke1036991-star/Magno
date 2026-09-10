@@ -14,6 +14,7 @@ interface AdminPanelProps {
   isLoading: boolean;
   paused?: boolean;
   tokenSymbol: string;
+  tokenAddress?: string;
   adminRoster?: string[];
   requiredConfirmations?: number;
   proposalCount?: number;
@@ -32,6 +33,8 @@ interface AdminPanelProps {
   onProposeFundador?: (address: string) => void;
   onProposeOwner?: (address: string) => void;
   onProposeSetTokenConfig?: (token: string, feed: string, enabled: boolean) => void;
+  onLiquidar?: (debtorAddress: string, tokenAddress: string) => void;
+  onMarcarMoroso?: (debtorAddress: string) => void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -40,6 +43,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   isLoading,
   paused = false,
   tokenSymbol,
+  tokenAddress = '',
   adminRoster = [],
   requiredConfirmations = 1,
   proposalCount = 0,
@@ -58,10 +62,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onProposeFundador,
   onProposeOwner,
   onProposeSetTokenConfig,
+  onLiquidar,
+  onMarcarMoroso,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [draft, setDraft] = useState('');
+  const [debtorDraft, setDebtorDraft] = useState('');
   if (!isOwner && !isAdmin) return null;
 
   const confirmToggle = (next: boolean, apply: (value: boolean) => void) => {
@@ -269,6 +276,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </View>
           )}
         </TouchableOpacity>
+      ) : null}
+      {(onLiquidar || onMarcarMoroso) ? (
+        <>
+          <Text style={[styles.note, { color: colors.textMuted, marginTop: 16 }]}>{t('liquidarTitle')}</Text>
+          <Text style={[styles.meta, { color: colors.textMuted }]}>{t('liquidarLead')}</Text>
+          <TextInput
+            value={debtorDraft}
+            onChangeText={setDebtorDraft}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={t('liquidarAddressPlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.surface }]}
+          />
+          {onMarcarMoroso ? (
+            <TouchableOpacity
+              disabled={isLoading}
+              onPress={() => {
+                const addr = debtorDraft.trim();
+                if (!isAddress(addr)) { Alert.alert(t('admin'), t('adminInvalidAddress')); return; }
+                Alert.alert(t('liquidarTitle'), t('marcarMorosoConfirm'), [
+                  { text: t('cancel'), style: 'cancel' },
+                  { text: t('ready'), onPress: () => { onMarcarMoroso(addr); setDebtorDraft(''); } },
+                ]);
+              }}
+              style={[styles.button, { backgroundColor: colors.chip }]}
+            >
+              <Text style={[styles.buttonText, { color: colors.text }]}>{t('marcarMorosoBtn')}</Text>
+            </TouchableOpacity>
+          ) : null}
+          {onLiquidar && tokenAddress ? (
+            <TouchableOpacity
+              disabled={isLoading}
+              onPress={() => {
+                const addr = debtorDraft.trim();
+                if (!isAddress(addr)) { Alert.alert(t('admin'), t('adminInvalidAddress')); return; }
+                Alert.alert(t('liquidarTitle'), t('liquidarConfirm'), [
+                  { text: t('cancel'), style: 'cancel' },
+                  { text: t('ready'), style: 'destructive', onPress: () => { onLiquidar(addr, tokenAddress); setDebtorDraft(''); } },
+                ]);
+              }}
+              style={[styles.button, { backgroundColor: '#B42318' }]}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <View style={styles.btnRow}>
+                  <AppIcon name="warning" size={16} color="#fff" />
+                  <Text style={styles.buttonText}>{t('liquidarBtn')} ({tokenSymbol})</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ) : null}
+        </>
       ) : null}
       {isOwner ? (
         <>
