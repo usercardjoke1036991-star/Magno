@@ -3,7 +3,7 @@
  * Extraído de app/index.tsx para reducir complejidad del componente raíz.
  * Cada handler valida precondiciones y delega al hook useWeb3Transactions.
  */
-import { formatUnits, parseUnits, type Eip1193Provider } from 'ethers';
+import { formatUnits, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
 import { Alert } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
 import { setWalletSigner } from '../services/quatriviumCreditService';
@@ -19,7 +19,7 @@ export interface HomeHandlersParams {
   userInfo: UserInfo;
   balances: { tokenBalance: string };
   selectedToken: Token;
-  appSigner: import('ethers').Signer | null | undefined;
+  appSigner: Signer | null | undefined;
   adminConnected: boolean;
   adminProvider: unknown;
   confirmFunds: () => Promise<boolean>;

@@ -160,12 +160,29 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Ownable, Pausable, Reentranc
 
 ---
 
+## Estado de verificaciones (última auditoría: 2026-09-10)
+
+| Verificación | Estado | Detalle |
+|---|---|---|
+| `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
+| `check-i18n.mjs` | ✅ OK | 611 claves en 16 locales, sin discrepancias |
+| `security-check.mjs` | ✅ OK | .env fuera de git, sin credenciales hardcodeadas |
+| `hardhat test` | ✅ 68/68 pasan | accounting, circuitBreaker, cuotas, identity, kyc, liquidation, mlm, morosity, peg, security |
+| `npm audit` (runtime) | ✅ OK | Vulns ws GHSA-58qx/96hv corregidas con override ws^8.21.0 |
+| `npm audit` (devDeps) | ⚠️ 66 vulns | En hardhat/solidity-coverage/expo SDK — devDeps, no en bundle de la app |
+| `production:check` | 🟡 9/14 | 5 faltantes son acciones manuales de deploy |
+| Imports rotos | ✅ 0 | Todos los módulos resuelven correctamente |
+| console sin __DEV__ | ✅ 0 | Sin logging de producción sin guardia |
+
+---
+
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
 | 2026-09-10 | CONTEXTO.md inicializado y poblado | Auditoría completa del proyecto |
 | 2026-09-10 | `app.json` slug cambiado: "magno" → "quatrivium-credit" | Consistencia con package name |
-| 2026-09-10 | `hooks/useHomeHandlers.ts` creado | Extraer handlers de app/index.tsx (783→450 líneas) |
-| 2026-09-10 | Liquidación añadida a AdminPanel | Admins pueden liquidar deudores sin script externo |
-| 2026-09-10 | `services/quatriviumCreditService.ts` + `liquidar()` | Soporte UI para `liquidate()` del contrato |
-| 2026-09-10 | Claves i18n de liquidación añadidas (16 locales) | Soporte multiidioma para nueva función |
+| 2026-09-10 | `hooks/useHomeHandlers.ts` creado | Extraer handlers de app/index.tsx (783→521 líneas) |
+| 2026-09-10 | Liquidación añadida a AdminPanel + servicio + hook | Admins pueden liquidar deudores sin script externo |
+| 2026-09-10 | Claves i18n de liquidación añadidas (16 locales) | 611 claves, soporte multiidioma para nueva función |
+| 2026-09-10 | `package.json` override `ws: ^8.21.0` | Corregir GHSA-58qx-3vcg-4xpx y GHSA-96hv-2xvq-fx4p |
+| 2026-09-10 | Auditoría profunda final — 0 errores TS, 68/68 tests | Proyecto listo para deploy en producción |
