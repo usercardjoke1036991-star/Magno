@@ -19,7 +19,7 @@
     "notify": "node scripts/notify-worker.mjs",
     "notify:prod": "node scripts/notify-worker.mjs --prod",
     "tunnel": "lt --port 8787 --subdomain quatrivium-notify",
-    "tunnel:ngrok": "ngrok http --log=stdout 8787",
+    "tunnel:ngrok": "ngrok http --domain=rundown-shelf-mongoose.ngrok-free.dev 8787",
     "production:check": "node scripts/check-production.mjs",
     "production:prepare": "node scripts/prepare-production-local.mjs"
   },
