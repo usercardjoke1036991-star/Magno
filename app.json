@@ -38,6 +38,13 @@
       "usesCleartextTraffic": false,
       "enableProguardInReleaseBuilds": true,
       "enableShrinkResourcesInReleaseBuilds": true,
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "READ_MEDIA_IMAGES"
+      ],
       "intentFilters": [
         {
           "action": "VIEW",
