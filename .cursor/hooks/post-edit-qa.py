@@ -107,6 +107,45 @@ def auditar_mql(ruta: str) -> list[str]:
     return advertencias
 
 
+def ejecutar_pytest_si_existe(proyecto_dir: str) -> list[str]:
+    """
+    Ejecuta pytest en la carpeta tests/ del proyecto si existe.
+    Retorna lista de mensajes (vacía si todo pasa).
+    Timeout de 60s para no bloquear el hook.
+    """
+    mensajes = []
+    tests_dir = os.path.join(proyecto_dir, "tests")
+
+    if not os.path.isdir(tests_dir):
+        mensajes.append("⚠️ Sin tests — considera añadir tests/test_main.py")
+        return mensajes
+
+    # Guard: no lanzar pytest recursivamente si ya estamos bajo pytest
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return mensajes
+
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "pytest", "tests/", "--tb=short", "-q", "--no-header"],
+            capture_output=True, text=True, cwd=proyecto_dir, timeout=60
+        )
+        if result.returncode == 0:
+            # Tests pasan — extraer la línea de resumen (última línea significativa)
+            lineas = [l for l in result.stdout.strip().splitlines() if l.strip()]
+            resumen = lineas[-1] if lineas else "tests OK"
+            mensajes.append(f"✅ pytest: {resumen}")
+        else:
+            # Tests fallaron — incluir output abreviado
+            output = (result.stdout + result.stderr).strip()[:600]
+            mensajes.append(f"❌ pytest FALLÓ:\n{output}")
+    except subprocess.TimeoutExpired:
+        mensajes.append("⚠️ pytest timeout (>60s) — verifica tests colgados")
+    except FileNotFoundError:
+        mensajes.append("⚠️ pytest no instalado — ejecutar: pip install pytest")
+
+    return mensajes
+
+
 def construir_contexto_adicional(archivo: str, errores: list, advertencias: list) -> str:
     """Genera el texto de contexto adicional para el agente."""
     if not errores and not advertencias:
@@ -159,6 +198,28 @@ def main():
     # Detección de secretos aplica a todos los tipos de texto
     if tipo in ("python", "javascript", "typescript", "kotlin", "java", "csharp", "go"):
         advertencias.extend(detectar_secretos_hardcodeados(archivo))
+
+    # Ejecutar pytest en la carpeta tests/ del proyecto (si existe)
+    # Se usa el directorio del archivo editado como raíz del proyecto
+    proyecto_dir = os.path.dirname(archivo) or os.getcwd()
+    # Subir hasta la raíz del proyecto (donde existe tests/ o requirements.txt)
+    for _ in range(4):  # máximo 4 niveles hacia arriba
+        if os.path.isdir(os.path.join(proyecto_dir, "tests")) or \
+           os.path.isfile(os.path.join(proyecto_dir, "requirements.txt")):
+            break
+        parent = os.path.dirname(proyecto_dir)
+        if parent == proyecto_dir:
+            break
+        proyecto_dir = parent
+
+    mensajes_pytest = ejecutar_pytest_si_existe(proyecto_dir)
+    # Separar OKs de errores/advertencias de pytest
+    for msg in mensajes_pytest:
+        if msg.startswith("❌"):
+            errores.append(msg)
+        elif msg.startswith("⚠️"):
+            advertencias.append(msg)
+        # Los ✅ solo se muestran si hay otros errores/advertencias (para no saturar)
 
     contexto = construir_contexto_adicional(archivo, errores, advertencias)
     print(json.dumps({"additional_context": contexto}))
