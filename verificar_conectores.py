@@ -194,7 +194,9 @@ def _parse_safe(codigo: str) -> Optional[ast.Module]:
 def _nombres_definidos_en_modulo(codigo: str) -> set[str]:
     """
     Extrae todos los nombres definidos a nivel de módulo en un archivo Python:
-    funciones, clases, variables de módulo, imports y alias de imports.
+    funciones, clases, variables de módulo, imports, alias y variables de bucle.
+    Incluye targets de `for`/`async for` para no marcar `verificador()` como
+    conector suelto cuando es una variable local del loop (falso positivo ERR-008).
     """
     tree = _parse_safe(codigo)
     if tree is None:
@@ -206,8 +208,9 @@ def _nombres_definidos_en_modulo(codigo: str) -> set[str]:
             nombres.add(nodo.name)
         elif isinstance(nodo, ast.Assign):
             for target in nodo.targets:
-                if isinstance(target, ast.Name):
-                    nombres.add(target.id)
+                nombres |= _nombres_de_target(target)
+        elif isinstance(nodo, (ast.For, ast.AsyncFor)):
+            nombres |= _nombres_de_target(nodo.target)
         elif isinstance(nodo, ast.Import):
             for alias in nodo.names:
                 nombres.add(alias.asname or alias.name.split(".")[0])
@@ -217,6 +220,17 @@ def _nombres_definidos_en_modulo(codigo: str) -> set[str]:
         elif isinstance(nodo, ast.AnnAssign):
             if isinstance(nodo.target, ast.Name):
                 nombres.add(nodo.target.id)
+    return nombres
+
+
+def _nombres_de_target(target: ast.AST) -> set[str]:
+    """Extrae nombres de un target AST (Name, Tuple, List)."""
+    nombres: set[str] = set()
+    if isinstance(target, ast.Name):
+        nombres.add(target.id)
+    elif isinstance(target, (ast.Tuple, ast.List)):
+        for elt in target.elts:
+            nombres |= _nombres_de_target(elt)
     return nombres
 
 
