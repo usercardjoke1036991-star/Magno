@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -21,6 +21,7 @@ import { AppIcon } from './icons';
 import { BrandLogo } from './BrandLogo';
 import { useUserProfile } from '../profile/ProfileContext';
 import { useWalletLevel } from '../hooks/useWalletLevel';
+import { isPhraseBackedUp } from '../services/appWallet';
 import type { TranslationKey } from '../i18n/translations';
 
 type Panel = 'home' | 'security' | 'profile' | 'appearance' | 'language' | 'mode' | 'admin';
@@ -28,10 +29,17 @@ type Panel = 'home' | 'security' | 'profile' | 'appearance' | 'language' | 'mode
 export const SettingsButton: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>('home');
+  const [phraseWarning, setPhraseWarning] = useState(false);
   const { t } = useI18n();
   const { colors } = useTheme();
   const { profile, walletAddress } = useUserProfile();
   const level = useWalletLevel(walletAddress);
+
+  useEffect(() => {
+    isPhraseBackedUp()
+      .then((backed) => setPhraseWarning(!backed))
+      .catch(() => {});
+  }, [open]); // re-check when settings modal closes
 
   const close = () => {
     setOpen(false);
@@ -71,16 +79,24 @@ export const SettingsButton: React.FC = () => {
 
   return (
     <>
-      <ProfileAvatar
-        profile={profile}
-        wallet={walletAddress}
-        size={40}
-        badge
-        level={walletAddress ? level : undefined}
-        showRankLabel={false}
-        onPress={() => setOpen(true)}
-        accessibilityLabel={t('settings')}
-      />
+      <View>
+        <ProfileAvatar
+          profile={profile}
+          wallet={walletAddress}
+          size={40}
+          badge
+          level={walletAddress ? level : undefined}
+          showRankLabel={false}
+          onPress={() => setOpen(true)}
+          accessibilityLabel={t('settings')}
+        />
+        {phraseWarning && (
+          <View
+            style={[styles.phraseBadge, { backgroundColor: colors.danger }]}
+            accessibilityLabel={t('securityPhraseTodo')}
+          />
+        )}
+      </View>
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
         <View style={[styles.frame, { backgroundColor: colors.overlay }]}>
@@ -198,5 +214,15 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 22,
     lineHeight: 24,
+  },
+  phraseBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: '#fff',
   },
 });

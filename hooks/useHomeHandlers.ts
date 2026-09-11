@@ -4,20 +4,23 @@
  * Cada handler valida precondiciones y delega al hook useWeb3Transactions.
  */
 import { formatUnits, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
 import { setWalletSigner } from '../services/quatriviumCreditService';
 import { useWeb3Transactions } from './useWeb3Transactions';
-import { isContractConfigured } from '../constants/rpcConfig';
+import { isContractConfigured, isDemoMode } from '../constants/rpcConfig';
 import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
 import { useI18n } from '../i18n/LanguageContext';
 import type { LoanTier, UserInfo } from './useWeb3Balances';
 import type { Token } from '../constants/tokens';
 
+const BSC_TESTNET_FAUCET = 'https://www.bnbchain.org/en/testnet-faucet';
+const MIN_GAS_BNB = 0.001; // mínimo recomendado para gas en testnet
+
 export interface HomeHandlersParams {
   walletAddress: string | null | undefined;
   userInfo: UserInfo;
-  balances: { tokenBalance: string };
+  balances: { tokenBalance: string; bnbBalance: string };
   selectedToken: Token;
   appSigner: Signer | null | undefined;
   adminConnected: boolean;
@@ -88,6 +91,25 @@ export const useHomeHandlers = ({
     }
     if (userInfo.paused) {
       Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    // Pre-check: verificar que la app wallet tiene BNB suficiente para gas
+    if (parseFloat(balances.bnbBalance || '0') < MIN_GAS_BNB) {
+      if (isDemoMode()) {
+        Alert.alert(
+          t('errNeedGas'),
+          t('errNeedGasTestnet'),
+          [
+            { text: t('cancel'), style: 'cancel' },
+            {
+              text: t('openFaucet'),
+              onPress: () => void Linking.openURL(BSC_TESTNET_FAUCET),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(t('errNeedGas'), t('errNeedGas'));
+      }
       return;
     }
     const result = await registrarHumano(walletAddress, padre);
