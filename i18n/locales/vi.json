@@ -66,7 +66,7 @@
   "royaltiesFrozen": "Hoa hồng bị tạm dừng. Tất toán nợ để nhận lại.",
   "referralHint": "Bạn chưa có trong mạng. Bên dưới, trong «Kích hoạt hạn mức tín dụng», dán mã của người đã mời bạn hoặc để trống.",
   "shareTitle": "Lời mời Quatrivium Credit",
-  "shareMessage": "{name} mời bạn đến Quatrivium Credit: vay khi cần, trả, và nếu muốn thì mời thêm người. Mỗi khi ai đó trong tuyến của bạn vay và trả, bạn nhận.\n\nMã: {code}\n\n{link}",
+  "shareMessage": "{name} mời bạn đến Quatrivium Credit. Vay tín dụng, trả đúng hạn và kiếm tiền bằng cách mời người khác.",
   "connect": "Kết nối",
   "connectFirst": "Hãy kết nối ví trước.",
   "invite": "Mời",
