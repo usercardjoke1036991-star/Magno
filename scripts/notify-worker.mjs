@@ -1,7 +1,7 @@
 /**
  * Avisos Quatrivium Credit: Telegram y WhatsApp Cloud API.
- * Uso: npm run notify          (demo / testnet, lee .env)
- *      npm run notify:prod     (real / mainnet, .env + .env.worker)
+ * Uso: npm run notify          (demo / testnet, lee .env y .env.worker si existe)
+ *      npm run notify:prod     (real / mainnet, exige .env.worker)
  *
  * 1. Cree un bot con @BotFather y ponga TELEGRAM_BOT_TOKEN.
  * 2. (Opcional) WhatsApp Cloud API: WHATSAPP_TOKEN y WHATSAPP_PHONE_NUMBER_ID.
@@ -18,12 +18,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 const workerEnv = resolve(process.cwd(), '.env.worker');
 const wantProd = process.argv.includes('--prod') || process.env.NOTIFY_PROFILE === 'prod';
-if (wantProd) {
-  if (!existsSync(workerEnv)) {
-    console.error('Falta .env.worker. Copie .env.worker.example o corra npm run production:prepare');
-    process.exit(1);
-  }
-  dotenv.config({ path: workerEnv, override: true });
+if (wantProd && !existsSync(workerEnv)) {
+  console.error('Falta .env.worker. Copie .env.worker.example o corra npm run production:prepare');
+  process.exit(1);
+}
+if (existsSync(workerEnv)) {
+  dotenv.config({ path: workerEnv, override: wantProd });
 }
 
 const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = createRequire(import.meta.url)('./bscNetworks.cjs');
@@ -276,6 +276,12 @@ const persist = () => {
 };
 
 let store = loadStore();
+if (!isMainnet) {
+  store.rateHits = store.rateHits || {};
+  for (const key of Object.keys(store.rateHits)) {
+    if (key.startsWith('email:') || key.startsWith('email-addr:')) delete store.rateHits[key];
+  }
+}
 
 const pruneRates = () => {
   const now = Date.now();
@@ -303,6 +309,14 @@ const rateLimit = (key, max = 20, windowMs = 60_000) => {
   next.push(now);
   store.rateHits[key] = next;
   return true;
+};
+
+const refundRate = (key) => {
+  const hits = store.rateHits?.[key];
+  if (!hits?.length) return;
+  hits.pop();
+  if (hits.length) store.rateHits[key] = hits;
+  else delete store.rateHits[key];
 };
 
 const stripUnsafe = (value, max = 64) =>
@@ -369,7 +383,8 @@ const requireAuth = (body) => {
     purpose !== 'perfil' &&
     purpose !== 'otp' &&
     purpose !== 'email' &&
-    purpose !== 'username'
+    purpose !== 'username' &&
+    purpose !== 'demo-identity'
   ) {
     throw new Error('purpose');
   }
@@ -541,8 +556,19 @@ const sendEmail = async (to, subject, text) => {
       },
       body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, text }),
     });
+    if (!response.ok) {
+      let detail = '';
+      try {
+        const body = await response.json();
+        detail = String(body.message || body.name || '').slice(0, 180);
+      } catch {
+        detail = '';
+      }
+      console.error('Resend HTTP', response.status, detail);
+    }
     return response.ok;
-  } catch {
+  } catch (error) {
+    console.error('Resend red', error?.cause?.code || error?.name || 'fail');
     return false;
   }
 };
@@ -785,15 +811,24 @@ const watchChain = async () => {
       const latest = await provider.getBlockNumber();
       const from = store.lastBlock + 1;
       if (from <= latest) {
-        const to = Math.min(from + 4000, latest);
-        const [signups, bonuses, commissions, pausedEv, unpausedEv, adminExec] = await Promise.all([
-          contract.queryFilter(contract.filters.AfiliadoRegistrado(), from, to),
-          contract.queryFilter(contract.filters.BonoActivacionPagado(), from, to),
-          contract.queryFilter(contract.filters.ComisionGeneracional(), from, to),
-          contract.queryFilter(contract.filters.Paused(), from, to),
-          contract.queryFilter(contract.filters.Unpaused(), from, to),
-          contract.queryFilter(contract.filters.AdminActionExecuted(), from, to),
-        ]);
+        const to = Math.min(from + 1200, latest);
+        const pull = async (filter) => {
+          try {
+            return await contract.queryFilter(filter, from, to);
+          } catch (error) {
+            const text = String(error?.message || error);
+            if (text.includes('rate limit') || text.includes('-32005')) {
+              throw error;
+            }
+            return [];
+          }
+        };
+        const signups = await pull(contract.filters.AfiliadoRegistrado());
+        const bonuses = await pull(contract.filters.BonoActivacionPagado());
+        const commissions = await pull(contract.filters.ComisionGeneracional());
+        const pausedEv = await pull(contract.filters.Paused());
+        const unpausedEv = await pull(contract.filters.Unpaused());
+        const adminExec = await pull(contract.filters.AdminActionExecuted());
         for (const event of signups) {
           const padre = String(event.args?.padre || '');
           const usuario = String(event.args?.usuario || '');
@@ -828,9 +863,15 @@ const watchChain = async () => {
         await scanDebtReminders(contract);
       }
     } catch (error) {
+      const text = String(error?.message || error);
+      if (text.includes('rate limit') || text.includes('-32005')) {
+        console.error('Avisos chain: RPC limitada, se espera antes de reintentar');
+        await new Promise((r) => setTimeout(r, 90000));
+        continue;
+      }
       console.error('Avisos chain:', error.message || error);
     }
-    await new Promise((r) => setTimeout(r, 20000));
+    await new Promise((r) => setTimeout(r, 45000));
   }
 };
 
@@ -1137,10 +1178,14 @@ const server = createServer(async (req, res) => {
       const channel = await deliverEmailOtp(email, code);
       if (!channel) {
         delete store.emailOtps[wallet];
+        refundRate(`email:${ip}`);
+        refundRate(`email-addr:${emailHash}`);
         persist();
+        console.error('OTP correo: entrega fallida (falta Resend o EMAIL_FROM, o Resend rechazó el envío)');
         json(res, 503, { error: 'delivery' });
         return;
       }
+      console.log('OTP correo: enviado');
       json(res, 200, { ok: true, channel });
       return;
     }
@@ -1493,14 +1538,62 @@ const server = createServer(async (req, res) => {
     }
     return;
   }
+  if (path === '/demo-identity') {
+    // Solo testnet: atestigua KYC/identidad de demo sin SMS para que el contrato no revierta.
+    if (isMainnet) {
+      json(res, 403, { error: 'mainnet' });
+      return;
+    }
+    if (!rateLimit(`demo-id:${ip}`, 8, 15 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      json(res, 413, { error: 'payload' });
+      return;
+    }
+    let authn;
+    try {
+      authn = requireAuth(body);
+    } catch (error) {
+      json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    if (String(body.purpose) !== 'demo-identity') {
+      json(res, 401, { error: 'purpose' });
+      return;
+    }
+    const wallet = authn.wallet;
+    if (!rateLimit(`demo-id-w:${wallet}`, 4, 15 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    const phoneHash = keccak256(toUtf8Bytes(`quatrivium.demo.phone.v1:${DATA_KEY_RAW}:${wallet}`));
+    const deviceHash = keccak256(
+      toUtf8Bytes(`quatrivium.demo.device.v1:${DATA_KEY_RAW}:${wallet}:${authn.deviceHash}`)
+    );
+    try {
+      await assertIdentityAvailable(phoneHash, deviceHash, wallet);
+      const attestation = await attestIdentity(wallet, phoneHash, deviceHash);
+      json(res, 200, attestation);
+    } catch (error) {
+      json(res, Number(error.status) || 503, { error: error.message || 'attester' });
+    }
+    return;
+  }
   json(res, 404, { error: 'not found' });
 });
 
-server.requestTimeout = 15_000;
-server.headersTimeout = 10_000;
+server.requestTimeout = 45_000;
+server.headersTimeout = 46_000;
 server.maxHeadersCount = 40;
 server.listen(PORT, BIND, () => {
   console.log(`Avisos Quatrivium Credit en http://${BIND}:${PORT}`);
+  console.log(`Correo Resend: ${hasEmail ? 'listo' : 'sin RESEND_API_KEY o EMAIL_FROM'}`);
+  console.log(`SMS/WhatsApp: ${hasSms ? 'listo' : 'no configurado (OTP teléfono en demo)'}`);
 });
 
 pollTelegram().catch((error) => console.error(error));

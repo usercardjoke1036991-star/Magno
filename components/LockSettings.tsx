@@ -22,6 +22,7 @@ import {
 import { isWeakPin } from '../utils/pinPolicy';
 import { loadAppWallet } from '../services/appWallet';
 import { storePasswordRecovery } from '../services/passwordRecovery';
+import { BiometricLockSection } from './BiometricLockSection';
 
 export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = false }) => {
   const { t } = useI18n();
@@ -175,6 +176,8 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
         {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{hasPin ? t('lockChangePin') : t('lockCreatePin')}</Text>}
       </TouchableOpacity>
       {message ? <Text style={[styles.note, { color: colors.textMuted }]}>{message}</Text> : null}
+
+      <BiometricLockSection />
 
       <Text style={[styles.section, { color: colors.text }]}>{t('lockPasswordTitle')}</Text>
       <Text style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordLead')}</Text>

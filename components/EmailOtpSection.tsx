@@ -52,6 +52,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
       else if (reason.includes('notify')) setError(t('emailNeedApi'));
       else if (reason.includes('taken')) setError(t('emailTaken'));
       else if (reason.includes('rate')) setError(t('otpRate'));
+      else if (reason.includes('appWallet') || reason.includes('locked')) setError(t('appWalletFailed'));
       else if (reason.includes('email')) setError(t('emailNotAllowed'));
       else setError(t('otpRequestFailed'));
     } finally {
@@ -82,8 +83,6 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('emailLead')}</Text>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('emailProviders')}</Text>
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
@@ -98,7 +97,10 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
           <Text style={[styles.label, { color: colors.text }]}>{t('emailField')}</Text>
           <TextInput
             value={email}
-            onChangeText={(value) => setEmail(normalizeEmail(value))}
+            onChangeText={(value) => {
+              setEmail(normalizeEmail(value));
+              setError('');
+            }}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
@@ -145,11 +147,6 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
 };
 
 const styles = StyleSheet.create({
-  lead: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 12,
-  },
   label: {
     fontSize: 12,
     fontWeight: '600',

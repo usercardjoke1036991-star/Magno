@@ -20,6 +20,7 @@ export async function safeJsonFetch(
       credentials: 'omit',
       headers: {
         Accept: 'application/json',
+        ...(url.includes('ngrok') ? { 'ngrok-skip-browser-warning': '1' } : {}),
         ...(rest.headers || {}),
       },
     });

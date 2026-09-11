@@ -221,3 +221,94 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(isValidUsername('ab')).to.equal(false);
   });
 });
+
+describe('biometric availability', function () {
+  const FINGERPRINT = 1;
+  const FACIAL = 2;
+  const WEAK = 2;
+
+  function kindsFromTypes(types) {
+    const kinds = [];
+    if (types.includes(FINGERPRINT)) kinds.push('fingerprint');
+    if (types.includes(FACIAL)) kinds.push('facial');
+    if (types.includes(3)) kinds.push('iris');
+    return kinds;
+  }
+
+  function resolveBiometricAvailability(probe) {
+    const kinds = kindsFromTypes(Array.isArray(probe.types) ? probe.types : []);
+    const hasHardware = Boolean(probe.hasHardware) || kinds.length > 0;
+    const enrolled =
+      Boolean(probe.enrolled) || (hasHardware && Number(probe.enrolledLevel || 0) >= WEAK);
+    if (!hasHardware) {
+      return { available: false, hasHardware: false, enrolled: false, kinds, reason: 'no-hardware' };
+    }
+    if (!enrolled) {
+      return { available: false, hasHardware: true, enrolled: false, kinds, reason: 'not-enrolled' };
+    }
+    return { available: true, hasHardware: true, enrolled: true, kinds, reason: 'ok' };
+  }
+
+  it('does not treat a missing NativeModules name as no hardware', function () {
+    const status = resolveBiometricAvailability({
+      hasHardware: true,
+      enrolled: true,
+      enrolledLevel: 3,
+      types: [FINGERPRINT],
+    });
+    expect(status.available).to.equal(true);
+    expect(status.kinds).to.deep.equal(['fingerprint']);
+  });
+
+  it('asks the user to enroll when the sensor exists but nothing is saved', function () {
+    const status = resolveBiometricAvailability({
+      hasHardware: true,
+      enrolled: false,
+      enrolledLevel: 1,
+      types: [FINGERPRINT],
+    });
+    expect(status.available).to.equal(false);
+    expect(status.reason).to.equal('not-enrolled');
+  });
+
+  it('accepts Xiaomi-style probes that only report types or enrolledLevel', function () {
+    const byType = resolveBiometricAvailability({
+      hasHardware: false,
+      enrolled: false,
+      enrolledLevel: 0,
+      types: [FINGERPRINT],
+    });
+    expect(byType.hasHardware).to.equal(true);
+    expect(byType.reason).to.equal('not-enrolled');
+
+    const byLevel = resolveBiometricAvailability({
+      hasHardware: true,
+      enrolled: false,
+      enrolledLevel: WEAK,
+      types: [],
+    });
+    expect(byLevel.available).to.equal(true);
+  });
+});
+
+describe('demo credit gates', function () {
+  function creditNeedsKyc(demo, exigido, declarado) {
+    if (demo) return false;
+    return Boolean(exigido) && !declarado;
+  }
+  function creditNeedsPhone(demo, exigida, bound) {
+    if (demo) return false;
+    return Boolean(exigida) && !bound;
+  }
+
+  it('lets a demo account operate without KYC or phone', function () {
+    expect(creditNeedsKyc(true, true, false)).to.equal(false);
+    expect(creditNeedsPhone(true, true, false)).to.equal(false);
+  });
+
+  it('still requires KYC and phone in live when the contract asks for them', function () {
+    expect(creditNeedsKyc(false, true, false)).to.equal(true);
+    expect(creditNeedsPhone(false, true, false)).to.equal(true);
+    expect(creditNeedsKyc(false, false, false)).to.equal(false);
+  });
+});

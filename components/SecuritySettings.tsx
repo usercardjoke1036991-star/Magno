@@ -19,7 +19,8 @@ import { useAppWallet } from '../wallet/AppWalletContext';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { useWeb3Transactions } from '../hooks/useWeb3Transactions';
 import { getSupportedTokens } from '../constants/tokens';
-import { verifyPin, isPinSet, biometricAvailable, isBiometricEnabled, setBiometricEnabled, authenticateBiometric } from '../services/appLock';
+import { verifyPin, isPinSet, isBiometricEnabled, getBiometricStatus, checkPassword } from '../services/appLock';
+import { BiometricLockSection } from './BiometricLockSection';
 import { isFundsConfirmEnabled, setFundsConfirmEnabled } from '../services/fundsConfirm';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { humanizeTxError } from '../utils/txErrors';
@@ -31,6 +32,7 @@ import {
   isValidSecretPhrase,
   markPhraseBackedUp,
 } from '../services/appWallet';
+import { isDemoMode } from '../constants/rpcConfig';
 import type { TranslationKey } from '../i18n/translations';
 
 type RowStatus = 'done' | 'todo' | 'warn';
@@ -48,32 +50,30 @@ export const SecuritySettings: React.FC = () => {
   const [backedUp, setBackedUp] = useState(false);
   const [hasPhrase, setHasPhrase] = useState(false);
   const [revealPin, setRevealPin] = useState('');
+  const [revealPassword, setRevealPassword] = useState('');
   const [restorePhrase, setRestorePhrase] = useState('');
   const [restorePin, setRestorePin] = useState('');
-  const [rotatePin, setRotatePin] = useState('');
   const [destroyWord, setDestroyWord] = useState('');
   const [destroyPin, setDestroyPin] = useState('');
   const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState(false);
   const [pinSet, setPinSet] = useState(false);
-  const [bioReady, setBioReady] = useState(false);
   const [bioOn, setBioOn] = useState(false);
   const [fundsOn, setFundsOn] = useState(false);
 
   const refreshPhrase = async () => {
-    const [exists, ack, pin, bioAvail, bioEnabled, funds] = await Promise.all([
+    const [exists, ack, pin, bioStatus, bioEnabled, funds] = await Promise.all([
       hasSecretPhrase(),
       isPhraseBackedUp(),
       isPinSet(),
-      biometricAvailable(),
+      getBiometricStatus(),
       isBiometricEnabled(),
       isFundsConfirmEnabled(),
     ]);
     setHasPhrase(exists);
     setBackedUp(ack);
     setPinSet(pin);
-    setBioReady(bioAvail);
-    setBioOn(bioEnabled);
+    setBioOn(bioEnabled && bioStatus.available);
     setFundsOn(funds);
     setPhrase(null);
     setShown(false);
@@ -87,9 +87,17 @@ export const SecuritySettings: React.FC = () => {
   const phoneOk = userInfo.identityBound;
 
   const reveal = async () => {
-    if (!(await verifyPin(revealPin))) {
-      Alert.alert(t('error'), t('lockPinWrong'));
-      return;
+    if (pinSet) {
+      if (!(await verifyPin(revealPin))) {
+        Alert.alert(t('error'), t('lockPinWrong'));
+        return;
+      }
+    } else {
+      const checked = await checkPassword(revealPassword);
+      if (!checked.ok) {
+        Alert.alert(t('error'), t('lockPasswordWrong'));
+        return;
+      }
     }
     const secret = await getSecretPhrase();
     if (!secret) {
@@ -99,30 +107,7 @@ export const SecuritySettings: React.FC = () => {
     setPhrase(secret);
     setShown(true);
     setRevealPin('');
-  };
-
-  const toggleFingerprint = async () => {
-    if (!bioReady) {
-      Alert.alert(t('securityAccessKey'), t('lockBiometricUnavailable'));
-      return;
-    }
-    // Requiere autenticación biométrica tanto para activar como para desactivar
-    const ok = await authenticateBiometric();
-    if (!ok) {
-      Alert.alert(t('securityAccessKey'), t('securityAccessKeyFailed'));
-      return;
-    }
-    if (bioOn) {
-      await setBiometricEnabled(false);
-      setBioOn(false);
-      return;
-    }
-    const enabled = await setBiometricEnabled(true);
-    if (!enabled) {
-      Alert.alert(t('securityAccessKey'), t('lockBiometricUnavailable'));
-      return;
-    }
-    setBioOn(true);
+    setRevealPassword('');
   };
 
   const confirmBackup = async () => {
@@ -178,46 +163,6 @@ export const SecuritySettings: React.FC = () => {
     } finally {
       setBusy(false);
     }
-  };
-
-  const rotatePhrase = async () => {
-    if (userInfo.hasActiveLoan) {
-      Alert.alert(t('activeLoan'), t('appWalletDestroyLoan'));
-      return;
-    }
-    if (userInfo.isDelinquent) {
-      Alert.alert(t('activeLoan'), t('destroyDelinquent'));
-      return;
-    }
-    if (pinSet && !(await verifyPin(rotatePin))) {
-      Alert.alert(t('error'), t('lockPinWrong'));
-      return;
-    }
-    Alert.alert(t('seedRotate'), t('seedRotateConfirm'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('seedRotate'),
-        style: 'destructive',
-        onPress: async () => {
-          setBusy(true);
-          try {
-            if (userInfo.isRegistered) {
-              await QuatriviumCreditService.destruirCuenta(getSupportedTokens()[0].address);
-            }
-            await recreate();
-            await refreshPhrase();
-            refetch();
-            setRotatePin('');
-            setShown(false);
-            Alert.alert(t('ready'), t('seedRotated'));
-          } catch (error) {
-            Alert.alert(t('error'), humanizeTxError(error));
-          } finally {
-            setBusy(false);
-          }
-        },
-      },
-    ]);
   };
 
   const destroyAccount = async () => {
@@ -308,7 +253,13 @@ export const SecuritySettings: React.FC = () => {
   if (panel !== 'menu') {
     return (
       <View>
-        <TouchableOpacity onPress={() => setPanel('menu')} accessibilityRole="button">
+        <TouchableOpacity
+          onPress={() => {
+            setPanel('menu');
+            void refreshPhrase();
+          }}
+          accessibilityRole="button"
+        >
           <Text style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</Text>
         </TouchableOpacity>
         <Text style={[styles.section, { color: colors.text }]}>{t(panelTitle[panel])}</Text>
@@ -334,24 +285,7 @@ export const SecuritySettings: React.FC = () => {
           />
         ) : null}
         {panel === 'access' ? (
-          <View>
-            <Text style={[styles.lead, { color: colors.textMuted }]}>{t('securityAccessKeyLead')}</Text>
-            {!bioReady ? (
-              <Text style={[styles.lead, { color: colors.warnText }]}>{t('lockBiometricUnavailable')}</Text>
-            ) : (
-              <TouchableOpacity
-                onPress={toggleFingerprint}
-                style={[styles.button, { backgroundColor: bioOn ? colors.surface : colors.connect, borderWidth: bioOn ? 1 : 0, borderColor: colors.border }]}
-              >
-                <Text style={[styles.buttonText, bioOn && { color: colors.text }]}>
-                  {bioOn ? t('securityAccessKeyDisable') : t('securityAccessKeyEnable')}
-                </Text>
-              </TouchableOpacity>
-            )}
-            {bioOn ? (
-              <Text style={[styles.rowHint, { color: colors.success }]}>{t('securityAccessKeyDone')}</Text>
-            ) : null}
-          </View>
+          <BiometricLockSection compact onChanged={setBioOn} />
         ) : null}
         {panel === 'phrase' ? (
           <View>
@@ -366,10 +300,20 @@ export const SecuritySettings: React.FC = () => {
                 <TouchableOpacity onPress={confirmBackup} style={[styles.button, { backgroundColor: colors.primary }]}>
                   <Text style={styles.buttonText}>{t('seedConfirmSaved')}</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShown(false);
+                    setPhrase(null);
+                  }}
+                  style={[styles.button, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}
+                >
+                  <Text style={[styles.buttonText, { color: colors.text }]}>{t('seedHide')}</Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <>
-                <TextInput
+                {pinSet ? (
+                  <TextInput
                     value={revealPin}
                     onChangeText={(value) => setRevealPin(value.replace(/\D/g, '').slice(0, 6))}
                     keyboardType="number-pad"
@@ -379,66 +323,31 @@ export const SecuritySettings: React.FC = () => {
                     placeholderTextColor={colors.textMuted}
                     style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
                   />
+                ) : (
+                  <TextInput
+                    value={revealPassword}
+                    onChangeText={setRevealPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    secureTextEntry
+                    placeholder={t('lockCurrentPassword')}
+                    placeholderTextColor={colors.textMuted}
+                    style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+                  />
+                )}
                 <TouchableOpacity
-                  disabled={revealPin.length !== 6}
+                  disabled={pinSet ? revealPin.length !== 6 : !revealPassword}
                   onPress={reveal}
-                  style={[styles.button, { backgroundColor: colors.connect }, revealPin.length !== 6 && { backgroundColor: colors.chip }]}
+                  style={[
+                    styles.button,
+                    { backgroundColor: colors.connect },
+                    (pinSet ? revealPin.length !== 6 : !revealPassword) && { backgroundColor: colors.chip },
+                  ]}
                 >
                   <Text style={styles.buttonText}>{t('seedReveal')}</Text>
                 </TouchableOpacity>
               </>
             )}
-            <Text style={[styles.label, { color: colors.text }]}>{t('seedRotate')}</Text>
-            <Text style={[styles.lead, { color: colors.textMuted }]}>{t('seedRotateLead')}</Text>
-            {pinSet ? (
-              <TextInput
-                value={rotatePin}
-                onChangeText={(value) => setRotatePin(value.replace(/\D/g, '').slice(0, 6))}
-                keyboardType="number-pad"
-                secureTextEntry
-                maxLength={6}
-                placeholder={t('seedRotatePinRequired')}
-                placeholderTextColor={colors.textMuted}
-                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-              />
-            ) : null}
-            <TouchableOpacity
-              disabled={busy || (pinSet && rotatePin.length !== 6)}
-              onPress={() => void rotatePhrase()}
-              style={[styles.button, styles.destroy, (busy || (pinSet && rotatePin.length !== 6)) && { opacity: 0.6 }]}
-            >
-              {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('seedRotate')}</Text>}
-            </TouchableOpacity>
-            <Text style={[styles.label, { color: colors.text }]}>{t('seedRestore')}</Text>
-            <TextInput
-              value={restorePhrase}
-              onChangeText={setRestorePhrase}
-              autoCapitalize="none"
-              autoCorrect={false}
-              multiline
-              placeholder={t('seedRestorePlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-            />
-            {pinSet ? (
-              <TextInput
-                value={restorePin}
-                onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
-                keyboardType="number-pad"
-                secureTextEntry
-                maxLength={6}
-                placeholder={t('lockCurrentPin')}
-                placeholderTextColor={colors.textMuted}
-                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-              />
-            ) : null}
-            <TouchableOpacity
-              disabled={busy || (pinSet && restorePin.length !== 6)}
-              onPress={restoreWallet}
-              style={[styles.button, { backgroundColor: colors.connect }, (busy || (pinSet && restorePin.length !== 6)) && { backgroundColor: colors.chip }]}
-            >
-              {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('seedRestoreAction')}</Text>}
-            </TouchableOpacity>
           </View>
         ) : null}
         {panel === 'replace' ? (
@@ -474,6 +383,37 @@ export const SecuritySettings: React.FC = () => {
             >
               <Text style={styles.buttonText}>{t('appWalletDestroy')}</Text>
             </TouchableOpacity>
+            <Text style={[styles.label, { color: colors.text }]}>{t('seedRestore')}</Text>
+            <Text style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountLead')}</Text>
+            <TextInput
+              value={restorePhrase}
+              onChangeText={setRestorePhrase}
+              autoCapitalize="none"
+              autoCorrect={false}
+              multiline
+              placeholder={t('seedRestorePlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+            />
+            {pinSet ? (
+              <TextInput
+                value={restorePin}
+                onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
+                keyboardType="number-pad"
+                secureTextEntry
+                maxLength={6}
+                placeholder={t('lockCurrentPin')}
+                placeholderTextColor={colors.textMuted}
+                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+              />
+            ) : null}
+            <TouchableOpacity
+              disabled={busy || (pinSet && restorePin.length !== 6)}
+              onPress={() => void restoreWallet()}
+              style={[styles.button, { backgroundColor: colors.connect }, (busy || (pinSet && restorePin.length !== 6)) && { backgroundColor: colors.chip }]}
+            >
+              {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('seedRestoreAction')}</Text>}
+            </TouchableOpacity>
           </View>
         ) : null}
       </View>
@@ -482,18 +422,20 @@ export const SecuritySettings: React.FC = () => {
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('securityLead')}</Text>
+      <Text style={[styles.lead, { color: colors.textMuted }]}>
+        {isDemoMode() ? t('securityLeadDemo') : t('securityLead')}
+      </Text>
       <Row
         icon="id"
-        label={t('securityKyc')}
-        hint={kycOk ? t('securityKycDone') : t('securityKycTodo')}
-        status={kycOk ? 'done' : 'warn'}
+        label={isDemoMode() ? t('securityKycDemo') : t('securityKyc')}
+        hint={kycOk ? t('securityKycDone') : isDemoMode() ? t('securityKycDemoHint') : t('securityKycTodo')}
+        status={kycOk ? 'done' : isDemoMode() ? 'todo' : 'warn'}
         onPress={() => setPanel('kyc')}
       />
       <Row
         icon="lock"
         label={t('securityPin')}
-        hint={pinSet ? t('securityPinHint') : t('securityPinTodo')}
+        hint={pinSet && bioOn ? t('securityPinHintBoth') : pinSet ? t('securityPinHint') : t('securityPinTodo')}
         status={pinSet ? 'done' : 'todo'}
         onPress={() => setPanel('pin')}
       />
@@ -513,9 +455,9 @@ export const SecuritySettings: React.FC = () => {
       />
       <Row
         icon="phone"
-        label={t('securityPhone')}
-        hint={phoneOk ? t('securityPhoneDone') : t('securityPhoneTodo')}
-        status={phoneOk ? 'done' : 'warn'}
+        label={isDemoMode() ? t('securityPhoneDemo') : t('securityPhone')}
+        hint={phoneOk ? t('securityPhoneDone') : isDemoMode() ? t('securityPhoneDemoHint') : t('securityPhoneTodo')}
+        status={phoneOk ? 'done' : isDemoMode() ? 'todo' : 'warn'}
         onPress={() => setPanel('phone')}
       />
       <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>

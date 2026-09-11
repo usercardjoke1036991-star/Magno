@@ -16,11 +16,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
+import { EmailOtpSection } from './EmailOtpSection';
 import { BrandLogo } from './BrandLogo';
 import {
   PASSWORD_LENGTH,
   PIN_LENGTH,
-  biometricAvailable,
+  getBiometricStatus,
   checkPassword,
   checkPin,
   getPinLockRemaining,
@@ -30,15 +31,18 @@ import {
   loadWrapFromBiometric,
   lockNow,
   setPassword,
-  setPin,
   shouldRelockAfterBackground,
 } from '../services/appLock';
 import { isValidMasterPassword } from '../utils/passwordPolicy';
 import { requestPasswordRecovery, resetPasswordWithEmail } from '../services/passwordRecovery';
+import { ensureAppWallet } from '../services/appWallet';
+import { loadVerifiedEmail } from '../services/accountEmail';
+import { notifyApiConfigured } from '../services/phoneOtp';
+import type { BiometricKind } from '../utils/biometricStatus';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'] as const;
 
-type SetupStage = 'welcome' | 'passwordEnter';
+type SetupStage = 'welcome' | 'passwordEnter' | 'emailEnter' | 'signIn';
 type UnlockMode = 'pin' | 'password';
 
 interface AppLockGateProps {
@@ -55,9 +59,9 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const [busy, setBusy] = useState(false);
   const [bioOn, setBioOn] = useState(false);
   const [bioReady, setBioReady] = useState(false);
+  const [bioKinds, setBioKinds] = useState<BiometricKind[]>([]);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupStage, setSetupStage] = useState<SetupStage>('welcome');
-  const [setupDraft, setSetupDraft] = useState('');
   const [pendingPin, setPendingPin] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -69,20 +73,23 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const [recoverEmail, setRecoverEmail] = useState('');
   const [recoverCode, setRecoverCode] = useState('');
   const [recoverSent, setRecoverSent] = useState(false);
+  const [setupWallet, setSetupWallet] = useState('');
   const backgroundAt = useRef<number | null>(null);
 
   const boot = useCallback(async () => {
     const pinSet = await isPinSet();
     const passwordSet = await isPasswordSet();
-    const enrolled = await biometricAvailable();
+    const bioStatus = await getBiometricStatus();
+    const enrolled = bioStatus.available;
     const enabled = passwordSet || pinSet ? await isBiometricEnabled() : false;
     setBioReady(enrolled);
+    setBioKinds(bioStatus.kinds);
     setBioOn(enabled);
     setHasPassword(passwordSet);
     setHasPin(pinSet);
     if (!passwordSet && !pinSet) {
       setNeedsSetup(true);
-      setSetupStage('passwordEnter');
+      setSetupStage('welcome');
       setLocked(false);
       setReady(true);
       return;
@@ -185,12 +192,13 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       setError('');
       return;
     }
-    setError(t('lockPinWrong'));
+    setError(t('securityAccessKeyFailed'));
   };
 
   const finishUnlock = async (usedPin: string) => {
     if (await isPasswordSet()) {
       setHasPassword(true);
+      setNeedsSetup(false);
       setLocked(false);
       setPinDigits('');
       setPasswordInput('');
@@ -232,7 +240,14 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     const result = await checkPassword(passwordInput);
     setBusy(false);
     if (result.ok) {
-      await finishUnlock(pendingPin);
+      setHasPassword(true);
+      setNeedsSetup(false);
+      setLocked(false);
+      setPinDigits('');
+      setPasswordInput('');
+      setError('');
+      setLockMs(0);
+      setRecovering(false);
       return;
     }
     setLockMs(result.remainingMs);
@@ -240,44 +255,6 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       result.locked ? t('lockCooldown', { seconds: Math.ceil(result.remainingMs / 1000) }) : t('lockPasswordWrong')
     );
     setPasswordInput('');
-  };
-
-  const pressSetupKey = async (key: string) => {
-    if (!key || busy) return;
-    if (key === '⌫') {
-      setPinDigits((value) => value.slice(0, -1));
-      setError('');
-      return;
-    }
-    if (pin.length >= PIN_LENGTH) return;
-    const next = pin + key;
-    setPinDigits(next);
-    if (next.length < PIN_LENGTH) return;
-    if (!setupDraft) {
-      setSetupDraft(next);
-      setPinDigits('');
-      setError('');
-      return;
-    }
-    if (next !== setupDraft) {
-      setError(t('lockPinMismatch'));
-      setSetupDraft('');
-      setPinDigits('');
-      return;
-    }
-    setBusy(true);
-    try {
-      await setPin(next);
-      await beginPasswordSetup(next);
-      setSetupDraft('');
-      setPinDigits('');
-    } catch (err) {
-      setError(err instanceof Error && err.message === 'weak-pin' ? t('lockPinWeak') : t('lockPinWrong'));
-      setSetupDraft('');
-      setPinDigits('');
-    } finally {
-      setBusy(false);
-    }
   };
 
   const saveUserPassword = async () => {
@@ -293,12 +270,24 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     setBusy(true);
     try {
       await setPassword(passwordInput, pendingPin || undefined);
+      const wallet = await ensureAppWallet();
+      const verified = await loadVerifiedEmail();
+      if (verified || !notifyApiConfigured()) {
+        setHasPassword(true);
+        setNeedsSetup(false);
+        setLocked(false);
+        setPasswordInput('');
+        setPasswordConfirm('');
+        setPendingPin('');
+        setSetupWallet('');
+        setError('');
+        return;
+      }
+      setSetupWallet(wallet.address.toLowerCase());
       setHasPassword(true);
-      setNeedsSetup(false);
-      setLocked(false);
+      setSetupStage('emailEnter');
       setPasswordInput('');
       setPasswordConfirm('');
-      setPendingPin('');
       setError('');
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
@@ -307,7 +296,11 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
           ? t('lockPasswordPrivateKey')
           : code === 'wrong-pin'
             ? t('lockPinWrong')
-            : t('lockPasswordWeak')
+            : code === 'device-bound'
+              ? t('errDeviceBound')
+              : code === 'locked'
+                ? t('appWalletFailed')
+                : t('lockPasswordWeak')
       );
     } finally {
       setBusy(false);
@@ -341,6 +334,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     try {
       await resetPasswordWithEmail(recoverEmail, recoverCode, passwordInput);
       setHasPassword(true);
+      setNeedsSetup(false);
       setLocked(false);
       setRecovering(false);
       setRecoverSent(false);
@@ -370,8 +364,10 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   }
 
   const setup = needsSetup;
-  const welcomeStage = setup && setupStage === 'welcome';
-  const passwordStage = setup && setupStage === 'passwordEnter';
+  const welcomeStage = setup && setupStage === 'welcome' && !recovering;
+  const passwordStage = setup && setupStage === 'passwordEnter' && !recovering;
+  const emailStage = setup && setupStage === 'emailEnter' && !recovering;
+  const signInStage = setup && setupStage === 'signIn' && !recovering;
   const passwordOk = isValidMasterPassword(passwordInput) && passwordInput === passwordConfirm;
 
   return (
@@ -388,35 +384,33 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 ? t('createAccount')
                 : recovering
                   ? t('lockRecoverTitle')
-                  : passwordStage
-                    ? t('lockPasswordTitle')
-                    : setup
-                      ? setupDraft
-                        ? t('lockConfirmPin')
-                        : t('lockCreatePin')
-                      : t('lockUnlock')}
+                  : emailStage
+                    ? t('onboardStepEmail')
+                    : signInStage
+                      ? t('signIn')
+                      : passwordStage
+                        ? t('lockPasswordTitle')
+                        : t('lockUnlock')}
             </Text>
             <Text style={[styles.lead, { color: colors.textMuted }]}>
               {welcomeStage
                 ? t('createAccountLead')
                 : recovering
                   ? t('lockRecoverLead')
-                  : passwordStage
-                    ? t('lockPasswordTypeLead')
-                    : setup
-                      ? t('lockSetupLead')
-                      : lockMs > 0
-                        ? t('lockCooldown', { seconds: Math.ceil(lockMs / 1000) })
-                        : unlockMode === 'password'
-                          ? t('lockUnlockLeadPassword')
-                          : t('lockUnlockLead')}
+                  : emailStage
+                    ? t('emailField')
+                    : signInStage
+                      ? t('signInLead')
+                      : passwordStage
+                        ? t('lockPasswordTypeLead')
+                        : lockMs > 0
+                            ? t('lockCooldown', { seconds: Math.ceil(lockMs / 1000) })
+                            : unlockMode === 'password'
+                              ? t('lockUnlockLeadPassword')
+                              : t('lockUnlockLead')}
             </Text>
             {passwordStage ? (
-              <>
-                <Text style={[styles.emailNote, { color: colors.textMuted }]}>{t('lockPasswordNotSeed')}</Text>
-                <Text style={[styles.emailNote, { color: colors.textMuted }]}>{t('lockPasswordNoEmail')}</Text>
-                <Text style={[styles.emailNote, { color: colors.textMuted }]}>{t('lockPasswordMin')}</Text>
-              </>
+              <Text style={[styles.emailNote, { color: colors.textMuted }]}>{t('lockPasswordMin')}</Text>
             ) : null}
             {!passwordStage && !welcomeStage && !recovering && setup ? (
               <View style={styles.dots}>
@@ -459,6 +453,24 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 style={[styles.primary, { backgroundColor: colors.connect }]}
               >
                 <Text style={styles.primaryText}>{t('createAccount')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSetupStage('passwordEnter');
+                  setError('');
+                }}
+                style={styles.switchMode}
+              >
+                <Text style={[styles.switchText, { color: colors.primary }]}>{t('createWithGoogle')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSetupStage('signIn');
+                  setError('');
+                }}
+                style={styles.switchMode}
+              >
+                <Text style={[styles.switchText, { color: colors.primary }]}>{t('signIn')}</Text>
               </TouchableOpacity>
             </View>
           ) : null}
@@ -509,10 +521,95 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
               >
                 {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>{t('ready')}</Text>}
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSetupStage('welcome');
+                  setPasswordInput('');
+                  setPasswordConfirm('');
+                  setError('');
+                }}
+                style={styles.switchMode}
+              >
+                <Text style={[styles.switchText, { color: colors.primary }]}>{t('lockRecoverBack')}</Text>
+              </TouchableOpacity>
             </View>
           ) : null}
 
-          {recovering && !setup ? (
+          {emailStage && setupWallet ? (
+            <View style={styles.passwordBlock}>
+              <EmailOtpSection
+                walletAddress={setupWallet}
+                verifiedEmail=""
+                onVerified={() => {
+                  setNeedsSetup(false);
+                  setLocked(false);
+                  setPendingPin('');
+                  setSetupWallet('');
+                  setError('');
+                }}
+              />
+            </View>
+          ) : null}
+
+          {signInStage ? (
+            <View style={styles.passwordBlock}>
+              <TextInput
+                value={recoverEmail}
+                onChangeText={(value) => setRecoverEmail(value.trim().toLowerCase())}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                placeholder={t('emailField')}
+                placeholderTextColor={colors.textMuted}
+                style={[
+                  styles.passwordInput,
+                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
+                ]}
+              />
+              <TextInput
+                value={passwordInput}
+                onChangeText={(value) => setPasswordInput(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+                maxLength={PASSWORD_LENGTH}
+                placeholder={t('lockPasswordGenerated')}
+                placeholderTextColor={colors.textMuted}
+                style={[
+                  styles.passwordInput,
+                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
+                ]}
+              />
+              <TouchableOpacity
+                disabled={busy || !passwordInput}
+                onPress={() => void submitUnlockPassword()}
+                style={[styles.primary, { backgroundColor: colors.connect }]}
+              >
+                {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>{t('signIn')}</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setRecovering(true);
+                  setError('');
+                }}
+                style={styles.switchMode}
+              >
+                <Text style={[styles.switchText, { color: colors.primary }]}>{t('lockForgotPassword')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSetupStage('welcome');
+                  setPasswordInput('');
+                  setError('');
+                }}
+                style={styles.switchMode}
+              >
+                <Text style={[styles.switchText, { color: colors.primary }]}>{t('lockRecoverBack')}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {recovering ? (
             <View style={styles.passwordBlock}>
               <TextInput
                 value={recoverEmail}
@@ -596,6 +693,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                   setRecoverSent(false);
                   setPasswordInput('');
                   setPasswordConfirm('');
+                  if (setup) setSetupStage('signIn');
                 }}
                 style={styles.switchMode}
               >
@@ -638,10 +736,20 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
               disabled={busy || lockMs > 0}
               style={[styles.bio, { borderColor: colors.border, backgroundColor: colors.surface }]}
               accessibilityRole="button"
-              accessibilityLabel={t('lockBiometric')}
+              accessibilityLabel={t(
+                bioKinds.includes('facial') && !bioKinds.includes('fingerprint') && !bioKinds.includes('iris')
+                  ? 'lockBiometricFace'
+                  : 'lockBiometric'
+              )}
             >
               <AppIcon name="shield" size={18} color={colors.primary} />
-              <Text style={[styles.bioText, { color: colors.text }]}>{t('lockBiometric')}</Text>
+              <Text style={[styles.bioText, { color: colors.text }]}>
+                {t(
+                  bioKinds.includes('facial') && !bioKinds.includes('fingerprint') && !bioKinds.includes('iris')
+                    ? 'lockBiometricFace'
+                    : 'lockBiometric'
+                )}
+              </Text>
             </TouchableOpacity>
           ) : null}
 
@@ -675,14 +783,13 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </TouchableOpacity>
           ) : null}
 
-          {(setup && setupStage !== 'welcome' && setupStage !== 'passwordEnter') ||
-          (!setup && !recovering && unlockMode === 'pin') ? (
+          {!setup && !recovering && unlockMode === 'pin' ? (
             <View style={styles.pad}>
               {KEYS.map((key, index) => (
                 <TouchableOpacity
                   key={`${key}-${index}`}
                   disabled={!key || busy || (!setup && lockMs > 0)}
-                  onPress={() => (setup ? pressSetupKey(key) : pressKey(key))}
+                  onPress={() => (pressKey(key))}
                   style={[styles.key, !key && styles.keyGhost]}
                   accessibilityRole={key ? 'button' : undefined}
                   accessibilityLabel={key === '⌫' ? t('lockBackspace') : key}

@@ -31,7 +31,7 @@ import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
 import { LOAN_TIERS } from '../constants/loanTiers';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
-import { isContractConfigured } from '../constants/rpcConfig';
+import { isContractConfigured, isDemoMode } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { usePendingInvite } from '../hooks/usePendingInvite';
@@ -142,6 +142,8 @@ function HomeScreenWithHooks() {
     <AccountOnboarding
       walletAddress={walletAddress}
       walletReady={walletReady}
+      walletFailed={walletFailed}
+      onRetryWallet={retryWallet}
       isRegistered={userInfo.isRegistered}
       kycDeclarado={userInfo.kycDeclarado}
       identityBound={userInfo.identityBound}
@@ -178,18 +180,20 @@ function HomeScreenWithHooks() {
           </View>
         ) : null}
 
-        <KycAccessBanner
-          kycDone={userInfo.kycDeclarado}
-          phoneDone={userInfo.identityBound}
-          walletAddress={walletAddress}
-          isRegistered={userInfo.isRegistered}
-          kycDeclarado={userInfo.kycDeclarado}
-          identityBound={userInfo.identityBound}
-          isLoading={txLoading}
-          paused={userInfo.paused}
-          onDeclare={handleDeclararKyc}
-          onPhoneBound={refetch}
-        />
+        {isDemoMode() ? null : (
+          <KycAccessBanner
+            kycDone={userInfo.kycDeclarado}
+            phoneDone={userInfo.identityBound}
+            walletAddress={walletAddress}
+            isRegistered={userInfo.isRegistered}
+            kycDeclarado={userInfo.kycDeclarado}
+            identityBound={userInfo.identityBound}
+            isLoading={txLoading}
+            paused={userInfo.paused}
+            onDeclare={handleDeclararKyc}
+            onPhoneBound={refetch}
+          />
+        )}
 
         <DemoModeBanner />
         <NetworkStatusBanner />

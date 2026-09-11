@@ -2,14 +2,13 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { ActivityIndicator, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  getRuntimeMode,
   isContractConfigured,
   isStoreProduction,
   setRuntimeMode,
   type AppMode,
 } from '../constants/rpcConfig';
 
-const STORAGE_KEY = 'quatrivium.appMode';
+const STORAGE_KEY = 'quatrivium.appMode.v2';
 
 interface AppModeValue {
   mode: AppMode;
@@ -19,8 +18,23 @@ interface AppModeValue {
 
 const AppModeContext = createContext<AppModeValue | null>(null);
 
+function applyChain(pref: AppMode): AppMode {
+  // Hasta que exista contrato mainnet, la RPC es siempre testnet (runtime demo).
+  // La preferencia live se conserva en la UI: cuenta real sobre red de prueba.
+  if (pref === 'live' && isContractConfigured('mainnet')) {
+    setRuntimeMode('live');
+    return 'live';
+  }
+  if (isContractConfigured('testnet')) {
+    setRuntimeMode('demo');
+    return pref;
+  }
+  setRuntimeMode('demo');
+  return 'demo';
+}
+
 export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setModeState] = useState<AppMode>(getRuntimeMode);
+  const [mode, setModeState] = useState<AppMode>('live');
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -32,20 +46,15 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
           await AsyncStorage.setItem(STORAGE_KEY, 'live');
           return;
         }
-        if (saved !== 'demo' && saved !== 'live') return;
-        const network = saved === 'live' ? 'mainnet' : 'testnet';
-        if (isContractConfigured(network)) {
-          setRuntimeMode(saved);
-          setModeState(saved);
-          return;
-        }
-        if (saved === 'live' && isContractConfigured('testnet')) {
-          setRuntimeMode('demo');
-          setModeState('demo');
-          await AsyncStorage.setItem(STORAGE_KEY, 'demo');
+        const pref: AppMode = saved === 'demo' ? 'demo' : 'live';
+        setModeState(applyChain(pref));
+        if (!saved) {
+          await AsyncStorage.setItem(STORAGE_KEY, pref);
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        setModeState(applyChain('live'));
+      })
       .finally(() => setReady(true));
   }, []);
 
@@ -53,12 +62,13 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (isStoreProduction() && next !== 'live') {
       return false;
     }
-    const network = next === 'live' ? 'mainnet' : 'testnet';
-    if (!isContractConfigured(network)) {
+    if (next === 'demo' && !isContractConfigured('testnet')) {
       return false;
     }
-    setRuntimeMode(next);
-    setModeState(next);
+    if (next === 'live' && !isContractConfigured('mainnet') && !isContractConfigured('testnet')) {
+      return false;
+    }
+    setModeState(applyChain(next));
     await AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
     return true;
   }, []);

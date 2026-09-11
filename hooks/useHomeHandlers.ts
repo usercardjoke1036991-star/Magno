@@ -3,36 +3,56 @@
  * Extraído de app/index.tsx para reducir complejidad del componente raíz.
  * Cada handler valida precondiciones y delega al hook useWeb3Transactions.
  */
-import { formatUnits, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
+import { formatUnits, parseEther, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
 import { Alert, Linking } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
-import { setWalletSigner } from '../services/quatriviumCreditService';
+import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { useWeb3Transactions } from './useWeb3Transactions';
-import { isContractConfigured, isDemoMode } from '../constants/rpcConfig';
+import { getProviderWithFallback, isContractConfigured, isDemoMode } from '../constants/rpcConfig';
+import { creditNeedsKyc, creditNeedsPhone } from '../utils/creditGates';
 import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
+import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { useI18n } from '../i18n/LanguageContext';
 import { NOTIFY_API } from '../constants/appLinks';
 import type { LoanTier, UserInfo } from './useWeb3Balances';
 import type { Token } from '../constants/tokens';
 
 const BSC_TESTNET_FAUCET = 'https://www.bnbchain.org/en/testnet-faucet';
-const MIN_GAS_BNB = 0.001; // mínimo recomendado para gas en testnet
+const MIN_GAS_WEI = parseEther('0.001');
+
+async function readOnChainBnb(address: string): Promise<bigint | null> {
+  try {
+    return await getProviderWithFallback().getBalance(address);
+  } catch {
+    return null;
+  }
+}
+
+async function waitForBnb(address: string, minWei: bigint, timeoutMs = 25_000): Promise<boolean> {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    const bal = await readOnChainBnb(address);
+    if (bal !== null && bal >= minWei) return true;
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+  const last = await readOnChainBnb(address);
+  return last !== null && last >= minWei;
+}
 
 /** Intenta fondear la wallet con BNB testnet desde el notify-worker. Silencioso si falla. */
 async function tryAutoFund(address: string): Promise<boolean> {
   if (!NOTIFY_API || !address) return false;
   try {
-    const res = await fetch(`${NOTIFY_API}/auto-fund`, {
+    const res = await safeJsonFetch(`${NOTIFY_API}/auto-fund`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address }),
-      signal: AbortSignal.timeout(15_000),
+      timeoutMs: 40_000,
     });
     if (!res.ok) return false;
-    const data = (await res.json()) as { funded?: boolean; txHash?: string };
+    const data = await readJsonLimited<{ funded?: boolean }>(res);
     return data.funded === true;
   } catch {
-    // Network error o worker no disponible — no bloquear el flujo
     return false;
   }
 }
@@ -106,15 +126,20 @@ export const useHomeHandlers = ({
 
   const ensureGasForTx = async (): Promise<boolean> => {
     if (!walletAddress) return false;
-    let localBnbBalance = parseFloat(balances.bnbBalance || '0');
-    if (localBnbBalance < MIN_GAS_BNB && isDemoMode()) {
-      const funded = await tryAutoFund(walletAddress);
+    let onChain = await readOnChainBnb(walletAddress);
+    if (onChain === null) {
+      const parsed = Number.parseFloat(balances.bnbBalance);
+      onChain = Number.isFinite(parsed) && parsed > 0 ? parseEther(parsed.toFixed(6)) : 0n;
+    }
+    if (onChain < MIN_GAS_WEI && isDemoMode()) {
+      await tryAutoFund(walletAddress);
+      const funded = await waitForBnb(walletAddress, MIN_GAS_WEI);
       if (funded) {
-        localBnbBalance += 0.005;
         void refetch();
+        return true;
       }
     }
-    if (localBnbBalance < MIN_GAS_BNB) {
+    if (onChain < MIN_GAS_WEI) {
       if (isDemoMode()) {
         Alert.alert(t('errNeedGas'), t('errNeedGasTestnet'), [
           { text: t('cancel'), style: 'cancel' },
@@ -160,11 +185,11 @@ export const useHomeHandlers = ({
       Alert.alert(t('register'), t('activateBeforeLoan'));
       return;
     }
-    if (!userInfo.kycDeclarado) {
+    if (creditNeedsKyc(userInfo)) {
       Alert.alert(t('kycTitle'), t('kycNeedBeforeLoan'));
       return;
     }
-    if (!userInfo.identityBound) {
+    if (creditNeedsPhone(userInfo)) {
       Alert.alert(t('otpTitle'), t('otpNeedBeforeLoan'));
       return;
     }
@@ -198,6 +223,14 @@ export const useHomeHandlers = ({
       return;
     }
     if (!(await ensureGasForTx())) return;
+    if (isDemoMode()) {
+      try {
+        await QuatriviumCreditService.prepareDemoCredit();
+      } catch {
+        Alert.alert(t('error'), t('demoPrepFailed'));
+        return;
+      }
+    }
     const result = await solicitarPrestamo(selectedToken.address, tier.id);
     if (result.success) refetch();
   };

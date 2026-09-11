@@ -58,13 +58,12 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
             </TouchableOpacity>
           );
         })}
-        <Text style={[styles.hint, { color: colors.textMuted, textAlign: align, marginTop: 12 }]}>{t('createAccountLead')}</Text>
         <TouchableOpacity
           onPress={() => chooseLang(lang)}
           style={[styles.continue, { backgroundColor: colors.primary }]}
           accessibilityRole="button"
         >
-          <Text style={[styles.continueText, { color: colors.onPrimary }]}>{t('createAccount')}</Text>
+          <Text style={[styles.continueText, { color: colors.onPrimary }]}>{t('ready')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

@@ -1,7 +1,10 @@
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
-import { NativeModules } from 'react-native';
 import { isWeakPin, lockoutMs, remainingLockMs } from '../utils/pinPolicy';
+import {
+  resolveBiometricAvailability,
+  type BiometricAvailability,
+} from '../utils/biometricStatus';
 import {
   isValidMasterPassword,
   masterPasswordFromRandomBytes,
@@ -184,16 +187,32 @@ export async function persistWrapForBiometric(wrapKey = getWalletWrapKey()): Pro
     await SecureStore.setItemAsync(WRAP_STORE, wrapKey, BIO_WRAP_OPTIONS);
     return true;
   } catch {
-    return false;
+    try {
+      await SecureStore.setItemAsync(WRAP_STORE, wrapKey, OPTIONS);
+      return true;
+    } catch {
+      return false;
+    }
   }
+}
+
+function applyWrap(value: string | null): string | null {
+  if (!value) return null;
+  setWalletWrapKey(value);
+  return getWalletWrapKey();
 }
 
 export async function loadWrapFromBiometric(): Promise<string | null> {
   try {
-    const value = await SecureStore.getItemAsync(WRAP_STORE, BIO_WRAP_OPTIONS);
-    if (!value) return null;
-    setWalletWrapKey(value);
-    return getWalletWrapKey();
+    const withAuth = await SecureStore.getItemAsync(WRAP_STORE, BIO_WRAP_OPTIONS);
+    if (withAuth) return applyWrap(withAuth);
+  } catch {
+    // Algunos OEM (MIUI) rechazan la lectura con requireAuthentication.
+  }
+  const ok = await authenticateBiometric();
+  if (!ok) return null;
+  try {
+    return applyWrap(await SecureStore.getItemAsync(WRAP_STORE, OPTIONS));
   } catch {
     return null;
   }
@@ -394,18 +413,46 @@ export async function isBiometricEnabled(): Promise<boolean> {
 }
 
 export async function setBiometricEnabled(enabled: boolean): Promise<boolean> {
-  if (!enabled) {
+  const result = await toggleBiometric(enabled);
+  return result.ok;
+}
+
+export type BiometricToggleReason =
+  | 'no-hardware'
+  | 'not-enrolled'
+  | 'native-missing'
+  | 'no-session'
+  | 'store-failed'
+  | 'auth-failed';
+
+export type BiometricToggleResult =
+  | { ok: true }
+  | { ok: false; reason: BiometricToggleReason };
+
+export async function toggleBiometric(enable: boolean): Promise<BiometricToggleResult> {
+  const status = await getBiometricStatus();
+  if (!enable) {
+    if (status.available) {
+      const ok = await authenticateBiometric();
+      if (!ok) return { ok: false, reason: 'auth-failed' };
+    }
     await SecureStore.setItemAsync(BIO_KEY, '0', OPTIONS);
     await clearBiometricWrap();
-    return true;
+    return { ok: true };
   }
+  if (status.reason === 'native-missing') return { ok: false, reason: 'native-missing' };
+  if (!status.hasHardware) return { ok: false, reason: 'no-hardware' };
+  if (!status.enrolled) return { ok: false, reason: 'not-enrolled' };
+  if (!getWalletWrapKey()) return { ok: false, reason: 'no-session' };
+  const ok = await authenticateBiometric();
+  if (!ok) return { ok: false, reason: 'auth-failed' };
   const stored = await persistWrapForBiometric();
   if (!stored) {
     await SecureStore.setItemAsync(BIO_KEY, '0', OPTIONS);
-    return false;
+    return { ok: false, reason: 'store-failed' };
   }
   await SecureStore.setItemAsync(BIO_KEY, '1', OPTIONS);
-  return true;
+  return { ok: true };
 }
 
 export async function isLockOnOpenEnabled(): Promise<boolean> {
@@ -416,33 +463,43 @@ export async function setLockOnOpenEnabled(enabled: boolean): Promise<void> {
   await SecureStore.setItemAsync(LOCK_OPEN_KEY, enabled ? '1' : '0', OPTIONS);
 }
 
-function hasLocalAuthNative(): boolean {
-  return Boolean(
-    (NativeModules as Record<string, unknown>).ExpoLocalAuthentication
-    || (NativeModules as Record<string, unknown>).ExpoLocalAuthenticationModule
-  );
-}
-
-export async function biometricAvailable(): Promise<boolean> {
-  if (!hasLocalAuthNative()) return false;
+export async function getBiometricStatus(): Promise<BiometricAvailability> {
   try {
     const LocalAuth = await import('expo-local-authentication');
     const hasHardware = await LocalAuth.hasHardwareAsync();
     const enrolled = await LocalAuth.isEnrolledAsync();
-    return hasHardware && enrolled;
+    const types = await LocalAuth.supportedAuthenticationTypesAsync().catch(() => [] as number[]);
+    const enrolledLevel = await LocalAuth.getEnrolledLevelAsync().catch(() => 0);
+    return resolveBiometricAvailability({
+      hasHardware,
+      enrolled,
+      enrolledLevel: typeof enrolledLevel === 'number' ? enrolledLevel : 0,
+      types: Array.isArray(types) ? types.map((value) => Number(value)) : [],
+    });
   } catch {
-    return false;
+    return {
+      available: false,
+      hasHardware: false,
+      enrolled: false,
+      kinds: [],
+      reason: 'native-missing',
+    };
   }
 }
 
+export async function biometricAvailable(): Promise<boolean> {
+  return (await getBiometricStatus()).available;
+}
+
 export async function authenticateBiometric(): Promise<boolean> {
-  if (!hasLocalAuthNative()) return false;
   try {
     const LocalAuth = await import('expo-local-authentication');
     const result = await LocalAuth.authenticateAsync({
       promptMessage: 'Quatrivium Credit',
-      cancelLabel: 'Usar PIN',
+      cancelLabel: 'Cancel',
       disableDeviceFallback: true,
+      requireConfirmation: false,
+      biometricsSecurityLevel: 'weak',
     });
     return result.success === true;
   } catch {

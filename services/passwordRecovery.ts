@@ -26,7 +26,7 @@ export async function storePasswordRecovery(walletAddress: string): Promise<void
       }),
     });
   } catch {
-    // La cuenta sigue; la recuperación quedará al volver a verificar el correo.
+    console.warn('No se pudo guardar la recuperación de contraseña. Verifique el correo de nuevo más tarde.');
   }
 }
 

@@ -103,3 +103,45 @@ Android Bundled 180ms node_modules\expo-notifications\build\index.js (1 module)
  LOG  Wallet signer configurado
  LOG  Wallet signer configurado
  LOG  Wallet signer limpio
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+Android .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 355ms index.js (1 module)
+ LOG  AppKit: Creating new instance - AppKit.ts:createAppKit
+ LOG  ✅ Web3 polyfills loaded successfully
+ LOG  [AppKit] [AppKit.ts:initControllers] AppKit initialization started
+Android node_modules\expo-notifications\build\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 107ms node_modules\expo-notifications\build\index.js (1 module)
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+Android .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 262ms index.js (1 module)
+ LOG  AppKit: Creating new instance - AppKit.ts:createAppKit
+ LOG  ✅ Web3 polyfills loaded successfully
+ LOG  [AppKit] [AppKit.ts:initControllers] AppKit initialization started
+Android node_modules\expo-notifications\build\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 76ms node_modules\expo-notifications\build\index.js (1 module)
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio
+ ERROR  [ReferenceError: Property 'getRuntimeMode' doesn't exist]
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio
+Android node_modules\expo-local-authentication\build\LocalAuthentication.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 224ms node_modules\expo-local-authentication\build\LocalAuthentication.js (1 module)
+ ERROR  [Error: Requiring unknown module "2071". If you are sure the module exists, try restarting Metro. You may also want to run `yarn` or `npm install`.]
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio
+ ERROR  [ReferenceError: Property 'prepareDemoCreditOnChain' doesn't exist]

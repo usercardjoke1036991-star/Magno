@@ -18,7 +18,7 @@ y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda blo
 ```
 Magno/
 ├── app/index.tsx                  # Pantalla principal (~522 líneas, orquesta con hooks)
-├── components/ (42 archivos)      # UI: WalletSection, LoanTierCard, AdminPanel, SecuritySettings…
+├── components/ (43 archivos)      # UI: WalletSection, LoanTierCard, AdminPanel, SecuritySettings…
 ├── hooks/                         # useWeb3Balances, useWeb3Transactions, useHomeHandlers
 ├── services/                      # quatriviumCreditService, appWallet, deviceBinding, kycDeclaration…
 ├── contracts/
@@ -26,7 +26,7 @@ Magno/
 │   ├── Groth16Verifier.sol        # ZK experimental (no en producción)
 │   ├── interfaces/                # AggregatorV3Interface (Chainlink)
 │   └── mocks/                     # ERC20Mock, MockV3Aggregator (testnet)
-├── test/ (14 archivos)            # accounting, circuitBreaker, cuotas, destroy, identity, kyc, mlm…
+├── test/ (15 archivos)            # accounting, circuitBreaker, cuotas, destroy, identity, kyc, mlm, demo-identity…
 ├── scripts/                       # deploy, security-check, production-check, notify-worker
 ├── i18n/ (17 locales)             # ar, bn, de, en, es, fr, hi, id, it, ja, ko, pt, ru, tr, ur, vi, zh
 ├── constants/                     # contractConfig, rpcConfig, tokens, loanTiers
@@ -44,7 +44,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 617 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 636 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -63,6 +63,11 @@ Magno/
 - **Liquidación en AdminPanel**: el servicio aprueba USDT automáticamente antes de `liquidate()`
 - **`useHomeHandlers` hook**: handlers extraídos de `app/index.tsx` para reducir complejidad
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
+- **Alta de cuenta**: idioma → crear o iniciar sesión → contraseña + confirmar → correo OTP → **usuario** → entrar. El nombre real se pide en KYC (no en demo).
+- **Frase secreta BIP-39**: solo respaldo (ver y anotar). No cierra la cuenta. Cerrar o restaurar otra frase está en **Reemplazar esta cuenta**, y exige pagar mora/deuda antes.
+- **Correo OTP**: solo al crear la cuenta y al recuperar la contraseña.
+- **Demo**: no exige KYC ni teléfono **en la UI**. En testnet el worker atestigua identidad on-chain (`/demo-identity`) para que el contrato no revierta `kyc required` / `identity required`. En mainnet sí exige KYC y OTP reales.
+- **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 
 ---
 
@@ -91,14 +96,14 @@ El contrato usa la misma regla: nivel 1 → 3 pagos; niveles 2–9 → 5 pagos.
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` (1309 líneas) — testnet en `0x5eB6c65f3e3b7DC555e690A83d61205F66700cC2`
-- 14 suites Hardhat (69 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security…
-- App móvil con 42 componentes React Native
-- i18n: 17 idiomas, 617 claves
+- 15 suites Hardhat (77 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity…
+- App móvil con 43 componentes React Native
+- i18n: 17 idiomas, 636 claves
 - Referidos Unilevel en contrato y UI
-- Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`)
+- Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
-- App lock: PIN 6 dígitos + huella (activar y desactivar requieren biometría)
-- Frase secreta BIP-39: ver/rotar exige PIN; rotar = cuenta nueva
+- App lock: PIN 6 dígitos + huella real (detección por `expo-local-authentication`, no por NativeModules; PIN y llave de acceso comparten el mismo interruptor)
+- Frase secreta BIP-39: ver/guardar; rotar o restaurar vive en Reemplazar cuenta
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
 - Auto-refresh de balances cada 30 s
@@ -149,15 +154,16 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Estado on-chain | `hooks/useWeb3Balances.ts` | Lee contrato + RPC · auto-refresh 30 s |
 | Transacciones | `hooks/useWeb3Transactions.ts` | Approve + préstamo + pago + LP + liquidación |
 | Servicio contrato | `services/quatriviumCreditService.ts` | Capa ethers sobre ABI |
+| Identidad demo | `services/demoIdentity.ts` + worker `/demo-identity` | Atestigua KYC/teléfono on-chain solo en testnet |
 | Wallet interna | `services/appWallet.ts` | HD wallet + frase BIP-39 cifrada |
 | KYC local | `services/kycDeclaration.ts` | Nombre/documento congelados; fingerprint keccak |
-| Lock | `services/appLock.ts` | PIN, password, biometría, lockout |
+| Lock | `services/appLock.ts` + `components/BiometricLockSection.tsx` | PIN, password, huella, lockout |
 | Storage seguro | `services/secureStorageService.ts` | Wrapper expo-secure-store |
 | Red | `constants/rpcConfig.ts` | RPC, chainId, modo demo/live |
 | Contrato | `constants/contractConfig.ts` | ABI + dirección según entorno |
 | Tokens | `constants/tokens.ts` | Lista de stables soportados |
 | ABI/contrato | `contracts/QuatriviumCredit.sol` | Lógica de crédito on-chain |
-| Tests | `test/*.test.js` | 14 suites Hardhat · 69 tests |
+| Tests | `test/*.test.js` | 15 suites Hardhat · 77 tests |
 | Errores tx | `utils/txErrors.ts` | Mensajes legibles de revert |
 
 ---
@@ -184,9 +190,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Verificación | Estado | Detalle |
 |---|---|---|
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
-| `check-i18n.mjs` | ✅ OK | 617 claves · 17 locales · sin BOM · sin discrepancias |
+| `check-i18n.mjs` | ✅ OK | 636 claves · 17 locales · sin BOM · sin discrepancias |
 | `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
-| `hardhat test` | ✅ 69/69 | Incluye destroy + mora |
+| `hardhat test` | ✅ 77/77 | Incluye destroy + mora + identidad demo + gates |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
 | `npm audit` (devDeps) | ⚠️ ~66 vulns | hardhat / solidity-coverage / expo SDK — **no van al APK** · no correr `--force` |
 | `production:check` | 🟡 **12/14** | Faltan 2 acciones **manuales**: deploy mainnet + Twilio/WhatsApp |
@@ -204,7 +210,11 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
-| 2026-09-11 | Auditoría final: nombre KYC inmutable en servicio (no solo UI); tipo de doc se sella al formulario KYC, no al onboarding; mora bloquea restaurar frase; pre-check BNB en préstamo/pago/depósito/KYC | Huecos de seguridad y errores de gas en demo |
+| 2026-09-11 | Testnet: `/demo-identity` + auto-fund espera saldo on-chain | El contrato exigía KYC/teléfono y el registro fallaba con BNB 0 |
+| 2026-09-11 | Frase secreta solo respaldo; OTP correo solo alta/recuperar; admin oculto sin wallet fundadora; demo sin KYC/teléfono | Alinear seguridad y demo con el flujo real |
+| 2026-09-11 | Huella: detección real (sin NativeModules), PIN y llave de acceso unificados, textos sin Face ID en Android | La app decía que no había huella aunque el teléfono sí la tenía |
+| 2026-09-11 | Auditoría productividad: no saltar onboarding si falla la wallet; errores device-bound/locked; KYC no cierra si falla on-chain; auto-fund con safeFetch | Huecos al crear cuenta y verificar correo |
+| 2026-09-11 | Alta: idioma → crear/entrar → clave → correo OTP. Demo se elige en Ajustes. Textos de avisos/Proton quitados. Botón crear con Gmail. | Flujo de cuenta real, no demo por defecto |
 | 2026-09-11 | `tx.origin` añadido a `depositarLiquidez` y `pagarPrestamo` | CONTEXTO lo daba por hecho y el contrato no lo tenía |
 | 2026-09-11 | `eas.json` imagen Android `sdk-54` en los 3 perfiles | Evita Java 25 en EAS cloud |
 | 2026-09-11 | Auto-fondeo BNB testnet + auto-refresh balances 30s + `EXPO_PUBLIC_NOTIFY_API` | Demo sin error de gas |

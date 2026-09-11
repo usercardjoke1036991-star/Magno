@@ -77,7 +77,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
     setNameLocked(Boolean(saved.boundLegalName));
     setDocLocked(Boolean(saved.docLocked));
     if (!kycDeclarado) {
-      await onDeclare();
+      const ok = await onDeclare();
+      if (!ok) return;
     }
     setEditing(false);
   };

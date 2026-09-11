@@ -22,6 +22,9 @@ import { BrandLogo } from './BrandLogo';
 import { useUserProfile } from '../profile/ProfileContext';
 import { useWalletLevel } from '../hooks/useWalletLevel';
 import { isPhraseBackedUp } from '../services/appWallet';
+import { useAccount } from '@reown/appkit-react-native';
+import { useWeb3Balances } from '../hooks/useWeb3Balances';
+import { getSupportedTokens } from '../constants/tokens';
 import type { TranslationKey } from '../i18n/translations';
 
 type Panel = 'home' | 'security' | 'profile' | 'appearance' | 'language' | 'mode' | 'admin';
@@ -34,6 +37,12 @@ export const SettingsButton: React.FC = () => {
   const { colors } = useTheme();
   const { profile, walletAddress } = useUserProfile();
   const level = useWalletLevel(walletAddress);
+  const { address: adminAddress, isConnected: adminConnected } = useAccount();
+  const { userInfo: adminInfo } = useWeb3Balances(
+    adminConnected && adminAddress ? adminAddress.toLowerCase() : '',
+    getSupportedTokens()[0]
+  );
+  const founderReady = Boolean(adminConnected && (adminInfo.isAdmin || adminInfo.isOwner));
 
   useEffect(() => {
     isPhraseBackedUp()
@@ -129,7 +138,17 @@ export const SettingsButton: React.FC = () => {
                   <MenuRow icon="sun" label={t('appearance')} onPress={() => setPanel('appearance')} />
                   <MenuRow icon="globe" label={t('language')} onPress={() => setPanel('language')} />
                   <MenuRow icon="bank" label={t('appModeTitle')} onPress={() => setPanel('mode')} />
-                  <MenuRow icon="shield" label={t('settingsAdminTitle')} onPress={() => setPanel('admin')} />
+                  {founderReady ? (
+                    <MenuRow icon="shield" label={t('settingsAdminTitle')} onPress={() => setPanel('admin')} />
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => setPanel('admin')}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('settingsAdminConnect')}
+                    >
+                      <Text style={[styles.adminLink, { color: colors.textMuted }]}>{t('settingsAdminConnect')}</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               ) : null}
               {panel === 'security' ? <SecuritySettings /> : null}
@@ -224,5 +243,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1.5,
     borderColor: '#fff',
+  },
+  adminLink: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 4,
   },
 });

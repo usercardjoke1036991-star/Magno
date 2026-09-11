@@ -6,15 +6,17 @@ import {
   Contract,
   Interface,
   ZeroAddress,
+  ZeroHash,
   isAddress,
   type AbstractProvider,
   type Signer,
 } from 'ethers';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
-import { assertTrustedRpc, getProviderWithFallback, isContractConfigured } from '../constants/rpcConfig';
+import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoMode } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
 import { cobrarComisionIntermediario, loadAppWallet } from './appWallet';
+import { requestDemoIdentity } from './demoIdentity';
 
 const logWarn = __DEV__ ? console.warn : () => {};
 const logInfo = __DEV__ ? console.log : () => {};
@@ -121,6 +123,34 @@ const asegurarAprobacionToken = async (
   }
 };
 
+async function prepareDemoCreditOnChain() {
+  if (!isDemoMode()) return;
+  const { signer } = await requireInternalSigner();
+  const address = await signer.getAddress();
+  const credit = contractWith(signer);
+  const [kyc, phoneHash, deviceHash] = await Promise.all([
+    credit.kycDeclarado(address) as Promise<boolean>,
+    credit.phoneHashOf(address) as Promise<string>,
+    credit.deviceHashOf(address) as Promise<string>,
+  ]);
+  if (!kyc) {
+    const tx = await credit.declararKyc();
+    await tx.wait();
+  }
+  if (phoneHash === ZeroHash || deviceHash === ZeroHash) {
+    const attestation = await requestDemoIdentity(address);
+    const tx = await credit.vincularIdentidad(
+      attestation.phoneHash,
+      attestation.deviceHash,
+      attestation.deadline,
+      attestation.v,
+      attestation.r,
+      attestation.s
+    );
+    await tx.wait();
+  }
+}
+
 export const QuatriviumCreditService = {
   connectWallet: async () => {
     const { signer } = await getProviderAndSigner();
@@ -206,8 +236,20 @@ export const QuatriviumCreditService = {
     const { signer } = await requireInternalSigner();
     const sponsor = padre && isAddress(padre) ? padre : ZeroAddress;
     const tx = await contractWith(signer).registrarHumanoConPadre(sponsor);
-    return tx.wait();
+    const receipt = await tx.wait();
+    try {
+      await prepareDemoCreditOnChain();
+    } catch (error) {
+      logWarn('prepareDemoCredit after register failed', error);
+    }
+    return receipt;
   },
+
+  /**
+   * En testnet el contrato sigue exigiendo KYC + identidad. La UI demo no pide SMS,
+   * así que el worker atestigua un hash único por wallet (nunca en mainnet).
+   */
+  prepareDemoCredit: prepareDemoCreditOnChain,
 
   declararKyc: async () => {
     const { signer } = await requireInternalSigner();
