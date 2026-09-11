@@ -63,7 +63,9 @@ if (isMainnet && sameKey(ATTESTER_EXPLICIT, DEPLOY_KEY)) {
   console.error('Mainnet: ATTESTER_PRIVATE_KEY debe ser distinta de PRIVATE_KEY.');
   process.exit(1);
 }
-const ATTESTER_KEY = ATTESTER_EXPLICIT || (isMainnet ? '' : DEPLOY_KEY);
+// Testnet: el contrato deja attester = primer admin (owner). Firmar con esa llave.
+// Mainnet: ATTESTER_PRIVATE_KEY distinta del owner.
+const ATTESTER_KEY = isMainnet ? ATTESTER_EXPLICIT : DEPLOY_KEY || ATTESTER_EXPLICIT;
 const START_BLOCK = Number(process.env.EXPO_PUBLIC_CONTRACT_START_BLOCK || 0);
 const ADMIN_CHAT = process.env.TELEGRAM_ADMIN_CHAT_ID || '';
 const CORS_ORIGINS = (process.env.NOTIFY_CORS_ORIGIN || '*')
@@ -1544,10 +1546,6 @@ const server = createServer(async (req, res) => {
       json(res, 403, { error: 'mainnet' });
       return;
     }
-    if (!rateLimit(`demo-id:${ip}`, 8, 15 * 60 * 1000)) {
-      json(res, 429, { error: 'rate' });
-      return;
-    }
     let body;
     try {
       body = await readBody(req);
@@ -1567,7 +1565,8 @@ const server = createServer(async (req, res) => {
       return;
     }
     const wallet = authn.wallet;
-    if (!rateLimit(`demo-id-w:${wallet}`, 4, 15 * 60 * 1000)) {
+    // Ngrok hace que todas las peticiones lleguen como 127.0.0.1: no limitar por IP aquí.
+    if (!rateLimit(`demo-id-w:${wallet}`, 20, 15 * 60 * 1000)) {
       json(res, 429, { error: 'rate' });
       return;
     }
@@ -1580,6 +1579,7 @@ const server = createServer(async (req, res) => {
       const attestation = await attestIdentity(wallet, phoneHash, deviceHash);
       json(res, 200, attestation);
     } catch (error) {
+      console.warn('demo-identity:', error.message || error);
       json(res, Number(error.status) || 503, { error: error.message || 'attester' });
     }
     return;
@@ -1594,6 +1594,11 @@ server.listen(PORT, BIND, () => {
   console.log(`Avisos Quatrivium Credit en http://${BIND}:${PORT}`);
   console.log(`Correo Resend: ${hasEmail ? 'listo' : 'sin RESEND_API_KEY o EMAIL_FROM'}`);
   console.log(`SMS/WhatsApp: ${hasSms ? 'listo' : 'no configurado (OTP teléfono en demo)'}`);
+  try {
+    if (ATTESTER_KEY) console.log(`Attester de firma: ${new Wallet(ATTESTER_KEY).address}`);
+  } catch {
+    console.warn('Attester de firma: llave inválida');
+  }
 });
 
 pollTelegram().catch((error) => console.error(error));

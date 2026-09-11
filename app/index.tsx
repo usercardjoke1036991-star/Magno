@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import { AppKit, useAccount, useProvider } from '@reown/appkit-react-native';
 import { parseUnits } from 'ethers';
-import { setWalletSigner } from '../services/quatriviumCreditService';
+import { setWalletSigner, clearWalletSigner } from '../services/quatriviumCreditService';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { useHomeHandlers } from '../hooks/useHomeHandlers';
 import { WalletSection } from '../components/WalletSection';
@@ -31,7 +31,7 @@ import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
 import { LOAN_TIERS } from '../constants/loanTiers';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
-import { isContractConfigured, isDemoMode } from '../constants/rpcConfig';
+import { isContractConfigured, isCreditReady } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { usePendingInvite } from '../hooks/usePendingInvite';
@@ -91,6 +91,8 @@ function HomeScreenWithHooks() {
     selectedToken
   );
   const debtReminder = useLoanPaymentReminders(userInfo);
+  const creditReady = isCreditReady();
+  const creditPaused = userInfo.paused || !creditReady;
 
   const {
     txLoading,
@@ -129,6 +131,8 @@ function HomeScreenWithHooks() {
   useEffect(() => {
     if (appSigner) {
       setWalletSigner(appSigner);
+    } else {
+      clearWalletSigner();
     }
   }, [appSigner]);
 
@@ -180,7 +184,7 @@ function HomeScreenWithHooks() {
           </View>
         ) : null}
 
-        {isDemoMode() ? null : (
+        {mode === 'demo' || !isContractConfigured('mainnet') ? null : (
           <KycAccessBanner
             kycDone={userInfo.kycDeclarado}
             phoneDone={userInfo.identityBound}
@@ -197,7 +201,7 @@ function HomeScreenWithHooks() {
 
         <DemoModeBanner />
         <NetworkStatusBanner />
-        {!isContractConfigured() && (
+        {mode === 'demo' && !isContractConfigured() && (
           <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>{t('configWarn')}</Text>
         )}
         {userInfo.paused && (
@@ -267,12 +271,17 @@ function HomeScreenWithHooks() {
         onClose={() => setRoom(null)}
       >
         <AppSubsection title={t('subsectionActivate')} icon="id">
+          {!creditReady ? (
+            <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+              {t('liveCreditNotReady')}
+            </Text>
+          ) : null}
           <ActivateCreditSection
             isRegistered={userInfo.isRegistered}
             onRegister={handleRegistrarHumano}
             isLoading={txLoading}
             initialInviteCode={pendingInviteCode}
-            paused={userInfo.paused}
+            paused={creditPaused}
           />
         </AppSubsection>
         <AppSubsection title={t('subsectionRank')} icon="star">
@@ -300,6 +309,11 @@ function HomeScreenWithHooks() {
         lead={t('sectionLoansLead')}
         onClose={() => setRoom(null)}
       >
+        {!creditReady ? (
+          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+            {t('liveCreditNotReady')}
+          </Text>
+        ) : null}
         {tokens.length > 1 ? (
           <TokenSelector
             tokens={tokens}
@@ -321,9 +335,9 @@ function HomeScreenWithHooks() {
               }}
               userLevel={userInfo.userProgress.nivelActual}
               hasActiveLoan={userInfo.hasActiveLoan}
-              isDelinquent={userInfo.isDelinquent}
-              paused={userInfo.paused}
-              isActiveTier={
+                isDelinquent={userInfo.isDelinquent}
+                paused={creditPaused}
+                isActiveTier={
                 Boolean(userInfo.activeLoan)
                 && parseUnits(
                   String(LOAN_TIERS.find((item) => item.id === tier.id)?.usdAmount ?? 0),
@@ -357,7 +371,7 @@ function HomeScreenWithHooks() {
                 userLevel={userInfo.userProgress.nivelActual}
                 hasActiveLoan={userInfo.hasActiveLoan}
                 isDelinquent={userInfo.isDelinquent}
-                paused={userInfo.paused}
+                paused={creditPaused}
                 isActiveTier={false}
                 isLoading={txLoading}
                 curveRateBps={userInfo.curveRateBps}
@@ -407,6 +421,11 @@ function HomeScreenWithHooks() {
         lead={t('sectionPoolLead')}
         onClose={() => setRoom(null)}
       >
+        {!creditReady ? (
+          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+            {t('liveCreditNotReady')}
+          </Text>
+        ) : null}
         {tokens.length > 1 ? (
           <TokenSelector
             tokens={tokens}
@@ -422,7 +441,7 @@ function HomeScreenWithHooks() {
           poolOutstanding={balances.poolOutstanding}
           poolCash={balances.poolCash}
           walletConnected={Boolean(walletAddress)}
-          paused={userInfo.paused}
+          paused={creditPaused}
           onDepositPool={handleDepositarPool}
         />
       </AppWindow>

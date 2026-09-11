@@ -69,6 +69,7 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['demo-identity', 'demoPrepFailed'],
   ['attester', 'demoPrepFailed'],
   ['notify', 'otpNeedApi'],
+  ['rate', 'otpRate'],
   ['internal-wallet-only', 'errInternalOnly'],
   ['no-admin-proposal', 'errNoAdminProposal'],
   ['user rejected', 'errRejected'],

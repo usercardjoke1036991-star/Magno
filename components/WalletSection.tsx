@@ -3,6 +3,7 @@ import { Alert, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 import { formatAddress } from '../utils/formatters';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { BrandLogo } from './BrandLogo';
 import { AppIcon, TokenLogo } from './icons';
 import { TransferWalletsModal } from './TransferWalletsModal';
 import type { Token } from '../constants/tokens';
@@ -49,6 +50,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
   return (
     <View>
       <View style={styles.walletInfo}>
+        <BrandLogo size={44} />
         <View style={styles.grow}>
           <Text style={[styles.walletLabel, { color: colors.textMuted }]}>{t('appWalletLabel')}</Text>
           <Text style={[styles.walletAddress, { color: colors.text }]}>{formatAddress(walletAddress)}</Text>
@@ -135,6 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
   },
   grow: {
     flex: 1,

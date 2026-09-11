@@ -44,7 +44,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 636 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 640 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -66,7 +66,7 @@ Magno/
 - **Alta de cuenta**: idioma → crear o iniciar sesión → contraseña + confirmar → correo OTP → **usuario** → entrar. El nombre real se pide en KYC (no en demo).
 - **Frase secreta BIP-39**: solo respaldo (ver y anotar). No cierra la cuenta. Cerrar o restaurar otra frase está en **Reemplazar esta cuenta**, y exige pagar mora/deuda antes.
 - **Correo OTP**: solo al crear la cuenta y al recuperar la contraseña.
-- **Demo**: no exige KYC ni teléfono **en la UI**. En testnet el worker atestigua identidad on-chain (`/demo-identity`) para que el contrato no revierta `kyc required` / `identity required`. En mainnet sí exige KYC y OTP reales.
+- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 
 ---
@@ -96,9 +96,9 @@ El contrato usa la misma regla: nivel 1 → 3 pagos; niveles 2–9 → 5 pagos.
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` (1309 líneas) — testnet en `0x5eB6c65f3e3b7DC555e690A83d61205F66700cC2`
-- 15 suites Hardhat (77 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity…
+- 15 suites Hardhat (81 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity…
 - App móvil con 43 componentes React Native
-- i18n: 17 idiomas, 636 claves
+- i18n: 17 idiomas, 640 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
@@ -163,7 +163,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Contrato | `constants/contractConfig.ts` | ABI + dirección según entorno |
 | Tokens | `constants/tokens.ts` | Lista de stables soportados |
 | ABI/contrato | `contracts/QuatriviumCredit.sol` | Lógica de crédito on-chain |
-| Tests | `test/*.test.js` | 15 suites Hardhat · 77 tests |
+| Tests | `test/*.test.js` | 15 suites Hardhat · 81 tests |
 | Errores tx | `utils/txErrors.ts` | Mensajes legibles de revert |
 
 ---
@@ -190,9 +190,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Verificación | Estado | Detalle |
 |---|---|---|
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
-| `check-i18n.mjs` | ✅ OK | 636 claves · 17 locales · sin BOM · sin discrepancias |
+| `check-i18n.mjs` | ✅ OK | 640 claves · 17 locales · sin BOM · sin discrepancias |
 | `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
-| `hardhat test` | ✅ 77/77 | Incluye destroy + mora + identidad demo + gates |
+| `hardhat test` | ✅ 81/81 | Incluye destroy + mora + identidad demo + gates + cooldown local |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
 | `npm audit` (devDeps) | ⚠️ ~66 vulns | hardhat / solidity-coverage / expo SDK — **no van al APK** · no correr `--force` |
 | `production:check` | 🟡 **12/14** | Faltan 2 acciones **manuales**: deploy mainnet + Twilio/WhatsApp |
@@ -210,7 +210,10 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
-| 2026-09-11 | Testnet: `/demo-identity` + auto-fund espera saldo on-chain | El contrato exigía KYC/teléfono y el registro fallaba con BNB 0 |
+| 2026-09-11 | Auditoría final: signer se reconecta al cambiar Demo/Real; crédito/pool bloqueados sin contrato mainnet; saldos BNB/USDT reales aunque el crédito esté en preparación | Evitar `wrong-network`, botones activos en Real vacío y préstamo/LP de Demo pegados |
+| 2026-09-11 | Demo y Real son mundos distintos (testnet vs mainnet); logo en billetera Quatrivium | Real heredaba préstamo y saldo de Demo porque ambos leían el mismo contrato de prueba |
+| 2026-09-11 | Cooldown de préstamo en cliente + FallbackProvider `quorum: 1` | `obtenerCooldownRestante` cambiaba cada segundo y LogBox mostraba `quorum not met` |
+| 2026-09-11 | Modo Real vuelve a exigir KYC/teléfono; demo solo si se elige en Ajustes | `isDemoMode()` (testnet) ocultaba el KYC de las cuentas reales |
 | 2026-09-11 | Frase secreta solo respaldo; OTP correo solo alta/recuperar; admin oculto sin wallet fundadora; demo sin KYC/teléfono | Alinear seguridad y demo con el flujo real |
 | 2026-09-11 | Huella: detección real (sin NativeModules), PIN y llave de acceso unificados, textos sin Face ID en Android | La app decía que no había huella aunque el teléfono sí la tenía |
 | 2026-09-11 | Auditoría productividad: no saltar onboarding si falla la wallet; errores device-bound/locked; KYC no cierra si falla on-chain; auto-fund con safeFetch | Huecos al crear cuenta y verificar correo |

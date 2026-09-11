@@ -10,8 +10,9 @@ import {
   REFERRAL_BONUS_THRESHOLD,
   REFERRAL_REPUTATION_POINTS,
 } from '../constants/reputation';
+import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 
-const logErr = __DEV__ ? console.error.bind(console) : () => {};
+const logErr = __DEV__ ? console.log.bind(console) : () => {};
 const logWarn = __DEV__ ? console.warn.bind(console) : () => {};
 
 export type { Token, LoanTier };
@@ -141,18 +142,21 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
+  const tokenAddress = selectedToken.address;
+  const tokenDecimals = selectedToken.decimals;
 
   const fetchBalances = useCallback(async () => {
     const gen = ++fetchGen.current;
     const live = () => gen === fetchGen.current;
+
     setIsLoading(true);
     setError(null);
 
     try {
       const provider = await assertTrustedRpc();
       if (!live()) return;
-      let decimals = selectedToken.decimals;
-      const tokenContract = new Contract(selectedToken.address, ERC20_ABI, provider);
+      let decimals = tokenDecimals;
+      const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
       try {
         decimals = Number(await tokenContract.decimals());
       } catch {
@@ -169,12 +173,12 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         try {
           const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
           try {
-            isTokenSupported = Boolean(await creditContract.isSupportedToken(selectedToken.address));
+            isTokenSupported = Boolean(await creditContract.isSupportedToken(tokenAddress));
           } catch {
             isTokenSupported = false;
           }
           try {
-            curveRateBps = Number(await creditContract.obtenerTasaInteresActual(selectedToken.address));
+            curveRateBps = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
           } catch {
             curveRateBps = 0;
           }
@@ -184,10 +188,10 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             kycExigido = false;
           }
           try {
-            const nav = (await creditContract.totalLiquidity(selectedToken.address)) as bigint;
+            const nav = (await creditContract.totalLiquidity(tokenAddress)) as bigint;
             let outstanding = 0n;
             try {
-              outstanding = (await creditContract.outstandingLoans(selectedToken.address)) as bigint;
+              outstanding = (await creditContract.outstandingLoans(tokenAddress)) as bigint;
             } catch {
               outstanding = 0n;
             }
@@ -246,11 +250,43 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }));
       }
 
-      setUserInfo((prev) => ({ ...prev, isTokenSupported, curveRateBps, kycExigido }));
+      if (!live()) return;
 
       if (!isContractConfigured()) {
+        setUserInfo((prev) => {
+          if (
+            !prev.isRegistered &&
+            !prev.hasActiveLoan &&
+            !prev.kycDeclarado &&
+            !prev.identityBound &&
+            prev.userProgress.solicitudesCompletadas === 0
+          ) {
+            return prev;
+          }
+          return { ...EMPTY_USER_INFO };
+        });
+        setLoanTiers(LOAN_TIERS);
+        setBalances((prev) => {
+          if (
+            prev.poolBalance === EMPTY_BALANCES.poolBalance &&
+            prev.poolOutstanding === EMPTY_BALANCES.poolOutstanding &&
+            prev.poolCash === EMPTY_BALANCES.poolCash &&
+            prev.lpBalance === EMPTY_BALANCES.lpBalance
+          ) {
+            return prev;
+          }
+          return {
+            ...prev,
+            poolBalance: EMPTY_BALANCES.poolBalance,
+            poolOutstanding: EMPTY_BALANCES.poolOutstanding,
+            poolCash: EMPTY_BALANCES.poolCash,
+            lpBalance: EMPTY_BALANCES.lpBalance,
+          };
+        });
         return;
       }
+
+      setUserInfo((prev) => ({ ...prev, isTokenSupported, curveRateBps, kycExigido }));
 
       try {
         const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
@@ -273,10 +309,10 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }
 
         try {
-          const supported = Boolean(await creditContract.isSupportedToken(selectedToken.address));
+          const supported = Boolean(await creditContract.isSupportedToken(tokenAddress));
           let nextCurve = 0;
           try {
-            nextCurve = Number(await creditContract.obtenerTasaInteresActual(selectedToken.address));
+            nextCurve = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
           } catch {
             nextCurve = 0;
           }
@@ -287,7 +323,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }
 
         try {
-          const lpValue = (await creditContract.valorLp(walletAddress, selectedToken.address)) as bigint;
+          const lpValue = (await creditContract.valorLp(walletAddress, tokenAddress)) as bigint;
           setBalances((prev) => ({
             ...prev,
             lpBalance: Number(formatUnits(lpValue, decimals)).toFixed(4),
@@ -298,10 +334,10 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }
 
         try {
-          const nav = (await creditContract.totalLiquidity(selectedToken.address)) as bigint;
+          const nav = (await creditContract.totalLiquidity(tokenAddress)) as bigint;
           let outstanding = 0n;
           try {
-            outstanding = (await creditContract.outstandingLoans(selectedToken.address)) as bigint;
+            outstanding = (await creditContract.outstandingLoans(tokenAddress)) as bigint;
           } catch {
             outstanding = 0n;
           }
@@ -331,7 +367,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
               totalDue = principal + (principal * tasa) / 10000n;
             }
 
-            const loanToken = String(loan.monedaActivo || selectedToken.address).toLowerCase();
+            const loanToken = String(loan.monedaActivo || tokenAddress).toLowerCase();
             const meta = getTokenMeta(loanToken);
             const loanDecimals = meta?.decimals ?? decimals;
             const loanSymbol = meta?.symbol ?? 'TOKEN';
@@ -480,7 +516,8 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
         try {
           const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
-          const cooldown = await QuatriviumCreditService.obtenerCooldownRestante(walletAddress);
+          const lastTs = Number(progress.ultimoPrestamoTimestamp);
+          const cooldown = cooldownRestanteDesdeTimestamp(lastTs);
           const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
 
           setUserInfo((prev) => ({
@@ -488,8 +525,8 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             userProgress: {
               nivelActual: currentLevel,
               solicitudesCompletadas: Number(progress.solicitudesCompletadas),
-              ultimoPrestamoTimestamp: Number(progress.ultimoPrestamoTimestamp),
-              cooldownRestante: Number(cooldown),
+              ultimoPrestamoTimestamp: lastTs,
+              cooldownRestante: cooldown,
             },
           }));
         } catch (e) {
@@ -614,10 +651,25 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       if (!live()) return;
       const errorMessage = fetchError instanceof Error ? fetchError.message : 'Failed to fetch balances';
       setError(errorMessage);
+      if (!isContractConfigured()) {
+        setUserInfo((prev) => {
+          if (
+            !prev.isRegistered &&
+            !prev.hasActiveLoan &&
+            !prev.kycDeclarado &&
+            !prev.identityBound &&
+            prev.userProgress.solicitudesCompletadas === 0
+          ) {
+            return prev;
+          }
+          return { ...EMPTY_USER_INFO };
+        });
+        setLoanTiers(LOAN_TIERS);
+      }
     } finally {
       if (live()) setIsLoading(false);
     }
-  }, [walletAddress, selectedToken]);
+  }, [walletAddress, tokenAddress, tokenDecimals]);
 
   useEffect(() => {
     fetchBalances();

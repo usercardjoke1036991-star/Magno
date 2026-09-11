@@ -10,6 +10,7 @@ import {
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { getContractAddress } from '../constants/contractConfig';
+import { isContractConfigured } from '../constants/rpcConfig';
 import { AppIcon } from './icons';
 import { AppSubsection } from './AppSection';
 
@@ -40,7 +41,8 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
   const { t } = useI18n();
   // Sin retiro ni posición LP: el aporte queda en el contrato para prestar.
   const { colors } = useTheme();
-  const blocked = isLoading || !walletConnected || !tokenSupported || paused;
+  const contractReady = isContractConfigured();
+  const blocked = isLoading || !walletConnected || !tokenSupported || paused || !contractReady;
 
   return (
     <View style={styles.stack}>
@@ -55,10 +57,16 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
           </Text>
         ) : null}
         <Text style={[styles.locked, { color: colors.textMuted }]}>{t('poolLockedNote')}</Text>
-        <Text style={[styles.label, { color: colors.primary }]}>{t('poolContractLabel')}</Text>
-        <Text selectable style={[styles.address, { color: colors.primary, backgroundColor: colors.surface }]}>
-          {getContractAddress()}
-        </Text>
+        {contractReady ? (
+          <>
+            <Text style={[styles.label, { color: colors.primary }]}>{t('poolContractLabel')}</Text>
+            <Text selectable style={[styles.address, { color: colors.primary, backgroundColor: colors.surface }]}>
+              {getContractAddress()}
+            </Text>
+          </>
+        ) : (
+          <Text style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</Text>
+        )}
       </AppSubsection>
       <AppSubsection title={t('subsectionPoolDeposit')} defaultOpen icon="deposit">
         {!walletConnected && <Text style={[styles.warn, { color: colors.warnText }]}>{t('connectFirst')}</Text>}

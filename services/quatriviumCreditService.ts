@@ -12,7 +12,7 @@ import {
   type Signer,
 } from 'ethers';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
-import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoMode } from '../constants/rpcConfig';
+import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
 import { cobrarComisionIntermediario, loadAppWallet } from './appWallet';
@@ -124,7 +124,7 @@ const asegurarAprobacionToken = async (
 };
 
 async function prepareDemoCreditOnChain() {
-  if (!isDemoMode()) return;
+  if (!isDemoAccount()) return;
   const { signer } = await requireInternalSigner();
   const address = await signer.getAddress();
   const credit = contractWith(signer);

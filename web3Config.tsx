@@ -86,7 +86,7 @@ export async function getEthersSignerFromProvider(
   try {
     return await toEthersWeb3Provider(eip1193Provider).getSigner();
   } catch (error) {
-    console.error('Error getting signer from provider:', error);
+    if (__DEV__) console.log('Error getting signer from provider:', error);
     return null;
   }
 }

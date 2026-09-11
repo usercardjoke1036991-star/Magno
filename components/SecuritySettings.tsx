@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -32,7 +32,8 @@ import {
   isValidSecretPhrase,
   markPhraseBackedUp,
 } from '../services/appWallet';
-import { isDemoMode } from '../constants/rpcConfig';
+import { useAppMode } from '../wallet/AppModeContext';
+import { isCreditReady } from '../constants/rpcConfig';
 import type { TranslationKey } from '../i18n/translations';
 
 type RowStatus = 'done' | 'todo' | 'warn';
@@ -41,8 +42,11 @@ type Panel = 'menu' | 'kyc' | 'pin' | 'access' | 'phrase' | 'phone' | 'replace';
 export const SecuritySettings: React.FC = () => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { mode } = useAppMode();
+  const demoAccount = mode === 'demo';
+  const primaryToken = useMemo(() => getSupportedTokens()[0], [mode]);
   const { address, recreate, restore } = useAppWallet();
-  const { userInfo, refetch } = useWeb3Balances(address, getSupportedTokens()[0]);
+  const { userInfo, refetch } = useWeb3Balances(address, primaryToken);
   const { declararKyc, isLoading: kycBusy } = useWeb3Transactions();
 
   const [panel, setPanel] = useState<Panel>('menu');
@@ -149,7 +153,11 @@ export const SecuritySettings: React.FC = () => {
           Alert.alert(t('activeLoan'), t('destroyDelinquent'));
           return;
         }
-        await QuatriviumCreditService.destruirCuenta(getSupportedTokens()[0].address);
+        if (!isCreditReady()) {
+          Alert.alert(t('error'), t('liveCreditNotReady'));
+          return;
+        }
+        await QuatriviumCreditService.destruirCuenta(primaryToken.address);
       }
       await restore(restorePhrase);
       await refreshPhrase();
@@ -191,7 +199,11 @@ export const SecuritySettings: React.FC = () => {
           setBusy(true);
           try {
             if (userInfo.isRegistered) {
-              await QuatriviumCreditService.destruirCuenta(getSupportedTokens()[0].address);
+              if (!isCreditReady()) {
+                Alert.alert(t('error'), t('liveCreditNotReady'));
+                return;
+              }
+              await QuatriviumCreditService.destruirCuenta(primaryToken.address);
             }
             await recreate();
             await refreshPhrase();
@@ -423,13 +435,13 @@ export const SecuritySettings: React.FC = () => {
   return (
     <View>
       <Text style={[styles.lead, { color: colors.textMuted }]}>
-        {isDemoMode() ? t('securityLeadDemo') : t('securityLead')}
+        {demoAccount ? t('securityLeadDemo') : t('securityLead')}
       </Text>
       <Row
         icon="id"
-        label={isDemoMode() ? t('securityKycDemo') : t('securityKyc')}
-        hint={kycOk ? t('securityKycDone') : isDemoMode() ? t('securityKycDemoHint') : t('securityKycTodo')}
-        status={kycOk ? 'done' : isDemoMode() ? 'todo' : 'warn'}
+        label={demoAccount ? t('securityKycDemo') : t('securityKyc')}
+        hint={kycOk ? t('securityKycDone') : demoAccount ? t('securityKycDemoHint') : t('securityKycTodo')}
+        status={kycOk ? 'done' : demoAccount ? 'todo' : 'warn'}
         onPress={() => setPanel('kyc')}
       />
       <Row
@@ -455,9 +467,9 @@ export const SecuritySettings: React.FC = () => {
       />
       <Row
         icon="phone"
-        label={isDemoMode() ? t('securityPhoneDemo') : t('securityPhone')}
-        hint={phoneOk ? t('securityPhoneDone') : isDemoMode() ? t('securityPhoneDemoHint') : t('securityPhoneTodo')}
-        status={phoneOk ? 'done' : isDemoMode() ? 'todo' : 'warn'}
+        label={demoAccount ? t('securityPhoneDemo') : t('securityPhone')}
+        hint={phoneOk ? t('securityPhoneDone') : demoAccount ? t('securityPhoneDemoHint') : t('securityPhoneTodo')}
+        status={phoneOk ? 'done' : demoAccount ? 'todo' : 'warn'}
         onPress={() => setPanel('phone')}
       />
       <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>

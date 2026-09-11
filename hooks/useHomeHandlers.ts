@@ -8,12 +8,13 @@ import { Alert, Linking } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
 import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { useWeb3Transactions } from './useWeb3Transactions';
-import { getProviderWithFallback, isContractConfigured, isDemoMode } from '../constants/rpcConfig';
+import { NOTIFY_API } from '../constants/appLinks';
+import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { creditNeedsKyc, creditNeedsPhone } from '../utils/creditGates';
 import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { useI18n } from '../i18n/LanguageContext';
-import { NOTIFY_API } from '../constants/appLinks';
+import { humanizeTxError } from '../utils/txErrors';
 import type { LoanTier, UserInfo } from './useWeb3Balances';
 import type { Token } from '../constants/tokens';
 
@@ -153,7 +154,17 @@ export const useHomeHandlers = ({
     return true;
   };
 
+  const ensureCreditReady = (): boolean => {
+    if (isCreditReady()) return true;
+    Alert.alert(
+      t(isDemoAccount() ? 'contract' : 'appModeLive'),
+      t(isDemoAccount() ? 'configureContract' : 'liveCreditNotReady'),
+    );
+    return false;
+  };
+
   const handleRegistrarHumano = async (padre?: string) => {
+    if (!ensureCreditReady()) return;
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
@@ -176,11 +187,8 @@ export const useHomeHandlers = ({
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
     }
+    if (!ensureCreditReady()) return;
     if (!(await confirmFunds())) return;
-    if (!isContractConfigured()) {
-      Alert.alert(t('contract'), t('configureContract'));
-      return;
-    }
     if (!userInfo.isRegistered) {
       Alert.alert(t('register'), t('activateBeforeLoan'));
       return;
@@ -223,11 +231,11 @@ export const useHomeHandlers = ({
       return;
     }
     if (!(await ensureGasForTx())) return;
-    if (isDemoMode()) {
+    if (isDemoAccount()) {
       try {
         await QuatriviumCreditService.prepareDemoCredit();
-      } catch {
-        Alert.alert(t('error'), t('demoPrepFailed'));
+      } catch (caught) {
+        Alert.alert(t('error'), humanizeTxError(caught) || t('demoPrepFailed'));
         return;
       }
     }
@@ -241,6 +249,7 @@ export const useHomeHandlers = ({
       return;
     }
     if (!(await confirmFunds())) return;
+    if (!ensureCreditReady()) return;
 
     if (!userInfo.activeLoan || userInfo.activeLoan.totalDueWei === '0') {
       Alert.alert(t('noDebt'), t('noActiveLoan'));
@@ -294,6 +303,7 @@ export const useHomeHandlers = ({
       return;
     }
     if (!(await confirmFunds())) return;
+    if (!ensureCreditReady()) return;
     if (userInfo.paused) {
       Alert.alert(t('admin'), t('protocolPaused'));
       return;
@@ -308,7 +318,10 @@ export const useHomeHandlers = ({
       return;
     }
     if (Number(parsed) > Number(balances.tokenBalance)) {
-      Alert.alert(t('amount'), t('poolNeedInternalFunds'));
+      Alert.alert(
+        t('amountExceedsBalance'),
+        t('poolNeedInternalFunds', { symbol: selectedToken.symbol }),
+      );
       return;
     }
     if (!(await ensureGasForTx())) return;
@@ -336,6 +349,7 @@ export const useHomeHandlers = ({
   };
 
   const handleDeclararKyc = async (): Promise<boolean> => {
+    if (!ensureCreditReady()) return false;
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return false;

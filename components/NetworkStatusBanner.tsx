@@ -25,9 +25,13 @@ export const NetworkStatusBanner: React.FC = () => {
     <View style={[styles.box, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text style={[styles.kicker, { color: colors.textMuted }]}>{t('networkLive')}</Text>
       <Text style={[styles.title, { color: colors.text }]}>{networkName}</Text>
-      <Text style={[styles.meta, { color: colors.textMuted }]}>
-        {live ? t('networkContract', { address: formatAddress(getContractAddress()) }) : t('configWarn')}
-      </Text>
+      {live ? (
+        <Text style={[styles.meta, { color: colors.textMuted }]}>
+          {t('networkContract', { address: formatAddress(getContractAddress()) })}
+        </Text>
+      ) : isDemoMode() ? (
+        <Text style={[styles.meta, { color: colors.textMuted }]}>{t('configWarn')}</Text>
+      ) : null}
       {isDemoMode() ? (
         <Text style={[styles.meta, { color: colors.textMuted }]}>{t('networkNotMainnet')}</Text>
       ) : null}

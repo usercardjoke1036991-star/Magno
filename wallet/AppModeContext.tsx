@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   isContractConfigured,
   isStoreProduction,
+  setProductMode,
   setRuntimeMode,
   type AppMode,
 } from '../constants/rpcConfig';
@@ -19,18 +20,11 @@ interface AppModeValue {
 const AppModeContext = createContext<AppModeValue | null>(null);
 
 function applyChain(pref: AppMode): AppMode {
-  // Hasta que exista contrato mainnet, la RPC es siempre testnet (runtime demo).
-  // La preferencia live se conserva en la UI: cuenta real sobre red de prueba.
-  if (pref === 'live' && isContractConfigured('mainnet')) {
-    setRuntimeMode('live');
-    return 'live';
-  }
-  if (isContractConfigured('testnet')) {
-    setRuntimeMode('demo');
-    return pref;
-  }
-  setRuntimeMode('demo');
-  return 'demo';
+  const account: AppMode = pref === 'demo' ? 'demo' : 'live';
+  setProductMode(account);
+  // Demo y Real son mundos distintos: Real nunca lee el contrato ni los saldos de testnet.
+  setRuntimeMode(account);
+  return account;
 }
 
 export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -42,6 +36,7 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .then(async (saved) => {
         if (isStoreProduction()) {
           setRuntimeMode('live');
+          setProductMode('live');
           setModeState('live');
           await AsyncStorage.setItem(STORAGE_KEY, 'live');
           return;
@@ -65,15 +60,16 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (next === 'demo' && !isContractConfigured('testnet')) {
       return false;
     }
-    if (next === 'live' && !isContractConfigured('mainnet') && !isContractConfigured('testnet')) {
-      return false;
-    }
     setModeState(applyChain(next));
     await AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
     return true;
   }, []);
 
   const value = useMemo(() => ({ mode, ready, setMode }), [mode, ready, setMode]);
+
+  useEffect(() => {
+    setProductMode(mode);
+  }, [mode]);
 
   if (!ready) {
     return (

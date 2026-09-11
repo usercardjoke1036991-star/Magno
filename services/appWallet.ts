@@ -82,6 +82,11 @@ function toConnectedWallet(privateKey: string): HDNodeWallet | Wallet {
   return new Wallet(privateKey).connect(writeProvider());
 }
 
+/** Reconecta un signer ya cargado al RPC del mundo activo (Demo testnet / Real mainnet). */
+export function withCurrentRpc(wallet: HDNodeWallet | Wallet): HDNodeWallet | Wallet {
+  return wallet.connect(writeProvider()) as HDNodeWallet | Wallet;
+}
+
 function normalizePhrase(phrase: string): string {
   return phrase.trim().toLowerCase().split(/\s+/).filter(Boolean).join(' ');
 }

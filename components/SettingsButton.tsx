@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -23,6 +23,7 @@ import { useUserProfile } from '../profile/ProfileContext';
 import { useWalletLevel } from '../hooks/useWalletLevel';
 import { isPhraseBackedUp } from '../services/appWallet';
 import { useAccount } from '@reown/appkit-react-native';
+import { useAppMode } from '../wallet/AppModeContext';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { getSupportedTokens } from '../constants/tokens';
 import type { TranslationKey } from '../i18n/translations';
@@ -37,10 +38,12 @@ export const SettingsButton: React.FC = () => {
   const { colors } = useTheme();
   const { profile, walletAddress } = useUserProfile();
   const level = useWalletLevel(walletAddress);
+  const { mode } = useAppMode();
+  const primaryToken = useMemo(() => getSupportedTokens()[0], [mode]);
   const { address: adminAddress, isConnected: adminConnected } = useAccount();
   const { userInfo: adminInfo } = useWeb3Balances(
     adminConnected && adminAddress ? adminAddress.toLowerCase() : '',
-    getSupportedTokens()[0]
+    primaryToken
   );
   const founderReady = Boolean(adminConnected && (adminInfo.isAdmin || adminInfo.isOwner));
 

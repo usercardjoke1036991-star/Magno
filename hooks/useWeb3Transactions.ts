@@ -34,7 +34,6 @@ export const useWeb3Transactions = () => {
       Alert.alert(t('ready'), successMessage || t('txConfirmed', { action: actionName }));
       return { success: true };
     } catch (error: unknown) {
-      console.error(`Transaction error (${actionName}):`, __DEV__ ? error : actionName);
       const errorMessage = humanizeTxError(error);
       Alert.alert(t('error'), errorMessage);
       return { success: false, error: errorMessage };

@@ -17,15 +17,35 @@ function defaultMode(): AppMode {
   return 'demo';
 }
 
-let runtimeMode: AppMode = defaultMode();
+let runtimeMode: AppMode = 'live';
+let productMode: AppMode = 'live';
 const modeListeners = new Set<() => void>();
 
 export function getRuntimeMode(): AppMode {
   return runtimeMode;
 }
 
+/** Red de prueba (RPC testnet). No es lo mismo que la cuenta demo. */
 export function isDemoMode(): boolean {
   return runtimeMode === 'demo';
+}
+
+/** Cuenta demo elegida en Ajustes. El mundo Real usa mainnet y no hereda el estado de Demo. */
+export function isDemoAccount(): boolean {
+  return productMode === 'demo';
+}
+
+/** Crédito on-chain listo en el mundo activo (testnet en Demo, mainnet en Real). */
+export function isCreditReady(): boolean {
+  return isContractConfigured(productMode === 'live' ? 'mainnet' : 'testnet');
+}
+
+export function getProductMode(): AppMode {
+  return productMode;
+}
+
+export function setProductMode(mode: AppMode): void {
+  productMode = mode === 'demo' ? 'demo' : 'live';
 }
 
 export function subscribeRuntimeMode(listener: () => void): () => void {
@@ -166,7 +186,11 @@ export const getProviderWithFallback = (): AbstractProvider => {
     stallTimeout: 2000,
   }));
 
-  cachedProvider = configs.length === 1 ? configs[0].provider : new FallbackProvider(configs, NETWORK_CONFIG.chainId);
+  // quorum 1: un RPC basta para lecturas. El chainId ya se valida en quorumChainId().
+  // Un countdown (p. ej. cooldown) nunca coincide entre 3 nodos si el default es ceil(n/2).
+  cachedProvider = configs.length === 1
+    ? configs[0].provider
+    : new FallbackProvider(configs, NETWORK_CONFIG.chainId, { quorum: 1 });
   return cachedProvider;
 };
 

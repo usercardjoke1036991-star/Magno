@@ -291,6 +291,32 @@ describe('biometric availability', function () {
   });
 });
 
+describe('loan cooldown from timestamp', function () {
+  const PRESTAMO_COOLDOWN_SECS = 48 * 60 * 60;
+
+  function cooldownRestanteDesdeTimestamp(ultimoPrestamoTimestamp, nowSec) {
+    if (!Number.isFinite(ultimoPrestamoTimestamp) || ultimoPrestamoTimestamp <= 0) {
+      return 0;
+    }
+    return Math.max(0, Math.floor(ultimoPrestamoTimestamp) + PRESTAMO_COOLDOWN_SECS - nowSec);
+  }
+
+  it('is zero when the user has never borrowed', function () {
+    expect(cooldownRestanteDesdeTimestamp(0, 1_700_000_000)).to.equal(0);
+  });
+
+  it('counts remaining seconds until 48h after the last loan', function () {
+    const last = 1_700_000_000;
+    expect(cooldownRestanteDesdeTimestamp(last, last + 3_600)).to.equal(PRESTAMO_COOLDOWN_SECS - 3_600);
+  });
+
+  it('is zero once the 48h window has elapsed', function () {
+    const last = 1_700_000_000;
+    expect(cooldownRestanteDesdeTimestamp(last, last + PRESTAMO_COOLDOWN_SECS)).to.equal(0);
+    expect(cooldownRestanteDesdeTimestamp(last, last + PRESTAMO_COOLDOWN_SECS + 10)).to.equal(0);
+  });
+});
+
 describe('demo credit gates', function () {
   function creditNeedsKyc(demo, exigido, declarado) {
     if (demo) return false;
@@ -310,5 +336,25 @@ describe('demo credit gates', function () {
     expect(creditNeedsKyc(false, true, false)).to.equal(true);
     expect(creditNeedsPhone(false, true, false)).to.equal(true);
     expect(creditNeedsKyc(false, false, false)).to.equal(false);
+  });
+
+  it('does not let a live account reuse demo testnet credit', function () {
+    function worlds(pref, mainnetConfigured, testnetConfigured) {
+      const account = pref === 'demo' ? 'demo' : 'live';
+      const runtime = account;
+      const creditReady = account === 'live' ? mainnetConfigured : testnetConfigured;
+      return { account, runtime, creditReady };
+    }
+    const liveBeforeMainnet = worlds('live', false, true);
+    expect(liveBeforeMainnet.runtime).to.equal('live');
+    expect(liveBeforeMainnet.creditReady).to.equal(false);
+
+    const demo = worlds('demo', false, true);
+    expect(demo.runtime).to.equal('demo');
+    expect(demo.creditReady).to.equal(true);
+
+    const liveOnMainnet = worlds('live', true, true);
+    expect(liveOnMainnet.runtime).to.equal('live');
+    expect(liveOnMainnet.creditReady).to.equal(true);
   });
 });

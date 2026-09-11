@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
 import { useI18n } from '../i18n/LanguageContext';
@@ -6,13 +6,15 @@ import { useTheme } from '../theme/ThemeContext';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { getSupportedTokens } from '../constants/tokens';
 import { formatAddress } from '../utils/formatters';
+import { useAppMode } from '../wallet/AppModeContext';
 
 export const AdminAccess: React.FC = () => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { open } = useAppKit();
   const { address, isConnected } = useAccount();
-  const token = getSupportedTokens()[0];
+  const { mode } = useAppMode();
+  const token = useMemo(() => getSupportedTokens()[0], [mode]);
   const { userInfo } = useWeb3Balances(
     isConnected && address ? address.toLowerCase() : '',
     token

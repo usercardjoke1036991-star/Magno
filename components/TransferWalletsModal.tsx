@@ -22,6 +22,7 @@ import { parsePositiveDecimal } from '../utils/formatters';
 import { isHexAddress } from '../utils/sanitize';
 import { humanizeTxError } from '../utils/txErrors';
 import { WalletMark } from './WalletMark';
+import { BrandLogo } from './BrandLogo';
 import type { Token } from '../constants/tokens';
 
 interface TransferWalletsModalProps {
@@ -158,6 +159,10 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
               </View>
               {mode === 'in' ? (
                 <>
+                  <View style={styles.chosen}>
+                    <BrandLogo size={40} />
+                    <Text style={[styles.chosenName, { color: colors.text }]}>{t('appWalletLabel')}</Text>
+                  </View>
                   <Text style={[styles.lead, { color: colors.textMuted }]}>
                     {t('appWalletInLead', { wallet: selected.name })}
                   </Text>

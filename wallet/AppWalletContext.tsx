@@ -1,8 +1,8 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { HDNodeWallet, Wallet } from 'ethers';
 import { subscribeRuntimeMode } from '../constants/rpcConfig';
 import { setWalletSigner, clearWalletSigner } from '../services/quatriviumCreditService';
-import { loadAppWallet, ensureAppWallet, importFromPhrase, recreateAppWallet, addressFromPhrase } from '../services/appWallet';
+import { loadAppWallet, ensureAppWallet, importFromPhrase, recreateAppWallet, addressFromPhrase, withCurrentRpc } from '../services/appWallet';
 import { wipeLocalAccount } from '../services/accountReset';
 
 interface AppWalletValue {
@@ -21,6 +21,8 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [signer, setSigner] = useState<HDNodeWallet | Wallet | null>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const signerRef = useRef(signer);
+  signerRef.current = signer;
 
   const boot = useCallback(async () => {
     const wallet = await ensureAppWallet();
@@ -45,6 +47,14 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [boot]);
 
   useEffect(() => subscribeRuntimeMode(() => {
+    const current = signerRef.current;
+    if (current) {
+      const next = withCurrentRpc(current);
+      setSigner(next);
+      setWalletSigner(next);
+      return;
+    }
+    clearWalletSigner();
     void loadAppWallet().then((wallet) => {
       if (!wallet) return;
       setSigner(wallet);
