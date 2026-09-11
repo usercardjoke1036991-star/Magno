@@ -63,6 +63,8 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['wrong-network', 'errWrongNetwork'],
   ['La billetera está en otra red', 'errWrongNetwork'],
   ['La billetera no reporta red', 'errWrongNetwork'],
+  ['INSUFFICIENT_FUNDS', 'errNeedGas'],
+  ['insufficient funds', 'errNeedGas'],
   ['platform-fee-bnb', 'errNeedGas'],
   ['internal-wallet-only', 'errInternalOnly'],
   ['no-admin-proposal', 'errNoAdminProposal'],
