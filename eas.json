@@ -8,6 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
+      "android": { "image": "sdk-54" },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "development",
         "EXPO_PUBLIC_CHAIN_ID": "97",
@@ -20,6 +21,7 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "android": { "image": "sdk-54" },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "development",
         "EXPO_PUBLIC_CHAIN_ID": "97",
@@ -32,6 +34,7 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
+      "android": { "image": "sdk-54" },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
         "EXPO_PUBLIC_CHAIN_ID": "56",

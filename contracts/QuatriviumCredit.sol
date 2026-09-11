@@ -649,6 +649,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function depositarLiquidez(address token, uint256 _monto) external nonReentrant whenNotPaused onlySupportedToken(token) {
+        require(tx.origin == msg.sender, "no contracts");
         require(_monto > 0, "monto>0");
         _assertPeg(token);
         stableTokens[token].safeTransferFrom(msg.sender, address(this), _monto);
@@ -851,6 +852,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function pagarPrestamo(address token, uint256 monto) external nonReentrant onlySupportedToken(token) {
+        require(tx.origin == msg.sender, "no contracts");
         require(monto > 0, "monto>0");
         require(usuarios[msg.sender].montoActivo > 0, "no active loan");
         require(usuarios[msg.sender].monedaActivo == token, "token mismatch");
