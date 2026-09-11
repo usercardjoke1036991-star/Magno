@@ -188,6 +188,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Ownable, Pausable, Reentranc
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-11 | Auto-fondeo BNB testnet desde notify-worker al registrarse + auto-refresh balances 30s. EXPO_PUBLIC_NOTIFY_API configurada en .env apuntando a https://rundown-shelf-mongoose.ngrok-free.dev | — |
 | 2026-09-10 | CONTEXTO.md inicializado y poblado | Auditoría completa del proyecto |
 | 2026-09-10 | `app.json` slug cambiado: "magno" → "quatrivium-credit" | Consistencia con package name |
 | 2026-09-10 | `hooks/useHomeHandlers.ts` creado | Extraer handlers de app/index.tsx (783→521 líneas) |
