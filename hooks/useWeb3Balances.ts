@@ -21,7 +21,6 @@ function creditStatusKey(wallet: string): string {
 }
 
 function persistCreditStatus(wallet: string, isRegistered: boolean, hasActiveLoan: boolean) {
-  if (!isRegistered && !hasActiveLoan) return;
   AsyncStorage.setItem(
     creditStatusKey(wallet),
     JSON.stringify({ isRegistered, hasActiveLoan })
@@ -40,6 +39,7 @@ export interface UserBalances {
 }
 
 export interface ActiveLoan {
+  tierId: number;
   principalWei: string;
   totalDueWei: string;
   totalDueLabel: string;
@@ -353,6 +353,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             }
 
             activeLoan = {
+              tierId: Number(loan.nivelActual || 0),
               principalWei: principal.toString(),
               totalDueWei: totalDue.toString(),
               totalDueLabel: formatDue(totalDue, loanDecimals, loanSymbol),
@@ -386,7 +387,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             isDelinquent: overdue,
             isRegistered: registered || prev.isRegistered,
           }));
-          persistCreditStatus(walletAddress, registered || hasLoan, hasLoan);
+          persistCreditStatus(walletAddress, registered, hasLoan);
         } catch (e) {
           logErr('Error fetching user loan status:', e);
         }
@@ -693,7 +694,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         setUserInfo((prev) => ({
           ...prev,
           isRegistered: Boolean(saved.isRegistered) || prev.isRegistered,
-          hasActiveLoan: Boolean(saved.hasActiveLoan) || prev.hasActiveLoan,
+          hasActiveLoan: Boolean(saved.hasActiveLoan),
         }));
       })
       .catch(() => {});

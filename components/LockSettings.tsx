@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -23,6 +22,7 @@ import { loadAppWallet } from '../services/appWallet';
 import { storePasswordRecovery } from '../services/passwordRecovery';
 import { BiometricLockSection } from './BiometricLockSection';
 import { SecretInput } from './SecretInput';
+import { AppText } from './AppText';
 
 export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = false }) => {
   const { t } = useI18n();
@@ -124,10 +124,10 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
 
   return (
     <View>
-      {hideLead ? null : <Text style={[styles.lead, { color: colors.textMuted }]}>{t('lockSettingsLead')}</Text>}
+      {hideLead ? null : <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockSettingsLead')}</AppText>}
       {hasPin ? (
         <>
-          <Text style={[styles.label, { color: colors.text }]}>{t('lockCurrentPin')}</Text>
+          <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPin')}</AppText>
           <SecretInput
             value={current}
             onChangeText={(value) => setCurrent(value.replace(/\D/g, '').slice(0, 6))}
@@ -137,9 +137,9 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
           />
         </>
       ) : (
-        <Text style={[styles.note, { color: colors.textMuted }]}>{t('lockCreateOptional')}</Text>
+        <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockCreateOptional')}</AppText>
       )}
-      <Text style={[styles.label, { color: colors.text }]}>{t('lockNewPin')}</Text>
+      <AppText style={[styles.label, { color: colors.text }]}>{t('lockNewPin')}</AppText>
       <SecretInput
         value={next}
         onChangeText={(value) => setNext(value.replace(/\D/g, '').slice(0, 6))}
@@ -147,7 +147,7 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
         maxLength={6}
         placeholder="••••••"
       />
-      <Text style={[styles.label, { color: colors.text }]}>{t('lockConfirmPin')}</Text>
+      <AppText style={[styles.label, { color: colors.text }]}>{t('lockConfirmPin')}</AppText>
       <SecretInput
         value={confirm}
         onChangeText={(value) => setConfirm(value.replace(/\D/g, '').slice(0, 6))}
@@ -164,20 +164,20 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
           (busy || (hasPin && current.length !== 6) || next.length !== 6) && { backgroundColor: colors.chip },
         ]}
       >
-        {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{hasPin ? t('lockChangePin') : t('lockCreatePin')}</Text>}
+        {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{hasPin ? t('lockChangePin') : t('lockCreatePin')}</AppText>}
       </TouchableOpacity>
-      {message ? <Text style={[styles.note, { color: colors.textMuted }]}>{message}</Text> : null}
+      {message ? <AppText style={[styles.note, { color: colors.textMuted }]}>{message}</AppText> : null}
 
       <BiometricLockSection />
 
-      <Text style={[styles.section, { color: colors.text }]}>{t('lockPasswordTitle')}</Text>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordLead')}</Text>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNotSeed')}</Text>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNoEmail')}</Text>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordMin')}</Text>
+      <AppText style={[styles.section, { color: colors.text }]}>{t('lockPasswordTitle')}</AppText>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordLead')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNotSeed')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNoEmail')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordMin')}</AppText>
       {hasPassword ? (
         <>
-          <Text style={[styles.label, { color: colors.text }]}>{t('lockCurrentPassword')}</Text>
+          <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPassword')}</AppText>
           <SecretInput
             value={currentPassword}
             onChangeText={(value) => setCurrentPassword(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
@@ -185,16 +185,16 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
           />
         </>
       ) : null}
-      <Text style={[styles.label, { color: colors.text }]}>{t('lockNewPassword')}</Text>
+      <AppText style={[styles.label, { color: colors.text }]}>{t('lockNewPassword')}</AppText>
       <SecretInput
         value={nextPassword}
         onChangeText={(value) => setNextPassword(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
         maxLength={PASSWORD_LENGTH}
       />
-      <Text style={[styles.counter, { color: colors.textMuted }]}>
+      <AppText style={[styles.counter, { color: colors.textMuted }]}>
         {t('lockPasswordCount', { count: nextPassword.length })}
-      </Text>
-      <Text style={[styles.label, { color: colors.text }]}>{t('lockPasswordConfirm')}</Text>
+      </AppText>
+      <AppText style={[styles.label, { color: colors.text }]}>{t('lockPasswordConfirm')}</AppText>
       <SecretInput
         value={confirmPassword}
         onChangeText={(value) => setConfirmPassword(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
@@ -214,10 +214,10 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
         {passwordBusy ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>{hasPassword ? t('lockChangePassword') : t('lockPasswordTitle')}</Text>
+          <AppText style={styles.buttonText}>{hasPassword ? t('lockChangePassword') : t('lockPasswordTitle')}</AppText>
         )}
       </TouchableOpacity>
-      {passwordMessage ? <Text style={[styles.note, { color: colors.textMuted }]}>{passwordMessage}</Text> : null}
+      {passwordMessage ? <AppText style={[styles.note, { color: colors.textMuted }]}>{passwordMessage}</AppText> : null}
     </View>
   );
 };

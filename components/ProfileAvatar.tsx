@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   avatarColorForWallet,
   initialsFromName,
@@ -8,6 +8,7 @@ import {
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { AppIcon } from './icons';
 import { RankFrame } from './RankFrame';
+import { AppText } from './AppText';
 
 interface ProfileAvatarProps {
   profile?: UserProfile | null;
@@ -57,7 +58,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
           style={{ width: size, height: size, borderRadius: size / 2 }}
         />
       ) : profile?.displayName ? (
-        <Text style={[styles.initials, { color: colors.fg, fontSize: Math.round(size * 0.36) }]}>{initials}</Text>
+        <AppText style={[styles.initials, { color: colors.fg, fontSize: Math.round(size * 0.36) }]}>{initials}</AppText>
       ) : (
         <AppIcon name="user" size={Math.round(size * 0.48)} color={colors.fg} />
       )}

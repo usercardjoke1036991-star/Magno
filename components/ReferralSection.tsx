@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { addressToInviteCode, buildInviteLink } from '../utils/inviteCode';
@@ -25,6 +25,7 @@ import {
 import { formatUSD } from '../utils/formatters';
 import { openSafeUrl } from '../utils/safeOpenUrl';
 import { AppSubsection } from './AppSection';
+import { AppText } from './AppText';
 
 export interface ReferralInfo {
   padre: string;
@@ -118,30 +119,30 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   return (
     <View style={styles.stack}>
       {isRestricted && (
-        <Text style={styles.warn}>{t('moraBlocked')}</Text>
+        <AppText style={styles.warn}>{t('moraBlocked')}</AppText>
       )}
 
       <AppSubsection title={t('subsectionInvite')} defaultOpen icon="share">
           {isFundador && (
         <View style={[styles.founderBadge, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="star" size={16} color={colors.text} />
-          <Text style={[styles.founderBadgeText, { color: colors.text }]}>{t('youAreFounder')}</Text>
+          <AppText style={[styles.founderBadgeText, { color: colors.text }]}>{t('youAreFounder')}</AppText>
         </View>
       )}
 
           <View style={styles.labelRow}>
             <AppIcon name="copy" size={14} color={colors.textMuted} />
-            <Text style={[styles.label, { color: colors.textMuted }]}>{t('inviteCode')}</Text>
+            <AppText style={[styles.label, { color: colors.textMuted }]}>{t('inviteCode')}</AppText>
           </View>
-      <Text selectable style={[styles.code, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <AppText selectable style={[styles.code, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}>
         {myCode || t('connectForCode')}
-      </Text>
+      </AppText>
       {Boolean(inviteLink) && (
-        <Text selectable style={[styles.link, { color: colors.primary }]}>
+        <AppText selectable style={[styles.link, { color: colors.primary }]}>
           {inviteLink}
-        </Text>
+        </AppText>
       )}
-      <Text style={[styles.hint, { color: colors.textMuted }]}>{t('inviteLinkHint')}</Text>
+      <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('inviteLinkHint')}</AppText>
       <TouchableOpacity
         style={[styles.shareButton, { backgroundColor: colors.primary }, isRestricted && styles.shareDisabled]}
         onPress={handleShare}
@@ -149,7 +150,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
       >
         <View style={styles.btnRow}>
           <AppIcon name="share" size={16} color={colors.onPrimary} />
-          <Text style={[styles.shareButtonText, { color: colors.onPrimary }]}>{t('shareInvite')}</Text>
+          <AppText style={[styles.shareButtonText, { color: colors.onPrimary }]}>{t('shareInvite')}</AppText>
         </View>
       </TouchableOpacity>
       <TouchableOpacity
@@ -159,7 +160,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
       >
         <View style={styles.btnRow}>
           <AppIcon name="whatsapp" size={18} color="#fff" />
-          <Text style={styles.shareButtonText}>{t('shareInviteWhatsApp')}</Text>
+          <AppText style={styles.shareButtonText}>{t('shareInviteWhatsApp')}</AppText>
         </View>
       </TouchableOpacity>
 
@@ -175,58 +176,58 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                 rankName={t(getRankForLevel(padreLevel).nameKey)}
                 showRankLabel={false}
               />
-              <Text style={[styles.metaLine, { color: colors.text, flex: 1 }]}>
+              <AppText style={[styles.metaLine, { color: colors.text, flex: 1 }]}>
                 {t('invitedBy')}: {padreLabel}
-              </Text>
+              </AppText>
             </View>
           ) : (
-            <Text style={[styles.metaLine, { color: colors.text }]}>
+            <AppText style={[styles.metaLine, { color: colors.text }]}>
               {t('invitedBy')}: {isFundador ? t('nobodyRoot') : t('pending')}
-            </Text>
+            </AppText>
           )}
-          <Text style={[styles.metaLine, { color: colors.text }]}>
+          <AppText style={[styles.metaLine, { color: colors.text }]}>
             {t('activationBonus')}:{' '}
             {isFundador
               ? t('notApplicable')
               : bonoActivacionCobrado
                 ? t('bonusPaid')
                 : t('bonusPending')}
-          </Text>
+          </AppText>
           {royaltiesCongeladas && (
-            <Text style={styles.warn}>{t('royaltiesFrozen')}</Text>
+            <AppText style={styles.warn}>{t('royaltiesFrozen')}</AppText>
           )}
         </View>
       ) : (
-        <Text style={[styles.hint, { color: colors.textMuted }]}>{t('referralHint')}</Text>
+        <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('referralHint')}</AppText>
       )}
       </AppSubsection>
 
       <AppSubsection title={t('referralRepTitle')} defaultOpen icon="star">
-        <Text style={[styles.earnHint, { color: colors.textMuted }]}>
+        <AppText style={[styles.earnHint, { color: colors.textMuted }]}>
           {t('referralRepLead', {
             points: String(REFERRAL_REPUTATION_POINTS),
             network: String(REFERRAL_NETWORK_POINTS),
             threshold: String(networkBonusThreshold),
             bonus: formatPoolBonus(),
           })}
-        </Text>
-        <Text style={[styles.metaLine, { color: colors.text }]}>
+        </AppText>
+        <AppText style={[styles.metaLine, { color: colors.text }]}>
           {t('referralRepScore', { score: String(reputation), network: String(networkPoints) })}
-        </Text>
-        <Text style={[styles.hint, { color: colors.textMuted }]}>
+        </AppText>
+        <AppText style={[styles.hint, { color: colors.textMuted }]}>
           {t('referralRepNext', {
             left: String(referralsForNextBonus(networkPoints, networkBonusThreshold)),
             bonus: formatPoolBonus(),
           })}
-        </Text>
+        </AppText>
       </AppSubsection>
 
       <AppSubsection title={t('referralEarnTitle')} defaultOpen={false} icon="pay">
-        <Text style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralLead')}</Text>
+        <AppText style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralLead')}</AppText>
         <View style={styles.earnHead}>
-          <Text style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.2 }]}>{t('referralEarnColRank')}</Text>
-          <Text style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1 }]}>{t('referralEarnColLoan')}</Text>
-          <Text style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</Text>
+          <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.2 }]}>{t('referralEarnColRank')}</AppText>
+          <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1 }]}>{t('referralEarnColLoan')}</AppText>
+          <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</AppText>
         </View>
         {LOAN_TIERS.map((tier) => {
           const rank = getRankForLevel(tier.id);
@@ -235,13 +236,13 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           const earn = formatCommissionUSD(directCommissionFromLoan(tier.usdAmount, appliedBps));
           return (
             <View key={tier.id} style={[styles.earnRow, { borderColor: colors.border }]}>
-              <Text style={[styles.earnCell, { color: colors.text, flex: 1.2 }]}>{rankLabel}</Text>
-              <Text style={[styles.earnCell, { color: colors.text, flex: 1 }]}>{formatUSD(tier.usdAmount)}</Text>
-              <Text style={[styles.earnCell, { color: colors.primary, flex: 1.4 }]}>
+              <AppText style={[styles.earnCell, { color: colors.text, flex: 1.2 }]}>{rankLabel}</AppText>
+              <AppText style={[styles.earnCell, { color: colors.text, flex: 1 }]}>{formatUSD(tier.usdAmount)}</AppText>
+              <AppText style={[styles.earnCell, { color: colors.primary, flex: 1.4 }]}>
                 {tier.id === 1
                   ? `${t('referralEarnFirst', { bonus: formatCommissionUSD(ACTIVATION_BONUS_USD) })} · ${t('referralEarnNext', { amount: earn })}`
                   : earn}
-              </Text>
+              </AppText>
             </View>
           );
         })}

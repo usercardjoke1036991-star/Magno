@@ -6,8 +6,6 @@ import {
   ScrollView,
   Share,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -25,6 +23,7 @@ import { copyText } from '../utils/copyText';
 import { WalletMark } from './WalletMark';
 import { BrandLogo } from './BrandLogo';
 import type { Token } from '../constants/tokens';
+import { AppText, AppTextInput } from './AppText';
 
 interface TransferWalletsModalProps {
   visible: boolean;
@@ -126,15 +125,15 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
             onPress={selected ? () => setWalletId(null) : close}
             accessibilityRole="button"
           >
-            <Text style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</Text>
+            <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+          <AppText style={[styles.title, { color: colors.text }]}>{title}</AppText>
           <View style={styles.spacer} />
         </View>
         <ScrollView keyboardShouldPersistTaps="always" contentContainerStyle={styles.body}>
           {!selected ? (
             <>
-              <Text style={[styles.lead, { color: colors.textMuted }]}>{t('appWalletPickLead')}</Text>
+              <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('appWalletPickLead')}</AppText>
               <View style={styles.grid}>
                 {COMPATIBLE_WALLETS.map((item) => (
                   <TouchableOpacity
@@ -145,9 +144,9 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                     accessibilityLabel={item.name}
                   >
                     <WalletMark wallet={item} size={48} />
-                    <Text style={[styles.cardName, { color: colors.text }]} numberOfLines={2}>
+                    <AppText style={[styles.cardName, { color: colors.text }]} numberOfLines={2}>
                       {item.name}
-                    </Text>
+                    </AppText>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -156,20 +155,20 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
             <View>
               <View style={styles.chosen}>
                 <WalletMark wallet={selected} size={40} />
-                <Text style={[styles.chosenName, { color: colors.text }]}>{selected.name}</Text>
+                <AppText style={[styles.chosenName, { color: colors.text }]}>{selected.name}</AppText>
               </View>
               {mode === 'in' ? (
                 <>
                   <View style={styles.chosen}>
                     <BrandLogo size={40} />
-                    <Text style={[styles.chosenName, { color: colors.text }]}>{t('appWalletLabel')}</Text>
+                    <AppText style={[styles.chosenName, { color: colors.text }]}>{t('appWalletLabel')}</AppText>
                   </View>
-                  <Text style={[styles.lead, { color: colors.textMuted }]}>
+                  <AppText style={[styles.lead, { color: colors.textMuted }]}>
                     {t('appWalletInLead', { wallet: selected.name })}
-                  </Text>
-                  <Text selectable style={[styles.address, { color: colors.text, backgroundColor: colors.surface }]}>
+                  </AppText>
+                  <AppText selectable style={[styles.address, { color: colors.text, backgroundColor: colors.surface }]}>
                     {walletAddress}
-                  </Text>
+                  </AppText>
                   <TouchableOpacity
                     style={[styles.send, { backgroundColor: colors.connect, marginTop: 12 }]}
                     onPress={() => {
@@ -179,21 +178,21 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                       });
                     }}
                   >
-                    <Text style={styles.sendText}>{t('copyAddress')}</Text>
+                    <AppText style={styles.sendText}>{t('copyAddress')}</AppText>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.send, { backgroundColor: colors.primary, marginTop: 8 }]}
                     onPress={() => Share.share({ message: walletAddress }).catch(() => {})}
                   >
-                    <Text style={styles.sendText}>{t('appWalletShare')}</Text>
+                    <AppText style={styles.sendText}>{t('appWalletShare')}</AppText>
                   </TouchableOpacity>
                 </>
               ) : (
                 <>
-                  <Text style={[styles.lead, { color: colors.textMuted }]}>
+                  <AppText style={[styles.lead, { color: colors.textMuted }]}>
                     {t('appWalletSendLead', { wallet: selected.name })}
-                  </Text>
-                  <TextInput
+                  </AppText>
+                  <AppTextInput
                     value={destination}
                     onChangeText={setDestination}
                     autoCapitalize="none"
@@ -211,7 +210,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                         asset === 'token' && { borderColor: colors.primary, backgroundColor: colors.chip },
                       ]}
                     >
-                      <Text style={[styles.chipText, { color: colors.text }]}>{selectedToken.symbol}</Text>
+                      <AppText style={[styles.chipText, { color: colors.text }]}>{selectedToken.symbol}</AppText>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => setAsset('bnb')}
@@ -221,10 +220,10 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                         asset === 'bnb' && { borderColor: colors.primary, backgroundColor: colors.chip },
                       ]}
                     >
-                      <Text style={[styles.chipText, { color: colors.text }]}>BNB</Text>
+                      <AppText style={[styles.chipText, { color: colors.text }]}>BNB</AppText>
                     </TouchableOpacity>
                   </View>
-                  <TextInput
+                  <AppTextInput
                     value={amount}
                     onChangeText={setAmount}
                     keyboardType="decimal-pad"
@@ -237,7 +236,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                     onPress={sendOut}
                     style={[styles.send, { backgroundColor: colors.primary }, (blocked || !amount) && { backgroundColor: colors.chip }]}
                   >
-                    {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.sendText}>{t('appWalletSend')}</Text>}
+                    {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.sendText}>{t('appWalletSend')}</AppText>}
                   </TouchableOpacity>
                 </>
               )}

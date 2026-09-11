@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { TELEGRAM_BOT, NOTIFY_API } from '../constants/appLinks';
@@ -16,6 +16,7 @@ import {
   type NotificationProfile,
 } from '../services/notificationProfile';
 import { loadVerifiedEmail } from '../services/accountEmail';
+import { AppText, AppTextInput } from './AppText';
 
 interface NotificationChannelsProps {
   walletAddress: string;
@@ -118,20 +119,20 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.text }]}>{t('notificationLead')}</Text>
+      <AppText style={[styles.lead, { color: colors.text }]}>{t('notificationLead')}</AppText>
       {email ? (
         <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
-          <Text style={[styles.label, { color: colors.textMuted }]}>{t('emailField')}</Text>
-          <Text selectable style={[styles.switchLabel, { color: colors.text }]}>{email}</Text>
-          <Text style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('emailDone')}</Text>
+          <AppText style={[styles.label, { color: colors.textMuted }]}>{t('emailField')}</AppText>
+          <AppText selectable style={[styles.switchLabel, { color: colors.text }]}>{email}</AppText>
+          <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('emailDone')}</AppText>
         </View>
       ) : null}
 
       <View style={styles.labelRow}>
         <AppIcon name="phone" size={15} color={colors.textMuted} />
-        <Text style={[styles.label, { color: colors.textMuted }]}>{t('notificationPhone')}</Text>
+        <AppText style={[styles.label, { color: colors.textMuted }]}>{t('notificationPhone')}</AppText>
       </View>
-      <TextInput
+      <AppTextInput
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
@@ -142,9 +143,9 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
 
       <View style={styles.labelRow}>
         <AppIcon name="whatsapp" size={15} color={colors.textMuted} />
-        <Text style={[styles.label, { color: colors.textMuted }]}>{t('notificationWhatsApp')}</Text>
+        <AppText style={[styles.label, { color: colors.textMuted }]}>{t('notificationWhatsApp')}</AppText>
       </View>
-      <TextInput
+      <AppTextInput
         value={whatsapp}
         onChangeText={setWhatsapp}
         keyboardType="phone-pad"
@@ -155,9 +156,9 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
 
       <View style={styles.labelRow}>
         <AppIcon name="telegram" size={15} color={colors.textMuted} />
-        <Text style={[styles.label, { color: colors.textMuted }]}>{t('notificationTelegram')}</Text>
+        <AppText style={[styles.label, { color: colors.textMuted }]}>{t('notificationTelegram')}</AppText>
       </View>
-      <TextInput
+      <AppTextInput
         value={telegramUsername}
         onChangeText={setTelegramUsername}
         autoCapitalize="none"
@@ -169,30 +170,30 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       <TouchableOpacity style={[styles.secondary, { borderColor: colors.border }]} onPress={handleTelegram}>
         <View style={styles.btnRow}>
           <AppIcon name="telegram" size={16} color={colors.text} />
-          <Text style={[styles.secondaryText, { color: colors.text }]}>{t('notificationOpenTelegram')}</Text>
+          <AppText style={[styles.secondaryText, { color: colors.text }]}>{t('notificationOpenTelegram')}</AppText>
         </View>
       </TouchableOpacity>
 
       <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <View style={styles.switchLabelRow}>
           <AppIcon name="bell" size={16} color={colors.textMuted} />
-          <Text style={[styles.switchLabel, { color: colors.text }]}>{t('notificationDebt')}</Text>
+          <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationDebt')}</AppText>
         </View>
-        <Text style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationDebtAlways')}</Text>
+        <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationDebtAlways')}</AppText>
       </View>
 
-      <Text style={[styles.optionalTitle, { color: colors.textMuted }]}>{t('notificationOptional')}</Text>
+      <AppText style={[styles.optionalTitle, { color: colors.textMuted }]}>{t('notificationOptional')}</AppText>
       <View style={styles.switchRow}>
         <View style={styles.switchLabelRow}>
           <AppIcon name="pay" size={16} color={colors.text} />
-          <Text style={[styles.switchLabel, { color: colors.text }]}>{t('notificationCommission')}</Text>
+          <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationCommission')}</AppText>
         </View>
         <Switch value={prefs.commission} onValueChange={() => toggle('commission')} />
       </View>
       <View style={styles.switchRow}>
         <View style={styles.switchLabelRow}>
           <AppIcon name="people" size={16} color={colors.text} />
-          <Text style={[styles.switchLabel, { color: colors.text }]}>{t('notificationSignup')}</Text>
+          <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationSignup')}</AppText>
         </View>
         <Switch value={prefs.signup} onValueChange={() => toggle('signup')} />
       </View>
@@ -204,7 +205,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       >
         <View style={styles.btnRow}>
           <AppIcon name="save" size={16} color={colors.onPrimary} />
-          <Text style={[styles.saveText, { color: colors.onPrimary }]}>{t('notificationSave')}</Text>
+          <AppText style={[styles.saveText, { color: colors.onPrimary }]}>{t('notificationSave')}</AppText>
         </View>
       </TouchableOpacity>
     </View>

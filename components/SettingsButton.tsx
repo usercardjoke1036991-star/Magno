@@ -4,7 +4,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -27,6 +26,7 @@ import { useAppMode } from '../wallet/AppModeContext';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { getSupportedTokens } from '../constants/tokens';
 import type { TranslationKey } from '../i18n/translations';
+import { AppText } from './AppText';
 
 type Panel = 'home' | 'security' | 'profile' | 'appearance' | 'language' | 'mode' | 'admin';
 
@@ -84,8 +84,8 @@ export const SettingsButton: React.FC = () => {
       accessibilityLabel={label}
     >
       <AppIcon name={icon} size={18} color={colors.primary} />
-      <Text style={[styles.menuLabel, { color: colors.text }]}>{label}</Text>
-      <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
+      <AppText style={[styles.menuLabel, { color: colors.text }]}>{label}</AppText>
+      <AppText style={[styles.chevron, { color: colors.textMuted }]}>›</AppText>
     </TouchableOpacity>
   );
 
@@ -120,17 +120,17 @@ export const SettingsButton: React.FC = () => {
                 <BrandLogo size={32} />
               ) : (
                 <TouchableOpacity onPress={() => setPanel('home')} accessibilityRole="button" accessibilityLabel={t('settingsBack')}>
-                  <Text style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</Text>
+                  <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
                 </TouchableOpacity>
               )}
               <View style={styles.sheetTitles}>
-                <Text style={[styles.sheetTitle, { color: colors.text }]}>{t(titles[panel])}</Text>
+                <AppText style={[styles.sheetTitle, { color: colors.text }]}>{t(titles[panel])}</AppText>
                 {panel === 'home' ? (
-                  <Text style={[styles.sheetLead, { color: colors.textMuted }]}>{t('settingsLead')}</Text>
+                  <AppText style={[styles.sheetLead, { color: colors.textMuted }]}>{t('settingsLead')}</AppText>
                 ) : null}
               </View>
               <TouchableOpacity onPress={close} style={styles.close} accessibilityRole="button" accessibilityLabel={t('closeSettings')}>
-                <Text style={[styles.closeText, { color: colors.textMuted }]}>×</Text>
+                <AppText style={[styles.closeText, { color: colors.textMuted }]}>×</AppText>
               </TouchableOpacity>
             </View>
             <ScrollView keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
@@ -149,7 +149,7 @@ export const SettingsButton: React.FC = () => {
                       accessibilityRole="button"
                       accessibilityLabel={t('settingsAdminConnect')}
                     >
-                      <Text style={[styles.adminLink, { color: colors.textMuted }]}>{t('settingsAdminConnect')}</Text>
+                      <AppText style={[styles.adminLink, { color: colors.textMuted }]}>{t('settingsAdminConnect')}</AppText>
                     </TouchableOpacity>
                   )}
                 </View>

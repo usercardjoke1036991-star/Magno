@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  TextInput,
 } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { getContractAddress } from '../constants/contractConfig';
 import { isContractConfigured } from '../constants/rpcConfig';
+import { useAppMode } from '../wallet/AppModeContext';
 import { AppIcon } from './icons';
 import { AppSubsection } from './AppSection';
+import { AppText, AppTextInput } from './AppText';
 
 interface PoolSupportSectionProps {
   isLoading: boolean;
@@ -41,70 +41,74 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
   const { t } = useI18n();
   // Sin retiro ni posición LP: el aporte queda en el contrato para prestar.
   const { colors } = useTheme();
+  const { mode } = useAppMode();
+  const allowDeposit = mode !== 'demo'; // Demo: sin aportar al pool
   const contractReady = isContractConfigured();
   const blocked = isLoading || !walletConnected || !tokenSupported || paused || !contractReady;
 
   return (
     <View style={styles.stack}>
       <AppSubsection title={t('subsectionPoolInfo')} defaultOpen={false} icon="info">
-        <Text style={[styles.lead, { color: colors.text }]}>{t('poolPublicLead')}</Text>
-        <Text style={[styles.destination, { color: colors.textMuted, backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <AppText style={[styles.lead, { color: colors.text }]}>{t('poolPublicLead')}</AppText>
+        <AppText style={[styles.destination, { color: colors.textMuted, backgroundColor: colors.surface, borderColor: colors.border }]}>
           {t('poolDestination', { amount: `${poolBalance} ${tokenSymbol}` })}
-        </Text>
+        </AppText>
         {poolCash && poolOutstanding ? (
-          <Text style={[styles.locked, { color: colors.textMuted }]}>
+          <AppText style={[styles.locked, { color: colors.textMuted }]}>
             {t('poolNavExplain', { cash: `${poolCash} ${tokenSymbol}`, loans: `${poolOutstanding} ${tokenSymbol}` })}
-          </Text>
+          </AppText>
         ) : null}
-        <Text style={[styles.locked, { color: colors.textMuted }]}>{t('poolLockedNote')}</Text>
+        <AppText style={[styles.locked, { color: colors.textMuted }]}>{t('poolLockedNote')}</AppText>
         {contractReady ? (
           <>
-            <Text style={[styles.label, { color: colors.primary }]}>{t('poolContractLabel')}</Text>
-            <Text selectable style={[styles.address, { color: colors.primary, backgroundColor: colors.surface }]}>
+            <AppText style={[styles.label, { color: colors.primary }]}>{t('poolContractLabel')}</AppText>
+            <AppText selectable style={[styles.address, { color: colors.primary, backgroundColor: colors.surface }]}>
               {getContractAddress()}
-            </Text>
+            </AppText>
           </>
         ) : (
-          <Text style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</Text>
+          <AppText style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
         )}
       </AppSubsection>
-      <AppSubsection title={t('subsectionPoolDeposit')} defaultOpen icon="deposit">
-        {!walletConnected && <Text style={[styles.warn, { color: colors.warnText }]}>{t('connectFirst')}</Text>}
-        {!tokenSupported && walletConnected && (
-          <Text style={[styles.warn, { color: colors.warnText }]}>{t('tokenNotEnabled')}</Text>
-        )}
-        <Text style={[styles.label, { color: colors.primary }]}>{t('amountDeposit')} ({tokenSymbol})</Text>
-        <TextInput
-          value={depositAmount}
-          onChangeText={setDepositAmount}
-          keyboardType="decimal-pad"
-          placeholder="10"
-          editable={!blocked}
-          placeholderTextColor={colors.textMuted}
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBg,
-              borderColor: colors.inputBorder,
-              color: colors.text,
-            },
-          ]}
-        />
-        <TouchableOpacity
-          disabled={blocked}
-          onPress={() => onDepositPool(depositAmount)}
-          style={[styles.button, { backgroundColor: colors.primary }, blocked && { backgroundColor: colors.chip }]}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <View style={styles.buttonRow}>
-              <AppIcon name="deposit" size={18} color="#fff" />
-              <Text style={styles.buttonText}>{t('depositPool')}</Text>
-            </View>
+      {allowDeposit ? (
+        <AppSubsection title={t('subsectionPoolDeposit')} defaultOpen icon="deposit">
+          {!walletConnected && <AppText style={[styles.warn, { color: colors.warnText }]}>{t('connectFirst')}</AppText>}
+          {!tokenSupported && walletConnected && (
+            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('tokenNotEnabled')}</AppText>
           )}
-        </TouchableOpacity>
-      </AppSubsection>
+          <AppText style={[styles.label, { color: colors.primary }]}>{t('amountDeposit')} ({tokenSymbol})</AppText>
+          <AppTextInput
+            value={depositAmount}
+            onChangeText={setDepositAmount}
+            keyboardType="decimal-pad"
+            placeholder="10"
+            editable={!blocked}
+            placeholderTextColor={colors.textMuted}
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.inputBg,
+                borderColor: colors.inputBorder,
+                color: colors.text,
+              },
+            ]}
+          />
+          <TouchableOpacity
+            disabled={blocked}
+            onPress={() => onDepositPool(depositAmount)}
+            style={[styles.button, { backgroundColor: colors.primary }, blocked && { backgroundColor: colors.chip }]}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <View style={styles.buttonRow}>
+                <AppIcon name="deposit" size={18} color="#fff" />
+                <AppText style={styles.buttonText}>{t('depositPool')}</AppText>
+              </View>
+            )}
+          </TouchableOpacity>
+        </AppSubsection>
+      ) : null}
     </View>
   );
 };

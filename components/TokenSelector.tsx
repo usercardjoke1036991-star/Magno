@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Token } from '../hooks/useWeb3Balances';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { TokenLogo } from './icons';
+import { AppText } from './AppText';
 
 interface TokenSelectorProps {
   tokens: Token[];
@@ -22,7 +23,7 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
     <View style={styles.tokenSelector}>
       <View style={styles.titleRow}>
         <TokenLogo symbol={selectedToken.symbol} size={18} />
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('selectToken')}</Text>
+        <AppText style={[styles.sectionTitle, { color: colors.text }]}>{t('selectToken')}</AppText>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {tokens.map((token) => (
@@ -39,14 +40,14 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
             onPress={() => onSelectToken(token)}
           >
             <TokenLogo symbol={token.symbol} size={18} />
-            <Text
+            <AppText
               style={[
                 styles.tokenButtonText,
                 { color: selectedToken.symbol === token.symbol ? colors.text : colors.textMuted },
               ]}
             >
               {token.symbol}
-            </Text>
+            </AppText>
           </TouchableOpacity>
         ))}
       </ScrollView>

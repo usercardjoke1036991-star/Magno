@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Alert, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Share, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { copyText } from '../utils/copyText';
 import { formatAddress } from '../utils/formatters';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { useAppMode } from '../wallet/AppModeContext';
 import { BrandLogo } from './BrandLogo';
 import { AppIcon, TokenLogo } from './icons';
 import { TransferWalletsModal } from './TransferWalletsModal';
 import type { Token } from '../constants/tokens';
+import { AppText } from './AppText';
 
 interface WalletSectionProps {
   walletAddress: string;
@@ -30,6 +32,8 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { mode } = useAppMode();
+  const isDemo = mode === 'demo';
   const [transferMode, setTransferMode] = useState<'in' | 'out' | null>(null);
 
   const copyAddress = async () => {
@@ -54,7 +58,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
   if (!walletAddress) {
     return (
       <View style={[styles.warnBox, { backgroundColor: colors.warnBg }]}>
-        <Text style={[styles.warn, { color: colors.warnText }]}>{t('appWalletLoading')}</Text>
+        <AppText style={[styles.warn, { color: colors.warnText }]}>{t('appWalletLoading')}</AppText>
       </View>
     );
   }
@@ -64,22 +68,24 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
       <View style={styles.walletInfo}>
         <BrandLogo size={44} />
         <View style={styles.grow}>
-          <Text style={[styles.walletLabel, { color: colors.textMuted }]}>{t('appWalletLabel')}</Text>
+          <AppText style={[styles.walletLabel, { color: colors.textMuted }]}>{t('appWalletLabel')}</AppText>
           <TouchableOpacity onPress={() => void copyAddress()} accessibilityRole="button" accessibilityLabel={t('copyAddress')}>
-            <Text style={[styles.walletAddress, { color: colors.text }]}>{formatAddress(walletAddress)}</Text>
+            <AppText style={[styles.walletAddress, { color: colors.text }]}>{formatAddress(walletAddress)}</AppText>
           </TouchableOpacity>
         </View>
         <View style={styles.balanceContainer}>
-          <Text style={[styles.balanceLabel, { color: colors.textMuted }]}>{t('bnbBalance')}</Text>
+          <AppText style={[styles.balanceLabel, { color: colors.textMuted }]}>{t('bnbBalance')}</AppText>
           <View style={styles.bnbRow}>
             <TokenLogo symbol="BNB" size={16} />
-            <Text style={[styles.balanceValue, { color: colors.connect }]}>{bnbBalance} BNB</Text>
+            <AppText style={[styles.balanceValue, { color: colors.connect }]}>{bnbBalance} BNB</AppText>
           </View>
         </View>
       </View>
-      <Text style={[styles.hint, { color: colors.textMuted }]}>{t('appWalletLead')}</Text>
-      {Number(bnbBalance) <= 0 ? (
-        <Text style={[styles.warn, { color: colors.warnText }]}>{t('appWalletNeedGas')}</Text>
+      <AppText style={[styles.hint, { color: colors.textMuted }]}>
+        {isDemo ? t('appWalletLeadDemo') : t('appWalletLead')}
+      </AppText>
+      {!isDemo && Number(bnbBalance) <= 0 ? (
+        <AppText style={[styles.warn, { color: colors.warnText }]}>{t('appWalletNeedGas')}</AppText>
       ) : null}
       <View style={styles.row}>
         <TouchableOpacity
@@ -90,7 +96,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
         >
           <View style={styles.actionRow}>
             <AppIcon name="copy" size={16} color="#fff" />
-            <Text style={styles.actionText}>{t('copyAddress')}</Text>
+            <AppText style={styles.actionText}>{t('copyAddress')}</AppText>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -101,44 +107,48 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
         >
           <View style={styles.actionRow}>
             <AppIcon name="share" size={16} color="#fff" />
-            <Text style={styles.actionText}>{t('appWalletShare')}</Text>
+            <AppText style={styles.actionText}>{t('appWalletShare')}</AppText>
           </View>
         </TouchableOpacity>
       </View>
-      <View style={styles.row}>
-        <TouchableOpacity
-          style={[styles.modeButton, { backgroundColor: colors.primary }]}
-          onPress={() => setTransferMode('in')}
-          accessibilityRole="button"
-          accessibilityLabel={t('appWalletInTitle')}
-        >
-          <Text style={styles.actionText}>{t('appWalletInTitle')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.modeButton, { backgroundColor: colors.primary }]}
-          onPress={() => setTransferMode('out')}
-          accessibilityRole="button"
-          accessibilityLabel={t('appWalletSendTitle')}
-        >
-          <Text style={styles.actionText}>{t('appWalletSendTitle')}</Text>
-        </TouchableOpacity>
-      </View>
+      {isDemo ? null : (
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[styles.modeButton, { backgroundColor: colors.primary }]}
+            onPress={() => setTransferMode('in')}
+            accessibilityRole="button"
+            accessibilityLabel={t('appWalletInTitle')}
+          >
+            <AppText style={styles.actionText}>{t('appWalletInTitle')}</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.modeButton, { backgroundColor: colors.primary }]}
+            onPress={() => setTransferMode('out')}
+            accessibilityRole="button"
+            accessibilityLabel={t('appWalletSendTitle')}
+          >
+            <AppText style={styles.actionText}>{t('appWalletSendTitle')}</AppText>
+          </TouchableOpacity>
+        </View>
+      )}
       {onConnectAdmin ? (
         <TouchableOpacity onPress={onConnectAdmin} accessibilityRole="button">
-          <Text style={[styles.hint, { color: colors.textMuted }]}>{t('appWalletAdminConnect')}</Text>
+          <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('appWalletAdminConnect')}</AppText>
         </TouchableOpacity>
       ) : null}
-      <TransferWalletsModal
-        visible={transferMode !== null}
-        mode={transferMode || 'in'}
-        walletAddress={walletAddress}
-        tokenBalance={tokenBalance}
-        bnbBalance={bnbBalance}
-        selectedToken={selectedToken}
-        isLoading={isLoading}
-        onClose={() => setTransferMode(null)}
-        onSent={onSent}
-      />
+      {isDemo ? null : (
+        <TransferWalletsModal
+          visible={transferMode !== null}
+          mode={transferMode || 'in'}
+          walletAddress={walletAddress}
+          tokenBalance={tokenBalance}
+          bnbBalance={bnbBalance}
+          selectedToken={selectedToken}
+          isLoading={isLoading}
+          onClose={() => setTransferMode(null)}
+          onSent={onSent}
+        />
+      )}
     </View>
   );
 };

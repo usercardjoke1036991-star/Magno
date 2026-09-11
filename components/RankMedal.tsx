@@ -1,6 +1,7 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { getRankForLevel, type RankStyle } from '../constants/ranks';
+import { AppText } from './AppText';
 
 const RANK_LOGOS = {
   1: require('../assets/ranks/1.png'),
@@ -38,9 +39,9 @@ export const RankMedal: React.FC<RankMedalProps> = ({
     <View style={[styles.wrap, { opacity: dimmed ? 0.38 : 1 }]}>
       <Image source={RANK_LOGOS[clamped]} style={{ width: size, height: size }} resizeMode="contain" />
       {showLabel && label ? (
-        <Text style={[styles.label, { color: style.text }]} numberOfLines={1}>
+        <AppText style={[styles.label, { color: style.text }]} numberOfLines={1}>
           {label}
-        </Text>
+        </AppText>
       ) : null}
     </View>
   );

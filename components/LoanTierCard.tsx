@@ -1,13 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { LoanTier } from '../hooks/useWeb3Balances';
-import { formatUSD } from '../utils/formatters';
+import { formatCountdownClock, formatUSD } from '../utils/formatters';
+import { useLiveCooldown } from '../hooks/useLiveCooldown';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { RankMedal } from './RankMedal';
 import { AppIcon } from './icons';
 import { directCommissionFromLoan, formatCommissionUSD, ACTIVATION_BONUS_USD } from '../constants/commissions';
+import { AppText } from './AppText';
 
 interface LoanTierCardProps {
   tier: LoanTier;
@@ -23,6 +25,7 @@ interface LoanTierCardProps {
   isDelinquent?: boolean;
   paused?: boolean;
   curveRateBps?: number;
+  ultimoPrestamoTimestamp?: number;
   onRequestLoan: (tier: LoanTier) => void;
   onPayLoan: () => void;
   onPayAll?: () => void;
@@ -43,6 +46,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   isDelinquent = false,
   paused = false,
   curveRateBps = 0,
+  ultimoPrestamoTimestamp = 0,
   onRequestLoan,
   onPayAll,
   onPayCount,
@@ -63,6 +67,9 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const referralEarn = formatCommissionUSD(directCommissionFromLoan(tier.usdAmount, appliedBps));
   const curveRaisesRate = appliedBps > tier.interestBps;
   const remainingInstallments = Math.max(0, cuotasTotales - cuotasPagadas);
+  const cooldownLeft = useLiveCooldown(ultimoPrestamoTimestamp);
+  const waitingNextLoan = cooldownLeft > 0 && !hasActiveLoan && !locked;
+  const requestBlocked = isLoading || locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan;
 
   return (
     <View style={[
@@ -78,62 +85,62 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
         <View style={styles.titleBlock}>
           <RankMedal level={tier.id} rank={rank} size={36} dimmed={locked} />
           <View style={styles.titleText}>
-            <Text style={[styles.rankName, { color: colors.textMuted }]}>{rankLabel}</Text>
-            <Text style={[styles.tierTitle, { color: colors.text }]}>{tier.name}</Text>
+            <AppText style={[styles.rankName, { color: colors.textMuted }]}>{rankLabel}</AppText>
+            <AppText style={[styles.tierTitle, { color: colors.text }]}>{tier.name}</AppText>
           </View>
         </View>
         {locked ? (
-          <Text style={[styles.metaBadge, { color: colors.textMuted }]}>{t('loanLockedBadge')}</Text>
+          <AppText style={[styles.metaBadge, { color: colors.textMuted }]}>{t('loanLockedBadge')}</AppText>
         ) : (
-          <Text style={[styles.metaBadge, { color: colors.success }]}>{t('loanUnlockedBadge')}</Text>
+          <AppText style={[styles.metaBadge, { color: colors.success }]}>{t('loanUnlockedBadge')}</AppText>
         )}
       </View>
 
-      <Text style={[styles.tierAmount, { color: colors.text }]}>{formatUSD(tier.usdAmount)}</Text>
-      <Text style={[styles.tierRate, { color: colors.text }]}>
+      <AppText style={[styles.tierAmount, { color: colors.text }]}>{formatUSD(tier.usdAmount)}</AppText>
+      <AppText style={[styles.tierRate, { color: colors.text }]}>
         {t('interestRate', { rate: String(appliedBps / 100) })}
-      </Text>
+      </AppText>
       {curveRaisesRate ? (
-        <Text style={[styles.tierMeta, { color: colors.textMuted }]}>
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>
           {t('interestRateCurveNote', { floor: String(tier.interestBps / 100) })}
-        </Text>
+        </AppText>
       ) : null}
-      <Text style={[styles.tierMeta, { color: colors.textMuted }]}>
+      <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>
         {t('interestAmount', { amount: formatUSD(interest) })}
-      </Text>
-      <Text style={[styles.tierTotal, { color: colors.text }]}>
+      </AppText>
+      <AppText style={[styles.tierTotal, { color: colors.text }]}>
         {t('totalRepay', { amount: formatUSD(totalRepay) })}
-      </Text>
+      </AppText>
       {installments > 1 ? (
-        <Text style={[styles.tierMeta, { color: colors.textMuted }]}>
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>
           {t('installmentPlan', { count: installments, amount: cuotaPreview })}
-        </Text>
+        </AppText>
       ) : (
-        <Text style={[styles.tierMeta, { color: colors.textMuted }]}>{t('repayOnce')}</Text>
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('repayOnce')}</AppText>
       )}
-      <Text style={[styles.tierMeta, { color: colors.textMuted }]}>{t('term')}: {tier.term}</Text>
+      <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('term')}: {tier.term}</AppText>
       {isMaxLevel ? (
-        <Text style={[styles.tierMeta, { color: colors.textMuted }]}>{t('maxLevelNote')}</Text>
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('maxLevelNote')}</AppText>
       ) : (
-        <Text style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payOnTimeToLevel', { count: tier.requiredCount })}</Text>
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payOnTimeToLevel', { count: tier.requiredCount })}</AppText>
       )}
-      <Text style={[styles.earnNote, { color: colors.textMuted }]}>
+      <AppText style={[styles.earnNote, { color: colors.textMuted }]}>
         {tier.id === 1
           ? t('referralEarnLevel1', {
               bonus: formatCommissionUSD(ACTIVATION_BONUS_USD),
               amount: referralEarn,
             })
           : t('referralEarnLevel', { amount: referralEarn })}
-      </Text>
+      </AppText>
 
       <View style={styles.tierActions}>
         {isActiveTier && hasActiveLoan ? (
           <>
             {remainingLabel && remainingInstallments > 1 && (
-              <Text style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payChoiceLead')}</Text>
+              <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payChoiceLead')}</AppText>
             )}
             {remainingLabel && remainingInstallments > 1 && (
-              <Text style={[styles.tierMeta, { color: colors.textMuted }]}>{t('remainingDebt', { amount: remainingLabel })}</Text>
+              <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('remainingDebt', { amount: remainingLabel })}</AppText>
             )}
             <TouchableOpacity
               disabled={isLoading}
@@ -145,7 +152,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
               ) : (
                 <View style={styles.btnRow}>
                   <AppIcon name="pay" size={16} color={colors.onPrimary} />
-                  <Text style={[styles.btnText, { color: colors.onPrimary }]}>
+                  <AppText style={[styles.btnText, { color: colors.onPrimary }]}>
                     {cuotasTotales > 1
                       ? t('payInstallment', {
                           current: cuotasPagadas + 1,
@@ -153,7 +160,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                           amount: cuotaLabel || dueLabel || t('debt'),
                         })
                       : `${t('pay')} ${dueLabel || t('debt')}`}
-                  </Text>
+                  </AppText>
                 </View>
               )}
             </TouchableOpacity>
@@ -163,7 +170,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                 onPress={() => onPayCount(2)}
                 style={[styles.btn, styles.btnSecond, { borderColor: colors.border, backgroundColor: colors.surface }]}
               >
-                <Text style={[styles.btnText, { color: colors.text }]}>{t('payNInstallments', { count: 2 })}</Text>
+                <AppText style={[styles.btnText, { color: colors.text }]}>{t('payNInstallments', { count: 2 })}</AppText>
               </TouchableOpacity>
             ) : null}
             {remainingInstallments > 1 && onPayAll ? (
@@ -172,19 +179,19 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                 onPress={onPayAll}
                 style={[styles.btn, styles.btnSecond, { borderColor: colors.border, backgroundColor: colors.surface }]}
               >
-                <Text style={[styles.btnText, { color: colors.text }]}>
+                <AppText style={[styles.btnText, { color: colors.text }]}>
                   {t('payAllNow', { amount: remainingLabel || dueLabel || t('debt') })}
-                </Text>
+                </AppText>
               </TouchableOpacity>
             ) : null}
           </>
         ) : (
           <TouchableOpacity
-            disabled={isLoading || locked || hasActiveLoan || isDelinquent || paused}
+            disabled={requestBlocked}
             onPress={() => onRequestLoan(tier)}
             style={[
               styles.btn,
-              locked || hasActiveLoan || isDelinquent || paused
+              locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan
                 ? { backgroundColor: colors.chip }
                 : { backgroundColor: colors.primary },
             ]}
@@ -194,16 +201,22 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
             ) : (
               <View style={styles.btnRow}>
                 <AppIcon
-                  name={locked || isDelinquent || paused ? 'lock' : 'bank'}
+                  name={locked || isDelinquent || paused || waitingNextLoan ? 'lock' : 'bank'}
                   size={16}
-                  color={locked || hasActiveLoan || isDelinquent || paused ? colors.textMuted : colors.onPrimary}
+                  color={
+                    locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan
+                      ? colors.textMuted
+                      : colors.onPrimary
+                  }
                 />
-                <Text
+                <AppText
                   style={[
                     styles.btnText,
                     {
                       color:
-                        locked || hasActiveLoan || isDelinquent || paused ? colors.textMuted : colors.onPrimary,
+                        locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan
+                          ? colors.textMuted
+                          : colors.onPrimary,
                     },
                   ]}
                 >
@@ -211,10 +224,12 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                     ? t('actionPaused')
                     : isDelinquent
                       ? t('delinquent')
-                      : hasActiveLoan && unlocked
-                        ? t('loanBusy')
-                        : t('requestUncollateralized')}
-                </Text>
+                      : waitingNextLoan
+                        ? t('requestWait', { time: formatCountdownClock(cooldownLeft) })
+                        : hasActiveLoan && unlocked
+                          ? t('loanBusy')
+                          : t('requestUncollateralized')}
+                </AppText>
               </View>
             )}
           </TouchableOpacity>

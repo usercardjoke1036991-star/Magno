@@ -3,8 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,6 +13,7 @@ import { notifyApiConfigured, requestPhoneOtp, verifyPhoneOtp } from '../service
 import { isValidPhone, normalizePhone } from '../services/notificationProfile';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { humanizeTxError } from '../utils/txErrors';
+import { AppText, AppTextInput } from './AppText';
 
 interface PhoneOtpSectionProps {
   walletAddress: string;
@@ -98,30 +97,30 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('otpLead')}</Text>
-      <Text style={[styles.note, { color: colors.textMuted }]}>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('otpLead')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>
         {t('otpWorldNote')}
-      </Text>
+      </AppText>
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
-          <Text style={[styles.doneText, { color: colors.text }]}>
+          <AppText style={[styles.doneText, { color: colors.text }]}>
             {t('otpDone')}
-          </Text>
+          </AppText>
           <TouchableOpacity onPress={() => setEditing(true)}>
-            <Text style={[styles.change, { color: colors.primary }]}>{t('otpChange')}</Text>
+            <AppText style={[styles.change, { color: colors.primary }]}>{t('otpChange')}</AppText>
           </TouchableOpacity>
         </View>
       ) : (
         <View>
           {!isRegistered ? (
-            <Text style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</Text>
+            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</AppText>
           ) : null}
           {!apiReady ? (
-            <Text style={[styles.warn, { color: colors.warnText }]}>{t('otpNeedApi')}</Text>
+            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('otpNeedApi')}</AppText>
           ) : null}
-          <Text style={[styles.label, { color: colors.text }]}>{t('otpPhone')}</Text>
-          <TextInput
+          <AppText style={[styles.label, { color: colors.text }]}>{t('otpPhone')}</AppText>
+          <AppTextInput
             value={phone}
             onChangeText={setPhone}
             editable={!blocked}
@@ -142,13 +141,13 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
             {busy && !sent ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>{sent ? t('otpResend') : t('otpSend')}</Text>
+              <AppText style={styles.buttonText}>{sent ? t('otpResend') : t('otpSend')}</AppText>
             )}
           </TouchableOpacity>
           {sent ? (
             <>
-              <Text style={[styles.label, { color: colors.text }]}>{t('otpCode')}</Text>
-              <TextInput
+              <AppText style={[styles.label, { color: colors.text }]}>{t('otpCode')}</AppText>
+              <AppTextInput
                 value={code}
                 onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
                 editable={!blocked}
@@ -170,12 +169,12 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
                 {busy && sent ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>{paused ? t('actionPaused') : t('otpConfirm')}</Text>
+                  <AppText style={styles.buttonText}>{paused ? t('actionPaused') : t('otpConfirm')}</AppText>
                 )}
               </TouchableOpacity>
             </>
           ) : null}
-          {error ? <Text style={[styles.warn, { color: colors.danger }]}>{error}</Text> : null}
+          {error ? <AppText style={[styles.warn, { color: colors.danger }]}>{error}</AppText> : null}
         </View>
       )}
     </View>

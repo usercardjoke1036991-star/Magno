@@ -3,9 +3,11 @@
  * Extraído de app/index.tsx para reducir complejidad del componente raíz.
  * Cada handler valida precondiciones y delega al hook useWeb3Transactions.
  */
-import { formatUnits, parseEther, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
+import { Contract, formatUnits, parseEther, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
 import { Alert, Linking } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
+import { ERC20_ABI } from '../constants/contractConfig';
+import { getTokenMeta } from '../constants/tokens';
 import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { useWeb3Transactions } from './useWeb3Transactions';
 import { NOTIFY_API } from '../constants/appLinks';
@@ -40,6 +42,15 @@ async function waitForBnb(address: string, minWei: bigint, timeoutMs = 25_000): 
   }
   const last = await readOnChainBnb(address);
   return last !== null && last >= minWei;
+}
+
+async function tokenBalanceOf(token: string, wallet: string): Promise<bigint | null> {
+  try {
+    const erc20 = new Contract(token, ERC20_ABI, getProviderWithFallback());
+    return BigInt(await erc20.balanceOf(wallet));
+  } catch {
+    return null;
+  }
 }
 
 type AutoFundResult = 'funded' | 'enough' | 'fail';
@@ -314,15 +325,26 @@ export const useHomeHandlers = ({
     );
     const count = kind === 'all' ? left : kind === 'installment' ? 1 : kind;
 
+    const assertEnoughToPay = async (amountWei: string) => {
+      if (isDemoAccount() || !walletAddress) return true;
+      const meta = getTokenMeta(loanToken) || selectedToken;
+      let available = Number(balances.tokenBalance);
+      if (loanToken.toLowerCase() !== selectedToken.address.toLowerCase()) {
+        const raw = await tokenBalanceOf(loanToken, walletAddress);
+        if (raw === null) return true;
+        available = Number(formatUnits(raw, meta.decimals));
+      }
+      const needed = Number(formatUnits(amountWei, meta.decimals));
+      if (needed > available + 1e-8) {
+        Alert.alert(t('amount'), t('amountExceedsBalance'));
+        return false;
+      }
+      return true;
+    };
+
     if (count >= left) {
       const amountWei = userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
-      if (!isDemoAccount() && loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
-        const needed = Number(formatUnits(amountWei, selectedToken.decimals));
-        if (needed > Number(balances.tokenBalance) + 1e-8) {
-          Alert.alert(t('amount'), t('amountExceedsBalance'));
-          return;
-        }
-      }
+      if (!(await assertEnoughToPay(amountWei))) return;
       const result = await pagarPrestamo(amountWei, loanToken);
       if (result.success) refetch();
       return;
@@ -331,13 +353,7 @@ export const useHomeHandlers = ({
     if (count <= 1) {
       const amountWei =
         userInfo.activeLoan.cuotaWei || userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
-      if (!isDemoAccount() && loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
-        const needed = Number(formatUnits(amountWei, selectedToken.decimals));
-        if (needed > Number(balances.tokenBalance) + 1e-8) {
-          Alert.alert(t('amount'), t('amountExceedsBalance'));
-          return;
-        }
-      }
+      if (!(await assertEnoughToPay(amountWei))) return;
       const result = await pagarPrestamo(amountWei, loanToken);
       if (result.success) refetch();
       return;

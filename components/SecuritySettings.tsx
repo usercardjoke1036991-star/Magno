@@ -4,8 +4,6 @@ import {
   Alert,
   StyleSheet,
   Switch,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -36,6 +34,7 @@ import {
 import { useAppMode } from '../wallet/AppModeContext';
 import { isCreditReady } from '../constants/rpcConfig';
 import type { TranslationKey } from '../i18n/translations';
+import { AppText, AppTextInput } from './AppText';
 
 type RowStatus = 'done' | 'todo' | 'warn';
 type Panel = 'menu' | 'kyc' | 'pin' | 'access' | 'phrase' | 'phone' | 'replace';
@@ -257,10 +256,10 @@ export const SecuritySettings: React.FC = () => {
         color={status === 'done' ? colors.success : status === 'warn' ? colors.danger : colors.primary}
       />
       <View style={styles.rowText}>
-        <Text style={[styles.rowLabel, { color: colors.text }]}>{label}</Text>
-        <Text style={[styles.rowHint, { color: colors.textMuted }]}>{hint}</Text>
+        <AppText style={[styles.rowLabel, { color: colors.text }]}>{label}</AppText>
+        <AppText style={[styles.rowHint, { color: colors.textMuted }]}>{hint}</AppText>
       </View>
-      <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
+      <AppText style={[styles.chevron, { color: colors.textMuted }]}>›</AppText>
     </TouchableOpacity>
   );
 
@@ -283,10 +282,10 @@ export const SecuritySettings: React.FC = () => {
           }}
           accessibilityRole="button"
         >
-          <Text style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</Text>
+          <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
         </TouchableOpacity>
-        <Text style={[styles.section, { color: colors.text }]}>{t(panelTitle[panel])}</Text>
-        {panel === 'kyc' ? (
+        <AppText style={[styles.section, { color: colors.text }]}>{t(panelTitle[panel])}</AppText>
+        {panel === 'kyc' && !demoAccount ? (
           <KycSection
             walletAddress={address}
             isRegistered={userInfo.isRegistered}
@@ -297,7 +296,7 @@ export const SecuritySettings: React.FC = () => {
           />
         ) : null}
         {panel === 'pin' ? <LockSettings hideLead /> : null}
-        {panel === 'phone' ? (
+        {panel === 'phone' && !demoAccount ? (
           <PhoneOtpSection
             walletAddress={address}
             isRegistered={userInfo.isRegistered}
@@ -312,16 +311,16 @@ export const SecuritySettings: React.FC = () => {
         ) : null}
         {panel === 'phrase' ? (
           <View>
-            <Text style={[styles.lead, { color: colors.textMuted }]}>{t('seedLead')}</Text>
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedLead')}</AppText>
             {!hasPhrase ? (
-              <Text style={[styles.lead, { color: colors.warnText }]}>{t('seedMissing')}</Text>
+              <AppText style={[styles.lead, { color: colors.warnText }]}>{t('seedMissing')}</AppText>
             ) : shown && phrase ? (
               <View style={[styles.phraseBox, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-                <Text style={[styles.phrase, { color: colors.text }]}>
+                <AppText style={[styles.phrase, { color: colors.text }]}>
                   {phrase}
-                </Text>
+                </AppText>
                 <TouchableOpacity onPress={confirmBackup} style={[styles.button, { backgroundColor: colors.primary }]}>
-                  <Text style={styles.buttonText}>{t('seedConfirmSaved')}</Text>
+                  <AppText style={styles.buttonText}>{t('seedConfirmSaved')}</AppText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -330,7 +329,7 @@ export const SecuritySettings: React.FC = () => {
                   }}
                   style={[styles.button, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}
                 >
-                  <Text style={[styles.buttonText, { color: colors.text }]}>{t('seedHide')}</Text>
+                  <AppText style={[styles.buttonText, { color: colors.text }]}>{t('seedHide')}</AppText>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -359,7 +358,7 @@ export const SecuritySettings: React.FC = () => {
                     (pinSet ? revealPin.length !== 6 : !revealPassword) && { backgroundColor: colors.chip },
                   ]}
                 >
-                  <Text style={styles.buttonText}>{t('seedReveal')}</Text>
+                  <AppText style={styles.buttonText}>{t('seedReveal')}</AppText>
                 </TouchableOpacity>
               </>
             )}
@@ -367,11 +366,11 @@ export const SecuritySettings: React.FC = () => {
         ) : null}
         {panel === 'replace' ? (
           <View>
-            <Text style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountLead')}</Text>
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountLead')}</AppText>
             {accountBlocked ? (
-              <Text style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyBlocked')}</Text>
+              <AppText style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyBlocked')}</AppText>
             ) : null}
-            <TextInput
+            <AppTextInput
               value={destroyWord}
               onChangeText={setDestroyWord}
               autoCapitalize="characters"
@@ -400,9 +399,9 @@ export const SecuritySettings: React.FC = () => {
                 (busy || accountBlocked) && styles.destroyDisabled,
               ]}
             >
-              <Text style={[styles.buttonText, accountBlocked && styles.destroyDisabledText]}>
+              <AppText style={[styles.buttonText, accountBlocked && styles.destroyDisabledText]}>
                 {t('appWalletDestroy')}
-              </Text>
+              </AppText>
             </TouchableOpacity>
             <TouchableOpacity
               disabled={accountBlocked}
@@ -410,14 +409,14 @@ export const SecuritySettings: React.FC = () => {
               accessibilityRole="button"
               accessibilityState={{ disabled: accountBlocked, expanded: showRestore }}
             >
-              <Text style={[styles.label, { color: accountBlocked ? colors.textMuted : colors.primary }]}>
+              <AppText style={[styles.label, { color: accountBlocked ? colors.textMuted : colors.primary }]}>
                 {t('seedRestoreToggle')}
-              </Text>
+              </AppText>
             </TouchableOpacity>
             {showRestore && !accountBlocked ? (
               <>
-                <Text style={[styles.lead, { color: colors.textMuted }]}>{t('seedRestoreLead')}</Text>
-                <TextInput
+                <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedRestoreLead')}</AppText>
+                <AppTextInput
                   value={restorePhrase}
                   onChangeText={setRestorePhrase}
                   autoCapitalize="none"
@@ -445,7 +444,7 @@ export const SecuritySettings: React.FC = () => {
                     (busy || (pinSet && restorePin.length !== 6)) && styles.destroyDisabled,
                   ]}
                 >
-                  {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('seedRestoreAction')}</Text>}
+                  {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRestoreAction')}</AppText>}
                 </TouchableOpacity>
               </>
             ) : null}
@@ -457,16 +456,18 @@ export const SecuritySettings: React.FC = () => {
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>
         {demoAccount ? t('securityLeadDemo') : t('securityLead')}
-      </Text>
+      </AppText>
+      {demoAccount ? null : (
       <Row
         icon="id"
-        label={demoAccount ? t('securityKycDemo') : t('securityKyc')}
-        hint={kycOk ? t('securityKycDone') : demoAccount ? t('securityKycDemoHint') : t('securityKycTodo')}
-        status={kycOk ? 'done' : demoAccount ? 'todo' : 'warn'}
+        label={t('securityKyc')}
+        hint={kycOk ? t('securityKycDone') : t('securityKycTodo')}
+        status={kycOk ? 'done' : 'warn'}
         onPress={() => setPanel('kyc')}
       />
+      )}
       <Row
         icon="lock"
         label={t('securityPin')}
@@ -488,18 +489,20 @@ export const SecuritySettings: React.FC = () => {
         status={backedUp ? 'done' : 'todo'}
         onPress={() => setPanel('phrase')}
       />
+      {demoAccount ? null : (
       <Row
         icon="phone"
-        label={demoAccount ? t('securityPhoneDemo') : t('securityPhone')}
-        hint={phoneOk ? t('securityPhoneDone') : demoAccount ? t('securityPhoneDemoHint') : t('securityPhoneTodo')}
-        status={phoneOk ? 'done' : demoAccount ? 'todo' : 'warn'}
+        label={t('securityPhone')}
+        hint={phoneOk ? t('securityPhoneDone') : t('securityPhoneTodo')}
+        status={phoneOk ? 'done' : 'warn'}
         onPress={() => setPanel('phone')}
       />
+      )}
       <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
         <AppIcon name="lock" size={16} color={colors.primary} />
         <View style={styles.rowText}>
-          <Text style={[styles.rowLabel, { color: colors.text }]}>{t('fundsConfirmTitle')}</Text>
-          <Text style={[styles.rowHint, { color: colors.textMuted }]}>{t('fundsConfirmLead')}</Text>
+          <AppText style={[styles.rowLabel, { color: colors.text }]}>{t('fundsConfirmTitle')}</AppText>
+          <AppText style={[styles.rowHint, { color: colors.textMuted }]}>{t('fundsConfirmLead')}</AppText>
         </View>
         <Switch
           value={fundsOn}

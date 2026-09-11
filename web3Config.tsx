@@ -1,11 +1,11 @@
 import '@walletconnect/react-native-compat';
 
-import React, { type ReactNode } from 'react';
+import React, { useEffect, type ReactNode } from 'react';
 import { createAppKit, AppKitProvider, type AppKitNetwork } from '@reown/appkit-react-native';
 import { EthersAdapter } from '@reown/appkit-ethers-react-native';
 import { BrowserProvider, type Eip1193Provider, type Signer } from 'ethers';
 import { appKitStorage } from './utils/appKitStorage';
-import { NETWORK_CONFIG, RPC_URLS, getRuntimeMode } from './constants/rpcConfig';
+import { NETWORK_CONFIG, RPC_URLS, getRuntimeMode, subscribeRuntimeMode } from './constants/rpcConfig';
 import { BSC_MAINNET, BSC_TESTNET } from './constants/bsc';
 
 const PROJECT_ID = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
@@ -73,6 +73,16 @@ export const appKit = createAppKit({
 });
 
 export function Web3Provider({ children }: { children: ReactNode }) {
+  useEffect(() => subscribeRuntimeMode(() => {
+    const next = getRuntimeMode() === 'live' ? bscMainnetNetwork : bscTestnetNetwork;
+    const kit = appKit as { switchNetwork?: (network: AppKitNetwork) => Promise<unknown> | unknown };
+    try {
+      void kit.switchNetwork?.(next);
+    } catch {
+      // AppKit de admin: si no expone switch, el signer de la app ya usa la red activa.
+    }
+  }), []);
+
   return <AppKitProvider instance={appKit}>{children}</AppKitProvider>;
 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -7,6 +7,7 @@ import { BrandLogo } from './BrandLogo';
 import { UsernameSection } from './UsernameSection';
 import { loadClaimedUsername } from '../services/accountUsername';
 import { useUserProfile } from '../profile/ProfileContext';
+import { AppText } from './AppText';
 
 interface AccountOnboardingProps {
   walletAddress: string;
@@ -58,10 +59,10 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   if (walletReady && !walletAddress) {
     return (
       <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center', paddingHorizontal: 24 }]}>
-        <Text style={[styles.title, { color: colors.text }]}>{t('appWalletFailed')}</Text>
+        <AppText style={[styles.title, { color: colors.text }]}>{t('appWalletFailed')}</AppText>
         {walletFailed && onRetryWallet ? (
           <TouchableOpacity onPress={() => onRetryWallet()} style={{ marginTop: 16, alignItems: 'center' }}>
-            <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '700' }}>{t('appWalletRetry')}</Text>
+            <AppText style={{ color: colors.primary, fontSize: 16, fontWeight: '700' }}>{t('appWalletRetry')}</AppText>
           </TouchableOpacity>
         ) : null}
       </SafeAreaView>
@@ -76,9 +77,9 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <BrandLogo size={64} style={styles.logo} />
-        <Text style={[styles.title, { color: colors.text }]}>{t('usernameTitle')}</Text>
-        <Text style={[styles.lead, { color: colors.textMuted }]}>{t('usernameLead')}</Text>
-        <Text style={[styles.step, { color: colors.primary }]}>{t('onboardStepUsername')}</Text>
+        <AppText style={[styles.title, { color: colors.text }]}>{t('usernameTitle')}</AppText>
+        <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('usernameLead')}</AppText>
+        <AppText style={[styles.step, { color: colors.primary }]}>{t('onboardStepUsername')}</AppText>
         <UsernameSection
           walletAddress={walletAddress}
           claimedUsername={username}

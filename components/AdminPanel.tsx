@@ -1,12 +1,13 @@
 import { isAddress } from 'ethers';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { formatAddress } from '../utils/formatters';
 import type { OpenAdminProposal } from '../utils/adminProposal';
 import type { ConfigurableStable } from '../constants/tokens';
+import { AppText, AppTextInput } from './AppText';
 
 interface AdminPanelProps {
   isOwner: boolean;
@@ -115,26 +116,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   return (
     <View>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('adminLead')}</Text>
-      {paused ? <Text style={[styles.paused, { color: colors.danger }]}>{t('protocolPaused')}</Text> : null}
-      <Text style={[styles.meta, { color: colors.textMuted }]}>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminLead')}</AppText>
+      {paused ? <AppText style={[styles.paused, { color: colors.danger }]}>{t('protocolPaused')}</AppText> : null}
+      <AppText style={[styles.meta, { color: colors.textMuted }]}>
         {t('adminRoster', {
           count: adminRoster.length,
           confirms: requiredConfirmations,
           proposal: proposalCount,
         })}
-      </Text>
+      </AppText>
       {adminRoster.map((item) => {
         const isFounderWallet = founderAddress && item.toLowerCase() === founderAddress.toLowerCase();
         return (
-          <Text key={item} style={[styles.meta, { color: colors.text }]}>
+          <AppText key={item} style={[styles.meta, { color: colors.text }]}>
             {formatAddress(item)} · {isFounderWallet ? t('adminRoleFounder') : t('adminRoleCofounder')}
-          </Text>
+          </AppText>
         );
       })}
 
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('adminAddFoundersLead')}</Text>
-      <TextInput
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminAddFoundersLead')}</AppText>
+      <AppTextInput
         value={draft}
         onChangeText={setDraft}
         autoCapitalize="none"
@@ -149,7 +150,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onPress={() => proposeWithAddress(onProposeAddAdmin)}
           style={[styles.button, { backgroundColor: colors.chip }]}
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>{t('adminAdd')}</Text>
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminAdd')}</AppText>
         </TouchableOpacity>
       ) : null}
       {onProposeRemoveAdmin ? (
@@ -158,7 +159,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onPress={() => proposeWithAddress(onProposeRemoveAdmin)}
           style={[styles.button, { backgroundColor: colors.chip }]}
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>{t('adminRemove')}</Text>
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminRemove')}</AppText>
         </TouchableOpacity>
       ) : null}
       {onProposeFundador ? (
@@ -167,7 +168,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onPress={() => proposeWithAddress(onProposeFundador)}
           style={[styles.button, { backgroundColor: colors.chip }]}
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>{t('adminSetFundador')}</Text>
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminSetFundador')}</AppText>
         </TouchableOpacity>
       ) : null}
       {onProposeOwner ? (
@@ -176,7 +177,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onPress={() => proposeWithAddress(onProposeOwner)}
           style={[styles.button, { backgroundColor: colors.chip }]}
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>{t('adminSetOwner')}</Text>
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminSetOwner')}</AppText>
         </TouchableOpacity>
       ) : null}
       {onProposeFeeCollector ? (
@@ -185,7 +186,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onPress={() => proposeWithAddress(onProposeFeeCollector)}
           style={[styles.button, { backgroundColor: colors.chip }]}
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>{t('adminFeeCollector')}</Text>
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminFeeCollector')}</AppText>
         </TouchableOpacity>
       ) : null}
       {onProposeConfirmations && adminRoster.length < 3 ? (
@@ -195,23 +196,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             onPress={() => confirmToggle(true, () => onProposeConfirmations(1))}
             style={[styles.button, styles.half, { backgroundColor: colors.chip }]}
           >
-            <Text style={[styles.buttonText, { color: colors.text }]}>{t('adminConfirms1')}</Text>
+            <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminConfirms1')}</AppText>
           </TouchableOpacity>
           <TouchableOpacity
             disabled={isLoading}
             onPress={() => confirmToggle(true, () => onProposeConfirmations(2))}
             style={[styles.button, styles.half, { backgroundColor: colors.chip }]}
           >
-            <Text style={[styles.buttonText, { color: colors.text }]}>{t('adminConfirms2')}</Text>
+            <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminConfirms2')}</AppText>
           </TouchableOpacity>
         </View>
       ) : null}
       {adminRoster.length >= 3 ? (
-        <Text style={[styles.note, { color: colors.textMuted }]}>{t('adminTwoOfThree')}</Text>
+        <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminTwoOfThree')}</AppText>
       ) : null}
       {onProposeSetTokenConfig && extraStables.length ? (
         <>
-          <Text style={[styles.note, { color: colors.textMuted }]}>{t('adminEnableTokenLead')}</Text>
+          <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminEnableTokenLead')}</AppText>
           {extraStables.map((stable) => (
             <TouchableOpacity
               key={stable.address}
@@ -221,15 +222,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               }
               style={[styles.button, { backgroundColor: colors.chip }]}
             >
-              <Text style={[styles.buttonText, { color: colors.text }]}>
+              <AppText style={[styles.buttonText, { color: colors.text }]}>
                 {t('adminEnableToken', { symbol: stable.symbol })}
-              </Text>
+              </AppText>
             </TouchableOpacity>
           ))}
         </>
       ) : null}
       {openProposal ? (
-        <Text style={[styles.meta, { color: colors.text }]}>
+        <AppText style={[styles.meta, { color: colors.text }]}>
           {t('adminProposalMeta', {
             id: openProposal.id,
             selector: openProposal.selector,
@@ -239,9 +240,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 ? t('adminProposalReady')
                 : new Date(openProposal.eta * 1000).toLocaleString(),
           })}
-        </Text>
+        </AppText>
       ) : (
-        <Text style={[styles.meta, { color: colors.textMuted }]}>{t('adminProposalNone')}</Text>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('adminProposalNone')}</AppText>
       )}
       {isAdmin && onConfirmProposal && openProposal ? (
         <TouchableOpacity
@@ -249,7 +250,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onPress={() => onConfirmProposal(openProposal.id)}
           style={[styles.button, { backgroundColor: colors.chip }]}
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>{t('confirmAdminProposal')}</Text>
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('confirmAdminProposal')}</AppText>
         </TouchableOpacity>
       ) : null}
       {isAdmin && onExecuteProposal && openProposal ? (
@@ -261,7 +262,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {isLoading ? (
             <ActivityIndicator color={colors.text} size="small" />
           ) : (
-            <Text style={[styles.buttonText, { color: colors.text }]}>{t('executeAdminProposal')}</Text>
+            <AppText style={[styles.buttonText, { color: colors.text }]}>{t('executeAdminProposal')}</AppText>
           )}
         </TouchableOpacity>
       ) : null}
@@ -272,16 +273,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           ) : (
             <View style={styles.btnRow}>
               <AppIcon name="warning" size={16} color="#fff" />
-              <Text style={styles.buttonText}>{t('pauseProtocol')}</Text>
+              <AppText style={styles.buttonText}>{t('pauseProtocol')}</AppText>
             </View>
           )}
         </TouchableOpacity>
       ) : null}
       {(onLiquidar || onMarcarMoroso) ? (
         <>
-          <Text style={[styles.note, { color: colors.textMuted, marginTop: 16 }]}>{t('liquidarTitle')}</Text>
-          <Text style={[styles.meta, { color: colors.textMuted }]}>{t('liquidarLead')}</Text>
-          <TextInput
+          <AppText style={[styles.note, { color: colors.textMuted, marginTop: 16 }]}>{t('liquidarTitle')}</AppText>
+          <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('liquidarLead')}</AppText>
+          <AppTextInput
             value={debtorDraft}
             onChangeText={setDebtorDraft}
             autoCapitalize="none"
@@ -303,7 +304,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               }}
               style={[styles.button, { backgroundColor: colors.chip }]}
             >
-              <Text style={[styles.buttonText, { color: colors.text }]}>{t('marcarMorosoBtn')}</Text>
+              <AppText style={[styles.buttonText, { color: colors.text }]}>{t('marcarMorosoBtn')}</AppText>
             </TouchableOpacity>
           ) : null}
           {onLiquidar && tokenAddress ? (
@@ -324,7 +325,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               ) : (
                 <View style={styles.btnRow}>
                   <AppIcon name="warning" size={16} color="#fff" />
-                  <Text style={styles.buttonText}>{t('liquidarBtn')} ({tokenSymbol})</Text>
+                  <AppText style={styles.buttonText}>{t('liquidarBtn')} ({tokenSymbol})</AppText>
                 </View>
               )}
             </TouchableOpacity>
@@ -339,7 +340,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             ) : (
               <View style={styles.btnRow}>
                 <AppIcon name="withdraw" size={16} color={colors.onPrimary} />
-                <Text style={[styles.buttonText, { color: colors.onPrimary }]}>{t('withdrawBnb')}</Text>
+                <AppText style={[styles.buttonText, { color: colors.onPrimary }]}>{t('withdrawBnb')}</AppText>
               </View>
             )}
           </TouchableOpacity>
@@ -349,9 +350,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             ) : (
               <View style={styles.btnRow}>
                 <AppIcon name="withdraw" size={16} color={colors.onPrimary} />
-                <Text style={[styles.buttonText, { color: colors.onPrimary }]}>
+                <AppText style={[styles.buttonText, { color: colors.onPrimary }]}>
                   {t('withdrawFees')} ({tokenSymbol})
-                </Text>
+                </AppText>
               </View>
             )}
           </TouchableOpacity>
@@ -416,6 +417,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
-
 

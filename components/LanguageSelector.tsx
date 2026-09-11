@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { LANGUAGES } from '../i18n/languages';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
+import { AppText } from './AppText';
 
 export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = false }) => {
   const { lang, setLang, t, rtl } = useI18n();
@@ -12,7 +13,7 @@ export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel 
   return (
     <View style={styles.wrap}>
       {!hideLabel && (
-        <Text style={[styles.label, rtl && styles.rtlText, { color: colors.textMuted }]}>{t('language')}</Text>
+        <AppText style={[styles.label, rtl && styles.rtlText, { color: colors.textMuted }]}>{t('language')}</AppText>
       )}
       {LANGUAGES.map((item) => {
         const active = item.code === lang;
@@ -29,10 +30,10 @@ export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel 
             ]}
             onPress={() => setLang(item.code)}
           >
-            <Text style={styles.flag}>{item.flag}</Text>
+            <AppText style={styles.flag}>{item.flag}</AppText>
             <View style={styles.optionTextWrap}>
-              <Text style={[styles.optionText, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>{item.native}</Text>
-              <Text style={[styles.optionSub, { color: colors.textMuted, textAlign: rtl ? 'right' : 'left' }]}>{item.english}</Text>
+              <AppText style={[styles.optionText, { color: colors.text, textAlign: rtl ? 'right' : 'left' }]}>{item.native}</AppText>
+              <AppText style={[styles.optionSub, { color: colors.textMuted, textAlign: rtl ? 'right' : 'left' }]}>{item.english}</AppText>
             </View>
             {active ? <AppIcon name="check" size={16} color={colors.text} /> : null}
           </TouchableOpacity>

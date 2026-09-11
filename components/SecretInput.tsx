@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
   type KeyboardTypeOptions,
@@ -12,6 +11,7 @@ import {
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
+import { AppTextInput } from './AppText';
 
 interface SecretInputProps {
   value: string;
@@ -44,7 +44,7 @@ export const SecretInput: React.FC<SecretInputProps> = ({
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }, containerStyle]}>
-      <TextInput
+      <AppTextInput
         key={visible ? 'visible' : 'hidden'}
         value={value}
         onChangeText={onChangeText}

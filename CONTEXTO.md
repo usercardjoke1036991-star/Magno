@@ -190,7 +190,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Verificación | Estado | Detalle |
 |---|---|---|
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
-| `check-i18n.mjs` | ✅ OK | 640 claves · 17 locales · sin BOM · sin discrepancias |
+| `check-i18n.mjs` | ✅ OK | 661 claves · 17 locales · sin BOM · sin discrepancias |
 | `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
 | `hardhat test` | ✅ 81/81 | Incluye destroy + mora + identidad demo + gates + cooldown local |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
@@ -210,7 +210,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
-| 2026-09-11 | Auditoría final: signer se reconecta al cambiar Demo/Real; crédito/pool bloqueados sin contrato mainnet; saldos BNB/USDT reales aunque el crédito esté en preparación | Evitar `wrong-network`, botones activos en Real vacío y préstamo/LP de Demo pegados |
+| 2026-09-11 | Auditoría final: caché de préstamo se limpia al pagar; ficha activa por `tierId`; saldo de pago usa el token de la deuda; AppKit sigue Demo/Real; worker rota RPC | Evitar deuda fantasma, botón Pagar en la ficha equivocada y avisos parados por Ankr |
 | 2026-09-11 | Demo y Real son mundos distintos (testnet vs mainnet); logo en billetera Quatrivium | Real heredaba préstamo y saldo de Demo porque ambos leían el mismo contrato de prueba |
 | 2026-09-11 | Cooldown de préstamo en cliente + FallbackProvider `quorum: 1` | `obtenerCooldownRestante` cambiaba cada segundo y LogBox mostraba `quorum not met` |
 | 2026-09-11 | Modo Real vuelve a exigir KYC/teléfono; demo solo si se elige en Ajustes | `isDemoMode()` (testnet) ocultaba el KYC de las cuentas reales |

@@ -30,7 +30,6 @@ import { AppText } from '../components/AppText';
 import { PoolSupportSection } from '../components/PoolSupportSection';
 import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
-import { LOAN_TIERS } from '../constants/loanTiers';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isContractConfigured, isCreditReady } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
@@ -62,6 +61,12 @@ function HomeScreenWithHooks() {
   const extraStables = useMemo(() => getConfigurableStables(), [mode]);
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
   const [room, setRoom] = useState<HomeRoom | null>(null);
+
+  useEffect(() => {
+    if (mode === 'demo' && room === 'pool') {
+      setRoom(null);
+    }
+  }, [mode, room]);
 
   useEffect(() => {
     const allowed: HomeRoom[] = ['wallet', 'credit', 'loans', 'network', 'pool', 'admin'];
@@ -97,6 +102,7 @@ function HomeScreenWithHooks() {
   const debtReminder = useLoanPaymentReminders(userInfo);
   const creditReady = isCreditReady();
   const creditPaused = userInfo.paused || !creditReady;
+  const activeLoan = userInfo.activeLoan;
 
   const {
     txLoading,
@@ -227,7 +233,9 @@ function HomeScreenWithHooks() {
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
-            { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' },
+            ...(mode === 'demo'
+              ? []
+              : [{ id: 'pool' as const, title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' as const }]),
             ...(adminInfo.isOwner || adminInfo.isAdmin
               ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const }]
               : []),
@@ -266,7 +274,7 @@ function HomeScreenWithHooks() {
             />
           </AppSubsection>
         ) : null}
-        {isConnected ? (
+        {isConnected && mode !== 'demo' ? (
           <AppSubsection title={t('notificationTitle')} defaultOpen={false} icon="bell">
             <NotificationChannels walletAddress={walletAddress} />
           </AppSubsection>
@@ -354,20 +362,20 @@ function HomeScreenWithHooks() {
               hasActiveLoan={userInfo.hasActiveLoan}
                 isDelinquent={userInfo.isDelinquent}
                 paused={creditPaused}
-                isActiveTier={
-                Boolean(userInfo.activeLoan)
-                && parseUnits(
-                  String(LOAN_TIERS.find((item) => item.id === tier.id)?.usdAmount ?? 0),
-                  18
-                ).toString() === userInfo.activeLoan?.principalWei
-              }
-              dueLabel={userInfo.activeLoan?.totalDueLabel}
-              cuotaLabel={userInfo.activeLoan?.cuotaLabel}
-              cuotasPagadas={userInfo.activeLoan?.cuotasPagadas}
-              cuotasTotales={userInfo.activeLoan?.cuotasTotales}
-              remainingLabel={userInfo.activeLoan?.remainingLabel}
+                isActiveTier={Boolean(
+                activeLoan && (
+                  (activeLoan.tierId > 0 && activeLoan.tierId === tier.id)
+                  || parseUnits(String(tier.usdAmount), 18).toString() === activeLoan.principalWei
+                )
+              )}
+              dueLabel={activeLoan?.totalDueLabel}
+              cuotaLabel={activeLoan?.cuotaLabel}
+              cuotasPagadas={activeLoan?.cuotasPagadas}
+              cuotasTotales={activeLoan?.cuotasTotales}
+              remainingLabel={activeLoan?.remainingLabel}
               isLoading={txLoading}
               curveRateBps={userInfo.curveRateBps}
+              ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}
@@ -392,6 +400,7 @@ function HomeScreenWithHooks() {
                 isActiveTier={false}
                 isLoading={txLoading}
                 curveRateBps={userInfo.curveRateBps}
+                ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
                 onRequestLoan={handleSolicitarCredito}
                 onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}

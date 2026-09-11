@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, G, Path, Polygon, Rect } from 'react-native-svg';
 import { getRankForLevel, type RankStyle } from '../constants/ranks';
+import { AppText } from './AppText';
 
 interface RankFrameProps {
   level: number;
@@ -191,9 +192,9 @@ export const RankFrame: React.FC<RankFrameProps> = ({
         {children}
       </View>
       {showLabel && caption ? (
-        <Text style={[styles.caption, { color: rank.text }]} numberOfLines={1}>
+        <AppText style={[styles.caption, { color: rank.text }]} numberOfLines={1}>
           {caption}
-        </Text>
+        </AppText>
       ) : null}
     </View>
   );

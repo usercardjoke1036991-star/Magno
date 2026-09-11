@@ -1,26 +1,14 @@
 import { Platform, StyleSheet, type StyleProp, type TextStyle } from 'react-native';
 
-const INTER: Record<string, string> = {
-  '400': 'Inter_400Regular',
-  normal: 'Inter_400Regular',
-  '500': 'Inter_500Medium',
-  medium: 'Inter_500Medium',
-  '600': 'Inter_600SemiBold',
-  '700': 'Inter_700Bold',
-  bold: 'Inter_700Bold',
-  '800': 'Inter_700Bold',
-  '900': 'Inter_700Bold',
-};
-
-let interReady = false;
-
-export function setInterReady(ready: boolean) {
-  interReady = ready;
-}
+/**
+ * MIUI reemplaza sans-serif por MiSans (variable). Fabric mide y pinta
+ * con anchos distintos y duplica letras. Una sola cara embebida, sin peso.
+ */
+const ANDROID_FACE = 'Inter';
 
 /**
- * MIUI dibuja dos veces los glifos si el peso no tiene archivo de fuente.
- * Con Inter cargada se usa el TTF; si no, sans-serif-medium / bold nativos.
+ * MIUI sintetiza pesos 500/600 y duplica letras. Inter ya está cargada
+ * antes del primer frame (App espera useFonts).
  */
 export function remapAndroidTextStyle(style: StyleProp<TextStyle>): StyleProp<TextStyle> {
   if (Platform.OS !== 'android') return style;
@@ -31,26 +19,18 @@ export function remapAndroidTextStyle(style: StyleProp<TextStyle>): StyleProp<Te
     && family !== 'System'
     && family !== 'sans-serif'
     && family !== 'sans-serif-medium'
-    && !String(family).startsWith('Inter_')
+    && family !== 'Inter_400Regular'
+    && family !== 'Inter_500Medium'
+    && family !== 'Inter_600SemiBold'
+    && family !== 'Inter_700Bold'
+    && family !== ANDROID_FACE
   );
 
-  const next: TextStyle = { ...flat, includeFontPadding: false };
+  const next: TextStyle = { ...flat };
 
   if (!isCustom) {
-    const weight = String(flat.fontWeight ?? '400');
-    if (interReady) {
-      next.fontFamily = INTER[weight] || INTER['400'];
-      next.fontWeight = 'normal';
-    } else if (weight === '500' || weight === '600' || weight === 'medium') {
-      next.fontFamily = 'sans-serif-medium';
-      next.fontWeight = 'normal';
-    } else if (weight === '700' || weight === '800' || weight === '900' || weight === 'bold') {
-      next.fontFamily = 'sans-serif';
-      next.fontWeight = 'bold';
-    } else {
-      next.fontFamily = 'sans-serif';
-      next.fontWeight = 'normal';
-    }
+    next.fontFamily = ANDROID_FACE;
+    next.fontWeight = '400';
   }
 
   if (typeof next.letterSpacing === 'number' && Math.abs(next.letterSpacing) < 2) {
@@ -62,3 +42,6 @@ export function remapAndroidTextStyle(style: StyleProp<TextStyle>): StyleProp<Te
 
   return next;
 }
+
+/** @deprecated Las fuentes se esperan en App.js; se mantiene por imports viejos. */
+export function setInterReady(_ready: boolean) {}

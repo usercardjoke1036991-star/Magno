@@ -41,6 +41,23 @@ const CONTRACT = (() => {
 const RPC = isMainnet
   ? process.env.BSC_MAINNET_RPC_URL || process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY || BSC_MAINNET.rpc[0]
   : process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY || process.env.BSC_TESTNET_RPC_URL || BSC_TESTNET.rpc[0];
+const RPC_CANDIDATES = [...new Set(
+  [
+    RPC,
+    process.env.BSC_MAINNET_RPC_URL,
+    process.env.BSC_TESTNET_RPC_URL,
+    process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY,
+    process.env.EXPO_PUBLIC_BSC_RPC_URL_FALLBACK_1,
+    process.env.EXPO_PUBLIC_BSC_RPC_URL_FALLBACK_2,
+    ...(isMainnet ? BSC_MAINNET.rpc : BSC_TESTNET.rpc),
+  ].filter((url) => /^https:\/\//i.test(String(url || '')))
+)];
+let rpcCursor = 0;
+const nextRpc = () => {
+  if (RPC_CANDIDATES.length < 2) return RPC_CANDIDATES[0] || RPC;
+  rpcCursor = (rpcCursor + 1) % RPC_CANDIDATES.length;
+  return RPC_CANDIDATES[rpcCursor];
+};
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || '';
 const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
@@ -799,8 +816,9 @@ const watchChain = async () => {
     console.log('Avisos: falta contrato o RPC. El servidor de perfiles sigue activo.');
     return;
   }
-  const provider = new JsonRpcProvider(RPC);
-  const contract = new Contract(CONTRACT, ABI, provider);
+  let rpcUrl = RPC_CANDIDATES[0] || RPC;
+  let provider = new JsonRpcProvider(rpcUrl);
+  let contract = new Contract(CONTRACT, ABI, provider);
   if (!store.lastBlock) {
     const latest = await provider.getBlockNumber();
     store.lastBlock = START_BLOCK > 0 ? START_BLOCK : latest;
@@ -866,9 +884,12 @@ const watchChain = async () => {
       }
     } catch (error) {
       const text = String(error?.message || error);
-      if (text.includes('rate limit') || text.includes('-32005')) {
-        console.error('Avisos chain: RPC limitada, se espera antes de reintentar');
-        await new Promise((r) => setTimeout(r, 90000));
+      if (text.includes('rate limit') || text.includes('-32005') || text.includes('limit exceeded')) {
+        rpcUrl = nextRpc();
+        provider = new JsonRpcProvider(rpcUrl);
+        contract = new Contract(CONTRACT, ABI, provider);
+        console.error('Avisos chain: RPC limitada, se cambia de nodo');
+        await new Promise((r) => setTimeout(r, 15000));
         continue;
       }
       console.error('Avisos chain:', error.message || error);

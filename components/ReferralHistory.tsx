@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useReferralNetwork } from '../hooks/useReferralNetwork';
@@ -9,6 +9,7 @@ import { ProfileAvatar } from './ProfileAvatar';
 import { useUserProfile } from '../profile/ProfileContext';
 import { labelForProfile } from '../services/userProfile';
 import { getRankForLevel } from '../constants/ranks';
+import { AppText } from './AppText';
 
 interface ReferralHistoryProps {
   walletAddress: string;
@@ -35,23 +36,23 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.text }]}>{t('referralHistoryLead')}</Text>
+      <AppText style={[styles.lead, { color: colors.text }]}>{t('referralHistoryLead')}</AppText>
 
       {isLoading && <ActivityIndicator color="#146C2E" style={styles.spinner} />}
-      {error && <Text style={styles.warn}>{t('referralLoadError')}</Text>}
+      {error && <AppText style={styles.warn}>{t('referralLoadError')}</AppText>}
 
       {!isLoading && !error && (
         <>
           {data.partial ? (
-            <Text style={[styles.warn, { color: colors.warnText }]}>{t('referralHistoryPartial')}</Text>
+            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('referralHistoryPartial')}</AppText>
           ) : null}
 
-          <Text style={[styles.summary, { color: colors.primary }]}>
+          <AppText style={[styles.summary, { color: colors.primary }]}>
             {t('referralDirects', { count: data.directs.length })} · {t('earnedTotal', { amount: data.totalEarnedLabel })}
-          </Text>
+          </AppText>
 
           {data.directs.length === 0 ? (
-            <Text style={[styles.empty, { color: colors.textMuted }]}>{t('referralNone')}</Text>
+            <AppText style={[styles.empty, { color: colors.textMuted }]}>{t('referralNone')}</AppText>
           ) : (
             data.directs.map((node) => {
               const expanded = open === node.address;
@@ -68,19 +69,19 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
                       rankName={t(getRankForLevel(node.level || 1).nameKey)}
                     />
                     <View style={styles.personText}>
-                      <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
+                      <AppText style={[styles.name, { color: colors.text }]}>{name}</AppText>
                       {name !== node.code ? (
-                        <Text style={[styles.code, { color: colors.textMuted }]}>{node.code}</Text>
+                        <AppText style={[styles.code, { color: colors.textMuted }]}>{node.code}</AppText>
                       ) : null}
-                      <Text style={styles.earned}>{t('referralEarnedWith', { amount: node.earnedLabel })}</Text>
-                      <Text style={styles.meta}>
+                      <AppText style={styles.earned}>{t('referralEarnedWith', { amount: node.earnedLabel })}</AppText>
+                      <AppText style={styles.meta}>
                         {t('referralTheirCount', { count: node.children.length })}
-                      </Text>
+                      </AppText>
                     </View>
                   </TouchableOpacity>
                   {expanded && node.children.length > 0 && (
                     <View style={styles.children}>
-                      <Text style={styles.childTitle}>{t('referralTheirNetwork')}</Text>
+                      <AppText style={styles.childTitle}>{t('referralTheirNetwork')}</AppText>
                       {node.children.map((child) => {
                         const childProfile = lookup(child.address);
                         return (
@@ -92,9 +93,9 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
                               level={child.level || 1}
                               showRankLabel={false}
                             />
-                            <Text style={styles.child}>
+                            <AppText style={styles.child}>
                               {labelForProfile(childProfile, child.code)}
-                            </Text>
+                            </AppText>
                           </View>
                         );
                       })}
@@ -107,20 +108,20 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
 
           {data.activity.length > 0 && (
             <View style={styles.activity}>
-              <Text style={styles.childTitle}>{t('activityTitle')}</Text>
+              <AppText style={styles.childTitle}>{t('activityTitle')}</AppText>
               {data.activity.slice(0, 8).map((item) => {
                 const fromCode = data.directs.find((node) => node.code === item.code)
                   || data.directs.flatMap((node) => node.children).find((child) => child.code === item.code);
                 const person = fromCode ? lookup(fromCode.address) : undefined;
                 const name = labelForProfile(person, item.code);
                 return (
-                  <Text key={item.id} style={styles.activityLine}>
+                  <AppText key={item.id} style={styles.activityLine}>
                     {t(item.titleKey as TranslationKey, {
                       code: name,
                       name,
                       amount: item.amountLabel || '',
                     })}
-                  </Text>
+                  </AppText>
                 );
               })}
             </View>
@@ -128,7 +129,7 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
 
           <TouchableOpacity style={styles.refresh} onPress={refetch}>
             <AppIcon name="refresh" size={16} color="#146C2E" />
-            <Text style={styles.refreshText}>{t('referralRefresh')}</Text>
+            <AppText style={styles.refreshText}>{t('referralRefresh')}</AppText>
           </TouchableOpacity>
         </>
       )}

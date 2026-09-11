@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Alert,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -22,6 +21,7 @@ import { useWalletLevel } from '../hooks/useWalletLevel';
 import { getRankForLevel } from '../constants/ranks';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { loadClaimedUsername } from '../services/accountUsername';
+import { AppText } from './AppText';
 
 export const ProfileSettings: React.FC = () => {
   const { t } = useI18n();
@@ -97,25 +97,25 @@ export const ProfileSettings: React.FC = () => {
           showRankLabel={Boolean(walletAddress)}
         />
         <View style={styles.heroText}>
-          <Text style={[styles.heroName, { color: colors.text }]}>
+          <AppText style={[styles.heroName, { color: colors.text }]}>
             {username ? `@${username}` : draft.displayName || t('profileNamePlaceholder')}
-          </Text>
-          <Text style={[styles.heroHint, { color: colors.textMuted }]}>{t('profileLead')}</Text>
-          <Text style={[styles.heroHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</Text>
+          </AppText>
+          <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('profileLead')}</AppText>
+          <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
         </View>
       </View>
 
       <TouchableOpacity style={[styles.photoBtn, { borderColor: colors.primary }]} onPress={pickPhoto}>
         <AppIcon name="id" size={16} color={colors.primary} />
-        <Text style={[styles.photoBtnText, { color: colors.primary }]}>{t('profilePickPhoto')}</Text>
+        <AppText style={[styles.photoBtnText, { color: colors.primary }]}>{t('profilePickPhoto')}</AppText>
       </TouchableOpacity>
       {draft.photoUri ? (
         <TouchableOpacity onPress={() => apply({ photoUri: '' })}>
-          <Text style={[styles.remove, { color: colors.textMuted }]}>{t('profileRemovePhoto')}</Text>
+          <AppText style={[styles.remove, { color: colors.textMuted }]}>{t('profileRemovePhoto')}</AppText>
         </TouchableOpacity>
       ) : null}
 
-      <Text style={[styles.label, { color: colors.primary }]}>{t('profileChooseAvatar')}</Text>
+      <AppText style={[styles.label, { color: colors.primary }]}>{t('profileChooseAvatar')}</AppText>
       <View style={styles.presets}>
         {AVATAR_PRESETS.map((item) => {
           const active = draft.avatarId === item.id && !draft.photoUri;
@@ -152,7 +152,7 @@ export const ProfileSettings: React.FC = () => {
         disabled={saving}
       >
         <AppIcon name="save" size={16} color="#fff" />
-        <Text style={styles.saveText}>{t('profileSave')}</Text>
+        <AppText style={styles.saveText}>{t('profileSave')}</AppText>
       </TouchableOpacity>
     </View>
   );

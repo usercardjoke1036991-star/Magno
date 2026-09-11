@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -14,6 +12,7 @@ import { claimUsername, checkUsernameAvailable } from '../services/accountUserna
 import { isValidUsername, normalizeUsername } from '../utils/usernamePolicy';
 import { isValidLegalName, normalizeLegalName } from '../services/kycDeclaration';
 import { notifyApiConfigured } from '../services/phoneOtp';
+import { AppText, AppTextInput } from './AppText';
 
 interface UsernameSectionProps {
   walletAddress: string;
@@ -67,22 +66,22 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('usernameLead')}</Text>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('usernameLead')}</AppText>
       {includeLegalName ? (
-        <Text style={[styles.lead, { color: colors.textMuted }]}>{t('legalNameLead')}</Text>
+        <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('legalNameLead')}</AppText>
       ) : null}
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
-          <Text style={[styles.doneText, { color: colors.text }]}>@{claimedUsername}</Text>
+          <AppText style={[styles.doneText, { color: colors.text }]}>@{claimedUsername}</AppText>
           <TouchableOpacity onPress={() => setEditing(true)}>
-            <Text style={[styles.change, { color: colors.primary }]}>{t('usernameChange')}</Text>
+            <AppText style={[styles.change, { color: colors.primary }]}>{t('usernameChange')}</AppText>
           </TouchableOpacity>
         </View>
       ) : (
         <View>
-          <Text style={[styles.label, { color: colors.text }]}>{t('usernameField')}</Text>
-          <TextInput
+          <AppText style={[styles.label, { color: colors.text }]}>{t('usernameField')}</AppText>
+          <AppTextInput
             value={username}
             onChangeText={(value) => setUsername(normalizeUsername(value))}
             autoCapitalize="none"
@@ -92,18 +91,18 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
             maxLength={20}
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
-          <Text style={[styles.hint, { color: colors.textMuted }]}>{t('usernameHint')}</Text>
+          <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('usernameHint')}</AppText>
           {includeLegalName ? (
             <>
-              <Text style={[styles.label, { color: colors.text }]}>{t('legalNameField')}</Text>
+              <AppText style={[styles.label, { color: colors.text }]}>{t('legalNameField')}</AppText>
               {legalNameLocked ? (
-                <TextInput
+                <AppTextInput
                   value={legalName}
                   editable={false}
                   style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text, opacity: 0.7 }]}
                 />
               ) : (
-                <TextInput
+                <AppTextInput
                   value={legalName}
                   onChangeText={setLegalName}
                   autoCapitalize="words"
@@ -112,9 +111,9 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
                   style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
                 />
               )}
-              <Text style={[styles.hint, { color: colors.textMuted }]}>
+              <AppText style={[styles.hint, { color: colors.textMuted }]}>
                 {legalNameLocked ? t('kycNameLocked') : t('legalNamePrivate')}
-              </Text>
+              </AppText>
             </>
           ) : null}
           <TouchableOpacity
@@ -122,12 +121,12 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
             onPress={() => void save()}
             style={[styles.button, { backgroundColor: colors.connect }, (busy || !valid) && { backgroundColor: colors.chip }]}
           >
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('usernameSave')}</Text>}
+            {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('usernameSave')}</AppText>}
           </TouchableOpacity>
           {!notifyApiConfigured() ? (
-            <Text style={[styles.hint, { color: colors.warnText }]}>{t('usernameLocalOnly')}</Text>
+            <AppText style={[styles.hint, { color: colors.warnText }]}>{t('usernameLocalOnly')}</AppText>
           ) : null}
-          {error ? <Text style={[styles.warn, { color: colors.danger }]}>{error}</Text> : null}
+          {error ? <AppText style={[styles.warn, { color: colors.danger }]}>{error}</AppText> : null}
         </View>
       )}
     </View>

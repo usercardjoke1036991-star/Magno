@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -7,6 +7,7 @@ import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { getSupportedTokens } from '../constants/tokens';
 import { formatAddress } from '../utils/formatters';
 import { useAppMode } from '../wallet/AppModeContext';
+import { AppText } from './AppText';
 
 export const AdminAccess: React.FC = () => {
   const { t } = useI18n();
@@ -23,15 +24,15 @@ export const AdminAccess: React.FC = () => {
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('settingsAdminLead')}</Text>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('settingsAdminLead')}</AppText>
       {isConnected && address ? (
-        <Text style={[styles.meta, { color: colors.text }]}>{formatAddress(address)}</Text>
+        <AppText style={[styles.meta, { color: colors.text }]}>{formatAddress(address)}</AppText>
       ) : null}
       {isConnected && allowed ? (
-        <Text style={[styles.ok, { color: colors.success }]}>{t('settingsAdminOk')}</Text>
+        <AppText style={[styles.ok, { color: colors.success }]}>{t('settingsAdminOk')}</AppText>
       ) : null}
       {isConnected && !allowed ? (
-        <Text style={[styles.warn, { color: colors.danger }]}>{t('settingsAdminNot')}</Text>
+        <AppText style={[styles.warn, { color: colors.danger }]}>{t('settingsAdminNot')}</AppText>
       ) : null}
       <TouchableOpacity
         onPress={() => open()}
@@ -39,7 +40,7 @@ export const AdminAccess: React.FC = () => {
         accessibilityRole="button"
         accessibilityLabel={t('settingsAdminConnect')}
       >
-        <Text style={[styles.btnText, { color: colors.onPrimary }]}>{t('settingsAdminConnect')}</Text>
+        <AppText style={[styles.btnText, { color: colors.onPrimary }]}>{t('settingsAdminConnect')}</AppText>
       </TouchableOpacity>
     </View>
   );

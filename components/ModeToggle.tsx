@@ -1,9 +1,10 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useAppMode } from '../wallet/AppModeContext';
 import { isStoreProduction, type AppMode } from '../constants/rpcConfig';
+import { AppText } from './AppText';
 
 export const ModeToggle: React.FC = () => {
   const { t } = useI18n();
@@ -30,9 +31,9 @@ export const ModeToggle: React.FC = () => {
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>
         {storeBuild ? t('appModeStoreLocked') : t('appModeLead')}
-      </Text>
+      </AppText>
       {storeBuild ? null : (
         <View style={styles.row}>
           <TouchableOpacity
@@ -42,9 +43,9 @@ export const ModeToggle: React.FC = () => {
               { borderColor: colors.border, backgroundColor: mode === 'demo' ? colors.primary : colors.surface },
             ]}
           >
-            <Text style={[styles.chipText, { color: mode === 'demo' ? colors.onPrimary : colors.text }]}>
+            <AppText style={[styles.chipText, { color: mode === 'demo' ? colors.onPrimary : colors.text }]}>
               {t('appModeDemo')}
-            </Text>
+            </AppText>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => choose('live')}
@@ -53,9 +54,9 @@ export const ModeToggle: React.FC = () => {
               { borderColor: colors.border, backgroundColor: mode === 'live' ? colors.primary : colors.surface },
             ]}
           >
-            <Text style={[styles.chipText, { color: mode === 'live' ? colors.onPrimary : colors.text }]}>
+            <AppText style={[styles.chipText, { color: mode === 'live' ? colors.onPrimary : colors.text }]}>
               {t('appModeLive')}
-            </Text>
+            </AppText>
           </TouchableOpacity>
         </View>
       )}

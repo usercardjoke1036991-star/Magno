@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Platform, View } from 'react-native';
+import { View } from 'react-native';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -20,10 +20,9 @@ import { LanguageWelcome } from './components/LanguageWelcome';
 import { FundsConfirmHost } from './components/FundsConfirmHost';
 import { AppModeProvider } from './wallet/AppModeContext';
 import { AppWalletProvider } from './wallet/AppWalletContext';
-import { setInterReady } from './theme/androidText';
-
 export default function App() {
   const [fontsLoaded] = useFonts({
+    Inter: Inter_400Regular,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -33,12 +32,6 @@ export default function App() {
   useEffect(() => {
     migrateLegacyStorage().catch(() => {});
   }, []);
-
-  useEffect(() => {
-    if (fontsLoaded && Platform.OS === 'android') {
-      setInterReady(true);
-    }
-  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return null;

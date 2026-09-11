@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AppText } from './AppText';
 import { UserInfo } from '../hooks/useWeb3Balances';
-import { formatCooldown, formatDueDate } from '../utils/formatters';
+import { formatCountdownClock, formatDueDate } from '../utils/formatters';
+import { useLiveCooldown } from '../hooks/useLiveCooldown';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
@@ -40,6 +41,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   const remainingInstallments = userInfo.activeLoan
     ? Math.max(0, userInfo.activeLoan.cuotasTotales - userInfo.activeLoan.cuotasPagadas)
     : 0;
+  const cooldownLeft = useLiveCooldown(userInfo.userProgress.ultimoPrestamoTimestamp);
 
   return (
     <View>
@@ -106,7 +108,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('cooldown')}</AppText>
               </View>
               <AppText style={[styles.metricValue, { color: colors.text }]}>
-                {formatCooldown(userInfo.userProgress.cooldownRestante, t('available'))}
+                {cooldownLeft > 0 ? formatCountdownClock(cooldownLeft) : t('available')}
               </AppText>
             </View>
           </View>

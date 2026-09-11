@@ -1,9 +1,10 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { formatRankLabel, RANK_LADDER } from '../constants/ranks';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { RankMedal } from './RankMedal';
+import { AppText } from './AppText';
 
 interface RankLadderProps {
   userLevel: number;
@@ -16,7 +17,7 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
 
   return (
     <View style={styles.wrap}>
-      <Text style={[styles.title, { color: colors.text }]}>{t('rankLadderTitle')}</Text>
+      <AppText style={[styles.title, { color: colors.text }]}>{t('rankLadderTitle')}</AppText>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {RANK_LADDER.map((rank) => {
           const reached = rank.level <= current;
@@ -32,7 +33,7 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
               ]}
             >
               <RankMedal level={rank.level} rank={rank} size={36} dimmed={!reached} />
-              <Text
+              <AppText
                 style={[
                   styles.caption,
                   { color: reached ? colors.text : colors.textMuted },
@@ -40,7 +41,7 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
                 numberOfLines={1}
               >
                 {label}
-              </Text>
+              </AppText>
             </View>
           );
         })}

@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { UserBalances } from '../hooks/useWeb3Balances';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon, TokenLogo } from './icons';
+import { AppText } from './AppText';
 
 interface BalanceDisplayProps {
   balances: UserBalances;
@@ -21,16 +22,16 @@ export const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
       <View style={styles.balanceItem}>
         <View style={styles.labelRow}>
           <AppIcon name="wallet" size={14} color={colors.textMuted} />
-          <Text style={[styles.balanceLabel, { color: colors.textMuted }]}>{t('yourWallet')}</Text>
+          <AppText style={[styles.balanceLabel, { color: colors.textMuted }]}>{t('yourWallet')}</AppText>
         </View>
         <View style={styles.valueRow}>
           <TokenLogo symbol={selectedTokenSymbol} size={18} />
-          <Text style={[styles.balanceValue, { color: colors.connect }]}>
+          <AppText style={[styles.balanceValue, { color: colors.connect }]}>
             {balances.tokenBalance} {selectedTokenSymbol}
-          </Text>
+          </AppText>
         </View>
       </View>
-      <Text style={[styles.hint, { color: colors.textMuted }]}>{t('walletVsPoolHint')}</Text>
+      <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('walletVsPoolHint')}</AppText>
     </View>
   );
 };

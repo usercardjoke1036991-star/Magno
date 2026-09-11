@@ -12,10 +12,10 @@ export const AppText = React.forwardRef<RNText, TextProps>((props, ref) => {
   return (
     <RNText
       ref={ref}
-      textBreakStrategy="simple"
+      allowFontScaling={false}
       {...rest}
       style={remapAndroidTextStyle(style)}
-      maxFontSizeMultiplier={maxFontSizeMultiplier ?? 1.25}
+      maxFontSizeMultiplier={1}
     />
   );
 });
@@ -26,10 +26,10 @@ export const AppTextInput = React.forwardRef<RNInput, TextInputProps>((props, re
   return (
     <RNInput
       ref={ref}
-      textBreakStrategy="simple"
+      allowFontScaling={false}
       {...rest}
       style={remapAndroidTextStyle(style)}
-      maxFontSizeMultiplier={maxFontSizeMultiplier ?? 1.25}
+      maxFontSizeMultiplier={1}
     />
   );
 });

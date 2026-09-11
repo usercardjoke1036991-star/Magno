@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -12,6 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { authenticateBiometric, isBiometricEnabled, verifyPin } from '../services/appLock';
 import { isFundsConfirmEnabled } from '../services/fundsConfirm';
 import { SecretInput } from './SecretInput';
+import { AppText } from './AppText';
 
 interface FundsConfirmValue {
   confirmFunds: () => Promise<boolean>;
@@ -70,8 +70,8 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => finish(false)}>
         <View style={styles.backdrop}>
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('fundsConfirmTitle')}</Text>
-            <Text style={[styles.lead, { color: colors.textMuted }]}>{t('fundsConfirmPrompt')}</Text>
+            <AppText style={[styles.title, { color: colors.text }]}>{t('fundsConfirmTitle')}</AppText>
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('fundsConfirmPrompt')}</AppText>
             <SecretInput
               value={pin}
               onChangeText={(value) => setPin(value.replace(/\D/g, '').slice(0, 6))}
@@ -79,16 +79,16 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
               maxLength={6}
               placeholder="••••••"
             />
-            {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
+            {error ? <AppText style={[styles.error, { color: colors.danger }]}>{error}</AppText> : null}
             <TouchableOpacity
               disabled={busy || pin.length !== 6}
               onPress={() => void submitPin()}
               style={[styles.button, { backgroundColor: colors.connect }]}
             >
-              {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('ready')}</Text>}
+              {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('ready')}</AppText>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => finish(false)}>
-              <Text style={[styles.cancel, { color: colors.textMuted }]}>{t('fundsConfirmCancel')}</Text>
+              <AppText style={[styles.cancel, { color: colors.textMuted }]}>{t('fundsConfirmCancel')}</AppText>
             </TouchableOpacity>
           </View>
         </View>

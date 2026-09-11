@@ -3,7 +3,6 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -13,6 +12,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { KycSection } from './KycSection';
 import { PhoneOtpSection } from './PhoneOtpSection';
+import { AppText } from './AppText';
 
 interface KycAccessBannerProps {
   kycDone: boolean;
@@ -54,14 +54,14 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
         >
           <AppIcon name={kycDone ? 'check' : 'id'} size={18} color={kycDone ? colors.success : '#fff'} />
           <View style={styles.grow}>
-            <Text style={[styles.title, { color: kycDone ? colors.text : '#fff' }]}>
+            <AppText style={[styles.title, { color: kycDone ? colors.text : '#fff' }]}>
               {kycDone ? t('kycBannerDoneTitle') : t('kycBannerTitle')}
-            </Text>
-            <Text style={[styles.lead, { color: kycDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
+            </AppText>
+            <AppText style={[styles.lead, { color: kycDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
               {kycDone ? t('kycBannerDone') : t('kycOpenHint')}
-            </Text>
+            </AppText>
           </View>
-          <Text style={[styles.chevron, { color: kycDone ? colors.textMuted : '#fff' }]}>›</Text>
+          <AppText style={[styles.chevron, { color: kycDone ? colors.textMuted : '#fff' }]}>›</AppText>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setOpen('phone')}
@@ -71,14 +71,14 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
         >
           <AppIcon name={phoneDone ? 'check' : 'phone'} size={18} color={phoneDone ? colors.success : '#fff'} />
           <View style={styles.grow}>
-            <Text style={[styles.title, { color: phoneDone ? colors.text : '#fff' }]}>
+            <AppText style={[styles.title, { color: phoneDone ? colors.text : '#fff' }]}>
               {phoneDone ? t('phoneBannerDoneTitle') : t('phoneBannerTitle')}
-            </Text>
-            <Text style={[styles.lead, { color: phoneDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
+            </AppText>
+            <AppText style={[styles.lead, { color: phoneDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
               {phoneDone ? t('phoneBannerDone') : t('phoneBannerTodo')}
-            </Text>
+            </AppText>
           </View>
-          <Text style={[styles.chevron, { color: phoneDone ? colors.textMuted : '#fff' }]}>›</Text>
+          <AppText style={[styles.chevron, { color: phoneDone ? colors.textMuted : '#fff' }]}>›</AppText>
         </TouchableOpacity>
       </View>
 
@@ -86,11 +86,11 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
         <SafeAreaView style={[styles.screen, { backgroundColor: colors.bg }]}>
           <View style={styles.screenHeader}>
             <TouchableOpacity onPress={() => setOpen(null)} accessibilityRole="button">
-              <Text style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</Text>
+              <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
             </TouchableOpacity>
-            <Text style={[styles.screenTitle, { color: colors.text }]}>
+            <AppText style={[styles.screenTitle, { color: colors.text }]}>
               {open === 'phone' ? t('otpTitle') : t('kycScreenTitle')}
-            </Text>
+            </AppText>
             <View style={styles.headerSpacer} />
           </View>
           <ScrollView keyboardShouldPersistTaps="always">

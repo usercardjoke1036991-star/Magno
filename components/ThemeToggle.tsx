@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import type { ThemePreference } from '../theme/palette';
 import { AppIcon } from './icons';
+import { AppText } from './AppText';
 
 export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = false }) => {
   const { t } = useI18n();
@@ -17,7 +18,7 @@ export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = fal
 
   return (
     <View style={styles.wrap}>
-      {!hideLabel && <Text style={[styles.label, { color: colors.textMuted }]}>{t('appearance')}</Text>}
+      {!hideLabel && <AppText style={[styles.label, { color: colors.textMuted }]}>{t('appearance')}</AppText>}
       <View style={[styles.track, { backgroundColor: colors.chip, borderColor: colors.border }]}>
         {options.map((item) => {
           const active = preference === item.value;
@@ -30,9 +31,9 @@ export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = fal
               accessibilityState={{ selected: active }}
             >
               <AppIcon name={item.icon} size={14} color={active ? colors.text : colors.textMuted} />
-              <Text style={[styles.optionText, { color: active ? colors.text : colors.textMuted }]}>
+              <AppText style={[styles.optionText, { color: active ? colors.text : colors.textMuted }]}>
                 {item.label}
-              </Text>
+              </AppText>
             </TouchableOpacity>
           );
         })}

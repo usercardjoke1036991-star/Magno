@@ -5,7 +5,6 @@ import {
   Linking,
   Platform,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -19,6 +18,7 @@ import {
   toggleBiometric,
   type BiometricToggleReason,
 } from '../services/appLock';
+import { AppText } from './AppText';
 
 function unlockLabel(kinds: BiometricKind[]): TranslationKey {
   const face = kinds.includes('facial');
@@ -115,14 +115,14 @@ export const BiometricLockSection: React.FC<{
   return (
     <View>
       {compact ? null : (
-        <Text style={[styles.section, { color: colors.text }]}>{t('lockBiometricSection')}</Text>
+        <AppText style={[styles.section, { color: colors.text }]}>{t('lockBiometricSection')}</AppText>
       )}
       {compact ? null : (
-        <Text style={[styles.lead, { color: colors.textMuted }]}>{t('lockBiometricLead')}</Text>
+        <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockBiometricLead')}</AppText>
       )}
-      {compact ? <Text style={[styles.lead, { color: colors.textMuted }]}>{t('securityAccessKeyLead')}</Text> : null}
+      {compact ? <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('securityAccessKeyLead')}</AppText> : null}
       {reason === 'ok' && !bioOn ? null : (
-        <Text style={[styles.note, { color: bioOn ? colors.success : colors.warnText }]}>{hint}</Text>
+        <AppText style={[styles.note, { color: bioOn ? colors.success : colors.warnText }]}>{hint}</AppText>
       )}
       {available || bioOn ? (
         <TouchableOpacity
@@ -136,9 +136,9 @@ export const BiometricLockSection: React.FC<{
           accessibilityRole="button"
           accessibilityLabel={t(unlockLabel(kinds))}
         >
-          <Text style={[styles.buttonText, bioOn && { color: colors.text }]}>
+          <AppText style={[styles.buttonText, bioOn && { color: colors.text }]}>
             {bioOn ? t('securityAccessKeyDisable') : t('securityAccessKeyEnable')}
-          </Text>
+          </AppText>
         </TouchableOpacity>
       ) : reason === 'not-enrolled' ? (
         <TouchableOpacity
@@ -147,7 +147,7 @@ export const BiometricLockSection: React.FC<{
           accessibilityRole="button"
           accessibilityLabel={t('lockBiometricOpenSettings')}
         >
-          <Text style={styles.buttonText}>{t('lockBiometricOpenSettings')}</Text>
+          <AppText style={styles.buttonText}>{t('lockBiometricOpenSettings')}</AppText>
         </TouchableOpacity>
       ) : null}
     </View>

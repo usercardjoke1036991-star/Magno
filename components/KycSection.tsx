@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
+import { AppText, AppTextInput } from './AppText';
 import {
   formatKycFingerprint,
   isValidKyc,
@@ -91,35 +92,35 @@ export const KycSection: React.FC<KycSectionProps> = ({
 
   return (
     <View>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('kycLead')}</Text>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycNotGov')}</Text>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycLocationPrivate')}</Text>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycBoundNote')}</Text>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('kycLead')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycNotGov')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycLocationPrivate')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycBoundNote')}</AppText>
       {fingerprint ? (
-        <Text style={[styles.note, { color: colors.textMuted }]}>{t('kycFingerprint', { fingerprint })}</Text>
+        <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycFingerprint', { fingerprint })}</AppText>
       ) : null}
 
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
-          <Text style={[styles.doneText, { color: colors.text }]}>{t('kycDone')}</Text>
+          <AppText style={[styles.doneText, { color: colors.text }]}>{t('kycDone')}</AppText>
           <TouchableOpacity onPress={() => setEditing(true)}>
-            <Text style={[styles.change, { color: colors.primary }]}>{t('kycEdit')}</Text>
+            <AppText style={[styles.change, { color: colors.primary }]}>{t('kycEdit')}</AppText>
           </TouchableOpacity>
         </View>
       ) : (
         <View>
           {!isRegistered ? (
-            <Text style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</Text>
+            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</AppText>
           ) : null}
-          <Text style={[styles.label, { color: colors.text }]}>{t('kycLegalName')}</Text>
+          <AppText style={[styles.label, { color: colors.text }]}>{t('kycLegalName')}</AppText>
           {identityNameFrozen ? (
             <View style={[styles.frozenField, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <Text style={[styles.frozenText, { color: colors.text }]}>{legalName}</Text>
-              <Text style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycNameLocked')}</Text>
+              <AppText style={[styles.frozenText, { color: colors.text }]}>{legalName}</AppText>
+              <AppText style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycNameLocked')}</AppText>
             </View>
           ) : (
-            <TextInput
+            <AppTextInput
               value={legalName}
               onChangeText={setLegalName}
               editable={!blocked}
@@ -129,8 +130,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
               style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
             />
           )}
-          <Text style={[styles.label, { color: colors.text }]}>{t('kycCountry')}</Text>
-          <TextInput
+          <AppText style={[styles.label, { color: colors.text }]}>{t('kycCountry')}</AppText>
+          <AppTextInput
             value={country}
             onChangeText={setCountry}
             editable={!blocked}
@@ -139,8 +140,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
             autoCapitalize="words"
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
-          <Text style={[styles.label, { color: colors.text }]}>{t('kycCity')}</Text>
-          <TextInput
+          <AppText style={[styles.label, { color: colors.text }]}>{t('kycCity')}</AppText>
+          <AppTextInput
             value={city}
             onChangeText={setCity}
             editable={!blocked}
@@ -149,8 +150,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
             autoCapitalize="words"
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
-          <Text style={[styles.label, { color: colors.text }]}>{t('kycRegion')}</Text>
-          <TextInput
+          <AppText style={[styles.label, { color: colors.text }]}>{t('kycRegion')}</AppText>
+          <AppTextInput
             value={region}
             onChangeText={setRegion}
             editable={!blocked}
@@ -159,11 +160,11 @@ export const KycSection: React.FC<KycSectionProps> = ({
             autoCapitalize="words"
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
-          <Text style={[styles.label, { color: colors.text }]}>{t('kycDocType')}</Text>
+          <AppText style={[styles.label, { color: colors.text }]}>{t('kycDocType')}</AppText>
           {identityDocFrozen ? (
             <View style={[styles.frozenField, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <Text style={[styles.frozenText, { color: colors.text }]}>{docLabel(docType)}</Text>
-              <Text style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycDocTypeLocked')}</Text>
+              <AppText style={[styles.frozenText, { color: colors.text }]}>{docLabel(docType)}</AppText>
+              <AppText style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycDocTypeLocked')}</AppText>
             </View>
           ) : (
             <View style={styles.types}>
@@ -177,14 +178,14 @@ export const KycSection: React.FC<KycSectionProps> = ({
                     docType === type && { borderColor: colors.primary, backgroundColor: colors.chip },
                   ]}
                 >
-                  <Text style={[styles.typeText, { color: colors.text }]}>{docLabel(type)}</Text>
+                  <AppText style={[styles.typeText, { color: colors.text }]}>{docLabel(type)}</AppText>
                 </TouchableOpacity>
               ))}
             </View>
           )}
           <TouchableOpacity onPress={() => setAccepted((value) => !value)} style={styles.checkRow}>
             <View style={[styles.box, { borderColor: colors.border }, accepted && { backgroundColor: colors.primary, borderColor: colors.primary }]} />
-            <Text style={[styles.checkText, { color: colors.text }]}>{t('kycDeclare')}</Text>
+            <AppText style={[styles.checkText, { color: colors.text }]}>{t('kycDeclare')}</AppText>
           </TouchableOpacity>
           <TouchableOpacity
             disabled={blocked || !accepted || !isValidKyc({ legalName, country, city, docType })}
@@ -198,9 +199,9 @@ export const KycSection: React.FC<KycSectionProps> = ({
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={[styles.buttonText, (blocked || !accepted) && { color: colors.textMuted }]}>
+              <AppText style={[styles.buttonText, (blocked || !accepted) && { color: colors.textMuted }]}>
                 {paused ? t('actionPaused') : t('kycSubmit')}
-              </Text>
+              </AppText>
             )}
           </TouchableOpacity>
         </View>

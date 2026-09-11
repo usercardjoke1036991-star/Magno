@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -14,6 +12,7 @@ import { notifyApiConfigured } from '../services/phoneOtp';
 import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
 import { storePasswordRecovery } from '../services/passwordRecovery';
 import { isAllowedEmailProvider, isValidEmail, normalizeEmail } from '../utils/emailPolicy';
+import { AppText, AppTextInput } from './AppText';
 
 interface EmailOtpSectionProps {
   walletAddress: string;
@@ -86,16 +85,16 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
-          <Text style={[styles.doneText, { color: colors.text }]}>{verifiedEmail}</Text>
+          <AppText style={[styles.doneText, { color: colors.text }]}>{verifiedEmail}</AppText>
           <TouchableOpacity onPress={() => setEditing(true)}>
-            <Text style={[styles.change, { color: colors.primary }]}>{t('emailChange')}</Text>
+            <AppText style={[styles.change, { color: colors.primary }]}>{t('emailChange')}</AppText>
           </TouchableOpacity>
         </View>
       ) : (
         <View>
-          {!apiReady ? <Text style={[styles.warn, { color: colors.warnText }]}>{t('emailNeedApi')}</Text> : null}
-          <Text style={[styles.label, { color: colors.text }]}>{t('emailField')}</Text>
-          <TextInput
+          {!apiReady ? <AppText style={[styles.warn, { color: colors.warnText }]}>{t('emailNeedApi')}</AppText> : null}
+          <AppText style={[styles.label, { color: colors.text }]}>{t('emailField')}</AppText>
+          <AppTextInput
             value={email}
             onChangeText={(value) => {
               setEmail(normalizeEmail(value));
@@ -113,12 +112,12 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
             onPress={() => void requestCode()}
             style={[styles.button, { backgroundColor: colors.connect }, (busy || !emailOk) && { backgroundColor: colors.chip }]}
           >
-            {busy && !sent ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{sent ? t('emailResend') : t('emailSend')}</Text>}
+            {busy && !sent ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{sent ? t('emailResend') : t('emailSend')}</AppText>}
           </TouchableOpacity>
           {sent ? (
             <>
-              <Text style={[styles.label, { color: colors.text }]}>{t('emailCode')}</Text>
-              <TextInput
+              <AppText style={[styles.label, { color: colors.text }]}>{t('emailCode')}</AppText>
+              <AppTextInput
                 value={code}
                 onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
                 keyboardType="number-pad"
@@ -132,14 +131,14 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
                 onPress={() => void confirmCode()}
                 style={[styles.button, { backgroundColor: colors.connect }]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('emailConfirm')}</Text>}
+                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('emailConfirm')}</AppText>}
               </TouchableOpacity>
             </>
           ) : null}
           {email.length > 0 && !allowed ? (
-            <Text style={[styles.warn, { color: colors.danger }]}>{t('emailNotAllowed')}</Text>
+            <AppText style={[styles.warn, { color: colors.danger }]}>{t('emailNotAllowed')}</AppText>
           ) : null}
-          {error ? <Text style={[styles.warn, { color: colors.danger }]}>{error}</Text> : null}
+          {error ? <AppText style={[styles.warn, { color: colors.danger }]}>{error}</AppText> : null}
         </View>
       )}
     </View>
