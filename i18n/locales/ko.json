@@ -66,7 +66,7 @@
   "royaltiesFrozen": "수수료가 정지되었습니다. 다시 수익을 받으려면 채무를 정산하세요.",
   "referralHint": "아직 네트워크에 없습니다. 아래 「내 신용 한도 활성화」에 초대한 사람의 코드를 붙여 넣거나 비워 두세요.",
   "shareTitle": "Quatrivium Credit 초대",
-  "shareMessage": "{name} 님이 Quatrivium Credit에 초대합니다. 필요할 때 빌리고, 상환하고, 원하시면 더 많은 사람을 초대하세요. 라인의 누군가가 빌리고 상환할 때마다 수익이 발생합니다.\n\n코드: {code}\n\n{link}",
+  "shareMessage": "{name}?(?) Quatrivium Credit? ?????. ?? ??? ??, ?? ????, ?? ??? ??? ??? ????.",
   "connect": "연결",
   "connectFirst": "먼저 지갑을 연결하세요.",
   "invite": "초대",

@@ -66,7 +66,7 @@
   "royaltiesFrozen": "Komisi ditangguhkan. Lunasi utang untuk mendapat lagi.",
   "referralHint": "Anda belum di jaringan. Di bawah, di «Aktifkan jalur kredit saya», tempel kode undangan orang yang mengundang Anda atau biarkan kosong.",
   "shareTitle": "Undangan Quatrivium Credit",
-  "shareMessage": "{name} mengundang Anda ke Quatrivium Credit: pinjam saat butuh, bayar, dan jika mau, undang lebih banyak orang. Setiap kali seseorang di jajaran Anda meminjam dan membayar, Anda mendapat.\n\nKode: {code}\n\n{link}",
+  "shareMessage": "{name} mengundang Anda ke Quatrivium Credit. Dapatkan kredit, bayar tepat waktu, dan dapatkan penghasilan dengan mengundang orang lain.",
   "connect": "Hubungkan",
   "connectFirst": "Hubungkan dulu dompet Anda.",
   "invite": "Undang",

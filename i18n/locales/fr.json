@@ -66,7 +66,7 @@
   "royaltiesFrozen": "Commissions suspendues. Régularisez votre dette pour gagner à nouveau.",
   "referralHint": "Vous n’êtes pas encore dans le réseau. Ci-dessous, dans « Activer ma ligne de crédit », collez le code de la personne qui vous a invité ou laissez le champ vide.",
   "shareTitle": "Invitation Quatrivium Credit",
-  "shareMessage": "{name} vous invite sur Quatrivium Credit : empruntez quand vous en avez besoin, remboursez, et si vous voulez, invitez d’autres personnes. Chaque fois que quelqu’un de votre ligne emprunte et rembourse, vous gagnez.\n\nCode : {code}\n\n{link}",
+  "shareMessage": "{name} vous invite sur Quatrivium Credit. Obtenez du cr?dit, remboursez ? temps et gagnez en invitant d'autres personnes.",
   "connect": "Connecter",
   "connectFirst": "Connectez d’abord votre portefeuille.",
   "invite": "Invitation",

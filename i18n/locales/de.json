@@ -66,7 +66,7 @@
   "royaltiesFrozen": "Provisionen ausgesetzt. Begleichen Sie Ihre Schuld, um wieder zu verdienen.",
   "referralHint": "Sie sind noch nicht im Netzwerk. Unten, unter „Meine Kreditlinie aktivieren“, fügen Sie den Code der Person ein, die Sie eingeladen hat, oder lassen Sie das Feld leer.",
   "shareTitle": "Quatrivium-Credit-Einladung",
-  "shareMessage": "{name} lädt Sie zu Quatrivium Credit ein: leihen Sie, wenn Sie es brauchen, zahlen Sie zurück, und wenn Sie möchten, laden Sie weitere Leute ein. Jedes Mal, wenn jemand in Ihrer Linie leiht und zurückzahlt, verdienen Sie.\n\nCode: {code}\n\n{link}",
+  "shareMessage": "{name} l?dt Sie zu Quatrivium Credit ein. Beantragen Sie Kredit, zahlen Sie p?nktlich zur?ck und verdienen Sie durch das Einladen anderer.",
   "connect": "Verbinden",
   "connectFirst": "Verbinden Sie zuerst Ihr Wallet.",
   "invite": "Einladen",
