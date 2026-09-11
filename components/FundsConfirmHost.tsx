@@ -4,7 +4,6 @@ import {
   Modal,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -12,6 +11,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { authenticateBiometric, isBiometricEnabled, verifyPin } from '../services/appLock';
 import { isFundsConfirmEnabled } from '../services/fundsConfirm';
+import { SecretInput } from './SecretInput';
 
 interface FundsConfirmValue {
   confirmFunds: () => Promise<boolean>;
@@ -72,15 +72,12 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.title, { color: colors.text }]}>{t('fundsConfirmTitle')}</Text>
             <Text style={[styles.lead, { color: colors.textMuted }]}>{t('fundsConfirmPrompt')}</Text>
-            <TextInput
+            <SecretInput
               value={pin}
               onChangeText={(value) => setPin(value.replace(/\D/g, '').slice(0, 6))}
               keyboardType="number-pad"
-              secureTextEntry
               maxLength={6}
               placeholder="••••••"
-              placeholderTextColor={colors.textMuted}
-              style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
             />
             {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
             <TouchableOpacity

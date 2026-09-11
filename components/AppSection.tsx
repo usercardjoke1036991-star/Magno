@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { AppText } from './AppText';
 import { AppIcon, type IconName } from './icons';
 
 interface AppSectionProps {
@@ -34,12 +35,12 @@ export const AppSection: React.FC<AppSectionProps> = ({
       >
         {icon ? <AppIcon name={icon} size={18} color={colors.textMuted} /> : null}
         <View style={styles.headerText}>
-          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+          <AppText style={[styles.title, { color: colors.text }]}>{title}</AppText>
           {description && open ? (
-            <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
+            <AppText style={[styles.description, { color: colors.textMuted }]}>{description}</AppText>
           ) : null}
         </View>
-        <Text style={[styles.chevron, { color: colors.textMuted }]}>{open ? '–' : '+'}</Text>
+        <AppText style={[styles.chevron, { color: colors.textMuted }]}>{open ? '–' : '+'}</AppText>
       </TouchableOpacity>
       {open && <View style={styles.body}>{children}</View>}
     </View>
@@ -73,8 +74,8 @@ export const AppSubsection: React.FC<AppSubsectionProps> = ({
         accessibilityLabel={title}
       >
         {icon ? <AppIcon name={icon} size={15} color={colors.textMuted} /> : null}
-        <Text style={[styles.subTitle, { color: colors.text }]}>{title}</Text>
-        <Text style={[styles.subChevron, { color: colors.textMuted }]}>{open ? '–' : '+'}</Text>
+        <AppText style={[styles.subTitle, { color: colors.text }]}>{title}</AppText>
+        <AppText style={[styles.subChevron, { color: colors.textMuted }]}>{open ? '–' : '+'}</AppText>
       </TouchableOpacity>
       {open ? <View style={styles.subBody}>{children}</View> : null}
     </View>
@@ -100,7 +101,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: '600',
-    letterSpacing: 0.2,
   },
   description: {
     marginTop: 4,

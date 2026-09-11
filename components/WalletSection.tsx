@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { copyText } from '../utils/copyText';
 import { formatAddress } from '../utils/formatters';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -32,6 +33,17 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
   const [transferMode, setTransferMode] = useState<'in' | 'out' | null>(null);
 
   const copyAddress = async () => {
+    const result = await copyText(walletAddress);
+    if (result === 'copied') {
+      Alert.alert(t('ready'), t('addressCopied'));
+      return;
+    }
+    if (result === 'failed') {
+      Alert.alert(t('wallet'), walletAddress);
+    }
+  };
+
+  const shareAddress = async () => {
     try {
       await Share.share({ message: walletAddress });
     } catch {
@@ -53,7 +65,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
         <BrandLogo size={44} />
         <View style={styles.grow}>
           <Text style={[styles.walletLabel, { color: colors.textMuted }]}>{t('appWalletLabel')}</Text>
-          <Text style={[styles.walletAddress, { color: colors.text }]}>{formatAddress(walletAddress)}</Text>
+          <TouchableOpacity onPress={() => void copyAddress()} accessibilityRole="button" accessibilityLabel={t('copyAddress')}>
+            <Text style={[styles.walletAddress, { color: colors.text }]}>{formatAddress(walletAddress)}</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.balanceContainer}>
           <Text style={[styles.balanceLabel, { color: colors.textMuted }]}>{t('bnbBalance')}</Text>
@@ -67,17 +81,30 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
       {Number(bnbBalance) <= 0 ? (
         <Text style={[styles.warn, { color: colors.warnText }]}>{t('appWalletNeedGas')}</Text>
       ) : null}
-      <TouchableOpacity
-        style={[styles.actionButton, { backgroundColor: colors.connect }]}
-        onPress={copyAddress}
-        accessibilityRole="button"
-        accessibilityLabel={t('appWalletShare')}
-      >
-        <View style={styles.actionRow}>
-          <AppIcon name="copy" size={18} color="#fff" />
-          <Text style={styles.actionText}>{t('appWalletShare')}</Text>
-        </View>
-      </TouchableOpacity>
+      <View style={styles.row}>
+        <TouchableOpacity
+          style={[styles.modeButton, { backgroundColor: colors.connect }]}
+          onPress={() => void copyAddress()}
+          accessibilityRole="button"
+          accessibilityLabel={t('copyAddress')}
+        >
+          <View style={styles.actionRow}>
+            <AppIcon name="copy" size={16} color="#fff" />
+            <Text style={styles.actionText}>{t('copyAddress')}</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeButton, { backgroundColor: colors.connect }]}
+          onPress={() => void shareAddress()}
+          accessibilityRole="button"
+          accessibilityLabel={t('appWalletShare')}
+        >
+          <View style={styles.actionRow}>
+            <AppIcon name="share" size={16} color="#fff" />
+            <Text style={styles.actionText}>{t('appWalletShare')}</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
       <View style={styles.row}>
         <TouchableOpacity
           style={[styles.modeButton, { backgroundColor: colors.primary }]}

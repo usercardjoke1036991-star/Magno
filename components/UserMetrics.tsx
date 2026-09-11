@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { AppText } from './AppText';
 import { UserInfo } from '../hooks/useWeb3Balances';
 import { formatCooldown, formatDueDate } from '../utils/formatters';
 import { useI18n } from '../i18n/LanguageContext';
@@ -54,12 +55,12 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               showRankLabel
             />
             <View style={styles.rankBannerText}>
-              <Text style={[styles.rankEyebrow, { color: colors.textMuted }]}>{t('rankYourRank')}</Text>
-              <Text style={[styles.rankTitle, { color: colors.text }]}>{rankLabel}</Text>
-              <Text style={[styles.rankMeta, { color: colors.textMuted }]}>
+              <AppText style={[styles.rankEyebrow, { color: colors.textMuted }]}>{t('rankYourRank')}</AppText>
+              <AppText style={[styles.rankTitle, { color: colors.text }]}>{rankLabel}</AppText>
+              <AppText style={[styles.rankMeta, { color: colors.textMuted }]}>
                 {t('level')} {userInfo.userProgress.nivelActual}/10
-              </Text>
-              <Text style={[styles.rankHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</Text>
+              </AppText>
+              <AppText style={[styles.rankHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
             </View>
           </View>
 
@@ -67,46 +68,46 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
             <View style={styles.metricItem}>
               <View style={styles.metricLabelRow}>
                 <AppIcon name="star" size={14} color={colors.textMuted} />
-                <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('level')}</Text>
+                <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('level')}</AppText>
               </View>
-              <Text style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/10</Text>
+              <AppText style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/10</AppText>
             </View>
 
             <View style={styles.metricItem}>
               <View style={styles.metricLabelRow}>
                 <AppIcon name="shield" size={14} color={colors.textMuted} />
-                <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('reputation')}</Text>
+                <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('reputation')}</AppText>
               </View>
-              <Text style={[styles.metricValue, { color: userInfo.isDelinquent ? colors.danger : colors.success }]}>
+              <AppText style={[styles.metricValue, { color: userInfo.isDelinquent ? colors.danger : colors.success }]}>
                 {userInfo.reputation}
-              </Text>
-              <Text style={[styles.rankHint, { color: colors.textMuted }]}>
+              </AppText>
+              <AppText style={[styles.rankHint, { color: colors.textMuted }]}>
                 {t('referralRepScoreShort', { network: String(userInfo.networkPoints || 0) })}
-              </Text>
+              </AppText>
             </View>
 
             <View style={styles.metricItem}>
               <View style={styles.metricLabelRow}>
                 <AppIcon name="chart" size={14} color={colors.textMuted} />
-                <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('toLevelUp')}</Text>
+                <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('toLevelUp')}</AppText>
               </View>
-              <Text style={[styles.metricValue, { color: colors.text }]}>
+              <AppText style={[styles.metricValue, { color: colors.text }]}>
                 {userInfo.userProgress.nivelActual >= 10
                   ? t('maxLevelReached')
                   : `${userInfo.userProgress.solicitudesCompletadas}/${
                       userInfo.userProgress.nivelActual <= 1 ? 3 : 5
                     } ${t('onTimePayments')}`}
-              </Text>
+              </AppText>
             </View>
 
             <View style={styles.metricItem}>
               <View style={styles.metricLabelRow}>
                 <AppIcon name="history" size={14} color={colors.textMuted} />
-                <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('cooldown')}</Text>
+                <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('cooldown')}</AppText>
               </View>
-              <Text style={[styles.metricValue, { color: colors.text }]}>
+              <AppText style={[styles.metricValue, { color: colors.text }]}>
                 {formatCooldown(userInfo.userProgress.cooldownRestante, t('available'))}
-              </Text>
+              </AppText>
             </View>
           </View>
 
@@ -114,19 +115,19 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
             {userInfo.isRegistered && (
               <View style={[styles.badge, { borderColor: colors.border }]}>
                 <AppIcon name="check" size={12} color={colors.success} />
-                <Text style={[styles.badgeText, { color: colors.text }]}>{t('registered')}</Text>
+                <AppText style={[styles.badgeText, { color: colors.text }]}>{t('registered')}</AppText>
               </View>
             )}
             {userInfo.hasActiveLoan && (
               <View style={[styles.badge, { borderColor: colors.border }]}>
                 <AppIcon name="bank" size={12} color={colors.textMuted} />
-                <Text style={[styles.badgeText, { color: colors.text }]}>{t('activeLoan')}</Text>
+                <AppText style={[styles.badgeText, { color: colors.text }]}>{t('activeLoan')}</AppText>
               </View>
             )}
             {userInfo.isDelinquent && (
               <View style={[styles.badge, { borderColor: colors.danger }]}>
                 <AppIcon name="warning" size={12} color={colors.danger} />
-                <Text style={[styles.badgeText, { color: colors.danger }]}>{t('delinquent')}</Text>
+                <AppText style={[styles.badgeText, { color: colors.danger }]}>{t('delinquent')}</AppText>
               </View>
             )}
           </View>
@@ -138,21 +139,21 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
           {reminder ? (
             <View style={[styles.reminder, { backgroundColor: reminder === 'cutoff' ? colors.warnBg : colors.surface, borderColor: colors.border }]}>
               <AppIcon name="bell" size={14} color={reminder === 'cutoff' ? colors.danger : colors.textMuted} />
-              <Text style={[styles.reminderText, { color: reminder === 'cutoff' ? colors.danger : colors.text }]}>
+              <AppText style={[styles.reminderText, { color: reminder === 'cutoff' ? colors.danger : colors.text }]}>
                 {reminder === 'cutoff' ? t('debtReminderCutoff') : t('debtReminderMid')}
-              </Text>
+              </AppText>
             </View>
           ) : null}
           <View style={styles.loanTitleRow}>
             <AppIcon name="warning" size={16} color={colors.textMuted} />
-            <Text style={[styles.loanTitle, { color: colors.textMuted }]}>{t('activeDebt')}</Text>
+            <AppText style={[styles.loanTitle, { color: colors.textMuted }]}>{t('activeDebt')}</AppText>
           </View>
-          <Text style={[styles.loanLine, { color: colors.text }]}>{userInfo.activeLoan.totalDueLabel}</Text>
-          <Text style={[styles.loanMeta, { color: colors.textMuted }]}>
+          <AppText style={[styles.loanLine, { color: colors.text }]}>{userInfo.activeLoan.totalDueLabel}</AppText>
+          <AppText style={[styles.loanMeta, { color: colors.textMuted }]}>
             {t('due')}: {formatDueDate(userInfo.activeLoan.proximaCuota || userInfo.activeLoan.vencimiento)}
-          </Text>
+          </AppText>
           {remainingInstallments > 1 ? (
-            <Text style={[styles.loanMeta, { color: colors.textMuted }]}>{t('payChoiceLead')}</Text>
+            <AppText style={[styles.loanMeta, { color: colors.textMuted }]}>{t('payChoiceLead')}</AppText>
           ) : null}
           {onPayLoan ? (
             <TouchableOpacity
@@ -163,7 +164,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               {isPaying ? (
                 <ActivityIndicator color={colors.onPrimary} size="small" />
               ) : (
-                <Text style={[styles.payBtnText, { color: colors.onPrimary }]}>
+                <AppText style={[styles.payBtnText, { color: colors.onPrimary }]}>
                   {userInfo.activeLoan.cuotasTotales > 1
                     ? t('payInstallment', {
                         current: userInfo.activeLoan.cuotasPagadas + 1,
@@ -171,7 +172,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
                         amount: userInfo.activeLoan.cuotaLabel,
                       })
                     : `${t('pay')} ${userInfo.activeLoan.remainingLabel || userInfo.activeLoan.totalDueLabel}`}
-                </Text>
+                </AppText>
               )}
             </TouchableOpacity>
           ) : null}
@@ -181,7 +182,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               onPress={() => onPayCount(2)}
               style={[styles.payBtn, styles.payAll, { borderColor: colors.border, backgroundColor: colors.surface }]}
             >
-              <Text style={[styles.payBtnText, { color: colors.text }]}>{t('payNInstallments', { count: 2 })}</Text>
+              <AppText style={[styles.payBtnText, { color: colors.text }]}>{t('payNInstallments', { count: 2 })}</AppText>
             </TouchableOpacity>
           ) : null}
           {onPayAll && remainingInstallments > 1 ? (
@@ -190,9 +191,9 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               onPress={onPayAll}
               style={[styles.payBtn, styles.payAll, { borderColor: colors.border, backgroundColor: colors.surface }]}
             >
-              <Text style={[styles.payBtnText, { color: colors.text }]}>
+              <AppText style={[styles.payBtnText, { color: colors.text }]}>
                 {t('payAllNow', { amount: userInfo.activeLoan.remainingLabel })}
-              </Text>
+              </AppText>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -217,8 +218,6 @@ const styles = StyleSheet.create({
   rankEyebrow: {
     fontSize: 11,
     fontWeight: '500',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
   },
   rankTitle: {
     fontSize: 20,

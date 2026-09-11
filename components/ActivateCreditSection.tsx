@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { AppText, AppTextInput } from './AppText';
 import { AppIcon } from './icons';
 
 interface ActivateCreditSectionProps {
   isRegistered: boolean;
+  checking?: boolean;
+  hasActiveLoan?: boolean;
   onRegister: (padre?: string) => void;
+  onGoLoans?: () => void;
   isLoading: boolean;
   initialInviteCode?: string;
   paused?: boolean;
@@ -14,15 +18,21 @@ interface ActivateCreditSectionProps {
 
 export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
   isRegistered,
+  checking = false,
+  hasActiveLoan = false,
   onRegister,
+  onGoLoans,
   isLoading,
   initialInviteCode = '',
   paused = false,
 }) => {
   const [showInfo, setShowInfo] = useState(false);
   const [padre, setPadre] = useState(initialInviteCode);
+  const [localBusy, setLocalBusy] = useState(false);
+  const [note, setNote] = useState('');
   const { t } = useI18n();
   const { colors } = useTheme();
+  const busy = isLoading || localBusy;
 
   useEffect(() => {
     if (initialInviteCode) {
@@ -35,7 +45,7 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <AppIcon name="id" size={16} color={colors.textMuted} />
-          <Text style={[styles.title, { color: colors.text }]}>{t('howItWorks')}</Text>
+          <AppText style={[styles.title, { color: colors.text }]}>{t('howItWorks')}</AppText>
         </View>
         <TouchableOpacity
           onPress={() => setShowInfo((value) => !value)}
@@ -48,28 +58,48 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
       <View style={styles.cycle}>
         {(['jobCycle1', 'jobCycle2', 'jobCycle3', 'jobCycle4', 'jobCycle5'] as const).map((key, index) => (
           <View key={key} style={styles.cycleRow}>
-            <Text style={[styles.cycleNum, { color: colors.primary }]}>{index + 1}</Text>
-            <Text style={[styles.cycleText, { color: colors.text }]}>{t(key)}</Text>
+            <AppText style={[styles.cycleNum, { color: colors.primary }]}>{index + 1}</AppText>
+            <AppText style={[styles.cycleText, { color: colors.text }]}>{t(key)}</AppText>
           </View>
         ))}
       </View>
 
-      {showInfo && (
+      {showInfo ? (
         <View style={[styles.identityInfo, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.identityNote, { color: colors.textMuted }]}>
+          <AppText style={[styles.identityNote, { color: colors.textMuted }]}>
             {t('howItWorksBody')}
-          </Text>
+          </AppText>
         </View>
-      )}
+      ) : null}
 
-      {isRegistered ? (
-        <View style={[styles.registeredBadge, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <AppIcon name="check" size={16} color={colors.success} />
-          <Text style={[styles.registeredText, { color: colors.text }]}>{t('readyToBorrow')}</Text>
+      {checking && !isRegistered ? (
+        <View style={[styles.registeredBadge, { backgroundColor: colors.chip, borderColor: colors.border }]}>
+          <ActivityIndicator color={colors.primary} />
+          <AppText style={[styles.registeredText, { color: colors.text }]}>{t('checkingCredit')}</AppText>
+        </View>
+      ) : isRegistered ? (
+        <View style={[styles.activeBox, { backgroundColor: colors.surface, borderColor: colors.success }]}>
+          <View style={styles.activeTitleRow}>
+            <AppIcon name="check" size={20} color={colors.success} />
+            <AppText style={[styles.activeTitle, { color: colors.success }]}>{t('readyToBorrow')}</AppText>
+          </View>
+          <AppText style={[styles.activeLead, { color: colors.text }]}>{t('creditLineActiveLead')}</AppText>
+          {onGoLoans ? (
+            <TouchableOpacity
+              onPress={onGoLoans}
+              style={[styles.registerButton, { backgroundColor: colors.primary, marginTop: 12 }]}
+              accessibilityRole="button"
+              accessibilityLabel={t('creditLineActiveNext')}
+            >
+              <AppText style={styles.registerButtonText}>
+                {hasActiveLoan ? t('pay') : t('creditLineActiveNext')}
+              </AppText>
+            </TouchableOpacity>
+          ) : null}
         </View>
       ) : (
         <View>
-          <TextInput
+          <AppTextInput
             value={padre}
             onChangeText={setPadre}
             placeholder={t('invitePlaceholder')}
@@ -82,33 +112,41 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
             ]}
           />
           <TouchableOpacity
-            disabled={isLoading || paused}
-            onPress={() => onRegister(padre.trim() || undefined)}
+            disabled={busy || paused}
+            onPress={() => {
+              setNote(t('activatingCredit'));
+              setLocalBusy(true);
+              Promise.resolve(onRegister(padre.trim() || undefined)).finally(() => {
+                setLocalBusy(false);
+                setNote('');
+              });
+            }}
             style={[
               styles.registerButton,
               { backgroundColor: colors.connect },
-              (isLoading || paused) && { backgroundColor: colors.chip },
+              (busy || paused) && { backgroundColor: colors.chip },
             ]}
           >
-            {isLoading ? (
+            {busy ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <View style={styles.btnRow}>
-                <AppIcon name="user" size={16} color={isLoading || paused ? colors.textMuted : '#fff'} />
-                <Text style={[styles.registerButtonText, (isLoading || paused) && { color: colors.textMuted }]}>
+                <AppIcon name="user" size={16} color={paused ? colors.textMuted : '#fff'} />
+                <AppText style={[styles.registerButtonText, paused && { color: colors.textMuted }]}>
                   {paused ? t('actionPaused') : t('activateCredit')}
-                </Text>
+                </AppText>
               </View>
             )}
           </TouchableOpacity>
+          {note ? <AppText style={[styles.note, { color: colors.textMuted }]}>{note}</AppText> : null}
         </View>
       )}
 
       <View style={[styles.securityNote, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <AppIcon name="shield" size={15} color={colors.textMuted} />
-        <Text style={[styles.securityNoteText, { color: colors.textMuted }]}>
+        <AppText style={[styles.securityNoteText, { color: colors.textMuted }]}>
           {t('securityNote')}
-        </Text>
+        </AppText>
       </View>
     </View>
   );
@@ -174,6 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     paddingVertical: 12,
+    paddingHorizontal: 12,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -182,6 +221,28 @@ const styles = StyleSheet.create({
   registeredText: {
     fontSize: 15,
     fontWeight: '500',
+    flex: 1,
+  },
+  activeBox: {
+    borderRadius: 12,
+    borderWidth: 1.5,
+    padding: 14,
+    marginBottom: 4,
+  },
+  activeTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  activeTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    flexShrink: 1,
+  },
+  activeLead: {
+    fontSize: 14,
+    lineHeight: 20,
   },
   referralInput: {
     borderWidth: 1,
@@ -200,6 +261,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '600',
+  },
+  note: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 10,
+    textAlign: 'center',
   },
   btnRow: {
     flexDirection: 'row',

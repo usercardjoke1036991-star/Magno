@@ -18,6 +18,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { EmailOtpSection } from './EmailOtpSection';
 import { BrandLogo } from './BrandLogo';
+import { SecretInput } from './SecretInput';
 import {
   PASSWORD_LENGTH,
   PIN_LENGTH,
@@ -477,38 +478,20 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
 
           {passwordStage ? (
             <View style={styles.passwordBlock}>
-              <TextInput
+              <SecretInput
                 value={passwordInput}
                 onChangeText={(value) => setPasswordInput(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="off"
-                secureTextEntry
                 maxLength={PASSWORD_LENGTH}
                 placeholder={t('lockNewPassword')}
-                placeholderTextColor={colors.textMuted}
-                style={[
-                  styles.passwordInput,
-                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
-                ]}
               />
               <Text style={[styles.counter, { color: colors.textMuted }]}>
                 {t('lockPasswordCount', { count: passwordInput.length })}
               </Text>
-              <TextInput
+              <SecretInput
                 value={passwordConfirm}
                 onChangeText={(value) => setPasswordConfirm(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="off"
-                secureTextEntry
                 maxLength={PASSWORD_LENGTH}
                 placeholder={t('lockPasswordConfirm')}
-                placeholderTextColor={colors.textMuted}
-                style={[
-                  styles.passwordInput,
-                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
-                ]}
               />
               <TouchableOpacity
                 disabled={busy || !passwordOk}
@@ -566,19 +549,11 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                   { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
                 ]}
               />
-              <TextInput
+              <SecretInput
                 value={passwordInput}
                 onChangeText={(value) => setPasswordInput(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-                autoCapitalize="none"
-                autoCorrect={false}
-                secureTextEntry
                 maxLength={PASSWORD_LENGTH}
                 placeholder={t('lockPasswordGenerated')}
-                placeholderTextColor={colors.textMuted}
-                style={[
-                  styles.passwordInput,
-                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
-                ]}
               />
               <TouchableOpacity
                 disabled={busy || !passwordInput}
@@ -649,33 +624,17 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                       { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
                     ]}
                   />
-                  <TextInput
+                  <SecretInput
                     value={passwordInput}
                     onChangeText={(value) => setPasswordInput(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry
                     maxLength={PASSWORD_LENGTH}
                     placeholder={t('lockNewPassword')}
-                    placeholderTextColor={colors.textMuted}
-                    style={[
-                      styles.passwordInput,
-                      { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
-                    ]}
                   />
-                  <TextInput
+                  <SecretInput
                     value={passwordConfirm}
                     onChangeText={(value) => setPasswordConfirm(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry
                     maxLength={PASSWORD_LENGTH}
                     placeholder={t('lockPasswordConfirm')}
-                    placeholderTextColor={colors.textMuted}
-                    style={[
-                      styles.passwordInput,
-                      { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
-                    ]}
                   />
                   <TouchableOpacity
                     disabled={busy || recoverCode.length !== 6 || !passwordOk}
@@ -704,21 +663,12 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
 
           {!setup && !recovering && unlockMode === 'password' ? (
             <View style={styles.passwordBlock}>
-              <TextInput
+              <SecretInput
                 value={passwordInput}
                 onChangeText={(value) => setPasswordInput(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="off"
-                secureTextEntry
                 maxLength={PASSWORD_LENGTH}
                 editable={lockMs <= 0}
                 placeholder={t('lockPasswordGenerated')}
-                placeholderTextColor={colors.textMuted}
-                style={[
-                  styles.passwordInput,
-                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
-                ]}
               />
               <TouchableOpacity
                 disabled={busy || lockMs > 0 || !passwordInput}

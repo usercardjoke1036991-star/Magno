@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -23,6 +22,7 @@ import { isWeakPin } from '../utils/pinPolicy';
 import { loadAppWallet } from '../services/appWallet';
 import { storePasswordRecovery } from '../services/passwordRecovery';
 import { BiometricLockSection } from './BiometricLockSection';
+import { SecretInput } from './SecretInput';
 
 export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = false }) => {
   const { t } = useI18n();
@@ -128,41 +128,32 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
       {hasPin ? (
         <>
           <Text style={[styles.label, { color: colors.text }]}>{t('lockCurrentPin')}</Text>
-          <TextInput
+          <SecretInput
             value={current}
             onChangeText={(value) => setCurrent(value.replace(/\D/g, '').slice(0, 6))}
             keyboardType="number-pad"
-            secureTextEntry
             maxLength={6}
             placeholder="••••••"
-            placeholderTextColor={colors.textMuted}
-            style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
         </>
       ) : (
         <Text style={[styles.note, { color: colors.textMuted }]}>{t('lockCreateOptional')}</Text>
       )}
       <Text style={[styles.label, { color: colors.text }]}>{t('lockNewPin')}</Text>
-      <TextInput
+      <SecretInput
         value={next}
         onChangeText={(value) => setNext(value.replace(/\D/g, '').slice(0, 6))}
         keyboardType="number-pad"
-        secureTextEntry
         maxLength={6}
         placeholder="••••••"
-        placeholderTextColor={colors.textMuted}
-        style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
       />
       <Text style={[styles.label, { color: colors.text }]}>{t('lockConfirmPin')}</Text>
-      <TextInput
+      <SecretInput
         value={confirm}
         onChangeText={(value) => setConfirm(value.replace(/\D/g, '').slice(0, 6))}
         keyboardType="number-pad"
-        secureTextEntry
         maxLength={6}
         placeholder="••••••"
-        placeholderTextColor={colors.textMuted}
-        style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
       />
       <TouchableOpacity
         disabled={busy || (hasPin && current.length !== 6) || next.length !== 6 || confirm.length !== 6}
@@ -187,42 +178,27 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
       {hasPassword ? (
         <>
           <Text style={[styles.label, { color: colors.text }]}>{t('lockCurrentPassword')}</Text>
-          <TextInput
+          <SecretInput
             value={currentPassword}
             onChangeText={(value) => setCurrentPassword(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
             maxLength={PASSWORD_LENGTH}
-            placeholderTextColor={colors.textMuted}
-            style={[styles.passwordInput, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
         </>
       ) : null}
       <Text style={[styles.label, { color: colors.text }]}>{t('lockNewPassword')}</Text>
-      <TextInput
+      <SecretInput
         value={nextPassword}
         onChangeText={(value) => setNextPassword(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-        autoCapitalize="none"
-        autoCorrect={false}
-        secureTextEntry
         maxLength={PASSWORD_LENGTH}
-        placeholderTextColor={colors.textMuted}
-        style={[styles.passwordInput, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
       />
       <Text style={[styles.counter, { color: colors.textMuted }]}>
         {t('lockPasswordCount', { count: nextPassword.length })}
       </Text>
       <Text style={[styles.label, { color: colors.text }]}>{t('lockPasswordConfirm')}</Text>
-      <TextInput
+      <SecretInput
         value={confirmPassword}
         onChangeText={(value) => setConfirmPassword(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-        autoCapitalize="none"
-        autoCorrect={false}
-        secureTextEntry
         maxLength={PASSWORD_LENGTH}
-        placeholderTextColor={colors.textMuted}
-        style={[styles.passwordInput, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
       />
       <TouchableOpacity
         disabled={

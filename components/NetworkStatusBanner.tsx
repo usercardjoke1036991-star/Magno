@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { AppText } from './AppText';
 import { getContractAddress } from '../constants/contractConfig';
 import {
   NETWORK_CONFIG,
@@ -23,17 +24,17 @@ export const NetworkStatusBanner: React.FC = () => {
 
   return (
     <View style={[styles.box, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[styles.kicker, { color: colors.textMuted }]}>{t('networkLive')}</Text>
-      <Text style={[styles.title, { color: colors.text }]}>{networkName}</Text>
+      <AppText style={[styles.kicker, { color: colors.textMuted }]}>{t('networkLive')}</AppText>
+      <AppText style={[styles.title, { color: colors.text }]}>{networkName}</AppText>
       {live ? (
-        <Text style={[styles.meta, { color: colors.textMuted }]}>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>
           {t('networkContract', { address: formatAddress(getContractAddress()) })}
-        </Text>
+        </AppText>
       ) : isDemoMode() ? (
-        <Text style={[styles.meta, { color: colors.textMuted }]}>{t('configWarn')}</Text>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('configWarn')}</AppText>
       ) : null}
       {isDemoMode() ? (
-        <Text style={[styles.meta, { color: colors.textMuted }]}>{t('networkNotMainnet')}</Text>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('networkNotMainnet')}</AppText>
       ) : null}
     </View>
   );
@@ -50,8 +51,6 @@ const styles = StyleSheet.create({
   kicker: {
     fontSize: 11,
     fontWeight: '600',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
   },
   title: {
     fontSize: 15,

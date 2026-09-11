@@ -34,7 +34,10 @@ export type IconName =
   | 'star'
   | 'warning'
   | 'user'
-  | 'copy';
+  | 'copy'
+  | 'eye'
+  | 'eyeOff'
+  | 'close';
 
 interface AppIconProps {
   name: IconName;
@@ -291,6 +294,27 @@ export const AppIcon: React.FC<AppIconProps> = ({ name, size = 22, color = '#146
         <Svg width={size} height={size} viewBox="0 0 24 24">
           <Rect x="8" y="8" width="11" height="12" rx="1.8" {...s} />
           <Path d="M6 16V5.8A1.8 1.8 0 017.8 4H16" {...s} />
+        </Svg>
+      );
+    case 'eye':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Path d="M3.5 12s3.2-6 8.5-6 8.5 6 8.5 6-3.2 6-8.5 6-8.5-6-8.5-6z" {...s} />
+          <Circle cx="12" cy="12" r="2.4" {...s} />
+        </Svg>
+      );
+    case 'eyeOff':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Path d="M3.5 12s3.2-6 8.5-6c2 0 3.8.7 5.3 1.7" {...s} />
+          <Path d="M20.5 12s-1.2 2.2-3.3 3.9M4 5l16 14" {...s} />
+          <Circle cx="12" cy="12" r="2.4" {...s} />
+        </Svg>
+      );
+    case 'close':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Path d="M7 7l10 10M17 7L7 17" {...s} />
         </Svg>
       );
     default:

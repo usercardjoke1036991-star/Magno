@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Alert } from 'react-native';
+import { showNotice } from '../utils/appNotice';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { humanizeTxError } from '../utils/txErrors';
 import { parseInviteInput } from '../utils/inviteCode';
@@ -22,7 +22,7 @@ export const useWeb3Transactions = () => {
     successMessage?: string
   ): Promise<TransactionResult> => {
     if (busyRef.current) {
-      Alert.alert(t('error'), t('txBusy'));
+      showNotice(t('error'), t('txBusy'));
       return { success: false, error: 'busy' };
     }
     busyRef.current = true;
@@ -31,11 +31,11 @@ export const useWeb3Transactions = () => {
 
     try {
       await transactionFn();
-      Alert.alert(t('ready'), successMessage || t('txConfirmed', { action: actionName }));
+      showNotice(t('ready'), successMessage || t('txConfirmed', { action: actionName }));
       return { success: true };
     } catch (error: unknown) {
       const errorMessage = humanizeTxError(error);
-      Alert.alert(t('error'), errorMessage);
+      showNotice(t('error'), errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       busyRef.current = false;
@@ -46,18 +46,18 @@ export const useWeb3Transactions = () => {
 
   const registrarHumano = async (walletAddress: string, padre?: string) => {
     if (!walletAddress) {
-      Alert.alert(t('connect'), t('connectFirst'));
+      showNotice(t('connect'), t('connectFirst'));
       return { success: false, error: 'Wallet not connected' };
     }
 
     const resolved = parseInviteInput(padre);
     if (padre?.trim() && resolved === null) {
-      Alert.alert(t('invite'), t('invalidSponsor'));
+      showNotice(t('invite'), t('invalidSponsor'));
       return { success: false, error: 'invalid padre' };
     }
     const sponsor = resolved || undefined;
     if (sponsor && sponsor.toLowerCase() === walletAddress.toLowerCase()) {
-      Alert.alert(t('invite'), t('cannotSelfInvite'));
+      showNotice(t('invite'), t('cannotSelfInvite'));
       return { success: false, error: 'self referral' };
     }
 
@@ -101,7 +101,7 @@ export const useWeb3Transactions = () => {
   };
 
   const retirarLiquidez = async () => {
-    Alert.alert(t('error'), t('poolLockedNote'));
+    showNotice(t('error'), t('poolLockedNote'));
     return { success: false, error: 'pool locked' } as TransactionResult;
   };
 

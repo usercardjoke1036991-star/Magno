@@ -23,6 +23,7 @@ import { verifyPin, isPinSet, isBiometricEnabled, getBiometricStatus, checkPassw
 import { BiometricLockSection } from './BiometricLockSection';
 import { isFundsConfirmEnabled, setFundsConfirmEnabled } from '../services/fundsConfirm';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
+import { SecretInput } from './SecretInput';
 import { humanizeTxError } from '../utils/txErrors';
 import {
   addressFromPhrase,
@@ -47,6 +48,7 @@ export const SecuritySettings: React.FC = () => {
   const primaryToken = useMemo(() => getSupportedTokens()[0], [mode]);
   const { address, recreate, restore } = useAppWallet();
   const { userInfo, refetch } = useWeb3Balances(address, primaryToken);
+  const accountBlocked = userInfo.hasActiveLoan || userInfo.isDelinquent;
   const { declararKyc, isLoading: kycBusy } = useWeb3Transactions();
 
   const [panel, setPanel] = useState<Panel>('menu');
@@ -61,6 +63,7 @@ export const SecuritySettings: React.FC = () => {
   const [destroyPin, setDestroyPin] = useState('');
   const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState(false);
+  const [showRestore, setShowRestore] = useState(false);
   const [pinSet, setPinSet] = useState(false);
   const [bioOn, setBioOn] = useState(false);
   const [fundsOn, setFundsOn] = useState(false);
@@ -133,6 +136,10 @@ export const SecuritySettings: React.FC = () => {
   };
 
   const restoreWallet = async () => {
+    if (accountBlocked) {
+      Alert.alert(t('activeLoan'), t('appWalletDestroyBlocked'));
+      return;
+    }
     if (pinSet && !(await verifyPin(restorePin))) {
       Alert.alert(t('error'), t('lockPinWrong'));
       return;
@@ -174,6 +181,10 @@ export const SecuritySettings: React.FC = () => {
   };
 
   const destroyAccount = async () => {
+    if (accountBlocked) {
+      Alert.alert(t('activeLoan'), t('appWalletDestroyBlocked'));
+      return;
+    }
     if (userInfo.hasActiveLoan) {
       Alert.alert(t('activeLoan'), t('appWalletDestroyLoan'));
       return;
@@ -325,26 +336,18 @@ export const SecuritySettings: React.FC = () => {
             ) : (
               <>
                 {pinSet ? (
-                  <TextInput
+                  <SecretInput
                     value={revealPin}
                     onChangeText={(value) => setRevealPin(value.replace(/\D/g, '').slice(0, 6))}
                     keyboardType="number-pad"
-                    secureTextEntry
                     maxLength={6}
                     placeholder={t('lockCurrentPin')}
-                    placeholderTextColor={colors.textMuted}
-                    style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
                   />
                 ) : (
-                  <TextInput
+                  <SecretInput
                     value={revealPassword}
                     onChangeText={setRevealPassword}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry
                     placeholder={t('lockCurrentPassword')}
-                    placeholderTextColor={colors.textMuted}
-                    style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
                   />
                 )}
                 <TouchableOpacity
@@ -365,67 +368,87 @@ export const SecuritySettings: React.FC = () => {
         {panel === 'replace' ? (
           <View>
             <Text style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountLead')}</Text>
-            {userInfo.hasActiveLoan ? (
-              <Text style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyLoan')}</Text>
+            {accountBlocked ? (
+              <Text style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyBlocked')}</Text>
             ) : null}
             <TextInput
               value={destroyWord}
               onChangeText={setDestroyWord}
               autoCapitalize="characters"
+              editable={!accountBlocked}
               placeholder="DESTRUIR"
               placeholderTextColor={colors.textMuted}
               style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
             />
             {pinSet ? (
-              <TextInput
+              <SecretInput
                 value={destroyPin}
                 onChangeText={(value) => setDestroyPin(value.replace(/\D/g, '').slice(0, 6))}
                 keyboardType="number-pad"
-                secureTextEntry
                 maxLength={6}
+                editable={!accountBlocked}
                 placeholder={t('lockCurrentPin')}
-                placeholderTextColor={colors.textMuted}
-                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
               />
             ) : null}
             <TouchableOpacity
-              disabled={busy}
+              disabled={busy || accountBlocked}
               onPress={destroyAccount}
-              style={[styles.button, styles.destroy, busy && { opacity: 0.6 }]}
+              accessibilityState={{ disabled: busy || accountBlocked }}
+              style={[
+                styles.button,
+                styles.destroy,
+                (busy || accountBlocked) && styles.destroyDisabled,
+              ]}
             >
-              <Text style={styles.buttonText}>{t('appWalletDestroy')}</Text>
+              <Text style={[styles.buttonText, accountBlocked && styles.destroyDisabledText]}>
+                {t('appWalletDestroy')}
+              </Text>
             </TouchableOpacity>
-            <Text style={[styles.label, { color: colors.text }]}>{t('seedRestore')}</Text>
-            <Text style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountLead')}</Text>
-            <TextInput
-              value={restorePhrase}
-              onChangeText={setRestorePhrase}
-              autoCapitalize="none"
-              autoCorrect={false}
-              multiline
-              placeholder={t('seedRestorePlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-            />
-            {pinSet ? (
-              <TextInput
-                value={restorePin}
-                onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
-                keyboardType="number-pad"
-                secureTextEntry
-                maxLength={6}
-                placeholder={t('lockCurrentPin')}
-                placeholderTextColor={colors.textMuted}
-                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-              />
-            ) : null}
             <TouchableOpacity
-              disabled={busy || (pinSet && restorePin.length !== 6)}
-              onPress={() => void restoreWallet()}
-              style={[styles.button, { backgroundColor: colors.connect }, (busy || (pinSet && restorePin.length !== 6)) && { backgroundColor: colors.chip }]}
+              disabled={accountBlocked}
+              onPress={() => setShowRestore((value) => !value)}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: accountBlocked, expanded: showRestore }}
             >
-              {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('seedRestoreAction')}</Text>}
+              <Text style={[styles.label, { color: accountBlocked ? colors.textMuted : colors.primary }]}>
+                {t('seedRestoreToggle')}
+              </Text>
             </TouchableOpacity>
+            {showRestore && !accountBlocked ? (
+              <>
+                <Text style={[styles.lead, { color: colors.textMuted }]}>{t('seedRestoreLead')}</Text>
+                <TextInput
+                  value={restorePhrase}
+                  onChangeText={setRestorePhrase}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  multiline
+                  placeholder={t('seedRestorePlaceholder')}
+                  placeholderTextColor={colors.textMuted}
+                  style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+                />
+                {pinSet ? (
+                  <SecretInput
+                    value={restorePin}
+                    onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
+                    keyboardType="number-pad"
+                    maxLength={6}
+                    placeholder={t('lockCurrentPin')}
+                  />
+                ) : null}
+                <TouchableOpacity
+                  disabled={busy || (pinSet && restorePin.length !== 6)}
+                  onPress={() => void restoreWallet()}
+                  style={[
+                    styles.button,
+                    { backgroundColor: colors.connect },
+                    (busy || (pinSet && restorePin.length !== 6)) && styles.destroyDisabled,
+                  ]}
+                >
+                  {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('seedRestoreAction')}</Text>}
+                </TouchableOpacity>
+              </>
+            ) : null}
           </View>
         ) : null}
       </View>
@@ -582,5 +605,11 @@ const styles = StyleSheet.create({
   },
   destroy: {
     backgroundColor: '#B42318',
+  },
+  destroyDisabled: {
+    backgroundColor: '#9CA3AF',
+  },
+  destroyDisabledText: {
+    color: '#F3F4F6',
   },
 });

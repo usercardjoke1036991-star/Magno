@@ -259,8 +259,6 @@ const styles = StyleSheet.create({
   rankName: {
     fontSize: 11,
     fontWeight: '500',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
   },
   tierTitle: {
     fontSize: 16,
@@ -273,7 +271,6 @@ const styles = StyleSheet.create({
   tierAmount: {
     fontSize: 26,
     fontWeight: '600',
-    letterSpacing: -0.4,
     marginBottom: 2,
   },
   tierRate: {

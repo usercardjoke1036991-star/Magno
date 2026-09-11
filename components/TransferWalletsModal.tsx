@@ -21,6 +21,7 @@ import { useFundsConfirm } from './FundsConfirmHost';
 import { parsePositiveDecimal } from '../utils/formatters';
 import { isHexAddress } from '../utils/sanitize';
 import { humanizeTxError } from '../utils/txErrors';
+import { copyText } from '../utils/copyText';
 import { WalletMark } from './WalletMark';
 import { BrandLogo } from './BrandLogo';
 import type { Token } from '../constants/tokens';
@@ -171,6 +172,17 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                   </Text>
                   <TouchableOpacity
                     style={[styles.send, { backgroundColor: colors.connect, marginTop: 12 }]}
+                    onPress={() => {
+                      void copyText(walletAddress).then((result) => {
+                        if (result === 'copied') Alert.alert(t('ready'), t('addressCopied'));
+                        else if (result === 'failed') Alert.alert(t('wallet'), walletAddress);
+                      });
+                    }}
+                  >
+                    <Text style={styles.sendText}>{t('copyAddress')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.send, { backgroundColor: colors.primary, marginTop: 8 }]}
                     onPress={() => Share.share({ message: walletAddress }).catch(() => {})}
                   >
                     <Text style={styles.sendText}>{t('appWalletShare')}</Text>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
@@ -26,6 +26,7 @@ import { SettingsButton } from '../components/SettingsButton';
 import { AppSubsection } from '../components/AppSection';
 import { AppWindow } from '../components/AppWindow';
 import { HomeHub, type HomeRoom } from '../components/HomeHub';
+import { AppText } from '../components/AppText';
 import { PoolSupportSection } from '../components/PoolSupportSection';
 import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
@@ -85,7 +86,10 @@ function HomeScreenWithHooks() {
   const walletAddress = appAddress;
   const isConnected = Boolean(walletAddress);
 
-  const { balances, userInfo, loanTiers, refetch } = useWeb3Balances(walletAddress, selectedToken);
+  const { balances, userInfo, loanTiers, isLoading: creditChecking, refetch } = useWeb3Balances(
+    walletAddress,
+    selectedToken
+  );
   const { userInfo: adminInfo } = useWeb3Balances(
     adminConnected && adminAddress ? adminAddress.toLowerCase() : '',
     selectedToken
@@ -167,20 +171,20 @@ function HomeScreenWithHooks() {
         <View style={styles.topBar}>
           <BrandLogo size={44} />
           <View style={styles.topBarText}>
-            <Text style={[styles.title, { color: colors.text }]}>Quatrivium Credit</Text>
-            <Text style={[styles.subtitle, rtl && styles.rtlText, { color: colors.textMuted }]}>
+            <AppText style={[styles.title, { color: colors.text }]}>Quatrivium Credit</AppText>
+            <AppText style={[styles.subtitle, rtl && styles.rtlText, { color: colors.textMuted }]}>
               {profile.displayName ? t('helloName', { name: profile.displayName }) : t('subtitle')}
-            </Text>
+            </AppText>
           </View>
           <SettingsButton />
         </View>
 
         {walletReady && (walletFailed || !walletAddress) ? (
           <View style={[styles.configWarn, { backgroundColor: colors.warnBg }]}>
-            <Text style={{ color: colors.warnText }}>{t('appWalletFailed')}</Text>
-            <Text style={{ color: colors.primary, marginTop: 8 }} onPress={() => retryWallet()}>
+            <AppText style={{ color: colors.warnText }}>{t('appWalletFailed')}</AppText>
+            <AppText style={{ color: colors.primary, marginTop: 8 }} onPress={() => retryWallet()}>
               {t('appWalletRetry')}
-            </Text>
+            </AppText>
           </View>
         ) : null}
 
@@ -202,20 +206,25 @@ function HomeScreenWithHooks() {
         <DemoModeBanner />
         <NetworkStatusBanner />
         {mode === 'demo' && !isContractConfigured() && (
-          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>{t('configWarn')}</Text>
+          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>{t('configWarn')}</AppText>
         )}
         {userInfo.paused && (
-          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
             {t('securityPausedBanner')}
-          </Text>
+          </AppText>
         )}
 
-        <Text style={[styles.hubTitle, { color: colors.text }]}>{t('hubChoose')}</Text>
+        <AppText style={[styles.hubTitle, { color: colors.text }]}>{t('hubChoose')}</AppText>
         <HomeHub
           onOpen={setRoom}
           tiles={[
             { id: 'wallet', title: t('sectionAccount'), lead: t('hubWalletLead'), icon: 'wallet' },
-            { id: 'credit', title: t('sectionCreditLine'), lead: t('hubCreditLead'), icon: 'id' },
+            {
+              id: 'credit',
+              title: t('sectionCreditLine'),
+              lead: userInfo.isRegistered || userInfo.hasActiveLoan ? t('hubCreditLeadActive') : t('hubCreditLead'),
+              icon: 'id',
+            },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
             { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' },
@@ -270,23 +279,31 @@ function HomeScreenWithHooks() {
         lead={t('sectionCreditLineLead')}
         onClose={() => setRoom(null)}
       >
-        <AppSubsection title={t('subsectionActivate')} icon="id">
+        <AppSubsection
+          title={userInfo.isRegistered || userInfo.hasActiveLoan ? t('subsectionCreditStatus') : t('subsectionActivate')}
+          icon="id"
+        >
           {!creditReady ? (
-            <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+            <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
               {t('liveCreditNotReady')}
-            </Text>
+            </AppText>
           ) : null}
           <ActivateCreditSection
-            isRegistered={userInfo.isRegistered}
+            isRegistered={userInfo.isRegistered || userInfo.hasActiveLoan}
+            checking={creditChecking && !userInfo.isRegistered && !userInfo.hasActiveLoan}
+            hasActiveLoan={userInfo.hasActiveLoan}
             onRegister={handleRegistrarHumano}
+            onGoLoans={() => setRoom('loans')}
             isLoading={txLoading}
             initialInviteCode={pendingInviteCode}
             paused={creditPaused}
           />
         </AppSubsection>
-        <AppSubsection title={t('subsectionRank')} icon="star">
-          <UserMetrics userInfo={userInfo} reminder={debtReminder} showDebt={false} />
-        </AppSubsection>
+        {userInfo.isRegistered || userInfo.hasActiveLoan || !creditChecking ? (
+          <AppSubsection title={t('subsectionRank')} icon="star">
+            <UserMetrics userInfo={userInfo} reminder={debtReminder} showDebt={false} />
+          </AppSubsection>
+        ) : null}
         {userInfo.activeLoan ? (
           <AppSubsection title={t('subsectionDebt')} icon="warning">
             <UserMetrics
@@ -310,9 +327,9 @@ function HomeScreenWithHooks() {
         onClose={() => setRoom(null)}
       >
         {!creditReady ? (
-          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
             {t('liveCreditNotReady')}
-          </Text>
+          </AppText>
         ) : null}
         {tokens.length > 1 ? (
           <TokenSelector
@@ -422,9 +439,9 @@ function HomeScreenWithHooks() {
         onClose={() => setRoom(null)}
       >
         {!creditReady ? (
-          <Text style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
             {t('liveCreditNotReady')}
-          </Text>
+          </AppText>
         ) : null}
         {tokens.length > 1 ? (
           <TokenSelector
@@ -519,7 +536,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '600',
-    letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 13,

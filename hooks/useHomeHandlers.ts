@@ -10,6 +10,8 @@ import { setWalletSigner, QuatriviumCreditService } from '../services/quatrivium
 import { useWeb3Transactions } from './useWeb3Transactions';
 import { NOTIFY_API } from '../constants/appLinks';
 import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
+import { isHttpsUrl } from '../utils/sanitize';
+import { showNotice } from '../utils/appNotice';
 import { creditNeedsKyc, creditNeedsPhone } from '../utils/creditGates';
 import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
@@ -40,22 +42,42 @@ async function waitForBnb(address: string, minWei: bigint, timeoutMs = 25_000): 
   return last !== null && last >= minWei;
 }
 
-/** Intenta fondear la wallet con BNB testnet desde el notify-worker. Silencioso si falla. */
-async function tryAutoFund(address: string): Promise<boolean> {
-  if (!NOTIFY_API || !address) return false;
+type AutoFundResult = 'funded' | 'enough' | 'fail';
+
+async function postAutoFund(base: string, address: string): Promise<AutoFundResult> {
+  const root = base.replace(/\/$/, '');
+  const local = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(root);
+  if (!local && !isHttpsUrl(root)) return 'fail';
   try {
-    const res = await safeJsonFetch(`${NOTIFY_API}/auto-fund`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address }),
-      timeoutMs: 40_000,
-    });
-    if (!res.ok) return false;
+    const res = local
+      ? await fetch(`${root}/auto-fund`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ address }),
+        })
+      : await safeJsonFetch(`${root}/auto-fund`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address }),
+          timeoutMs: 20_000,
+        });
+    if (!res.ok) return 'fail';
     const data = await readJsonLimited<{ funded?: boolean }>(res);
-    return data.funded === true;
+    return data.funded === true ? 'funded' : 'enough';
   } catch {
-    return false;
+    return 'fail';
   }
+}
+
+/** Intenta fondear la wallet con BNB testnet desde el notify-worker. */
+async function tryAutoFund(address: string): Promise<AutoFundResult> {
+  if (!address) return 'fail';
+  const bases = [NOTIFY_API, __DEV__ ? 'http://127.0.0.1:8787' : ''].filter(Boolean);
+  for (const base of bases) {
+    const result = await postAutoFund(base, address);
+    if (result !== 'fail') return result;
+  }
+  return 'fail';
 }
 
 export interface HomeHandlersParams {
@@ -132,22 +154,28 @@ export const useHomeHandlers = ({
       const parsed = Number.parseFloat(balances.bnbBalance);
       onChain = Number.isFinite(parsed) && parsed > 0 ? parseEther(parsed.toFixed(6)) : 0n;
     }
-    if (onChain < MIN_GAS_WEI && isDemoMode()) {
-      await tryAutoFund(walletAddress);
-      const funded = await waitForBnb(walletAddress, MIN_GAS_WEI);
-      if (funded) {
-        void refetch();
-        return true;
+    const demoGas = isDemoAccount() || isDemoMode();
+    if (onChain < MIN_GAS_WEI && demoGas) {
+      showNotice(t('ready'), t('demoLookingGas'));
+      const fund = await tryAutoFund(walletAddress);
+      if (fund !== 'fail') {
+        const funded = await waitForBnb(walletAddress, MIN_GAS_WEI, fund === 'funded' ? 12_000 : 8_000);
+        if (funded) {
+          void refetch();
+          return true;
+        }
       }
+      const again = await readOnChainBnb(walletAddress);
+      if (again !== null) onChain = again;
     }
     if (onChain < MIN_GAS_WEI) {
-      if (isDemoMode()) {
-        Alert.alert(t('errNeedGas'), t('errNeedGasTestnet'), [
+      if (demoGas) {
+        showNotice(t('errNeedGas'), t('errNeedGasTestnet'), [
           { text: t('cancel'), style: 'cancel' },
           { text: t('openFaucet'), onPress: () => void Linking.openURL(BSC_TESTNET_FAUCET) },
         ]);
       } else {
-        Alert.alert(t('errNeedGas'), t('errNeedGas'));
+        showNotice(t('errNeedGas'), t('errNeedGas'));
       }
       return false;
     }
@@ -156,7 +184,7 @@ export const useHomeHandlers = ({
 
   const ensureCreditReady = (): boolean => {
     if (isCreditReady()) return true;
-    Alert.alert(
+    showNotice(
       t(isDemoAccount() ? 'contract' : 'appModeLive'),
       t(isDemoAccount() ? 'configureContract' : 'liveCreditNotReady'),
     );
@@ -166,11 +194,11 @@ export const useHomeHandlers = ({
   const handleRegistrarHumano = async (padre?: string) => {
     if (!ensureCreditReady()) return;
     if (!walletAddress) {
-      Alert.alert(t('connect'), t('appWalletNotReady'));
+      showNotice(t('connect'), t('appWalletNotReady'));
       return;
     }
     if (userInfo.paused) {
-      Alert.alert(t('admin'), t('protocolPaused'));
+      showNotice(t('admin'), t('protocolPaused'));
       return;
     }
 
@@ -240,7 +268,17 @@ export const useHomeHandlers = ({
       }
     }
     const result = await solicitarPrestamo(selectedToken.address, tier.id);
-    if (result.success) refetch();
+    if (result.success) {
+      if (isDemoAccount()) {
+        try {
+          const minted = await QuatriviumCreditService.topUpDemoUsdtToDebt(selectedToken.address);
+          if (minted) Alert.alert(t('ready'), t('demoUsdtTopUp'));
+        } catch (caught) {
+          Alert.alert(t('error'), humanizeTxError(caught) || t('demoUsdtTopUpFailed'));
+        }
+      }
+      refetch();
+    }
   };
 
   const handlePagar = async (kind: 'installment' | 'all' | number) => {
@@ -258,6 +296,18 @@ export const useHomeHandlers = ({
     if (!(await ensureGasForTx())) return;
 
     const loanToken = userInfo.activeLoan.token;
+    if (isDemoAccount()) {
+      try {
+        await QuatriviumCreditService.topUpDemoUsdtToDebt(
+          loanToken,
+          userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei
+        );
+        void refetch();
+      } catch (caught) {
+        Alert.alert(t('error'), humanizeTxError(caught) || t('demoUsdtTopUpFailed'));
+        return;
+      }
+    }
     const left = Math.max(
       1,
       (userInfo.activeLoan.cuotasTotales || 1) - (userInfo.activeLoan.cuotasPagadas || 0)
@@ -266,7 +316,7 @@ export const useHomeHandlers = ({
 
     if (count >= left) {
       const amountWei = userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
-      if (loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
+      if (!isDemoAccount() && loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
         const needed = Number(formatUnits(amountWei, selectedToken.decimals));
         if (needed > Number(balances.tokenBalance) + 1e-8) {
           Alert.alert(t('amount'), t('amountExceedsBalance'));
@@ -281,7 +331,7 @@ export const useHomeHandlers = ({
     if (count <= 1) {
       const amountWei =
         userInfo.activeLoan.cuotaWei || userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
-      if (loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
+      if (!isDemoAccount() && loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
         const needed = Number(formatUnits(amountWei, selectedToken.decimals));
         if (needed > Number(balances.tokenBalance) + 1e-8) {
           Alert.alert(t('amount'), t('amountExceedsBalance'));

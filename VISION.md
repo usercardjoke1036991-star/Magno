@@ -4,7 +4,7 @@
 [Describe qué es este proyecto en 2-3 líneas]
 
 ## 🏗️ Arquitectura Propuesta
-Estructura por definir según el tipo de proyecto
+[Estructura técnica sugerida]
 
 ## 📦 Módulos
 - ✅ index.js — Punto de entrada principal
@@ -19,22 +19,19 @@ Estructura por definir según el tipo de proyecto
 ## 🗺️ Roadmap
 
 ### Fase 1 — MVP
-- Definir la idea central del proyecto
-- Crear la estructura base de archivos
-- Implementar funcionalidad mínima funcional
+- [ ] Definir funcionalidades mínimas del MVP
 
 ### Fase 2 — Mejoras
-- Añadir tests automatizados
-- Mejorar manejo de errores
-- Documentar API/interfaces públicas
+- [ ] Mejorar UX y rendimiento
 
 ### Fase 3 — Avanzado
-- Optimizar rendimiento
-- Añadir CI/CD completo
-- Preparar para producción/distribución
+- [ ] Funcionalidades avanzadas y optimizaciones
 
 ## 💭 Ideas del Backlog
-- [ideas sueltas que el usuario ha mencionado]
+- ojito y X en contraseñas, copiar direccion, destruir gris si hay deuda, aclarar restaurar frase
+- en Demo fondear USDT de prueba para pagar interes y subir de nivel
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
+- [2026-09-11 15:36] Idea añadida al backlog: "ojito y X en contraseñas, copiar direccion, destruir gris si hay deuda, aclarar "
+- [2026-09-11 15:52] Idea añadida al backlog: "en Demo fondear USDT de prueba para pagar interes y subir de nivel"

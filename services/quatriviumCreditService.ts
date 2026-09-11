@@ -12,7 +12,8 @@ import {
   type Signer,
 } from 'ethers';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
-import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount } from '../constants/rpcConfig';
+import { isTestnetOnlyToken } from '../constants/bsc';
+import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
 import { cobrarComisionIntermediario, loadAppWallet } from './appWallet';
@@ -122,6 +123,35 @@ const asegurarAprobacionToken = async (
     logInfo('Token aprobado');
   }
 };
+
+const DEMO_TOKEN_ABI = [...ERC20_ABI, 'function mint(address to, uint256 amount)'];
+
+/** En Demo cubre el interés con USDT de prueba para poder pagar y subir de nivel. Nunca en Real. */
+async function topUpDemoUsdtToDebt(tokenAddress: string, neededWei = '0'): Promise<boolean> {
+  if (!isDemoAccount() || !isDemoMode()) return false;
+  if (!isTestnetOnlyToken(tokenAddress)) return false;
+  const { signer } = await requireInternalSigner();
+  const userAddress = await signer.getAddress();
+  const credit = contractWith(signer);
+  const deuda = await credit.obtenerDeuda(userAddress);
+  const fromLoan = deuda[2] as bigint;
+  let needed = fromLoan;
+  if (neededWei && neededWei !== '0') {
+    try {
+      const extra = BigInt(neededWei);
+      if (extra > needed) needed = extra;
+    } catch {
+      // Se usa la deuda on-chain.
+    }
+  }
+  if (needed <= 0n) return false;
+  const token = new Contract(tokenAddress, DEMO_TOKEN_ABI, signer);
+  const balance = (await token.balanceOf(userAddress)) as bigint;
+  if (balance >= needed) return false;
+  const tx = await token.mint(userAddress, needed - balance);
+  await tx.wait();
+  return true;
+}
 
 async function prepareDemoCreditOnChain() {
   if (!isDemoAccount()) return;
@@ -250,6 +280,8 @@ export const QuatriviumCreditService = {
    * así que el worker atestigua un hash único por wallet (nunca en mainnet).
    */
   prepareDemoCredit: prepareDemoCreditOnChain,
+
+  topUpDemoUsdtToDebt,
 
   declararKyc: async () => {
     const { signer } = await requireInternalSigner();

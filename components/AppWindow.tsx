@@ -1,8 +1,9 @@
 import React from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { AppText } from './AppText';
 
 interface AppWindowProps {
   visible: boolean;
@@ -21,14 +22,14 @@ export const AppWindow: React.FC<AppWindowProps> = ({ visible, title, lead, onCl
       <SafeAreaView style={[styles.screen, { backgroundColor: colors.bg }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel={t('settingsBack')}>
-            <Text style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</Text>
+            <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+          <AppText style={[styles.title, { color: colors.text }]} numberOfLines={1}>
             {title}
-          </Text>
+          </AppText>
           <View style={styles.spacer} />
         </View>
-        {lead ? <Text style={[styles.lead, { color: colors.textMuted }]}>{lead}</Text> : null}
+        {lead ? <AppText style={[styles.lead, { color: colors.textMuted }]}>{lead}</AppText> : null}
         <ScrollView
           keyboardShouldPersistTaps="always"
           contentContainerStyle={styles.body}

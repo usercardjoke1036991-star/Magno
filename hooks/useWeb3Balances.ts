@@ -1,7 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Contract, formatEther, formatUnits, isAddress } from 'ethers';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
-import { assertTrustedRpc, isContractConfigured, subscribeRuntimeMode } from '../constants/rpcConfig';
+import { assertTrustedRpc, isContractConfigured, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { getTokenMeta, type Token } from '../constants/tokens';
 import { LOAN_TIERS, overlayOnChainTier, type LoanTier } from '../constants/loanTiers';
 import { describeAdminCalldata, type OpenAdminProposal } from '../utils/adminProposal';
@@ -14,6 +15,18 @@ import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 
 const logErr = __DEV__ ? console.log.bind(console) : () => {};
 const logWarn = __DEV__ ? console.warn.bind(console) : () => {};
+
+function creditStatusKey(wallet: string): string {
+  return `quatrivium.creditStatus.${NETWORK_CONFIG.chainId}.${wallet.toLowerCase()}`;
+}
+
+function persistCreditStatus(wallet: string, isRegistered: boolean, hasActiveLoan: boolean) {
+  if (!isRegistered && !hasActiveLoan) return;
+  AsyncStorage.setItem(
+    creditStatusKey(wallet),
+    JSON.stringify({ isRegistered, hasActiveLoan })
+  ).catch(() => {});
+}
 
 export type { Token, LoanTier };
 
@@ -145,11 +158,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   const tokenAddress = selectedToken.address;
   const tokenDecimals = selectedToken.decimals;
 
-  const fetchBalances = useCallback(async () => {
+  const fetchBalances = useCallback(async (opts?: { silent?: boolean }) => {
     const gen = ++fetchGen.current;
     const live = () => gen === fetchGen.current;
 
-    setIsLoading(true);
+    if (!opts?.silent) setIsLoading(true);
     setError(null);
 
     try {
@@ -293,71 +306,17 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         if (!live()) return;
 
         try {
-          const rows = await Promise.all(
-            LOAN_TIERS.map(async (base) => {
-              try {
-                const row = await creditContract.niveles(base.id);
-                return overlayOnChainTier(base, BigInt(row[0]), BigInt(row[1]), BigInt(row[2]));
-              } catch {
-                return base;
-              }
-            })
-          );
-          if (live()) setLoanTiers(rows);
-        } catch {
-          if (live()) setLoanTiers(LOAN_TIERS);
-        }
+          const [loan, registeredFlag] = await Promise.all([
+            creditContract.usuarios(walletAddress).catch(() => null),
+            creditContract.humanosVerificados(walletAddress).catch(() => null),
+          ]);
+          if (!live()) return;
 
-        try {
-          const supported = Boolean(await creditContract.isSupportedToken(tokenAddress));
-          let nextCurve = 0;
-          try {
-            nextCurve = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
-          } catch {
-            nextCurve = 0;
-          }
-          setUserInfo((prev) => ({ ...prev, isTokenSupported: supported, curveRateBps: nextCurve }));
-        } catch (e) {
-          logWarn('isSupportedToken failed:', e);
-          setUserInfo((prev) => ({ ...prev, isTokenSupported: false }));
-        }
-
-        try {
-          const lpValue = (await creditContract.valorLp(walletAddress, tokenAddress)) as bigint;
-          setBalances((prev) => ({
-            ...prev,
-            lpBalance: Number(formatUnits(lpValue, decimals)).toFixed(4),
-          }));
-        } catch (e) {
-          logWarn('valorLp failed:', e);
-          setBalances((prev) => ({ ...prev, lpBalance: '0.00' }));
-        }
-
-        try {
-          const nav = (await creditContract.totalLiquidity(tokenAddress)) as bigint;
-          let outstanding = 0n;
-          try {
-            outstanding = (await creditContract.outstandingLoans(tokenAddress)) as bigint;
-          } catch {
-            outstanding = 0n;
-          }
-          setBalances((prev) => ({
-            ...prev,
-            poolBalance: Number(formatUnits(nav, decimals)).toFixed(2),
-            poolOutstanding: Number(formatUnits(outstanding, decimals)).toFixed(2),
-            poolCash: Number(formatUnits(nav > outstanding ? nav - outstanding : 0n, decimals)).toFixed(2),
-          }));
-        } catch {
-          // keep ERC20 cash fallback already set
-        }
-
-        try {
-          const loan = await creditContract.usuarios(walletAddress);
-          const principal = BigInt(loan.montoActivo);
+          const principal = loan ? BigInt(loan.montoActivo) : 0n;
           const hasLoan = principal > 0n;
           let activeLoan: ActiveLoan | null = null;
 
-          if (principal > 0n) {
+          if (loan && principal > 0n) {
             let totalDue = principal;
             try {
               const debt = await creditContract.obtenerDeuda(walletAddress);
@@ -418,23 +377,77 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
               || (activeLoan.proximaCuota > 0 && nowSec > activeLoan.proximaCuota)
             )
           );
+          const registered = Boolean(registeredFlag) || hasLoan;
 
           setUserInfo((prev) => ({
             ...prev,
             hasActiveLoan: hasLoan,
             activeLoan,
             isDelinquent: overdue,
+            isRegistered: registered || prev.isRegistered,
           }));
+          persistCreditStatus(walletAddress, registered || hasLoan, hasLoan);
         } catch (e) {
           logErr('Error fetching user loan status:', e);
         }
 
         try {
-          const registered = await creditContract.humanosVerificados(walletAddress);
-          setUserInfo((prev) => ({ ...prev, isRegistered: Boolean(registered) }));
+          const rows = await Promise.all(
+            LOAN_TIERS.map(async (base) => {
+              try {
+                const row = await creditContract.niveles(base.id);
+                return overlayOnChainTier(base, BigInt(row[0]), BigInt(row[1]), BigInt(row[2]));
+              } catch {
+                return base;
+              }
+            })
+          );
+          if (live()) setLoanTiers(rows);
+        } catch {
+          if (live()) setLoanTiers(LOAN_TIERS);
+        }
+
+        try {
+          const supported = Boolean(await creditContract.isSupportedToken(tokenAddress));
+          let nextCurve = 0;
+          try {
+            nextCurve = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
+          } catch {
+            nextCurve = 0;
+          }
+          setUserInfo((prev) => ({ ...prev, isTokenSupported: supported, curveRateBps: nextCurve }));
         } catch (e) {
-          logErr('Error fetching registration status:', e);
-          setUserInfo((prev) => ({ ...prev, isRegistered: false }));
+          logWarn('isSupportedToken failed:', e);
+          setUserInfo((prev) => ({ ...prev, isTokenSupported: false }));
+        }
+
+        try {
+          const lpValue = (await creditContract.valorLp(walletAddress, tokenAddress)) as bigint;
+          setBalances((prev) => ({
+            ...prev,
+            lpBalance: Number(formatUnits(lpValue, decimals)).toFixed(4),
+          }));
+        } catch (e) {
+          logWarn('valorLp failed:', e);
+          setBalances((prev) => ({ ...prev, lpBalance: '0.00' }));
+        }
+
+        try {
+          const nav = (await creditContract.totalLiquidity(tokenAddress)) as bigint;
+          let outstanding = 0n;
+          try {
+            outstanding = (await creditContract.outstandingLoans(tokenAddress)) as bigint;
+          } catch {
+            outstanding = 0n;
+          }
+          setBalances((prev) => ({
+            ...prev,
+            poolBalance: Number(formatUnits(nav, decimals)).toFixed(2),
+            poolOutstanding: Number(formatUnits(outstanding, decimals)).toFixed(2),
+            poolCash: Number(formatUnits(nav > outstanding ? nav - outstanding : 0n, decimals)).toFixed(2),
+          }));
+        } catch {
+          // keep ERC20 cash fallback already set
         }
 
         try {
@@ -672,6 +685,21 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   }, [walletAddress, tokenAddress, tokenDecimals]);
 
   useEffect(() => {
+    if (!walletAddress || !isAddress(walletAddress)) return;
+    AsyncStorage.getItem(creditStatusKey(walletAddress))
+      .then((raw) => {
+        if (!raw) return;
+        const saved = JSON.parse(raw) as { isRegistered?: boolean; hasActiveLoan?: boolean };
+        setUserInfo((prev) => ({
+          ...prev,
+          isRegistered: Boolean(saved.isRegistered) || prev.isRegistered,
+          hasActiveLoan: Boolean(saved.hasActiveLoan) || prev.hasActiveLoan,
+        }));
+      })
+      .catch(() => {});
+  }, [walletAddress]);
+
+  useEffect(() => {
     fetchBalances();
   }, [fetchBalances]);
 
@@ -682,7 +710,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   // Auto-refresh cada 30 s cuando hay wallet conectada para mantener el saldo al día
   useEffect(() => {
     if (!walletAddress) return;
-    const id = setInterval(() => { fetchBalances(); }, 30_000);
+    const id = setInterval(() => { void fetchBalances({ silent: true }); }, 30_000);
     return () => clearInterval(id);
   }, [walletAddress, fetchBalances]);
 

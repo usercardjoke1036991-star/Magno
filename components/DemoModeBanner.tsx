@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { AppText } from './AppText';
 import { isContractConfigured } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -12,23 +13,23 @@ export const DemoModeBanner: React.FC = () => {
   if (mode === 'demo') {
     return (
       <View style={[styles.box, { backgroundColor: colors.chip, borderColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.text }]}>{t('appModeDemoBanner')}</Text>
-        <Text style={[styles.lead, { color: colors.textMuted }]}>{t('appModeDemoBannerLead')}</Text>
+        <AppText style={[styles.title, { color: colors.text }]}>{t('appModeDemoBanner')}</AppText>
+        <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('appModeDemoBannerLead')}</AppText>
       </View>
     );
   }
   if (!isContractConfigured('mainnet')) {
     return (
       <View style={[styles.box, { backgroundColor: colors.warnBg, borderColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.warnText }]}>{t('liveNetworkPending')}</Text>
-        <Text style={[styles.lead, { color: colors.warnText }]}>{t('liveNetworkPendingLead')}</Text>
+        <AppText style={[styles.title, { color: colors.warnText }]}>{t('liveNetworkPending')}</AppText>
+        <AppText style={[styles.lead, { color: colors.warnText }]}>{t('liveNetworkPendingLead')}</AppText>
       </View>
     );
   }
   return (
     <View style={[styles.box, { backgroundColor: colors.chip, borderColor: colors.border }]}>
-      <Text style={[styles.title, { color: colors.text }]}>{t('appModeLive')}</Text>
-      <Text style={[styles.lead, { color: colors.textMuted }]}>{t('appModeLiveBannerLead')}</Text>
+      <AppText style={[styles.title, { color: colors.text }]}>{t('appModeLive')}</AppText>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('appModeLiveBannerLead')}</AppText>
     </View>
   );
 };
@@ -44,8 +45,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
   },
   lead: {
     fontSize: 12,

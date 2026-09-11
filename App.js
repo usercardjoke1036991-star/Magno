@@ -1,5 +1,12 @@
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from '@expo-google-fonts/inter';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Web3Provider } from './web3Config';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -13,11 +20,29 @@ import { LanguageWelcome } from './components/LanguageWelcome';
 import { FundsConfirmHost } from './components/FundsConfirmHost';
 import { AppModeProvider } from './wallet/AppModeContext';
 import { AppWalletProvider } from './wallet/AppWalletContext';
+import { setInterReady } from './theme/androidText';
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
   useEffect(() => {
     migrateLegacyStorage().catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (fontsLoaded && Platform.OS === 'android') {
+      setInterReady(true);
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <SafeAreaProvider>

@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { AppText } from './AppText';
 import { AppIcon, type IconName } from './icons';
 
 export type HomeRoom = 'wallet' | 'credit' | 'loans' | 'network' | 'pool' | 'admin';
@@ -31,8 +32,8 @@ export const HomeHub: React.FC<HomeHubProps> = ({ tiles, onOpen }) => {
           accessibilityLabel={tile.title}
         >
           <AppIcon name={tile.icon} size={22} color={colors.primary} />
-          <Text style={[styles.title, { color: colors.text }]}>{tile.title}</Text>
-          <Text style={[styles.lead, { color: colors.textMuted }]}>{tile.lead}</Text>
+          <AppText style={[styles.title, { color: colors.text }]}>{tile.title}</AppText>
+          <AppText style={[styles.lead, { color: colors.textMuted }]}>{tile.lead}</AppText>
         </TouchableOpacity>
       ))}
     </View>

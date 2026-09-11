@@ -25,6 +25,8 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['device taken', 'errDeviceTaken'],
   ['device-bound', 'errDeviceBound'],
   ['already bound', 'errAlreadyBound'],
+  ['already registered', 'errAlreadyRegistered'],
+  ['padre not registered', 'errPadreNotRegistered'],
   ['bad attest', 'errBadAttest'],
   ['expired', 'errExpired'],
   ['daily origination cap', 'errDailyCap'],
