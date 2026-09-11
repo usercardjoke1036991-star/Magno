@@ -13,6 +13,8 @@ export interface KycDeclaration {
   city: string;
   region: string;
   docType: KycDocType;
+  /** true cuando el usuario eligió DNI/pasaporte en el formulario KYC (no en el alta de nombre). */
+  docLocked: boolean;
   declaredAt: number;
 }
 
@@ -88,6 +90,7 @@ function parseDeclaration(parsed: Partial<KycDeclaration>): KycDeclaration | nul
     city: normalizeCity(String(parsed.city || '')),
     region: normalizeCity(String(parsed.region || '')),
     docType: safeDocType(parsed.docType),
+    docLocked: Boolean(parsed.docLocked),
     declaredAt: Number(parsed.declaredAt) || 0,
   };
 }
@@ -113,13 +116,21 @@ export async function saveKycDeclaration(
   draft: Partial<KycDeclaration> & Pick<KycDeclaration, 'legalName'>
 ): Promise<KycDeclaration> {
   const prev = await loadKycDeclaration(wallet);
-  const legalName = normalizeLegalName(draft.legalName);
-  const boundLegalName = prev?.boundLegalName || legalName;
+  const incomingName = normalizeLegalName(draft.legalName);
+  const boundLegalName = prev?.boundLegalName || incomingName;
+  const legalName = boundLegalName;
+  const incomingDoc = draft.docType !== undefined;
+  const docLocked = Boolean(prev?.docLocked) || incomingDoc;
+  const docType = prev?.docLocked
+    ? prev.docType
+    : incomingDoc
+      ? safeDocType(draft.docType)
+      : (prev?.docType || 'nationalId');
   const origin: KycIdentitySnapshot = {
-    legalName: prev?.boundLegalName || legalName,
+    legalName: boundLegalName,
     country: prev?.country || normalizeCountry(draft.country ?? ''),
     city: prev?.city || normalizeCity(draft.city ?? ''),
-    docType: prev?.docType || safeDocType(draft.docType),
+    docType: prev?.docLocked ? prev.docType : docType,
   };
   const next: KycDeclaration = {
     legalName,
@@ -129,7 +140,8 @@ export async function saveKycDeclaration(
     country: normalizeCountry(draft.country ?? prev?.country ?? ''),
     city: normalizeCity(draft.city ?? prev?.city ?? ''),
     region: normalizeCity(draft.region ?? prev?.region ?? ''),
-    docType: prev?.docType || safeDocType(draft.docType),
+    docType,
+    docLocked,
     declaredAt: prev?.declaredAt || Date.now(),
   };
   await SecureStore.setItemAsync(PREFIX + walletKey(wallet), JSON.stringify(next), OPTIONS);

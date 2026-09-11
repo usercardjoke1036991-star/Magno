@@ -39,6 +39,7 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
   const [editing, setEditing] = useState(!claimedUsername);
   const valid = isValidUsername(username) && (!includeLegalName || isValidLegalName(legalName));
   const done = Boolean(claimedUsername) && (!includeLegalName || isValidLegalName(initialLegal)) && !editing;
+  const legalNameLocked = includeLegalName && isValidLegalName(initialLegal);
 
   const save = async () => {
     if (!valid || !walletAddress) return;
@@ -95,15 +96,25 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
           {includeLegalName ? (
             <>
               <Text style={[styles.label, { color: colors.text }]}>{t('legalNameField')}</Text>
-              <TextInput
-                value={legalName}
-                onChangeText={setLegalName}
-                autoCapitalize="words"
-                placeholder={t('legalNameField')}
-                placeholderTextColor={colors.textMuted}
-                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-              />
-              <Text style={[styles.hint, { color: colors.textMuted }]}>{t('legalNamePrivate')}</Text>
+              {legalNameLocked ? (
+                <TextInput
+                  value={legalName}
+                  editable={false}
+                  style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text, opacity: 0.7 }]}
+                />
+              ) : (
+                <TextInput
+                  value={legalName}
+                  onChangeText={setLegalName}
+                  autoCapitalize="words"
+                  placeholder={t('legalNameField')}
+                  placeholderTextColor={colors.textMuted}
+                  style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+                />
+              )}
+              <Text style={[styles.hint, { color: colors.textMuted }]}>
+                {legalNameLocked ? t('kycNameLocked') : t('legalNamePrivate')}
+              </Text>
             </>
           ) : null}
           <TouchableOpacity

@@ -104,6 +104,30 @@ export const useHomeHandlers = ({
     }
   };
 
+  const ensureGasForTx = async (): Promise<boolean> => {
+    if (!walletAddress) return false;
+    let localBnbBalance = parseFloat(balances.bnbBalance || '0');
+    if (localBnbBalance < MIN_GAS_BNB && isDemoMode()) {
+      const funded = await tryAutoFund(walletAddress);
+      if (funded) {
+        localBnbBalance += 0.005;
+        void refetch();
+      }
+    }
+    if (localBnbBalance < MIN_GAS_BNB) {
+      if (isDemoMode()) {
+        Alert.alert(t('errNeedGas'), t('errNeedGasTestnet'), [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('openFaucet'), onPress: () => void Linking.openURL(BSC_TESTNET_FAUCET) },
+        ]);
+      } else {
+        Alert.alert(t('errNeedGas'), t('errNeedGas'));
+      }
+      return false;
+    }
+    return true;
+  };
+
   const handleRegistrarHumano = async (padre?: string) => {
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
@@ -114,36 +138,7 @@ export const useHomeHandlers = ({
       return;
     }
 
-    // Intento silencioso de auto-fondeo desde el notify-worker (solo testnet con worker activo).
-    // Si el worker no está disponible, simplemente continúa con el saldo actual.
-    let localBnbBalance = parseFloat(balances.bnbBalance || '0');
-    if (localBnbBalance < MIN_GAS_BNB && isDemoMode()) {
-      const funded = await tryAutoFund(walletAddress);
-      if (funded) {
-        localBnbBalance += 0.005; // el worker envía 0.005 BNB
-        void refetch(); // actualiza la UI de forma asíncrona
-      }
-    }
-
-    // Pre-check: verificar que la app wallet tiene BNB suficiente para gas
-    if (localBnbBalance < MIN_GAS_BNB) {
-      if (isDemoMode()) {
-        Alert.alert(
-          t('errNeedGas'),
-          t('errNeedGasTestnet'),
-          [
-            { text: t('cancel'), style: 'cancel' },
-            {
-              text: t('openFaucet'),
-              onPress: () => void Linking.openURL(BSC_TESTNET_FAUCET),
-            },
-          ]
-        );
-      } else {
-        Alert.alert(t('errNeedGas'), t('errNeedGas'));
-      }
-      return;
-    }
+    if (!(await ensureGasForTx())) return;
     const result = await registrarHumano(walletAddress, padre);
     if (result.success) {
       await clearPendingInvite();
@@ -202,6 +197,7 @@ export const useHomeHandlers = ({
       );
       return;
     }
+    if (!(await ensureGasForTx())) return;
     const result = await solicitarPrestamo(selectedToken.address, tier.id);
     if (result.success) refetch();
   };
@@ -217,6 +213,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('noDebt'), t('noActiveLoan'));
       return;
     }
+    if (!(await ensureGasForTx())) return;
 
     const loanToken = userInfo.activeLoan.token;
     const left = Math.max(
@@ -281,6 +278,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('amount'), t('poolNeedInternalFunds'));
       return;
     }
+    if (!(await ensureGasForTx())) return;
     try {
       const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
       const result = await depositarLiquidez(amountWei, selectedToken.address);
@@ -313,6 +311,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('register'), t('activateBeforeLoan'));
       return false;
     }
+    if (!(await ensureGasForTx())) return false;
     const result = await declararKyc();
     if (result.success) refetch();
     return result.success;

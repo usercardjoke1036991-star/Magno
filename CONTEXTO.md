@@ -59,7 +59,7 @@ Magno/
 - **Cerrar cuenta exige deuda = 0 y !esMoroso**: el contrato y la UI bloquean a morosos
 - **ZK es experimental**: `snarkjs` hace stub en Metro; el registro real es `registrarHumanoConPadre()`
 - **Entornos separados en `eas.json`**: development/preview→chain 97, production→chain 56
-- **`slug: "quatrivium-credit"` en `app.json`**: renombrado desde "magno" en sept 2026
+- **`slug: "magno"` en `app.json`**: el projectId EAS es `0a9b20f0-900a-4d35-8541-14b6202d84f5`; el nombre visible es Quatrivium Credit
 - **Liquidación en AdminPanel**: el servicio aprueba USDT automáticamente antes de `liquidate()`
 - **`useHomeHandlers` hook**: handlers extraídos de `app/index.tsx` para reducir complejidad
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
@@ -204,7 +204,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
-| 2026-09-11 | Auditoría de CONTEXTO.md: cifras y afirmaciones de seguridad alineadas con el código real | El documento mentía en componentes, i18n, Ownable, circuit breaker y liquidación |
+| 2026-09-11 | Auditoría final: nombre KYC inmutable en servicio (no solo UI); tipo de doc se sella al formulario KYC, no al onboarding; mora bloquea restaurar frase; pre-check BNB en préstamo/pago/depósito/KYC | Huecos de seguridad y errores de gas en demo |
 | 2026-09-11 | `tx.origin` añadido a `depositarLiquidez` y `pagarPrestamo` | CONTEXTO lo daba por hecho y el contrato no lo tenía |
 | 2026-09-11 | `eas.json` imagen Android `sdk-54` en los 3 perfiles | Evita Java 25 en EAS cloud |
 | 2026-09-11 | Auto-fondeo BNB testnet + auto-refresh balances 30s + `EXPO_PUBLIC_NOTIFY_API` | Demo sin error de gas |

@@ -160,6 +160,10 @@ export const SecuritySettings: React.FC = () => {
           Alert.alert(t('activeLoan'), t('appWalletDestroyLoan'));
           return;
         }
+        if (userInfo.isDelinquent) {
+          Alert.alert(t('activeLoan'), t('destroyDelinquent'));
+          return;
+        }
         await QuatriviumCreditService.destruirCuenta(getSupportedTokens()[0].address);
       }
       await restore(restorePhrase);

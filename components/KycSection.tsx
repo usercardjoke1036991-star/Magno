@@ -40,6 +40,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
   const [accepted, setAccepted] = useState(false);
   const [fingerprint, setFingerprint] = useState('');
   const [editing, setEditing] = useState(false);
+  const [nameLocked, setNameLocked] = useState(false);
+  const [docLocked, setDocLocked] = useState(false);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -52,12 +54,14 @@ export const KycSection: React.FC<KycSectionProps> = ({
       setDocType(saved.docType);
       setAccepted(true);
       setFingerprint(formatKycFingerprint(saved.identityFingerprint));
+      setNameLocked(Boolean(saved.boundLegalName));
+      setDocLocked(Boolean(saved.docLocked));
     }).catch(() => {});
   }, [walletAddress]);
 
   const done = kycDeclarado && !editing;
-  // nombre y tipo de documento se congelan en el primer submit on-chain
-  const identityFrozen = kycDeclarado;
+  const identityNameFrozen = kycDeclarado || nameLocked;
+  const identityDocFrozen = kycDeclarado || docLocked;
   const blocked = isLoading || paused || !isRegistered || !walletAddress;
 
   const submit = async () => {
@@ -70,6 +74,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
       docType,
     });
     setFingerprint(formatKycFingerprint(saved.identityFingerprint));
+    setNameLocked(Boolean(saved.boundLegalName));
+    setDocLocked(Boolean(saved.docLocked));
     if (!kycDeclarado) {
       await onDeclare();
     }
@@ -106,7 +112,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
             <Text style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</Text>
           ) : null}
           <Text style={[styles.label, { color: colors.text }]}>{t('kycLegalName')}</Text>
-          {identityFrozen ? (
+          {identityNameFrozen ? (
             <View style={[styles.frozenField, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <Text style={[styles.frozenText, { color: colors.text }]}>{legalName}</Text>
               <Text style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycNameLocked')}</Text>
@@ -153,7 +159,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
           <Text style={[styles.label, { color: colors.text }]}>{t('kycDocType')}</Text>
-          {identityFrozen ? (
+          {identityDocFrozen ? (
             <View style={[styles.frozenField, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <Text style={[styles.frozenText, { color: colors.text }]}>{docLabel(docType)}</Text>
               <Text style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycDocTypeLocked')}</Text>
