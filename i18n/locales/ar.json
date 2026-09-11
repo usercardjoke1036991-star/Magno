@@ -588,7 +588,7 @@
   "legalNameField": "Real name",
   "legalNameLead": "Your real name is linked to your credentials. Nobody sees it in the app, the directory or the blockchain.",
   "legalNamePrivate": "The real name is not shown on the profile, the avatar or the referral network.",
-  "kycBoundNote": "Once this account is verified with an identity, it stays bound to that identity. If you later change the details on the phone, level, network and loans are not reset. That way a name change cannot be used against the app.",
+  "kycBoundNote": "الاسم ونوع المستند دائمان. يمكن تحديث المدينة والمنطقة في أي وقت.",
   "lockPasswordMin": "At least 8 characters. You choose how long it is. Do not use a 0x private key.",
   "lockForgotPassword": "Forgot password",
   "lockRecoverTitle": "Restore password",
@@ -611,5 +611,9 @@
   "liquidarDone": "Debtor liquidated. Prize sent to your wallet.",
   "liquidarBtn": "Liquidate debtor",
   "marcarMorosoConfirm": "This will mark the user as delinquent if their loan is already overdue. It does not pay the debt, only changes the status. Continue?",
-  "marcarMorosoBtn": "Mark as delinquent"
+  "marcarMorosoBtn": "Mark as delinquent",
+  "kycNameLocked": "الاسم مسجل — لا يمكن تغييره.",
+  "kycDocTypeLocked": "نوع المستند مسجل — لا يمكن تغييره.",
+  "destroyDelinquent": "يجب تسوية الدين قبل إغلاق الحساب.",
+  "seedRotatePinRequired": "أدخل رمز PIN للتأكيد"
 }

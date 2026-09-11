@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "ultimo_actualizado": "2026-09-10",
-  "total_errores_aprendidos": 7,
+  "ultimo_actualizado": "2026-09-11",
+  "total_errores_aprendidos": 12,
   "patrones": [
     {
       "id": "ERR-001",
@@ -57,7 +57,7 @@
       "ejemplo_malo": "# Busca en TODOS los subdirectorios, incluyendo subproyectos con su propio .git:\nmql_files = list(d.glob('**/*.mq5'))",
       "ejemplo_correcto": "# Buscar solo en raíz y src/ para no contaminar subproyectos independientes:\nmql_files = (list(d.glob('*.mq5')) + list(d.glob('*.mq4')) +\n             list(d.glob('src/*.mq5')) + list(d.glob('src/*.mq4')))",
       "fecha_aprendido": "2026-09-10",
-      "veces_detectado": 65,
+      "veces_detectado": 88,
       "severidad": "advertencia",
       "notas": "Al usar ** glob en el workspace raíz, se detectan archivos de subproyectos que tienen su propio tipo y contexto. Usar _es_subproyecto() para filtrar."
     },
@@ -88,7 +88,7 @@
       "ejemplo_malo": "def funcion():\n    \"\"\"Verifica \\src y \\config del proyecto.\"\"\"  # \\s y \\c son escapes inválidos\n    pass",
       "ejemplo_correcto": "def funcion():\n    \"\"\"Verifica src/ y config/ del proyecto.\"\"\"  # Sin backslash\n    # O usar raw string: r\"Verifica \\src y \\config\"\n    pass",
       "fecha_aprendido": "2026-09-10",
-      "veces_detectado": 65,
+      "veces_detectado": 88,
       "severidad": "advertencia",
       "notas": "En Python 3.12+ estas SyntaxWarnings se convertirán en SyntaxErrors. Usar r-strings para regex, o eliminar backslashes en docstrings."
     },
@@ -123,6 +123,70 @@
       "veces_detectado": 0,
       "severidad": "critico",
       "notas": "Este patrón NO se detecta por regex simple — solo por 'python verificar_conectores.py' (análisis AST). El campo patron_deteccion es un placeholder inerte; la detección real la hace verificar_conectores_sueltos() en qa_autonomo.py."
+    },
+    {
+      "id": "ERR-009",
+      "tipo_proyecto": [
+        "python",
+        "python-web",
+        "python-ml",
+        "python-trading"
+      ],
+      "descripcion": "División por cero posible: expresión a/b sin guard 'if b != 0' o 'if b' previo",
+      "patron_deteccion": "ERR-009-DETECCION-EXCLUSIVA-DETECTAR-LOGICA",
+      "ejemplo_malo": "def promedio(total, count):\n    return total / count  # ← si count==0, ZeroDivisionError",
+      "ejemplo_correcto": "def promedio(total, count):\n    if count == 0:\n        return 0\n    return total / count",
+      "fecha_aprendido": "2026-09-11",
+      "veces_detectado": 0,
+      "severidad": "advertencia",
+      "notas": "Detección estática via AST en detectar_logica.py. Se reporta como advertencia porque no siempre es posible determinar con certeza estática si el denominador puede ser 0."
+    },
+    {
+      "id": "ERR-010",
+      "tipo_proyecto": [
+        "python",
+        "python-web",
+        "python-ml"
+      ],
+      "descripcion": "Acceso a atributo/subscript de parámetro con default=None sin verificación previa",
+      "patron_deteccion": "ERR-010-DETECCION-EXCLUSIVA-DETECTAR-LOGICA",
+      "ejemplo_malo": "def procesar(usuario=None):\n    return usuario.nombre  # ← AttributeError si usuario es None",
+      "ejemplo_correcto": "def procesar(usuario=None):\n    if usuario is None:\n        return ''\n    return usuario.nombre",
+      "fecha_aprendido": "2026-09-11",
+      "veces_detectado": 0,
+      "severidad": "advertencia",
+      "notas": "Detección AST en detectar_logica.py. Solo analiza parámetros con default=None para reducir falsos positivos. Reporta como advertencia."
+    },
+    {
+      "id": "ERR-011",
+      "tipo_proyecto": [
+        "mql5"
+      ],
+      "descripcion": "Lógica de trading invertida: señal bullish→Sell o bearish→Buy en el mismo bloque",
+      "patron_deteccion": "ERR-011-DETECCION-EXCLUSIVA-DETECTAR-LOGICA",
+      "ejemplo_malo": "if(bullish == true) { trade.Sell(lot, _Symbol, Bid, sl, tp); }",
+      "ejemplo_correcto": "if(bullish == true) { trade.Buy(lot, _Symbol, Ask, sl, tp); }\nif(bearish == true) { trade.Sell(lot, _Symbol, Bid, sl, tp); }",
+      "fecha_aprendido": "2026-09-11",
+      "veces_detectado": 0,
+      "severidad": "critico",
+      "notas": "Error de lógica que causa pérdidas inmediatas al operar en dirección contraria a la señal. Detectado por detectar_logica.py con análisis regex sobre patrones de señal bullish/bearish."
+    },
+    {
+      "id": "ERR-012",
+      "tipo_proyecto": [
+        "react",
+        "nextjs",
+        "react-native",
+        "node"
+      ],
+      "descripcion": "useEffect sin array de dependencias → se ejecuta en cada render, loop infinito potencial",
+      "patron_deteccion": "ERR-012-DETECCION-EXCLUSIVA-DETECTAR-LOGICA",
+      "ejemplo_malo": "useEffect(() => {\n  fetchData();\n})  // Sin [] → fetchData se llama en cada render",
+      "ejemplo_correcto": "useEffect(() => {\n  fetchData();\n}, [])  // [] → solo al montar el componente\n// o: }, [userId])  // solo cuando cambia userId",
+      "fecha_aprendido": "2026-09-11",
+      "veces_detectado": 0,
+      "severidad": "critico",
+      "notas": "Si fetchData() actualiza estado, se crea un loop infinito: render → useEffect → setState → render → .... Detectado por detectar_logica.py analizando la firma de useEffect."
     }
   ]
 }

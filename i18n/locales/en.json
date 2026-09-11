@@ -588,7 +588,7 @@
   "legalNameField": "Real name",
   "legalNameLead": "Your real name is private. No one else will see it in the app or the network.",
   "legalNamePrivate": "Your real name is not visible to anyone else.",
-  "kycBoundNote": "You can update your details at any time. Your account and level remain unchanged.",
+  "kycBoundNote": "Name and document type are permanent. City and region can be updated at any time.",
   "lockPasswordMin": "At least 8 characters. You choose how long it is. Do not use a 0x private key.",
   "lockForgotPassword": "Forgot password",
   "lockRecoverTitle": "Restore password",
@@ -611,5 +611,9 @@
   "liquidarDone": "Debtor liquidated. Prize sent to your wallet.",
   "liquidarBtn": "Liquidate debtor",
   "marcarMorosoConfirm": "This will mark the user as delinquent if their loan has expired. Continue?",
-  "marcarMorosoBtn": "Mark as delinquent"
+  "marcarMorosoBtn": "Mark as delinquent",
+  "kycNameLocked": "Name registered — cannot be changed.",
+  "kycDocTypeLocked": "Document type registered — cannot be changed.",
+  "destroyDelinquent": "You must clear your debt before closing the account.",
+  "seedRotatePinRequired": "Enter your PIN to confirm"
 }

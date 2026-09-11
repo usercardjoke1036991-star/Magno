@@ -246,6 +246,52 @@ Reportar cualquier conector roto en la sección `### 🔗 Conectores` del health
 
 ---
 
+## 🧠 DETECCIÓN DE LÓGICA EN CADA PETICIÓN
+
+Al generar o modificar código, verificar activamente ANTES de entregar:
+
+### Python:
+- ¿Hay división? → ¿Se verifica que el denominador `!= 0`? (ERR-009)
+  - ❌ `return total / count` → ✅ `if count == 0: return 0; return total / count`
+- ¿Se accede a `.atributo` de un objeto con `default=None`? → ¿Se verifica que no es None primero? (ERR-010)
+  - ❌ `def f(x=None): return x.valor` → ✅ `if x is None: return; return x.valor`
+- ¿Hay `while True`? → ¿Hay un `break` alcanzable bajo TODAS las condiciones?
+  - ❌ `while True: print("loop")` → ✅ `while True: ...; if cond: break`
+- ¿Se itera una lista y se modifica dentro del loop? → Usar copia: `for x in lista[:]:`
+  - ❌ `for x in lista: lista.append(y)` → ✅ `for x in lista[:]: lista.append(y)` o acumular aparte
+- ¿Hay `return acum` DENTRO de un `for`? → El return debe estar FUERA del for.
+
+### MQL5:
+- ¿La señal dice comprar? → ¿Se ejecuta `trade.Buy()` (no `Sell()`)? (ERR-011)
+- ¿El lote es calculado? → ¿Puede ser 0? Usar `NormalizeDouble` con mínimo `0.01`
+- ¿Se usa `MagicNumber`? → ¿Es `!= 0`?
+- ¿Hay `trade.Buy/Sell` sin check de spread? → Añadir verificación de `SYMBOL_SPREAD`
+
+### React/Node:
+- ¿`useEffect` sin `[deps]`? → Loop infinito. SIEMPRE añadir array de dependencias (ERR-012)
+  - ❌ `useEffect(() => { fetch(...) })` → ✅ `useEffect(() => { fetch(...) }, [])`
+- ¿Se muta `state` directamente? → Usar `setState()` o el setter de `useState`
+  - ❌ `this.state.count = 5` → ✅ `this.setState({ count: 5 })`
+- ¿`.map()` sin `key`? → Añadir `key={item.id}` o `key={index}`
+- ¿`fetch()` sin `await` ni `.then()`? → La promesa queda sin resolver
+
+### HERRAMIENTA DISPONIBLE:
+```powershell
+python detectar_logica.py          # Analiza directorio actual
+python detectar_logica.py ruta/    # Analiza ruta específica
+python detectar_logica.py --json   # Salida JSON para integración
+```
+
+### REGLA ABSOLUTA DE LÓGICA:
+Antes de entregar código, ejecutar mentalmente el flujo principal y los casos borde:
+1. ¿Qué pasa con valores vacíos / null / 0?
+2. ¿Qué pasa si el usuario hace algo inesperado?
+3. ¿El resultado es el esperado bajo TODAS las condiciones?
+
+Si alguna respuesta es dudosa → añadir guard o reportar como advertencia.
+
+---
+
 ## INTEGRACIÓN CON EL SISTEMA QA
 
 Este advisor trabaja en conjunto con:
@@ -253,5 +299,6 @@ Este advisor trabaja en conjunto con:
 - `project-context-detector.mdc` → para la detección de tipo de proyecto
 - `CONTEXTO.md` → como fuente de verdad del estado del proyecto
 - `verificar_conectores.py` → para análisis estático de conectores sueltos (ERR-008)
+- `detectar_logica.py` → para detección de errores de lógica (ERR-009 a ERR-012)
 
 **Prioridad de información**: CONTEXTO.md > código fuente > suposiciones del agente

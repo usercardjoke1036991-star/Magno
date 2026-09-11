@@ -129,7 +129,7 @@ export async function saveKycDeclaration(
     country: normalizeCountry(draft.country ?? prev?.country ?? ''),
     city: normalizeCity(draft.city ?? prev?.city ?? ''),
     region: normalizeCity(draft.region ?? prev?.region ?? ''),
-    docType: draft.docType || prev?.docType || 'nationalId',
+    docType: prev?.docType || safeDocType(draft.docType),
     declaredAt: prev?.declaredAt || Date.now(),
   };
   await SecureStore.setItemAsync(PREFIX + walletKey(wallet), JSON.stringify(next), OPTIONS);

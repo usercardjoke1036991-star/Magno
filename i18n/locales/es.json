@@ -588,7 +588,7 @@
   "legalNameField": "Nombre real",
   "legalNameLead": "Su nombre real es privado. Nadie lo verá en la app ni en la red.",
   "legalNamePrivate": "Su nombre real no es visible para nadie más.",
-  "kycBoundNote": "Puede actualizar sus datos en cualquier momento. Su cuenta y nivel no cambian.",
+  "kycBoundNote": "Nombre y tipo de documento son permanentes. Ciudad y región son editables en cualquier momento.",
   "lockPasswordMin": "Mínimo 8 caracteres. Usted elige cuántos. No use una clave privada 0x.",
   "lockForgotPassword": "Olvidé la contraseña",
   "lockRecoverTitle": "Restablecer contraseña",
@@ -611,5 +611,9 @@
   "liquidarDone": "Deudor liquidado. Premio enviado a su billetera.",
   "liquidarBtn": "Liquidar deudor",
   "marcarMorosoConfirm": "Marcará al usuario como moroso si su préstamo ya venció. ¿Continuar?",
-  "marcarMorosoBtn": "Marcar como moroso"
+  "marcarMorosoBtn": "Marcar como moroso",
+  "kycNameLocked": "Nombre registrado — no puede modificarse.",
+  "kycDocTypeLocked": "Tipo de documento registrado — no puede modificarse.",
+  "destroyDelinquent": "Debes saldar la deuda antes de cerrar la cuenta.",
+  "seedRotatePinRequired": "Ingresa tu PIN para confirmar"
 }

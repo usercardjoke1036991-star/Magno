@@ -77,3 +77,29 @@ Android Bundled 6063ms node_modules\expo-notifications\build\index.js (815 modul
  ERROR  [SyntaxError: 406:209:':' expected in property initialization]
  ERROR  [SyntaxError: 3:13:';' expected]
  ERROR  [SyntaxError: 3:13:';' expected]
+Android .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 293ms index.js (1 module)
+ LOG  AppKit: Creating new instance - AppKit.ts:createAppKit
+ LOG  ✅ Web3 polyfills loaded successfully
+ LOG  [AppKit] [AppKit.ts:initControllers] AppKit initialization started
+Android node_modules\expo-notifications\build\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 93ms node_modules\expo-notifications\build\index.js (1 module)
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+Android .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 195ms index.js (1 module)
+ LOG  AppKit: Creating new instance - AppKit.ts:createAppKit
+ LOG  ✅ Web3 polyfills loaded successfully
+ LOG  [AppKit] [AppKit.ts:initControllers] AppKit initialization started
+Android node_modules\expo-notifications\build\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 180ms node_modules\expo-notifications\build\index.js (1 module)
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer configurado
+ LOG  Wallet signer limpio

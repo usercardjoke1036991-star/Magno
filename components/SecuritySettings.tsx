@@ -50,6 +50,7 @@ export const SecuritySettings: React.FC = () => {
   const [revealPin, setRevealPin] = useState('');
   const [restorePhrase, setRestorePhrase] = useState('');
   const [restorePin, setRestorePin] = useState('');
+  const [rotatePin, setRotatePin] = useState('');
   const [destroyWord, setDestroyWord] = useState('');
   const [destroyPin, setDestroyPin] = useState('');
   const [busy, setBusy] = useState(false);
@@ -105,14 +106,15 @@ export const SecuritySettings: React.FC = () => {
       Alert.alert(t('securityAccessKey'), t('lockBiometricUnavailable'));
       return;
     }
-    if (bioOn) {
-      await setBiometricEnabled(false);
-      setBioOn(false);
-      return;
-    }
+    // Requiere autenticación biométrica tanto para activar como para desactivar
     const ok = await authenticateBiometric();
     if (!ok) {
       Alert.alert(t('securityAccessKey'), t('securityAccessKeyFailed'));
+      return;
+    }
+    if (bioOn) {
+      await setBiometricEnabled(false);
+      setBioOn(false);
       return;
     }
     const enabled = await setBiometricEnabled(true);
@@ -174,9 +176,17 @@ export const SecuritySettings: React.FC = () => {
     }
   };
 
-  const rotatePhrase = () => {
+  const rotatePhrase = async () => {
     if (userInfo.hasActiveLoan) {
       Alert.alert(t('activeLoan'), t('appWalletDestroyLoan'));
+      return;
+    }
+    if (userInfo.isDelinquent) {
+      Alert.alert(t('activeLoan'), t('destroyDelinquent'));
+      return;
+    }
+    if (pinSet && !(await verifyPin(rotatePin))) {
+      Alert.alert(t('error'), t('lockPinWrong'));
       return;
     }
     Alert.alert(t('seedRotate'), t('seedRotateConfirm'), [
@@ -193,6 +203,7 @@ export const SecuritySettings: React.FC = () => {
             await recreate();
             await refreshPhrase();
             refetch();
+            setRotatePin('');
             setShown(false);
             Alert.alert(t('ready'), t('seedRotated'));
           } catch (error) {
@@ -208,6 +219,10 @@ export const SecuritySettings: React.FC = () => {
   const destroyAccount = async () => {
     if (userInfo.hasActiveLoan) {
       Alert.alert(t('activeLoan'), t('appWalletDestroyLoan'));
+      return;
+    }
+    if (userInfo.isDelinquent) {
+      Alert.alert(t('activeLoan'), t('destroyDelinquent'));
       return;
     }
     if (destroyWord.trim().toUpperCase() !== 'DESTRUIR') {
@@ -371,10 +386,22 @@ export const SecuritySettings: React.FC = () => {
             )}
             <Text style={[styles.label, { color: colors.text }]}>{t('seedRotate')}</Text>
             <Text style={[styles.lead, { color: colors.textMuted }]}>{t('seedRotateLead')}</Text>
+            {pinSet ? (
+              <TextInput
+                value={rotatePin}
+                onChangeText={(value) => setRotatePin(value.replace(/\D/g, '').slice(0, 6))}
+                keyboardType="number-pad"
+                secureTextEntry
+                maxLength={6}
+                placeholder={t('seedRotatePinRequired')}
+                placeholderTextColor={colors.textMuted}
+                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+              />
+            ) : null}
             <TouchableOpacity
-              disabled={busy}
-              onPress={rotatePhrase}
-              style={[styles.button, styles.destroy, busy && { opacity: 0.6 }]}
+              disabled={busy || (pinSet && rotatePin.length !== 6)}
+              onPress={() => void rotatePhrase()}
+              style={[styles.button, styles.destroy, (busy || (pinSet && rotatePin.length !== 6)) && { opacity: 0.6 }]}
             >
               {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('seedRotate')}</Text>}
             </TouchableOpacity>

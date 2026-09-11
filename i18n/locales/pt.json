@@ -588,7 +588,7 @@
   "legalNameField": "Nome real",
   "legalNameLead": "O nome real fica ligado às suas credenciais. Ninguém o vê no app nem na blockchain.",
   "legalNamePrivate": "O nome real não aparece no perfil, no avatar nem na rede.",
-  "kycBoundNote": "Quando esta conta é verificada com uma identidade, fica ligada a ela. Se depois mudar os dados no telefone, nível, rede e empréstimos não são reiniciados.",
+  "kycBoundNote": "Nome e tipo de documento são permanentes. Cidade e região podem ser atualizados a qualquer momento.",
   "lockPasswordMin": "Mínimo 8 caracteres. Você escolhe o tamanho. Não use uma chave privada 0x.",
   "lockForgotPassword": "Esqueci a senha",
   "lockRecoverTitle": "Restaurar senha",
@@ -611,5 +611,9 @@
   "liquidarDone": "Debtor liquidated. Prize sent to your wallet.",
   "liquidarBtn": "Liquidate debtor",
   "marcarMorosoConfirm": "This will mark the user as delinquent if their loan is already overdue. It does not pay the debt, only changes the status. Continue?",
-  "marcarMorosoBtn": "Mark as delinquent"
+  "marcarMorosoBtn": "Mark as delinquent",
+  "kycNameLocked": "Nome registrado — não pode ser alterado.",
+  "kycDocTypeLocked": "Tipo de documento registrado — não pode ser alterado.",
+  "destroyDelinquent": "Quite a dívida antes de fechar a conta.",
+  "seedRotatePinRequired": "Digite seu PIN para confirmar"
 }

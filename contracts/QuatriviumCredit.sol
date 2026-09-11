@@ -1247,6 +1247,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(msg.sender != fundador, "founder");
         require(humanosVerificados[msg.sender], "not verified");
         require(!cuentaDestruida[msg.sender], "dead");
+        require(!esMoroso[msg.sender], "in mora");
         require(usuarios[msg.sender].montoActivo == 0, "active loan");
 
         IERC20 erc = stableTokens[token];

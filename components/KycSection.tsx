@@ -56,6 +56,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
   }, [walletAddress]);
 
   const done = kycDeclarado && !editing;
+  // nombre y tipo de documento se congelan en el primer submit on-chain
+  const identityFrozen = kycDeclarado;
   const blocked = isLoading || paused || !isRegistered || !walletAddress;
 
   const submit = async () => {
@@ -104,15 +106,22 @@ export const KycSection: React.FC<KycSectionProps> = ({
             <Text style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</Text>
           ) : null}
           <Text style={[styles.label, { color: colors.text }]}>{t('kycLegalName')}</Text>
-          <TextInput
-            value={legalName}
-            onChangeText={setLegalName}
-            editable={!blocked}
-            placeholder={t('kycLegalName')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="words"
-            style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-          />
+          {identityFrozen ? (
+            <View style={[styles.frozenField, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.frozenText, { color: colors.text }]}>{legalName}</Text>
+              <Text style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycNameLocked')}</Text>
+            </View>
+          ) : (
+            <TextInput
+              value={legalName}
+              onChangeText={setLegalName}
+              editable={!blocked}
+              placeholder={t('kycLegalName')}
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="words"
+              style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+            />
+          )}
           <Text style={[styles.label, { color: colors.text }]}>{t('kycCountry')}</Text>
           <TextInput
             value={country}
@@ -144,21 +153,28 @@ export const KycSection: React.FC<KycSectionProps> = ({
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
           <Text style={[styles.label, { color: colors.text }]}>{t('kycDocType')}</Text>
-          <View style={styles.types}>
-            {DOC_TYPES.map((type) => (
-              <TouchableOpacity
-                key={type}
-                onPress={() => setDocType(type)}
-                style={[
-                  styles.typeChip,
-                  { borderColor: colors.border, backgroundColor: colors.surface },
-                  docType === type && { borderColor: colors.primary, backgroundColor: colors.chip },
-                ]}
-              >
-                <Text style={[styles.typeText, { color: colors.text }]}>{docLabel(type)}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {identityFrozen ? (
+            <View style={[styles.frozenField, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.frozenText, { color: colors.text }]}>{docLabel(docType)}</Text>
+              <Text style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycDocTypeLocked')}</Text>
+            </View>
+          ) : (
+            <View style={styles.types}>
+              {DOC_TYPES.map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  onPress={() => setDocType(type)}
+                  style={[
+                    styles.typeChip,
+                    { borderColor: colors.border, backgroundColor: colors.surface },
+                    docType === type && { borderColor: colors.primary, backgroundColor: colors.chip },
+                  ]}
+                >
+                  <Text style={[styles.typeText, { color: colors.text }]}>{docLabel(type)}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
           <TouchableOpacity onPress={() => setAccepted((value) => !value)} style={styles.checkRow}>
             <View style={[styles.box, { borderColor: colors.border }, accepted && { backgroundColor: colors.primary, borderColor: colors.primary }]} />
             <Text style={[styles.checkText, { color: colors.text }]}>{t('kycDeclare')}</Text>
@@ -213,6 +229,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 10,
     fontSize: 14,
+  },
+  frozenField: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  frozenText: {
+    fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
+  },
+  frozenBadge: {
+    fontSize: 11,
+    marginLeft: 8,
   },
   types: {
     flexDirection: 'row',

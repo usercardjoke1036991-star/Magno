@@ -12,6 +12,20 @@ describe('QuatriviumCredit - destroy account', function () {
     await expect(contract.connect(owner).destruirCuenta(tokenAddr)).to.be.reverted;
   });
 
+  it('blocks destroy while the user is in mora (delinquent)', async () => {
+    const { token, contract, owner, user, tokenAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, user);
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    // Avanzar tiempo hasta vencimiento para poder marcar mora
+    await ethers.provider.send('evm_increaseTime', [8 * 24 * 3600]);
+    await ethers.provider.send('evm_mine', []);
+    await contract.marcarMorosoSiVencido(user.address);
+    expect(await contract.esMoroso(user.address)).to.equal(true);
+    // Con préstamo activo Y mora → ambas protecciones aplican
+    await expect(contract.connect(user).destruirCuenta(tokenAddr)).to.be.reverted;
+  });
+
   it('sends leftover tokens and LP to the pool, frees phone/device, and wipes progress', async () => {
     const { token, contract, owner, user, extra, tokenAddr, contractAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
