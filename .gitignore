@@ -47,3 +47,9 @@ yarn-error.*
 artifacts/
 cache/
 typechain-types/
+
+# APKs
+*.apk
+
+# Debug screenshots
+store-assets/debug-screen*.png

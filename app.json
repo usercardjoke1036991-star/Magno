@@ -35,9 +35,6 @@
       "edgeToEdgeEnabled": true,
       "package": "com.quatrivium.credit",
       "allowBackup": false,
-      "usesCleartextTraffic": false,
-      "enableProguardInReleaseBuilds": true,
-      "enableShrinkResourcesInReleaseBuilds": true,
       "permissions": [
         "USE_BIOMETRIC",
         "USE_FINGERPRINT",
