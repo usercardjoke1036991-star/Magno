@@ -66,7 +66,7 @@
   "royaltiesFrozen": "Komisyonlar askıda. Yeniden kazanmak için borcunuzu kapatın.",
   "referralHint": "Henüz ağda değilsiniz. Aşağıda, «Kredi hattımı etkinleştir» bölümünde sizi davet edenin kodunu yapıştırın veya boş bırakın.",
   "shareTitle": "Quatrivium Credit daveti",
-  "shareMessage": "{name} sizi Quatrivium Credit’e davet ediyor: ihtiyacınız olduğunda kredi alın, geri ödeyin ve isterseniz daha fazla kişi davet edin. Hattınızdaki biri her borçlanıp geri ödediğinde siz kazanırsınız.\n\nKod: {code}\n\n{link}",
+  "shareMessage": "{name} sizi Quatrivium Credit'a davet ediyor. Kredi alin, zamaninda odeyin ve baskalarini davet ederek kazanin.",
   "connect": "Bağla",
   "connectFirst": "Önce cüzdanınızı bağlayın.",
   "invite": "Davet",
