@@ -1441,6 +1441,58 @@ const server = createServer(async (req, res) => {
     json(res, 200, { wrap });
     return;
   }
+  if (path === '/auto-fund') {
+    // Solo en testnet: fondea automáticamente wallets sin BNB para gas.
+    // En mainnet se rechaza (ATTESTER no debe gastar BNB real en fondeos anónimos).
+    if (isMainnet) {
+      json(res, 403, { error: 'mainnet: use faucet' });
+      return;
+    }
+    if (!rateLimit(`autofund:${ip}`, 5, 60_000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      json(res, 413, { error: 'payload' });
+      return;
+    }
+    const address = String(body.address || '').trim();
+    if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
+      json(res, 400, { error: 'address' });
+      return;
+    }
+    const MIN_FUND_WEI = 1_000_000_000_000_000n;  // 0.001 BNB
+    const SEND_WEI     = 5_000_000_000_000_000n;  // 0.005 BNB
+    try {
+      if (!ATTESTER_KEY || !identityProvider) {
+        json(res, 503, { error: 'not configured' });
+        return;
+      }
+      const balance = await identityProvider.getBalance(address);
+      if (balance >= MIN_FUND_WEI) {
+        json(res, 200, { funded: false });
+        return;
+      }
+      const funder = new Wallet(ATTESTER_KEY, identityProvider);
+      const funderBal = await identityProvider.getBalance(funder.address);
+      if (funderBal < SEND_WEI + MIN_FUND_WEI) {
+        console.warn('auto-fund: funder wallet low on BNB testnet —', funder.address);
+        json(res, 503, { error: 'funder insufficient' });
+        return;
+      }
+      const tx = await funder.sendTransaction({ to: address, value: SEND_WEI, gasLimit: 21000n });
+      await tx.wait(1);
+      console.log(`auto-fund: sent 0.005 BNB testnet to ${address} — tx ${tx.hash}`);
+      json(res, 200, { funded: true, txHash: tx.hash });
+    } catch (fundErr) {
+      console.error('auto-fund error:', fundErr.message || fundErr);
+      json(res, 503, { error: 'fund failed' });
+    }
+    return;
+  }
   json(res, 404, { error: 'not found' });
 });
 

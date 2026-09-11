@@ -627,6 +627,13 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     fetchBalances();
   }), [fetchBalances]);
 
+  // Auto-refresh cada 30 s cuando hay wallet conectada para mantener el saldo al día
+  useEffect(() => {
+    if (!walletAddress) return;
+    const id = setInterval(() => { fetchBalances(); }, 30_000);
+    return () => clearInterval(id);
+  }, [walletAddress, fetchBalances]);
+
   return {
     balances,
     userInfo,

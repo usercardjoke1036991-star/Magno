@@ -11,11 +11,31 @@ import { useWeb3Transactions } from './useWeb3Transactions';
 import { isContractConfigured, isDemoMode } from '../constants/rpcConfig';
 import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
 import { useI18n } from '../i18n/LanguageContext';
+import { NOTIFY_API } from '../constants/appLinks';
 import type { LoanTier, UserInfo } from './useWeb3Balances';
 import type { Token } from '../constants/tokens';
 
 const BSC_TESTNET_FAUCET = 'https://www.bnbchain.org/en/testnet-faucet';
 const MIN_GAS_BNB = 0.001; // mínimo recomendado para gas en testnet
+
+/** Intenta fondear la wallet con BNB testnet desde el notify-worker. Silencioso si falla. */
+async function tryAutoFund(address: string): Promise<boolean> {
+  if (!NOTIFY_API || !address) return false;
+  try {
+    const res = await fetch(`${NOTIFY_API}/auto-fund`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { funded?: boolean; txHash?: string };
+    return data.funded === true;
+  } catch {
+    // Network error o worker no disponible — no bloquear el flujo
+    return false;
+  }
+}
 
 export interface HomeHandlersParams {
   walletAddress: string | null | undefined;
@@ -93,8 +113,20 @@ export const useHomeHandlers = ({
       Alert.alert(t('admin'), t('protocolPaused'));
       return;
     }
+
+    // Intento silencioso de auto-fondeo desde el notify-worker (solo testnet con worker activo).
+    // Si el worker no está disponible, simplemente continúa con el saldo actual.
+    let localBnbBalance = parseFloat(balances.bnbBalance || '0');
+    if (localBnbBalance < MIN_GAS_BNB && isDemoMode()) {
+      const funded = await tryAutoFund(walletAddress);
+      if (funded) {
+        localBnbBalance += 0.005; // el worker envía 0.005 BNB
+        void refetch(); // actualiza la UI de forma asíncrona
+      }
+    }
+
     // Pre-check: verificar que la app wallet tiene BNB suficiente para gas
-    if (parseFloat(balances.bnbBalance || '0') < MIN_GAS_BNB) {
+    if (localBnbBalance < MIN_GAS_BNB) {
       if (isDemoMode()) {
         Alert.alert(
           t('errNeedGas'),
