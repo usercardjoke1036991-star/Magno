@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -109,6 +110,22 @@ export const SecuritySettings: React.FC = () => {
   useEffect(() => {
     refreshPhrase().catch(() => {});
   }, [address]);
+
+  useEffect(() => {
+    if (!shown) return undefined;
+    const hide = () => {
+      setShown(false);
+      setPhrase(null);
+    };
+    const timer = setTimeout(hide, 45_000);
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') hide();
+    });
+    return () => {
+      clearTimeout(timer);
+      sub.remove();
+    };
+  }, [shown]);
 
   const kycOk = userInfo.kycDeclarado;
   const phoneOk = userInfo.identityBound;

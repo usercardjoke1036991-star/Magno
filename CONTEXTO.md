@@ -236,6 +236,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Inicio de sesion: correo ya verificado no pide codigo. Guardar sesion en la misma pantalla. | — |
 | 2026-09-12 | Auditoria profunda: Demo 0xD2d2A9 operativo (1000 niveles, pool 2000 USDT). Si la huella esta marcada pero el sensor no responde, se salta y se pide el siguiente metodo. | — |
 | 2026-09-12 | Nombre visible de la app: Quatrivium Finance. Paquete Android/iOS y firmas EIP-712 sin cambiar. | — |
 | 2026-09-12 | Como confirma permite varios metodos a la vez; se confirman en secuencia (AND). | — |

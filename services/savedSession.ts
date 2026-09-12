@@ -14,18 +14,23 @@ export async function isSessionSaved(): Promise<boolean> {
   }
 }
 
-export async function markSessionSaved(): Promise<void> {
-  await SecureStore.setItemAsync(FLAG, '1', OPTIONS);
-  const wrap = getWalletWrapKey();
-  if (wrap && !(await isAuthEnabled('unlock'))) {
-    await SecureStore.setItemAsync(WRAP, wrap, OPTIONS);
-    return;
-  }
+export async function purgePersistedWrap(): Promise<void> {
   try {
     await SecureStore.deleteItemAsync(WRAP);
   } catch {
     // ignore
   }
+}
+
+export async function markSessionSaved(): Promise<void> {
+  await SecureStore.setItemAsync(FLAG, '1', OPTIONS);
+  const wrap = getWalletWrapKey();
+  // Si el desbloqueo está on, la wrap se deriva al desbloquear. No dejarla suelta en el almacén.
+  if (wrap && !(await isAuthEnabled('unlock'))) {
+    await SecureStore.setItemAsync(WRAP, wrap, OPTIONS);
+    return;
+  }
+  await purgePersistedWrap();
 }
 
 export async function restoreSavedSessionWrap(): Promise<boolean> {

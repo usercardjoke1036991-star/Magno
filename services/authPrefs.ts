@@ -127,6 +127,10 @@ export async function saveAuthPrefs(prefs: AuthPrefs): Promise<AuthPrefs> {
     }
   }
   await persist(next);
+  if (next.unlock.on) {
+    const { purgePersistedWrap } = await import('./savedSession');
+    await purgePersistedWrap();
+  }
   return next;
 }
 
