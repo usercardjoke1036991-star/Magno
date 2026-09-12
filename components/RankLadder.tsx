@@ -30,14 +30,14 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
               style={[
                 styles.item,
                 { borderColor: 'transparent' },
-                active && { borderColor: colors.border, backgroundColor: colors.surface },
+                active && { borderColor: rank.metal, backgroundColor: colors.surface },
               ]}
             >
               <RankMedal level={rank.level} rank={rank} size={36} dimmed={!reached} />
               <AppText
                 style={[
                   styles.caption,
-                  { color: reached ? colors.text : colors.textMuted },
+                  { color: reached ? rank.text : colors.textMuted },
                 ]}
                 numberOfLines={1}
               >

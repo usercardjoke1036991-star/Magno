@@ -23,6 +23,9 @@ Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmac
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] El emblema conserva el relieve 3D y se pinta con el color mineral de cada rango; la piedra sigue en el centro.
+- [2026-09-12] Las medallas conservan la textura 3D original y llevan en el centro la piedra o metal de su rango.
+- [2026-09-12] Cada rango usa el color mineral real de su metal o piedra. Las medallas ya no repiten cobre, oro ni celeste.
 - [2026-09-12] Auditoria live: desbloqueo apagado ya no se fuerza por error; el signer no se limpia al remount; Bonos se oculta en el Demo de 100 niveles.
 - [2026-09-12] Correo anadido como metodo en Como confirma y en el desbloqueo, si el correo ya esta verificado.
 - [2026-09-12] Como confirma oculta PIN, huella y autenticador hasta que el usuario los registre en Seguridad.
@@ -71,4 +74,4 @@ Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmac
 (puntos críticos)
 
 ## Última sesión
-[2026-09-12] Decisión: Si el contrato live no tiene hitos ni donar, la sala Bonos no aparece en el hub.
+[2026-09-12] Cambio: El emblema conserva el relieve 3D y se pinta con el color mineral de cada rango; la piedra sigue en el centro.
