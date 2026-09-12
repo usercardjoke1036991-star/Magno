@@ -24,15 +24,17 @@ import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
  * suma fama de cada alta. Los puntos de red (bono USDT del pool) son solo
  * del referidor directo, para no drenar la caja.
  *
- * EIP-170: ESTE archivo no puede pasar de 24576 bytes. El protocolo sí puede crecer:
- * cada pieza nueva (niveles, bonos, identidad, red) vive en un contrato hermano
- * con su propio tope. No se borran funciones de este núcleo para “hacer hueco”.
+ * EIP-170: ESTE archivo no puede pasar de 24576 bytes (límite de Ethereum, no nuestro).
+ * El protocolo no se recorta: cada pieza nueva vive en un contrato hermano
+ * (QuatriviumLeveling, etc.), cada uno con su propio tope de 24 KB.
  */
 contract QuatriviumCredit is ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     uint256 public constant TIMELOCK_DELAY = 72 hours;
     uint256 public constant COOLDOWN_PRESTAMO = 48 hours;
+    uint256 internal constant GRACIA_MORA = 30 days;
+    uint256 internal constant FAMA_POR_DIA_MORA = 10;
     uint256 public constant ORIGINATION_WINDOW = 1 days;
     uint256 public constant MAX_ADMINS = 3;
     uint256 internal constant MAX_NIVEL_TOTAL = 1000;
@@ -127,6 +129,8 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     mapping(address => bool) public humanosVerificados;
     mapping(address => bool) public blacklist;
     mapping(address => bool) public esMoroso;
+    mapping(address => uint256) internal moraDesde;
+    mapping(address => uint256) internal moraDiasCobrados;
     mapping(address => uint256) public reputacion;
     mapping(address => uint256) public puntosRed;
     mapping(address => uint256) public bonosRedCobrados;
@@ -812,20 +816,20 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         }
     }
 
-    function _subirNivelSiATiempo(bool enPlazo) internal {
+    function _subirNivelSiATiempo(address deudor, bool enPlazo) internal {
         if (
             !enPlazo
-            || usuarios[msg.sender].vencimiento == 0
-            || block.timestamp > usuarios[msg.sender].vencimiento
+            || usuarios[deudor].vencimiento == 0
+            || block.timestamp > usuarios[deudor].vencimiento
         ) {
             return;
         }
-        reputacion[msg.sender] += puntosPorPagoATiempo;
-        prestamosPagadosATiempo[msg.sender] += 1;
-        emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
-        ProgresoNivel storage progresoPago = progresoUsuarios[msg.sender];
+        reputacion[deudor] += puntosPorPagoATiempo;
+        prestamosPagadosATiempo[deudor] += 1;
+        emit ReputationUpdated(deudor, reputacion[deudor]);
+        ProgresoNivel storage progresoPago = progresoUsuarios[deudor];
         uint256 unlocked = progresoPago.nivelActual == 0 ? 1 : progresoPago.nivelActual;
-        if (usuarios[msg.sender].montoActivo != _tier(unlocked).montoPrestamo) {
+        if (usuarios[deudor].montoActivo != _tier(unlocked).montoPrestamo) {
             return;
         }
         progresoPago.solicitudesCompletadas++;
@@ -834,32 +838,33 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas && unlocked < MAX_NIVEL_TOTAL) {
             progresoPago.nivelActual++;
             progresoPago.solicitudesCompletadas = 0;
-            emit NivelActualizado(msg.sender, progresoPago.nivelActual);
+            emit NivelActualizado(deudor, progresoPago.nivelActual);
         }
     }
 
-    function _limpiarPrestamo() internal {
-        usuarios[msg.sender].montoActivo = 0;
-        usuarios[msg.sender].vencimiento = 0;
-        usuarios[msg.sender].enMora = false;
-        usuarios[msg.sender].monedaActivo = address(0);
-        usuarios[msg.sender].tasaAplicadaBP = 0;
-        delete planPago[msg.sender];
-        prestamosCerrados[msg.sender] += 1;
-        if (esMoroso[msg.sender]) {
-            esMoroso[msg.sender] = false;
-            emit MorosityUpdated(msg.sender, false);
+    function _limpiarPrestamo(address deudor) internal {
+        usuarios[deudor].montoActivo = 0;
+        usuarios[deudor].vencimiento = 0;
+        usuarios[deudor].enMora = false;
+        usuarios[deudor].monedaActivo = address(0);
+        usuarios[deudor].tasaAplicadaBP = 0;
+        delete planPago[deudor];
+        delete moraDesde[deudor];
+        prestamosCerrados[deudor] += 1;
+        if (esMoroso[deudor]) {
+            esMoroso[deudor] = false;
+            emit MorosityUpdated(deudor, false);
         }
     }
 
-    function _repartirPago(address token, uint256 interesParte) internal returns (uint256 comisionesRed) {
-        uint256 nivelPrestamo = usuarios[msg.sender].nivelActual;
+    function _repartirPago(address deudor, address token, uint256 interesParte) internal returns (uint256 comisionesRed) {
+        uint256 nivelPrestamo = usuarios[deudor].nivelActual;
         if (nivelPrestamo == 0) nivelPrestamo = 1;
         uint256 retenidoPool;
         bool usoBonoA;
         (comisionesRed, retenidoPool, usoBonoA) =
-            _dispersarInteres(msg.sender, token, interesParte, nivelPrestamo, prestamosCerrados[msg.sender]);
-        emit InteresDistribuido(msg.sender, token, interesParte, comisionesRed, retenidoPool, usoBonoA);
+            _dispersarInteres(deudor, token, interesParte, nivelPrestamo, prestamosCerrados[deudor]);
+        emit InteresDistribuido(deudor, token, interesParte, comisionesRed, retenidoPool, usoBonoA);
     }
 
     function pagarPrestamo(address token, uint256 monto) external nonReentrant onlySupportedToken(token) {
@@ -867,12 +872,13 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(monto > 0, "monto>0");
         require(usuarios[msg.sender].montoActivo > 0, "no active loan");
         require(usuarios[msg.sender].monedaActivo == token, "token mismatch");
-        _pagarInterno(token, monto);
+        _pagarComo(msg.sender, token, monto);
     }
 
-    function _pagarInterno(address token, uint256 monto) internal {
-        (uint256 principalDue, uint256 interesDue, uint256 totalDue, ) = _deudaActual(msg.sender);
-        PlanPago storage plan = planPago[msg.sender];
+    function _pagarComo(address deudor, address token, uint256 monto) internal {
+        _aplicarPenalizacionDiaria(deudor);
+        (uint256 principalDue, uint256 interesDue, uint256 totalDue, ) = _deudaActual(deudor);
+        PlanPago storage plan = planPago[deudor];
         require(totalDue > plan.pagado, "already paid");
         uint8 totales = plan.totales == 0 ? 1 : plan.totales;
         uint256 cuota = _montoCuota(totalDue, plan.pagado, totales, plan.pagadas);
@@ -884,24 +890,24 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (plan.venceCuota != 0 && block.timestamp > plan.venceCuota) {
             plan.enPlazo = false;
         }
-        if (_estaVencido(msg.sender)) {
+        if (_estaVencido(deudor)) {
             plan.enPlazo = false;
-            _aplicarMoraSiVencido(msg.sender);
+            _aplicarMoraSiVencido(deudor);
         }
 
-        stableTokens[token].safeTransferFrom(msg.sender, address(this), pago);
+        stableTokens[token].safeTransferFrom(deudor, address(this), pago);
         uint256 interesYa = (interesDue * pagadoAntes) / totalDue;
         uint256 interesParte = pago == restante
             ? interesDue - interesYa
             : (interesDue * pago) / totalDue;
         if (interesParte > pago) interesParte = pago;
         _reducirOutstanding(token, pago - interesParte);
-        uint256 comisionesRed = _repartirPago(token, interesParte);
+        uint256 comisionesRed = _repartirPago(deudor, token, interesParte);
 
         plan.pagado = uint128(pagadoAntes + pago);
         if (uint256(plan.pagado) < totalDue) {
             plan.pagadas += 1;
-            uint256 vence = usuarios[msg.sender].vencimiento;
+            uint256 vence = usuarios[deudor].vencimiento;
             uint256 left = totales > plan.pagadas ? totales - plan.pagadas : 1;
             plan.venceCuota = uint64(vence > block.timestamp ? block.timestamp + ((vence - block.timestamp) / left) : vence);
             return;
@@ -912,9 +918,9 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
             _reducirOutstanding(token, principalDue - prevOut - (pago - interesParte));
         }
         bool enPlazo = plan.enPlazo;
-        _subirNivelSiATiempo(enPlazo);
-        _limpiarPrestamo();
-        emit PrestamoPagado(msg.sender, principalDue, comisionesRed, token);
+        _subirNivelSiATiempo(deudor, enPlazo);
+        _limpiarPrestamo(deudor);
+        emit PrestamoPagado(deudor, principalDue, comisionesRed, token);
     }
 
     function _inhabilitado(address usuario) internal view returns (bool) {
@@ -924,9 +930,15 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return planPago[usuario].venceCuota != 0 && block.timestamp > planPago[usuario].venceCuota;
     }
 
-    function dispersionCongelada(address deudor) public view returns (bool) {
-        return _inhabilitado(deudor)
-            || (prestamosMorosos[deudor] > 0 && reputacion[deudor] < REPUTACION_SANA);
+    /// @notice Tras el mes de gracia las comisiones y bonos del usuario van al pool.
+    function _fueraDeGracia(address usuario) internal view returns (bool) {
+        if (!esMoroso[usuario]) return false;
+        uint256 desde = moraDesde[usuario];
+        return desde != 0 && block.timestamp > desde + GRACIA_MORA;
+    }
+
+    function dispersionCongelada(address usuario) public view returns (bool) {
+        return _fueraDeGracia(usuario);
     }
 
     function _bpGeneracion(uint8 generacion) internal pure returns (uint256) {
@@ -957,16 +969,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint256 remaining = interes;
         uint256 corteFundador = (interes * FUNDADOR_BP) / 10000;
         remaining -= _pagarCapped(token, fundador, corteFundador, remaining, deudor, 0);
-
-        if (dispersionCongelada(deudor)) {
-            retenidoPool = remaining;
-            if (retenidoPool > 0) {
-                totalLiquidity[token] += retenidoPool;
-                emit DispersionCongelada(deudor, token, retenidoPool);
-                emit InteresRetenidoPool(token, retenidoPool);
-            }
-            return (interes - retenidoPool, retenidoPool, false);
-        }
 
         address padre = redGenealogica[deudor].padre;
         if (habriaBonoA) {
@@ -1031,7 +1033,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (amount == 0 || to == address(0) || to == deudor || cuentaDestruida[to]) {
             return 0;
         }
-        if (generacion != 0 && _inhabilitado(to)) {
+        if (generacion != 0 && _fueraDeGracia(to)) {
             return 0;
         }
         stableTokens[token].safeTransfer(to, amount);
@@ -1082,7 +1084,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function _pagarBonosRed(address usuario, address token) internal {
-        if (_inhabilitado(usuario) || blacklist[usuario]) return;
+        if (_fueraDeGracia(usuario) || blacklist[usuario]) return;
         uint256 earned = puntosRed[usuario] / UMBRAL_BONO_RED;
         uint256 already = bonosRedCobrados[usuario];
         if (earned <= already) return;
@@ -1141,25 +1143,49 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return planPago[usuario].venceCuota > 0 && block.timestamp > planPago[usuario].venceCuota;
     }
 
+    function _aplicarPenalizacionDiaria(address usuario) internal {
+        uint256 desde = moraDesde[usuario];
+        if (!esMoroso[usuario] || desde == 0 || block.timestamp <= desde + GRACIA_MORA) return;
+        uint256 dias = (block.timestamp - desde - GRACIA_MORA) / 1 days;
+        uint256 ya = moraDiasCobrados[usuario];
+        if (dias <= ya) return;
+        uint256 nivel = progresoUsuarios[usuario].nivelActual;
+        if (nivel == 0) nivel = 1;
+        uint256 quita = (dias - ya) * FAMA_POR_DIA_MORA * nivel;
+        reputacion[usuario] = reputacion[usuario] > quita ? reputacion[usuario] - quita : 0;
+        moraDiasCobrados[usuario] = dias;
+        penalizacionesAcumuladas[usuario] += quita;
+        emit ReputationUpdated(usuario, reputacion[usuario]);
+    }
+
     function _aplicarMoraSiVencido(address usuario) internal {
         if (!_estaVencido(usuario) || esMoroso[usuario]) return;
         esMoroso[usuario] = true;
         usuarios[usuario].enMora = true;
+        moraDesde[usuario] = block.timestamp;
+        moraDiasCobrados[usuario] = 0;
         prestamosMorosos[usuario] += 1;
-        penalizacionesAcumuladas[usuario] += penalizacionPorMora;
         emit MorosityUpdated(usuario, true);
-        if (reputacion[usuario] >= penalizacionPorMora) {
-            reputacion[usuario] -= penalizacionPorMora;
-        } else {
-            reputacion[usuario] = 0;
-        }
-        emit ReputationUpdated(usuario, reputacion[usuario]);
     }
 
-    function marcarMorosoSiVencido(address usuario) external {
-        require(usuarios[usuario].montoActivo > 0, "no active loan");
-        require(_estaVencido(usuario), "not expired");
-        _aplicarMoraSiVencido(usuario);
+    function marcarMorosoSiVencido(address usuario) external nonReentrant {
+        require(usuarios[usuario].montoActivo > 0 && _estaVencido(usuario), "not due");
+        _aplicarPenalizacionDiaria(usuario);
+        address token = usuarios[usuario].monedaActivo;
+        (, , uint256 totalDue, ) = _deudaActual(usuario);
+        uint256 pagado = planPago[usuario].pagado;
+        uint256 restante = totalDue - pagado;
+        require(restante > 0, "already paid");
+        uint8 tot = planPago[usuario].totales == 0 ? 1 : planPago[usuario].totales;
+        uint256 amount = block.timestamp > usuarios[usuario].vencimiento
+            ? restante
+            : _montoCuota(totalDue, pagado, tot, planPago[usuario].pagadas);
+        IERC20 erc = stableTokens[token];
+        if (erc.balanceOf(usuario) >= amount && erc.allowance(usuario, address(this)) >= amount) {
+            _pagarComo(usuario, token, amount);
+        } else {
+            _aplicarMoraSiVencido(usuario);
+        }
     }
 
     function liquidate(address deudor, address tokenAddress) external nonReentrant onlySupportedToken(tokenAddress) {
@@ -1321,6 +1347,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         prestamosMorosos[msg.sender] = 0;
         prestamosCerrados[msg.sender] = 0;
         penalizacionesAcumuladas[msg.sender] = 0;
+        delete moraDesde[msg.sender];
         hitoCobrado[msg.sender] = 0;
         donado[msg.sender] = 0;
         cuentaDestruida[msg.sender] = true;
@@ -1329,7 +1356,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function cobrarBonoHito(address token) external whenNotPaused nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
-        require(humanosVerificados[msg.sender] && !blacklist[msg.sender] && !_inhabilitado(msg.sender));
+        require(humanosVerificados[msg.sender] && !blacklist[msg.sender] && !_fueraDeGracia(msg.sender));
         uint256 nivel = progresoUsuarios[msg.sender].nivelActual;
         if (nivel == 0) nivel = 1;
         uint256 next = hitoCobrado[msg.sender] + 100;

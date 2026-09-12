@@ -7,6 +7,7 @@ const {
   proposeAndExecute,
   assertNavInvariant,
   attestIdentity,
+  drainToken,
 } = require('./helpers.cjs');
 
 const FUNDADOR_BP = 1500n;
@@ -217,7 +218,7 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     await expect(proposeAndExecute(contract, owner, 'setFundador', [user.address])).to.be.reverted;
   });
 
-  it('freezes upline royalties after delinquency until reputation returns to 100', async () => {
+  it('keeps paying the upline during the grace month and restores the debtor after pay', async () => {
     const { token, contract, owner, user, extra: padre, tokenAddr, contractAddr } =
       await deployProtocol();
     await seedPool(token, contract, owner, '2000');
@@ -225,39 +226,32 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     await registerAndFund(token, contract, user, '20', padre.address);
 
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    await drainToken(token, user, owner);
     const info = await contract.usuarios(user.address);
     await ethers.provider.send('evm_setNextBlockTimestamp', [Number(info.vencimiento) + 10]);
     await ethers.provider.send('evm_mine');
     await contract.marcarMorosoSiVencido(user.address);
 
-    expect(await contract.reputacion(user.address)).to.equal(0n);
-    expect(await contract.dispersionCongelada(user.address)).to.equal(true);
-
-    const padreBefore = await token.balanceOf(padre.address);
-    const liqBefore = await contract.totalLiquidity(tokenAddr);
-    const lateDebt = await contract.obtenerDeuda(user.address);
-    await contract.connect(user).pagarPrestamo(tokenAddr, lateDebt.total);
-
-    const founderCut = corteFundador(lateDebt.interes);
-    expect((await token.balanceOf(padre.address)) - padreBefore).to.equal(0n);
-    expect((await contract.totalLiquidity(tokenAddr)) - liqBefore).to.equal(
-      lateDebt.interes - founderCut
-    );
-    expect((await contract.redGenealogica(user.address)).bonoActivacionCobrado).to.equal(false);
-    expect(await contract.dispersionCongelada(user.address)).to.equal(true);
-
-    await advanceCooldown();
-    await token.mint(user.address, ethers.parseUnits('2', 18));
-    await borrowAndPay(contract, token, user, tokenAddr);
-    expect((await token.balanceOf(padre.address)) - padreBefore).to.equal(0n);
     expect(await contract.reputacion(user.address)).to.equal(100n);
     expect(await contract.dispersionCongelada(user.address)).to.equal(false);
 
+    const padreBefore = await token.balanceOf(padre.address);
+    const lateDebt = await contract.obtenerDeuda(user.address);
+    await token.mint(user.address, lateDebt.total);
+    await token.connect(user).approve(contractAddr, ethers.MaxUint256);
+    await contract.connect(user).pagarPrestamo(tokenAddr, lateDebt.total);
+
+    const bono = await contract.BONO_ACTIVACION();
+    expect((await token.balanceOf(padre.address)) - padreBefore).to.equal(bono);
+    expect((await contract.redGenealogica(user.address)).bonoActivacionCobrado).to.equal(true);
+    expect(await contract.dispersionCongelada(user.address)).to.equal(false);
+
     await advanceCooldown();
+    await token.mint(user.address, ethers.parseUnits('2', 18));
     const padreMid = await token.balanceOf(padre.address);
-    const third = await borrowAndPay(contract, token, user, tokenAddr);
+    const next = await borrowAndPay(contract, token, user, tokenAddr);
     expect((await token.balanceOf(padre.address)) - padreMid).to.equal(
-      (third.interes * GEN_BP[0]) / 10000n
+      (next.interes * GEN_BP[0]) / 10000n
     );
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });

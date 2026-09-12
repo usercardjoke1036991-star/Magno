@@ -620,7 +620,7 @@
   "lockRecoverFail": "Não foi possível restaurar a senha. Confira o e-mail e o código.",
   "kycFingerprint": "Impressao de identidade: {fingerprint}",
   "referralRepTitle": "Pontos de reputação",
-  "referralRepLead": "Quem entra com o seu código soma {points} de reputação para você. Se essa pessoa trouxer outra, você também soma, menos quanto mais longe estiver — a mesma escala das comissões. O fundador recebe fama de cada cadastro. A fama não move dinheiro: as comissões saem dos juros ao pagar, e o bônus do pool ({bonus} a cada {threshold} pontos de rede) é só do indicador direto quando a pessoa paga o primeiro nível ({network} pontos de rede).",
+  "referralRepLead": "Quem entra com o seu código soma {points} de reputação para você. Se essa pessoa trouxer outra, você também soma, menos quanto mais longe estiver — a mesma escala das comissões. A fama não move dinheiro: as comissões saem dos juros ao pagar, e o bônus do pool ({bonus} a cada {threshold} pontos de rede) é só do indicador direto quando a pessoa paga o primeiro nível ({network} pontos de rede).",
   "referralRepScore": "Reputação {score} · pontos de rede {network}",
   "referralRepScoreShort": "Rede {network}",
   "referralRepNext": "Faltam {left} pontos de rede para o próximo bônus de {bonus}.",

@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { deployProtocol, seedPool, registerAndFund } = require('./helpers.cjs');
+const { deployProtocol, seedPool, registerAndFund, drainToken } = require('./helpers.cjs');
 
 describe('QuatriviumCredit - destroy account', function () {
   it('blocks destroy while a loan is active and lets the founder keep the root', async () => {
@@ -17,6 +17,7 @@ describe('QuatriviumCredit - destroy account', function () {
     await seedPool(token, contract, owner, '500');
     await registerAndFund(token, contract, user);
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    await drainToken(token, user, owner);
     // Avanzar tiempo hasta vencimiento para poder marcar mora
     await ethers.provider.send('evm_increaseTime', [8 * 24 * 3600]);
     await ethers.provider.send('evm_mine', []);

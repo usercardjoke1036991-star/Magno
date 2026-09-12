@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identitaetsfingerabdruck: {fingerprint}",
   "referralRepTitle": "Reputationspunkte",
-  "referralRepLead": "Wer mit Ihrem Code beitritt, bringt Ihnen {points} Reputation. Bringt diese Person jemand anderen, gewinnen Sie ebenfalls, weniger je weiter unten — dieselbe Skala wie die Provisionen. Der Gründer erhält Ruhm von jeder Anmeldung. Ruhm bewegt kein Geld: Provisionen kommen aus den Zinsen bei der Rückzahlung, und der Pool-Bonus ({bonus} alle {threshold} Netzwerkpunkte) geht nur an den direkten Werber, wenn die Person die erste Stufe zurückzahlt ({network} Netzwerkpunkte).",
+  "referralRepLead": "Wer mit Ihrem Code beitritt, bringt Ihnen {points} Reputation. Bringt diese Person jemand anderen, gewinnen Sie ebenfalls, weniger je weiter unten — dieselbe Skala wie die Provisionen. Ruhm bewegt kein Geld: Provisionen kommen aus den Zinsen bei der Rückzahlung, und der Pool-Bonus ({bonus} alle {threshold} Netzwerkpunkte) geht nur an den direkten Werber, wenn die Person die erste Stufe zurückzahlt ({network} Netzwerkpunkte).",
   "referralRepScore": "Reputation {score} · Netzwerk {network}",
   "referralRepScoreShort": "Netzwerk {network}",
   "referralRepNext": "Noch {left} Netzwerkpunkte bis zum nächsten Bonus von {bonus}.",

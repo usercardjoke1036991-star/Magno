@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "İtibar puanları",
-  "referralRepLead": "Kodunuzla giren kişi size {points} itibar ekler. O başkasını getirirse siz de kazanırsınız, hat uzadıkça daha az — komisyonlarla aynı ölçek. Kurucu her kayıttan ün kazanır. Ün para hareket ettirmez: komisyonlar ödeme faizinden gelir, havuz bonusu ({bonus} her {threshold} ağ puanı) yalnızca kişi ilk seviyeyi ödediğinde doğrudan referans alana gider ({network} ağ puanı).",
+  "referralRepLead": "Kodunuzla giren kişi size {points} itibar ekler. O başkasını getirirse siz de kazanırsınız, hat uzadıkça daha az — komisyonlarla aynı ölçek. Ün para hareket ettirmez: komisyonlar ödeme faizinden gelir, havuz bonusu ({bonus} her {threshold} ağ puanı) yalnızca kişi ilk seviyeyi ödediğinde doğrudan referans alana gider ({network} ağ puanı).",
   "referralRepScore": "İtibar {score} · ağ {network}",
   "referralRepScoreShort": "Ağ {network}",
   "referralRepNext": "Sonraki {bonus} bonus için {left} ağ puanı daha gerekir.",

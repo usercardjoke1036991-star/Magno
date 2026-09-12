@@ -21,7 +21,6 @@ import {
   REFERRAL_REPUTATION_POINTS,
   fameForGeneration,
   formatPoolBonus,
-  founderFamePoints,
   referralsForNextBonus,
 } from '../constants/reputation';
 import { formatUSD } from '../utils/formatters';
@@ -214,7 +213,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           })}
         </AppText>
         <AppText style={[styles.hint, { color: colors.textMuted }]}>
-          {`1 · ${fameForGeneration(1)}   2 · ${fameForGeneration(2)}   3 · ${fameForGeneration(3)}   4 · ${fameForGeneration(4)}   5 · ${fameForGeneration(5)}   6–12 · ${fameForGeneration(6)}   13–40 · ${fameForGeneration(13)}   ★ ${founderFamePoints()}`}
+          {`1 · ${fameForGeneration(1)}   2 · ${fameForGeneration(2)}   3 · ${fameForGeneration(3)}   4 · ${fameForGeneration(4)}   5 · ${fameForGeneration(5)}   6–12 · ${fameForGeneration(6)}   13–40 · ${fameForGeneration(13)}`}
         </AppText>
         <AppText style={[styles.metaLine, { color: colors.text }]}>
           {t('referralRepScore', { score: String(reputation), network: String(networkPoints) })}

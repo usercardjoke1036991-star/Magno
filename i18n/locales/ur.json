@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "شہرت کے پوائنٹس",
-  "referralRepLead": "آپ کے کوڈ سے شامل ہونے والا آپ کو {points} شہرت دیتا ہے۔ اگر وہ کسی اور کو لائے تو آپ کو بھی ملتی ہے، دور ہونے پر کم — کمیشن جیسی پیمائش۔ بانی کو ہر اندراج سے شہرت ملتی ہے۔ شہرت پیسہ نہیں ہلاتی: کمیشن سود سے جب قرض ادا ہو، اور پول بونس ({bonus} ہر {threshold} نیٹ ورک پوائنٹس) صرف براہ راست ریفرر کو ملتا ہے جب پہلا درجہ ادا کرے ({network} نیٹ ورک پوائنٹس)۔",
+  "referralRepLead": "آپ کے کوڈ سے شامل ہونے والا آپ کو {points} شہرت دیتا ہے۔ اگر وہ کسی اور کو لائے تو آپ کو بھی ملتی ہے، دور ہونے پر کم — کمیشن جیسی پیمائش۔ شہرت پیسہ نہیں ہلاتی: کمیشن سود سے جب قرض ادا ہو، اور پول بونس ({bonus} ہر {threshold} نیٹ ورک پوائنٹس) صرف براہ راست ریفرر کو ملتا ہے جب پہلا درجہ ادا کرے ({network} نیٹ ورک پوائنٹس)۔",
   "referralRepScore": "شہرت {score} · نیٹ ورک {network}",
   "referralRepScoreShort": "نیٹ ورک {network}",
   "referralRepNext": "اگلے {bonus} بونس کے لیے {left} نیٹ ورک پوائنٹس اور درکار ہیں۔",

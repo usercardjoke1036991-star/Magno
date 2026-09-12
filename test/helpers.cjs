@@ -89,6 +89,13 @@ async function proposeAndExecute(contract, signer, fragment, args = []) {
   return id;
 }
 
+async function drainToken(token, from, to) {
+  const bal = await token.balanceOf(from.address);
+  if (bal > 0n) {
+    await token.connect(from).transfer(to.address, bal);
+  }
+}
+
 async function assertNavInvariant(token, contract, tokenAddr, contractAddr) {
   const { expect } = require('chai');
   const cash = await token.balanceOf(contractAddr);
@@ -104,5 +111,6 @@ module.exports = {
   attestIdentity,
   registerAndFund,
   proposeAndExecute,
+  drainToken,
   assertNavInvariant,
 };

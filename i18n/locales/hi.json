@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "प्रतिष्ठा अंक",
-  "referralRepLead": "आपके कोड से जुड़ने वाला आपको {points} प्रतिष्ठा देता है। अगर वे किसी और को लाते हैं, आपको भी मिलती है, दूर होने पर कम — कमीशन जैसी ही माप। संस्थापक को हर पंजीकरण से प्रसिद्धि मिलती है। प्रसिद्धि पैसे नहीं हिलाती: कमीशन ब्याज से जब ऋण चुके, और पूल बोनस ({bonus} हर {threshold} नेटवर्क अंक) केवल सीधे रेफरर को मिलता है जब पहला स्तर चुकाएँ ({network} नेटवर्क अंक)।",
+  "referralRepLead": "आपके कोड से जुड़ने वाला आपको {points} प्रतिष्ठा देता है। अगर वे किसी और को लाते हैं, आपको भी मिलती है, दूर होने पर कम — कमीशन जैसी ही माप। प्रसिद्धि पैसे नहीं हिलाती: कमीशन ब्याज से जब ऋण चुके, और पूल बोनस ({bonus} हर {threshold} नेटवर्क अंक) केवल सीधे रेफरर को मिलता है जब पहला स्तर चुकाएँ ({network} नेटवर्क अंक)।",
   "referralRepScore": "प्रतिष्ठा {score} · नेटवर्क अंक {network}",
   "referralRepScoreShort": "नेटवर्क {network}",
   "referralRepNext": "अगले {bonus} बोनस के लिए {left} नेटवर्क अंक और चाहिए।",

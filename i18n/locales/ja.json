@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "評判ポイント",
-  "referralRepLead": "あなたのコードで参加すると {points} の評判が入ります。その人が別の人を連れてくると、あなたも得ますが、遠いほど少なくなります（コミッションと同じ比率）。創業者は毎回の登録から名声を得ます。名声はお金を動かしません。コミッションは返済時の利息から、プールボーナス（ネットワークポイント {threshold} ごとに {bonus}）は初回レベル返済時に直接の紹介者だけです（{network} ネットワークポイント）。",
+  "referralRepLead": "あなたのコードで参加すると {points} の評判が入ります。その人が別の人を連れてくると、あなたも得ますが、遠いほど少なくなります（コミッションと同じ比率）。名声はお金を動かしません。コミッションは返済時の利息から、プールボーナス（ネットワークポイント {threshold} ごとに {bonus}）は初回レベル返済時に直接の紹介者だけです（{network} ネットワークポイント）。",
   "referralRepScore": "評判 {score} · ネットワーク {network}",
   "referralRepScoreShort": "ネットワーク {network}",
   "referralRepNext": "次の {bonus} ボーナスまでネットワークがあと {left} ポイント必要です。",
