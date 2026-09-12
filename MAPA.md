@@ -227,6 +227,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/check-i18n.mjs` — módulo JS/TS
 - `scripts/check-production.mjs` — módulo JS/TS
 - `scripts/deploy.cjs` — módulo JS/TS
+  - Funciones/clases: DEPLOYED_TESTNET
 - `scripts/fetch-wallet-logos.py` — módulo Python
   - Funciones/clases: fetch, to_png, is_github_identicon, save_square, main
 - `scripts/linkCredit.cjs` — módulo JS/TS
@@ -243,6 +244,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/_dump_ui.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
   - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
+- `scripts/_probe-live-health.cjs` — módulo JS/TS
 - `services/accountEmail.ts` — módulo JS/TS
   - Funciones/clases: loadVerifiedEmail, isEmailVerified, saveVerifiedEmail, clearVerifiedEmail
 - `services/accountReset.ts` — módulo JS/TS

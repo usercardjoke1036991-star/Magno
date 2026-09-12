@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { milestoneBonusUsd, milestoneLevels } from '../constants/loanTiers';
+import { displayMaxLoanLevel, milestoneBonusUsd, milestoneLevels } from '../constants/loanTiers';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatUSD } from '../utils/formatters';
@@ -12,6 +12,7 @@ interface MilestoneBonusCatalogProps {
   lastHito: number;
   claimable: number;
   canClaim?: boolean;
+  maxLevel?: number;
   isPaying?: boolean;
   onClaim: () => void;
 }
@@ -21,6 +22,7 @@ export function MilestoneBonusCatalog({
   lastHito,
   claimable,
   canClaim = true,
+  maxLevel,
   isPaying = false,
   onClaim,
 }: MilestoneBonusCatalogProps) {
@@ -32,7 +34,7 @@ export function MilestoneBonusCatalog({
       <AppText style={[styles.lead, { color: colors.textMuted }]}>
         {canClaim ? t('bonusCatalogLead') : t('bonusLegacyContract')}
       </AppText>
-      {milestoneLevels().map((level) => {
+      {milestoneLevels().filter((level) => level <= displayMaxLoanLevel(maxLevel)).map((level) => {
         const amount = formatUSD(milestoneBonusUsd(level));
         const claimed = lastHito >= level;
         const unlocked = userLevel >= level;

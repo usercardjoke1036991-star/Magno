@@ -489,8 +489,8 @@ export const QuatriviumCreditService = {
     let lastHito = 0;
     let hitoSupported = false;
     let donatedWei = '0';
-    const caps = capsCache?.caps;
-    if (caps?.canClaimHitos !== false) {
+    const caps = await QuatriviumCreditService.detectarCapacidadProtocolo();
+    if (caps.canClaimHitos) {
       try {
         lastHito = Number(await contractWith(provider).hitoCobrado(userAddress));
         hitoSupported = true;
@@ -498,7 +498,7 @@ export const QuatriviumCreditService = {
         lastHito = 0;
       }
     }
-    if (caps?.canDonate !== false) {
+    if (caps.canDonate) {
       try {
         donatedWei = (await contractWith(provider).donado(userAddress)).toString();
       } catch {

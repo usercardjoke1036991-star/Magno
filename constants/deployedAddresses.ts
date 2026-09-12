@@ -1,9 +1,9 @@
 /** Direcciones públicas ya desplegadas. Mainnet se rellena tras `npm run deploy:bsc`. */
 export const DEPLOYED_TESTNET = {
   chainId: 97,
-  contract: '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3',
+  contract: '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f',
   usdt: '0x2d4AE5E6984D98777a24473F196326ff2604F5A6',
-  startBlock: 130526896,
+  startBlock: 130652258,
 } as const;
 
 export const DEPLOYED_MAINNET = {

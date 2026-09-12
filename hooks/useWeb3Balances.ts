@@ -789,6 +789,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           setUserInfo((prev) => ({
             ...prev,
             isRegistered: Boolean(saved.isRegistered),
+            hasActiveLoan: Boolean(saved.hasActiveLoan),
           }));
         })
         .catch(() => {});

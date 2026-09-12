@@ -34,6 +34,7 @@ interface LoanTierCardProps {
   onPayLoan: () => void;
   onPayAll?: () => void;
   onPayCount?: (count: number) => void;
+  showMilestoneBonus?: boolean;
 }
 
 export const LoanTierCard: React.FC<LoanTierCardProps> = ({
@@ -58,6 +59,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   onPayAll,
   onPayCount,
   onPayLoan,
+  showMilestoneBonus = false,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
@@ -131,7 +133,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('repayOnce')}</AppText>
       )}
       <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('term')}: {tier.term}</AppText>
-      {isMilestoneLevel(tier.id) ? (
+      {showMilestoneBonus && isMilestoneLevel(tier.id) ? (
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>
           {t('milestoneBonusOnTier', { amount: formatUSD(milestoneBonusUsd(tier.id)) })}
         </AppText>

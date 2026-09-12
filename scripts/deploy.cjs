@@ -28,6 +28,36 @@ function parseAdmins(deployerAddress) {
   return { admins, confirms };
 }
 
+function writeTestnetKnownAddress(address, usdt, startBlock) {
+  const block = Number(startBlock || 0);
+  const knownPath = path.join(__dirname, '..', 'constants', 'deployedAddresses.ts');
+  if (fs.existsSync(knownPath) && /^0x[0-9a-fA-F]{40}$/.test(address)) {
+    let source = fs.readFileSync(knownPath, 'utf8');
+    source = source.replace(
+      /export const DEPLOYED_TESTNET = \{[\s\S]*?\} as const;/,
+      `export const DEPLOYED_TESTNET = {
+  chainId: 97,
+  contract: '${address}',
+  usdt: '${usdt}',
+  startBlock: ${block || 0},
+} as const;`
+    );
+    fs.writeFileSync(knownPath, source, 'utf8');
+    console.log('Actualizado constants/deployedAddresses.ts');
+  }
+  const easPath = path.join(__dirname, '..', 'eas.json');
+  if (fs.existsSync(easPath)) {
+    const eas = JSON.parse(fs.readFileSync(easPath, 'utf8'));
+    for (const profile of ['development', 'preview']) {
+      if (!eas.build?.[profile]?.env) continue;
+      eas.build[profile].env.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET = address;
+      if (block) eas.build[profile].env.EXPO_PUBLIC_CONTRACT_START_BLOCK = String(block);
+    }
+    fs.writeFileSync(easPath, JSON.stringify(eas, null, 2) + '\n', 'utf8');
+    console.log('Actualizado eas.json development/preview');
+  }
+}
+
 function upsertEnvKey(filePath, key, value) {
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, `${key}=${value}\n`, 'utf8');
@@ -157,10 +187,17 @@ async function main() {
   if (isTestnet) {
     const deployTx = contract.deploymentTransaction();
     const receipt = deployTx ? await deployTx.wait() : null;
-    if (receipt?.blockNumber) {
-      upsertEnvKey(envPath, 'EXPO_PUBLIC_CONTRACT_START_BLOCK', String(receipt.blockNumber));
+    const startBlock = receipt?.blockNumber ? String(receipt.blockNumber) : '';
+    if (startBlock) {
+      upsertEnvKey(envPath, 'EXPO_PUBLIC_CONTRACT_START_BLOCK', startBlock);
     }
     upsertEnvKey(envPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET', address);
+    const workerPath = path.join(__dirname, '..', '.env.worker');
+    if (fs.existsSync(workerPath)) {
+      upsertEnvKey(workerPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET', address);
+      if (startBlock) upsertEnvKey(workerPath, 'EXPO_PUBLIC_CONTRACT_START_BLOCK', startBlock);
+    }
+    writeTestnetKnownAddress(address, usdt, startBlock);
     console.log('Inyectado en .env: EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET=' + address);
   } else {
     upsertEnvKey(envPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET', address);

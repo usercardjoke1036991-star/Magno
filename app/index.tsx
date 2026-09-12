@@ -177,6 +177,12 @@ function HomeScreenWithHooks() {
     }
   }, [room, adminInfo.isAdmin, adminInfo.isOwner]);
 
+  useEffect(() => {
+    if (room === 'bonuses' && !userInfo.canClaimHitos && !userInfo.canDonate) {
+      setRoom(null);
+    }
+  }, [room, userInfo.canClaimHitos, userInfo.canDonate]);
+
   return (
     <AccountOnboarding
       walletAddress={walletAddress}
@@ -438,6 +444,7 @@ function HomeScreenWithHooks() {
               onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}
               onPayCount={(count) => handlePagar(count)}
+              showMilestoneBonus={userInfo.canClaimHitos}
             />
           ))}
         </AppSubsection>
@@ -462,13 +469,14 @@ function HomeScreenWithHooks() {
               onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}
               onPayCount={(count) => handlePagar(count)}
+              showMilestoneBonus={userInfo.canClaimHitos}
             />
           </AppSubsection>
         ) : null}
       </AppWindow>
 
       <AppWindow
-        visible={room === 'bonuses'}
+        visible={room === 'bonuses' && (userInfo.canClaimHitos || userInfo.canDonate)}
         title={t('sectionBonuses')}
         lead={t('sectionBonusesLead')}
         onClose={() => setRoom(null)}
@@ -484,6 +492,7 @@ function HomeScreenWithHooks() {
             lastHito={userInfo.userProgress.lastHito}
             claimable={userInfo.userProgress.bonusPending}
             canClaim={userInfo.canClaimHitos}
+            maxLevel={userInfo.maxLoanLevel}
             isPaying={txLoading}
             onClaim={handleCobrarBonoHito}
           />
