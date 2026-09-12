@@ -108,7 +108,7 @@ Botón **Activar línea de crédito**.
 
 ### 4.6 Pedir préstamo
 
-Hay **100 niveles** (1 a 100). El usuario solo puede pedir el nivel que ya desbloqueó; los demás se ven en ficha, bloqueados.
+Hay **1000 niveles** (1 a 1000), del $1 al $1 000 000. El usuario solo puede pedir el nivel que ya desbloqueó; los demás se ven en ficha, bloqueados (los lejanos se agrupan de 50 en 50). Los 1–100 son la tabla original; 101–1000 salen de fórmula. El contrato live de Demo aún tope 100 hasta redeploy.
 
 Al pulsar **Pedir**:
 
@@ -299,8 +299,11 @@ En la UI el bloque se llama algo como identidad / línea de crédito. En el cód
 | Contrato | `constants/contractConfig.ts` | Dirección según entorno |
 | Tokens | `constants/tokens.ts` | Lista de stables |
 | Errores tx | `utils/txErrors.ts` | Mensajes legibles de revert |
+| Seguridad | `SecuritySettings` + `authPrefs` | El usuario elige cómo desbloquea, mueve dinero e inicia sesión |
+| Autenticador | `services/authenticator.ts` | TOTP de 6 dígitos (Google Authenticator u otra app) |
+| Historial | `components/MovementHistory.tsx` | Préstamos, pagos y envíos entre billeteras (on-chain + diario local) |
 
-No hay login con email, no hay backend propio de usuarios, no hay historial de txs en un servidor. Todo sale de la wallet + RPC + contrato.
+El correo sirve para crear cuenta, entrar y recuperar la clave. El historial de movimientos vive en el teléfono y en los logs del contrato, no en un servidor de usuarios.
 
 ---
 

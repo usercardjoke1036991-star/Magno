@@ -50,7 +50,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 703 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 783 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -71,45 +71,51 @@ Magno/
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
 - **Alta de cuenta**: idioma → crear o iniciar sesión → contraseña + confirmar → correo OTP → **usuario** → entrar. El nombre real se pide en KYC (no en demo).
 - **Frase secreta BIP-39**: solo respaldo (ver y anotar). No cierra la cuenta. Cerrar o restaurar otra frase está en **Reemplazar esta cuenta**, y exige pagar mora/deuda antes.
-- **Correo OTP**: solo al crear la cuenta y al recuperar la contraseña.
+- **Correo**: crear cuenta, iniciar sesión, recuperar contraseña y avisos de pago. Tras **Guardar sesión** el teléfono pide el método elegido en Seguridad (contraseña, PIN, huella o autenticador). El correo se reemplaza en Seguridad.
+- **Métodos de seguridad**: el usuario elige por separado cómo desbloquea la pantalla, cómo confirma un movimiento de dinero y cómo inicia sesión. El autenticador TOTP se suma a contraseña, PIN y huella.
+- **Historial de movimientos**: sala en el hub con préstamos, pagos y transferencias (billeteras, plataforma, fecha y hora).
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
 
 ---
 
-## Niveles de crédito (fuente: `constants/loanTiers.ts` + `LoanTierSeed.sol`)
+## Niveles de crédito (fuente: `constants/loanTiers.ts` + `LoanTierSeed.sol` + `LoanLadder.sol`)
 
-**100 niveles**, del **$1** al **$10 000**. Reglas de la escalera (todas estrictas):
+**1000 niveles**, del **$1** al **$1 000 000**. Los 1–100 siguen en tabla (`LoanTierSeed`). Los 101–1000 son fórmula (`LoanLadder`) para no meter 900 filas en el constructor ni romper EIP-170.
+
+Reglas:
 - el **principal** del siguiente > el anterior
-- la **tasa** del anterior > la del siguiente (el préstamo viejo siempre es más caro en %)
-- el **interés en $** del siguiente > el anterior (cada subida cobra más interés en dólares)
+- el **interés en $** del siguiente > el anterior
 - el **total a devolver** también sube
+- **1–100**: la tasa del anterior > la del siguiente (estricta)
+- **101–1000**: la tasa no sube (baja 1 bps/nivel hasta 4,06 % y luego se sostiene; si bajara más el interés $ se rompería)
 
-`requiredCount` live (núcleo `0x1E5118`): L1 → 3; L2–99 → 5; L100 no sube.
-La escalera nueva (3 hasta L5, +5 desde $100, bono 2.000 USDT en L100) vive en `QuatriviumLeveling.sol` y se cableará en el próximo deploy, sin recortar el núcleo.
+`requiredCount` (la velocidad de llegada marca la de pago): L1 → 3; L2–9 → 5; desde **$100 (L10)** cada nivel pide **5 más** (5, 10, 15…; L100 = 455; L999 = 4950). L1000 no sube.
+Bono de pool cada 100 niveles: **20 USDT × nivel del hito** (100 → 2000, 200 → 4000, 1000 → 20 000). Se cobra en la sala Bonos, de uno en uno, con caja libre sobre el piso del 20%. Donar va a la billetera fundadora; donar o inyectar al pool suma reputación y un título (Aliado / Patrono / Círculo).
+Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda → Zafiro → Rubí → Platino → Diamante → Maestro), cada uno con marco propio.
 
-| Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Live / planificado |
-|------:|----------:|------:|-----:|----------:|:------:|:-------------------|
-| 1 | $1 | 7 días | 100% | $1.00 | 1 | 3 / 3 |
-| 5 | $20 | 25 días | 50% | $10.00 | 1 | 5 / 3 |
-| 6 | $35 | 30 días | 48% | $16.80 | 1 | 5 / 5 |
-| 10 | $100 | 50 días | 34% | $34.00 | 3 | 5 / 5 |
-| 11 | $120 | 50 días | 33.71% | $40.45 | 3 | 5 / 10 |
-| 50 | $825 | 68 días | 22.44% | $185.13 | 3 | 5 / 205 |
-| 100 | **$10 000** | 90 días | 8% | $800.00 | 3 | — / 455 + bono 2.000 |
+| Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Solicitudes |
+|------:|----------:|------:|-----:|----------:|:------:|:------------|
+| 1 | $1 | 7 días | 100% | $1.00 | 1 | 3 |
+| 10 | $100 | 50 días | 34% | $34 | 3 | 5 |
+| 11 | $120 | 50 días | 33,71% | $40.45 | 3 | 10 |
+| 100 | $10 000 | 90 días | 8% | $800 | 3 | 455 |
+| 101 | $11 100 | 90 días | 7,99% | $886.89 | 3 | 460 |
+| 1000 | **$1 000 000** | 180 días | 4,06% | $40 600 | 12 | — |
 
 > Los bps son tasa plana sobre el principal por el plazo (no APR anual).
-> A partir de $50: 2 cuotas. A partir de $60: 3. Tabla completa: `constants/loanTiers.ts`.
-> Redeploy testnet 2026-09-11: `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3`. Demo es un mundo nuevo: hay que volver a activar la línea. Pool semilla 2000 USDT.
+> Cuotas: $50 → 2; $60 → 3; $25 000 → 6; $100 000 → 12.
+> Contrato **live** `0x1E5118` sigue en 100 niveles hasta el próximo redeploy testnet. El código ya sirve 1000.
+> Un millón sin colateral exige pool enorme. La semilla Demo (~2000 USDT) no cubre ni L100.
 
 ---
 
 ## Lo que está funcionando ✅
-- Contrato `QuatriviumCredit.sol` — testnet en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles, bloque 130526896)
-- 15 suites Hardhat (89 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld…
-- App móvil con 43 componentes React Native
-- i18n: 17 idiomas, 702 claves
+- Contrato `QuatriviumCredit.sol` — código de 1000 niveles ($1 a $1 000 000). Live Demo sigue en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles) hasta redeploy testnet
+- 15 suites Hardhat (97 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
+- App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
+- i18n: 17 idiomas, 783 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
@@ -172,7 +178,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Identidad demo | `services/demoIdentity.ts` + worker `/demo-identity` | Atestigua KYC/teléfono on-chain solo en testnet |
 | Wallet interna | `services/appWallet.ts` | HD wallet + frase BIP-39 cifrada |
 | KYC local | `services/kycDeclaration.ts` | Nombre/documento congelados; fingerprint keccak |
-| Lock | `services/appLock.ts` + `components/BiometricLockSection.tsx` | PIN, password, huella, lockout |
+| Lock | `services/appLock.ts` + `authPrefs.ts` + `authenticator.ts` | PIN, password, huella, TOTP; el usuario elige para qué usa cada uno |
+| Historial | `services/movementHistory.ts` + `MovementHistory.tsx` | Préstamos, pagos y envíos entre billeteras |
 | Storage seguro | `services/secureStorageService.ts` | Wrapper expo-secure-store |
 | Red | `constants/rpcConfig.ts` | RPC, chainId, modo demo/live |
 | Contrato | `constants/contractConfig.ts` | ABI + dirección según entorno |
@@ -205,9 +212,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Verificación | Estado | Detalle |
 |---|---|---|
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
-| `check-i18n.mjs` | ✅ OK | 702 claves · 17 locales · sin BOM · sin discrepancias |
+| `check-i18n.mjs` | ✅ OK | 756 claves · 17 locales · sin BOM · sin discrepancias |
 | `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
-| `hardhat test` | ✅ 83/83 | Incluye 100 niveles + destroy + mora + identidad demo + gates |
+| `hardhat test` | ✅ 91/91 | Incluye 1000 niveles + destroy + mora + identidad demo + gates |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
 | `npm audit` (devDeps) | ⚠️ ~66 vulns | hardhat / solidity-coverage / expo SDK — **no van al APK** · no correr `--force` |
 | `production:check` | 🟡 **12/14** | Faltan 2 acciones **manuales**: deploy mainnet + Twilio/WhatsApp |
@@ -225,6 +232,16 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Auditoria live 12-sep: stack caido (8081/8787), ADB trabado, Ankr 401 y eth_getLogs rate-limit. Worker ahora sondea RPC, salta atraso y no rota por cupo. App en telefono abre candado. | — |
+| 2026-09-12 | Bonos 20 USDT x nivel de hito, sala Bonos, donar() al fundador y reputacion por donar o inyectar pool | — |
+| 2026-09-12 | Bono de hito: 2000 USDT del pool al llegar a cada 100 niveles, cobro uno a uno con caja libre sobre el piso del 20% | — |
+| 2026-09-12 | RequiredCount +5 por nivel desde 100 USDT. 12 rangos de piedras (ambar, perla, jade, esmeralda, zafiro, rubi) con marcos. | — |
+| 2026-09-12 | Escalera 1000 niveles hasta 1M USDT. Nucleo lee formula 101-1000. App, rangos y tests alineados. Live Demo sigue en 100 niveles hasta redeploy. | — |
+| 2026-09-12 | Correcciones de auditoria: wrap TOTP, confirmar fondos sin colgar, cooldown en vivo, deep link history e historial por mundo. | — |
+| 2026-09-12 | Seguridad: el usuario elige metodo para desbloquear, mover dinero e iniciar sesion. Autenticador TOTP. Historial de prestamos, pagos y envios. | — |
+| 2026-09-12 | Seguridad: el usuario elige método para desbloquear, mover dinero e iniciar sesión. Autenticador TOTP. Historial de préstamos, pagos y transferencias. | — |
+| 2026-09-12 | Guardar sesion al crear o iniciar. Correo para recuperar clave y avisos de pago (interruptor en Avisos). | — |
+| 2026-09-12 | Correo para crear e iniciar sesion. Se reemplaza en Seguridad, no en Perfil. Iniciar sesion envia codigo al correo. | — |
 | 2026-09-12 | Deep links: quatrivium://room/credit y /profile. Verificado en Demo: historial 0 a tiempo / mora / penaliz. y Perfil Nivel 1/100 Bronce. | — |
 | 2026-09-12 | UserMetrics muestra historial on-chain (a tiempo, mora, penalizaciones). Perfil enseña nivel/100. DOCUMENTO alineado a 100 niveles. | — |
 | 2026-09-12 | useWalletLevel deja de recortar el nivel a 10. El marco de rango en Ajustes y referidos sigue el nivel on-chain 1-100. | — |

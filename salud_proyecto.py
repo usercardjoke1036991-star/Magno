@@ -64,6 +64,8 @@ ARCHIVOS_CRITICOS = (
     "scripts/check-i18n.mjs",
     "scripts/check-production.mjs",
     "scripts/security-check.mjs",
+    "components/MilestoneBonusCatalog.tsx",
+    "components/DonateFounderSection.tsx",
 )
 
 # archivo → símbolos que deben existir (conexión funcional, no solo el archivo)
@@ -77,6 +79,8 @@ SIMBOLOS_CRITICOS: dict[str, tuple[str, ...]] = {
     "hooks/useHomeHandlers.ts": (
         "handleSolicitarCredito",
         "handlePagar",
+        "handleCobrarBonoHito",
+        "handleDonar",
         "assertEnoughToPay",
         "topUpDemoUsdtToDebt",
         "solicitarPrestamo",
@@ -96,12 +100,17 @@ SIMBOLOS_CRITICOS: dict[str, tuple[str, ...]] = {
         "pagarPrestamo",
         "topUpDemoUsdtToDebt",
         "pool locked",
+        "cobrarBonoHito",
+        "donar",
+        "detectarCapacidadProtocolo",
     ),
     "contracts/QuatriviumCredit.sol": (
         "solicitarPrestamo",
         "pagarPrestamo",
         "COOLDOWN_PRESTAMO",
         "retirarLiquidez",
+        "cobrarBonoHito",
+        "donar",
     ),
     "web3Config.tsx": (
         "subscribeRuntimeMode",
@@ -121,6 +130,8 @@ SIMBOLOS_CRITICOS: dict[str, tuple[str, ...]] = {
         "useWeb3Balances",
         "LoanTierCard",
         "handleSolicitarCredito",
+        "handleDonar",
+        "MilestoneBonusCatalog",
     ),
 }
 

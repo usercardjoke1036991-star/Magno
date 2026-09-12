@@ -86,6 +86,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: AppText, AppTextInput
 - `components/AppWindow.tsx` — módulo JS/TS
   - Funciones/clases: AppWindow
+- `components/AuthenticatorSetup.tsx` — módulo JS/TS
+  - Funciones/clases: AuthenticatorSetup
+- `components/AuthMethodPicker.tsx` — módulo JS/TS
+  - Funciones/clases: AuthMethodPicker
 - `components/BalanceDisplay.tsx` — módulo JS/TS
   - Funciones/clases: BalanceDisplay
 - `components/BiometricLockSection.tsx` — módulo JS/TS
@@ -93,6 +97,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `components/BrandLogo.tsx` — módulo JS/TS
   - Funciones/clases: BrandLogo
 - `components/DemoModeBanner.tsx` — módulo JS/TS
+- `components/DonateFounderSection.tsx` — módulo JS/TS
+  - Funciones/clases: DonateFounderSection
 - `components/EmailOtpSection.tsx` — módulo JS/TS
   - Funciones/clases: EmailOtpSection
 - `components/FundsConfirmHost.tsx` — módulo JS/TS
@@ -111,10 +117,16 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: LanguageWelcome
 - `components/LoanTierCard.tsx` — módulo JS/TS
   - Funciones/clases: LoanTierCard
+- `components/LockedLoanCatalog.tsx` — módulo JS/TS
+  - Funciones/clases: LockedLoanCatalog
 - `components/LockSettings.tsx` — módulo JS/TS
   - Funciones/clases: LockSettings
+- `components/MilestoneBonusCatalog.tsx` — módulo JS/TS
+  - Funciones/clases: MilestoneBonusCatalog
 - `components/ModeToggle.tsx` — módulo JS/TS
   - Funciones/clases: ModeToggle
+- `components/MovementHistory.tsx` — módulo JS/TS
+  - Funciones/clases: MovementHistory
 - `components/NetworkStatusBanner.tsx` — módulo JS/TS
   - Funciones/clases: NetworkStatusBanner
 - `components/NotificationChannels.tsx` — módulo JS/TS
@@ -174,13 +186,15 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
-  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, USD100_LEVEL, MAX_LEVEL_BONUS_USD, requiredCountForLevel, requiredCountPlanned, LOAN_TIER_ROWS, LOAN_TIERS, installmentsForPrincipalWei, overlayOnChainTier
+  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/ranks.ts` — módulo JS/TS
-  - Funciones/clases: clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
+  - Funciones/clases: RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
 - `constants/reputation.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, referralsForNextBonus, formatPoolBonus
 - `constants/rpcConfig.ts` — módulo JS/TS
   - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
+- `constants/support.ts` — módulo JS/TS
+  - Funciones/clases: SUPPORT_PATRON_USD, SUPPORT_CIRCLE_USD, supportKind, supportNameKey
 - `constants/tokens.ts` — módulo JS/TS
   - Funciones/clases: getConfigurableStables, getSupportedTokens, getTokenMeta, isOfficialWorldToken
 - `hooks/useHomeHandlers.ts` — módulo JS/TS
@@ -222,6 +236,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/security-check.mjs` — módulo JS/TS
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
+- `scripts/verify-totp.mjs` — módulo JS/TS
 - `scripts/_dump_ui.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
   - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
@@ -232,9 +247,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/accountUsername.ts` — módulo JS/TS
   - Funciones/clases: loadClaimedUsername, saveClaimedUsername, checkUsernameAvailable, claimUsername, clearClaimedUsername
 - `services/appLock.ts` — módulo JS/TS
-  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, isPinSet, getPinLockRemaining, setPin, checkPin, verifyPin, changePin, clearPin, setPassword, checkPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
+  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, isPinSet, getPinLockRemaining, setPin, checkPin, matchPin, verifyPin, changePin, clearPin, setPassword, checkPassword, matchPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
 - `services/appWallet.ts` — módulo JS/TS
   - Funciones/clases: rewrapWalletWithNewKey, withCurrentRpc, isValidSecretPhrase, loadAppWallet, createAppWallet, ensureAppWallet, wipeAppWallet, recreateAppWallet, addressFromPhrase, importFromPhrase, getSecretPhrase, hasSecretPhrase, isPhraseBackedUp, markPhraseBackedUp, cobrarComisionIntermediario, enviarToken, enviarBnb
+- `services/authenticator.ts` — módulo JS/TS
+  - Funciones/clases: isAuthenticatorEnabled, loadAuthenticatorSecret, createAuthenticatorSecret, authenticatorUri, persistAuthenticatorWrap, confirmAuthenticator, verifyAuthenticator, unlockWithAuthenticator, clearAuthenticator
+- `services/authPrefs.ts` — módulo JS/TS
+  - Funciones/clases: getAvailableMethods, isMethodReady, loadAuthPrefs, getAuthMethod, setAuthMethod, fallbackAuthIfNeeded
 - `services/demoIdentity.ts` — módulo JS/TS
   - Funciones/clases: requestDemoIdentity
 - `services/deviceBinding.ts` — módulo JS/TS
@@ -245,6 +264,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: isFundsConfirmEnabled, setFundsConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
   - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration
+- `services/movementHistory.ts` — módulo JS/TS
+  - Funciones/clases: recordMovement, loadMovementHistory
 - `services/notificationProfile.ts` — módulo JS/TS
   - Funciones/clases: normalizePhone, isValidPhone, loadNotificationProfile, saveNotificationProfile
 - `services/passwordRecovery.ts` — módulo JS/TS
@@ -252,7 +273,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/phoneOtp.ts` — módulo JS/TS
   - Funciones/clases: notifyApiConfigured, requestPhoneOtp, verifyPhoneOtp
 - `services/quatriviumCreditService.ts` — módulo JS/TS
-  - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, QuatriviumCreditService
+  - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, asWeiString, QuatriviumCreditService
 - `services/referralNetwork.ts` — módulo JS/TS
   - Funciones/clases: loadReferralNetwork
 - `services/secureStorageService.ts` — módulo JS/TS
@@ -326,6 +347,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: migrateLegacyStorage
 - `utils/passwordPolicy.ts` — módulo JS/TS
   - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, PASSWORD_ALPHABET, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, masterPasswordFromRandomBytes
+- `utils/pendingDeepLink.ts` — módulo JS/TS
+  - Funciones/clases: rememberAppUrl, takePendingAppUrl
 - `utils/pinPolicy.ts` — módulo JS/TS
   - Funciones/clases: isWeakPin, lockoutMs, remainingLockMs
 - `utils/safeFetch.ts` — módulo JS/TS
@@ -336,6 +359,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: stripUnsafeText, isHttpsUrl, isAllowedWei, isHexAddress
 - `utils/secretBox.ts` — módulo JS/TS
   - Funciones/clases: timingSafeEqualBytes, timingSafeEqualHex, hmacSha256, deriveWrapKey, isSealedBlob, sealSecret, openSecret
+- `utils/totp.ts` — módulo JS/TS
+  - Funciones/clases: bytesToBase32, base32ToBytes, totpAt, verifyTotp, otpauthUrl
 - `utils/txErrors.ts` — módulo JS/TS
   - Funciones/clases: setTxErrorLang, humanizeTxError
 - `utils/usernamePolicy.ts` — módulo JS/TS

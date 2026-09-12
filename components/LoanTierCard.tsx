@@ -10,7 +10,7 @@ import { RankMedal } from './RankMedal';
 import { AppIcon } from './icons';
 import { directCommissionFromLoan, formatCommissionUSD, ACTIVATION_BONUS_USD } from '../constants/commissions';
 import { AppText } from './AppText';
-import { MAX_LOAN_LEVEL } from '../constants/loanTiers';
+import { isMilestoneLevel, MAX_LOAN_LEVEL, milestoneBonusUsd } from '../constants/loanTiers';
 
 interface LoanTierCardProps {
   tier: LoanTier;
@@ -131,6 +131,11 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('repayOnce')}</AppText>
       )}
       <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('term')}: {tier.term}</AppText>
+      {isMilestoneLevel(tier.id) ? (
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>
+          {t('milestoneBonusOnTier', { amount: formatUSD(milestoneBonusUsd(tier.id)) })}
+        </AppText>
+      ) : null}
       {isMaxLevel ? (
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('maxLevelNote')}</AppText>
       ) : (

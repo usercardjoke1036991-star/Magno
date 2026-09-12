@@ -16,6 +16,7 @@
 - 💡 .env / configuración — Variables de entorno
 - 💡 CI/CD — GitHub Actions (comprobacion.yml)
 - ✅ salud_proyecto.py — Marcado como completado manualmente
+- ✅ escalera de 1000 niveles — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -46,6 +47,13 @@
 - interface intuitiva que reconoce cuenta real y cuenta demo sin confundirlas
 - tema minimalista blanco y negro y foto de perfil gris como Facebook
 - mostrar historial de credito on-chain en metricas: pagos a tiempo, mora y penalizaciones
+- correo para crear cuenta e iniciar sesion; se cambia o reemplaza solo desde Seguridad
+- guardar sesion al crear o entrar; correo para recuperar clave y avisos de pago
+- elegir metodo de seguridad para desbloquear, mover dinero e iniciar sesion; autenticador TOTP; historial de prestamos, pagos y transferencias entre billeteras
+- escalera de 1000 niveles hasta 1000000 USDT manteniendo tasa decreciente e interes en dolares creciente
+- subida +5 solicitudes por nivel desde 100 USDT y 12 rangos de piedras con marcos
+- Bono de pool de 2000 USDT cada 100 niveles alcanzados (100, 200... 1000), el mismo que el hito original del nivel 100
+- Bonos de hito proporcionales al nivel, ventana Bonos para reclamar y donacion a la billetera fundadora con titulo Aliado/Patrono/Circulo
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -67,3 +75,11 @@
 - [2026-09-12 02:35] Idea añadida al backlog: "interface intuitiva que reconoce cuenta real y cuenta demo sin confundirlas"
 - [2026-09-12 08:30] Idea añadida al backlog: "tema minimalista blanco y negro y foto de perfil gris como Facebook"
 - [2026-09-12 08:46] Idea añadida al backlog: "mostrar historial de credito on-chain en metricas: pagos a tiempo, mora y penali"
+- [2026-09-12 09:05] Idea añadida al backlog: "correo para crear cuenta e iniciar sesion; se cambia o reemplaza solo desde Segu"
+- [2026-09-12 09:14] Idea añadida al backlog: "guardar sesion al crear o entrar; correo para recuperar clave y avisos de pago"
+- [2026-09-12 09:32] Idea añadida al backlog: "elegir metodo de seguridad para desbloquear, mover dinero e iniciar sesion; aute"
+- [2026-09-12 09:48] Idea añadida al backlog: "escalera de 1000 niveles hasta 1000000 USDT manteniendo tasa decreciente e inter"
+- [2026-09-12 10:15] Módulo completado: 'escalera de 1000 niveles'
+- [2026-09-12 10:24] Idea añadida al backlog: "subida +5 solicitudes por nivel desde 100 USDT y 12 rangos de piedras con marcos"
+- [2026-09-12 10:37] Idea añadida al backlog: "Bono de pool de 2000 USDT cada 100 niveles alcanzados (100, 200... 1000), el mis"
+- [2026-09-12 10:48] Idea añadida al backlog: "Bonos de hito proporcionales al nivel, ventana Bonos para reclamar y donacion a "

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { getRankForLevel, type RankStyle } from '../constants/ranks';
+import { getRankForLevel, RANK_MEDAL_ASSET, type RankStyle } from '../constants/ranks';
 import { AppText } from './AppText';
 
 const RANK_LOGOS = {
@@ -34,15 +34,7 @@ export const RankMedal: React.FC<RankMedalProps> = ({
   label,
 }) => {
   const style = rank || getRankForLevel(level);
-  const logoByFamily = {
-    bronze: 1,
-    silver: 3,
-    gold: 5,
-    platinum: 7,
-    diamond: 9,
-    master: 10,
-  } as const;
-  const clamped = logoByFamily[style.family];
+  const clamped = RANK_MEDAL_ASSET[style.family];
   return (
     <View style={[styles.wrap, { opacity: dimmed ? 0.38 : 1 }]}>
       <Image source={RANK_LOGOS[clamped]} style={{ width: size, height: size }} resizeMode="contain" />

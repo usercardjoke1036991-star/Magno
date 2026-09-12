@@ -12,10 +12,10 @@
 - **Tests detectados:** 18 archivo(s)
 
 ### Qué funciona
-- Contrato `QuatriviumCredit.sol` — testnet en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles, bloque 130526896)
-- 15 suites Hardhat (89 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld…
-- App móvil con 43 componentes React Native
-- i18n: 17 idiomas, 702 claves
+- Contrato `QuatriviumCredit.sol` — código de 1000 niveles ($1 a $1 000 000). Live Demo sigue en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles) hasta redeploy testnet
+- 15 suites Hardhat (97 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
+- App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
+- i18n: 17 idiomas, 783 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
@@ -44,9 +44,9 @@
 - Identidad demo — `services/demoIdentity.ts` + worker `/demo-identity`
 - Wallet interna — `services/appWallet.ts`
 - KYC local — `services/kycDeclaration.ts`
-- Lock — `services/appLock.ts` + `components/BiometricLockSection.tsx`
+- Lock — `services/appLock.ts` + `authPrefs.ts` + `authenticator.ts`
+- Historial — `services/movementHistory.ts` + `MovementHistory.tsx`
 - Storage seguro — `services/secureStorageService.ts`
-- Red — `constants/rpcConfig.ts`
 
 ### Funciones reales (código)
 - `actualizar_contexto.py`

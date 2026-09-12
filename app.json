@@ -63,6 +63,26 @@
               "scheme": "https",
               "host": "www.quatriviumcredit.app",
               "pathPrefix": "/invite"
+            },
+            {
+              "scheme": "https",
+              "host": "quatriviumcredit.app",
+              "pathPrefix": "/history"
+            },
+            {
+              "scheme": "https",
+              "host": "www.quatriviumcredit.app",
+              "pathPrefix": "/history"
+            },
+            {
+              "scheme": "https",
+              "host": "quatriviumcredit.app",
+              "pathPrefix": "/room"
+            },
+            {
+              "scheme": "https",
+              "host": "www.quatriviumcredit.app",
+              "pathPrefix": "/room"
             }
           ]
         }

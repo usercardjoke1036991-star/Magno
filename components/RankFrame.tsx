@@ -132,6 +132,100 @@ function FrameOrnaments({
     );
   }
 
+  if (rank.family === 'amber') {
+    return (
+      <G>
+        <Circle cx={cx} cy={cy} r={r + 5} fill={dark} opacity={0.9} />
+        <Circle cx={cx} cy={cy} r={r + 2.2} fill={light} />
+        <Circle cx={cx} cy={cy} r={r} fill={metal} />
+        <Circle cx={cx - r * 0.25} cy={cy - r * 0.2} r={r * 0.22} fill={light} opacity={0.55} />
+        <Circle cx={cx + r * 0.55} cy={cy + r + 3} r={2.1} fill={dark} />
+        <Circle cx={cx + r * 0.55} cy={cy + r + 3} r={1.3} fill={light} />
+      </G>
+    );
+  }
+
+  if (rank.family === 'pearl') {
+    return (
+      <G>
+        <Circle cx={cx} cy={cy} r={r + 4} fill={dark} />
+        <Circle cx={cx} cy={cy} r={r + 1.6} fill={light} />
+        <Circle cx={cx} cy={cy} r={r} fill={metal} />
+        <Circle cx={cx - r * 0.28} cy={cy - r * 0.28} r={r * 0.18} fill="#fff" opacity={0.7} />
+        <Circle cx={cx - 6} cy={cy + r + 4} r={2.2} fill={light} stroke={dark} strokeWidth={0.6} />
+        <Circle cx={cx} cy={cy + r + 5} r={2.6} fill={light} stroke={dark} strokeWidth={0.6} />
+        <Circle cx={cx + 6} cy={cy + r + 4} r={2.2} fill={light} stroke={dark} strokeWidth={0.6} />
+      </G>
+    );
+  }
+
+  if (rank.family === 'jade') {
+    const cut = r + 3.2;
+    return (
+      <G>
+        <Rect x={cx - cut} y={cy - cut} width={cut * 2} height={cut * 2} rx={5} fill={dark} />
+        <Rect x={cx - r} y={cy - r} width={r * 2} height={r * 2} rx={4} fill={metal} />
+        <Rect x={cx - 7} y={cy - r - 7} width={14} height={2.4} rx={1} fill={light} />
+        <Rect x={cx - 5} y={cy + r + 3} width={10} height={2} rx={1} fill={light} />
+      </G>
+    );
+  }
+
+  if (rank.family === 'emerald') {
+    const w = r + 3;
+    const h = r + 1.5;
+    return (
+      <G>
+        <Polygon
+          points={`${cx - w * 0.55},${cy - h} ${cx + w * 0.55},${cy - h} ${cx + w},${cy} ${cx + w * 0.55},${cy + h} ${cx - w * 0.55},${cy + h} ${cx - w},${cy}`}
+          fill={dark}
+        />
+        <Polygon
+          points={`${cx - r * 0.5},${cy - r} ${cx + r * 0.5},${cy - r} ${cx + r},${cy} ${cx + r * 0.5},${cy + r} ${cx - r * 0.5},${cy + r} ${cx - r},${cy}`}
+          fill={metal}
+          stroke={light}
+          strokeWidth={1.1}
+        />
+      </G>
+    );
+  }
+
+  if (rank.family === 'sapphire') {
+    const hex = Array.from({ length: 6 }, (_, i) => {
+      const a = (i * Math.PI) / 3 - Math.PI / 6;
+      return `${cx + Math.cos(a) * (r + 4)},${cy + Math.sin(a) * (r + 4)}`;
+    }).join(' ');
+    const inner = Array.from({ length: 6 }, (_, i) => {
+      const a = (i * Math.PI) / 3 - Math.PI / 6;
+      return `${cx + Math.cos(a) * r},${cy + Math.sin(a) * r}`;
+    }).join(' ');
+    return (
+      <G>
+        <Polygon points={hex} fill={dark} />
+        <Polygon points={inner} fill={metal} stroke={light} strokeWidth={1.2} />
+        <Circle cx={cx} cy={cy} r={2.2} fill={light} />
+      </G>
+    );
+  }
+
+  if (rank.family === 'ruby') {
+    return (
+      <G>
+        <Polygon
+          points={`${cx},${cy - r - 6} ${cx + r + 3},${cy - r * 0.15} ${cx + r * 0.7},${cy + r + 3} ${cx - r * 0.7},${cy + r + 3} ${cx - r - 3},${cy - r * 0.15}`}
+          fill={dark}
+        />
+        <Polygon
+          points={`${cx},${cy - r - 1} ${cx + r - 1},${cy - r * 0.1} ${cx + r * 0.55},${cy + r - 1} ${cx - r * 0.55},${cy + r - 1} ${cx - r + 1},${cy - r * 0.1}`}
+          fill={metal}
+          stroke={light}
+          strokeWidth={1}
+        />
+        <Circle cx={cx} cy={cy - r * 0.15} r={1.8} fill={light} />
+      </G>
+    );
+  }
+
   return (
     <G>
       <Circle cx={cx} cy={cy} r={r + 3.5} fill={dark} />
@@ -156,12 +250,21 @@ export const RankFrame: React.FC<RankFrameProps> = ({
 }) => {
   const rank = getRankForLevel(level);
   const ring = Math.max(4, Math.round(size * 0.08));
-  const outer =
-    rank.family === 'master' || rank.family === 'diamond' || rank.family === 'gold'
-      ? Math.round(size * 0.26)
-      : Math.round(size * 0.14);
+  const wide =
+    rank.family === 'master' ||
+    rank.family === 'diamond' ||
+    rank.family === 'gold' ||
+    rank.family === 'emerald' ||
+    rank.family === 'sapphire' ||
+    rank.family === 'ruby' ||
+    rank.family === 'jade';
+  const outer = wide ? Math.round(size * 0.26) : Math.round(size * 0.14);
   const crest =
-    rank.family === 'master' ? Math.round(size * 0.42) : rank.family === 'diamond' ? Math.round(size * 0.28) : Math.round(size * 0.16);
+    rank.family === 'master'
+      ? Math.round(size * 0.42)
+      : rank.family === 'diamond' || rank.family === 'ruby'
+        ? Math.round(size * 0.28)
+        : Math.round(size * 0.16);
   const box = size + (ring + outer) * 2;
   const cx = box / 2;
   const cy = crest + ring + outer + size / 2;

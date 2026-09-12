@@ -4,7 +4,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
 import { AppIcon, type IconName } from './icons';
 
-export type HomeRoom = 'wallet' | 'credit' | 'loans' | 'network' | 'pool' | 'admin';
+export type HomeRoom = 'wallet' | 'credit' | 'loans' | 'bonuses' | 'network' | 'pool' | 'admin' | 'history';
 
 interface HubTile {
   id: HomeRoom;

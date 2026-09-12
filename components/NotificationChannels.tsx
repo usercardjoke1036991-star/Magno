@@ -31,7 +31,12 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   const [whatsapp, setWhatsapp] = useState('');
   const [telegramUsername, setTelegramUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [prefs, setPrefs] = useState<NotificationPrefs>({ debt: true, commission: false, signup: false });
+  const [prefs, setPrefs] = useState<NotificationPrefs>({
+    debt: true,
+    commission: false,
+    signup: false,
+    email: true,
+  });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -122,11 +127,22 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       <AppText style={[styles.lead, { color: colors.text }]}>{t('notificationLead')}</AppText>
       {email ? (
         <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
-          <AppText style={[styles.label, { color: colors.textMuted }]}>{t('emailField')}</AppText>
+          <View style={styles.switchRow}>
+            <View style={styles.switchLabelRow}>
+              <AppIcon name="bell" size={16} color={colors.textMuted} />
+              <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationEmail')}</AppText>
+            </View>
+            <Switch value={prefs.email} onValueChange={() => toggle('email')} />
+          </View>
           <AppText selectable style={[styles.switchLabel, { color: colors.text }]}>{email}</AppText>
-          <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('emailDone')}</AppText>
+          <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationEmailHint')}</AppText>
         </View>
-      ) : null}
+      ) : (
+        <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
+          <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationEmail')}</AppText>
+          <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationEmailLink')}</AppText>
+        </View>
+      )}
 
       <View style={styles.labelRow}>
         <AppIcon name="phone" size={15} color={colors.textMuted} />

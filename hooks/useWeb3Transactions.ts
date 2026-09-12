@@ -76,6 +76,22 @@ export const useWeb3Transactions = () => {
     );
   };
 
+  const cobrarBonoHito = async (tokenAddress: string) => {
+    return executeTransaction(
+      'cobrarBonoHito',
+      () => QuatriviumCreditService.cobrarBonoHito(tokenAddress),
+      t('claimPoolBonus')
+    );
+  };
+
+  const donarProyecto = async (amountWei: string, tokenAddress: string) => {
+    return executeTransaction(
+      'donar',
+      () => QuatriviumCreditService.donar(amountWei, tokenAddress),
+      t('donateThanks')
+    );
+  };
+
   const pagarPrestamo = async (amountWei: string, tokenAddress: string) => {
     return executeTransaction(
       'pagarPrestamo',
@@ -247,6 +263,8 @@ export const useWeb3Transactions = () => {
     executeTransaction,
     registrarHumano,
     solicitarPrestamo,
+    cobrarBonoHito,
+    donarProyecto,
     pagarPrestamo,
     pagarCuotas,
     depositarLiquidez,

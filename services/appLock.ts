@@ -226,6 +226,18 @@ export async function clearBiometricWrap(): Promise<void> {
   }
 }
 
+async function persistCompanionWraps(wrap = getWalletWrapKey()): Promise<void> {
+  if (!wrap) return;
+  try {
+    const { isAuthenticatorEnabled, persistAuthenticatorWrap } = await import('./authenticator');
+    if (await isAuthenticatorEnabled()) {
+      await persistAuthenticatorWrap(wrap);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export async function isPinSet(): Promise<boolean> {
   return Boolean(await readPinRecord());
 }
@@ -255,12 +267,14 @@ export async function setPin(pin: string): Promise<string> {
     if (await isBiometricEnabled()) {
       await persistWrapForBiometric(existingWrap);
     }
+    await persistCompanionWraps(existingWrap);
     return existingWrap;
   }
   const wrap = activateSession(pin, record);
   if (await isBiometricEnabled()) {
     await persistWrapForBiometric(wrap);
   }
+  await persistCompanionWraps(wrap);
   return wrap;
 }
 
@@ -299,7 +313,13 @@ export async function checkPin(pin: string): Promise<PinCheck> {
     activateSession(pin, record);
     await writeGate({ fails: 0, until: 0 });
   }
+  await persistCompanionWraps();
   return { ok: true };
+}
+
+export async function matchPin(pin: string): Promise<boolean> {
+  if (!isSixDigits(pin)) return false;
+  return pinHashMatches(pin);
 }
 
 export async function verifyPin(pin: string): Promise<boolean> {
@@ -385,6 +405,7 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
   if (await isBiometricEnabled()) {
     await persistWrapForBiometric(nextWrap);
   }
+  await persistCompanionWraps(nextWrap);
   await writeGate({ fails: 0, until: 0 });
   return nextWrap;
 }
@@ -412,7 +433,17 @@ export async function checkPassword(password: string): Promise<PinCheck> {
   }
   setWalletWrapKey(deriveWrapKey(password, record.salt, rounds));
   await writeGate({ fails: 0, until: 0 });
+  await persistCompanionWraps();
   return { ok: true };
+}
+
+export async function matchPassword(password: string): Promise<boolean> {
+  if (!password) return false;
+  const record = await readPasswordRecord();
+  if (!record) return false;
+  const rounds = passwordRounds(record);
+  const hash = await hashSecret(password, record.salt, rounds);
+  return timingSafeEqualHex(digestHex(hash), digestHex(record.hash));
 }
 
 export async function changePassword(current: string, next: string, pin?: string): Promise<boolean> {

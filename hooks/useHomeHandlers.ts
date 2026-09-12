@@ -9,13 +9,16 @@ import { getEthersSignerFromProvider } from '../web3Config';
 import { ERC20_ABI } from '../constants/contractConfig';
 import { getTokenMeta, isOfficialWorldToken } from '../constants/tokens';
 import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
+import { recordMovement } from '../services/movementHistory';
 import { useWeb3Transactions } from './useWeb3Transactions';
 import { notifyApiBases } from '../constants/appLinks';
 import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
 import { creditNeedsKyc, creditNeedsPhone } from '../utils/creditGates';
-import { formatCooldown, parsePositiveDecimal } from '../utils/formatters';
+import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
+import { formatCooldown, formatUSD, parsePositiveDecimal } from '../utils/formatters';
+import { milestoneBonusUsd } from '../constants/loanTiers';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { useI18n } from '../i18n/LanguageContext';
 import { humanizeTxError } from '../utils/txErrors';
@@ -122,6 +125,8 @@ export const useHomeHandlers = ({
     isLoading: txLoading,
     registrarHumano,
     solicitarPrestamo,
+    cobrarBonoHito,
+    donarProyecto,
     pagarPrestamo,
     pagarCuotas,
     depositarLiquidez,
@@ -263,11 +268,12 @@ export const useHomeHandlers = ({
       Alert.alert(t('delinquent'), t('moraBlocked'));
       return;
     }
-    if (userInfo.userProgress.cooldownRestante > 0) {
+    const wait = cooldownRestanteDesdeTimestamp(userInfo.userProgress.ultimoPrestamoTimestamp);
+    if (wait > 0) {
       Alert.alert(
         t('cooldownTitle'),
         t('cooldownWait', {
-          time: formatCooldown(userInfo.userProgress.cooldownRestante, t('available')),
+          time: formatCooldown(wait, t('available')),
         })
       );
       return;
@@ -299,6 +305,48 @@ export const useHomeHandlers = ({
       }
     }
     refetch();
+  };
+
+  const handleCobrarBonoHito = async () => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!ensureCreditReady()) return;
+    if (userInfo.paused) {
+      Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    if (userInfo.isDelinquent) {
+      Alert.alert(t('delinquent'), t('moraBlocked'));
+      return;
+    }
+    if (!userInfo.canClaimHitos) {
+      Alert.alert(t('toPoolBonus'), t('bonusLegacyContract'));
+      return;
+    }
+    if (!userInfo.userProgress.bonusPending) {
+      Alert.alert(t('toPoolBonus'), t('milestoneBonusHint', {
+        amount: formatUSD(milestoneBonusUsd(userInfo.userProgress.nextMilestone || 100)),
+        level: userInfo.userProgress.nextMilestone || 100,
+      }));
+      return;
+    }
+    if (!(await ensureGasForTx())) return;
+    const result = await cobrarBonoHito(selectedToken.address);
+    if (result.success) {
+      const level = userInfo.userProgress.bonusPending;
+      void recordMovement(walletAddress, {
+        kind: 'bonus',
+        from: selectedToken.address,
+        to: walletAddress,
+        amountLabel: formatUSD(milestoneBonusUsd(level)),
+        tokenSymbol: selectedToken.symbol,
+        platform: 'Quatrivium',
+        timestamp: Date.now(),
+      });
+      refetch();
+    }
   };
 
   const handlePagar = async (kind: 'installment' | 'all' | number) => {
@@ -423,6 +471,55 @@ export const useHomeHandlers = ({
     }
   };
 
+  const handleDonar = async (amountHuman: string) => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    if (!ensureCreditReady()) return;
+    if (!userInfo.canDonate) {
+      Alert.alert(t('donateTitle'), t('bonusLegacyContract'));
+      return;
+    }
+    if (!userInfo.founderAddress) {
+      Alert.alert(t('error'), t('liveCreditNotReady'));
+      return;
+    }
+    if (!userInfo.isTokenSupported && !isOfficialWorldToken(selectedToken.address)) {
+      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
+      return;
+    }
+    const parsed = parsePositiveDecimal(amountHuman);
+    if (!parsed) {
+      Alert.alert(t('amount'), t('amountGreaterZero'));
+      return;
+    }
+    if (Number(parsed) > Number(balances.tokenBalance)) {
+      Alert.alert(t('amountExceedsBalance'), t('poolNeedInternalFunds', { symbol: selectedToken.symbol }));
+      return;
+    }
+    if (!(await ensureGasForTx())) return;
+    try {
+      const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
+      const result = await donarProyecto(amountWei, selectedToken.address);
+      if (result.success) {
+        void recordMovement(walletAddress, {
+          kind: 'donation',
+          from: walletAddress,
+          to: userInfo.founderAddress,
+          amountLabel: `${parsed} ${selectedToken.symbol}`,
+          tokenSymbol: selectedToken.symbol,
+          platform: 'Quatrivium',
+          timestamp: Date.now(),
+        });
+        refetch();
+      }
+    } catch {
+      Alert.alert(t('amount'), t('invalidAmount'));
+    }
+  };
+
   const handleRetirarComisiones = async () => {
     await runAsAdmin(async () => {
       const result = await retirarComisiones();
@@ -541,8 +638,10 @@ export const useHomeHandlers = ({
     txLoading,
     handleRegistrarHumano,
     handleSolicitarCredito,
+    handleCobrarBonoHito,
     handlePagar,
     handleDepositarPool,
+    handleDonar,
     handleRetirarComisiones,
     handleRetirarComisionesToken,
     handleDeclararKyc,

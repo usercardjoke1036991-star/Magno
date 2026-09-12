@@ -11,6 +11,7 @@ export interface NotificationPrefs {
   debt: boolean;
   commission: boolean;
   signup: boolean;
+  email: boolean;
 }
 
 export interface NotificationProfile {
@@ -24,7 +25,7 @@ const DEFAULT_PROFILE: NotificationProfile = {
   phone: '',
   whatsapp: '',
   telegramUsername: '',
-  prefs: { debt: true, commission: false, signup: false },
+  prefs: { debt: true, commission: false, signup: false, email: true },
 };
 
 const digitsOnly = (value: string) => value.replace(/[^\d+]/g, '');
@@ -50,7 +51,12 @@ export async function loadNotificationProfile(): Promise<NotificationProfile> {
     const next = {
       ...DEFAULT_PROFILE,
       ...parsed,
-      prefs: { ...DEFAULT_PROFILE.prefs, ...parsed.prefs, debt: true },
+      prefs: {
+        ...DEFAULT_PROFILE.prefs,
+        ...parsed.prefs,
+        debt: true,
+        email: parsed.prefs?.email !== false,
+      },
     };
     if (!(await SecureStore.getItemAsync(STORAGE_KEY))) {
       await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(next));

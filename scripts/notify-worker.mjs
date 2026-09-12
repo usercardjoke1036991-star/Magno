@@ -41,6 +41,15 @@ const CONTRACT = (() => {
 const RPC = isMainnet
   ? process.env.BSC_MAINNET_RPC_URL || process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY || BSC_MAINNET.rpc[0]
   : process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY || process.env.BSC_TESTNET_RPC_URL || BSC_TESTNET.rpc[0];
+const expectedChainId = isMainnet ? BSC_MAINNET.chainId : BSC_TESTNET.chainId;
+const expectedChainName = isMainnet ? BSC_MAINNET.chainName : BSC_TESTNET.chainName;
+const publicRpc = (url) => {
+  const value = String(url || '');
+  if (!/^https:\/\//i.test(value)) return false;
+  // Ankr público responde 401 sin API key y deja el provider reintentando para siempre.
+  if (/rpc\.ankr\.com/i.test(value) && !/rpc\.ankr\.com\/[^/]+\/[A-Za-z0-9]/i.test(value)) return false;
+  return true;
+};
 const RPC_CANDIDATES = [...new Set(
   [
     RPC,
@@ -50,16 +59,34 @@ const RPC_CANDIDATES = [...new Set(
     process.env.EXPO_PUBLIC_BSC_RPC_URL_FALLBACK_1,
     process.env.EXPO_PUBLIC_BSC_RPC_URL_FALLBACK_2,
     ...(isMainnet ? BSC_MAINNET.rpc : BSC_TESTNET.rpc),
-  ].filter((url) => /^https:\/\//i.test(String(url || '')))
+  ].filter(publicRpc)
 )];
 let rpcCursor = 0;
+const makeProvider = (url) =>
+  new JsonRpcProvider(url, { chainId: expectedChainId, name: expectedChainName }, { staticNetwork: true, batchMaxCount: 1 });
+const probeRpc = async (url) => {
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] }),
+      signal: AbortSignal.timeout(6000),
+    });
+    const body = await response.json();
+    return Number.parseInt(String(body.result || '0'), 16) === expectedChainId;
+  } catch {
+    return false;
+  }
+};
 const nextRpc = () => {
   if (RPC_CANDIDATES.length < 2) return RPC_CANDIDATES[0] || RPC;
   rpcCursor = (rpcCursor + 1) % RPC_CANDIDATES.length;
   return RPC_CANDIDATES[rpcCursor];
 };
+const rpcRateLimited = (error) =>
+  /rate limit|-32005|limit exceeded|could not coalesce/i.test(String(error?.message || error || ''));
 const rpcUnhealthy = (error) =>
-  /rate limit|-32005|limit exceeded|timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN|502|503|504|missing response|failed to detect network|server error|could not coalesce|network/i
+  /timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN|502|503|504|missing response|failed to detect network|server error|network/i
     .test(String(error?.message || error || ''));
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || '';
@@ -644,7 +671,10 @@ const sixDigitCode = () => {
 
 const wrapOk = (value) => /^0x[0-9a-f]{64}$/.test(String(value || ''));
 
-const identityProvider = RPC ? new JsonRpcProvider(RPC) : null;
+let identityProvider = RPC_CANDIDATES[0] || RPC ? makeProvider(RPC_CANDIDATES[0] || RPC) : null;
+const setIdentityProvider = (url) => {
+  identityProvider = url ? makeProvider(url) : null;
+};
 
 const takenByOther = (owner, wallet) => {
   if (!owner || owner === ZeroAddress) return false;
@@ -695,12 +725,13 @@ const notifyWallet = async (wallet, kind, text) => {
   const profile = store.profiles[wallet.toLowerCase()];
   const chatId = store.telegramByWallet[wallet.toLowerCase()];
   const pushChannels = kind === 'debt' || profile?.prefs?.[kind] === true;
-  if (!pushChannels && !profile?.email) return;
+  const emailOn = Boolean(profile?.email) && profile?.prefs?.email !== false;
+  if (!pushChannels && !emailOn) return;
   if (pushChannels) {
     await sendTelegram(chatId, text);
     if (profile) await sendWhatsApp(profile.whatsapp || profile.phone, text);
   }
-  if (profile?.email) await sendEmail(profile.email, 'Quatrivium Credit', text);
+  if (emailOn) await sendEmail(profile.email, 'Quatrivium Credit', text);
 };
 
 const bindTelegram = (wallet, chatId) => {
@@ -841,25 +872,50 @@ const watchChain = async () => {
     return;
   }
   let rpcUrl = RPC_CANDIDATES[0] || RPC;
-  let provider = new JsonRpcProvider(rpcUrl);
+  for (const candidate of RPC_CANDIDATES) {
+    if (await probeRpc(candidate)) {
+      rpcUrl = candidate;
+      break;
+    }
+  }
+  let provider = makeProvider(rpcUrl);
+  setIdentityProvider(rpcUrl);
   let contract = new Contract(CONTRACT, ABI, provider);
-  if (!store.lastBlock) {
-    const latest = await provider.getBlockNumber();
-    store.lastBlock = START_BLOCK > 0 ? START_BLOCK : latest;
-    saveStore(store);
+  try {
+    if (!store.lastBlock) {
+      const latest = await provider.getBlockNumber();
+      store.lastBlock = START_BLOCK > 0 ? START_BLOCK : latest;
+      saveStore(store);
+    }
+  } catch (error) {
+    console.warn('Avisos chain: no se pudo leer el bloque inicial', error?.message || error);
   }
 
   let lastDebtCheck = 0;
+  let logWindow = 200;
   for (;;) {
+    let scannedTo = Number(store.lastBlock || 0);
     try {
       const latest = await provider.getBlockNumber();
+      const lag = store.lastBlock > 0 ? latest - store.lastBlock : 0;
+      if (lag > 4000) {
+        store.lastBlock = Math.max(0, latest - 400);
+        saveStore(store);
+        console.warn(`Avisos chain: ${lag} bloques atrás, se sigue desde el presente`);
+      }
       const from = store.lastBlock + 1;
+      scannedTo = store.lastBlock;
       if (from <= latest) {
-        const to = Math.min(from + 1200, latest);
+        const to = Math.min(from + logWindow, latest);
+        scannedTo = to;
         const pull = async (filter) => {
           try {
             return await contract.queryFilter(filter, from, to);
           } catch (error) {
+            if (rpcRateLimited(error)) {
+              logWindow = 80;
+              throw error;
+            }
             if (rpcUnhealthy(error)) {
               throw error;
             }
@@ -900,15 +956,38 @@ const watchChain = async () => {
         }
         store.lastBlock = to;
         saveStore(store);
+        if (logWindow < 200) logWindow = Math.min(200, logWindow + 20);
       }
       if (Date.now() - lastDebtCheck > 60_000) {
         lastDebtCheck = Date.now();
         await scanDebtReminders(contract);
       }
     } catch (error) {
+      if (rpcRateLimited(error)) {
+        if (scannedTo > store.lastBlock) {
+          store.lastBlock = scannedTo;
+          saveStore(store);
+        }
+        console.warn('Avisos chain: RPC con cupo, se omite el barrido de eventos');
+        try {
+          if (Date.now() - lastDebtCheck > 60_000) {
+            lastDebtCheck = Date.now();
+            await scanDebtReminders(contract);
+          }
+        } catch {
+          // los avisos de deuda se reintentan en el siguiente ciclo
+        }
+        await new Promise((r) => setTimeout(r, 45000));
+        continue;
+      }
       if (rpcUnhealthy(error)) {
         rpcUrl = nextRpc();
-        provider = new JsonRpcProvider(rpcUrl);
+        for (let i = 0; i < RPC_CANDIDATES.length; i += 1) {
+          if (await probeRpc(rpcUrl)) break;
+          rpcUrl = nextRpc();
+        }
+        provider = makeProvider(rpcUrl);
+        setIdentityProvider(rpcUrl);
         contract = new Contract(CONTRACT, ABI, provider);
         console.error('Avisos chain: RPC caída, se cambia de nodo');
         await new Promise((r) => setTimeout(r, 15000));
@@ -963,7 +1042,7 @@ const server = createServer(async (req, res) => {
   const path = requestPath(req);
   const ip = clientIp(req);
   if (req.method === 'GET' && path === '/health') {
-    json(res, 200, { ok: true });
+    json(res, 200, { ok: true, chainId: CHAIN_ID, rpc: Boolean(identityProvider) });
     return;
   }
   if (req.method !== 'POST') {
@@ -1003,6 +1082,7 @@ const server = createServer(async (req, res) => {
         debt: true,
         commission: body.prefs?.commission === true,
         signup: body.prefs?.signup === true,
+        email: body.prefs?.email !== false,
       },
       displayName: stripUnsafe(body.displayName || prev.displayName || '', 24),
       username: prev.username || '',

@@ -20,6 +20,7 @@ import {
   setPin,
 } from '../services/appLock';
 import { isWeakPin } from '../utils/pinPolicy';
+import { fallbackAuthIfNeeded } from '../services/authPrefs';
 import { loadAppWallet } from '../services/appWallet';
 import { storePasswordRecovery } from '../services/passwordRecovery';
 import { SecretInput } from './SecretInput';
@@ -82,7 +83,13 @@ export const LockSettings: React.FC<{
       setMessage(t('lockPinChanged'));
       onChanged?.();
     } catch (error) {
-      setMessage(error instanceof Error && error.message === 'weak-pin' ? t('lockPinWeak') : t('lockPinWrong'));
+      setMessage(
+        error instanceof Error && error.message === 'weak-pin'
+          ? t('lockPinWeak')
+          : error instanceof Error && error.message === 'locked'
+            ? t('lockUnlockLead')
+            : t('lockPinWrong')
+      );
     } finally {
       setBusy(false);
     }
@@ -110,6 +117,7 @@ export const LockSettings: React.FC<{
             setCurrent('');
             setNext('');
             setConfirm('');
+            await fallbackAuthIfNeeded('pin');
             setMessage(t('lockPinRemoved'));
             onChanged?.();
           } catch (error) {

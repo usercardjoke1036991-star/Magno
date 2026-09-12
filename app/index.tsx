@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import { parseAppDeepLink } from '../utils/appDeepLink';
+import { rememberAppUrl, takePendingAppUrl } from '../utils/pendingDeepLink';
 import { AppKit, useAccount, useProvider } from '@reown/appkit-react-native';
 import { parseUnits } from 'ethers';
 import { setWalletSigner } from '../services/quatriviumCreditService';
@@ -15,6 +16,7 @@ import { BalanceDisplay } from '../components/BalanceDisplay';
 import { UserMetrics } from '../components/UserMetrics';
 import { RankLadder } from '../components/RankLadder';
 import { LoanTierCard } from '../components/LoanTierCard';
+import { LockedLoanCatalog } from '../components/LockedLoanCatalog';
 import { AdminPanel } from '../components/AdminPanel';
 import { ActivateCreditSection } from '../components/ActivateCreditSection';
 import { AccountWorldCard } from '../components/AccountWorldCard';
@@ -28,8 +30,11 @@ import { AppWindow } from '../components/AppWindow';
 import { HomeHub, type HomeRoom } from '../components/HomeHub';
 import { AppText } from '../components/AppText';
 import { PoolSupportSection } from '../components/PoolSupportSection';
+import { MilestoneBonusCatalog } from '../components/MilestoneBonusCatalog';
+import { DonateFounderSection } from '../components/DonateFounderSection';
 import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
+import { MovementHistory } from '../components/MovementHistory';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isContractConfigured, isCreditReady } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
@@ -70,9 +75,11 @@ function HomeScreenWithHooks() {
 
   useEffect(() => {
     const apply = (url?: string | null) => {
-      const link = parseAppDeepLink(url);
+      if (url) rememberAppUrl(url);
+      const link = parseAppDeepLink(url || takePendingAppUrl());
       if (link?.kind === 'room') setRoom(link.room);
     };
+    apply(takePendingAppUrl());
     Linking.getInitialURL().then(apply).catch(() => {});
     RNLinking.getInitialURL().then(apply).catch(() => {});
     const sub = Linking.addEventListener('url', ({ url }) => apply(url));
@@ -105,7 +112,6 @@ function HomeScreenWithHooks() {
   const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
   const lockedTiers = loanTiers.filter((tier) => tier.id > userInfo.userProgress.nivelActual);
   const visibleUnlocked = unlockedTiers.slice(-3);
-  const visibleLocked = lockedTiers;
   const labelTier = (tier: (typeof loanTiers)[number]) => ({
     ...tier,
     name: `${t('level')} ${tier.id}`,
@@ -129,8 +135,10 @@ function HomeScreenWithHooks() {
     txLoading,
     handleRegistrarHumano,
     handleSolicitarCredito,
+    handleCobrarBonoHito,
     handlePagar,
     handleDepositarPool,
+    handleDonar,
     handleRetirarComisiones,
     handleRetirarComisionesToken,
     handleDeclararKyc,
@@ -277,7 +285,9 @@ function HomeScreenWithHooks() {
               icon: 'id',
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
+            { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' },
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
+            { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
             ...(mode === 'demo'
               ? []
               : [{ id: 'pool' as const, title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' as const }]),
@@ -354,7 +364,14 @@ function HomeScreenWithHooks() {
         </AppSubsection>
         {userInfo.isRegistered || userInfo.hasActiveLoan || !creditChecking ? (
           <AppSubsection title={t('subsectionRank')} icon="star">
-            <UserMetrics userInfo={userInfo} reminder={debtReminder} showDebt={false} />
+            <UserMetrics
+              userInfo={userInfo}
+              reminder={debtReminder}
+              showDebt={false}
+              onOpenBonuses={() => setRoom('bonuses')}
+              lpUsd={Number.parseFloat(balances.lpBalance) || 0}
+              isPaying={txLoading}
+            />
           </AppSubsection>
         ) : null}
         {userInfo.activeLoan ? (
@@ -422,32 +439,64 @@ function HomeScreenWithHooks() {
             />
           ))}
         </AppSubsection>
-        {visibleLocked.length ? (
+        {lockedTiers.length ? (
           <AppSubsection title={t('subsectionLocked')} icon="lock">
             <AppText style={[styles.lockedHint, rtl && styles.rtlText, { color: colors.textMuted }]}>
               {t('lockedLevelsHint')}
             </AppText>
-            {visibleLocked.map((tier) => (
-              <LoanTierCard
-                key={tier.id}
-                tier={labelTier(tier)}
-                userLevel={userInfo.userProgress.nivelActual}
-                hasActiveLoan={userInfo.hasActiveLoan}
-                isDelinquent={userInfo.isDelinquent}
-                paused={creditPaused}
-                isActiveTier={false}
-                isLoading={txLoading}
-                curveRateBps={userInfo.curveRateBps}
-                ultimoPrestamoTimestamp={0}
-                isRegistered={userInfo.isRegistered}
-                onActivateCredit={() => setRoom('credit')}
-                onRequestLoan={handleSolicitarCredito}
-                onPayLoan={() => handlePagar('installment')}
+            <LockedLoanCatalog
+              tiers={lockedTiers}
+              labelTier={labelTier}
+              userLevel={userInfo.userProgress.nivelActual}
+              hasActiveLoan={userInfo.hasActiveLoan}
+              isDelinquent={userInfo.isDelinquent}
+              paused={creditPaused}
+              isLoading={txLoading}
+              curveRateBps={userInfo.curveRateBps}
+              ultimoPrestamoTimestamp={0}
+              isRegistered={userInfo.isRegistered}
+              onActivateCredit={() => setRoom('credit')}
+              onRequestLoan={handleSolicitarCredito}
+              onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}
               onPayCount={(count) => handlePagar(count)}
-              />
-            ))}
+            />
           </AppSubsection>
+        ) : null}
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'bonuses'}
+        title={t('sectionBonuses')}
+        lead={t('sectionBonusesLead')}
+        onClose={() => setRoom(null)}
+      >
+        {!creditReady ? (
+          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
+            {t('liveCreditNotReady')}
+          </AppText>
+        ) : null}
+        <AppSubsection title={t('sectionBonuses')} icon="star">
+          <MilestoneBonusCatalog
+            userLevel={userInfo.userProgress.nivelActual}
+            lastHito={userInfo.userProgress.lastHito}
+            claimable={userInfo.userProgress.bonusPending}
+            canClaim={userInfo.canClaimHitos}
+            isPaying={txLoading}
+            onClaim={handleCobrarBonoHito}
+          />
+        </AppSubsection>
+        {userInfo.canDonate ? (
+        <DonateFounderSection
+          isLoading={txLoading}
+          tokenSymbol={selectedToken.symbol}
+          tokenSupported={userInfo.isTokenSupported}
+          walletConnected={Boolean(walletAddress)}
+          founderAddress={userInfo.founderAddress}
+          donatedUsd={userInfo.donatedUsd || 0}
+          lpUsd={Number.parseFloat(balances.lpBalance) || 0}
+          onDonate={handleDonar}
+        />
         ) : null}
       </AppWindow>
 
@@ -482,6 +531,15 @@ function HomeScreenWithHooks() {
       </AppWindow>
 
       <AppWindow
+        visible={room === 'history'}
+        title={t('historyTitle')}
+        lead={t('historyLead')}
+        onClose={() => setRoom(null)}
+      >
+        <MovementHistory walletAddress={walletAddress} enabled={room === 'history'} />
+      </AppWindow>
+
+      <AppWindow
         visible={room === 'pool'}
         title={t('sectionPool')}
         lead={t('sectionPoolLead')}
@@ -510,6 +568,18 @@ function HomeScreenWithHooks() {
           paused={creditPaused}
           onDepositPool={handleDepositarPool}
         />
+        {userInfo.canDonate ? (
+        <DonateFounderSection
+          isLoading={txLoading}
+          tokenSymbol={selectedToken.symbol}
+          tokenSupported={userInfo.isTokenSupported}
+          walletConnected={Boolean(walletAddress)}
+          founderAddress={userInfo.founderAddress}
+          donatedUsd={userInfo.donatedUsd || 0}
+          lpUsd={Number.parseFloat(balances.lpBalance) || 0}
+          onDonate={handleDonar}
+        />
+        ) : null}
       </AppWindow>
 
       <AppWindow

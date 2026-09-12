@@ -68,7 +68,7 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const value = useMemo(() => ({ mode, ready, setMode }), [mode, ready, setMode]);
 
   useEffect(() => {
-    setProductMode(mode);
+    applyChain(mode);
   }, [mode]);
 
   if (!ready) {

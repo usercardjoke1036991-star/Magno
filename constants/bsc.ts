@@ -30,9 +30,12 @@ export const BSC_TESTNET = {
   usdt: '0x337610d27c682e347c9cd60bd4b3b107c9d34ddd',
   usdtUsdFeed: '0xeca2605f0bcf2ba5966372c99837b1f182d3d620',
   rpc: [
+    'https://bsc-testnet-rpc.publicnode.com',
     'https://bsc-testnet.publicnode.com',
+    'https://bsc-testnet.drpc.org',
+    'https://bsc-testnet.bnbchain.org',
     'https://data-seed-prebsc-1-s1.binance.org:8545/',
-    'https://rpc.ankr.com/bsc_testnet_chapel',
+    'https://data-seed-prebsc-2-s1.binance.org:8545/',
   ],
 } as const;
 

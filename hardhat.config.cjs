@@ -32,6 +32,7 @@ module.exports = {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
+      blockGasLimit: 100_000_000,
     },
     bscTestnet: {
       url: testnetRpc,

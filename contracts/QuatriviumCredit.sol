@@ -14,7 +14,8 @@ import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
  *         El principal vuelve íntegro al pool. El interés se reparte (red + pool) con suma cero.
  *         Oráculo, pausa de emergencia y admin con timelock + confirmaciones.
  *
- * Escala: Nivel 1 = 1e18 (1 USDT). El bono de reclutamiento es menor que el interés del
+ * Escala: 1000 niveles, $1 → $1 000 000. 1–100 en LoanTierSeed; 101–1000 por fórmula en _tier.
+ * Nivel 1 = 1e18 (1 USDT). El bono de reclutamiento es menor que el interés del
  * Nivel 1, así un bot que fabrica referidos pierde dinero en cada ciclo.
  * El fundador cobra un recorte fijo de cada interés. Si una llave se compromete,
  * las otras fundadoras pueden reasignar fundador y owner (timelock + confirmaciones).
@@ -31,6 +32,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     uint256 public constant COOLDOWN_PRESTAMO = 48 hours;
     uint256 public constant ORIGINATION_WINDOW = 1 days;
     uint256 public constant MAX_ADMINS = 3;
+    uint256 internal constant MAX_NIVEL_TOTAL = 1000;
 
     /// @notice Bono único al referidor directo cuando el referido paga su primer Nivel 1 (0.50 USDT).
     uint256 public constant BONO_ACTIVACION = 5e17;
@@ -41,6 +43,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     uint256 public constant UMBRAL_BONO_RED = 250;
     uint256 public constant BONO_RED_USDT = 5e17;
     uint256 internal constant BONO_RED_PISO_CAJA_BP = 2000;
+    /// @notice Bono de hito = 20 USDT × nivel (100 → 2000, 1000 → 20 000).
     /// @dev 15% fundador + 15/8/6/4/2% las primeras 5 generaciones. El resto va al pool;
     ///      generaciones 6+ toman de ese resto (0,8% y luego 0,4%) sin bajar del piso del pool.
     uint256 internal constant POOL_RECURRENTE_BP = 5000;
@@ -118,9 +121,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
     mapping(address => PlanPago) public planPago;
 
-    uint256 internal constant UMBRAL_DOS_CUOTAS = 50e18;
-    uint256 internal constant UMBRAL_TRES_CUOTAS = 60e18;
-
     mapping(address => bool) public humanosVerificados;
     mapping(address => bool) public blacklist;
     mapping(address => bool) public esMoroso;
@@ -137,6 +137,10 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint256 ultimoPrestamoTimestamp;
     }
     mapping(address => ProgresoNivel) public progresoUsuarios;
+    /// @notice Último hito de 100 cobrado (0, 100, 200… 1000).
+    mapping(address => uint256) public hitoCobrado;
+    /// @notice USDT donado al fundador (no entra al pool).
+    mapping(address => uint256) public donado;
 
     uint256 public tasaBaseBP;
     uint256 public puntoOptimoUtilBP;
@@ -182,6 +186,8 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     event ReputationUpdated(address indexed usuario, uint256 nuevaReputacion);
     event PuntosRed(address indexed usuario, uint256 puntos);
     event BonoRedPagado(address indexed usuario, uint256 umbral, uint256 monto, address indexed token);
+    event BonoHitoPagado(address indexed usuario, uint256 hito, uint256 monto, address indexed token);
+    event Donacion(address indexed usuario, uint256 monto, address indexed token);
     event AdminActionProposed(uint256 indexed id, address indexed proposer, bytes4 selector, uint256 eta);
     event AdminActionConfirmed(uint256 indexed id, address indexed admin, uint256 confirms);
     event AdminActionCancelled(uint256 indexed id, address indexed admin);
@@ -364,17 +370,9 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         bytes4 sel = bytes4(p.data);
         require(allowedAdminSelector[sel], "selector not allowed");
         p.executed = true;
-        (bool ok, bytes memory result) = address(this).call(p.data);
-        require(ok, _revertReason(result));
+        (bool ok, ) = address(this).call(p.data);
+        require(ok);
         emit AdminActionExecuted(id, sel);
-    }
-
-    function _revertReason(bytes memory result) private pure returns (string memory) {
-        if (result.length < 68) return "admin call failed";
-        assembly {
-            result := add(result, 0x04)
-        }
-        return abi.decode(result, (string));
     }
 
     function pausarContrato() external onlyAdmin {
@@ -664,7 +662,9 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         lpShares[msg.sender][token] += shares;
         totalShares[token] += shares;
         totalLiquidity[token] += _monto;
+        reputacion[msg.sender] += _monto / 2e17;
         emit LiquidezAportada(msg.sender, _monto, token);
+        emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
     }
 
     function _assertPeg(address token) internal view {
@@ -718,7 +718,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         }
         uint256 desbloqueado = progreso.nivelActual;
         uint256 pedido = nivel == 0 ? desbloqueado : nivel;
-        require(pedido >= 1 && pedido <= desbloqueado && pedido <= LoanTierSeed.MAX_NIVEL, "nivel locked");
+        require(pedido >= 1 && pedido <= desbloqueado && pedido <= MAX_NIVEL_TOTAL, "nivel locked");
         require(
             block.timestamp >= progreso.ultimoPrestamoTimestamp + COOLDOWN_PRESTAMO,
             "cooldown 48h"
@@ -727,7 +727,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         _assertPeg(token);
         _bumpOriginationWindow();
 
-        Level memory L = _niveles[pedido];
+        Level memory L = _tier(pedido);
         require(L.montoPrestamo > 0, "tier not set");
         require(totalLiquidity[token] >= outstandingLoans[token] + L.montoPrestamo, "insufficient liquidity");
         uint256 utilAfter = ((outstandingLoans[token] + L.montoPrestamo) * 10000) / totalLiquidity[token];
@@ -757,9 +757,20 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function _cuotasDeMonto(uint256 monto) internal pure returns (uint8) {
-        if (monto >= UMBRAL_TRES_CUOTAS) return 3;
-        if (monto >= UMBRAL_DOS_CUOTAS) return 2;
+        if (monto >= 100000e18) return 12;
+        if (monto >= 25000e18) return 6;
+        if (monto >= 60e18) return 3;
+        if (monto >= 50e18) return 2;
         return 1;
+    }
+
+    function _tier(uint256 id) internal view returns (Level memory L) {
+        if (id <= LoanTierSeed.MAX_NIVEL) return _niveles[id];
+        if (id > MAX_NIVEL_TOTAL) return L;
+        uint256 t = id - LoanTierSeed.MAX_NIVEL;
+        L.montoPrestamo = (10000 + 1100 * t) * 1e18;
+        L.plazo = (90 + t / 10) * 1 days;
+        L.tasaInteresBP = 800 - (t > 394 ? 394 : t);
     }
 
     function _montoCuota(
@@ -783,7 +794,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (tasaBP == 0 && principal > 0) {
             uint256 nivel = usuarios[usuario].nivelActual;
             if (nivel == 0) nivel = 1;
-            tasaBP = _niveles[nivel].tasaInteresBP;
+            tasaBP = _tier(nivel).tasaInteresBP;
         }
         interes = (principal * tasaBP) / 10000;
         total = principal + interes;
@@ -814,13 +825,13 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
         ProgresoNivel storage progresoPago = progresoUsuarios[msg.sender];
         uint256 unlocked = progresoPago.nivelActual == 0 ? 1 : progresoPago.nivelActual;
-        if (usuarios[msg.sender].montoActivo != _niveles[unlocked].montoPrestamo) {
+        if (usuarios[msg.sender].montoActivo != _tier(unlocked).montoPrestamo) {
             return;
         }
         progresoPago.solicitudesCompletadas++;
-        // Núcleo = contrato live: 3 en L1, 5 en el resto. La escalera nueva vive en QuatriviumLeveling.
-        uint256 solicitudesRequeridas = unlocked <= 1 ? 3 : 5;
-        if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas && unlocked < LoanTierSeed.MAX_NIVEL) {
+        // L1 → 3; L2–9 → 5; desde $100 (L10) cada nivel pide 5 más que el anterior.
+        uint256 solicitudesRequeridas = unlocked <= 1 ? 3 : (unlocked < 10 ? 5 : 5 * (unlocked - 9));
+        if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas && unlocked < MAX_NIVEL_TOTAL) {
             progresoPago.nivelActual++;
             progresoPago.solicitudesCompletadas = 0;
             emit NivelActualizado(msg.sender, progresoPago.nivelActual);
@@ -1240,10 +1251,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return finalBloqueo - block.timestamp;
     }
 
-    function obtenerLiquidezUsuario(address user) external view returns (uint256) {
-        return usuarios[user].montoActivo;
-    }
-
     function destruirCuenta(address token) external nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
         require(msg.sender != fundador, "founder");
@@ -1289,20 +1296,41 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         prestamosMorosos[msg.sender] = 0;
         prestamosCerrados[msg.sender] = 0;
         penalizacionesAcumuladas[msg.sender] = 0;
+        hitoCobrado[msg.sender] = 0;
+        donado[msg.sender] = 0;
         cuentaDestruida[msg.sender] = true;
         emit CuentaDestruida(msg.sender, token, pulled);
     }
 
-    function isSupportedToken(address token) external view returns (bool) {
-        return supportedToken[token];
+    function cobrarBonoHito(address token) external whenNotPaused nonReentrant onlySupportedToken(token) {
+        require(tx.origin == msg.sender, "no contracts");
+        require(humanosVerificados[msg.sender] && !blacklist[msg.sender] && !_inhabilitado(msg.sender));
+        uint256 nivel = progresoUsuarios[msg.sender].nivelActual;
+        if (nivel == 0) nivel = 1;
+        uint256 next = hitoCobrado[msg.sender] + 100;
+        require(next <= MAX_NIVEL_TOTAL && next <= (nivel / 100) * 100);
+        uint256 bono = next * 20e18;
+        uint256 caja = _cajaLibre(token);
+        uint256 piso = (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000;
+        require(caja > piso && caja - piso >= bono);
+        hitoCobrado[msg.sender] = next;
+        totalLiquidity[token] -= bono;
+        stableTokens[token].safeTransfer(msg.sender, bono);
+        emit BonoHitoPagado(msg.sender, next, bono, token);
+    }
+
+    function donar(address token, uint256 amount) external nonReentrant onlySupportedToken(token) {
+        require(tx.origin == msg.sender, "no contracts");
+        require(amount > 0 && fundador != address(0));
+        stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
+        donado[msg.sender] += amount;
+        reputacion[msg.sender] += amount / 1e17;
+        emit Donacion(msg.sender, amount, token);
+        emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
     }
 
     function niveles(uint256 id) external view returns (uint256, uint256, uint256) {
-        Level memory L = _niveles[id];
+        Level memory L = _tier(id);
         return (L.montoPrestamo, L.plazo, L.tasaInteresBP);
-    }
-
-    function adminCount() external view returns (uint256) {
-        return ownerList.length;
     }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { Linking as RNLinking, View } from 'react-native';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -20,6 +20,8 @@ import { LanguageWelcome } from './components/LanguageWelcome';
 import { FundsConfirmHost } from './components/FundsConfirmHost';
 import { AppModeProvider } from './wallet/AppModeContext';
 import { AppWalletProvider } from './wallet/AppWalletContext';
+import * as Linking from 'expo-linking';
+import { rememberAppUrl } from './utils/pendingDeepLink';
 export default function App() {
   const [fontsLoaded] = useFonts({
     Inter: Inter_400Regular,
@@ -31,6 +33,15 @@ export default function App() {
 
   useEffect(() => {
     migrateLegacyStorage().catch(() => {});
+    const remember = (url) => rememberAppUrl(url);
+    Linking.getInitialURL().then(remember).catch(() => {});
+    RNLinking.getInitialURL().then(remember).catch(() => {});
+    const sub = Linking.addEventListener('url', ({ url }) => remember(url));
+    const rnSub = RNLinking.addEventListener('url', ({ url }) => remember(url));
+    return () => {
+      sub.remove();
+      rnSub.remove();
+    };
   }, []);
 
   if (!fontsLoaded) {

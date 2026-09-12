@@ -18,6 +18,7 @@ import {
   toggleBiometric,
   type BiometricToggleReason,
 } from '../services/appLock';
+import { fallbackAuthIfNeeded } from '../services/authPrefs';
 import { AppText } from './AppText';
 
 function unlockLabel(kinds: BiometricKind[]): TranslationKey {
@@ -104,6 +105,7 @@ export const BiometricLockSection: React.FC<{
       }
       const next = !bioOn;
       setBioOn(next);
+      if (!next) await fallbackAuthIfNeeded('biometric');
       onChanged?.(next);
     } finally {
       setBusy(false);

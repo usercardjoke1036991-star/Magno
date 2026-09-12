@@ -18,12 +18,14 @@ interface EmailOtpSectionProps {
   walletAddress: string;
   verifiedEmail: string;
   onVerified: (email: string) => void;
+  changeLabel?: string;
 }
 
 export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
   walletAddress,
   verifiedEmail,
   onVerified,
+  changeLabel,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
@@ -87,7 +89,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
           <AppIcon name="check" size={16} color={colors.success} />
           <AppText style={[styles.doneText, { color: colors.text }]}>{verifiedEmail}</AppText>
           <TouchableOpacity onPress={() => setEditing(true)}>
-            <AppText style={[styles.change, { color: colors.primary }]}>{t('emailChange')}</AppText>
+            <AppText style={[styles.change, { color: colors.primary }]}>{changeLabel || t('emailChange')}</AppText>
           </TouchableOpacity>
         </View>
       ) : (

@@ -1,23 +1,88 @@
-export const MAX_LOAN_LEVEL = 100;
-export const MAX_LOAN_USD = 10000;
-/** Primer nivel de 100 USDT. A partir de aquí las solicitudes suben de 5 en 5. */
+export const MAX_LOAN_LEVEL = 1000;
+export const MAX_LOAN_USD = 1_000_000;
+export const CORE_LOAN_LEVEL = 100;
+export const CORE_LOAN_USD = 10_000;
+/** Primer nivel de 100 USDT. Desde aquí cada peldaño pide 5 solicitudes más. */
 export const USD100_LEVEL = 10;
-/** Bono repetible del pool al completar la racha del nivel 100. */
-export const MAX_LEVEL_BONUS_USD = 2000;
+/** Bono de pool al llegar a cada hito de 100 niveles (100, 200… 1000). */
+export const MILESTONE_EVERY = 100;
+/** 20 USDT × nivel del hito: 100 → 2000, 1000 → 20 000. */
+export const MILESTONE_BONUS_PER_LEVEL_USD = 20;
+export const MILESTONE_BONUS_USD = MILESTONE_EVERY * MILESTONE_BONUS_PER_LEVEL_USD;
+export const MAX_LEVEL_BONUS_USD = MAX_LOAN_LEVEL * MILESTONE_BONUS_PER_LEVEL_USD;
+export const MILESTONE_BONUS_TOTAL_USD = 110_000;
+export const LADDER_STEP_USD = 1_100;
+export const LADDER_RATE_DROPS = 394;
+export const ONCHAIN_TIER_SCAN = CORE_LOAN_LEVEL;
 
-/** Lo que exige el contrato live hoy: 3 en L1, 5 en L2–99. El 100 no sube. */
+/** L1 → 3; L2–9 → 5; L10–999 → 5, 10, 15…; L1000 no sube. */
 export function requiredCountForLevel(id: number): number {
   if (id < 1 || id >= MAX_LOAN_LEVEL) return 0;
   if (id <= 1) return 3;
-  return 5;
-}
-
-/** Escalera del hermano `QuatriviumLeveling` (próximo deploy). */
-export function requiredCountPlanned(id: number): number {
-  if (id < 1 || id > MAX_LOAN_LEVEL) return 0;
-  if (id <= 5) return 3;
   if (id < USD100_LEVEL) return 5;
   return 5 * (id - 9);
+}
+
+/** Contrato live de 100 niveles: L1 → 3 y el resto → 5. */
+export function requiredCountForLiveLevel(id: number, maxLevel = MAX_LOAN_LEVEL): number {
+  if (maxLevel <= CORE_LOAN_LEVEL) {
+    if (id < 1 || id >= CORE_LOAN_LEVEL) return 0;
+    return id <= 1 ? 3 : 5;
+  }
+  return requiredCountForLevel(id);
+}
+
+export function requiredCountPlanned(id: number): number {
+  return requiredCountForLevel(id);
+}
+
+export function milestoneReached(level: number): number {
+  if (!Number.isFinite(level) || level < MILESTONE_EVERY) return 0;
+  return Math.min(MAX_LOAN_LEVEL, Math.floor(level / MILESTONE_EVERY) * MILESTONE_EVERY);
+}
+
+export function nextClaimableMilestone(level: number, lastClaimed: number): number {
+  const reached = milestoneReached(level);
+  const claimed = Math.max(0, Math.floor(Number(lastClaimed) || 0));
+  const next = claimed + MILESTONE_EVERY;
+  if (next < MILESTONE_EVERY || next > MAX_LOAN_LEVEL || next > reached) return 0;
+  return next;
+}
+
+export function nextUpcomingMilestone(level: number, lastClaimed: number): number {
+  const claimable = nextClaimableMilestone(level, lastClaimed);
+  if (claimable) return claimable;
+  const next = Math.max(0, Math.floor(Number(lastClaimed) || 0)) + MILESTONE_EVERY;
+  return next > MAX_LOAN_LEVEL ? 0 : next;
+}
+
+export function isMilestoneLevel(id: number): boolean {
+  return id >= MILESTONE_EVERY && id <= MAX_LOAN_LEVEL && id % MILESTONE_EVERY === 0;
+}
+
+export function milestoneBonusUsd(level: number): number {
+  return isMilestoneLevel(level) ? level * MILESTONE_BONUS_PER_LEVEL_USD : 0;
+}
+
+export function milestoneLevels(): number[] {
+  const rows: number[] = [];
+  for (let level = MILESTONE_EVERY; level <= MAX_LOAN_LEVEL; level += MILESTONE_EVERY) {
+    rows.push(level);
+  }
+  return rows;
+}
+
+export function ladderUsdAmount(id: number): number {
+  return CORE_LOAN_USD + LADDER_STEP_USD * (id - CORE_LOAN_LEVEL);
+}
+
+export function ladderInterestBps(id: number): number {
+  const t = id - CORE_LOAN_LEVEL;
+  return 800 - Math.min(t, LADDER_RATE_DROPS);
+}
+
+export function ladderTermDays(id: number): number {
+  return 90 + Math.floor((id - CORE_LOAN_LEVEL) / 10);
 }
 
 export interface LoanTier {
@@ -31,8 +96,8 @@ export interface LoanTier {
   installments: number;
 }
 
-/** 100 niveles: monto e interés $ suben; la tasa del anterior siempre es más cara que la del siguiente. */
-export const LOAN_TIER_ROWS: ReadonlyArray<Omit<LoanTier, 'name' | 'term'>> = [
+/** Niveles 1–100: tablas fijas. 101–1000 se generan con la misma fórmula que LoanLadder.sol. */
+export const CORE_LOAN_TIER_ROWS: ReadonlyArray<Omit<LoanTier, 'name' | 'term'>> = [
   { id: 1, usdAmount: 1, termDays: 7, requiredCount: 3, interestBps: 10000, installments: 1 },
   { id: 2, usdAmount: 2, termDays: 10, requiredCount: 5, interestBps: 9500, installments: 1 },
   { id: 3, usdAmount: 5, termDays: 15, requiredCount: 5, interestBps: 8000, installments: 1 },
@@ -132,7 +197,28 @@ export const LOAN_TIER_ROWS: ReadonlyArray<Omit<LoanTier, 'name' | 'term'>> = [
   { id: 97, usdAmount: 8600, termDays: 89, requiredCount: 5, interestBps: 887, installments: 3 },
   { id: 98, usdAmount: 9100, termDays: 89, requiredCount: 5, interestBps: 858, installments: 3 },
   { id: 99, usdAmount: 9500, termDays: 90, requiredCount: 5, interestBps: 829, installments: 3 },
-  { id: 100, usdAmount: 10000, termDays: 90, requiredCount: 0, interestBps: 800, installments: 3 },
+  { id: 100, usdAmount: 10000, termDays: 90, requiredCount: 5, interestBps: 800, installments: 3 },
+];
+
+function buildLadderRows(): Array<Omit<LoanTier, 'name' | 'term'>> {
+  const rows: Array<Omit<LoanTier, 'name' | 'term'>> = [];
+  for (let id = CORE_LOAN_LEVEL + 1; id <= MAX_LOAN_LEVEL; id += 1) {
+    const usdAmount = ladderUsdAmount(id);
+    rows.push({
+      id,
+      usdAmount,
+      termDays: ladderTermDays(id),
+      requiredCount: requiredCountForLevel(id),
+      interestBps: ladderInterestBps(id),
+      installments: installmentsForUsd(usdAmount),
+    });
+  }
+  return rows;
+}
+
+export const LOAN_TIER_ROWS: ReadonlyArray<Omit<LoanTier, 'name' | 'term'>> = [
+  ...CORE_LOAN_TIER_ROWS,
+  ...buildLadderRows(),
 ];
 
 export const LOAN_TIERS: LoanTier[] = LOAN_TIER_ROWS.map((row) => ({
@@ -142,7 +228,25 @@ export const LOAN_TIERS: LoanTier[] = LOAN_TIER_ROWS.map((row) => ({
   term: `${row.termDays} días`,
 }));
 
+export function visibleLoanTiers(maxLevel = MAX_LOAN_LEVEL): LoanTier[] {
+  const cap = Math.min(MAX_LOAN_LEVEL, Math.max(1, Math.floor(maxLevel) || MAX_LOAN_LEVEL));
+  return LOAN_TIERS.filter((tier) => tier.id <= cap).map((tier) => ({
+    ...tier,
+    requiredCount: requiredCountForLiveLevel(tier.id, cap),
+  }));
+}
+
+export function installmentsForUsd(usd: number): number {
+  if (usd >= 100_000) return 12;
+  if (usd >= 25_000) return 6;
+  if (usd >= 60) return 3;
+  if (usd >= 50) return 2;
+  return 1;
+}
+
 export function installmentsForPrincipalWei(monto: bigint): number {
+  if (monto >= 100_000n * 10n ** 18n) return 12;
+  if (monto >= 25_000n * 10n ** 18n) return 6;
   if (monto >= 60n * 10n ** 18n) return 3;
   if (monto >= 50n * 10n ** 18n) return 2;
   return 1;

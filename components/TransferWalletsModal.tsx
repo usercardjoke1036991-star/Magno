@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { parseUnits } from 'ethers';
 import { COMPATIBLE_WALLETS } from '../constants/compatibleWallets';
 import { enviarBnb, enviarToken, loadAppWallet } from '../services/appWallet';
+import { recordMovement } from '../services/movementHistory';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useFundsConfirm } from './FundsConfirmHost';
@@ -80,9 +81,15 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
       Alert.alert(t('amount'), t('invalidAmount'));
       return;
     }
-    const available = Number(asset === 'bnb' ? bnbBalance : tokenBalance);
-    if (Number(parsed) > available) {
-      Alert.alert(t('amount'), t('amountExceedsBalance'));
+    try {
+      const decimals = asset === 'bnb' ? 18 : selectedToken.decimals;
+      const available = parseUnits(asset === 'bnb' ? bnbBalance || '0' : tokenBalance || '0', decimals);
+      if (parseUnits(parsed, decimals) > available) {
+        Alert.alert(t('amount'), t('amountExceedsBalance'));
+        return;
+      }
+    } catch {
+      Alert.alert(t('amount'), t('invalidAmount'));
       return;
     }
     const signer = await loadAppWallet();
@@ -93,16 +100,26 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
     if (!(await confirmFunds())) return;
     setBusy(true);
     try {
-      if (asset === 'bnb') {
-        await enviarBnb(signer, to, parseUnits(parsed, 18).toString());
-      } else {
-        await enviarToken(
-          signer,
-          selectedToken.address,
-          to,
-          parseUnits(parsed, selectedToken.decimals).toString()
-        );
-      }
+      const receipt =
+        asset === 'bnb'
+          ? await enviarBnb(signer, to, parseUnits(parsed, 18).toString())
+          : await enviarToken(
+              signer,
+              selectedToken.address,
+              to,
+              parseUnits(parsed, selectedToken.decimals).toString()
+            );
+      const hash = receipt && typeof receipt === 'object' && 'hash' in receipt ? String(receipt.hash || '') : '';
+      await recordMovement(walletAddress, {
+        kind: 'transfer_out',
+        from: walletAddress,
+        to,
+        amountLabel: `${parsed} ${asset === 'bnb' ? 'BNB' : selectedToken.symbol}`,
+        tokenSymbol: asset === 'bnb' ? 'BNB' : selectedToken.symbol,
+        platform: selected?.name || 'BSC',
+        timestamp: Date.now(),
+        txHash: hash || undefined,
+      });
       Alert.alert(t('ready'), t('appWalletSent'));
       setAmount('');
       onSent();

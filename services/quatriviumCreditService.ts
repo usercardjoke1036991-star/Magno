@@ -16,7 +16,7 @@ import { isTestnetOnlyToken } from '../constants/bsc';
 import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
-import { MAX_LOAN_LEVEL, requiredCountForLevel } from '../constants/loanTiers';
+import { CORE_LOAN_LEVEL, MAX_LOAN_LEVEL, nextClaimableMilestone, nextUpcomingMilestone } from '../constants/loanTiers';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 import { cobrarComisionIntermediario, loadAppWallet } from './appWallet';
 import { requestDemoIdentity } from './demoIdentity';
@@ -102,6 +102,30 @@ const contractWith = (runner: Signer | AbstractProvider) => {
   assertContractConfigured();
   return new Contract(getContractAddress(), CONTRACT_ABI, runner);
 };
+
+export type ProtocolCaps = {
+  maxLevel: number;
+  canClaimHitos: boolean;
+  canDonate: boolean;
+};
+
+const DEFAULT_CAPS: ProtocolCaps = {
+  maxLevel: MAX_LOAN_LEVEL,
+  canClaimHitos: false,
+  canDonate: false,
+};
+
+let capsCache: { addr: string; caps: ProtocolCaps } | null = null;
+
+export function asWeiString(value: unknown): string {
+  try {
+    if (typeof value === 'bigint') return value.toString();
+    const text = String(value ?? '0').trim();
+    return /^\d+$/.test(text) ? text : '0';
+  } catch {
+    return '0';
+  }
+}
 
 const proposeAdmin = async (fragment: string, args: unknown[]) => {
   const { signer } = await requireSigner();
@@ -191,6 +215,40 @@ async function prepareDemoCreditOnChain() {
 }
 
 export const QuatriviumCreditService = {
+  detectarCapacidadProtocolo: async (): Promise<ProtocolCaps> => {
+    if (!isContractConfigured() || !isAddress(getContractAddress())) {
+      return DEFAULT_CAPS;
+    }
+    const addr = getContractAddress().toLowerCase();
+    if (capsCache?.addr === addr) return capsCache.caps;
+    const { provider } = await getProviderAndSigner();
+    const credit = contractWith(provider);
+    let maxLevel = CORE_LOAN_LEVEL;
+    let canClaimHitos = false;
+    let canDonate = false;
+    try {
+      const row = await credit.niveles(CORE_LOAN_LEVEL + 1);
+      if (BigInt(row[0] ?? 0) > 0n) maxLevel = MAX_LOAN_LEVEL;
+    } catch {
+      maxLevel = CORE_LOAN_LEVEL;
+    }
+    try {
+      await credit.hitoCobrado(ZeroAddress);
+      canClaimHitos = true;
+    } catch {
+      canClaimHitos = false;
+    }
+    try {
+      await credit.donado(ZeroAddress);
+      canDonate = true;
+    } catch {
+      canDonate = false;
+    }
+    const caps = { maxLevel, canClaimHitos, canDonate };
+    capsCache = { addr, caps };
+    return caps;
+  },
+
   connectWallet: async () => {
     const { signer } = await getProviderAndSigner();
     if (!signer) {
@@ -223,6 +281,27 @@ export const QuatriviumCreditService = {
     await credit.solicitarPrestamo.staticCall(tokenAddress, nivel);
     await cobrarComisionIntermediario(signer, true);
     const tx = await credit.solicitarPrestamo(tokenAddress, nivel);
+    return tx.wait();
+  },
+
+  cobrarBonoHito: async (tokenAddress: string) => {
+    assertToken(tokenAddress);
+    const { signer } = await requireInternalSigner();
+    const credit = contractWith(signer);
+    await credit.cobrarBonoHito.staticCall(tokenAddress);
+    const tx = await credit.cobrarBonoHito(tokenAddress);
+    return tx.wait();
+  },
+
+  donar: async (amountInWei: string, tokenAddress: string) => {
+    assertToken(tokenAddress);
+    assertAmount(amountInWei);
+    const { signer } = await requireInternalSigner();
+    const userAddress = await signer.getAddress();
+    await asegurarAprobacionToken(signer, userAddress, tokenAddress, amountInWei);
+    const credit = contractWith(signer);
+    await credit.donar.staticCall(tokenAddress, amountInWei);
+    const tx = await credit.donar(tokenAddress, amountInWei);
     return tx.wait();
   },
 
@@ -399,14 +478,28 @@ export const QuatriviumCreditService = {
     const progress = await contractWith(provider).obtenerProgresoUsuario(userAddress);
     const nivelActual = Number(progress.nivelActual);
     const solicitudesCompletadas = Number(progress.solicitudesCompletadas);
+    let lastHito = 0;
+    let hitoSupported = false;
+    let donatedWei = '0';
+    try {
+      lastHito = Number(await contractWith(provider).hitoCobrado(userAddress));
+      hitoSupported = true;
+    } catch {
+      lastHito = 0;
+    }
+    try {
+      donatedWei = (await contractWith(provider).donado(userAddress)).toString();
+    } catch {
+      donatedWei = '0';
+    }
     return {
       nivelActual,
       solicitudesCompletadas,
       ultimoPrestamoTimestamp: Number(progress.ultimoPrestamoTimestamp),
-      bonusPending: (() => {
-        const need = requiredCountForLevel(nivelActual);
-        return need > 0 && nivelActual >= MAX_LOAN_LEVEL && solicitudesCompletadas >= need ? 1 : 0;
-      })(),
+      lastHito,
+      bonusPending: hitoSupported ? nextClaimableMilestone(nivelActual, lastHito) : 0,
+      nextMilestone: nextUpcomingMilestone(nivelActual, lastHito),
+      donatedWei: asWeiString(donatedWei),
     };
   },
 

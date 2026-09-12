@@ -4,11 +4,29 @@ export type RankNameKey =
   | 'rankBronze'
   | 'rankSilver'
   | 'rankGold'
+  | 'rankAmber'
+  | 'rankPearl'
+  | 'rankJade'
+  | 'rankEmerald'
+  | 'rankSapphire'
+  | 'rankRuby'
   | 'rankPlatinum'
   | 'rankDiamond'
   | 'rankMaster';
 
-export type RankFamily = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master';
+export type RankFamily =
+  | 'bronze'
+  | 'silver'
+  | 'gold'
+  | 'amber'
+  | 'pearl'
+  | 'jade'
+  | 'emerald'
+  | 'sapphire'
+  | 'ruby'
+  | 'platinum'
+  | 'diamond'
+  | 'master';
 
 export interface RankStyle {
   family: RankFamily;
@@ -50,6 +68,60 @@ const FAMILY_STYLE: Record<RankFamily, Omit<RankStyle, 'level' | 'division'>> = 
     tint: '#FFF4D4',
     text: '#6E5208',
   },
+  amber: {
+    family: 'amber',
+    nameKey: 'rankAmber',
+    metal: '#E08A2A',
+    dark: '#8A4A0C',
+    light: '#FFD08A',
+    tint: '#FFF0D4',
+    text: '#6E3808',
+  },
+  pearl: {
+    family: 'pearl',
+    nameKey: 'rankPearl',
+    metal: '#E8D8C8',
+    dark: '#8A7464',
+    light: '#FFF8F0',
+    tint: '#FBF4EC',
+    text: '#5A4638',
+  },
+  jade: {
+    family: 'jade',
+    nameKey: 'rankJade',
+    metal: '#3CA87A',
+    dark: '#14583C',
+    light: '#B8F0D4',
+    tint: '#E4F8EE',
+    text: '#0C4A32',
+  },
+  emerald: {
+    family: 'emerald',
+    nameKey: 'rankEmerald',
+    metal: '#1E9A5A',
+    dark: '#0A4A28',
+    light: '#8EF0B8',
+    tint: '#D8F8E8',
+    text: '#064020',
+  },
+  sapphire: {
+    family: 'sapphire',
+    nameKey: 'rankSapphire',
+    metal: '#2F5FDE',
+    dark: '#142A7A',
+    light: '#A8C4FF',
+    tint: '#E4ECFF',
+    text: '#102060',
+  },
+  ruby: {
+    family: 'ruby',
+    nameKey: 'rankRuby',
+    metal: '#D42848',
+    dark: '#6E1024',
+    light: '#FFB0C0',
+    tint: '#FFE4EA',
+    text: '#5A0C1C',
+  },
   platinum: {
     family: 'platinum',
     nameKey: 'rankPlatinum',
@@ -80,13 +152,34 @@ const FAMILY_STYLE: Record<RankFamily, Omit<RankStyle, 'level' | 'division'>> = 
 };
 
 const FAMILY_BANDS: Array<{ family: RankFamily; from: number; to: number }> = [
-  { family: 'bronze', from: 1, to: 16 },
-  { family: 'silver', from: 17, to: 33 },
-  { family: 'gold', from: 34, to: 50 },
-  { family: 'platinum', from: 51, to: 66 },
-  { family: 'diamond', from: 67, to: 83 },
-  { family: 'master', from: 84, to: 100 },
+  { family: 'bronze', from: 1, to: 83 },
+  { family: 'silver', from: 84, to: 166 },
+  { family: 'gold', from: 167, to: 249 },
+  { family: 'amber', from: 250, to: 332 },
+  { family: 'pearl', from: 333, to: 415 },
+  { family: 'jade', from: 416, to: 498 },
+  { family: 'emerald', from: 499, to: 581 },
+  { family: 'sapphire', from: 582, to: 664 },
+  { family: 'ruby', from: 665, to: 747 },
+  { family: 'platinum', from: 748, to: 830 },
+  { family: 'diamond', from: 831, to: 913 },
+  { family: 'master', from: 914, to: 1000 },
 ];
+
+export const RANK_MEDAL_ASSET: Record<RankFamily, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10> = {
+  bronze: 1,
+  silver: 2,
+  gold: 3,
+  amber: 4,
+  pearl: 5,
+  jade: 6,
+  emerald: 7,
+  sapphire: 8,
+  ruby: 9,
+  platinum: 8,
+  diamond: 9,
+  master: 10,
+};
 
 export function clampLoanLevel(level: number): number {
   return Math.min(MAX_LOAN_LEVEL, Math.max(1, Math.floor(level) || 1));

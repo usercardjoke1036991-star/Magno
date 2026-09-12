@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { authenticateBiometric, checkPassword, isBiometricEnabled, isPinSet, verifyPin } from '../services/appLock';
-import { isFundsConfirmEnabled } from '../services/fundsConfirm';
+import { authenticateBiometric, matchPassword, matchPin } from '../services/appLock';
+import { verifyAuthenticator } from '../services/authenticator';
+import { getAuthMethod, type AuthMethod } from '../services/authPrefs';
 import { SecretInput } from './SecretInput';
 import { AppText } from './AppText';
 
@@ -25,10 +26,12 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
   const [open, setOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [password, setPassword] = useState('');
-  const [usePin, setUsePin] = useState(true);
+  const [code, setCode] = useState('');
+  const [method, setMethod] = useState<AuthMethod>('password');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const resolver = useRef<((ok: boolean) => void) | null>(null);
+  const inflight = useRef<Promise<boolean> | null>(null);
 
   const finish = useCallback((ok: boolean) => {
     resolver.current?.(ok);
@@ -36,30 +39,43 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
     setOpen(false);
     setPin('');
     setPassword('');
+    setCode('');
     setBusy(false);
     setError('');
   }, []);
 
-  const confirmFunds = useCallback(async () => {
-    if (!(await isFundsConfirmEnabled())) return true;
-    if (await isBiometricEnabled()) {
-      const bio = await authenticateBiometric();
-      if (bio) return true;
-    }
-    const pinSet = await isPinSet();
-    setUsePin(pinSet);
-    return new Promise<boolean>((resolve) => {
+  const askSecret = (next: AuthMethod) =>
+    new Promise<boolean>((resolve) => {
       resolver.current = resolve;
+      setMethod(next);
       setOpen(true);
     });
+
+  const confirmFunds = useCallback(async () => {
+    if (inflight.current) return inflight.current;
+    const run = (async () => {
+      const chosen = await getAuthMethod('funds');
+      if (chosen === 'biometric') {
+        const bio = await authenticateBiometric();
+        if (bio) return true;
+        return askSecret('password');
+      }
+      return askSecret(chosen);
+    })();
+    inflight.current = run;
+    try {
+      return await run;
+    } finally {
+      inflight.current = null;
+    }
   }, []);
 
   const submitSecret = async () => {
     if (busy) return;
-    if (usePin) {
+    if (method === 'pin') {
       if (pin.length !== 6) return;
       setBusy(true);
-      const ok = await verifyPin(pin);
+      const ok = await matchPin(pin);
       if (!ok) {
         setError(t('lockPinWrong'));
         setPin('');
@@ -69,10 +85,23 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       finish(true);
       return;
     }
+    if (method === 'authenticator') {
+      if (code.length !== 6) return;
+      setBusy(true);
+      const ok = await verifyAuthenticator(code);
+      if (!ok) {
+        setError(t('authenticatorWrong'));
+        setCode('');
+        setBusy(false);
+        return;
+      }
+      finish(true);
+      return;
+    }
     if (!password) return;
     setBusy(true);
-    const result = await checkPassword(password);
-    if (!result.ok) {
+    const ok = await matchPassword(password);
+    if (!ok) {
       setError(t('lockPasswordWrong'));
       setPassword('');
       setBusy(false);
@@ -82,6 +111,14 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const value = useMemo(() => ({ confirmFunds }), [confirmFunds]);
+  const prompt =
+    method === 'pin'
+      ? t('fundsConfirmPrompt')
+      : method === 'authenticator'
+        ? t('fundsConfirmPromptAuth')
+        : t('fundsConfirmPromptPassword');
+  const canSubmit =
+    method === 'pin' ? pin.length === 6 : method === 'authenticator' ? code.length === 6 : Boolean(password);
 
   return (
     <FundsConfirmContext.Provider value={value}>
@@ -90,16 +127,22 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
         <View style={styles.backdrop}>
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <AppText style={[styles.title, { color: colors.text }]}>{t('fundsConfirmTitle')}</AppText>
-            <AppText style={[styles.lead, { color: colors.textMuted }]}>
-              {t(usePin ? 'fundsConfirmPrompt' : 'fundsConfirmPromptPassword')}
-            </AppText>
-            {usePin ? (
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{prompt}</AppText>
+            {method === 'pin' ? (
               <SecretInput
                 value={pin}
                 onChangeText={(value) => setPin(value.replace(/\D/g, '').slice(0, 6))}
                 keyboardType="number-pad"
                 maxLength={6}
                 placeholder="••••••"
+              />
+            ) : method === 'authenticator' ? (
+              <SecretInput
+                value={code}
+                onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
+                keyboardType="number-pad"
+                maxLength={6}
+                placeholder={t('authenticatorCode')}
               />
             ) : (
               <SecretInput
@@ -110,7 +153,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
             )}
             {error ? <AppText style={[styles.error, { color: colors.danger }]}>{error}</AppText> : null}
             <TouchableOpacity
-              disabled={busy || (usePin ? pin.length !== 6 : !password)}
+              disabled={busy || !canSubmit}
               onPress={() => void submitSecret()}
               style={[styles.button, { backgroundColor: colors.connect }]}
             >
@@ -157,16 +200,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     marginBottom: 14,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 18,
-    letterSpacing: 6,
-    textAlign: 'center',
-    marginBottom: 12,
   },
   error: {
     fontSize: 13,

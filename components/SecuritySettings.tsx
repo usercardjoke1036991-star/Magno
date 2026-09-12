@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
-  Switch,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -19,7 +18,10 @@ import { useWeb3Transactions } from '../hooks/useWeb3Transactions';
 import { getSupportedTokens } from '../constants/tokens';
 import { verifyPin, isPinSet, isPasswordSet, isBiometricEnabled, getBiometricStatus, checkPassword } from '../services/appLock';
 import { BiometricLockSection } from './BiometricLockSection';
-import { isFundsConfirmEnabled, setFundsConfirmEnabled } from '../services/fundsConfirm';
+import { AuthMethodPicker } from './AuthMethodPicker';
+import { AuthenticatorSetup } from './AuthenticatorSetup';
+import { isAuthenticatorEnabled } from '../services/authenticator';
+import { loadAuthPrefs, type AuthPrefs } from '../services/authPrefs';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { SecretInput } from './SecretInput';
 import { humanizeTxError } from '../utils/txErrors';
@@ -34,10 +36,12 @@ import {
 import { useAppMode } from '../wallet/AppModeContext';
 import { isCreditReady } from '../constants/rpcConfig';
 import type { TranslationKey } from '../i18n/translations';
+import { loadVerifiedEmail } from '../services/accountEmail';
+import { EmailOtpSection } from './EmailOtpSection';
 import { AppText, AppTextInput } from './AppText';
 
 type RowStatus = 'done' | 'todo' | 'warn';
-type Panel = 'menu' | 'kyc' | 'password' | 'pin' | 'fingerprint' | 'access' | 'phrase' | 'phone' | 'replace';
+type Panel = 'menu' | 'kyc' | 'password' | 'email' | 'pin' | 'fingerprint' | 'access' | 'phrase' | 'phone' | 'replace' | 'methods' | 'authenticator';
 
 export const SecuritySettings: React.FC = () => {
   const { t } = useI18n();
@@ -58,32 +62,40 @@ export const SecuritySettings: React.FC = () => {
   const [revealPassword, setRevealPassword] = useState('');
   const [restorePhrase, setRestorePhrase] = useState('');
   const [restorePin, setRestorePin] = useState('');
+  const [restorePassword, setRestorePassword] = useState('');
   const [destroyWord, setDestroyWord] = useState('');
   const [destroyPin, setDestroyPin] = useState('');
+  const [destroyPassword, setDestroyPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState(false);
   const [showRestore, setShowRestore] = useState(false);
   const [pinSet, setPinSet] = useState(false);
   const [passwordSet, setPasswordSet] = useState(false);
   const [bioOn, setBioOn] = useState(false);
-  const [fundsOn, setFundsOn] = useState(false);
+  const [authOn, setAuthOn] = useState(false);
+  const [authPrefs, setAuthPrefs] = useState<AuthPrefs>({ unlock: 'password', funds: 'password', signin: 'password' });
+  const [email, setEmail] = useState('');
 
   const refreshPhrase = async () => {
-    const [exists, ack, pin, password, bioStatus, bioEnabled, funds] = await Promise.all([
+    const [exists, ack, pin, password, bioStatus, bioEnabled, authenticator, prefs, verifiedEmail] = await Promise.all([
       hasSecretPhrase(),
       isPhraseBackedUp(),
       isPinSet(),
       isPasswordSet(),
       getBiometricStatus(),
       isBiometricEnabled(),
-      isFundsConfirmEnabled(),
+      isAuthenticatorEnabled(),
+      loadAuthPrefs(),
+      loadVerifiedEmail(),
     ]);
     setHasPhrase(exists);
     setBackedUp(ack);
     setPinSet(pin);
     setPasswordSet(password);
     setBioOn(bioEnabled && bioStatus.available);
-    setFundsOn(funds);
+    setAuthOn(authenticator);
+    setAuthPrefs(prefs);
+    setEmail(verifiedEmail);
     setPhrase(null);
     setShown(false);
   };
@@ -146,6 +158,10 @@ export const SecuritySettings: React.FC = () => {
       Alert.alert(t('error'), t('lockPinWrong'));
       return;
     }
+    if (!pinSet && passwordSet && !(await checkPassword(restorePassword)).ok) {
+      Alert.alert(t('error'), t('lockPasswordWrong'));
+      return;
+    }
     if (!isValidSecretPhrase(restorePhrase)) {
       Alert.alert(t('error'), t('seedInvalid'));
       return;
@@ -201,6 +217,10 @@ export const SecuritySettings: React.FC = () => {
     }
     if (pinSet && !(await verifyPin(destroyPin))) {
       Alert.alert(t('error'), t('lockPinWrong'));
+      return;
+    }
+    if (!pinSet && passwordSet && !(await checkPassword(destroyPassword)).ok) {
+      Alert.alert(t('error'), t('lockPasswordWrong'));
       return;
     }
     Alert.alert(t('appWalletDestroyTitle'), t('appWalletDestroyConfirm'), [
@@ -269,12 +289,23 @@ export const SecuritySettings: React.FC = () => {
   const panelTitle: Record<Exclude<Panel, 'menu'>, TranslationKey> = {
     kyc: 'securityKyc',
     password: 'lockPasswordTitle',
+    email: 'securityEmail',
     pin: 'securityPin',
     fingerprint: 'securityFingerprint',
     access: 'securityAccessKey',
     phrase: 'seedTitle',
     phone: 'securityPhone',
     replace: 'oneAccountTitle',
+    methods: 'authMethodsTitle',
+    authenticator: 'authenticatorTitle',
+  };
+
+  const methodHint = (purpose: keyof AuthPrefs) => {
+    const method = authPrefs[purpose];
+    if (method === 'pin') return t('authMethodPin');
+    if (method === 'biometric') return t('authMethodBiometric');
+    if (method === 'authenticator') return t('authMethodAuthenticator');
+    return t('authMethodPassword');
   };
 
   if (panel !== 'menu') {
@@ -301,6 +332,17 @@ export const SecuritySettings: React.FC = () => {
           />
         ) : null}
         {panel === 'password' ? <LockSettings mode="password" onChanged={() => void refreshPhrase()} /> : null}
+        {panel === 'email' ? (
+          <EmailOtpSection
+            walletAddress={address}
+            verifiedEmail={email}
+            changeLabel={t('securityEmailReplace')}
+            onVerified={(next) => {
+              setEmail(next);
+              void refreshPhrase();
+            }}
+          />
+        ) : null}
         {panel === 'pin' ? <LockSettings mode="pin" onChanged={() => void refreshPhrase()} /> : null}
         {panel === 'phone' && !demoAccount ? (
           <PhoneOtpSection
@@ -317,6 +359,10 @@ export const SecuritySettings: React.FC = () => {
         ) : null}
         {panel === 'access' ? (
           <BiometricLockSection compact onChanged={setBioOn} />
+        ) : null}
+        {panel === 'methods' ? <AuthMethodPicker onChanged={() => void refreshPhrase()} /> : null}
+        {panel === 'authenticator' ? (
+          <AuthenticatorSetup account={address || email || 'cuenta'} onChanged={() => void refreshPhrase()} />
         ) : null}
         {panel === 'phrase' ? (
           <View>
@@ -397,15 +443,22 @@ export const SecuritySettings: React.FC = () => {
                 editable={!accountBlocked}
                 placeholder={t('lockCurrentPin')}
               />
+            ) : passwordSet ? (
+              <SecretInput
+                value={destroyPassword}
+                onChangeText={setDestroyPassword}
+                editable={!accountBlocked}
+                placeholder={t('lockCurrentPassword')}
+              />
             ) : null}
             <TouchableOpacity
-              disabled={busy || accountBlocked}
+              disabled={busy || accountBlocked || (pinSet && destroyPin.length !== 6) || (!pinSet && passwordSet && !destroyPassword)}
               onPress={destroyAccount}
               accessibilityState={{ disabled: busy || accountBlocked }}
               style={[
                 styles.button,
                 styles.destroy,
-                (busy || accountBlocked) && styles.destroyDisabled,
+                (busy || accountBlocked || (pinSet && destroyPin.length !== 6) || (!pinSet && passwordSet && !destroyPassword)) && styles.destroyDisabled,
               ]}
             >
               <AppText style={[styles.buttonText, accountBlocked && styles.destroyDisabledText]}>
@@ -443,14 +496,20 @@ export const SecuritySettings: React.FC = () => {
                     maxLength={6}
                     placeholder={t('lockCurrentPin')}
                   />
+                ) : passwordSet ? (
+                  <SecretInput
+                    value={restorePassword}
+                    onChangeText={setRestorePassword}
+                    placeholder={t('lockCurrentPassword')}
+                  />
                 ) : null}
                 <TouchableOpacity
-                  disabled={busy || (pinSet && restorePin.length !== 6)}
+                  disabled={busy || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)}
                   onPress={() => void restoreWallet()}
                   style={[
                     styles.button,
                     { backgroundColor: colors.connect },
-                    (busy || (pinSet && restorePin.length !== 6)) && styles.destroyDisabled,
+                    (busy || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)) && styles.destroyDisabled,
                   ]}
                 >
                   {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRestoreAction')}</AppText>}
@@ -483,6 +542,13 @@ export const SecuritySettings: React.FC = () => {
         hint={passwordSet ? t('securityPasswordDone') : t('securityPasswordTodo')}
         status={passwordSet ? 'done' : 'warn'}
         onPress={() => setPanel('password')}
+      />
+      <Row
+        icon="id"
+        label={t('securityEmail')}
+        hint={email || t('securityEmailTodo')}
+        status={email ? 'done' : 'warn'}
+        onPress={() => setPanel('email')}
       />
       <Row
         icon="lock"
@@ -521,20 +587,20 @@ export const SecuritySettings: React.FC = () => {
         onPress={() => setPanel('phone')}
       />
       )}
-      <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-        <AppIcon name="lock" size={16} color={colors.primary} />
-        <View style={styles.rowText}>
-          <AppText style={[styles.rowLabel, { color: colors.text }]}>{t('fundsConfirmTitle')}</AppText>
-          <AppText style={[styles.rowHint, { color: colors.textMuted }]}>{t('fundsConfirmLead')}</AppText>
-        </View>
-        <Switch
-          value={fundsOn}
-          onValueChange={(value) => {
-            setFundsOn(value);
-            void setFundsConfirmEnabled(value);
-          }}
-        />
-      </View>
+      <Row
+        icon="lock"
+        label={t('authMethodsTitle')}
+        hint={`${t('authUnlock')}: ${methodHint('unlock')} · ${t('authFunds')}: ${methodHint('funds')} · ${t('authSignIn')}: ${methodHint('signin')}`}
+        status="done"
+        onPress={() => setPanel('methods')}
+      />
+      <Row
+        icon="shield"
+        label={t('authenticatorTitle')}
+        hint={authOn ? t('authenticatorOn') : t('authenticatorOff')}
+        status={authOn ? 'done' : 'todo'}
+        onPress={() => setPanel('authenticator')}
+      />
       <Row
         icon="warning"
         label={t('oneAccountTitle')}

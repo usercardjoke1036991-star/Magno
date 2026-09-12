@@ -15,10 +15,9 @@ import {
 import { AppIcon } from './icons';
 import { ProfileAvatar } from './ProfileAvatar';
 import { UsernameSection } from './UsernameSection';
-import { EmailOtpSection } from './EmailOtpSection';
 import { useWalletLevel } from '../hooks/useWalletLevel';
 import { getRankForLevel } from '../constants/ranks';
-import { loadVerifiedEmail } from '../services/accountEmail';
+import { MAX_LOAN_LEVEL } from '../constants/loanTiers';
 import { loadClaimedUsername } from '../services/accountUsername';
 import { AppText } from './AppText';
 
@@ -29,7 +28,6 @@ export const ProfileSettings: React.FC = () => {
   const level = useWalletLevel(walletAddress);
   const [draft, setDraft] = useState<UserProfile>(profile);
   const [saving, setSaving] = useState(false);
-  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
 
   useEffect(() => {
@@ -37,7 +35,6 @@ export const ProfileSettings: React.FC = () => {
   }, [profile]);
 
   useEffect(() => {
-    loadVerifiedEmail().then(setEmail).catch(() => {});
     loadClaimedUsername().then(setUsername).catch(() => {});
   }, [walletAddress]);
 
@@ -102,7 +99,7 @@ export const ProfileSettings: React.FC = () => {
           <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('profileLead')}</AppText>
           {walletAddress ? (
             <AppText style={[styles.heroHint, { color: colors.textMuted }]}>
-              {t('level')} {level}/100 · {t(getRankForLevel(level).nameKey)}
+              {t('level')} {level}/{MAX_LOAN_LEVEL} · {t(getRankForLevel(level).nameKey)}
             </AppText>
           ) : null}
           <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
@@ -126,11 +123,6 @@ export const ProfileSettings: React.FC = () => {
           setUsername(value);
           await saveProfile({ ...draft, displayName: value });
         }}
-      />
-      <EmailOtpSection
-        walletAddress={walletAddress}
-        verifiedEmail={email}
-        onVerified={setEmail}
       />
 
       <TouchableOpacity

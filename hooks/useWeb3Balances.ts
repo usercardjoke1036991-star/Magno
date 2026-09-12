@@ -4,9 +4,17 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
 import { assertTrustedRpc, isContractConfigured, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { getTokenMeta, isOfficialWorldToken, type Token } from '../constants/tokens';
-import { LOAN_TIERS, overlayOnChainTier, type LoanTier } from '../constants/loanTiers';
+import {
+  LOAN_TIERS,
+  MAX_LOAN_LEVEL,
+  ONCHAIN_TIER_SCAN,
+  overlayOnChainTier,
+  requiredCountForLiveLevel,
+  visibleLoanTiers,
+  type LoanTier,
+} from '../constants/loanTiers';
 import { describeAdminCalldata, type OpenAdminProposal } from '../utils/adminProposal';
-import { QuatriviumCreditService } from '../services/quatriviumCreditService';
+import { asWeiString, QuatriviumCreditService } from '../services/quatriviumCreditService';
 import {
   REFERRAL_BONUS_THRESHOLD,
   REFERRAL_REPUTATION_POINTS,
@@ -80,7 +88,13 @@ export interface UserInfo {
     ultimoPrestamoTimestamp: number;
     cooldownRestante: number;
     bonusPending: number;
+    nextMilestone: number;
+    lastHito: number;
   };
+  donatedUsd: number;
+  maxLoanLevel: number;
+  canClaimHitos: boolean;
+  canDonate: boolean;
   isOwner: boolean;
   isAdmin: boolean;
   paused: boolean;
@@ -124,7 +138,11 @@ const EMPTY_USER_INFO: UserInfo = {
   referralPoints: REFERRAL_REPUTATION_POINTS,
   isDelinquent: false,
   creditHistory: { paidOnTime: 0, missedLoans: 0, penalties: 0 },
-  userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0, bonusPending: 0 },
+  userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0, bonusPending: 0, nextMilestone: 100, lastHito: 0 },
+  donatedUsd: 0,
+  maxLoanLevel: MAX_LOAN_LEVEL,
+  canClaimHitos: false,
+  canDonate: false,
   isOwner: false,
   isAdmin: false,
   paused: false,
@@ -193,7 +211,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         try {
           const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
           try {
-            isTokenSupported = Boolean(await creditContract.isSupportedToken(tokenAddress));
+            isTokenSupported = Boolean(await creditContract.supportedToken(tokenAddress));
           } catch {
             isTokenSupported = isOfficialWorldToken(tokenAddress);
           }
@@ -311,6 +329,20 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       try {
         const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
         if (!live()) return;
+        let caps = { maxLevel: MAX_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
+        try {
+          caps = await QuatriviumCreditService.detectarCapacidadProtocolo();
+        } catch {
+          caps = { maxLevel: MAX_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
+        }
+        if (live()) {
+          setUserInfo((prev) => ({
+            ...prev,
+            maxLoanLevel: caps.maxLevel,
+            canClaimHitos: caps.canClaimHitos,
+            canDonate: caps.canDonate,
+          }));
+        }
 
         try {
           const [loan, registeredFlag] = await Promise.all([
@@ -432,7 +464,10 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
                 ultimoPrestamoTimestamp: lastTs,
                 cooldownRestante: cooldown,
                 bonusPending: Number(progress.bonusPending || 0),
+                nextMilestone: Number(progress.nextMilestone || 0),
+                lastHito: Number(progress.lastHito || 0),
               },
+              donatedUsd: Number(formatUnits(BigInt(asWeiString(progress.donatedWei)), 18)),
             }));
           }
         } catch (e) {
@@ -441,42 +476,42 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
         try {
           if (opts?.silent && onChainTiersReadyRef.current) {
-            // El barrido de 100 niveles cada 30 s satura el RPC público.
+            // Solo se contrastan los 100 niveles semilla. 101–1000 son fórmula local.
           } else {
-            const discovered: LoanTier[] = [];
-            for (let start = 0; start < LOAN_TIERS.length && live(); start += 20) {
-              const batch = LOAN_TIERS.slice(start, start + 20);
+            const overlay = new Map<number, LoanTier>();
+            const scan = LOAN_TIERS.filter((tier) => tier.id <= ONCHAIN_TIER_SCAN);
+            for (let start = 0; start < scan.length && live(); start += 20) {
+              const batch = scan.slice(start, start + 20);
               const rows = await Promise.all(
                 batch.map(async (base) => {
                   try {
                     const row = await creditContract.niveles(base.id);
                     const monto = BigInt(row[0] ?? 0);
-                    if (monto === 0n) return null;
+                    if (monto === 0n) return base;
                     return overlayOnChainTier(base, monto, BigInt(row[1]), BigInt(row[2]));
                   } catch {
-                    return null;
+                    return base;
                   }
                 })
               );
-              const good = rows.filter((item): item is LoanTier => Boolean(item));
-              discovered.push(...good);
-              if (good.length < batch.length) break;
+              rows.forEach((tier) => overlay.set(tier.id, tier));
             }
             if (live()) {
-              if (discovered.length) {
-                onChainTiersReadyRef.current = true;
-                setLoanTiers(discovered);
-              } else {
-                setLoanTiers(LOAN_TIERS.slice(0, 10));
-              }
+              onChainTiersReadyRef.current = true;
+              setLoanTiers(
+                visibleLoanTiers(caps.maxLevel).map((tier) => {
+                  const next = overlay.get(tier.id) || tier;
+                  return { ...next, requiredCount: requiredCountForLiveLevel(next.id, caps.maxLevel) };
+                })
+              );
             }
           }
         } catch {
-          if (live()) setLoanTiers(LOAN_TIERS);
+          if (live()) setLoanTiers(visibleLoanTiers(caps.maxLevel));
         }
 
         try {
-          const supported = Boolean(await creditContract.isSupportedToken(tokenAddress));
+          const supported = Boolean(await creditContract.supportedToken(tokenAddress));
           let nextCurve = 0;
           try {
             nextCurve = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
@@ -485,7 +520,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }
           setUserInfo((prev) => ({ ...prev, isTokenSupported: supported, curveRateBps: nextCurve }));
         } catch (e) {
-          logWarn('isSupportedToken failed:', e);
+          logWarn('supportedToken failed:', e);
           setUserInfo((prev) => ({
             ...prev,
             isTokenSupported: prev.isTokenSupported || isOfficialWorldToken(tokenAddress),
@@ -755,7 +790,6 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           setUserInfo((prev) => ({
             ...prev,
             isRegistered: Boolean(saved.isRegistered),
-            hasActiveLoan: Boolean(saved.hasActiveLoan),
           }));
         })
         .catch(() => {});

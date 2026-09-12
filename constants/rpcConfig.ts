@@ -83,13 +83,19 @@ export const NETWORK_CONFIG = {
   },
 };
 
+function usableRpc(url: string | undefined): url is string {
+  if (!url || !/^https:\/\//i.test(url)) return false;
+  if (/rpc\.ankr\.com/i.test(url) && !/rpc\.ankr\.com\/[^/]+\/[A-Za-z0-9]/i.test(url)) return false;
+  return true;
+}
+
 const DEMO_RPCS = [
   process.env.EXPO_PUBLIC_BSC_TESTNET_RPC_PRIMARY,
   process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY,
   process.env.EXPO_PUBLIC_BSC_RPC_URL_FALLBACK_1,
   process.env.EXPO_PUBLIC_BSC_RPC_URL_FALLBACK_2,
   ...BSC_TESTNET.rpc,
-].filter((url): url is string => Boolean(url));
+].filter(usableRpc);
 
 const LIVE_RPCS = [
   process.env.EXPO_PUBLIC_BSC_MAINNET_RPC_PRIMARY,
@@ -179,7 +185,7 @@ export const getProviderWithFallback = (): AbstractProvider => {
 
   const network = { chainId: NETWORK_CONFIG.chainId, name: NETWORK_CONFIG.chainName };
   const configs = urls.map((url, index) => ({
-    provider: new JsonRpcProvider(url, network, { staticNetwork: true }),
+    provider: new JsonRpcProvider(url, network, { staticNetwork: true, batchMaxCount: 1 }),
     priority: index + 1,
     weight: 1,
     stallTimeout: 2000,

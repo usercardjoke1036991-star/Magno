@@ -2,13 +2,14 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AppText } from './AppText';
 import { UserInfo } from '../hooks/useWeb3Balances';
-import { formatCountdownClock, formatDueDate } from '../utils/formatters';
+import { formatCountdownClock, formatDueDate, formatUSD } from '../utils/formatters';
 import { useLiveCooldown } from '../hooks/useLiveCooldown';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
-import { MAX_LOAN_LEVEL, requiredCountForLevel } from '../constants/loanTiers';
+import { MAX_LOAN_LEVEL, milestoneBonusUsd, requiredCountForLiveLevel } from '../constants/loanTiers';
+import { supportKind, supportNameKey } from '../constants/support';
 import { ProfileAvatar } from './ProfileAvatar';
 import { useUserProfile } from '../profile/ProfileContext';
 import type { DebtReminderKind } from '../utils/debtReminders';
@@ -21,6 +22,9 @@ interface UserMetricsProps {
   onPayLoan?: () => void;
   onPayAll?: () => void;
   onPayCount?: (count: number) => void;
+  onClaimBonus?: () => void;
+  onOpenBonuses?: () => void;
+  lpUsd?: number;
   isPaying?: boolean;
 }
 
@@ -32,6 +36,9 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   onPayLoan,
   onPayAll,
   onPayCount,
+  onClaimBonus,
+  onOpenBonuses,
+  lpUsd = 0,
   isPaying = false,
 }) => {
   const { t } = useI18n();
@@ -43,6 +50,10 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
     ? Math.max(0, userInfo.activeLoan.cuotasTotales - userInfo.activeLoan.cuotasPagadas)
     : 0;
   const cooldownLeft = useLiveCooldown(userInfo.userProgress.ultimoPrestamoTimestamp);
+  const claimableMilestone = userInfo.userProgress.bonusPending;
+  const nextMilestone = userInfo.userProgress.nextMilestone;
+  const bonusAmount = formatUSD(milestoneBonusUsd(claimableMilestone || nextMilestone));
+  const supportKey = supportNameKey(supportKind(userInfo.donatedUsd || 0, lpUsd));
 
   return (
     <View>
@@ -61,11 +72,47 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               <AppText style={[styles.rankEyebrow, { color: colors.textMuted }]}>{t('rankYourRank')}</AppText>
               <AppText style={[styles.rankTitle, { color: colors.text }]}>{rankLabel}</AppText>
               <AppText style={[styles.rankMeta, { color: colors.textMuted }]}>
-                {t('level')} {userInfo.userProgress.nivelActual}/100
+                {t('level')} {userInfo.userProgress.nivelActual}/{userInfo.maxLoanLevel || MAX_LOAN_LEVEL}
               </AppText>
               <AppText style={[styles.rankHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
+              {supportKey ? (
+                <AppText style={[styles.rankHint, { color: colors.primary }]}>{t(supportKey)}</AppText>
+              ) : null}
             </View>
           </View>
+
+          {nextMilestone > 0 ? (
+            <View style={[styles.loanBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <AppText style={[styles.loanMeta, { color: colors.text, marginTop: 0 }]}>
+                {claimableMilestone > 0
+                  ? t('milestoneBonusReady', { level: claimableMilestone, amount: bonusAmount })
+                  : t('milestoneBonusHint', { level: nextMilestone, amount: bonusAmount })}
+              </AppText>
+              {onOpenBonuses ? (
+                <TouchableOpacity
+                  disabled={isPaying}
+                  onPress={onOpenBonuses}
+                  style={[styles.payBtn, { backgroundColor: colors.primary }]}
+                >
+                  <AppText style={[styles.payBtnText, { color: colors.onPrimary }]}>{t('openBonuses')}</AppText>
+                </TouchableOpacity>
+              ) : claimableMilestone > 0 && onClaimBonus ? (
+                <TouchableOpacity
+                  disabled={isPaying}
+                  onPress={onClaimBonus}
+                  style={[styles.payBtn, { backgroundColor: colors.primary }]}
+                >
+                  {isPaying ? (
+                    <ActivityIndicator color={colors.onPrimary} size="small" />
+                  ) : (
+                    <AppText style={[styles.payBtnText, { color: colors.onPrimary }]}>{t('claimPoolBonus')}</AppText>
+                  )}
+                </TouchableOpacity>
+              ) : claimableMilestone > 0 ? (
+                <AppText style={[styles.loanMeta, { color: colors.textMuted }]}>{t('poolBonusPending')}</AppText>
+              ) : null}
+            </View>
+          ) : null}
 
           <View style={styles.metricsGrid}>
             <View style={styles.metricItem}>
@@ -73,7 +120,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
                 <AppIcon name="star" size={14} color={colors.textMuted} />
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('level')}</AppText>
               </View>
-              <AppText style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/100</AppText>
+              <AppText style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/{userInfo.maxLoanLevel || MAX_LOAN_LEVEL}</AppText>
             </View>
 
             <View style={styles.metricItem}>
@@ -100,13 +147,13 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               <View style={styles.metricLabelRow}>
                 <AppIcon name="chart" size={14} color={colors.textMuted} />
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>
-                  {userInfo.userProgress.nivelActual >= MAX_LOAN_LEVEL ? t('maxLevelReached') : t('toLevelUp')}
+                  {userInfo.userProgress.nivelActual >= (userInfo.maxLoanLevel || MAX_LOAN_LEVEL) ? t('maxLevelReached') : t('toLevelUp')}
                 </AppText>
               </View>
               <AppText style={[styles.metricValue, { color: colors.text }]}>
-                {userInfo.userProgress.nivelActual >= MAX_LOAN_LEVEL
+                {userInfo.userProgress.nivelActual >= (userInfo.maxLoanLevel || MAX_LOAN_LEVEL)
                   ? t('maxLevelReached')
-                  : `${userInfo.userProgress.solicitudesCompletadas}/${requiredCountForLevel(userInfo.userProgress.nivelActual)} ${t('onTimePayments')}`}
+                  : `${userInfo.userProgress.solicitudesCompletadas}/${requiredCountForLiveLevel(userInfo.userProgress.nivelActual, userInfo.maxLoanLevel || MAX_LOAN_LEVEL)} ${t('onTimePayments')}`}
               </AppText>
             </View>
 

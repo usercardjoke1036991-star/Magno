@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { formatRankLabel, getRankForLevel, RANK_LADDER } from '../constants/ranks';
+import { clampLoanLevel, formatRankLabel, getRankForLevel, RANK_LADDER } from '../constants/ranks';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { RankMedal } from './RankMedal';
@@ -13,7 +13,7 @@ interface RankLadderProps {
 export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const current = Math.min(100, Math.max(1, userLevel || 1));
+  const current = clampLoanLevel(userLevel || 1);
   const currentFamily = getRankForLevel(current).family;
 
   return (
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   item: {
-    width: 72,
+    width: 78,
     alignItems: 'center',
     borderRadius: 10,
     paddingVertical: 6,
