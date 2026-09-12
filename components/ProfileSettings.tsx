@@ -9,7 +9,6 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useUserProfile } from '../profile/ProfileContext';
 import {
-  AVATAR_PRESETS,
   persistPickedPhoto,
   type UserProfile,
 } from '../services/userProfile';
@@ -67,7 +66,7 @@ export const ProfileSettings: React.FC = () => {
         Alert.alert(t('profilePhoto'), t('profilePhotoUnavailable'));
         return;
       }
-      apply({ photoUri: uri, avatarId: draft.avatarId });
+      apply({ photoUri: uri });
     } catch {
       Alert.alert(t('profilePhoto'), t('profilePhotoUnavailable'));
     }
@@ -114,23 +113,6 @@ export const ProfileSettings: React.FC = () => {
           <AppText style={[styles.remove, { color: colors.textMuted }]}>{t('profileRemovePhoto')}</AppText>
         </TouchableOpacity>
       ) : null}
-
-      <AppText style={[styles.label, { color: colors.primary }]}>{t('profileChooseAvatar')}</AppText>
-      <View style={styles.presets}>
-        {AVATAR_PRESETS.map((item) => {
-          const active = draft.avatarId === item.id && !draft.photoUri;
-          return (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => apply({ avatarId: item.id, photoUri: '' })}
-              style={[
-                styles.preset,
-                { backgroundColor: item.bg, borderColor: active ? colors.text : 'transparent' },
-              ]}
-            />
-          );
-        })}
-      </View>
 
       <UsernameSection
         walletAddress={walletAddress}
@@ -198,23 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginBottom: 10,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  presets: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  preset: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
   },
   input: {
     borderWidth: 1,

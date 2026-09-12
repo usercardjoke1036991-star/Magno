@@ -173,7 +173,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
-  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, LOAN_TIER_ROWS, LOAN_TIERS, installmentsForPrincipalWei, overlayOnChainTier
+  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, USD100_LEVEL, MAX_LEVEL_BONUS_USD, requiredCountForLevel, requiredCountPlanned, LOAN_TIER_ROWS, LOAN_TIERS, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/ranks.ts` — módulo JS/TS
   - Funciones/clases: clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
 - `constants/reputation.ts` — módulo JS/TS
@@ -279,6 +279,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/helpers.cjs` — módulo JS/TS
 - `test/identity.test.js` — módulo JS/TS
 - `test/kyc.test.js` — módulo JS/TS
+- `test/levelProgress.test.js` — módulo JS/TS
 - `test/liquidation.test.js` — módulo JS/TS
 - `test/loanLevels.test.js` — módulo JS/TS
 - `test/mlm.test.js` — módulo JS/TS
@@ -337,6 +338,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: normalizeUsername, isValidUsername
 - `wallet/AppModeContext.tsx` — módulo JS/TS
   - Funciones/clases: AppModeProvider, useAppMode
+- `wallet/appModePersist.ts` — módulo JS/TS
+  - Funciones/clases: APP_MODE_STORAGE_KEY, resolvePersistedMode
 - `wallet/AppWalletContext.tsx` — módulo JS/TS
   - Funciones/clases: AppWalletProvider, useAppWallet
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
 import { LoanTier } from '../hooks/useWeb3Balances';
 import { formatCountdownClock, formatUSD } from '../utils/formatters';
 import { useLiveCooldown } from '../hooks/useLiveCooldown';
@@ -61,6 +61,8 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const { colors } = useTheme();
   const locked = tier.id > userLevel;
   const unlocked = !locked;
+  const [detailsOpen, setDetailsOpen] = useState(!locked);
+  const showDetails = unlocked || detailsOpen;
   const appliedBps = Math.max(tier.interestBps, curveRateBps || 0);
   const interest = (tier.usdAmount * appliedBps) / 10000;
   const totalRepay = tier.usdAmount + interest;
@@ -76,16 +78,10 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const waitingNextLoan = cooldownLeft > 0 && !hasActiveLoan && !locked;
   const needsActivate = !isRegistered && unlocked && !hasActiveLoan;
   const requestBlocked = isLoading || locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan;
+  const toggleLockedDetails = () => setDetailsOpen((open) => !open);
 
-  return (
-    <View style={[
-      styles.tierCard,
-      {
-        backgroundColor: colors.card,
-        borderColor: colors.border,
-      },
-      locked && { opacity: 0.55 },
-    ]}>
+  const card = (
+    <>
       <View style={[styles.accent, { backgroundColor: locked ? colors.border : rank.metal }]} />
       <View style={styles.tierRow}>
         <View style={styles.titleBlock}>
@@ -96,13 +92,21 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
           </View>
         </View>
         {locked ? (
-          <AppText style={[styles.metaBadge, { color: colors.textMuted }]}>{t('loanLockedBadge')}</AppText>
+          <View style={styles.lockedMeta} pointerEvents="none">
+            <AppText style={[styles.metaBadge, { color: colors.textMuted }]}>{t('loanLockedBadge')}</AppText>
+            <AppText style={[styles.chevron, { color: colors.primary }]}>{detailsOpen ? '–' : '+'}</AppText>
+          </View>
         ) : (
           <AppText style={[styles.metaBadge, { color: colors.success }]}>{t('loanUnlockedBadge')}</AppText>
         )}
       </View>
 
       <AppText style={[styles.tierAmount, { color: colors.text }]}>{formatUSD(tier.usdAmount)}</AppText>
+      {!showDetails ? (
+        <AppText style={[styles.seeDetails, { color: colors.primary }]}>{t('loanSeeDetails')}</AppText>
+      ) : null}
+      {showDetails ? (
+      <View>
       <AppText style={[styles.tierRate, { color: colors.text }]}>
         {t('interestRate', { rate: String(appliedBps / 100) })}
       </AppText>
@@ -140,7 +144,9 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
       </AppText>
 
       <View style={styles.tierActions}>
-        {isActiveTier && hasActiveLoan ? (
+        {locked ? (
+          <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('loanLockedBody')}</AppText>
+        ) : isActiveTier && hasActiveLoan ? (
           <>
             {remainingLabel && remainingInstallments > 1 && (
               <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payChoiceLead')}</AppText>
@@ -255,8 +261,35 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
           </TouchableOpacity>
         )}
       </View>
-    </View>
+      </View>
+      ) : null}
+    </>
   );
+
+  const cardStyle = [
+    styles.tierCard,
+    {
+      backgroundColor: colors.card,
+      borderColor: colors.border,
+    },
+  ];
+
+  if (locked) {
+    return (
+      <Pressable
+        onPress={toggleLockedDetails}
+        style={({ pressed }) => [cardStyle, { opacity: pressed ? 0.82 : 0.92 }]}
+        android_ripple={{ color: colors.chip }}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: detailsOpen }}
+        accessibilityLabel={`${tier.name}. ${t('loanSeeDetails')}`}
+      >
+        {card}
+      </Pressable>
+    );
+  }
+
+  return <View style={cardStyle}>{card}</View>;
 };
 
 const styles = StyleSheet.create({
@@ -298,6 +331,21 @@ const styles = StyleSheet.create({
   tierTitle: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  lockedMeta: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  chevron: {
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 20,
+  },
+  seeDetails: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 4,
+    marginBottom: 2,
   },
   metaBadge: {
     fontSize: 11,

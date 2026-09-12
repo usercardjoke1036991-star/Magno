@@ -124,6 +124,14 @@ def write_ts(tiers: list[dict], path: str) -> None:
     body = "\n".join(rows)
     text = f"""export const MAX_LOAN_LEVEL = 100;
 export const MAX_LOAN_USD = 10000;
+export const USD100_LEVEL = 10;
+export const MAX_LEVEL_BONUS_USD = 2000;
+
+export function requiredCountForLevel(id: number): number {{
+  if (id < 1 || id >= MAX_LOAN_LEVEL) return 0;
+  if (id <= 1) return 3;
+  return 5;
+}}
 
 export interface LoanTier {{
   id: number;
@@ -143,6 +151,7 @@ export const LOAN_TIER_ROWS: ReadonlyArray<Omit<LoanTier, 'name' | 'term'>> = [
 
 export const LOAN_TIERS: LoanTier[] = LOAN_TIER_ROWS.map((row) => ({{
   ...row,
+  requiredCount: requiredCountForLevel(row.id),
   name: `Nivel ${{row.id}}`,
   term: `${{row.termDays}} días`,
 }}));

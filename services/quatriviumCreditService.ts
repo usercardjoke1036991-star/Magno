@@ -16,7 +16,8 @@ import { isTestnetOnlyToken } from '../constants/bsc';
 import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
-import { MAX_LOAN_LEVEL } from '../constants/loanTiers';
+import { MAX_LOAN_LEVEL, requiredCountForLevel } from '../constants/loanTiers';
+import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 import { cobrarComisionIntermediario, loadAppWallet } from './appWallet';
 import { requestDemoIdentity } from './demoIdentity';
 
@@ -389,17 +390,22 @@ export const QuatriviumCreditService = {
   obtenerProgresoUsuario: async (userAddress: string) => {
     const { provider } = await getProviderAndSigner();
     const progress = await contractWith(provider).obtenerProgresoUsuario(userAddress);
+    const nivelActual = Number(progress.nivelActual);
+    const solicitudesCompletadas = Number(progress.solicitudesCompletadas);
     return {
-      nivelActual: Number(progress.nivelActual),
-      solicitudesCompletadas: Number(progress.solicitudesCompletadas),
+      nivelActual,
+      solicitudesCompletadas,
       ultimoPrestamoTimestamp: Number(progress.ultimoPrestamoTimestamp),
+      bonusPending: (() => {
+        const need = requiredCountForLevel(nivelActual);
+        return need > 0 && nivelActual >= MAX_LOAN_LEVEL && solicitudesCompletadas >= need ? 1 : 0;
+      })(),
     };
   },
 
   obtenerCooldownRestante: async (userAddress: string) => {
-    const { provider } = await getProviderAndSigner();
-    const cooldown = await contractWith(provider).obtenerCooldownRestante(userAddress);
-    return Number(cooldown);
+    const progress = await QuatriviumCreditService.obtenerProgresoUsuario(userAddress);
+    return cooldownRestanteDesdeTimestamp(progress.ultimoPrestamoTimestamp);
   },
 
   obtenerOwner: async () => {

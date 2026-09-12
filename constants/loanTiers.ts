@@ -1,5 +1,24 @@
 export const MAX_LOAN_LEVEL = 100;
 export const MAX_LOAN_USD = 10000;
+/** Primer nivel de 100 USDT. A partir de aquí las solicitudes suben de 5 en 5. */
+export const USD100_LEVEL = 10;
+/** Bono repetible del pool al completar la racha del nivel 100. */
+export const MAX_LEVEL_BONUS_USD = 2000;
+
+/** Lo que exige el contrato live hoy: 3 en L1, 5 en L2–99. El 100 no sube. */
+export function requiredCountForLevel(id: number): number {
+  if (id < 1 || id >= MAX_LOAN_LEVEL) return 0;
+  if (id <= 1) return 3;
+  return 5;
+}
+
+/** Escalera del hermano `QuatriviumLeveling` (próximo deploy). */
+export function requiredCountPlanned(id: number): number {
+  if (id < 1 || id > MAX_LOAN_LEVEL) return 0;
+  if (id <= 5) return 3;
+  if (id < USD100_LEVEL) return 5;
+  return 5 * (id - 9);
+}
 
 export interface LoanTier {
   id: number;
@@ -118,6 +137,7 @@ export const LOAN_TIER_ROWS: ReadonlyArray<Omit<LoanTier, 'name' | 'term'>> = [
 
 export const LOAN_TIERS: LoanTier[] = LOAN_TIER_ROWS.map((row) => ({
   ...row,
+  requiredCount: requiredCountForLevel(row.id),
   name: `Nivel ${row.id}`,
   term: `${row.termDays} días`,
 }));

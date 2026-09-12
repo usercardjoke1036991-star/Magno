@@ -106,7 +106,7 @@ function HomeScreenWithHooks() {
   const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
   const lockedTiers = loanTiers.filter((tier) => tier.id > userInfo.userProgress.nivelActual);
   const visibleUnlocked = unlockedTiers.slice(-3);
-  const visibleLocked = lockedTiers.slice(0, 2);
+  const visibleLocked = lockedTiers;
   const labelTier = (tier: (typeof loanTiers)[number]) => ({
     ...tier,
     name: `${t('level')} ${tier.id}`,
@@ -400,6 +400,9 @@ function HomeScreenWithHooks() {
         </AppSubsection>
         {visibleLocked.length ? (
           <AppSubsection title={t('subsectionLocked')} icon="lock">
+            <AppText style={[styles.lockedHint, rtl && styles.rtlText, { color: colors.textMuted }]}>
+              {t('lockedLevelsHint')}
+            </AppText>
             {visibleLocked.map((tier) => (
               <LoanTierCard
                 key={tier.id}
@@ -411,7 +414,7 @@ function HomeScreenWithHooks() {
                 isActiveTier={false}
                 isLoading={txLoading}
                 curveRateBps={userInfo.curveRateBps}
-                ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
+                ultimoPrestamoTimestamp={0}
                 isRegistered={userInfo.isRegistered}
                 onActivateCredit={() => setRoom('credit')}
                 onRequestLoan={handleSolicitarCredito}
@@ -577,6 +580,11 @@ const styles = StyleSheet.create({
   hubTitle: {
     fontSize: 15,
     fontWeight: '600',
+    marginBottom: 10,
+  },
+  lockedHint: {
+    fontSize: 13,
+    lineHeight: 18,
     marginBottom: 10,
   },
 });

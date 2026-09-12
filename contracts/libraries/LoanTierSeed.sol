@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 /// @dev Tablas de 100 niveles. Fuente: constants/loanTiers.ts
+/// Solicitudes: 1–5 → 3; 6–9 → 5; desde 10 (100 USDT) → 5, 10, 15… (nivel 100 = 455, bono de pool).
 library LoanTierSeed {
     uint256 internal constant MAX_NIVEL = 100;
     uint256 internal constant MAX_MONTO = 10000 * 1e18;

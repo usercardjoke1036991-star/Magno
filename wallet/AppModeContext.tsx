@@ -1,15 +1,13 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, AppState, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   isContractConfigured,
-  isStoreProduction,
   setProductMode,
   setRuntimeMode,
   type AppMode,
 } from '../constants/rpcConfig';
-
-const STORAGE_KEY = 'quatrivium.appMode.v2';
+import { APP_MODE_STORAGE_KEY, resolvePersistedMode } from './appModePersist';
 
 interface AppModeValue {
   mode: AppMode;
@@ -32,19 +30,15 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
+    AsyncStorage.getItem(APP_MODE_STORAGE_KEY)
       .then(async (saved) => {
-        if (isStoreProduction()) {
-          setRuntimeMode('live');
-          setProductMode('live');
-          setModeState('live');
-          await AsyncStorage.setItem(STORAGE_KEY, 'live');
-          return;
+        let pref = resolvePersistedMode(saved);
+        if (pref === 'demo' && !isContractConfigured('testnet')) {
+          pref = 'live';
         }
-        const pref: AppMode = saved === 'demo' ? 'demo' : 'live';
         setModeState(applyChain(pref));
         if (!saved) {
-          await AsyncStorage.setItem(STORAGE_KEY, pref);
+          await AsyncStorage.setItem(APP_MODE_STORAGE_KEY, 'live');
         }
       })
       .catch(() => {
@@ -54,16 +48,22 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const setMode = useCallback(async (next: AppMode) => {
-    if (isStoreProduction() && next !== 'live') {
-      return false;
-    }
     if (next === 'demo' && !isContractConfigured('testnet')) {
       return false;
     }
     setModeState(applyChain(next));
-    await AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
+    await AsyncStorage.setItem(APP_MODE_STORAGE_KEY, next).catch(() => {});
     return true;
   }, []);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'background' || state === 'inactive') {
+        AsyncStorage.setItem(APP_MODE_STORAGE_KEY, mode).catch(() => {});
+      }
+    });
+    return () => sub.remove();
+  }, [mode]);
 
   const value = useMemo(() => ({ mode, ready, setMode }), [mode, ready, setMode]);
 

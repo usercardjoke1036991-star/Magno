@@ -38,6 +38,11 @@
 - orquestador de salud que entiende Quatrivium y verifica que cada pieza este conectada
 - 100 niveles de credito hasta 10000 USDT con tasa decreciente e interes en dolares creciente
 - auditoria profunda del proyecto y correccion de todo lo que falle para dejar Demo 100 por ciento productivo
+- primera cuenta entra en Real; si cambia a Demo la app reabre en el ultimo modo
+- avatar solo foto y marco de rango, sin paleta de colores
+- ver toda la info de niveles superiores aunque esten bloqueados
+- Desde 100 USDT, solicitudes por nivel +5 cada nivel; el nivel 100 da un bono del pool al completar su racha, no un nivel extra
+- Separar niveles y bonos a un contrato hermano para crecer sin tope de un solo archivo
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -51,3 +56,8 @@
 - [2026-09-11 19:39] Módulo completado: 'salud_proyecto.py'
 - [2026-09-11 23:18] Idea añadida al backlog: "100 niveles de credito hasta 10000 USDT con tasa decreciente e interes en dolare"
 - [2026-09-11 23:46] Idea añadida al backlog: "auditoria profunda del proyecto y correccion de todo lo que falle para dejar Dem"
+- [2026-09-12 01:18] Idea añadida al backlog: "primera cuenta entra en Real; si cambia a Demo la app reabre en el ultimo modo"
+- [2026-09-12 01:21] Idea añadida al backlog: "avatar solo foto y marco de rango, sin paleta de colores"
+- [2026-09-12 01:25] Idea añadida al backlog: "ver toda la info de niveles superiores aunque esten bloqueados"
+- [2026-09-12 01:33] Idea añadida al backlog: "Desde 100 USDT, solicitudes por nivel +5 cada nivel; el nivel 100 da un bono del"
+- [2026-09-12 02:05] Idea añadida al backlog: "Separar niveles y bonos a un contrato hermano para crecer sin tope de un solo ar"

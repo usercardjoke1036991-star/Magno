@@ -245,13 +245,13 @@
   "profileNameInvalid": "২ থেকে ২৪ অক্ষর ব্যবহার করুন।",
   "profilePhoto": "প্রোফাইল ছবি",
   "profilePickPhoto": "গ্যালারি থেকে ছবি বেছে নিন",
-  "profileChooseAvatar": "অথবা অবতার রং বেছে নিন",
+  "profileChooseAvatar": "প্রোফাইল ছবি",
   "profileRemovePhoto": "ছবি সরান",
   "profileSave": "প্রোফাইল সংরক্ষণ",
   "profileSaved": "আপনার প্রোফাইল সংরক্ষিত। রেফারেলরা এই নাম দেখবে।",
   "profileSaveError": "প্রোফাইল সংরক্ষণ করা যায়নি।",
   "profilePhotoDenied": "গ্যালারি ছবি ব্যবহার করতে Quatrivium Credit-এর অনুমতি দরকার।",
-  "profilePhotoUnavailable": "এই বিল্ডে গ্যালারি নেই। পরিবর্তে অবতার রং বেছে নিন।",
+  "profilePhotoUnavailable": "এই বিল্ডে গ্যালারি নেই।",
   "profileSomeone": "একজন Quatrivium Credit ব্যবহারকারী",
   "helloName": "হ্যালো, {name}",
   "referralEarnLevel": "রেফারেল এই স্তর চায় ও পরিশোধ করলে কমিশন: {amount} (সুদের ১৫%)।",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "আপনার লাইনের অবস্থা",
   "hubCreditLeadActive": "সক্রিয়। এখানে চান বা পরিশোধ করুন।",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} দিন"
+  "termDays": "{days} দিন",
+  "lockedLevelsHint": "এগুলো লক থাকবে। পরিমাণ, হার, মেয়াদ ও সুদ দেখতে একটি স্তরে ট্যাপ করুন।",
+  "loanSeeDetails": "সম্পূর্ণ তথ্য দেখুন",
+  "toPoolBonus": "পুল বোনাসের জন্য",
+  "payOnTimeToBonus": "এই স্তরের {count}টি সময়মতো পরিশোধ সম্পন্ন করলে পুল থেকে {amount} পাবেন",
+  "claimPoolBonus": "পুল বোনাস নিন",
+  "poolBonusPending": "পুলের পর্যাপ্ত নগদ না আসা পর্যন্ত বোনাস অপেক্ষমাণ"
 }

@@ -245,13 +245,13 @@
   "profileNameInvalid": "Gunakan antara 2 dan 24 karakter.",
   "profilePhoto": "Foto profil",
   "profilePickPhoto": "Pilih foto dari galeri",
-  "profileChooseAvatar": "Atau pilih warna avatar",
+  "profileChooseAvatar": "Foto profil",
   "profileRemovePhoto": "Hapus foto",
   "profileSave": "Simpan profil",
   "profileSaved": "Profil Anda disimpan. Referral akan melihat nama ini.",
   "profileSaveError": "Profil tidak bisa disimpan.",
   "profilePhotoDenied": "Quatrivium Credit butuh izin untuk memakai foto galeri.",
-  "profilePhotoUnavailable": "Galeri tidak tersedia di build ini. Pilih warna avatar saja.",
+  "profilePhotoUnavailable": "Galeri tidak tersedia di build ini.",
   "profileSomeone": "Pengguna Quatrivium Credit",
   "helloName": "Hai, {name}",
   "referralEarnLevel": "Komisi jika referral mengajukan dan membayar level ini: {amount} (15% dari bunga).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "Status jalur Anda",
   "hubCreditLeadActive": "Aktif. Ajukan atau bayar di sini.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} hari"
+  "termDays": "{days} hari",
+  "lockedLevelsHint": "Tetap terkunci. Ketuk level untuk melihat jumlah, suku bunga, jangka waktu, dan bunga.",
+  "loanSeeDetails": "Lihat detail lengkap",
+  "toPoolBonus": "Untuk bonus pool",
+  "payOnTimeToBonus": "Selesaikan {count} pembayaran tepat waktu di level ini untuk menerima {amount} dari pool",
+  "claimPoolBonus": "Klaim bonus pool",
+  "poolBonusPending": "Bonus menunggu kas bebas di pool"
 }

@@ -245,13 +245,13 @@
   "profileNameInvalid": "2 سے 24 حروف استعمال کریں۔",
   "profilePhoto": "پروفائل تصویر",
   "profilePickPhoto": "گیلری سے تصویر منتخب کریں",
-  "profileChooseAvatar": "یا اوتار رنگ منتخب کریں",
+  "profileChooseAvatar": "پروفائل تصویر",
   "profileRemovePhoto": "تصویر ہٹائیں",
   "profileSave": "پروفائل محفوظ کریں",
   "profileSaved": "آپ کا پروفائل محفوظ ہوا۔ ریفرل یہ نام دیکھیں گے۔",
   "profileSaveError": "پروفائل محفوظ نہیں ہو سکا۔",
   "profilePhotoDenied": "گیلری تصویر استعمال کرنے کے لیے Quatrivium Credit کو اجازت چاہیے۔",
-  "profilePhotoUnavailable": "اس بلڈ میں گیلری دستیاب نہیں۔ اس کے بجائے اوتار رنگ منتخب کریں۔",
+  "profilePhotoUnavailable": "اس بلڈ میں گیلری دستیاب نہیں۔",
   "profileSomeone": "ایک Quatrivium Credit صارف",
   "helloName": "سلام، {name}",
   "referralEarnLevel": "اگر ریفرل اس سطح مانگے اور ادا کرے تو کمیشن: {amount} (سود کا 15٪)۔",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "آپ کی لائن کی حالت",
   "hubCreditLeadActive": "فعال۔ یہاں مانگیں یا ادا کریں۔",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} دن"
+  "termDays": "{days} دن",
+  "lockedLevelsHint": "یہ لاک رہیں گے۔ رقم، شرح، مدت اور سود دیکھنے کے لیے سطح دبائیں۔",
+  "loanSeeDetails": "مکمل تفصیل دیکھیں",
+  "toPoolBonus": "پول بونس کے لیے",
+  "payOnTimeToBonus": "اس سطح کی {count} بروقت ادائیگیاں مکمل کریں اور پول سے {amount} حاصل کریں",
+  "claimPoolBonus": "پول بونس وصول کریں",
+  "poolBonusPending": "بونس پول میں دستیاب نقد کے انتظار میں ہے"
 }

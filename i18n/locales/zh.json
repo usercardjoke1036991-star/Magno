@@ -245,13 +245,13 @@
   "profileNameInvalid": "请使用 2 到 24 个字符。",
   "profilePhoto": "头像",
   "profilePickPhoto": "从相册选择照片",
-  "profileChooseAvatar": "或选择头像颜色",
+  "profileChooseAvatar": "头像照片",
   "profileRemovePhoto": "移除照片",
   "profileSave": "保存资料",
   "profileSaved": "资料已保存。下线将看到此名称。",
   "profileSaveError": "无法保存资料。",
   "profilePhotoDenied": "Quatrivium Credit 需要权限才能使用相册照片。",
-  "profilePhotoUnavailable": "此版本无法使用相册。请改为选择头像颜色。",
+  "profilePhotoUnavailable": "此安装无法使用相册。",
   "profileSomeone": "一位 Quatrivium Credit 用户",
   "helloName": "您好，{name}",
   "referralEarnLevel": "下线申请并还清此等级时的佣金：{amount}（利息的 15%）。",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "额度状态",
   "hubCreditLeadActive": "已开通。在此申请或还款。",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} 天"
+  "termDays": "{days} 天",
+  "lockedLevelsHint": "仍为锁定。点按一级即可查看金额、利率、期限和利息。",
+  "loanSeeDetails": "查看完整资料",
+  "toPoolBonus": "奖池奖金",
+  "payOnTimeToBonus": "在本等级按时完成 {count} 笔还款即可从奖池领取 {amount}",
+  "claimPoolBonus": "领取奖池奖金",
+  "poolBonusPending": "奖金待领：奖池可用资金不足"
 }

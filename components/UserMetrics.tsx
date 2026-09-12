@@ -8,6 +8,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
+import { MAX_LOAN_LEVEL, requiredCountForLevel } from '../constants/loanTiers';
 import { ProfileAvatar } from './ProfileAvatar';
 import { useUserProfile } from '../profile/ProfileContext';
 import type { DebtReminderKind } from '../utils/debtReminders';
@@ -91,14 +92,14 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
             <View style={styles.metricItem}>
               <View style={styles.metricLabelRow}>
                 <AppIcon name="chart" size={14} color={colors.textMuted} />
-                <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('toLevelUp')}</AppText>
+                <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>
+                  {userInfo.userProgress.nivelActual >= MAX_LOAN_LEVEL ? t('maxLevelReached') : t('toLevelUp')}
+                </AppText>
               </View>
               <AppText style={[styles.metricValue, { color: colors.text }]}>
-                {userInfo.userProgress.nivelActual >= 100
+                {userInfo.userProgress.nivelActual >= MAX_LOAN_LEVEL
                   ? t('maxLevelReached')
-                  : `${userInfo.userProgress.solicitudesCompletadas}/${
-                      userInfo.userProgress.nivelActual <= 1 ? 3 : 5
-                    } ${t('onTimePayments')}`}
+                  : `${userInfo.userProgress.solicitudesCompletadas}/${requiredCountForLevel(userInfo.userProgress.nivelActual)} ${t('onTimePayments')}`}
               </AppText>
             </View>
 

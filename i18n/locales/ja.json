@@ -245,13 +245,13 @@
   "profileNameInvalid": "2〜24文字で入力してください。",
   "profilePhoto": "プロフィール写真",
   "profilePickPhoto": "ギャラリーから写真を選ぶ",
-  "profileChooseAvatar": "またはアバターの色を選ぶ",
+  "profileChooseAvatar": "プロフィール写真",
   "profileRemovePhoto": "写真を削除",
   "profileSave": "プロフィールを保存",
   "profileSaved": "プロフィールを保存しました。紹介先にはこの名前が表示されます。",
   "profileSaveError": "プロフィールを保存できませんでした。",
   "profilePhotoDenied": "Quatrivium Credit がギャラリー写真を使うには許可が必要です。",
-  "profilePhotoUnavailable": "このビルドではギャラリーを使えません。代わりにアバターの色を選んでください。",
+  "profilePhotoUnavailable": "このビルドではギャラリーを使えません。",
   "profileSomeone": "Quatrivium Credit のユーザー",
   "helloName": "こんにちは、{name} さん",
   "referralEarnLevel": "紹介先がこのレベルを申請して返済したときのコミッション: {amount}（利息の 15%）。",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "枠の状態",
   "hubCreditLeadActive": "有効。ここで申込または返済。",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} 日"
+  "termDays": "{days} 日",
+  "lockedLevelsHint": "ロックのままです。レベルをタップすると金額・利率・期限・利息が見られます。",
+  "loanSeeDetails": "詳細を見る",
+  "toPoolBonus": "プールボーナス",
+  "payOnTimeToBonus": "このレベルの期日内返済を {count} 回完了すると、プールから {amount} を受け取れます",
+  "claimPoolBonus": "プールボーナスを受け取る",
+  "poolBonusPending": "プールに余裕資金ができるまでボーナスは保留です"
 }

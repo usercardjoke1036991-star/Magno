@@ -245,13 +245,13 @@
   "profileNameInvalid": "Utilisez entre 2 et 24 caractères.",
   "profilePhoto": "Photo de profil",
   "profilePickPhoto": "Choisir une photo dans la galerie",
-  "profileChooseAvatar": "Ou choisir une couleur d’avatar",
+  "profileChooseAvatar": "Photo de profil",
   "profileRemovePhoto": "Supprimer la photo",
   "profileSave": "Enregistrer le profil",
   "profileSaved": "Votre profil a été enregistré. Les filleuls verront ce nom.",
   "profileSaveError": "Le profil n’a pas pu être enregistré.",
   "profilePhotoDenied": "Quatrivium Credit a besoin de l’autorisation d’utiliser une photo de la galerie.",
-  "profilePhotoUnavailable": "La galerie n’est pas disponible dans cette version. Choisissez une couleur d’avatar.",
+  "profilePhotoUnavailable": "La galerie n’est pas disponible dans cette version.",
   "profileSomeone": "Un utilisateur de Quatrivium Credit",
   "helloName": "Bonjour, {name}",
   "referralEarnLevel": "Commission si un filleul demande et paie ce niveau : {amount} (15 % des intérêts).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "État de votre ligne",
   "hubCreditLeadActive": "Active. Demandez ou payez ici.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} jours"
+  "termDays": "{days} jours",
+  "lockedLevelsHint": "Ils restent verrouillés. Touchez un niveau pour voir montant, taux, délai et intérêts.",
+  "loanSeeDetails": "Voir la fiche complète",
+  "toPoolBonus": "Pour le bonus du pool",
+  "payOnTimeToBonus": "Effectuez {count} remboursements à temps de ce niveau pour recevoir {amount} du pool",
+  "claimPoolBonus": "Réclamer le bonus du pool",
+  "poolBonusPending": "Bonus en attente de liquidités libres dans le pool"
 }

@@ -245,13 +245,13 @@
   "profileNameInvalid": "2~24자를 사용하세요.",
   "profilePhoto": "프로필 사진",
   "profilePickPhoto": "갤러리에서 사진 선택",
-  "profileChooseAvatar": "또는 아바타 색 선택",
+  "profileChooseAvatar": "프로필 사진",
   "profileRemovePhoto": "사진 삭제",
   "profileSave": "프로필 저장",
   "profileSaved": "프로필이 저장되었습니다. 추천인이 이 이름을 봅니다.",
   "profileSaveError": "프로필을 저장할 수 없습니다.",
   "profilePhotoDenied": "Quatrivium Credit이 갤러리 사진을 쓰려면 권한이 필요합니다.",
-  "profilePhotoUnavailable": "이 빌드에서는 갤러리를 쓸 수 없습니다. 대신 아바타 색을 선택하세요.",
+  "profilePhotoUnavailable": "이 빌드에서는 갤러리를 사용할 수 없습니다.",
   "profileSomeone": "Quatrivium Credit 사용자",
   "helloName": "안녕하세요, {name}님",
   "referralEarnLevel": "추천인이 이 레벨을 신청하고 갚을 때 수수료: {amount}(이자의 15%).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "한도 상태",
   "hubCreditLeadActive": "활성. 여기서 신청하거나 상환.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days}일"
+  "termDays": "{days}일",
+  "lockedLevelsHint": "잠긴 상태는 유지됩니다. 단계를 눌러 금액, 이율, 기간, 이자를 보세요.",
+  "loanSeeDetails": "전체 정보 보기",
+  "toPoolBonus": "풀 보너스",
+  "payOnTimeToBonus": "이 레벨에서 {count}회 기한 내 상환하면 풀에서 {amount}를 받습니다",
+  "claimPoolBonus": "풀 보너스 받기",
+  "poolBonusPending": "풀에 여유 현금이 생길 때까지 보너스가 대기 중입니다"
 }

@@ -245,13 +245,13 @@
   "profileNameInvalid": "Verwenden Sie zwischen 2 und 24 Zeichen.",
   "profilePhoto": "Profilfoto",
   "profilePickPhoto": "Foto aus der Galerie wählen",
-  "profileChooseAvatar": "Oder eine Avatar-Farbe wählen",
+  "profileChooseAvatar": "Profilfoto",
   "profileRemovePhoto": "Foto entfernen",
   "profileSave": "Profil speichern",
   "profileSaved": "Ihr Profil wurde gespeichert. Empfehlungen sehen diesen Namen.",
   "profileSaveError": "Das Profil konnte nicht gespeichert werden.",
   "profilePhotoDenied": "Quatrivium Credit braucht die Erlaubnis, ein Galeriefoto zu nutzen.",
-  "profilePhotoUnavailable": "Die Galerie ist in diesem Build nicht verfügbar. Wählen Sie stattdessen eine Avatar-Farbe.",
+  "profilePhotoUnavailable": "Die Galerie ist in dieser Installation nicht verfügbar.",
   "profileSomeone": "Ein Quatrivium-Credit-Nutzer",
   "helloName": "Hallo, {name}",
   "referralEarnLevel": "Provision, wenn eine Empfehlung diese Stufe beantragt und zahlt: {amount} (15 % der Zinsen).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "Status Ihrer Linie",
   "hubCreditLeadActive": "Aktiv. Hier leihen oder zahlen.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} Tage"
+  "termDays": "{days} Tage",
+  "lockedLevelsHint": "Sie bleiben gesperrt. Tippen Sie auf eine Stufe, um Betrag, Zins, Frist und Zinsen zu sehen.",
+  "loanSeeDetails": "Alle Details ansehen",
+  "toPoolBonus": "Für den Pool-Bonus",
+  "payOnTimeToBonus": "Zahlen Sie {count} Kredite dieser Stufe pünktlich zurück, um {amount} aus dem Pool zu erhalten",
+  "claimPoolBonus": "Pool-Bonus abholen",
+  "poolBonusPending": "Bonus wartet auf freie Mittel im Pool"
 }

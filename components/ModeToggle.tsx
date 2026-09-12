@@ -3,17 +3,16 @@ import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useAppMode } from '../wallet/AppModeContext';
-import { isStoreProduction, type AppMode } from '../constants/rpcConfig';
+import { type AppMode } from '../constants/rpcConfig';
 import { AppText } from './AppText';
 
 export const ModeToggle: React.FC = () => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { mode, setMode } = useAppMode();
-  const storeBuild = isStoreProduction();
 
   const choose = (next: AppMode) => {
-    if (storeBuild || next === mode) return;
+    if (next === mode) return;
     Alert.alert(t('appModeTitle'), next === 'demo' ? t('appModeSwitchDemo') : t('appModeSwitchLive'), [
       { text: t('cancel'), style: 'cancel' },
       {
@@ -31,35 +30,31 @@ export const ModeToggle: React.FC = () => {
 
   return (
     <View>
-      <AppText style={[styles.lead, { color: colors.textMuted }]}>
-        {storeBuild ? t('appModeStoreLocked') : t('appModeLead')}
-      </AppText>
-      {storeBuild ? null : (
-        <View style={styles.row}>
-          <TouchableOpacity
-            onPress={() => choose('demo')}
-            style={[
-              styles.chip,
-              { borderColor: colors.border, backgroundColor: mode === 'demo' ? colors.primary : colors.surface },
-            ]}
-          >
-            <AppText style={[styles.chipText, { color: mode === 'demo' ? colors.onPrimary : colors.text }]}>
-              {t('appModeDemo')}
-            </AppText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => choose('live')}
-            style={[
-              styles.chip,
-              { borderColor: colors.border, backgroundColor: mode === 'live' ? colors.primary : colors.surface },
-            ]}
-          >
-            <AppText style={[styles.chipText, { color: mode === 'live' ? colors.onPrimary : colors.text }]}>
-              {t('appModeLive')}
-            </AppText>
-          </TouchableOpacity>
-        </View>
-      )}
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('appModeLead')}</AppText>
+      <View style={styles.row}>
+        <TouchableOpacity
+          onPress={() => choose('demo')}
+          style={[
+            styles.chip,
+            { borderColor: colors.border, backgroundColor: mode === 'demo' ? colors.primary : colors.surface },
+          ]}
+        >
+          <AppText style={[styles.chipText, { color: mode === 'demo' ? colors.onPrimary : colors.text }]}>
+            {t('appModeDemo')}
+          </AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => choose('live')}
+          style={[
+            styles.chip,
+            { borderColor: colors.border, backgroundColor: mode === 'live' ? colors.primary : colors.surface },
+          ]}
+        >
+          <AppText style={[styles.chipText, { color: mode === 'live' ? colors.onPrimary : colors.text }]}>
+            {t('appModeLive')}
+          </AppText>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

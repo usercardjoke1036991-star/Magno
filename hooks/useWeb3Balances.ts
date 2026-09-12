@@ -79,6 +79,7 @@ export interface UserInfo {
     solicitudesCompletadas: number;
     ultimoPrestamoTimestamp: number;
     cooldownRestante: number;
+    bonusPending: number;
   };
   isOwner: boolean;
   isAdmin: boolean;
@@ -123,7 +124,7 @@ const EMPTY_USER_INFO: UserInfo = {
   referralPoints: REFERRAL_REPUTATION_POINTS,
   isDelinquent: false,
   creditHistory: { paidOnTime: 0, missedLoans: 0, penalties: 0 },
-  userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0 },
+  userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0, bonusPending: 0 },
   isOwner: false,
   isAdmin: false,
   paused: false,
@@ -579,6 +580,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
               solicitudesCompletadas: Number(progress.solicitudesCompletadas),
               ultimoPrestamoTimestamp: lastTs,
               cooldownRestante: cooldown,
+              bonusPending: Number(progress.bonusPending || 0),
             },
           }));
         } catch (e) {

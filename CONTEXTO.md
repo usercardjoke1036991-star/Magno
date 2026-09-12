@@ -74,6 +74,7 @@ Magno/
 - **Correo OTP**: solo al crear la cuenta y al recuperar la contraseña.
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
+- **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
 
 ---
 
@@ -85,19 +86,18 @@ Magno/
 - el **interés en $** del siguiente > el anterior (cada subida cobra más interés en dólares)
 - el **total a devolver** también sube
 
-`requiredCount` = préstamos **de este nivel** a tiempo para desbloquear el siguiente.
-Contrato: nivel 1 → 3 pagos; niveles 2–99 → 5 pagos; 100 es el tope.
+`requiredCount` live (núcleo `0x1E5118`): L1 → 3; L2–99 → 5; L100 no sube.
+La escalera nueva (3 hasta L5, +5 desde $100, bono 2.000 USDT en L100) vive en `QuatriviumLeveling.sol` y se cableará en el próximo deploy, sin recortar el núcleo.
 
-| Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Para subir |
-|------:|----------:|------:|-----:|----------:|:------:|:-----------|
-| 1 | $1 | 7 días | 100% | $1.00 | 1 | 3 |
-| 2 | $2 | 10 días | 95% | $1.90 | 1 | 5 |
-| 5 | $20 | 25 días | 50% | $10.00 | 1 | 5 |
-| 6 | $35 | 30 días | 48% | $16.80 | 1 | 5 |
-| 7 | $50 | 35 días | 40% | $20.00 | 2 | 5 |
-| 10 | $100 | 50 días | 34% | $34.00 | 3 | 5 |
-| 50 | $825 | 68 días | 22.44% | $185.13 | 3 | 5 |
-| 100 | **$10 000** | 90 días | 8% | $800.00 | 3 | — |
+| Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Live / planificado |
+|------:|----------:|------:|-----:|----------:|:------:|:-------------------|
+| 1 | $1 | 7 días | 100% | $1.00 | 1 | 3 / 3 |
+| 5 | $20 | 25 días | 50% | $10.00 | 1 | 5 / 3 |
+| 6 | $35 | 30 días | 48% | $16.80 | 1 | 5 / 5 |
+| 10 | $100 | 50 días | 34% | $34.00 | 3 | 5 / 5 |
+| 11 | $120 | 50 días | 33.71% | $40.45 | 3 | 5 / 10 |
+| 50 | $825 | 68 días | 22.44% | $185.13 | 3 | 5 / 205 |
+| 100 | **$10 000** | 90 días | 8% | $800.00 | 3 | — / 455 + bono 2.000 |
 
 > Los bps son tasa plana sobre el principal por el plazo (no APR anual).
 > A partir de $50: 2 cuotas. A partir de $60: 3. Tabla completa: `constants/loanTiers.ts`.
@@ -225,6 +225,10 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Auditoria productiva: UI y nucleo coinciden con 0x1E5118 (L1=3, resto=5). QuatriviumLeveling guarda la escalera+bono para el proximo deploy. eas.json production ya no inyecta testnet. | — |
+| 2026-09-12 | Vista de niveles superiores: todos los bloqueados se listan; pulse para ver la ficha completa. Siguen sin poder pedirse. | — |
+| 2026-09-12 | Avatar: solo imagen y marco de rango. El color de fondo sin foto se deriva de la wallet. | — |
+| 2026-09-12 | Decisión: alta nueva = Real. El último modo (Demo o Real) se restaura al reabrir. Demo disponible también en tienda (mundo testnet aislado). | — |
 | 2026-09-11 | Fixes Demo: notifyApiBases localhost, lastBlock por contrato, CTA Activar en LoanTierCard, prepareDemoCredit visible tras registrar. | — |
 | 2026-09-11 | Auditoria live post-redeploy 100 niveles: UI pide Activar, L1  / L2 bloqueado, historial vacio. Cache de credito keyed por contrato; refresh silencioso no reescanea niveles. | — |
 | 2026-09-11 | Escalera de 100 niveles hasta $10 000: tasa del anterior siempre mayor; interés $ y monto siempre suben | Completar la línea de crédito y corregir el desorden de tasas 5→6 y 7→8 |

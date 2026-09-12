@@ -245,13 +245,13 @@
   "profileNameInvalid": "2 ile 24 karakter kullanın.",
   "profilePhoto": "Profil fotoğrafı",
   "profilePickPhoto": "Galeriden fotoğraf seç",
-  "profileChooseAvatar": "Veya bir avatar rengi seçin",
+  "profileChooseAvatar": "Profil fotoğrafı",
   "profileRemovePhoto": "Fotoğrafı kaldır",
   "profileSave": "Profili kaydet",
   "profileSaved": "Profiliniz kaydedildi. Referanslar bu adı görecek.",
   "profileSaveError": "Profil kaydedilemedi.",
   "profilePhotoDenied": "Quatrivium Credit galeri fotoğrafı için izin ister.",
-  "profilePhotoUnavailable": "Galeri bu sürümde yok. Bunun yerine avatar rengi seçin.",
+  "profilePhotoUnavailable": "Galeri bu sürümde yok.",
   "profileSomeone": "Bir Quatrivium Credit kullanıcısı",
   "helloName": "Merhaba, {name}",
   "referralEarnLevel": "Bir referans bu seviyeyi talep edip öderse komisyon: {amount} (faizin %15’i).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "Hattınızın durumu",
   "hubCreditLeadActive": "Aktif. Buradan isteyin veya ödeyin.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} gün"
+  "termDays": "{days} gün",
+  "lockedLevelsHint": "Kilitli kalır. Tutarı, oranı, vade ve faizi görmek için bir seviyeye dokunun.",
+  "loanSeeDetails": "Tüm ayrıntıları gör",
+  "toPoolBonus": "Havuz bonusu için",
+  "payOnTimeToBonus": "Bu seviyede {count} zamanında ödemeyi tamamlayın ve havuzdan {amount} kazanın",
+  "claimPoolBonus": "Havuz bonusunu al",
+  "poolBonusPending": "Bonus, havuzda serbest nakit olana kadar bekliyor"
 }

@@ -114,10 +114,7 @@ export function initialsFromName(name: string, fallback = 'BC'): string {
   return fallback;
 }
 
-export function avatarColorForWallet(wallet: string, avatarId?: number): { bg: string; fg: string } {
-  if (typeof avatarId === 'number' && AVATAR_PRESETS[avatarId]) {
-    return AVATAR_PRESETS[avatarId];
-  }
+export function avatarColorForWallet(wallet: string): { bg: string; fg: string } {
   let hash = 0;
   const key = wallet.toLowerCase();
   for (let i = 0; i < key.length; i += 1) {

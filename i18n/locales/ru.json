@@ -245,13 +245,13 @@
   "profileNameInvalid": "Используйте от 2 до 24 символов.",
   "profilePhoto": "Фото профиля",
   "profilePickPhoto": "Выбрать фото из галереи",
-  "profileChooseAvatar": "Или выбрать цвет аватара",
+  "profileChooseAvatar": "Фото профиля",
   "profileRemovePhoto": "Удалить фото",
   "profileSave": "Сохранить профиль",
   "profileSaved": "Профиль сохранён. Рефералы увидят это имя.",
   "profileSaveError": "Не удалось сохранить профиль.",
   "profilePhotoDenied": "Quatrivium Credit нужен доступ к фото из галереи.",
-  "profilePhotoUnavailable": "Галерея недоступна в этой сборке. Выберите цвет аватара.",
+  "profilePhotoUnavailable": "Галерея недоступна в этой сборке.",
   "profileSomeone": "Пользователь Quatrivium Credit",
   "helloName": "Привет, {name}",
   "referralEarnLevel": "Комиссия, если реферал запросит и погасит этот уровень: {amount} (15% от процентов).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "Состояние линии",
   "hubCreditLeadActive": "Активна. Берите или платите здесь.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} дн."
+  "termDays": "{days} дн.",
+  "lockedLevelsHint": "Они остаются закрытыми. Нажмите уровень, чтобы увидеть сумму, ставку, срок и процент.",
+  "loanSeeDetails": "Смотреть полностью",
+  "toPoolBonus": "Для бонуса пула",
+  "payOnTimeToBonus": "Сделайте {count} своевременных выплат этого уровня, чтобы получить {amount} из пула",
+  "claimPoolBonus": "Получить бонус пула",
+  "poolBonusPending": "Бонус ждёт свободных средств в пуле"
 }

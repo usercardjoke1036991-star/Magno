@@ -33,7 +33,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   rankName,
   showRankLabel,
 }) => {
-  const colors = avatarColorForWallet(wallet, profile?.avatarId);
+  const colors = avatarColorForWallet(wallet);
   const initials = initialsFromName(profile?.displayName || '', wallet ? wallet.slice(2, 4).toUpperCase() : 'QC');
   const localPhoto = Boolean(profile?.photoUri && !/^https?:/i.test(profile.photoUri));
   const rank = level ? getRankForLevel(level) : null;

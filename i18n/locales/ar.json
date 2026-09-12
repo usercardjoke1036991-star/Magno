@@ -245,13 +245,13 @@
   "profileNameInvalid": "استخدم بين 2 و24 حرفاً.",
   "profilePhoto": "صورة الملف",
   "profilePickPhoto": "اختر صورة من المعرض",
-  "profileChooseAvatar": "أو اختر لون الصورة الرمزية",
+  "profileChooseAvatar": "صورة الملف",
   "profileRemovePhoto": "إزالة الصورة",
   "profileSave": "حفظ الملف",
   "profileSaved": "تم حفظ ملفك. سيظهر هذا الاسم للمُحالين.",
   "profileSaveError": "تعذر حفظ الملف الشخصي.",
   "profilePhotoDenied": "يحتاج Quatrivium Credit إذناً لاستخدام صورة من المعرض.",
-  "profilePhotoUnavailable": "المعرض غير متاح في هذا الإصدار. اختر لون صورة رمزية بدلاً من ذلك.",
+  "profilePhotoUnavailable": "المعرض غير متاح في هذا الإصدار.",
   "profileSomeone": "مستخدم Quatrivium Credit",
   "helloName": "مرحباً، {name}",
   "referralEarnLevel": "العمولة إذا طلب مُحال هذا المستوى وسدده: {amount} (15% من الفائدة).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "حالة خطك",
   "hubCreditLeadActive": "نشط. اطلب أو ادفع هنا.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} يومًا"
+  "termDays": "{days} يومًا",
+  "lockedLevelsHint": "تبقى مقفلة. اضغط مستوى لرؤية المبلغ والنسبة والأجل والفائدة.",
+  "loanSeeDetails": "عرض التفاصيل كاملة",
+  "toPoolBonus": "لمكافأة المجمع",
+  "payOnTimeToBonus": "أكمل {count} دفعات في موعدها من هذا المستوى لتحصل على {amount} من المجمع",
+  "claimPoolBonus": "استلم مكافأة المجمع",
+  "poolBonusPending": "المكافأة بانتظار سيولة كافية في المجمع"
 }

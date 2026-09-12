@@ -113,9 +113,8 @@ export const RPC_URLS = {
 
 export const CONTRACT_ADDRESSES = {
   mainnet: process.env.EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET || ZERO_ADDRESS,
-  testnet: isStoreProduction()
-    ? ZERO_ADDRESS
-    : process.env.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET || DEPLOYED_TESTNET.contract,
+  // Demo sigue existiendo en el APK de tienda: mundos aislados, no se mezcla con Real.
+  testnet: process.env.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET || DEPLOYED_TESTNET.contract || ZERO_ADDRESS,
 };
 
 export function getActiveContractNetwork(): 'mainnet' | 'testnet' {

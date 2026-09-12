@@ -245,13 +245,13 @@
   "profileNameInvalid": "Dùng từ 2 đến 24 ký tự.",
   "profilePhoto": "Ảnh hồ sơ",
   "profilePickPhoto": "Chọn ảnh từ thư viện",
-  "profileChooseAvatar": "Hoặc chọn màu avatar",
+  "profileChooseAvatar": "Ảnh hồ sơ",
   "profileRemovePhoto": "Xóa ảnh",
   "profileSave": "Lưu hồ sơ",
   "profileSaved": "Hồ sơ đã lưu. Người được giới thiệu sẽ thấy tên này.",
   "profileSaveError": "Không thể lưu hồ sơ.",
   "profilePhotoDenied": "Quatrivium Credit cần quyền dùng ảnh thư viện.",
-  "profilePhotoUnavailable": "Thư viện không có trong bản dựng này. Hãy chọn màu avatar.",
+  "profilePhotoUnavailable": "Thư viện không có trong bản dựng này.",
   "profileSomeone": "Một người dùng Quatrivium Credit",
   "helloName": "Xin chào, {name}",
   "referralEarnLevel": "Hoa hồng nếu người được giới thiệu yêu cầu và trả cấp này: {amount} (15% lãi).",
@@ -661,5 +661,11 @@
   "subsectionCreditStatus": "Trạng thái hạn mức",
   "hubCreditLeadActive": "Đã bật. Xin hoặc trả tại đây.",
   "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
-  "termDays": "{days} ngày"
+  "termDays": "{days} ngày",
+  "lockedLevelsHint": "Vẫn bị khóa. Chạm một cấp để xem số tiền, lãi suất, kỳ hạn và lãi.",
+  "loanSeeDetails": "Xem đủ thông tin",
+  "toPoolBonus": "Thưởng từ quỹ",
+  "payOnTimeToBonus": "Hoàn thành {count} khoản trả đúng hạn của cấp này để nhận {amount} từ quỹ",
+  "claimPoolBonus": "Nhận thưởng quỹ",
+  "poolBonusPending": "Thưởng đang chờ quỹ có tiền mặt dư"
 }

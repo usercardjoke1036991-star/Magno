@@ -20,9 +20,9 @@ import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
  * las otras fundadoras pueden reasignar fundador y owner (timelock + confirmaciones).
  * Las comisiones de red recorren toda la línea hacia arriba (no se cortan a 5).
  *
- * EIP-170: el runtime de ESTE contrato debe caber en 24576 bytes. La app Expo no tiene
- * ese tope. Para crecer el protocolo: contratos hermanos (identidad / créditos / red) o
- * librerías `public` con DELEGATECALL, no un único archivo infinito.
+ * EIP-170: ESTE archivo no puede pasar de 24576 bytes. El protocolo sí puede crecer:
+ * cada pieza nueva (niveles, bonos, identidad, red) vive en un contrato hermano
+ * con su propio tope. No se borran funciones de este núcleo para “hacer hueco”.
  */
 contract QuatriviumCredit is ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -818,6 +818,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
             return;
         }
         progresoPago.solicitudesCompletadas++;
+        // Núcleo = contrato live: 3 en L1, 5 en el resto. La escalera nueva vive en QuatriviumLeveling.
         uint256 solicitudesRequeridas = unlocked <= 1 ? 3 : 5;
         if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas && unlocked < LoanTierSeed.MAX_NIVEL) {
             progresoPago.nivelActual++;
