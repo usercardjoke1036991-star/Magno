@@ -43,6 +43,10 @@ if sys.platform == "win32":
 _DIRS_EXCLUIDOS = {
     ".venv", "venv", "__pycache__", "node_modules", "dist", "build",
     ".pytest_cache", ".mypy_cache", ".git", ".cursor", ".github",
+    "site-packages", ".gradle", "cache", "artifacts", ".cxx", "CMakeFiles",
+    "coverage", "typechain-types", "typechain", ".cache",
+    ".next", ".nuxt", ".turbo", "out", "DerivedData", "Pods",
+    ".expo", ".ruff_cache",
 }
 
 # ─────────────────────────────────────────────
@@ -129,7 +133,10 @@ def _iterar_py(directorio: Path) -> list[Path]:
     nombres_subproyecto = {p.name for p in _subproyectos_inmediatos(directorio)}
     excluir = _DIRS_EXCLUIDOS | nombres_subproyecto
     for dirpath, dirnames, filenames in os.walk(str(directorio)):
-        dirnames[:] = [d for d in dirnames if d not in excluir]
+        dirnames[:] = [
+            d for d in dirnames
+            if d not in excluir and not d.startswith("Auditoria")
+        ]
         for fname in filenames:
             if fname.endswith(".py"):
                 resultado.append(Path(dirpath) / fname)
@@ -143,7 +150,10 @@ def _iterar_js(directorio: Path) -> list[Path]:
     nombres_subproyecto = {p.name for p in _subproyectos_inmediatos(directorio)}
     excluir = _DIRS_EXCLUIDOS | nombres_subproyecto
     for dirpath, dirnames, filenames in os.walk(str(directorio)):
-        dirnames[:] = [d for d in dirnames if d not in excluir]
+        dirnames[:] = [
+            d for d in dirnames
+            if d not in excluir and not d.startswith("Auditoria")
+        ]
         for fname in filenames:
             if Path(fname).suffix in ext:
                 resultado.append(Path(dirpath) / fname)
@@ -156,7 +166,10 @@ def _iterar_mql(directorio: Path) -> list[Path]:
     nombres_subproyecto = {p.name for p in _subproyectos_inmediatos(directorio)}
     excluir = _DIRS_EXCLUIDOS | nombres_subproyecto
     for dirpath, dirnames, filenames in os.walk(str(directorio)):
-        dirnames[:] = [d for d in dirnames if d not in excluir]
+        dirnames[:] = [
+            d for d in dirnames
+            if d not in excluir and not d.startswith("Auditoria")
+        ]
         for fname in filenames:
             if fname.endswith((".mq5", ".mq4", ".mqh")):
                 resultado.append(Path(dirpath) / fname)
@@ -247,6 +260,22 @@ def _recopilar_nombres_proyecto(archivos_py: list[Path]) -> set[str]:
     return todos
 
 
+def _es_submodulo_local(ruta_modulo: Path, nombre: str) -> bool:
+    """True si `from paquete import nombre` apunta a un .py o paquete real."""
+    if not nombre.isidentifier():
+        return False
+    if ruta_modulo.name != "__init__.py":
+        return False
+    base = ruta_modulo.parent
+    try:
+        return (
+            (base / f"{nombre}.py").is_file()
+            or (base / nombre / "__init__.py").is_file()
+        )
+    except OSError:
+        return False
+
+
 def _resolver_modulo_local(modulo: str, desde_archivo: Path, raiz: Path) -> Optional[Path]:
     """
     Intenta resolver un nombre de módulo a un archivo .py local.
@@ -317,17 +346,20 @@ def detectar_imports_rotos(archivo: Path, raiz: Path) -> list[dict]:
             nombre = alias.name
             if nombre == "*":
                 continue  # star import, no se puede verificar estáticamente
-            if nombre not in nombres_en_modulo:
-                conectores.append(_conector(
-                    tipo="import_roto_python",
-                    archivo=rel,
-                    linea=nodo.lineno,
-                    mensaje=(
-                        f"'from {modulo} import {nombre}' — "
-                        f"'{nombre}' no está definido en {ruta_modulo.name}"
-                    ),
-                    severidad="roto",
-                ))
+            if nombre in nombres_en_modulo:
+                continue
+            if _es_submodulo_local(ruta_modulo, nombre):
+                continue
+            conectores.append(_conector(
+                tipo="import_roto_python",
+                archivo=rel,
+                linea=nodo.lineno,
+                mensaje=(
+                    f"'from {modulo} import {nombre}' — "
+                    f"'{nombre}' no está definido en {ruta_modulo.name}"
+                ),
+                severidad="roto",
+            ))
 
     return conectores
 
@@ -487,6 +519,66 @@ def detectar_imports_js_rotos(archivo: Path, raiz: Path) -> list[dict]:
     return conectores
 
 
+def _nombres_js_definidos(codigo: str) -> set[str]:
+    """Nombres locales JS/TS: const/function, destructuring y imports."""
+    nombres: set[str] = set()
+    for m in re.finditer(
+        r"(?:^|\s)(?:const|let|var|function|class)\s+(\w+)",
+        codigo,
+        re.MULTILINE,
+    ):
+        nombres.add(m.group(1))
+    for m in re.finditer(r"(?:const|let|var)\s*\{([^}]+)\}", codigo):
+        for part in m.group(1).split(","):
+            part = part.strip()
+            if not part:
+                continue
+            if part.startswith("..."):
+                rest = part.lstrip(".").strip()
+                if rest.isidentifier():
+                    nombres.add(rest)
+                continue
+            if ":" in part:
+                alias = part.split(":")[-1].split("=")[0].strip()
+                if alias.isidentifier():
+                    nombres.add(alias)
+            else:
+                name = part.split("=")[0].strip()
+                if name.isidentifier():
+                    nombres.add(name)
+    for m in re.finditer(r"\(\s*\{([^}]+)\}", codigo):
+        for part in m.group(1).split(","):
+            part = part.strip()
+            if not part or part.startswith("..."):
+                rest = part.lstrip(".").strip()
+                if rest.isidentifier():
+                    nombres.add(rest)
+                continue
+            if ":" in part:
+                alias = part.split(":")[-1].split("=")[0].strip()
+                if alias.isidentifier():
+                    nombres.add(alias)
+            else:
+                name = part.split("=")[0].strip()
+                if name.isidentifier():
+                    nombres.add(name)
+    for m in re.finditer(r"(?:const|let|var)\s*\[([^\]]+)\]", codigo):
+        for part in m.group(1).split(","):
+            name = part.strip()
+            if name.startswith("..."):
+                name = name.lstrip(".").strip()
+            if name.isidentifier():
+                nombres.add(name)
+    patron_import_nombre = re.compile(
+        r"""import\s+(?:type\s+)?(?:[\w*]+\s*,\s*)?{?\s*([\w\s,]+?)\s*}?\s+from"""
+    )
+    for m in patron_import_nombre.finditer(codigo):
+        for nombre in re.split(r"[,\s]+", m.group(1)):
+            if nombre.strip() and nombre.strip() not in {"type", "from"}:
+                nombres.add(nombre.strip())
+    return nombres
+
+
 def detectar_handlers_jsx_sin_definir(archivo: Path, raiz: Path) -> list[dict]:
     """
     Detecta handlers JSX (onClick, onChange, onSubmit, etc.) que referencian
@@ -498,22 +590,7 @@ def detectar_handlers_jsx_sin_definir(archivo: Path, raiz: Path) -> list[dict]:
 
     rel = _ruta_relativa(archivo, raiz)
     conectores = []
-
-    # Nombres definidos en el archivo (const/let/var/function/class)
-    patron_definicion = re.compile(
-        r"""(?:^|\s)(?:const|let|var|function)\s+(\w+)\s*[=({]""",
-        re.MULTILINE
-    )
-    nombres_definidos = set(m.group(1) for m in patron_definicion.finditer(codigo))
-
-    # Nombres importados (no se pueden verificar aquí)
-    patron_import_nombre = re.compile(
-        r"""import\s+(?:[\w*]+\s*,\s*)?{?\s*([\w\s,]+?)\s*}?\s+from"""
-    )
-    for m in patron_import_nombre.finditer(codigo):
-        for nombre in re.split(r"[,\s]+", m.group(1)):
-            if nombre.strip():
-                nombres_definidos.add(nombre.strip())
+    nombres_definidos = _nombres_js_definidos(codigo)
 
     # Handlers JSX: onClick={X}, onChange={X}, onSubmit={X}, etc.
     patron_handler = re.compile(

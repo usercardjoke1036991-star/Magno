@@ -58,6 +58,9 @@ const nextRpc = () => {
   rpcCursor = (rpcCursor + 1) % RPC_CANDIDATES.length;
   return RPC_CANDIDATES[rpcCursor];
 };
+const rpcUnhealthy = (error) =>
+  /rate limit|-32005|limit exceeded|timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN|502|503|504|missing response|failed to detect network|server error|could not coalesce|network/i
+    .test(String(error?.message || error || ''));
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || '';
 const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
@@ -836,8 +839,7 @@ const watchChain = async () => {
           try {
             return await contract.queryFilter(filter, from, to);
           } catch (error) {
-            const text = String(error?.message || error);
-            if (text.includes('rate limit') || text.includes('-32005')) {
+            if (rpcUnhealthy(error)) {
               throw error;
             }
             return [];
@@ -883,12 +885,11 @@ const watchChain = async () => {
         await scanDebtReminders(contract);
       }
     } catch (error) {
-      const text = String(error?.message || error);
-      if (text.includes('rate limit') || text.includes('-32005') || text.includes('limit exceeded')) {
+      if (rpcUnhealthy(error)) {
         rpcUrl = nextRpc();
         provider = new JsonRpcProvider(rpcUrl);
         contract = new Contract(CONTRACT, ABI, provider);
-        console.error('Avisos chain: RPC limitada, se cambia de nodo');
+        console.error('Avisos chain: RPC caída, se cambia de nodo');
         await new Promise((r) => setTimeout(r, 15000));
         continue;
       }
@@ -920,6 +921,7 @@ const isJsonRequest = (req) => {
 const requestPath = (req) => String(req.url || '/').split('?')[0];
 
 const server = createServer(async (req, res) => {
+  try {
   requestOrigin = String(req.headers.origin || '');
   if (!originAllowed()) {
     json(res, 403, { error: 'origin' });
@@ -1606,6 +1608,10 @@ const server = createServer(async (req, res) => {
     return;
   }
   json(res, 404, { error: 'not found' });
+  } catch (error) {
+    console.error('notify http:', error?.message || error);
+    if (!res.headersSent) json(res, 500, { error: 'server' });
+  }
 });
 
 server.requestTimeout = 45_000;

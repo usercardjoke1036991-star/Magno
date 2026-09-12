@@ -129,6 +129,9 @@ def _nombre_sugiere_path(nombre: str) -> bool:
 _EXCLUIR_DIRS = {
     ".venv", "venv", "__pycache__", "node_modules", "dist", "build",
     ".pytest_cache", ".mypy_cache", ".git",
+    "cache", "artifacts", ".cxx", "CMakeFiles",
+    "coverage", "typechain-types", ".cache",
+    ".next", ".nuxt", ".turbo", "out", "DerivedData", "Pods",
 }
 
 
@@ -152,7 +155,10 @@ def _iterar_archivos_logica(directorio: Path, extensiones: set) -> list:
     nombres_excluidos = _EXCLUIR_DIRS | subproyectos
 
     for dirpath, dirnames, filenames in os.walk(str(raiz)):
-        dirnames[:] = [d for d in dirnames if d not in nombres_excluidos]
+        dirnames[:] = [
+            d for d in dirnames
+            if d not in nombres_excluidos and not d.startswith("Auditoria")
+        ]
         dp = Path(dirpath)
         for fname in filenames:
             f = dp / fname
@@ -342,6 +348,11 @@ def detectar_bucle_infinito(tree: ast.AST, codigo: str) -> list[dict]:
     dentro del cuerpo directo del bucle.
     """
     resultados = []
+    padres = {
+        child: node
+        for node in ast.walk(tree)
+        for child in ast.iter_child_nodes(node)
+    }
 
     for node in ast.walk(tree):
         if not isinstance(node, ast.While):
@@ -358,6 +369,15 @@ def detectar_bucle_infinito(tree: ast.AST, codigo: str) -> list[dict]:
                 es_infinito = True
 
         if not es_infinito:
+            continue
+
+        # try: while True: q.get_nowait()  except Empty: pass  → drena cola (no FP)
+        parent = padres.get(node)
+        if (
+            isinstance(parent, ast.Try)
+            and parent.handlers
+            and parent.body == [node]
+        ):
             continue
 
         if not _tiene_salida_directa(node.body):
@@ -619,14 +639,14 @@ def detectar_volumen_cero(contenido: str) -> list[dict]:
     resultados = []
     lineas = contenido.splitlines()
 
-    # Asignación explícita a 0
+    # Asignación explícita a 0 (no 0.01: \b entre 0 y . daba FP)
     pat_zero = re.compile(
-        r"\b(InpLotSize|InpLots|LotSize|lot_size|lotSize|volume)\s*=\s*0\b",
+        r"\b(InpLotSize|InpLots|LotSize|lot_size|lotSize|volume)\s*=\s*0(?![.\d])",
         re.IGNORECASE,
     )
-    # input de tipo double sin valor por defecto o con 0
+    # input double = 0 o 0.0, no 0.01
     pat_input_zero = re.compile(
-        r'input\s+double\s+\w*[Ll]ot\w*\s*=\s*0\.?0*\s*;',
+        r'input\s+double\s+\w*[Ll]ot\w*\s*=\s*0(?:\.0+)?\s*;',
         re.IGNORECASE,
     )
 
@@ -871,6 +891,8 @@ def detectar_useeffect_sin_deps(contenido: str) -> list[dict]:
         tiene_deps = False
         coma_nivel1 = False
 
+        brace = 0
+        bracket = 0
         while pos < len(contenido) and depth > 0:
             c = contenido[pos]
             prev = contenido[pos - 1] if pos > 0 else ""
@@ -887,10 +909,22 @@ def detectar_useeffect_sin_deps(contenido: str) -> list[dict]:
                 depth -= 1
                 if depth == 0:
                     break
-            elif c == "," and depth == 1:
+            elif c == "{":
+                brace += 1
+            elif c == "}":
+                brace = max(0, brace - 1)
+            elif c == "[":
+                bracket += 1
+            elif c == "]":
+                bracket = max(0, bracket - 1)
+            elif (
+                c == ","
+                and depth == 1
+                and brace == 0
+                and bracket == 0
+            ):
                 # Coma al nivel del useEffect — hay segundo argumento
                 coma_nivel1 = True
-                # Verificar si el siguiente argumento no-espacio es '['
                 rest = contenido[pos + 1 :].lstrip()
                 if rest.startswith("["):
                     tiene_deps = True

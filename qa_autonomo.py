@@ -20,6 +20,12 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
 
+try:
+    from io_utf8 import run_utf8
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from io_utf8 import run_utf8
+
 # Forzar UTF-8 en Windows para que los símbolos Unicode se impriman correctamente
 # Usa reconfigure() para no reemplazar el objeto stdout (seguro bajo pytest/CI)
 if sys.platform == "win32":
@@ -185,9 +191,15 @@ def verificar_python(directorio: str, reporte: ReporteQA):
     ya_bajo_pytest = bool(os.environ.get("PYTEST_CURRENT_TEST"))
     if test_files and tests_dir.exists() and not ya_bajo_pytest:
         try:
-            result = subprocess.run(
-                [sys.executable, "-m", "pytest", str(tests_dir), "--tb=short", "-q", "--no-header"],
-                capture_output=True, text=True, cwd=directorio, timeout=120
+            env_pytest = os.environ.copy()
+            env_pytest["QA_AUTONOMO_RUNNING"] = "1"
+            result = run_utf8(
+                [
+                    sys.executable, "-m", "pytest", str(tests_dir),
+                    "--tb=short", "-q", "--no-header",
+                    "-k", "not test_qa_autonomo_rendimiento",
+                ],
+                cwd=directorio, timeout=120, env=env_pytest,
             )
             if result.returncode == 0:
                 reporte.agregar("pytest", f"Todos los tests pasaron: {result.stdout.strip()[:200]}", "ok")
@@ -393,6 +405,9 @@ def verificar_go(directorio: str, reporte: ReporteQA):
 _EXCLUIR_SEGMENTOS_UNIVERSAL = {
     ".venv", "venv", "__pycache__", "node_modules", "dist", "build",
     ".pytest_cache", ".mypy_cache",
+    "cache", "artifacts", ".cxx", "CMakeFiles",
+    "coverage", "typechain-types", ".cache",
+    ".next", ".nuxt", ".turbo", "out", "DerivedData", "Pods",
 }
 
 # Extensiones auditables por defecto para la búsqueda de patrones de error
@@ -439,7 +454,7 @@ def _iterar_archivos_auditables(
         # Podar directorios excluidos y subproyectos EN SITIO (evita descender)
         dirnames[:] = [
             d for d in dirnames
-            if d not in nombres_excluidos
+            if d not in nombres_excluidos and not d.startswith("Auditoria")
         ]
         dp = Path(dirpath)
         for fname in filenames:
@@ -557,6 +572,22 @@ def verificar_ci(directorio: str, reporte: ReporteQA):
         reporte.agregar("ci", "No hay workflows de GitHub Actions configurados", "advertencia")
     else:
         reporte.agregar("ci", f"{len(workflows)} workflow(s) de CI configurado(s)", "ok")
+
+
+def verificar_readme(directorio: str, reporte: ReporteQA):
+    """
+    Check suave: README.md existe.
+    No es crítico — solo advertencia si falta (no falla QA).
+    """
+    readme = Path(directorio) / "README.md"
+    if not readme.exists():
+        reporte.agregar(
+            "documentacion",
+            "README.md no existe — ejecutar: python actualizar_readme.py",
+            "advertencia",
+        )
+    else:
+        reporte.agregar("documentacion", "README.md presente", "ok")
 
 
 # ─────────────────────────────────────────────
@@ -858,6 +889,185 @@ def verificar_conectores_sueltos(directorio: str, reporte: "ReporteQA"):
 
 
 # ─────────────────────────────────────────────
+# MÓDULO 4e: VERIFICACIÓN DE MÓDULOS Y MODALES UI
+# ─────────────────────────────────────────────
+
+def verificar_modulos_proyecto(directorio: str, reporte: "ReporteQA"):
+    """
+    Ejecuta verificar_modulos.py (módulos documentados + modales UI).
+    Si el import falla, aviso — no crash.
+    """
+    import importlib.util
+    import time
+
+    raiz = Path(__file__).parent
+    script = raiz / "verificar_modulos.py"
+    if not script.exists():
+        script = Path(directorio) / "verificar_modulos.py"
+        if not script.exists():
+            reporte.agregar(
+                "modulos",
+                "verificar_modulos.py no encontrado — omitiendo módulos/modales",
+                "info",
+            )
+            return
+
+    t0 = time.time()
+    try:
+        spec = importlib.util.spec_from_file_location("verificar_modulos", script)
+        if spec is None or spec.loader is None:
+            reporte.agregar(
+                "modulos",
+                "No se pudo cargar verificar_modulos.py — omitiendo",
+                "advertencia",
+            )
+            return
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        resultado = mod.verificar_modulos(directorio)
+        elapsed = time.time() - t0
+
+        criticos = resultado.get("criticos", [])
+        advertencias = resultado.get("advertencias", [])
+        verificados = resultado.get("verificados", 0)
+
+        for h in criticos:
+            reporte.agregar(
+                "modulos",
+                f"[MODULOS] {h.get('mensaje', '')}",
+                "critico",
+                archivo=h.get("archivo"),
+                linea=h.get("linea"),
+            )
+        for h in advertencias:
+            reporte.agregar(
+                "modulos",
+                f"[MODULOS] {h.get('mensaje', '')}",
+                "advertencia",
+                archivo=h.get("archivo"),
+                linea=h.get("linea"),
+            )
+        if not criticos and not advertencias:
+            reporte.agregar(
+                "modulos",
+                (
+                    f"Módulos y modales OK "
+                    f"({verificados} archivo(s), {elapsed:.2f}s)"
+                ),
+                "ok",
+            )
+        elif not criticos:
+            reporte.agregar(
+                "modulos",
+                (
+                    f"{len(advertencias)} aviso(s) de módulos/modales "
+                    f"({elapsed:.2f}s)"
+                ),
+                "advertencia",
+            )
+    except Exception as e:
+        elapsed = time.time() - t0
+        reporte.agregar(
+            "modulos",
+            f"Error al ejecutar verificar_modulos: {e} ({elapsed:.2f}s)",
+            "advertencia",
+        )
+
+
+# ─────────────────────────────────────────────
+# MÓDULO 4f: MAPA DEL PROYECTO (PIEZAS + DOCS + CONEXIÓN)
+# ─────────────────────────────────────────────
+
+def verificar_mapa_proyecto(directorio: str, reporte: "ReporteQA"):
+    """
+    Ejecuta mapa_proyecto.py (inventario + desfase docs/código).
+    Si MAPA.md ya existe, no lo pisa: 4c-4e ya corrieron y un rewrite
+    con incluir_subchecks=False borraría la sección Conexión.
+    Si falta, lo crea con sub-checks para que nazca completo.
+    """
+    import importlib.util
+    import time
+
+    raiz = Path(__file__).parent
+    script = raiz / "mapa_proyecto.py"
+    if not script.exists():
+        script = Path(directorio) / "mapa_proyecto.py"
+        if not script.exists():
+            reporte.agregar(
+                "mapa",
+                "mapa_proyecto.py no encontrado — omitiendo mapa unificado",
+                "info",
+            )
+            return
+
+    t0 = time.time()
+    try:
+        spec = importlib.util.spec_from_file_location("mapa_proyecto", script)
+        if spec is None or spec.loader is None:
+            reporte.agregar(
+                "mapa",
+                "No se pudo cargar mapa_proyecto.py — omitiendo",
+                "advertencia",
+            )
+            return
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        mapa_path = Path(directorio) / "MAPA.md"
+        falta_mapa = not mapa_path.exists()
+        resultado = mod.mapa_proyecto(
+            directorio,
+            escribir_mapa=falta_mapa,
+            incluir_subchecks=falta_mapa,
+        )
+        elapsed = time.time() - t0
+
+        estado = resultado.get("estado") or "?"
+        dv = resultado.get("docs_vs_codigo") or {}
+        criticos = dv.get("criticos") or []
+        avisos = dv.get("avisos") or []
+
+        for h in criticos:
+            reporte.agregar(
+                "mapa",
+                f"[MAPA] {h.get('mensaje', '')}",
+                "critico",
+                archivo=h.get("archivo"),
+                linea=h.get("linea"),
+            )
+        for h in avisos:
+            reporte.agregar(
+                "mapa",
+                f"[MAPA] {h.get('mensaje', '')}",
+                "advertencia",
+                archivo=h.get("archivo"),
+            )
+        extra = ""
+        if falta_mapa and resultado.get("mapa_escrito"):
+            extra = " — MAPA.md creado"
+        if not criticos and not avisos:
+            reporte.agregar(
+                "mapa",
+                f"Mapa {estado} ({elapsed:.2f}s){extra}",
+                "ok",
+            )
+        elif not criticos:
+            reporte.agregar(
+                "mapa",
+                f"Mapa {estado}: {len(avisos)} aviso(s) ({elapsed:.2f}s)",
+                "advertencia",
+            )
+    except Exception as e:
+        elapsed = time.time() - t0
+        reporte.agregar(
+            "mapa",
+            f"Error al ejecutar mapa_proyecto: {e} ({elapsed:.2f}s)",
+            "advertencia",
+        )
+
+
+# ─────────────────────────────────────────────
 # MÓDULO 5: ORQUESTADOR PRINCIPAL
 # ─────────────────────────────────────────────
 
@@ -872,6 +1082,7 @@ def ejecutar_qa(directorio: str) -> ReporteQA:
 
     # Verificaciones universales
     verificar_ci(directorio, reporte)
+    verificar_readme(directorio, reporte)
 
     # Verificaciones por tipo de proyecto
     tipo_handlers = {
@@ -906,6 +1117,12 @@ def ejecutar_qa(directorio: str) -> ReporteQA:
 
     # Verificación de conectores sueltos (ERR-008) — módulo 4d
     verificar_conectores_sueltos(directorio, reporte)
+
+    # Verificación de módulos y modales UI — módulo 4e
+    verificar_modulos_proyecto(directorio, reporte)
+
+    # Mapa unificado (piezas + docs vs código) — módulo 4f
+    verificar_mapa_proyecto(directorio, reporte)
 
     return reporte
 

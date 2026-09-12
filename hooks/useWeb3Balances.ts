@@ -155,6 +155,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
+  const chainStatusReadyRef = useRef(false);
   const tokenAddress = selectedToken.address;
   const tokenDecimals = selectedToken.decimals;
 
@@ -378,16 +379,28 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
               || (activeLoan.proximaCuota > 0 && nowSec > activeLoan.proximaCuota)
             )
           );
-          const registered = Boolean(registeredFlag) || hasLoan;
-
-          setUserInfo((prev) => ({
-            ...prev,
-            hasActiveLoan: hasLoan,
-            activeLoan,
-            isDelinquent: overdue,
-            isRegistered: registered || prev.isRegistered,
-          }));
-          persistCreditStatus(walletAddress, registered, hasLoan);
+          const loanReadOk = loan !== null;
+          const registeredReadOk = registeredFlag !== null;
+          if (!loanReadOk && !registeredReadOk) {
+            logWarn('Loan/registration RPC failed; keeping last known status');
+          } else {
+            const registered = registeredReadOk
+              ? Boolean(registeredFlag) || hasLoan
+              : hasLoan;
+            setUserInfo((prev) => ({
+              ...prev,
+              hasActiveLoan: loanReadOk ? hasLoan : prev.hasActiveLoan,
+              activeLoan: loanReadOk ? activeLoan : prev.activeLoan,
+              isDelinquent: loanReadOk ? overdue : prev.isDelinquent,
+              isRegistered: registeredReadOk
+                ? registered
+                : (hasLoan || prev.isRegistered),
+            }));
+            if (loanReadOk && registeredReadOk) {
+              chainStatusReadyRef.current = true;
+              persistCreditStatus(walletAddress, registered, hasLoan);
+            }
+          }
         } catch (e) {
           logErr('Error fetching user loan status:', e);
         }
@@ -686,14 +699,17 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   }, [walletAddress, tokenAddress, tokenDecimals]);
 
   useEffect(() => {
+    chainStatusReadyRef.current = false;
     if (!walletAddress || !isAddress(walletAddress)) return;
+    const wallet = walletAddress.toLowerCase();
     AsyncStorage.getItem(creditStatusKey(walletAddress))
       .then((raw) => {
-        if (!raw) return;
+        if (!raw || chainStatusReadyRef.current) return;
         const saved = JSON.parse(raw) as { isRegistered?: boolean; hasActiveLoan?: boolean };
+        if (walletAddress.toLowerCase() !== wallet) return;
         setUserInfo((prev) => ({
           ...prev,
-          isRegistered: Boolean(saved.isRegistered) || prev.isRegistered,
+          isRegistered: Boolean(saved.isRegistered),
           hasActiveLoan: Boolean(saved.hasActiveLoan),
         }));
       })

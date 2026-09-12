@@ -126,6 +126,7 @@ Este autopiloto trabaja en conjunto con:
 - `CONTEXTO.md` → fuente de verdad técnica del estado actual
 
 **Prioridad de lectura al inicio de sesión**:
-1. CONTEXTO.md (estado técnico actual)
-2. VISION.md (dirección aspiracional)
-3. Código fuente (evidencia concreta)
+1. MEMORIA.md (sesión: enfoque, decisiones, cambios, no romper)
+2. CONTEXTO.md (estado técnico actual)
+3. VISION.md (dirección aspiracional)
+4. Código fuente (evidencia concreta)

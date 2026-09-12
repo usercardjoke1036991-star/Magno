@@ -103,6 +103,20 @@ function HomeScreenWithHooks() {
   const creditReady = isCreditReady();
   const creditPaused = userInfo.paused || !creditReady;
   const activeLoan = userInfo.activeLoan;
+  const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
+  const matchesActiveLoan = (tier: (typeof loanTiers)[number]) => {
+    if (!activeLoan) return false;
+    if (activeLoan.tierId > 0 && activeLoan.tierId === tier.id) return true;
+    try {
+      return parseUnits(String(tier.usdAmount), 18).toString() === activeLoan.principalWei;
+    } catch {
+      return false;
+    }
+  };
+  const hasMatchingPayCard = unlockedTiers.some(matchesActiveLoan);
+  const fallbackPayTierId = !activeLoan || hasMatchingPayCard
+    ? 0
+    : (activeLoan.tierId || unlockedTiers[unlockedTiers.length - 1]?.id || 0);
 
   const {
     txLoading,
@@ -362,12 +376,7 @@ function HomeScreenWithHooks() {
               hasActiveLoan={userInfo.hasActiveLoan}
                 isDelinquent={userInfo.isDelinquent}
                 paused={creditPaused}
-                isActiveTier={Boolean(
-                activeLoan && (
-                  (activeLoan.tierId > 0 && activeLoan.tierId === tier.id)
-                  || parseUnits(String(tier.usdAmount), 18).toString() === activeLoan.principalWei
-                )
-              )}
+                isActiveTier={matchesActiveLoan(tier) || Boolean(activeLoan && !hasMatchingPayCard && tier.id === fallbackPayTierId)}
               dueLabel={activeLoan?.totalDueLabel}
               cuotaLabel={activeLoan?.cuotaLabel}
               cuotasPagadas={activeLoan?.cuotasPagadas}

@@ -17,7 +17,7 @@ Cada cambio se analiza como si fuera un engranaje en un reloj: mover uno afecta 
 **ANTES de responder cualquier petición**, ejecuta este protocolo silenciosamente:
 
 ```
-1. Leer CONTEXTO.md del proyecto activo (si existe)
+1. Leer MEMORIA.md + CONTEXTO.md + VISION.md del proyecto activo (si existen)
 2. Identificar el MÓDULO ACTIVO: ¿qué archivo/función/componente involucra la petición?
 3. Mapear DEPENDENCIAS del módulo activo:
    - ¿Qué módulos dependen de él? (¿quién lo llama?)

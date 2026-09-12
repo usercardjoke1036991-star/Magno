@@ -289,10 +289,12 @@ Antes de responder cualquier cosa, busca y lee automáticamente los siguientes a
 en el directorio raíz del proyecto actual (en este orden de prioridad):
 
 ```
-1. CONTEXTO.md      ← Fuente principal: estado, arquitectura y decisiones del proyecto
-2. ARQUITECTURA.md  ← Si existe: detalles de arquitectura del sistema
-3. ESTADO.md        ← Si existe: estado operativo y tareas en curso
-4. README.md        ← Descripción general del proyecto
+1. MEMORIA.md       ← Sesión: enfoque, decisiones, cambios, no romper
+2. CONTEXTO.md      ← Fuente principal: estado técnico y arquitectura
+3. VISION.md        ← Qué quiere construir el usuario
+4. ARQUITECTURA.md  ← Si existe: detalles de arquitectura del sistema
+5. ESTADO.md        ← Si existe: estado operativo y tareas en curso
+6. README.md        ← Descripción general del proyecto
 ```
 
 **Si `CONTEXTO.md` existe**: cargarlo SIEMPRE antes de hacer cualquier acción.

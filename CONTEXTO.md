@@ -18,6 +18,11 @@ y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda blo
 ```
 Magno/
 ├── app/index.tsx                  # Pantalla principal (~522 líneas, orquesta con hooks)
+├── app/_layout.tsx                # Placeholder Expo Router (arranque real: App.js)
+├── babel.config.js                # Babel / Expo
+├── metro.config.js                # Metro + stub snarkjs
+├── hardhat.config.cjs             # Hardhat: tests y deploy Solidity
+├── zkService.ts                   # Reexport ZK experimental (stub Metro)
 ├── components/ (43 archivos)      # UI: WalletSection, LoanTierCard, AdminPanel, SecuritySettings…
 ├── hooks/                         # useWeb3Balances, useWeb3Transactions, useHomeHandlers
 ├── services/                      # quatriviumCreditService, appWallet, deviceBinding, kycDeclaration…
@@ -28,6 +33,7 @@ Magno/
 │   └── mocks/                     # ERC20Mock, MockV3Aggregator (testnet)
 ├── test/ (15 archivos)            # accounting, circuitBreaker, cuotas, destroy, identity, kyc, mlm, demo-identity…
 ├── scripts/                       # deploy, security-check, production-check, notify-worker
+├── salud_proyecto.py              # Reloj suizo: grafo UI→hooks→contrato + i18n/tsc (`npm run salud`)
 ├── i18n/ (17 locales)             # ar, bn, de, en, es, fr, hi, id, it, ja, ko, pt, ru, tr, ur, vi, zh
 ├── constants/                     # contractConfig, rpcConfig, tokens, loanTiers
 ├── stubs/zk-node-stub.js          # Metro stub: snarkjs no es bundleable en RN
@@ -150,6 +156,10 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Módulo | Archivo(s) | Función |
 |---|---|---|
 | Pantalla home | `app/index.tsx` | Orquesta UI (handlers extraídos a `useHomeHandlers`) |
+| Layout Expo | `app/_layout.tsx` | Placeholder; el arranque real es `App.js` |
+| Tooling RN | `babel.config.js` · `metro.config.js` | Babel/Expo y Metro (stub ZK) |
+| Contratos JS | `hardhat.config.cjs` | Tests y deploy Hardhat |
+| ZK stub | `zkService.ts` | Reexport experimental; no va a producción |
 | Handlers | `hooks/useHomeHandlers.ts` | Lógica de cada acción del usuario |
 | Estado on-chain | `hooks/useWeb3Balances.ts` | Lee contrato + RPC · auto-refresh 30 s |
 | Transacciones | `hooks/useWeb3Transactions.ts` | Approve + préstamo + pago + LP + liquidación |
@@ -185,7 +195,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 
 ---
 
-## Estado de verificaciones (última auditoría: 2026-09-11)
+## Estado de verificaciones (última auditoría: 2026-09-11 noche)
 
 | Verificación | Estado | Detalle |
 |---|---|---|
@@ -210,6 +220,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-11 | Auditoría final productividad: hidratación de caché no revierte préstamo/registro on-chain; assertEnoughToPay en todas las cuotas; worker rota RPC y no tumba el HTTP | — |
+| 2026-09-11 | salud_proyecto.py orquesta grafo critico + i18n/tsc/security/conectores (npm run salud) | — |
 | 2026-09-11 | Auditoría final: caché de préstamo se limpia al pagar; ficha activa por `tierId`; saldo de pago usa el token de la deuda; AppKit sigue Demo/Real; worker rota RPC | Evitar deuda fantasma, botón Pagar en la ficha equivocada y avisos parados por Ankr |
 | 2026-09-11 | Demo y Real son mundos distintos (testnet vs mainnet); logo en billetera Quatrivium | Real heredaba préstamo y saldo de Demo porque ambos leían el mismo contrato de prueba |
 | 2026-09-11 | Cooldown de préstamo en cliente + FallbackProvider `quorum: 1` | `obtenerCooldownRestante` cambiaba cada segundo y LogBox mostraba `quorum not met` |

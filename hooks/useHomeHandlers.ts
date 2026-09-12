@@ -328,11 +328,15 @@ export const useHomeHandlers = ({
     const assertEnoughToPay = async (amountWei: string) => {
       if (isDemoAccount() || !walletAddress) return true;
       const meta = getTokenMeta(loanToken) || selectedToken;
-      let available = Number(balances.tokenBalance);
-      if (loanToken.toLowerCase() !== selectedToken.address.toLowerCase()) {
-        const raw = await tokenBalanceOf(loanToken, walletAddress);
-        if (raw === null) return true;
+      const raw = await tokenBalanceOf(loanToken, walletAddress);
+      let available: number;
+      if (raw !== null) {
         available = Number(formatUnits(raw, meta.decimals));
+      } else if (loanToken.toLowerCase() === selectedToken.address.toLowerCase()) {
+        available = Number(balances.tokenBalance);
+      } else {
+        Alert.alert(t('error'), t('errRpcNoContract'));
+        return false;
       }
       const needed = Number(formatUnits(amountWei, meta.decimals));
       if (needed > available + 1e-8) {
@@ -359,6 +363,16 @@ export const useHomeHandlers = ({
       return;
     }
 
+    let multiWei = userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei;
+    try {
+      const cuota = BigInt(userInfo.activeLoan.cuotaWei || '0');
+      const remaining = BigInt(userInfo.activeLoan.remainingWei || userInfo.activeLoan.totalDueWei || '0');
+      const planned = cuota * BigInt(count);
+      multiWei = (planned > 0n && planned < remaining ? planned : remaining).toString();
+    } catch {
+      // se usa remainingWei
+    }
+    if (!(await assertEnoughToPay(multiWei))) return;
     const result = await pagarCuotas(count, loanToken);
     if (result.success) refetch();
   };
