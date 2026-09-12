@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "पुष्टि करने के लिए PIN दर्ज करें",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "डेमो में KYC या फ़ोन नहीं मांगा जाता।",
   "securityKycDemo": "KYC (डेमो में वैकल्पिक)",
   "securityKycDemoHint": "डेमो में खाता आज़माने के लिए ज़रूरी नहीं।",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "सूचनाएं और पासवर्ड रिकवरी के लिए सुरक्षा में ईमेल जोड़ें।",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "साइन इन: पासवर्ड और ईमेल। बाकी वैकल्पिक।",
+  "authMethodsPickMany": "जितने चाहें चुनें। एक-एक करके मांगे जाएंगे।",
   "authUnlock": "Unlock screen",
   "authFunds": "वॉलेट स्थानांतरण",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "ईमेल",
   "fundsConfirmPromptEmail": "ईमेल पर आया कोड लिखें।",
   "lockUnlockLeadEmail": "अनलॉक करने के लिए ईमेल कोड लिखें।",
-  "lockPasswordUseEmail": "ईमेल उपयोग करें"
+  "lockPasswordUseEmail": "ईमेल उपयोग करें",
+  "authSignInStep": "Extra step when signing in"
 }

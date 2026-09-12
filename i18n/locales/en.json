@@ -656,7 +656,7 @@
   "seedRotatePinRequired": "Enter your PIN to confirm",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter the account email. We send a code so you can sign in.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "demoPrepFailed": "Could not prepare the demo credit line. Check the connection and try again.",
   "liveNetworkPending": "Live network being prepared",
   "liveNetworkPendingLead": "Live credit is not active yet.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "Link email in Security to get alerts and recover your password.",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "To sign in: password and email. Everything else is optional.",
+  "authMethodsPickMany": "Choose as many as you want. They will be asked one after another.",
   "authUnlock": "Unlock screen",
   "authFunds": "Wallet transfers",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "Email",
   "fundsConfirmPromptEmail": "Type the code sent to your email.",
   "lockUnlockLeadEmail": "Type the email code to unlock.",
-  "lockPasswordUseEmail": "Use email"
+  "lockPasswordUseEmail": "Use email",
+  "authSignInStep": "Extra step when signing in"
 }

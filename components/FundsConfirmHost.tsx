@@ -10,7 +10,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { authenticateBiometric, matchPassword, matchPin } from '../services/appLock';
 import { verifyAuthenticator } from '../services/authenticator';
-import { getAuthMethod, isAuthEnabled, isMethodReady, type AuthMethod, type AuthPurpose } from '../services/authPrefs';
+import { getAuthMethods, isAuthEnabled, isMethodReady, type AuthMethod, type AuthPurpose } from '../services/authPrefs';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
 import { ensureAppWallet } from '../services/appWallet';
@@ -77,14 +77,22 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       const slot: AuthPurpose = nextPurpose === 'transfer' ? 'funds' : nextPurpose;
       if (!(await isAuthEnabled(slot))) return true;
       setPurpose(nextPurpose);
-      const preferred = await getAuthMethod(slot);
-      const chosen = (await isMethodReady(preferred)) ? preferred : 'password';
-      if (chosen === 'biometric') {
-        const bio = await authenticateBiometric();
-        if (bio) return true;
-        return askSecret('password');
+      const preferred = await getAuthMethods(slot);
+      const queue: AuthMethod[] = [];
+      for (const method of preferred) {
+        if (await isMethodReady(method)) queue.push(method);
       }
-      return askSecret(chosen);
+      if (!queue.length) queue.push('password');
+      for (const chosen of queue) {
+        if (chosen === 'biometric') {
+          const bio = await authenticateBiometric();
+          if (!bio) return false;
+          continue;
+        }
+        const ok = await askSecret(chosen);
+        if (!ok) return false;
+      }
+      return true;
     })();
     inflight.current = run;
     try {

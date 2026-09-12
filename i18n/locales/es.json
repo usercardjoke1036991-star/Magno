@@ -658,7 +658,7 @@
   "seedRotatePinRequired": "Ingresa tu PIN para confirmar",
   "signIn": "Iniciar sesión",
   "createWithGoogle": "Crear cuenta con Gmail (opcional)",
-  "signInLead": "Ingrese el correo de la cuenta. Le enviamos un código para entrar.",
+  "signInLead": "Contraseña y correo van juntos. Le enviamos un código. Si activó un paso extra en Cómo confirma, también se pide.",
   "demoPrepFailed": "No se pudo preparar el crédito de prueba. Revise la conexión e inténtelo de nuevo.",
   "liveNetworkPending": "Red real en preparación",
   "liveNetworkPendingLead": "El crédito Real aún no está activo.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "Vincule el correo en Seguridad para recibir avisos y recuperar la contraseña.",
   "authMethodsTitle": "Cómo confirma",
   "authMethodsLead": "Para iniciar sesión: contraseña y correo. Lo demás es opcional.",
+  "authMethodsPickMany": "Marque todos los que quiera. Se pedirán uno detrás de otro.",
   "authUnlock": "Desbloquear pantalla",
   "authFunds": "Transferencias entre billeteras",
   "authSignIn": "Iniciar sesión",
@@ -797,5 +798,6 @@
   "authMethodEmail": "Correo",
   "fundsConfirmPromptEmail": "Escriba el código enviado a su correo.",
   "lockUnlockLeadEmail": "Escriba el código del correo para entrar.",
-  "lockPasswordUseEmail": "Usar correo"
+  "lockPasswordUseEmail": "Usar correo",
+  "authSignInStep": "Paso extra al iniciar sesión"
 }

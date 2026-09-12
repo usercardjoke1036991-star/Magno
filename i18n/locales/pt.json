@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "Digite seu PIN para confirmar",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "No demo não se pede KYC nem telefone para operar.",
   "securityKycDemo": "KYC (opcional no demo)",
   "securityKycDemoHint": "Não é exigido para testar a conta no modo demo.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "Vincule o e-mail em Segurança para avisos e recuperar a senha.",
   "authMethodsTitle": "Como confirma",
   "authMethodsLead": "Para iniciar sessão: senha e e-mail. O resto é opcional.",
+  "authMethodsPickMany": "Marque quantos quiser. Serão pedidos um a seguir ao outro.",
   "authUnlock": "Desbloquear ecrã",
   "authFunds": "Transferências entre carteiras",
   "authSignIn": "Iniciar sessão",
@@ -797,5 +798,6 @@
   "authMethodEmail": "E-mail",
   "fundsConfirmPromptEmail": "Escreva o codigo enviado ao e-mail.",
   "lockUnlockLeadEmail": "Escreva o codigo do e-mail para entrar.",
-  "lockPasswordUseEmail": "Usar e-mail"
+  "lockPasswordUseEmail": "Usar e-mail",
+  "authSignInStep": "Extra step when signing in"
 }

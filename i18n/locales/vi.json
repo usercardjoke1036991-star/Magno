@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "Nhập PIN của bạn để xác nhận",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "Demo không yêu cầu KYC hay điện thoại.",
   "securityKycDemo": "KYC (tùy chọn ở demo)",
   "securityKycDemoHint": "Không bắt buộc khi thử tài khoản demo.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "Lien ket email trong Bao mat de nhan thong bao va lay lai mat khau.",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "Để đăng nhập: mật khẩu và email. Phần còn lại tùy chọn.",
+  "authMethodsPickMany": "Chọn bao nhiêu tùy ý. Sẽ hỏi lần lượt.",
   "authUnlock": "Unlock screen",
   "authFunds": "Chuyển giữa ví",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "Email",
   "fundsConfirmPromptEmail": "Nhap ma gui den email.",
   "lockUnlockLeadEmail": "Nhap ma email de mo khoa.",
-  "lockPasswordUseEmail": "Dung email"
+  "lockPasswordUseEmail": "Dung email",
+  "authSignInStep": "Extra step when signing in"
 }

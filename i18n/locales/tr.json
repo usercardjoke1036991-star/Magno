@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "Onaylamak için PIN'inizi girin",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "Demoda KYC veya telefon istenmez.",
   "securityKycDemo": "KYC (demoda isteğe bağlı)",
   "securityKycDemoHint": "Demo hesabını denemek için gerekmez.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "Bildirim ve sifre icin Guvenlikte e-posta baglayin.",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "Oturum açmak için: parola ve e-posta. Geri kalanı isteğe bağlı.",
+  "authMethodsPickMany": "İstediğiniz kadar seçin. Sırayla sorulur.",
   "authUnlock": "Unlock screen",
   "authFunds": "Cüzdan transferleri",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "E-posta",
   "fundsConfirmPromptEmail": "E-postaya gelen kodu yazin.",
   "lockUnlockLeadEmail": "Girmek icin e-posta kodunu yazin.",
-  "lockPasswordUseEmail": "E-posta kullan"
+  "lockPasswordUseEmail": "E-posta kullan",
+  "authSignInStep": "Extra step when signing in"
 }

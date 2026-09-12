@@ -21,7 +21,7 @@ import { BiometricLockSection } from './BiometricLockSection';
 import { AuthMethodPicker } from './AuthMethodPicker';
 import { AuthenticatorSetup } from './AuthenticatorSetup';
 import { isAuthenticatorEnabled } from '../services/authenticator';
-import { loadAuthPrefs, type AuthPrefs, type AuthPurpose } from '../services/authPrefs';
+import { loadAuthPrefs, type AuthMethod, type AuthPrefs, type AuthPurpose } from '../services/authPrefs';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { SecretInput } from './SecretInput';
 import { humanizeTxError } from '../utils/txErrors';
@@ -74,10 +74,11 @@ export const SecuritySettings: React.FC = () => {
   const [bioOn, setBioOn] = useState(false);
   const [authOn, setAuthOn] = useState(false);
   const [authPrefs, setAuthPrefs] = useState<AuthPrefs>({
-    unlock: { on: false, method: 'password' },
-    funds: { on: true, method: 'password' },
-    loanRequest: { on: false, method: 'password' },
-    loanPay: { on: false, method: 'password' },
+    signin: { on: false, methods: ['password'], method: 'password' },
+    unlock: { on: false, methods: ['password'], method: 'password' },
+    funds: { on: true, methods: ['password'], method: 'password' },
+    loanRequest: { on: false, methods: ['password'], method: 'password' },
+    loanPay: { on: false, methods: ['password'], method: 'password' },
   });
   const [email, setEmail] = useState('');
 
@@ -304,14 +305,19 @@ export const SecuritySettings: React.FC = () => {
     authenticator: 'authenticatorTitle',
   };
 
+  const methodLabel = (method: AuthMethod) => {
+    if (method === 'email') return t('authMethodEmail');
+    if (method === 'pin') return t('authMethodPin');
+    if (method === 'biometric') return t('authMethodBiometric');
+    if (method === 'authenticator') return t('authMethodAuthenticator');
+    return t('authMethodPassword');
+  };
+
   const methodHint = (purpose: AuthPurpose) => {
     const slot = authPrefs[purpose];
     if (!slot.on) return t('loanConfirmOff');
-    if (slot.method === 'email') return t('authMethodEmail');
-    if (slot.method === 'pin') return t('authMethodPin');
-    if (slot.method === 'biometric') return t('authMethodBiometric');
-    if (slot.method === 'authenticator') return t('authMethodAuthenticator');
-    return t('authMethodPassword');
+    const methods = slot.methods?.length ? slot.methods : [slot.method];
+    return methods.map(methodLabel).join(', ');
   };
 
   if (panel !== 'menu') {
@@ -584,7 +590,7 @@ export const SecuritySettings: React.FC = () => {
       <Row
         icon="lock"
         label={t('authMethodsTitle')}
-        hint={`${t('authSignInRequired')} · ${t('authUnlock')} ${methodHint('unlock')} · ${t('authFunds')} ${methodHint('funds')}`}
+        hint={`${t('authSignInRequired')} · ${t('authSignInStep')} ${methodHint('signin')} · ${t('authUnlock')} ${methodHint('unlock')} · ${t('authFunds')} ${methodHint('funds')}`}
         status="done"
         onPress={() => setPanel('methods')}
       />

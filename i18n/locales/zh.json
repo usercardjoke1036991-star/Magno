@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "输入PIN码以确认",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "演示模式不要求 KYC 或电话。",
   "securityKycDemo": "KYC（演示可选）",
   "securityKycDemoHint": "演示模式下试用账户不要求此项。",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "在安全中绑定邮箱以接收提醒并找回密码。",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "登录需要密码和邮箱。其余为可选。",
+  "authMethodsPickMany": "可多选。将按顺序逐一确认。",
   "authUnlock": "Unlock screen",
   "authFunds": "钱包转账",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "邮箱",
   "fundsConfirmPromptEmail": "输入发到邮箱的验证码。",
   "lockUnlockLeadEmail": "输入邮箱验证码以解锁。",
-  "lockPasswordUseEmail": "使用邮箱"
+  "lockPasswordUseEmail": "使用邮箱",
+  "authSignInStep": "Extra step when signing in"
 }

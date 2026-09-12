@@ -60,6 +60,7 @@
 - mora: al vencer se debita la billetera; si no hay saldo, mes de gracia cobrando; luego reputacion 10x nivel por dia y comisiones/bonos al pool hasta pagar. El fundador no entra en mora: el pool cubre su principal; no se exime de la espera de 48h. EIP-170 se resuelve con hermanos/librerias, no recortando el nucleo
 - el fundador no entra en mora: si al vencer no hay saldo el pool cubre su prestamo; no se exime de la espera de 48h entre prestamos
 - Demo live redesplegado con protocolo 1000 niveles, mora del fundador, hitos y donar; Mainnet sigue sin contrato
+- Tres pantallas distintas: crear cuenta, iniciar sesion con correo y contrasena juntos mas el paso extra de Como confirma, y desbloquear solo si la sesion esta guardada
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -95,3 +96,4 @@
 - [2026-09-12 14:20] Idea añadida al backlog: "mora: al vencer se debita la billetera; si no hay saldo, mes de gracia cobrando;"
 - [2026-09-12 14:45] Idea añadida al backlog: "el fundador no entra en mora: si al vencer no hay saldo el pool cubre su prestam"
 - [2026-09-12 15:10] Idea añadida al backlog: "Demo live redesplegado con protocolo 1000 niveles, mora del fundador, hitos y do"
+- [2026-09-12 15:52] Idea añadida al backlog: "Tres pantallas distintas: crear cuenta, iniciar sesion con correo y contrasena j"

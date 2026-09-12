@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "確認するにはPINを入力してください",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "デモでは KYC も電話も不要です。",
   "securityKycDemo": "KYC（デモでは任意）",
   "securityKycDemoHint": "デモで口座を試すには不要です。",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "通知とパスワード再設定のため、セキュリティでメールを連携。",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "ログインはパスワードとメール。他は任意です。",
+  "authMethodsPickMany": "いくつでも選べます。順番に確認します。",
   "authUnlock": "Unlock screen",
   "authFunds": "ウォレット間送金",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "メール",
   "fundsConfirmPromptEmail": "メールに届いたコードを入力してください。",
   "lockUnlockLeadEmail": "メールのコードでロックを解除します。",
-  "lockPasswordUseEmail": "メールを使う"
+  "lockPasswordUseEmail": "メールを使う",
+  "authSignInStep": "Extra step when signing in"
 }

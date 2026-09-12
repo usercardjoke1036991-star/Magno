@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "PIN zur Bestätigung eingeben",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "Demo verlangt kein KYC und keine Telefonnummer.",
   "securityKycDemo": "KYC (optional in der Demo)",
   "securityKycDemoHint": "Für das Testkonto in der Demo nicht nötig.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "Verknüpfen Sie die E-Mail unter Sicherheit für Hinweise und Passwort-Reset.",
   "authMethodsTitle": "So bestätigen",
   "authMethodsLead": "Zur Anmeldung: Passwort und E-Mail. Alles andere ist optional.",
+  "authMethodsPickMany": "Wählen Sie so viele wie Sie wollen. Sie werden nacheinander abgefragt.",
   "authUnlock": "Bildschirm entsperren",
   "authFunds": "Transfers zwischen Wallets",
   "authSignIn": "Anmelden",
@@ -797,5 +798,6 @@
   "authMethodEmail": "E-Mail",
   "fundsConfirmPromptEmail": "Geben Sie den Code aus der E-Mail ein.",
   "lockUnlockLeadEmail": "E-Mail-Code zum Entsperren eingeben.",
-  "lockPasswordUseEmail": "E-Mail verwenden"
+  "lockPasswordUseEmail": "E-Mail verwenden",
+  "authSignInStep": "Extra step when signing in"
 }

@@ -39,10 +39,13 @@ import { ensureAppWallet } from '../services/appWallet';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
 import { isAuthenticatorEnabled, unlockWithAuthenticator } from '../services/authenticator';
-import { getAuthMethod, isAuthEnabled, type AuthMethod } from '../services/authPrefs';
+import { getAuthMethods, isAuthEnabled, type AuthMethod } from '../services/authPrefs';
+import { getWalletWrapKey } from '../services/walletSession';
+import { isSessionSaved, markSessionSaved, restoreSavedSessionWrap } from '../services/savedSession';
+import { isValidEmail, normalizeEmail } from '../utils/emailPolicy';
 import type { BiometricKind } from '../utils/biometricStatus';
 
-type UnlockMode = 'pin' | 'password' | 'authenticator' | 'email';
+type UnlockMode = 'pin' | 'password' | 'authenticator' | 'email' | 'biometric';
 
 function modeFromMethod(
   method: AuthMethod,
@@ -51,6 +54,7 @@ function modeFromMethod(
   authOn: boolean,
   hasEmail = false
 ): UnlockMode {
+  if (method === 'biometric') return 'biometric';
   if (method === 'email' && hasEmail) return 'email';
   if (method === 'pin' && pinSet) return 'pin';
   if (method === 'authenticator' && authOn) return 'authenticator';
@@ -97,7 +101,84 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const [recoverSent, setRecoverSent] = useState(false);
   const [setupWallet, setSetupWallet] = useState('');
   const [sessionReady, setSessionReady] = useState(false);
+  const [askingSignIn, setAskingSignIn] = useState(false);
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInCode, setSignInCode] = useState('');
+  const [signInExtra, setSignInExtra] = useState(false);
+  const [methodQueue, setMethodQueue] = useState<AuthMethod[]>([]);
+  const methodQueueRef = useRef<AuthMethod[]>([]);
   const backgroundAt = useRef<number | null>(null);
+
+  const applyQueuedMethod = async (
+    method: AuthMethod,
+    flags: { passwordSet: boolean; pinSet: boolean; authOn: boolean; hasEmail: boolean; bioEnabled: boolean }
+  ) => {
+    const nextMode = modeFromMethod(method, flags.passwordSet, flags.pinSet, flags.authOn, flags.hasEmail);
+    setUnlockMode(nextMode);
+    setBioOn(flags.bioEnabled && method === 'biometric');
+    setPasswordInput('');
+    setAuthCode('');
+    setPinDigits('');
+    setError('');
+    if (nextMode === 'email' && flags.hasEmail) {
+      try {
+        const wallet = await ensureAppWallet();
+        const verifiedEmail = await loadVerifiedEmail();
+        if (verifiedEmail) await requestEmailOtp(wallet.address, verifiedEmail);
+      } catch {
+        // El usuario puede reenviar.
+      }
+    }
+  };
+
+  const startMethodQueue = async (purpose: 'unlock' | 'signin', flags: {
+    passwordSet: boolean;
+    pinSet: boolean;
+    authOn: boolean;
+    hasEmail: boolean;
+    bioEnabled: boolean;
+  }) => {
+    const methods = await getAuthMethods(purpose);
+    methodQueueRef.current = methods;
+    setMethodQueue(methods);
+    await applyQueuedMethod(methods[0] || 'password', flags);
+  };
+
+  const passQueuedMethod = async (fromSignIn: boolean) => {
+    const rest = methodQueueRef.current.slice(1);
+    methodQueueRef.current = rest;
+    setMethodQueue(rest);
+    if (!rest.length) {
+      if (fromSignIn) {
+        setSignInExtra(false);
+        setSessionReady(true);
+      } else {
+        setLocked(false);
+        setNeedsSetup(!(await isPasswordSet()));
+        setRecovering(false);
+      }
+      setPinDigits('');
+      setPasswordInput('');
+      setAuthCode('');
+      setError('');
+      setLockMs(0);
+      return;
+    }
+    const [passwordSet, pinSet, authOn, verifiedEmail, bioEnabled] = await Promise.all([
+      isPasswordSet(),
+      isPinSet(),
+      isAuthenticatorEnabled(),
+      loadVerifiedEmail(),
+      isBiometricEnabled(),
+    ]);
+    await applyQueuedMethod(rest[0], {
+      passwordSet,
+      pinSet,
+      authOn,
+      hasEmail: Boolean(verifiedEmail),
+      bioEnabled,
+    });
+  };
   const boot = useCallback(async () => {
     const pinSet = await isPinSet();
     const passwordSet = await isPasswordSet();
@@ -113,31 +194,45 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     setHasPin(pinSet);
     setHasAuth(authOn);
     setHasEmail(Boolean(verifiedEmail));
+    if (verifiedEmail) setSignInEmail(verifiedEmail);
     if (!passwordSet && !pinSet) {
       setNeedsSetup(true);
       setSetupStage('welcome');
       setLocked(false);
+      setAskingSignIn(false);
       setReady(true);
       return;
     }
+    await restoreSavedSessionWrap();
+    const wrapReady = Boolean(getWalletWrapKey());
+    const sessionSaved = await isSessionSaved();
     const unlockOn = await isAuthEnabled('unlock');
-    const method = await getAuthMethod('unlock');
-    const nextMode = modeFromMethod(method, passwordSet, pinSet, authOn, Boolean(verifiedEmail));
     setNeedsSetup(false);
-    setUnlockMode(nextMode);
-    setBioOn(enabled && method === 'biometric');
-    if (unlockOn && nextMode === 'email' && verifiedEmail) {
-      try {
-        const wallet = await ensureAppWallet();
-        await requestEmailOtp(wallet.address, verifiedEmail);
-      } catch {
-        // El usuario puede reenviar.
-      }
-    }
-    if (unlockOn) {
-      lockNow();
-      setLocked(true);
+    if (sessionSaved && unlockOn && !wrapReady) {
+      await startMethodQueue('unlock', {
+        passwordSet,
+        pinSet,
+        authOn,
+        hasEmail: Boolean(verifiedEmail),
+        bioEnabled: enabled,
+      });
     } else {
+      methodQueueRef.current = [];
+      setMethodQueue([]);
+    }
+    if (wrapReady && !unlockOn) {
+      setAskingSignIn(false);
+      setLocked(false);
+    } else if (sessionSaved && unlockOn && !wrapReady) {
+      lockNow();
+      setAskingSignIn(false);
+      setLocked(true);
+    } else if (wrapReady) {
+      setAskingSignIn(false);
+      setLocked(false);
+    } else {
+      lockNow();
+      setAskingSignIn(true);
       setLocked(false);
     }
     setReady(true);
@@ -158,10 +253,16 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     boot().catch(async () => {
       const unlockOn = await isAuthEnabled('unlock').catch(() => false);
       setNeedsSetup(false);
-      if (unlockOn) {
+      if (unlockOn && (await isSessionSaved().catch(() => false)) && !getWalletWrapKey()) {
         lockNow();
+        setAskingSignIn(false);
         setLocked(true);
+      } else if (!getWalletWrapKey()) {
+        lockNow();
+        setAskingSignIn(true);
+        setLocked(false);
       } else {
+        setAskingSignIn(false);
         setLocked(false);
       }
       setReady(true);
@@ -182,23 +283,24 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
           isPinSet(),
           isAuthenticatorEnabled(),
           isAuthEnabled('unlock'),
-          getAuthMethod('unlock'),
           isBiometricEnabled(),
           loadVerifiedEmail(),
         ])
-          .then(([passwordSet, pinSet, authOn, unlockOn, method, bioEnabled, verifiedEmail]) => {
+          .then(async ([passwordSet, pinSet, authOn, unlockOn, bioEnabled, verifiedEmail]) => {
             if (!(passwordSet || pinSet)) return;
             setNeedsSetup(false);
             setRecovering(false);
-            setPinDigits('');
-            setPasswordInput('');
-            setAuthCode('');
             setHasAuth(authOn);
             setHasEmail(Boolean(verifiedEmail));
-            setUnlockMode(modeFromMethod(method, passwordSet, pinSet, authOn, Boolean(verifiedEmail)));
-            setBioOn(bioEnabled && method === 'biometric');
             setError('');
             if (unlockOn) {
+              await startMethodQueue('unlock', {
+                passwordSet,
+                pinSet,
+                authOn,
+                hasEmail: Boolean(verifiedEmail),
+                bioEnabled,
+              });
               lockNow();
               setLocked(true);
             }
@@ -227,10 +329,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     const wrap = await loadWrapFromBiometric();
     setBusy(false);
     if (wrap) {
-      setLocked(false);
-      setNeedsSetup(!(await isPasswordSet()));
-      setPinDigits('');
-      setError('');
+      await passQueuedMethod(askingSignIn);
       return;
     }
     setError(t('securityAccessKeyFailed'));
@@ -238,14 +337,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
 
   const finishUnlock = async (usedPin: string) => {
     if (await isPasswordSet()) {
-      setHasPassword(true);
-      setNeedsSetup(false);
-      setLocked(false);
-      setPinDigits('');
-      setPasswordInput('');
-      setError('');
-      setLockMs(0);
-      setRecovering(false);
+      await passQueuedMethod(askingSignIn);
       return;
     }
     await beginPasswordSetup(usedPin);
@@ -282,12 +374,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       const [wallet, email] = await Promise.all([ensureAppWallet(), loadVerifiedEmail()]);
       if (!email) throw new Error('email');
       await verifyEmailOtp(wallet.address, email, authCode);
-      setNeedsSetup(false);
-      setLocked(false);
-      setAuthCode('');
-      setError('');
-      setLockMs(0);
-      setRecovering(false);
+      await passQueuedMethod(askingSignIn);
     } catch {
       setError(t('emailCodeWrong'));
       setAuthCode('');
@@ -320,12 +407,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     const ok = await unlockWithAuthenticator(authCode);
     setBusy(false);
     if (ok) {
-      setNeedsSetup(false);
-      setLocked(false);
-      setAuthCode('');
-      setError('');
-      setLockMs(0);
-      setRecovering(false);
+      await passQueuedMethod(askingSignIn);
       return;
     }
     setError(t('authenticatorWrong'));
@@ -338,14 +420,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     const result = await checkPassword(passwordInput);
     setBusy(false);
     if (result.ok) {
-      setHasPassword(true);
-      setNeedsSetup(false);
-      setLocked(false);
-      setPinDigits('');
-      setPasswordInput('');
-      setError('');
-      setLockMs(0);
-      setRecovering(false);
+      await passQueuedMethod(askingSignIn);
       return;
     }
     setLockMs(result.remainingMs);
@@ -443,10 +518,117 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     }
   };
 
+  const beginSignIn = () => {
+    setAskingSignIn(true);
+    setSignInExtra(false);
+    setNeedsSetup(false);
+    setLocked(false);
+    setRecovering(false);
+    setSessionReady(false);
+    setPasswordInput('');
+    setSignInCode('');
+    setError('');
+  };
+
+  const continueAfterSignInSecrets = async () => {
+    const extraOn = await isAuthEnabled('signin');
+    if (!extraOn) {
+      setSessionReady(true);
+      return;
+    }
+    const pinSet = await isPinSet();
+    const passwordSet = await isPasswordSet();
+    const authOn = await isAuthenticatorEnabled();
+    const verifiedEmail = await loadVerifiedEmail();
+    const bioEnabled = await isBiometricEnabled();
+    await startMethodQueue('signin', {
+      passwordSet,
+      pinSet,
+      authOn,
+      hasEmail: Boolean(verifiedEmail),
+      bioEnabled,
+    });
+    setSignInExtra(true);
+  };
+
+  const sendSignInEmail = async () => {
+    if (busy || lockMs > 0) return;
+    setBusy(true);
+    setError('');
+    try {
+      const checked = await checkPassword(passwordInput);
+      if (!checked.ok) {
+        setLockMs(checked.remainingMs);
+        setError(
+          checked.locked ? t('lockCooldown', { seconds: Math.ceil(checked.remainingMs / 1000) }) : t('lockPasswordWrong')
+        );
+        return;
+      }
+      const saved = await loadVerifiedEmail();
+      const typed = normalizeEmail(signInEmail);
+      if (!saved || typed !== saved || !isValidEmail(typed)) {
+        setError(t('emailNotAllowed'));
+        return;
+      }
+      const wallet = await ensureAppWallet();
+      await requestEmailOtp(wallet.address, saved);
+    } catch (caught) {
+      const reason = String((caught as Error)?.message || '');
+      if (reason.includes('rate')) setError(t('otpRate'));
+      else if (reason.includes('notify')) setError(t('emailNeedApi'));
+      else if (reason.includes('appWallet') || reason.includes('locked')) setError(t('appWalletFailed'));
+      else setError(t('otpRequestFailed'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitSignIn = async () => {
+    if (busy || lockMs > 0) return;
+    setBusy(true);
+    setError('');
+    try {
+      const checked = await checkPassword(passwordInput);
+      if (!checked.ok) {
+        setLockMs(checked.remainingMs);
+        setError(
+          checked.locked ? t('lockCooldown', { seconds: Math.ceil(checked.remainingMs / 1000) }) : t('lockPasswordWrong')
+        );
+        return;
+      }
+      const saved = await loadVerifiedEmail();
+      const typed = normalizeEmail(signInEmail);
+      if (!saved || typed !== saved || !isValidEmail(typed)) {
+        setError(t('emailNotAllowed'));
+        return;
+      }
+      if (signInCode.length !== 6) {
+        setError(t('emailCodeWrong'));
+        return;
+      }
+      const wallet = await ensureAppWallet();
+      await verifyEmailOtp(wallet.address, saved, signInCode);
+      setHasPassword(true);
+      setHasEmail(true);
+      setSignInCode('');
+      await continueAfterSignInSecrets();
+    } catch (caught) {
+      const reason = String((caught as Error)?.message || '');
+      if (reason.includes('code')) setError(t('emailCodeWrong'));
+      else if (reason.includes('expired')) setError(t('emailExpired'));
+      else setError(t('otpRequestFailed'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const keepSession = () => {
+    void markSessionSaved();
     setHasPassword(true);
     setNeedsSetup(false);
     setLocked(false);
+    setAskingSignIn(false);
+    setSignInExtra(false);
     setRecovering(false);
     setSessionReady(false);
     setPendingPin('');
@@ -454,6 +636,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     setPasswordInput('');
     setPasswordConfirm('');
     setAuthCode('');
+    setSignInCode('');
     setError('');
   };
 
@@ -474,7 +657,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     );
   }
 
-  if (!needsSetup && !locked) {
+  if (!needsSetup && !locked && !askingSignIn) {
     return <>{children}</>;
   }
 
@@ -499,14 +682,16 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 : welcomeStage
                 ? t('createAccount')
                 : recovering
-                  ? setup
+                  ? t('lockRecoverTitle')
+                  : askingSignIn && !signInExtra
                     ? t('signIn')
-                    : t('lockRecoverTitle')
-                  : emailStage
+                    : emailStage
                     ? t('onboardStepEmail')
                     : passwordStage
                       ? t('lockPasswordTitle')
-                      : t('lockUnlock')}
+                      : askingSignIn
+                        ? t('signIn')
+                        : t('lockUnlock')}
             </AppText>
             <AppText style={[styles.lead, { color: colors.textMuted }]}>
               {sessionReady
@@ -514,10 +699,10 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 : welcomeStage
                 ? t('createAccountLead')
                 : recovering
-                  ? setup
+                  ? t('lockRecoverLead')
+                  : askingSignIn && !signInExtra
                     ? t('signInLead')
-                    : t('lockRecoverLead')
-                  : emailStage
+                    : emailStage
                     ? t('emailField')
                     : passwordStage
                       ? t('lockPasswordTypeLead')
@@ -529,7 +714,9 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                               ? t('lockUnlockLeadAuth')
                               : unlockMode === 'email'
                                 ? t('lockUnlockLeadEmail')
-                                : t('lockUnlockLead')}
+                                : unlockMode === 'biometric'
+                                  ? t('lockBiometric')
+                                  : t('lockUnlockLead')}
             </AppText>
             {passwordStage ? (
               <AppText style={[styles.emailNote, { color: colors.textMuted }]}>{t('lockPasswordMin')}</AppText>
@@ -548,7 +735,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 ))}
               </View>
             ) : null}
-            {!setup && !recovering && !sessionReady && unlockMode === 'pin' ? (
+            {!setup && !recovering && !sessionReady && (!askingSignIn || signInExtra) && unlockMode === 'pin' ? (
               <View style={styles.dots}>
                 {Array.from({ length: PIN_LENGTH }).map((_, index) => (
                   <View
@@ -576,16 +763,80 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
               >
                 <AppText style={styles.primaryText}>{t('createAccount')}</AppText>
               </TouchableOpacity>
+              <TouchableOpacity onPress={beginSignIn} style={styles.switchMode}>
+                <AppText style={[styles.switchText, { color: colors.primary }]}>{t('signIn')}</AppText>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {askingSignIn && !signInExtra && !recovering && !sessionReady ? (
+            <View style={styles.passwordBlock}>
+              <AppTextInput
+                value={signInEmail}
+                onChangeText={(value) => setSignInEmail(value.trim().toLowerCase())}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                placeholder={t('emailField')}
+                placeholderTextColor={colors.textMuted}
+                style={[
+                  styles.passwordInput,
+                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
+                ]}
+              />
+              <SecretInput
+                value={passwordInput}
+                onChangeText={(value) => setPasswordInput(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
+                maxLength={PASSWORD_LENGTH}
+                editable={lockMs <= 0}
+                placeholder={t('lockPasswordGenerated')}
+              />
+              <SecretInput
+                value={signInCode}
+                onChangeText={(value) => setSignInCode(value.replace(/\D/g, '').slice(0, 6))}
+                keyboardType="number-pad"
+                maxLength={6}
+                editable={lockMs <= 0}
+                placeholder={t('emailCode')}
+              />
+              <TouchableOpacity
+                disabled={busy || lockMs > 0 || !passwordInput || !signInEmail}
+                onPress={() => void sendSignInEmail()}
+                style={styles.switchMode}
+              >
+                <AppText style={[styles.switchText, { color: colors.primary }]}>{t('emailResend')}</AppText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={busy || lockMs > 0 || !passwordInput || !signInEmail || signInCode.length !== 6}
+                onPress={() => void submitSignIn()}
+                style={[styles.primary, { backgroundColor: colors.connect }]}
+              >
+                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('signIn')}</AppText>}
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   setRecovering(true);
-                  setSetupStage('signIn');
                   setError('');
+                  setPasswordInput('');
+                  setPasswordConfirm('');
                 }}
                 style={styles.switchMode}
               >
-                <AppText style={[styles.switchText, { color: colors.primary }]}>{t('signIn')}</AppText>
+                <AppText style={[styles.switchText, { color: colors.primary }]}>{t('lockForgotPassword')}</AppText>
               </TouchableOpacity>
+              {!hasPassword ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    setAskingSignIn(false);
+                    setNeedsSetup(true);
+                    setSetupStage('welcome');
+                    setError('');
+                  }}
+                  style={styles.switchMode}
+                >
+                  <AppText style={[styles.switchText, { color: colors.primary }]}>{t('lockRecoverBack')}</AppText>
+                </TouchableOpacity>
+              ) : null}
             </View>
           ) : null}
 
@@ -732,7 +983,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </View>
           ) : null}
 
-          {!setup && !recovering && !sessionReady && unlockMode === 'email' ? (
+          {!setup && !recovering && !sessionReady && (!askingSignIn || signInExtra) && unlockMode === 'email' ? (
             <View style={styles.passwordBlock}>
               <SecretInput
                 value={authCode}
@@ -755,7 +1006,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </View>
           ) : null}
 
-          {!setup && !recovering && !sessionReady && unlockMode === 'authenticator' ? (
+          {!setup && !recovering && !sessionReady && (!askingSignIn || signInExtra) && unlockMode === 'authenticator' ? (
             <View style={styles.passwordBlock}>
               <SecretInput
                 value={authCode}
@@ -775,7 +1026,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </View>
           ) : null}
 
-          {!setup && !recovering && !sessionReady && unlockMode === 'password' ? (
+          {!setup && !recovering && !sessionReady && (!askingSignIn || signInExtra) && unlockMode === 'password' ? (
             <View style={styles.passwordBlock}>
               <SecretInput
                 value={passwordInput}
@@ -794,7 +1045,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </View>
           ) : null}
 
-          {bioOn && bioReady && !setup && !recovering && !sessionReady ? (
+          {bioOn && bioReady && !setup && !recovering && !sessionReady && (!askingSignIn || signInExtra) ? (
             <TouchableOpacity
               onPress={tryBiometric}
               disabled={busy || lockMs > 0}
@@ -817,7 +1068,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </TouchableOpacity>
           ) : null}
 
-          {!setup && !recovering && !sessionReady && hasPassword && unlockMode !== 'password' ? (
+          {!setup && !recovering && !sessionReady && !methodQueue.length && (!askingSignIn || signInExtra) && hasPassword && unlockMode !== 'password' ? (
             <TouchableOpacity
               onPress={() => {
                 setUnlockMode('password');
@@ -830,7 +1081,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
               <AppText style={[styles.switchText, { color: colors.primary }]}>{t('lockPasswordUse')}</AppText>
             </TouchableOpacity>
           ) : null}
-          {!setup && !recovering && !sessionReady && hasPin && unlockMode !== 'pin' ? (
+          {!setup && !recovering && !sessionReady && !methodQueue.length && (!askingSignIn || signInExtra) && hasPin && unlockMode !== 'pin' ? (
             <TouchableOpacity
               onPress={() => {
                 setUnlockMode('pin');
@@ -843,7 +1094,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
               <AppText style={[styles.switchText, { color: colors.primary }]}>{t('lockPasswordUsePin')}</AppText>
             </TouchableOpacity>
           ) : null}
-          {!setup && !recovering && !sessionReady && hasAuth && unlockMode !== 'authenticator' ? (
+          {!setup && !recovering && !sessionReady && !methodQueue.length && (!askingSignIn || signInExtra) && hasAuth && unlockMode !== 'authenticator' ? (
             <TouchableOpacity
               onPress={() => {
                 setUnlockMode('authenticator');
@@ -856,7 +1107,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
               <AppText style={[styles.switchText, { color: colors.primary }]}>{t('lockPasswordUseAuth')}</AppText>
             </TouchableOpacity>
           ) : null}
-          {!setup && !recovering && !sessionReady && hasEmail && unlockMode !== 'email' ? (
+          {!setup && !recovering && !sessionReady && !methodQueue.length && (!askingSignIn || signInExtra) && hasEmail && unlockMode !== 'email' ? (
             <TouchableOpacity
               onPress={() => {
                 setUnlockMode('email');
@@ -872,7 +1123,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </TouchableOpacity>
           ) : null}
 
-          {!setup && !recovering && !sessionReady && hasPassword ? (
+          {!setup && !recovering && !sessionReady && (!askingSignIn || signInExtra) && hasPassword ? (
             <TouchableOpacity
               onPress={() => {
                 setRecovering(true);
@@ -886,7 +1137,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             </TouchableOpacity>
           ) : null}
 
-          {!setup && !recovering && !sessionReady && unlockMode === 'pin' ? (
+          {!setup && !recovering && !sessionReady && (!askingSignIn || signInExtra) && unlockMode === 'pin' ? (
             <View style={styles.pad}>
               {KEYS.map((key, index) => (
                 <TouchableOpacity

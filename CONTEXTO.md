@@ -236,6 +236,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Como confirma permite varios metodos a la vez; se confirman en secuencia (AND). | — |
+| 2026-09-12 | Inicio de sesion (correo+contrasena juntos + paso extra de Como confirma) separado de desbloquear. La sesion guardada se persiste; sin ella no se muestra Desbloquear. | — |
 | 2026-09-12 | Demo live 0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f bloque 130652258: 1000 niveles, donar, hitos, mora fundador. FamaLib 0x6B98072a087B3fd856c24249232EE3fb40cB5003. Pool 2000 USDT NAV ok. | — |
 | 2026-09-12 | Fundador exento de mora/gracia: el pool cubre su principal al vencer sin saldo. Espera 48h intacta. QuatriviumFamaLib por delegatecall. Nucleo 24457/24576. | — |
 | 2026-09-12 | Fundador exento de mora/gracia: si no hay saldo al vencer, el pool cubre el principal. Sigue la espera de 48h. Fama de linea en QuatriviumFamaLib. Nucleo 24457/24576. | — |

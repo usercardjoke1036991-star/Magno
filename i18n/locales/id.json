@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "Masukkan PIN untuk mengonfirmasi",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "Demo tidak meminta KYC atau telepon.",
   "securityKycDemo": "KYC (opsional di demo)",
   "securityKycDemoHint": "Tidak wajib untuk mencoba akun di mode demo.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "Tautkan email di Keamanan untuk pemberitahuan dan pulihkan sandi.",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "Untuk masuk: kata sandi dan email. Lainnya opsional.",
+  "authMethodsPickMany": "Pilih sebanyak yang Anda mau. Akan diminta satu per satu.",
   "authUnlock": "Unlock screen",
   "authFunds": "Transfer antar dompet",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "Email",
   "fundsConfirmPromptEmail": "Tulis kode yang dikirim ke email.",
   "lockUnlockLeadEmail": "Tulis kode email untuk masuk.",
-  "lockPasswordUseEmail": "Gunakan email"
+  "lockPasswordUseEmail": "Gunakan email",
+  "authSignInStep": "Extra step when signing in"
 }

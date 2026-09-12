@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "أدخل رمز PIN للتأكيد",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "في التجريب لا يُطلب KYC ولا هاتف.",
   "securityKycDemo": "KYC (اختياري في العرض)",
   "securityKycDemoHint": "غير مطلوب لتجربة الحساب في وضع العرض.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "اربط البريد من الأمان للتنبيهات واستعادة كلمة السر.",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "لتسجيل الدخول: كلمة المرور والبريد. الباقي اختياري.",
+  "authMethodsPickMany": "اختر ما تشاء. سيُطلب كل نظام على حدة.",
   "authUnlock": "Unlock screen",
   "authFunds": "تحويلات بين المحافظ",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "البريد",
   "fundsConfirmPromptEmail": "اكتب الرمز المرسل إلى بريدك.",
   "lockUnlockLeadEmail": "اكتب رمز البريد للدخول.",
-  "lockPasswordUseEmail": "استخدام البريد"
+  "lockPasswordUseEmail": "استخدام البريد",
+  "authSignInStep": "Extra step when signing in"
 }

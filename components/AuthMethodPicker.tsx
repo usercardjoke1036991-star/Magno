@@ -23,24 +23,27 @@ function methodKey(method: AuthMethod): TranslationKey {
 }
 
 function purposeKey(purpose: AuthPurpose): TranslationKey {
+  if (purpose === 'signin') return 'authSignInStep';
   if (purpose === 'unlock') return 'authUnlock';
   if (purpose === 'funds') return 'authFunds';
   if (purpose === 'loanRequest') return 'loanConfirmRequest';
   return 'loanConfirmPay';
 }
 
+function emptyPrefs(): AuthPrefs {
+  return {
+    signin: { on: false, methods: ['password'], method: 'password' },
+    unlock: { on: false, methods: ['password'], method: 'password' },
+    funds: { on: true, methods: ['password'], method: 'password' },
+    loanRequest: { on: false, methods: ['password'], method: 'password' },
+    loanPay: { on: false, methods: ['password'], method: 'password' },
+  };
+}
+
 export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChanged }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const empty = useMemo(
-    () => ({
-      unlock: { on: false, method: 'password' as const },
-      funds: { on: true, method: 'password' as const },
-      loanRequest: { on: false, method: 'password' as const },
-      loanPay: { on: false, method: 'password' as const },
-    }),
-    []
-  );
+  const empty = useMemo(() => emptyPrefs(), []);
   const [draft, setDraft] = useState<AuthPrefs>(empty);
   const [available, setAvailable] = useState<AuthMethod[]>(['password']);
   const [busy, setBusy] = useState(false);
@@ -56,14 +59,21 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
 
   const setOn = (purpose: AuthPurpose, on: boolean) => {
     setDraft((current) => {
-      const method = available.includes(current[purpose].method) ? current[purpose].method : 'password';
-      return { ...current, [purpose]: { ...current[purpose], on, method } };
+      const methods = current[purpose].methods.filter((method) => available.includes(method));
+      const next = methods.length ? methods : ['password'];
+      return { ...current, [purpose]: { on, methods: next, method: next[0] } };
     });
   };
 
-  const setMethod = (purpose: AuthPurpose, method: AuthMethod) => {
+  const toggleMethod = (purpose: AuthPurpose, method: AuthMethod) => {
     if (!available.includes(method)) return;
-    setDraft((current) => ({ ...current, [purpose]: { ...current[purpose], method, on: true } }));
+    setDraft((current) => {
+      const selected = current[purpose].methods;
+      const has = selected.includes(method);
+      let next = has ? selected.filter((item) => item !== method) : [...selected, method];
+      if (!next.length) next = [method];
+      return { ...current, [purpose]: { on: true, methods: next, method: next[0] } };
+    });
   };
 
   const save = async () => {
@@ -102,26 +112,29 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
               />
             </View>
             {slot.on ? (
-              <View style={styles.row}>
-                {available.map((method) => {
-                  const selected = slot.method === method;
-                  return (
-                    <TouchableOpacity
-                      key={method}
-                      onPress={() => setMethod(purpose, method)}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border, backgroundColor: colors.card },
-                        selected && { borderColor: colors.primary, backgroundColor: colors.chip },
-                      ]}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected }}
-                    >
-                      <AppText style={[styles.chipText, { color: colors.text }]}>{t(methodKey(method))}</AppText>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+              <>
+                <AppText style={[styles.pickHint, { color: colors.primary }]}>{t('authMethodsPickMany')}</AppText>
+                <View style={styles.row}>
+                  {available.map((method) => {
+                    const selected = slot.methods.includes(method);
+                    return (
+                      <TouchableOpacity
+                        key={method}
+                        onPress={() => toggleMethod(purpose, method)}
+                        style={[
+                          styles.chip,
+                          { borderColor: colors.border, backgroundColor: colors.card },
+                          selected && { borderColor: colors.primary, backgroundColor: colors.chip },
+                        ]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                      >
+                        <AppText style={[styles.chipText, { color: colors.text }]}>{t(methodKey(method))}</AppText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </>
             ) : null}
           </View>
         );
@@ -161,6 +174,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginTop: 6,
+  },
+  pickHint: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 8,
   },
   row: {
     flexDirection: 'row',

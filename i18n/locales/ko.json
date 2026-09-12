@@ -638,7 +638,7 @@
   "seedRotatePinRequired": "확인하려면 PIN을 입력하세요",
   "signIn": "Sign in",
   "createWithGoogle": "Create account with Gmail (optional)",
-  "signInLead": "Enter your email and password. If this is another phone, recover the account with Gmail.",
+  "signInLead": "Password and email go together. We send a code. If you turned on an extra step in How you confirm, that is asked too.",
   "securityLeadDemo": "데모에서는 KYC나 전화가 없습니다.",
   "securityKycDemo": "KYC(데모에서 선택)",
   "securityKycDemoHint": "데모에서 계정을 써 보는 데 필요하지 않습니다.",
@@ -712,6 +712,7 @@
   "notificationEmailLink": "알림과 비밀번호 찾기를 위해 보안에서 이메일을 연결하세요.",
   "authMethodsTitle": "How you confirm",
   "authMethodsLead": "로그인: 비밀번호와 이메일. 나머지는 선택.",
+  "authMethodsPickMany": "원하는 만큼 고르세요. 하나씩 확인합니다.",
   "authUnlock": "Unlock screen",
   "authFunds": "지갑 간 이체",
   "authSignIn": "Sign in",
@@ -797,5 +798,6 @@
   "authMethodEmail": "이메일",
   "fundsConfirmPromptEmail": "이메일로 받은 코드를 입력하세요.",
   "lockUnlockLeadEmail": "이메일 코드로 잠금을 해제하세요.",
-  "lockPasswordUseEmail": "이메일 사용"
+  "lockPasswordUseEmail": "이메일 사용",
+  "authSignInStep": "Extra step when signing in"
 }

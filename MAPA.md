@@ -258,7 +258,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/authenticator.ts` — módulo JS/TS
   - Funciones/clases: isAuthenticatorEnabled, loadAuthenticatorSecret, createAuthenticatorSecret, authenticatorUri, persistAuthenticatorWrap, confirmAuthenticator, verifyAuthenticator, unlockWithAuthenticator, clearAuthenticator
 - `services/authPrefs.ts` — módulo JS/TS
-  - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethod, isAuthEnabled, setAuthMethod, fallbackAuthIfNeeded
+  - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethods, getAuthMethod, isAuthEnabled, setAuthMethod, setAuthMethods, fallbackAuthIfNeeded
 - `services/demoIdentity.ts` — módulo JS/TS
   - Funciones/clases: requestDemoIdentity
 - `services/deviceBinding.ts` — módulo JS/TS
@@ -281,6 +281,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, cachedProtocolCaps, asWeiString, QuatriviumCreditService
 - `services/referralNetwork.ts` — módulo JS/TS
   - Funciones/clases: loadReferralNetwork
+- `services/savedSession.ts` — módulo JS/TS
+  - Funciones/clases: isSessionSaved, markSessionSaved, restoreSavedSessionWrap, clearSavedSession
 - `services/secureStorageService.ts` — módulo JS/TS
   - Funciones/clases: SecureStorageService
 - `services/userProfile.ts` — módulo JS/TS
@@ -388,7 +390,7 @@ Sin desfases detectados entre docs y código.
 
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
-- detectar_logica: 0 crítico(s), 3 aviso(s)
+- detectar_logica: 0 crítico(s), 4 aviso(s)
 - verificar_modulos: 0 crítico(s), 13 aviso(s)
 
 ## Estado

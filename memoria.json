@@ -1,6 +1,8 @@
 {
   "enfoque": "Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmaciones es opcional",
   "decisiones": [
+    "- [2026-09-12] En Como confirma se pueden marcar varios sistemas por accion. Se piden todos, uno detras de otro.",
+    "- [2026-09-12] Crear cuenta, iniciar sesion y desbloquear son pantallas distintas. Iniciar sesion pide contrasena y correo a la vez, mas el paso extra de Como confirma. Desbloquear solo si la sesion esta guardada.",
     "- [2026-09-12] Demo productivo es 0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f (1000 niveles + FamaLib). El 0x1E5118 queda fuera de servicio. Mainnet no se toca sin CONFIRM_MAINNET.",
     "- [2026-09-12] El fundador no entra en mora ni gracia. Si al vencer se debita y no hay saldo, el pool cubre el principal. Sigue la espera de 48h. No se le liquida.",
     "- [2026-09-12] No recortar funciones del nucleo por EIP-170. El tope de 24 KB es de Ethereum. Lo nuevo va a contratos hermanos. Gracia 30d con ganancias; despues freeze al pool y penalizacion proporcional al nivel.",
@@ -24,6 +26,9 @@
     "- [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico"
   ],
   "cambios": [
+    "- [2026-09-12] Como confirma: chips multi-seleccion. Desbloqueo, inicio extra, transferencias y prestamos piden todos los metodos marcados en secuencia.",
+    "- [2026-09-12] AppLockGate: iniciar sesion (correo+clave+OTP+paso extra) separado de desbloquear. Como confirma tiene signin. Sesion guardada persistida.",
+    "- [2026-09-12] Al matar la app, si el desbloqueo estaba apagado se perdia la wrap key y la billetera fallaba. AppLockGate ahora pide contrasena si no hay sesion, aunque el desbloqueo este off.",
     "- [2026-09-12] Auditoria: UI hitos/deep link, caps antes de progreso, hidratar prestamo activo. Redeploy testnet 0xD2d2A9 + FamaLib 0x6B98072. Pool 2000 USDT. Hardhat 103/103.",
     "- [2026-09-12] Fundador exento de mora: pool cubre su prestamo. Fama de linea en QuatriviumFamaLib. Nucleo 24457/24576. Hardhat 103/103.",
     "- [2026-09-12] Mora con mes de gracia: siguen cobrando 30 dias para poder pagar. Luego 10 de reputacion por nivel y dia; comisiones y bonos van al pool hasta saldar.",
@@ -70,11 +75,8 @@
     "- [2026-09-11] Demo productivo: identidad local si ngrok falla; worker reinicia barrido al cambiar de contrato; ficha de nivel pide Activar si no hay registro; aviso si el atestado demo falla.",
     "- [2026-09-11] Auditoria live del contrato 0x1E5118: mundo nuevo pide Activar (no hereda linea vieja). Cache de credito ahora incluye la direccion del contrato y no barre 100 niveles cada 30s.",
     "- [2026-09-11] Redeploy testnet 100 niveles 0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3 bloque 130526896",
-    "- [2026-09-11] 100 niveles de credito hasta 10000 USDT: tasa del anterior siempre mayor, interes en dolares creciente",
-    "- [2026-09-11] Historial de referidos: ABI BonoActivacionPagado, startBlock del contrato, fechas y seccion visible",
-    "- [2026-09-11] Auditoria final: caché de crédito no pisa on-chain; pago multi-cuota exige saldo; worker rota RPC ante caídas",
-    "- [2026-09-11] Unificado el reloj suizo en salud_proyecto.py (npm run salud / --watch)"
+    "- [2026-09-11] 100 niveles de credito hasta 10000 USDT: tasa del anterior siempre mayor, interes en dolares creciente"
   ],
   "no_olvidar": "(puntos críticos)",
-  "ultima_sesion": "[2026-09-12] Cambio: Auditoria: UI hitos/deep link, caps antes de progreso, hidratar prestamo activo. Redeploy testnet 0xD2d2A9 + FamaLib 0x6B98072. Pool 2000 USDT. Hardhat 103/103."
+  "ultima_sesion": "[2026-09-12] Cambio: Como confirma: chips multi-seleccion. Desbloqueo, inicio extra, transferencias y prestamos piden todos los metodos marcados en secuencia."
 }
