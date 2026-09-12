@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import { AppKit, useAccount, useProvider } from '@reown/appkit-react-native';
 import { parseUnits } from 'ethers';
-import { setWalletSigner, clearWalletSigner } from '../services/quatriviumCreditService';
+import { setWalletSigner } from '../services/quatriviumCreditService';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { useHomeHandlers } from '../hooks/useHomeHandlers';
 import { WalletSection } from '../components/WalletSection';
@@ -16,8 +16,7 @@ import { RankLadder } from '../components/RankLadder';
 import { LoanTierCard } from '../components/LoanTierCard';
 import { AdminPanel } from '../components/AdminPanel';
 import { ActivateCreditSection } from '../components/ActivateCreditSection';
-import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
-import { DemoModeBanner } from '../components/DemoModeBanner';
+import { AccountWorldCard } from '../components/AccountWorldCard';
 import { AccountOnboarding } from '../components/AccountOnboarding';
 import { KycAccessBanner } from '../components/KycAccessBanner';
 import { BrandLogo } from '../components/BrandLogo';
@@ -161,11 +160,7 @@ function HomeScreenWithHooks() {
   });
 
   useEffect(() => {
-    if (appSigner) {
-      setWalletSigner(appSigner);
-    } else {
-      clearWalletSigner();
-    }
+    if (appSigner) setWalletSigner(appSigner);
   }, [appSigner]);
 
   useEffect(() => {
@@ -199,7 +194,27 @@ function HomeScreenWithHooks() {
         <View style={styles.topBar}>
           <BrandLogo size={44} />
           <View style={styles.topBarText}>
-            <AppText style={[styles.title, { color: colors.text }]}>Quatrivium Credit</AppText>
+            <View style={styles.titleRow}>
+              <AppText style={[styles.title, { color: colors.text }]}>Quatrivium Credit</AppText>
+              <View
+                style={[
+                  styles.worldBadge,
+                  {
+                    borderColor: mode === 'demo' ? colors.warnText : colors.success,
+                    backgroundColor: mode === 'demo' ? colors.warnBg : colors.chip,
+                  },
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.worldBadgeText,
+                    { color: mode === 'demo' ? colors.warnText : colors.success },
+                  ]}
+                >
+                  {mode === 'demo' ? t('appModeDemo') : t('appModeLive')}
+                </AppText>
+              </View>
+            </View>
             <AppText style={[styles.subtitle, rtl && styles.rtlText, { color: colors.textMuted }]}>
               {profile.displayName ? t('helloName', { name: profile.displayName }) : t('subtitle')}
             </AppText>
@@ -231,8 +246,7 @@ function HomeScreenWithHooks() {
           />
         )}
 
-        <DemoModeBanner />
-        <NetworkStatusBanner />
+        <AccountWorldCard />
         {mode === 'demo' && !isContractConfigured() && (
           <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>{t('configWarn')}</AppText>
         )}
@@ -246,11 +260,20 @@ function HomeScreenWithHooks() {
         <HomeHub
           onOpen={setRoom}
           tiles={[
-            { id: 'wallet', title: t('sectionAccount'), lead: t('hubWalletLead'), icon: 'wallet' },
+            {
+              id: 'wallet',
+              title: t('sectionAccount'),
+              lead: mode === 'demo' ? t('hubWalletLeadDemo') : t('hubWalletLead'),
+              icon: 'wallet',
+            },
             {
               id: 'credit',
               title: t('sectionCreditLine'),
-              lead: userInfo.isRegistered || userInfo.hasActiveLoan ? t('hubCreditLeadActive') : t('hubCreditLead'),
+              lead: !creditReady
+                ? t('hubCreditLeadPending')
+                : userInfo.isRegistered || userInfo.hasActiveLoan
+                  ? t('hubCreditLeadActive')
+                  : t('hubCreditLead'),
               icon: 'id',
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
@@ -558,9 +581,25 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 12,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
   title: {
     fontSize: 22,
     fontWeight: '600',
+  },
+  worldBadge: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  worldBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   subtitle: {
     fontSize: 13,

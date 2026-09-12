@@ -46,19 +46,26 @@ const assertContractConfigured = () => {
   }
 };
 
+const recoverAppSigner = async (): Promise<Signer | null> => {
+  const app = await loadAppWallet();
+  if (!app) return null;
+  setWalletSigner(app);
+  return app;
+};
+
 const getProviderAndSigner = async () => {
   const provider = await assertTrustedRpc(getProviderWithFallback());
-  if (walletSigner) {
-    if (!walletSigner.provider) {
-      throw new Error('wrong-network');
-    }
-    const connected = await walletSigner.provider.getNetwork().catch(() => null);
-    if (connected && Number(connected.chainId) !== Number((await provider.getNetwork()).chainId)) {
-      throw new Error('wrong-network');
-    }
-    return { provider, signer: walletSigner };
+  let signer = walletSigner;
+  if (!signer || !signer.provider) {
+    signer = await recoverAppSigner();
+    return { provider, signer };
   }
-  return { provider, signer: null as Signer | null };
+  const connected = await signer.provider.getNetwork().catch(() => null);
+  const expected = Number((await provider.getNetwork()).chainId);
+  if (connected && Number(connected.chainId) !== expected) {
+    signer = await recoverAppSigner();
+  }
+  return { provider, signer };
 };
 
 const requireSigner = async () => {

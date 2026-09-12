@@ -43,6 +43,7 @@
 - ver toda la info de niveles superiores aunque esten bloqueados
 - Desde 100 USDT, solicitudes por nivel +5 cada nivel; el nivel 100 da un bono del pool al completar su racha, no un nivel extra
 - Separar niveles y bonos a un contrato hermano para crecer sin tope de un solo archivo
+- interface intuitiva que reconoce cuenta real y cuenta demo sin confundirlas
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -61,3 +62,4 @@
 - [2026-09-12 01:25] Idea añadida al backlog: "ver toda la info de niveles superiores aunque esten bloqueados"
 - [2026-09-12 01:33] Idea añadida al backlog: "Desde 100 USDT, solicitudes por nivel +5 cada nivel; el nivel 100 da un bono del"
 - [2026-09-12 02:05] Idea añadida al backlog: "Separar niveles y bonos a un contrato hermano para crecer sin tope de un solo ar"
+- [2026-09-12 02:35] Idea añadida al backlog: "interface intuitiva que reconoce cuenta real y cuenta demo sin confundirlas"

@@ -4,10 +4,14 @@
 App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% funcional
 
 ## Decisiones
+- [2026-09-12] La UI nombra Cuenta Demo y Cuenta Real. Cada mundo limpia saldo y credito al cambiar. El USDT oficial no se trata como apagado por un RPC caido.
 - [2026-09-12] No recortar funciones del nucleo por EIP-170. El protocolo crece con contratos hermanos, cada uno con su propio tope de 24 KB.
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] Signer interno se recupera si HMR lo limpia. errNoWallet ya no pide billetera externa. gitignore cubre __pycache__ y .venv.
+- [2026-09-12] Textos Demo/Real recortados a lo esencial: que cuenta es y si vale dinero.
+- [2026-09-12] Cuentas Demo y Real visibles y aisladas. Token oficial no se apaga si cae el RPC. Cooldown antes que aviso de token.
 - [2026-09-12] Auditoria: Demo alineado con contrato live 3/5. Escalera nueva en QuatriviumLeveling. eas.json production sin testnet. Salud 14/14, Hardhat 85/85.
 - [2026-09-12] Ficha de nivel bloqueado: toda la tarjeta es pulsable para desplegar o plegar la info.
 - [2026-09-12] Niveles bloqueados: catalogo completo plegable con ficha (monto, tasa, plazo, interes).
@@ -25,4 +29,4 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 (puntos críticos)
 
 ## Última sesión
-[2026-09-12] Cambio: Auditoria: Demo alineado con contrato live 3/5. Escalera nueva en QuatriviumLeveling. eas.json production sin testnet. Salud 14/14, Hardhat 85/85.
+[2026-09-12] Cambio: Signer interno se recupera si HMR lo limpia. errNoWallet ya no pide billetera externa. gitignore cubre __pycache__ y .venv.

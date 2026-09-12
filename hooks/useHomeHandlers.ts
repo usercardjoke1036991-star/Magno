@@ -7,7 +7,7 @@ import { Contract, formatUnits, parseEther, parseUnits, type Eip1193Provider, ty
 import { Alert, Linking } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
 import { ERC20_ABI } from '../constants/contractConfig';
-import { getTokenMeta } from '../constants/tokens';
+import { getTokenMeta, isOfficialWorldToken } from '../constants/tokens';
 import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { useWeb3Transactions } from './useWeb3Transactions';
 import { notifyApiBases } from '../constants/appLinks';
@@ -263,10 +263,6 @@ export const useHomeHandlers = ({
       Alert.alert(t('delinquent'), t('moraBlocked'));
       return;
     }
-    if (!userInfo.isTokenSupported) {
-      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
-      return;
-    }
     if (userInfo.userProgress.cooldownRestante > 0) {
       Alert.alert(
         t('cooldownTitle'),
@@ -274,6 +270,10 @@ export const useHomeHandlers = ({
           time: formatCooldown(userInfo.userProgress.cooldownRestante, t('available')),
         })
       );
+      return;
+    }
+    if (!userInfo.isTokenSupported && !isOfficialWorldToken(selectedToken.address)) {
+      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
       return;
     }
     if (!(await ensureGasForTx())) return;
@@ -395,7 +395,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('admin'), t('protocolPaused'));
       return;
     }
-    if (!userInfo.isTokenSupported) {
+    if (!userInfo.isTokenSupported && !isOfficialWorldToken(selectedToken.address)) {
       Alert.alert(t('token'), t('tokenNotEnabledAlert'));
       return;
     }

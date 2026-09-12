@@ -68,7 +68,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
       <View style={styles.walletInfo}>
         <BrandLogo size={44} />
         <View style={styles.grow}>
-          <AppText style={[styles.walletLabel, { color: colors.textMuted }]}>{t('appWalletLabel')}</AppText>
+          <AppText style={[styles.walletLabel, { color: colors.textMuted }]}>
+            {isDemo ? t('accountWorldDemo') : t('accountWorldLive')}
+          </AppText>
           <TouchableOpacity onPress={() => void copyAddress()} accessibilityRole="button" accessibilityLabel={t('copyAddress')}>
             <AppText style={[styles.walletAddress, { color: colors.text }]}>{formatAddress(walletAddress)}</AppText>
           </TouchableOpacity>
@@ -81,9 +83,6 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
           </View>
         </View>
       </View>
-      <AppText style={[styles.hint, { color: colors.textMuted }]}>
-        {isDemo ? t('appWalletLeadDemo') : t('appWalletLead')}
-      </AppText>
       {!isDemo && Number(bnbBalance) <= 0 ? (
         <AppText style={[styles.warn, { color: colors.warnText }]}>{t('appWalletNeedGas')}</AppText>
       ) : null}

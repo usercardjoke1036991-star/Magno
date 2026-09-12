@@ -9,13 +9,13 @@
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
 - **Estado:** Testnet operativo — mainnet pendiente de deploy (acción manual del fundador)
-- **Tests detectados:** 17 archivo(s)
+- **Tests detectados:** 18 archivo(s)
 
 ### Qué funciona
 - Contrato `QuatriviumCredit.sol` — testnet en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles, bloque 130526896)
-- 15 suites Hardhat (81 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity…
+- 15 suites Hardhat (89 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld…
 - App móvil con 43 componentes React Native
-- i18n: 17 idiomas, 640 claves
+- i18n: 17 idiomas, 686 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados

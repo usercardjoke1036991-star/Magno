@@ -70,6 +70,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `app/_layout.tsx` — módulo JS/TS
 - `components/AccountOnboarding.tsx` — módulo JS/TS
   - Funciones/clases: AccountOnboarding
+- `components/AccountWorldCard.tsx` — módulo JS/TS
+  - Funciones/clases: AccountWorldCard
 - `components/ActivateCreditSection.tsx` — módulo JS/TS
   - Funciones/clases: ActivateCreditSection
 - `components/AdminAccess.tsx` — módulo JS/TS
@@ -91,7 +93,6 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `components/BrandLogo.tsx` — módulo JS/TS
   - Funciones/clases: BrandLogo
 - `components/DemoModeBanner.tsx` — módulo JS/TS
-  - Funciones/clases: DemoModeBanner
 - `components/EmailOtpSection.tsx` — módulo JS/TS
   - Funciones/clases: EmailOtpSection
 - `components/FundsConfirmHost.tsx` — módulo JS/TS
@@ -181,7 +182,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/rpcConfig.ts` — módulo JS/TS
   - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
 - `constants/tokens.ts` — módulo JS/TS
-  - Funciones/clases: getConfigurableStables, getSupportedTokens, getTokenMeta
+  - Funciones/clases: getConfigurableStables, getSupportedTokens, getTokenMeta, isOfficialWorldToken
 - `hooks/useHomeHandlers.ts` — módulo JS/TS
   - Funciones/clases: useHomeHandlers
 - `hooks/useLiveCooldown.ts` — módulo JS/TS
@@ -269,6 +270,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `stubs/zk-node-stub.js` — módulo JS/TS
 - `stubs/zlib-stub.js` — módulo JS/TS
 - `test/accounting.test.js` — módulo JS/TS
+- `test/accountWorld.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
 - `test/cuotas.test.js` — módulo JS/TS
 - `test/cyber-hardening.test.js` — módulo JS/TS

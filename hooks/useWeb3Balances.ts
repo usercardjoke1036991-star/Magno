@@ -3,7 +3,7 @@ import { Contract, formatEther, formatUnits, isAddress } from 'ethers';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
 import { assertTrustedRpc, isContractConfigured, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
-import { getTokenMeta, type Token } from '../constants/tokens';
+import { getTokenMeta, isOfficialWorldToken, type Token } from '../constants/tokens';
 import { LOAN_TIERS, overlayOnChainTier, type LoanTier } from '../constants/loanTiers';
 import { describeAdminCalldata, type OpenAdminProposal } from '../utils/adminProposal';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
@@ -195,7 +195,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           try {
             isTokenSupported = Boolean(await creditContract.isSupportedToken(tokenAddress));
           } catch {
-            isTokenSupported = false;
+            isTokenSupported = isOfficialWorldToken(tokenAddress);
           }
           try {
             curveRateBps = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
@@ -458,7 +458,10 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           setUserInfo((prev) => ({ ...prev, isTokenSupported: supported, curveRateBps: nextCurve }));
         } catch (e) {
           logWarn('isSupportedToken failed:', e);
-          setUserInfo((prev) => ({ ...prev, isTokenSupported: false }));
+          setUserInfo((prev) => ({
+            ...prev,
+            isTokenSupported: prev.isTokenSupported || isOfficialWorldToken(tokenAddress),
+          }));
         }
 
         try {
@@ -762,7 +765,12 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   }, [fetchBalances]);
 
   useEffect(() => subscribeRuntimeMode(() => {
-    fetchBalances();
+    chainStatusReadyRef.current = false;
+    onChainTiersReadyRef.current = false;
+    setUserInfo({ ...EMPTY_USER_INFO });
+    setBalances({ ...EMPTY_BALANCES });
+    setLoanTiers(LOAN_TIERS);
+    void fetchBalances();
   }), [fetchBalances]);
 
   // Auto-refresh cada 30 s cuando hay wallet conectada para mantener el saldo al día

@@ -140,7 +140,13 @@ export const SettingsButton: React.FC = () => {
                   <MenuRow icon="user" label={t('profile')} onPress={() => setPanel('profile')} />
                   <MenuRow icon="sun" label={t('appearance')} onPress={() => setPanel('appearance')} />
                   <MenuRow icon="globe" label={t('language')} onPress={() => setPanel('language')} />
-                  <MenuRow icon="bank" label={t('appModeTitle')} onPress={() => setPanel('mode')} />
+                  <MenuRow
+                    icon="bank"
+                    label={t('settingsAccountNow', {
+                      world: mode === 'demo' ? t('appModeDemo') : t('appModeLive'),
+                    })}
+                    onPress={() => setPanel('mode')}
+                  />
                   {founderReady ? (
                     <MenuRow icon="shield" label={t('settingsAdminTitle')} onPress={() => setPanel('admin')} />
                   ) : (

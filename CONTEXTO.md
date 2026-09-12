@@ -50,7 +50,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 640 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 686 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -107,9 +107,9 @@ La escalera nueva (3 hasta L5, +5 desde $100, bono 2.000 USDT en L100) vive en `
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — testnet en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles, bloque 130526896)
-- 15 suites Hardhat (81 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity…
+- 15 suites Hardhat (89 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld…
 - App móvil con 43 componentes React Native
-- i18n: 17 idiomas, 640 claves
+- i18n: 17 idiomas, 686 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
@@ -225,6 +225,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Auditoria: recoverAppSigner ante signer nulo; i18n errNoWallet; gitignore Python; Hardhat 89/89; salud 14/14. | — |
+| 2026-09-12 | UI de Cuenta Demo/Real inconfundible; isOfficialWorldToken evita falso token apagado; cooldown se muestra antes. | — |
 | 2026-09-12 | Auditoria productiva: UI y nucleo coinciden con 0x1E5118 (L1=3, resto=5). QuatriviumLeveling guarda la escalera+bono para el proximo deploy. eas.json production ya no inyecta testnet. | — |
 | 2026-09-12 | Vista de niveles superiores: todos los bloqueados se listan; pulse para ver la ficha completa. Siguen sin poder pedirse. | — |
 | 2026-09-12 | Avatar: solo imagen y marco de rango. El color de fondo sin foto se deriva de la wallet. | — |
