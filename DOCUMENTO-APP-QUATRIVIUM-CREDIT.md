@@ -2,7 +2,7 @@
 
 Documento de referencia de la app **Quatrivium Credit**. Describe lo que existe hoy en el código y en el contrato, no un pitch de marketing.
 
-Última actualización: 30 de agosto de 2026.
+Última actualización: 12 de septiembre de 2026.
 
 ---
 
@@ -27,7 +27,7 @@ No es un banco, no es un exchange y no es un DEX. Es un **pool de liquidez + mot
 ## 2. Propuesta de valor
 
 1. **Crédito sin pedirle garantía al usuario.** No deposita USDT extra ni NFT ni BNB como colateral.
-2. **Reputación on-chain.** Pagar a tiempo sube el nivel (1 → 10). La mora baja la reputación y corta el acceso.
+2. **Reputación on-chain.** Pagar a tiempo sube el nivel (1 → 100) y suma puntos de reputación. La mora resta puntos y corta el acceso.
 3. **Pool de liquidez.** Cualquiera puede depositar USDT y retirar su parte (NAV). Esa liquidez es la que se presta.
 4. **Reglas públicas.** Montos, plazos, tasas, cooldown, tope diario y oráculo están en el contrato, no en un servidor opaco.
 
@@ -89,9 +89,10 @@ Muestra:
 
 Tarjeta **Tu Progreso**:
 
-- Nivel actual (1–10)
-- Reputación (empieza en 100)
-- Pagos a tiempo vs. los que faltan para subir (3 en nivel 1, 5 después)
+- Nivel actual (1–100)
+- Reputación (empieza en 100; no tiene techo 100)
+- Historial: pagos a tiempo, préstamos en mora y penalizaciones
+- Pagos a tiempo vs. los que faltan para subir (3 en nivel 1, 5 en L2–99; el 100 no sube)
 - Cooldown restante (48 h entre préstamos)
 - Si hay deuda activa: monto a devolver y fecha de vencimiento
 - Badges: Registrado / Préstamo activo / En mora
@@ -107,7 +108,7 @@ Botón **Activar línea de crédito**.
 
 ### 4.6 Pedir préstamo
 
-Hay **10 tarjetas de nivel** (1 a 10). El usuario solo puede pedir el nivel que ya desbloqueó.
+Hay **100 niveles** (1 a 100). El usuario solo puede pedir el nivel que ya desbloqueó; los demás se ven en ficha, bloqueados.
 
 Al pulsar **Pedir**:
 
@@ -141,8 +142,8 @@ Con deuda activa, la tarjeta del nivel muestra **Pagar**.
 - Hay que pagar **el total** (principal + interés), no cuotas parciales.
 - Si paga **antes del vencimiento**:
   - Suma un pago a tiempo
-  - Tras 3 (nivel 1) o 5 (niveles 2–10) pagos a tiempo, **sube de nivel**
-  - Recupera reputación (hasta 100)
+  - Tras 3 (nivel 1) o 5 (niveles 2–99) pagos a tiempo, **sube de nivel**
+  - Suma puntos de reputación (`puntosPorPagoATiempo`, 100 por defecto)
 - Si paga **tarde**:
   - El préstamo se cierra igual
   - **No** cuenta para subir de nivel
@@ -335,7 +336,7 @@ Sujeto a timelock + confirmaciones, salvo pausa:
 El admin **no** puede:
 
 - Perdonar una deuda concreta desde un botón mágico en la UI (no está cableado)
-- Inventar un nivel 11
+- Inventar un nivel 101
 - Saltar el oráculo
 - Quitar el self-register y prestar a una dirección no registrada
 
@@ -378,7 +379,7 @@ No sustituyen una prueba manual en el teléfono con WalletConnect.
 | Principal | Lo que te prestan |
 | Interés | Extra que devuelves, fijado al pedir |
 | Nivel | Tope de monto/plazo que ya desbloqueaste |
-| Reputación | Puntos (0–100). La mora los baja |
+| Reputación | Puntos on-chain (arranque 100). Pago a tiempo suma; mora resta (piso 0) |
 | Mora | Atraso. Bloquea pedir otro préstamo |
 | Cooldown | 48 h de espera entre préstamos |
 | Pool / NAV | Caja + deudas vigentes |

@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "Tanpa sidik jari",
   "securityFingerprintDone": "Aktif",
   "securityFingerprintLead": "Sidik jari untuk membuka aplikasi.",
-  "themeMinimalist": "Minimalis"
+  "themeMinimalist": "Minimalis",
+  "creditHistoryShort": "{onTime} tepat waktu · {missed} telat · {penalties} penalti"
 }

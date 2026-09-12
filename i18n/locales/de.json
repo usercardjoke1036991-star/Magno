@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "Kein Fingerabdruck",
   "securityFingerprintDone": "Aktiv",
   "securityFingerprintLead": "Fingerabdruck zum Öffnen der App.",
-  "themeMinimalist": "Minimalistisch"
+  "themeMinimalist": "Minimalistisch",
+  "creditHistoryShort": "{onTime} pünktlich · {missed} Verzug · {penalties} Abzüge"
 }

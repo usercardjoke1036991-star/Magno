@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "कोई फ़िंगरप्रिंट नहीं",
   "securityFingerprintDone": "चालू",
   "securityFingerprintLead": "ऐप खोलने के लिए फ़िंगरप्रिंट।",
-  "themeMinimalist": "न्यूनतम"
+  "themeMinimalist": "न्यूनतम",
+  "creditHistoryShort": "{onTime} समय पर · {missed} देर · {penalties} जुर्माना"
 }

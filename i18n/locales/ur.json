@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "کوئی فنگر پرنٹ نہیں",
   "securityFingerprintDone": "آن",
   "securityFingerprintLead": "ایپ کھولنے کے لیے فنگر پرنٹ۔",
-  "themeMinimalist": "سادہ"
+  "themeMinimalist": "سادہ",
+  "creditHistoryShort": "{onTime} وقت پر · {missed} تاخیر · {penalties} جرمانے"
 }

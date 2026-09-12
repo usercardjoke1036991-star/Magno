@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Linking as RNLinking, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
+import { parseAppDeepLink } from '../utils/appDeepLink';
 import { AppKit, useAccount, useProvider } from '@reown/appkit-react-native';
 import { parseUnits } from 'ethers';
 import { setWalletSigner } from '../services/quatriviumCreditService';
@@ -68,19 +69,18 @@ function HomeScreenWithHooks() {
   }, [mode, room]);
 
   useEffect(() => {
-    const allowed: HomeRoom[] = ['wallet', 'credit', 'loans', 'network', 'pool', 'admin'];
     const apply = (url?: string | null) => {
-      if (!url) return;
-      const parsed = Linking.parse(url);
-      const parts = String(parsed.path || '').replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
-      const fromQuery = String(parsed.queryParams?.room || '');
-      const fromPath = parts[0] === 'room' ? parts[1] || '' : parts[0] || '';
-      const candidate = (fromQuery || fromPath) as HomeRoom;
-      if (allowed.includes(candidate)) setRoom(candidate);
+      const link = parseAppDeepLink(url);
+      if (link?.kind === 'room') setRoom(link.room);
     };
     Linking.getInitialURL().then(apply).catch(() => {});
+    RNLinking.getInitialURL().then(apply).catch(() => {});
     const sub = Linking.addEventListener('url', ({ url }) => apply(url));
-    return () => sub.remove();
+    const rnSub = RNLinking.addEventListener('url', ({ url }) => apply(url));
+    return () => {
+      sub.remove();
+      rnSub.remove();
+    };
   }, []);
 
   useEffect(() => {

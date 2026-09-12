@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "ফিঙ্গারপ্রিন্ট নেই",
   "securityFingerprintDone": "চালু",
   "securityFingerprintLead": "অ্যাপ খুলতে ফিঙ্গারপ্রিন্ট।",
-  "themeMinimalist": "মিনিমাল"
+  "themeMinimalist": "মিনিমাল",
+  "creditHistoryShort": "{onTime} সময়ে · {missed} দেরি · {penalties} জরিমানা"
 }

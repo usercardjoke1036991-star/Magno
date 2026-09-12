@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "بدون بصمة",
   "securityFingerprintDone": "مفعّلة",
   "securityFingerprintLead": "بصمة لفتح التطبيق.",
-  "themeMinimalist": "بسيط"
+  "themeMinimalist": "بسيط",
+  "creditHistoryShort": "{onTime} في الموعد · {missed} تأخير · {penalties} غرامات"
 }

@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "No fingerprint",
   "securityFingerprintDone": "On",
   "securityFingerprintLead": "Fingerprint to open the app.",
-  "themeMinimalist": "Minimalist"
+  "themeMinimalist": "Minimalist",
+  "creditHistoryShort": "{onTime} on time · {missed} late · {penalties} penalties"
 }

@@ -232,7 +232,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/accountUsername.ts` — módulo JS/TS
   - Funciones/clases: loadClaimedUsername, saveClaimedUsername, checkUsernameAvailable, claimUsername, clearClaimedUsername
 - `services/appLock.ts` — módulo JS/TS
-  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, isPinSet, getPinLockRemaining, setPin, checkPin, verifyPin, changePin, setPassword, checkPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
+  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, isPinSet, getPinLockRemaining, setPin, checkPin, verifyPin, changePin, clearPin, setPassword, checkPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
 - `services/appWallet.ts` — módulo JS/TS
   - Funciones/clases: rewrapWalletWithNewKey, withCurrentRpc, isValidSecretPhrase, loadAppWallet, createAppWallet, ensureAppWallet, wipeAppWallet, recreateAppWallet, addressFromPhrase, importFromPhrase, getSecretPhrase, hasSecretPhrase, isPhraseBackedUp, markPhraseBackedUp, cobrarComisionIntermediario, enviarToken, enviarBnb
 - `services/demoIdentity.ts` — módulo JS/TS
@@ -300,6 +300,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: asFieldElement, ZKTypeValidator, ZK_SECURITY_CONSTANTS
 - `utils/adminProposal.ts` — módulo JS/TS
   - Funciones/clases: describeAdminCalldata
+- `utils/appDeepLink.ts` — módulo JS/TS
+  - Funciones/clases: parseAppDeepLink
 - `utils/appKitStorage.ts` — módulo JS/TS
   - Funciones/clases: appKitStorage
 - `utils/appNotice.ts` — módulo JS/TS

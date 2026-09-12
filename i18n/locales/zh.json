@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "未设置",
   "securityFingerprintDone": "已开启",
   "securityFingerprintLead": "用指纹打开应用。",
-  "themeMinimalist": "极简"
+  "themeMinimalist": "极简",
+  "creditHistoryShort": "{onTime} 按时 · {missed} 逾期 · {penalties} 罚分"
 }

@@ -50,7 +50,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 686 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 703 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -225,13 +225,16 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Deep links: quatrivium://room/credit y /profile. Verificado en Demo: historial 0 a tiempo / mora / penaliz. y Perfil Nivel 1/100 Bronce. | — |
+| 2026-09-12 | UserMetrics muestra historial on-chain (a tiempo, mora, penalizaciones). Perfil enseña nivel/100. DOCUMENTO alineado a 100 niveles. | — |
+| 2026-09-12 | useWalletLevel deja de recortar el nivel a 10. El marco de rango en Ajustes y referidos sigue el nivel on-chain 1-100. | — |
 | 2026-09-12 | Tema Minimalista (blanco y negro). Avatar sin foto: silueta gris tipo Facebook. | — |
 | 2026-09-12 | Panel de seguridad: contraseña y frase solo se reemplazan; PIN, huella y llave se pueden quitar. | — |
 | 2026-09-12 | Auditoria: recoverAppSigner ante signer nulo; i18n errNoWallet; gitignore Python; Hardhat 89/89; salud 14/14. | — |
 | 2026-09-12 | UI de Cuenta Demo/Real inconfundible; isOfficialWorldToken evita falso token apagado; cooldown se muestra antes. | — |
 | 2026-09-12 | Auditoria productiva: UI y nucleo coinciden con 0x1E5118 (L1=3, resto=5). QuatriviumLeveling guarda la escalera+bono para el proximo deploy. eas.json production ya no inyecta testnet. | — |
 | 2026-09-12 | Vista de niveles superiores: todos los bloqueados se listan; pulse para ver la ficha completa. Siguen sin poder pedirse. | — |
-| 2026-09-12 | Avatar: solo imagen y marco de rango. El color de fondo sin foto se deriva de la wallet. | — |
+| 2026-09-12 | Avatar: solo imagen y marco de rango. Sin foto: silueta gris estilo Facebook. | — |
 | 2026-09-12 | Decisión: alta nueva = Real. El último modo (Demo o Real) se restaura al reabrir. Demo disponible también en tienda (mundo testnet aislado). | — |
 | 2026-09-11 | Fixes Demo: notifyApiBases localhost, lastBlock por contrato, CTA Activar en LoanTierCard, prepareDemoCredit visible tras registrar. | — |
 | 2026-09-11 | Auditoria live post-redeploy 100 niveles: UI pide Activar, L1  / L2 bloqueado, historial vacio. Cache de credito keyed por contrato; refresh silencioso no reescanea niveles. | — |

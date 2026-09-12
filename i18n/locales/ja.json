@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "指紋なし",
   "securityFingerprintDone": "オン",
   "securityFingerprintLead": "アプリを開く指紋。",
-  "themeMinimalist": "ミニマル"
+  "themeMinimalist": "ミニマル",
+  "creditHistoryShort": "{onTime} 期限内 · {missed} 延滞 · {penalties} 減点"
 }

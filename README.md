@@ -15,12 +15,12 @@
 - Contrato `QuatriviumCredit.sol` — testnet en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles, bloque 130526896)
 - 15 suites Hardhat (89 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld…
 - App móvil con 43 componentes React Native
-- i18n: 17 idiomas, 686 claves
+- i18n: 17 idiomas, 702 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
-- App lock: PIN 6 dígitos + huella real (detección por `expo-local-authentication`, no por NativeModules; PIN y llave de acceso comparten el mismo interruptor)
-- Frase secreta BIP-39: ver/guardar; rotar o restaurar vive en Reemplazar cuenta
+- App lock: contraseña y frase solo se reemplazan; PIN, huella y llave de acceso se pueden cambiar o quitar (huella y llave usan el mismo sensor)
+- Frase secreta BIP-39: ver/anotar; rotar o restaurar vive en Reemplazar cuenta (no se elimina suelta)
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
 - Auto-refresh de balances cada 30 s

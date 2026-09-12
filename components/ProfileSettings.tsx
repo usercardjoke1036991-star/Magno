@@ -100,6 +100,11 @@ export const ProfileSettings: React.FC = () => {
             {username ? `@${username}` : draft.displayName || t('profileNamePlaceholder')}
           </AppText>
           <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('profileLead')}</AppText>
+          {walletAddress ? (
+            <AppText style={[styles.heroHint, { color: colors.textMuted }]}>
+              {t('level')} {level}/100 · {t(getRankForLevel(level).nameKey)}
+            </AppText>
+          ) : null}
           <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
         </View>
       </View>

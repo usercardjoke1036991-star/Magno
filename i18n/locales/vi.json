@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "Chưa có vân tay",
   "securityFingerprintDone": "Bật",
   "securityFingerprintLead": "Vân tay để mở ứng dụng.",
-  "themeMinimalist": "Tối giản"
+  "themeMinimalist": "Tối giản",
+  "creditHistoryShort": "{onTime} đúng hạn · {missed} trễ · {penalties} phạt"
 }

@@ -10,6 +10,10 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] Verificado en el telefono: Crédito muestra historial y 1/100; Perfil muestra nivel y Bronce. Deep link room/profile abre Ajustes.
+- [2026-09-12] Historial de credito visible: a tiempo, mora y penalizaciones. Docs ya no hablan de 10 niveles.
+- [2026-09-12] Marco de rango: useWalletLevel ya no recorta a 10; usa clampLoanLevel 1-100.
+- [2026-09-12] Montos de prestamo desde 1000 se ven 1.000.00 para no confundir con mas dinero.
 - [2026-09-12] Tema Minimalista blanco y negro. Foto de perfil por defecto: silueta gris estilo Facebook.
 - [2026-09-12] Apariencia: Claro, Oscuro y Sistema se ven distintos en el selector. Sistema sigue el tema del telefono.
 - [2026-09-12] Panel de seguridad sin avisos de reemplazar o no eliminar. La interfaz se entiende por los botones.
@@ -36,4 +40,4 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 (puntos críticos)
 
 ## Última sesión
-[2026-09-12] Cambio: En espera entre prestamos solo se ve la cuenta atras en vivo, no Solicitar.
+[2026-09-12] Cambio: Verificado en el telefono: Crédito muestra historial y 1/100; Perfil muestra nivel y Bronce. Deep link room/profile abre Ajustes.

@@ -85,6 +85,13 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
                 {userInfo.reputation}
               </AppText>
               <AppText style={[styles.rankHint, { color: colors.textMuted }]}>
+                {t('creditHistoryShort', {
+                  onTime: String(userInfo.creditHistory?.paidOnTime ?? 0),
+                  missed: String(userInfo.creditHistory?.missedLoans ?? 0),
+                  penalties: String(userInfo.creditHistory?.penalties ?? 0),
+                })}
+              </AppText>
+              <AppText style={[styles.rankHint, { color: colors.textMuted }]}>
                 {t('referralRepScoreShort', { network: String(userInfo.networkPoints || 0) })}
               </AppText>
             </View>

@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "지문 없음",
   "securityFingerprintDone": "켜짐",
   "securityFingerprintLead": "앱을 여는 지문.",
-  "themeMinimalist": "미니멀"
+  "themeMinimalist": "미니멀",
+  "creditHistoryShort": "{onTime} 정시 · {missed} 연체 · {penalties} 감점"
 }

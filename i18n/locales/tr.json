@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "Parmak izi yok",
   "securityFingerprintDone": "Açık",
   "securityFingerprintLead": "Uygulamayı açmak için parmak izi.",
-  "themeMinimalist": "Yalın"
+  "themeMinimalist": "Yalın",
+  "creditHistoryShort": "{onTime} zamanında · {missed} gecikme · {penalties} ceza"
 }

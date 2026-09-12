@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { clampLoanLevel } from '../constants/ranks';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 
 const cache = new Map<string, { level: number; at: number }>();
@@ -11,7 +12,7 @@ export async function getWalletLevel(wallet?: string): Promise<number> {
   if (hit && Date.now() - hit.at < TTL_MS) return hit.level;
   try {
     const progress = await QuatriviumCreditService.obtenerProgresoUsuario(key);
-    const level = Math.min(10, Math.max(1, Number(progress.nivelActual) || 1));
+    const level = clampLoanLevel(Number(progress.nivelActual) || 1);
     cache.set(key, { level, at: Date.now() });
     return level;
   } catch {
@@ -21,20 +22,21 @@ export async function getWalletLevel(wallet?: string): Promise<number> {
 
 export function rememberWalletLevel(wallet: string, level: number) {
   const key = wallet.toLowerCase();
-  cache.set(key, { level: Math.min(10, Math.max(1, level || 1)), at: Date.now() });
+  cache.set(key, { level: clampLoanLevel(level), at: Date.now() });
 }
 
 export function useWalletLevel(wallet?: string, knownLevel?: number) {
   const [level, setLevel] = useState(() => {
-    if (knownLevel && knownLevel > 0) return knownLevel;
+    if (knownLevel && knownLevel > 0) return clampLoanLevel(knownLevel);
     const key = String(wallet || '').toLowerCase();
     return cache.get(key)?.level || 1;
   });
 
   useEffect(() => {
     if (knownLevel && knownLevel > 0) {
-      setLevel(knownLevel);
-      if (wallet) rememberWalletLevel(wallet, knownLevel);
+      const next = clampLoanLevel(knownLevel);
+      setLevel(next);
+      if (wallet) rememberWalletLevel(wallet, next);
       return;
     }
     let cancelled = false;

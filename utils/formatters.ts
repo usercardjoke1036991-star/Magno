@@ -50,7 +50,10 @@ export const formatAddress = (address: string): string => {
  * @returns Formatted USD string
  */
 export const formatUSD = (amount: number): string => {
-  return `$${amount.toFixed(2)}`;
+  const safe = Number.isFinite(amount) ? amount : 0;
+  const [whole, cents] = Math.abs(safe).toFixed(2).split('.');
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `$${safe < 0 ? '-' : ''}${grouped}.${cents}`;
 };
 
 export const formatDueDate = (unixSeconds: number): string => {

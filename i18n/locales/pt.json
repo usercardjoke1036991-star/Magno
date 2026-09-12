@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "Sem impressão",
   "securityFingerprintDone": "Ativa",
   "securityFingerprintLead": "Impressão digital para abrir o app.",
-  "themeMinimalist": "Minimalista"
+  "themeMinimalist": "Minimalista",
+  "creditHistoryShort": "{onTime} em dia · {missed} atraso · {penalties} penalizações"
 }

@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "Sin huella",
   "securityFingerprintDone": "Activa",
   "securityFingerprintLead": "Huella para abrir la app.",
-  "themeMinimalist": "Minimalista"
+  "themeMinimalist": "Minimalista",
+  "creditHistoryShort": "{onTime} a tiempo · {missed} mora · {penalties} penaliz."
 }

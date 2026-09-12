@@ -45,6 +45,7 @@
 - Separar niveles y bonos a un contrato hermano para crecer sin tope de un solo archivo
 - interface intuitiva que reconoce cuenta real y cuenta demo sin confundirlas
 - tema minimalista blanco y negro y foto de perfil gris como Facebook
+- mostrar historial de credito on-chain en metricas: pagos a tiempo, mora y penalizaciones
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -65,3 +66,4 @@
 - [2026-09-12 02:05] Idea añadida al backlog: "Separar niveles y bonos a un contrato hermano para crecer sin tope de un solo ar"
 - [2026-09-12 02:35] Idea añadida al backlog: "interface intuitiva que reconoce cuenta real y cuenta demo sin confundirlas"
 - [2026-09-12 08:30] Idea añadida al backlog: "tema minimalista blanco y negro y foto de perfil gris como Facebook"
+- [2026-09-12 08:46] Idea añadida al backlog: "mostrar historial de credito on-chain en metricas: pagos a tiempo, mora y penali"

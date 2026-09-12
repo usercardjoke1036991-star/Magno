@@ -700,5 +700,6 @@
   "securityFingerprintTodo": "Нет отпечатка",
   "securityFingerprintDone": "Включён",
   "securityFingerprintLead": "Отпечаток для открытия приложения.",
-  "themeMinimalist": "Минимализм"
+  "themeMinimalist": "Минимализм",
+  "creditHistoryShort": "{onTime} вовремя · {missed} просрочка · {penalties} штрафы"
 }

@@ -1,3 +1,5 @@
+import { formatUSD } from '../utils/formatters';
+
 export const DIRECT_COMMISSION_BPS = 1500;
 export const ACTIVATION_BONUS_USD = 0.5;
 
@@ -10,7 +12,7 @@ export function directCommissionFromLoan(usdAmount: number, interestBps: number)
 }
 
 export function formatCommissionUSD(amount: number): string {
-  if (amount >= 1) return `$${amount.toFixed(2)}`;
+  if (amount >= 1) return formatUSD(amount);
   if (amount >= 0.01) return `$${amount.toFixed(3)}`;
   return `$${amount.toFixed(4)}`;
 }

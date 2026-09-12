@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import * as Linking from 'expo-linking';
+import { parseAppDeepLink } from '../utils/appDeepLink';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { LanguageSelector } from './LanguageSelector';
@@ -52,6 +54,18 @@ export const SettingsButton: React.FC = () => {
       .then((backed) => setPhraseWarning(!backed))
       .catch(() => {});
   }, [open]); // re-check when settings modal closes
+
+  useEffect(() => {
+    const apply = (url?: string | null) => {
+      const link = parseAppDeepLink(url);
+      if (link?.kind !== 'settings') return;
+      setOpen(true);
+      setPanel(link.panel === 'profile' ? 'profile' : 'home');
+    };
+    Linking.getInitialURL().then(apply).catch(() => {});
+    const sub = Linking.addEventListener('url', ({ url }) => apply(url));
+    return () => sub.remove();
+  }, []);
 
   const close = () => {
     setOpen(false);
