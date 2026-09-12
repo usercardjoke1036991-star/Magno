@@ -660,7 +660,7 @@
   "checkingCredit": "Đang kiểm tra hạn mức đã kích hoạt chưa…",
   "subsectionCreditStatus": "Trạng thái hạn mức",
   "hubCreditLeadActive": "Đã bật. Xin hoặc trả tại đây.",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "Tín dụng Thật chưa hoạt động.",
   "termDays": "{days} ngày",
   "lockedLevelsHint": "Vẫn bị khóa. Chạm một cấp để xem số tiền, lãi suất, kỳ hạn và lãi.",
   "loanSeeDetails": "Xem đủ thông tin",
@@ -684,5 +684,6 @@
   "walletWorldLive": "Tài khoản Thật",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "Số dư thử.",
-  "hubCreditLeadPending": "Chưa hoạt động."
+  "hubCreditLeadPending": "Chưa hoạt động.",
+  "errEmptyRevertDemo": "Phải chờ 48 giờ giữa các khoản vay. Xem đếm ngược trên Yêu cầu."
 }

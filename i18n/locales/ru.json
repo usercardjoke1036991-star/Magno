@@ -660,7 +660,7 @@
   "checkingCredit": "Проверяем, активна ли линия…",
   "subsectionCreditStatus": "Состояние линии",
   "hubCreditLeadActive": "Активна. Берите или платите здесь.",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "Реальный кредит ещё не активен.",
   "termDays": "{days} дн.",
   "lockedLevelsHint": "Они остаются закрытыми. Нажмите уровень, чтобы увидеть сумму, ставку, срок и процент.",
   "loanSeeDetails": "Смотреть полностью",
@@ -684,5 +684,6 @@
   "walletWorldLive": "Реальный счёт",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "Тестовый баланс.",
-  "hubCreditLeadPending": "Ещё не активен."
+  "hubCreditLeadPending": "Ещё не активен.",
+  "errEmptyRevertDemo": "Между займами нужно ждать 48 часов. Смотрите отсчёт на «Запросить»."
 }

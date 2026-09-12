@@ -27,6 +27,7 @@ interface LoanTierCardProps {
   paused?: boolean;
   curveRateBps?: number;
   ultimoPrestamoTimestamp?: number;
+  cooldownRestante?: number;
   isRegistered?: boolean;
   onActivateCredit?: () => void;
   onRequestLoan: (tier: LoanTier) => void;
@@ -50,6 +51,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   paused = false,
   curveRateBps = 0,
   ultimoPrestamoTimestamp = 0,
+  cooldownRestante = 0,
   isRegistered = true,
   onActivateCredit,
   onRequestLoan,
@@ -74,7 +76,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const referralEarn = formatCommissionUSD(directCommissionFromLoan(tier.usdAmount, appliedBps));
   const curveRaisesRate = appliedBps > tier.interestBps;
   const remainingInstallments = Math.max(0, cuotasTotales - cuotasPagadas);
-  const cooldownLeft = useLiveCooldown(ultimoPrestamoTimestamp);
+  const cooldownLeft = useLiveCooldown(ultimoPrestamoTimestamp, cooldownRestante);
   const waitingNextLoan = cooldownLeft > 0 && !hasActiveLoan && !locked;
   const needsActivate = !isRegistered && unlocked && !hasActiveLoan;
   const requestBlocked = isLoading || locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan;
@@ -197,6 +199,17 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
               </TouchableOpacity>
             ) : null}
           </>
+        ) : waitingNextLoan ? (
+          <View
+            style={[styles.waitBox, { backgroundColor: colors.chip, borderColor: colors.border }]}
+            accessibilityRole="text"
+            accessibilityLabel={`${t('cooldown')} ${formatCountdownClock(cooldownLeft)}`}
+          >
+            <AppText style={[styles.waitLabel, { color: colors.textMuted }]}>{t('cooldown')}</AppText>
+            <AppText style={[styles.waitClock, { color: colors.text }]}>
+              {formatCountdownClock(cooldownLeft)}
+            </AppText>
+          </View>
         ) : (
           <TouchableOpacity
             disabled={needsActivate ? isLoading : requestBlocked}
@@ -209,7 +222,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
             }}
             style={[
               styles.btn,
-              !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan)
+              !needsActivate && (locked || hasActiveLoan || isDelinquent || paused)
                 ? { backgroundColor: colors.chip }
                 : { backgroundColor: colors.primary },
             ]}
@@ -219,16 +232,10 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
             ) : (
               <View style={styles.btnRow}>
                 <AppIcon
-                  name={
-                    needsActivate
-                      ? 'id'
-                      : locked || isDelinquent || paused || waitingNextLoan
-                        ? 'lock'
-                        : 'bank'
-                  }
+                  name={needsActivate ? 'id' : locked || isDelinquent || paused ? 'lock' : 'bank'}
                   size={16}
                   color={
-                    !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan)
+                    !needsActivate && (locked || hasActiveLoan || isDelinquent || paused)
                       ? colors.textMuted
                       : colors.onPrimary
                   }
@@ -238,7 +245,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                     styles.btnText,
                     {
                       color:
-                        !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan)
+                        !needsActivate && (locked || hasActiveLoan || isDelinquent || paused)
                           ? colors.textMuted
                           : colors.onPrimary,
                     },
@@ -250,11 +257,9 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                       ? t('actionPaused')
                       : isDelinquent
                         ? t('delinquent')
-                        : waitingNextLoan
-                          ? t('requestWait', { time: formatCountdownClock(cooldownLeft) })
-                          : hasActiveLoan && unlocked
-                            ? t('loanBusy')
-                            : t('requestUncollateralized')}
+                        : hasActiveLoan && unlocked
+                          ? t('loanBusy')
+                          : t('requestUncollateralized')}
                 </AppText>
               </View>
             )}
@@ -399,5 +404,23 @@ const styles = StyleSheet.create({
   btnText: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  waitBox: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waitLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  waitClock: {
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: 1,
+    fontVariant: ['tabular-nums'],
   },
 });

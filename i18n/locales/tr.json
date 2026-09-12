@@ -660,7 +660,7 @@
   "checkingCredit": "Hattınızın aktif olup olmadığı kontrol ediliyor…",
   "subsectionCreditStatus": "Hattınızın durumu",
   "hubCreditLeadActive": "Aktif. Buradan isteyin veya ödeyin.",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "Gerçek kredi henüz aktif değil.",
   "termDays": "{days} gün",
   "lockedLevelsHint": "Kilitli kalır. Tutarı, oranı, vade ve faizi görmek için bir seviyeye dokunun.",
   "loanSeeDetails": "Tüm ayrıntıları gör",
@@ -684,5 +684,6 @@
   "walletWorldLive": "Gerçek hesap",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "Test bakiyesi.",
-  "hubCreditLeadPending": "Henüz aktif değil."
+  "hubCreditLeadPending": "Henüz aktif değil.",
+  "errEmptyRevertDemo": "İki kredi arasında 48 saat bekleyin. İste üzerindeki geri sayımı görün."
 }

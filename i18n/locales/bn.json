@@ -660,7 +660,7 @@
   "checkingCredit": "লাইন আগে থেকে সক্রিয় কিনা দেখা হচ্ছে…",
   "subsectionCreditStatus": "আপনার লাইনের অবস্থা",
   "hubCreditLeadActive": "সক্রিয়। এখানে চান বা পরিশোধ করুন।",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "আসল ঋণ এখনো সক্রিয় নয়।",
   "termDays": "{days} দিন",
   "lockedLevelsHint": "এগুলো লক থাকবে। পরিমাণ, হার, মেয়াদ ও সুদ দেখতে একটি স্তরে ট্যাপ করুন।",
   "loanSeeDetails": "সম্পূর্ণ তথ্য দেখুন",
@@ -684,5 +684,6 @@
   "walletWorldLive": "আসল অ্যাকাউন্ট",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "পরীক্ষার ব্যালেন্স।",
-  "hubCreditLeadPending": "এখনো সক্রিয় নয়।"
+  "hubCreditLeadPending": "এখনো সক্রিয় নয়।",
+  "errEmptyRevertDemo": "দুই ঋণের মাঝে ৪৮ ঘণ্টা অপেক্ষা করুন। আবেদনে কাউন্টডাউন দেখুন।"
 }

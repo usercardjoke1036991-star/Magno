@@ -412,6 +412,34 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }
 
         try {
+          const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
+          const lastTs = Number(progress.ultimoPrestamoTimestamp);
+          let cooldown = cooldownRestanteDesdeTimestamp(lastTs);
+          if (lastTs <= 0) {
+            try {
+              cooldown = Number(await creditContract.obtenerCooldownRestante(walletAddress));
+            } catch {
+              cooldown = 0;
+            }
+          }
+          const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
+          if (live()) {
+            setUserInfo((prev) => ({
+              ...prev,
+              userProgress: {
+                nivelActual: currentLevel,
+                solicitudesCompletadas: Number(progress.solicitudesCompletadas),
+                ultimoPrestamoTimestamp: lastTs,
+                cooldownRestante: cooldown,
+                bonusPending: Number(progress.bonusPending || 0),
+              },
+            }));
+          }
+        } catch (e) {
+          logErr('Error fetching user progress:', e);
+        }
+
+        try {
           if (opts?.silent && onChainTiersReadyRef.current) {
             // El barrido de 100 niveles cada 30 s satura el RPC público.
           } else {
@@ -568,26 +596,6 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }));
         } catch {
           // Contrato desplegado antes de los bonos de red.
-        }
-
-        try {
-          const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
-          const lastTs = Number(progress.ultimoPrestamoTimestamp);
-          const cooldown = cooldownRestanteDesdeTimestamp(lastTs);
-          const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
-
-          setUserInfo((prev) => ({
-            ...prev,
-            userProgress: {
-              nivelActual: currentLevel,
-              solicitudesCompletadas: Number(progress.solicitudesCompletadas),
-              ultimoPrestamoTimestamp: lastTs,
-              cooldownRestante: cooldown,
-              bonusPending: Number(progress.bonusPending || 0),
-            },
-          }));
-        } catch (e) {
-          logErr('Error fetching user progress:', e);
         }
 
         try {

@@ -1,14 +1,41 @@
-import { useEffect, useState } from 'react';
-import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
+import { useEffect, useRef, useState } from 'react';
+import { cooldownRestanteDesdeTimestamp, PRESTAMO_COOLDOWN_SECS } from '../utils/creditCooldown';
+
+function nowSec(): number {
+  return Math.floor(Date.now() / 1000);
+}
+
+function endFromInputs(ultimoPrestamoTimestamp: number, cooldownHintSec: number): number {
+  if (Number.isFinite(ultimoPrestamoTimestamp) && ultimoPrestamoTimestamp > 0) {
+    return Math.floor(ultimoPrestamoTimestamp) + PRESTAMO_COOLDOWN_SECS;
+  }
+  const hint = Math.max(0, Math.floor(cooldownHintSec || 0));
+  return hint > 0 ? nowSec() + hint : 0;
+}
 
 /** Seconds left until the next loan can be requested. Ticks every second. */
-export function useLiveCooldown(ultimoPrestamoTimestamp: number): number {
-  const [left, setLeft] = useState(() => cooldownRestanteDesdeTimestamp(ultimoPrestamoTimestamp));
+export function useLiveCooldown(
+  ultimoPrestamoTimestamp: number,
+  cooldownHintSec = 0,
+): number {
+  const endRef = useRef(endFromInputs(ultimoPrestamoTimestamp, cooldownHintSec));
+  const [left, setLeft] = useState(() =>
+    Math.max(
+      cooldownRestanteDesdeTimestamp(ultimoPrestamoTimestamp),
+      Math.max(0, Math.floor(cooldownHintSec || 0)),
+    ),
+  );
 
   useEffect(() => {
+    const nextEnd = endFromInputs(ultimoPrestamoTimestamp, cooldownHintSec);
+    if (ultimoPrestamoTimestamp > 0 || nextEnd > endRef.current) {
+      endRef.current = nextEnd;
+    } else if (endRef.current <= 0) {
+      endRef.current = nextEnd;
+    }
     let id: ReturnType<typeof setInterval> | undefined;
     const tick = () => {
-      const next = cooldownRestanteDesdeTimestamp(ultimoPrestamoTimestamp);
+      const next = endRef.current > 0 ? Math.max(0, endRef.current - nowSec()) : 0;
       setLeft(next);
       if (next <= 0 && id) {
         clearInterval(id);
@@ -16,13 +43,13 @@ export function useLiveCooldown(ultimoPrestamoTimestamp: number): number {
       }
     };
     tick();
-    if (cooldownRestanteDesdeTimestamp(ultimoPrestamoTimestamp) > 0) {
+    if (endRef.current - nowSec() > 0) {
       id = setInterval(tick, 1000);
     }
     return () => {
       if (id) clearInterval(id);
     };
-  }, [ultimoPrestamoTimestamp]);
+  }, [ultimoPrestamoTimestamp, cooldownHintSec]);
 
   return left;
 }

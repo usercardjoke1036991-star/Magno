@@ -660,7 +660,7 @@
   "checkingCredit": "جارٍ التحقق مما إذا كان الخط نشطاً…",
   "subsectionCreditStatus": "حالة خطك",
   "hubCreditLeadActive": "نشط. اطلب أو ادفع هنا.",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "الائتمان الحقيقي غير مفعّل بعد.",
   "termDays": "{days} يومًا",
   "lockedLevelsHint": "تبقى مقفلة. اضغط مستوى لرؤية المبلغ والنسبة والأجل والفائدة.",
   "loanSeeDetails": "عرض التفاصيل كاملة",
@@ -684,5 +684,6 @@
   "walletWorldLive": "الحساب الحقيقي",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "رصيد تجريبي.",
-  "hubCreditLeadPending": "غير مفعّل بعد."
+  "hubCreditLeadPending": "غير مفعّل بعد.",
+  "errEmptyRevertDemo": "يجب الانتظار 48 ساعة بين قرض وآخر. انظر العد التنازلي في طلب."
 }

@@ -660,7 +660,7 @@
   "checkingCredit": "Vérification de votre ligne de crédit…",
   "subsectionCreditStatus": "État de votre ligne",
   "hubCreditLeadActive": "Active. Demandez ou payez ici.",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "Le crédit Réel n’est pas encore actif.",
   "termDays": "{days} jours",
   "lockedLevelsHint": "Ils restent verrouillés. Touchez un niveau pour voir montant, taux, délai et intérêts.",
   "loanSeeDetails": "Voir la fiche complète",
@@ -684,5 +684,6 @@
   "walletWorldLive": "Compte Réel",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "Solde de test.",
-  "hubCreditLeadPending": "Pas encore actif."
+  "hubCreditLeadPending": "Pas encore actif.",
+  "errEmptyRevertDemo": "Attendez 48 heures entre deux prêts. Voyez le compte à rebours sur Demander."
 }

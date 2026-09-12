@@ -286,17 +286,19 @@ export const useHomeHandlers = ({
       }
     }
     const result = await solicitarPrestamo(selectedToken.address, tier.id);
-    if (result.success) {
-      if (isDemoAccount()) {
-        try {
-          const minted = await QuatriviumCreditService.topUpDemoUsdtToDebt(selectedToken.address);
-          if (minted) Alert.alert(t('ready'), t('demoUsdtTopUp'));
-        } catch (caught) {
-          Alert.alert(t('error'), humanizeTxError(caught) || t('demoUsdtTopUpFailed'));
-        }
-      }
+    if (!result.success) {
       refetch();
+      return;
     }
+    if (isDemoAccount()) {
+      try {
+        const minted = await QuatriviumCreditService.topUpDemoUsdtToDebt(selectedToken.address);
+        if (minted) Alert.alert(t('ready'), t('demoUsdtTopUp'));
+      } catch (caught) {
+        Alert.alert(t('error'), humanizeTxError(caught) || t('demoUsdtTopUpFailed'));
+      }
+    }
+    refetch();
   };
 
   const handlePagar = async (kind: 'installment' | 'all' | number) => {

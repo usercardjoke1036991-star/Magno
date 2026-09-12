@@ -1,5 +1,10 @@
+import { isDemoAccount } from '../constants/rpcConfig';
 import type { Lang } from '../i18n/languages';
 import { translations, type TranslationKey } from '../i18n/translations';
+
+function emptyRevertKey(): TranslationKey {
+  return isDemoAccount() ? 'errEmptyRevertDemo' : 'errEmptyRevert';
+}
 
 function extractRawError(error: unknown): string {
   const err = error as {
@@ -113,10 +118,11 @@ export function humanizeTxError(error: unknown): string {
   const table = translations[errorLang] || translations.es;
   const match = REVERT_KEYS.find(([needle]) => raw.includes(needle));
   if (match) {
-    return table[match[1]];
+    const key = match[1] === 'errEmptyRevert' ? emptyRevertKey() : match[1];
+    return table[key];
   }
   if (/execution reverted/i.test(raw) && !/execution reverted:\s+\S/i.test(raw)) {
-    return table.errEmptyRevert;
+    return table[emptyRevertKey()];
   }
   const trimmed = raw.replace(/^Error:\s*/i, '').trim();
   return trimmed.slice(0, 280) || table.txFailed;

@@ -9,6 +9,8 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] En espera entre prestamos solo se ve la cuenta atras en vivo, no Solicitar.
+- [2026-09-12] Revert vacio en Demo ya no pide pasar a Demo: avisa la espera de 48h.
 - [2026-09-12] Signer interno se recupera si HMR lo limpia. errNoWallet ya no pide billetera externa. gitignore cubre __pycache__ y .venv.
 - [2026-09-12] Textos Demo/Real recortados a lo esencial: que cuenta es y si vale dinero.
 - [2026-09-12] Cuentas Demo y Real visibles y aisladas. Token oficial no se apaga si cae el RPC. Cooldown antes que aviso de token.
@@ -29,4 +31,4 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 (puntos críticos)
 
 ## Última sesión
-[2026-09-12] Cambio: Signer interno se recupera si HMR lo limpia. errNoWallet ya no pide billetera externa. gitignore cubre __pycache__ y .venv.
+[2026-09-12] Cambio: En espera entre prestamos solo se ve la cuenta atras en vivo, no Solicitar.

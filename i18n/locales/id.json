@@ -660,7 +660,7 @@
   "checkingCredit": "Memeriksa apakah jalur sudah aktif…",
   "subsectionCreditStatus": "Status jalur Anda",
   "hubCreditLeadActive": "Aktif. Ajukan atau bayar di sini.",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "Kredit Nyata belum aktif.",
   "termDays": "{days} hari",
   "lockedLevelsHint": "Tetap terkunci. Ketuk level untuk melihat jumlah, suku bunga, jangka waktu, dan bunga.",
   "loanSeeDetails": "Lihat detail lengkap",
@@ -684,5 +684,6 @@
   "walletWorldLive": "Akun Nyata",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "Saldo uji.",
-  "hubCreditLeadPending": "Belum aktif."
+  "hubCreditLeadPending": "Belum aktif.",
+  "errEmptyRevertDemo": "Tunggu 48 jam antara pinjaman. Lihat hitungan mundur di Ajukan."
 }

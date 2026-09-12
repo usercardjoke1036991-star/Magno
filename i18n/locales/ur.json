@@ -660,7 +660,7 @@
   "checkingCredit": "چیک ہو رہا ہے کہ لائن پہلے سے فعال ہے…",
   "subsectionCreditStatus": "آپ کی لائن کی حالت",
   "hubCreditLeadActive": "فعال۔ یہاں مانگیں یا ادا کریں۔",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "حقیقی قرض ابھی فعال نہیں۔",
   "termDays": "{days} دن",
   "lockedLevelsHint": "یہ لاک رہیں گے۔ رقم، شرح، مدت اور سود دیکھنے کے لیے سطح دبائیں۔",
   "loanSeeDetails": "مکمل تفصیل دیکھیں",
@@ -684,5 +684,6 @@
   "walletWorldLive": "حقیقی اکاؤنٹ",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "ٹیسٹ بیلنس۔",
-  "hubCreditLeadPending": "ابھی فعال نہیں۔"
+  "hubCreditLeadPending": "ابھی فعال نہیں۔",
+  "errEmptyRevertDemo": "دو قرضوں کے درمیان 48 گھنٹے انتظار کریں۔ درخواست پر الٹی گنتی دیکھیں۔"
 }

@@ -412,6 +412,7 @@ function HomeScreenWithHooks() {
               isLoading={txLoading}
               curveRateBps={userInfo.curveRateBps}
               ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
+              cooldownRestante={userInfo.userProgress.cooldownRestante}
               isRegistered={userInfo.isRegistered}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}

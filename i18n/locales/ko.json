@@ -660,7 +660,7 @@
   "checkingCredit": "한도가 이미 활성화됐는지 확인 중…",
   "subsectionCreditStatus": "한도 상태",
   "hubCreditLeadActive": "활성. 여기서 신청하거나 상환.",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "실제 신용이 아직 활성화되지 않았습니다.",
   "termDays": "{days}일",
   "lockedLevelsHint": "잠긴 상태는 유지됩니다. 단계를 눌러 금액, 이율, 기간, 이자를 보세요.",
   "loanSeeDetails": "전체 정보 보기",
@@ -684,5 +684,6 @@
   "walletWorldLive": "실제 계정",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "테스트 잔액.",
-  "hubCreditLeadPending": "아직 비활성."
+  "hubCreditLeadPending": "아직 비활성.",
+  "errEmptyRevertDemo": "대출 사이에는 48시간을 기다려야 합니다. 신청의 카운트다운을 보세요."
 }

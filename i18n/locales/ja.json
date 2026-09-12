@@ -660,7 +660,7 @@
   "checkingCredit": "与信枠が有効か確認しています…",
   "subsectionCreditStatus": "枠の状態",
   "hubCreditLeadActive": "有効。ここで申込または返済。",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "本番与信はまだ有効ではありません。",
   "termDays": "{days} 日",
   "lockedLevelsHint": "ロックのままです。レベルをタップすると金額・利率・期限・利息が見られます。",
   "loanSeeDetails": "詳細を見る",
@@ -684,5 +684,6 @@
   "walletWorldLive": "本番口座",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "テスト残高。",
-  "hubCreditLeadPending": "まだ無効。"
+  "hubCreditLeadPending": "まだ無効。",
+  "errEmptyRevertDemo": "ローンの間は48時間待つ必要があります。「申し込む」のカウントダウンを見てください。"
 }

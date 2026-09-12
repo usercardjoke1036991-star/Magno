@@ -660,7 +660,7 @@
   "checkingCredit": "正在检查额度是否已开通…",
   "subsectionCreditStatus": "额度状态",
   "hubCreditLeadActive": "已开通。在此申请或还款。",
-  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "errEmptyRevert": "真实信贷尚未开通。",
   "termDays": "{days} 天",
   "lockedLevelsHint": "仍为锁定。点按一级即可查看金额、利率、期限和利息。",
   "loanSeeDetails": "查看完整资料",
@@ -684,5 +684,6 @@
   "walletWorldLive": "真实账户",
   "settingsAccountNow": "{world}",
   "hubWalletLeadDemo": "测试余额。",
-  "hubCreditLeadPending": "尚未开通。"
+  "hubCreditLeadPending": "尚未开通。",
+  "errEmptyRevertDemo": "两次贷款之间须等待 48 小时。请查看“申请”上的倒计时。"
 }
