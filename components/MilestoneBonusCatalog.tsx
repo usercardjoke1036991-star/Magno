@@ -32,7 +32,7 @@ export function MilestoneBonusCatalog({
   return (
     <View style={styles.stack}>
       <AppText style={[styles.lead, { color: colors.textMuted }]}>
-        {canClaim ? t('bonusCatalogLead') : t('bonusLegacyContract')}
+        {t('bonusCatalogLead')}
       </AppText>
       {milestoneLevels().filter((level) => level <= displayMaxLoanLevel(maxLevel)).map((level) => {
         const amount = formatUSD(milestoneBonusUsd(level));

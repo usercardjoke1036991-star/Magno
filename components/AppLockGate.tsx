@@ -75,7 +75,7 @@ interface AppLockGateProps {
 export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(true);
   const [locked, setLocked] = useState(false);
   const [pin, setPinDigits] = useState('');
   const [error, setError] = useState('');
@@ -83,7 +83,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const [bioOn, setBioOn] = useState(false);
   const [bioReady, setBioReady] = useState(false);
   const [bioKinds, setBioKinds] = useState<BiometricKind[]>([]);
-  const [needsSetup, setNeedsSetup] = useState(false);
+  const [needsSetup, setNeedsSetup] = useState(true);
   const [setupStage, setSetupStage] = useState<SetupStage>('welcome');
   const [pendingPin, setPendingPin] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -122,13 +122,15 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     setPinDigits('');
     setError('');
     if (nextMode === 'email' && flags.hasEmail) {
-      try {
-        const wallet = await ensureAppWallet();
-        const verifiedEmail = await loadVerifiedEmail();
-        if (verifiedEmail) await requestEmailOtp(wallet.address, verifiedEmail);
-      } catch {
-        // El usuario puede reenviar.
-      }
+      void (async () => {
+        try {
+          const wallet = await ensureAppWallet();
+          const verifiedEmail = await loadVerifiedEmail();
+          if (verifiedEmail) await requestEmailOtp(wallet.address, verifiedEmail);
+        } catch {
+          // El usuario puede reenviar.
+        }
+      })();
     }
   };
 
@@ -208,17 +210,32 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     });
   };
   const boot = useCallback(async () => {
+    if (__DEV__) console.log('[boot] AppLockGate start');
     const pinSet = await isPinSet();
     const passwordSet = await isPasswordSet();
     const authOn = await isAuthenticatorEnabled();
     const verifiedEmail = await loadVerifiedEmail();
-    const bioStatus = await getBiometricStatus();
-    const enrolled = bioStatus.available;
+    if (__DEV__) {
+      console.log('[boot] AppLockGate creds', {
+        pinSet,
+        passwordSet,
+        authOn,
+        hasEmail: Boolean(verifiedEmail),
+      });
+    }
     const enabled = passwordSet || pinSet ? await isBiometricEnabled() : false;
-    const bioReadyNow = Boolean(enabled && enrolled);
-    setBioReady(enrolled);
-    setBioKinds(bioStatus.kinds);
-    setBioOn(bioReadyNow);
+    setBioReady(false);
+    setBioKinds([]);
+    setBioOn(false);
+    const bioReadyNow = false;
+    setTimeout(() => {
+      void getBiometricStatus().then((bioStatus) => {
+        const enrolled = bioStatus.available;
+        setBioReady(enrolled);
+        setBioKinds(bioStatus.kinds);
+        setBioOn(Boolean(enabled && enrolled));
+      });
+    }, 2500);
     setHasPassword(passwordSet);
     setHasPin(pinSet);
     setHasAuth(authOn);
@@ -279,7 +296,10 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    boot().catch(async () => {
+    let settled = false;
+    const failOpen = async () => {
+      if (settled) return;
+      settled = true;
       const unlockOn = await isAuthEnabled('unlock').catch(() => false);
       setNeedsSetup(false);
       if (unlockOn && (await isSessionSaved().catch(() => false)) && !getWalletWrapKey()) {
@@ -295,7 +315,20 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
         setLocked(false);
       }
       setReady(true);
-    });
+    };
+    const watchdog = setTimeout(() => {
+      void failOpen();
+    }, 6000);
+    boot()
+      .then(() => {
+        settled = true;
+      })
+      .catch(() => failOpen())
+      .finally(() => clearTimeout(watchdog));
+    return () => {
+      settled = true;
+      clearTimeout(watchdog);
+    };
   }, [boot]);
 
   // En Xiaomi/MIUI el diálogo de huella al abrir falla. Solo se pide si el usuario pulsa el botón.

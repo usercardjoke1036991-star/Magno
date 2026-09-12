@@ -12,7 +12,7 @@ import { setWalletSigner, QuatriviumCreditService } from '../services/quatrivium
 import { recordMovement } from '../services/movementHistory';
 import { useWeb3Transactions } from './useWeb3Transactions';
 import { notifyApiBases } from '../constants/appLinks';
-import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
+import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode, isDonationEnabled, isDonationVisible } from '../constants/rpcConfig';
 import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
 import { creditNeedsKyc, creditNeedsPhone } from '../utils/creditGates';
@@ -439,6 +439,10 @@ export const useHomeHandlers = ({
   };
 
   const handleDepositarPool = async (amountHuman: string) => {
+    if (isDemoAccount()) {
+      Alert.alert(t('sectionPool'), t('liveCreditNotReady'));
+      return;
+    }
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
@@ -476,6 +480,18 @@ export const useHomeHandlers = ({
   };
 
   const handleDonar = async (amountHuman: string) => {
+    if (!isDonationVisible()) {
+      Alert.alert(t('donateTitle'), t('donateRealOnly'));
+      return;
+    }
+    if (!userInfo.founderAddress) {
+      Alert.alert(t('donateTitle'), t('donateWalletPending'));
+      return;
+    }
+    if (!isDonationEnabled()) {
+      Alert.alert(t('donateTitle'), t('liveCreditNotReady'));
+      return;
+    }
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
@@ -484,10 +500,6 @@ export const useHomeHandlers = ({
     if (!ensureCreditReady()) return;
     if (!userInfo.canDonate) {
       Alert.alert(t('donateTitle'), t('bonusLegacyContract'));
-      return;
-    }
-    if (!userInfo.founderAddress) {
-      Alert.alert(t('error'), t('liveCreditNotReady'));
       return;
     }
     if (!userInfo.isTokenSupported && !isOfficialWorldToken(selectedToken.address)) {

@@ -14,7 +14,7 @@ import {
 } from 'ethers';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
 import { isTestnetOnlyToken } from '../constants/bsc';
-import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
+import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount, isDemoMode, isDonationEnabled } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
 import { CORE_LOAN_LEVEL, MAX_LOAN_LEVEL, nextClaimableMilestone, nextUpcomingMilestone } from '../constants/loanTiers';
@@ -262,6 +262,9 @@ export const QuatriviumCreditService = {
   },
 
   depositar: async (amountInWei: string, tokenAddress: string) => {
+    if (isDemoAccount() || isDemoMode()) {
+      throw new Error('pool-real-only');
+    }
     assertToken(tokenAddress);
     assertAmount(amountInWei);
     const { signer } = await requireInternalSigner();
@@ -301,6 +304,9 @@ export const QuatriviumCreditService = {
   },
 
   donar: async (amountInWei: string, tokenAddress: string) => {
+    if (!isDonationEnabled()) {
+      throw new Error('donate-real-only');
+    }
     assertToken(tokenAddress);
     assertAmount(amountInWei);
     const { signer } = await requireInternalSigner();

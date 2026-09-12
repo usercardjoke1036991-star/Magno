@@ -55,7 +55,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `vision_proyecto.py` — módulo Python
   - Funciones/clases: VisionProyecto, detectar_tipo_proyecto, analizar_modulos_existentes, _contar_funciones_py, _ruta_vision, leer_vision, _parsear_vision_md, escribir_vision, _generar_vision_md, cmd_init, cmd_agregar_idea, cmd_actualizar, cmd_mostrar, cmd_completar_modulo, cmd_json, _generar_arquitectura, _proximos_pasos, main
 - `web3Config.tsx` — módulo JS/TS
-  - Funciones/clases: appKit, Web3Provider, toEthersWeb3Provider, getEthersSignerFromProvider, web3ConfigDebug
+  - Funciones/clases: Web3Provider, toEthersWeb3Provider, getEthersSignerFromProvider, web3ConfigDebug
 - `zkService.ts` — módulo JS/TS
 - `android/app/src/debug/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/debugOptimized/AndroidManifest.xml` — manifiesto Android
@@ -186,7 +186,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/contractConfig.ts` — módulo JS/TS
   - Funciones/clases: getUsdtAddress, ERC20_ABI, CONTRACT_ABI
 - `constants/deployedAddresses.ts` — módulo JS/TS
-  - Funciones/clases: DEPLOYED_TESTNET, DEPLOYED_MAINNET, getKnownStartBlock
+  - Funciones/clases: DEPLOYED_TESTNET, DEPLOYED_MAINNET, getRealDonationWallet, getKnownStartBlock
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
@@ -196,9 +196,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/reputation.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, generationBps, fameForGeneration, founderFamePoints, referralsForNextBonus, formatPoolBonus
 - `constants/rpcConfig.ts` — módulo JS/TS
-  - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
+  - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, donationVisibleInWorld, donationAllowedInWorld, isDonationVisible, isDonationEnabled, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
 - `constants/support.ts` — módulo JS/TS
-  - Funciones/clases: SUPPORT_PATRON_USD, SUPPORT_CIRCLE_USD, supportKind, supportNameKey
+  - Funciones/clases: SUPPORT_PATRON_USD, SUPPORT_CIRCLE_USD, FAME_PER_USDT_DONATE, FAME_PER_USDT_POOL, fameFromUsd, fameFromDonateUsd, fameFromPoolUsd, supportKind, supportNameKey
 - `constants/tokens.ts` — módulo JS/TS
   - Funciones/clases: getConfigurableStables, getSupportedTokens, getTokenMeta, isOfficialWorldToken
 - `hooks/useHomeHandlers.ts` — módulo JS/TS
@@ -284,7 +284,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/referralNetwork.ts` — módulo JS/TS
   - Funciones/clases: loadReferralNetwork
 - `services/savedSession.ts` — módulo JS/TS
-  - Funciones/clases: isSessionSaved, markSessionSaved, restoreSavedSessionWrap, clearSavedSession
+  - Funciones/clases: isSessionSaved, purgePersistedWrap, markSessionSaved, restoreSavedSessionWrap, clearSavedSession
 - `services/secureStorageService.ts` — módulo JS/TS
   - Funciones/clases: SecureStorageService
 - `services/userProfile.ts` — módulo JS/TS

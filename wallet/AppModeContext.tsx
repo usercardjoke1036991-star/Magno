@@ -26,25 +26,34 @@ function applyChain(pref: AppMode): AppMode {
 }
 
 export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setModeState] = useState<AppMode>('live');
-  const [ready, setReady] = useState(false);
+  const [mode, setModeState] = useState<AppMode>(() => applyChain('live'));
+  const [ready, setReady] = useState(true);
 
   useEffect(() => {
+    let done = false;
+    const finish = (next: AppMode = 'live') => {
+      if (done) return;
+      done = true;
+      setModeState(applyChain(next));
+      setReady(true);
+    };
     AsyncStorage.getItem(APP_MODE_STORAGE_KEY)
       .then(async (saved) => {
         let pref = resolvePersistedMode(saved);
         if (pref === 'demo' && !isContractConfigured('testnet')) {
           pref = 'live';
         }
-        setModeState(applyChain(pref));
         if (!saved) {
-          await AsyncStorage.setItem(APP_MODE_STORAGE_KEY, 'live');
+          await AsyncStorage.setItem(APP_MODE_STORAGE_KEY, 'live').catch(() => {});
         }
+        finish(pref);
       })
       .catch(() => {
-        setModeState(applyChain('live'));
-      })
-      .finally(() => setReady(true));
+        finish('live');
+      });
+    return () => {
+      done = true;
+    };
   }, []);
 
   const setMode = useCallback(async (next: AppMode) => {

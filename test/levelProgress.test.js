@@ -138,4 +138,14 @@ describe('QuatriviumCredit - donacion al fundador', function () {
     expect(await contract.reputacion(user.address)).to.equal(beforeRep + 100n);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
+
+  it('scales fame with the donated and pooled amounts', async () => {
+    const { contract, user, token, tokenAddr } = await deployProtocol();
+    await registerAndFund(token, contract, user, '80');
+    const before = await contract.reputacion(user.address);
+    await contract.connect(user).donar(tokenAddr, ethers.parseUnits('25', 18));
+    expect(await contract.reputacion(user.address)).to.equal(before + 250n);
+    await contract.connect(user).depositarLiquidez(tokenAddr, ethers.parseUnits('4', 18));
+    expect(await contract.reputacion(user.address)).to.equal(before + 250n + 20n);
+  });
 });

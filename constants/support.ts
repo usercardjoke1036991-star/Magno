@@ -2,6 +2,25 @@ export type SupportKind = 'none' | 'ally' | 'patron' | 'circle';
 
 export const SUPPORT_PATRON_USD = 50;
 export const SUPPORT_CIRCLE_USD = 200;
+/** Contrato: donar += amount / 1e17 → 10 puntos por USDT. */
+export const FAME_PER_USDT_DONATE = 10;
+/** Contrato: depositar += amount / 2e17 → 5 puntos por USDT. */
+export const FAME_PER_USDT_POOL = 5;
+
+export function fameFromUsd(usd: number, pointsPerUsdt: number): number {
+  if (!Number.isFinite(usd) || usd <= 0 || !Number.isFinite(pointsPerUsdt) || pointsPerUsdt <= 0) {
+    return 0;
+  }
+  return Math.floor(usd * pointsPerUsdt);
+}
+
+export function fameFromDonateUsd(usd: number): number {
+  return fameFromUsd(usd, FAME_PER_USDT_DONATE);
+}
+
+export function fameFromPoolUsd(usd: number): number {
+  return fameFromUsd(usd, FAME_PER_USDT_POOL);
+}
 
 export function supportKind(donatedUsd: number, lpUsd: number): SupportKind {
   const donated = Number.isFinite(donatedUsd) ? Math.max(0, donatedUsd) : 0;

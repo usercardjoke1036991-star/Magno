@@ -516,13 +516,38 @@ export async function setLockOnOpenEnabled(enabled: boolean): Promise<void> {
   await SecureStore.setItemAsync(LOCK_OPEN_KEY, enabled ? '1' : '0', OPTIONS);
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      }
+    );
+  });
+}
+
+const MISSING_BIO: BiometricAvailability = {
+  available: false,
+  hasHardware: false,
+  enrolled: false,
+  kinds: [],
+  reason: 'native-missing',
+};
+
 export async function getBiometricStatus(): Promise<BiometricAvailability> {
   try {
-    const LocalAuth = await import('expo-local-authentication');
-    const hasHardware = await LocalAuth.hasHardwareAsync();
-    const enrolled = await LocalAuth.isEnrolledAsync();
-    const types = await LocalAuth.supportedAuthenticationTypesAsync().catch(() => [] as number[]);
-    const enrolledLevel = await LocalAuth.getEnrolledLevelAsync().catch(() => 0);
+    const LocalAuth = await withTimeout(import('expo-local-authentication'), 2500, null);
+    if (!LocalAuth) return MISSING_BIO;
+    const hasHardware = await withTimeout(LocalAuth.hasHardwareAsync(), 2000, false);
+    const enrolled = await withTimeout(LocalAuth.isEnrolledAsync(), 2000, false);
+    const types = await withTimeout(LocalAuth.supportedAuthenticationTypesAsync(), 2000, [] as number[]);
+    const enrolledLevel = await withTimeout(LocalAuth.getEnrolledLevelAsync(), 2000, 0);
     return resolveBiometricAvailability({
       hasHardware,
       enrolled,
@@ -530,13 +555,7 @@ export async function getBiometricStatus(): Promise<BiometricAvailability> {
       types: Array.isArray(types) ? types.map((value) => Number(value)) : [],
     });
   } catch {
-    return {
-      available: false,
-      hasHardware: false,
-      enrolled: false,
-      kinds: [],
-      reason: 'native-missing',
-    };
+    return MISSING_BIO;
   }
 }
 

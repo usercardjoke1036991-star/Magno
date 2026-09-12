@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { supportKind, supportNameKey } from '../constants/support';
+import { fameFromDonateUsd, supportKind, supportNameKey } from '../constants/support';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { formatUSD } from '../utils/formatters';
+import { formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { AppSubsection } from './AppSection';
 import { AppText, AppTextInput } from './AppText';
 import { AppIcon } from './icons';
@@ -16,6 +16,7 @@ interface DonateFounderSectionProps {
   founderAddress?: string;
   donatedUsd: number;
   lpUsd: number;
+  canSend?: boolean;
   onDonate: (amount: string) => void;
 }
 
@@ -27,6 +28,7 @@ export function DonateFounderSection({
   founderAddress,
   donatedUsd,
   lpUsd,
+  canSend = false,
   onDonate,
 }: DonateFounderSectionProps) {
   const [amount, setAmount] = useState('5');
@@ -34,14 +36,23 @@ export function DonateFounderSection({
   const { colors } = useTheme();
   const kind = supportKind(donatedUsd, lpUsd);
   const titleKey = supportNameKey(kind);
-  const blocked = isLoading || !walletConnected || !tokenSupported || !founderAddress;
+  const blocked = isLoading || !walletConnected || !canSend || !founderAddress || !tokenSupported;
+  const parsed = parsePositiveDecimal(amount);
+  const fameGain = parsed ? fameFromDonateUsd(Number(parsed)) : 0;
 
   return (
     <View style={styles.stack}>
       <AppSubsection title={t('donateTitle')} defaultOpen icon="star">
         <AppText style={[styles.lead, { color: colors.text }]}>{t('donateLead')}</AppText>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('donateFameNote')}</AppText>
+        {!canSend ? (
+          <AppText style={[styles.meta, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
+        ) : !founderAddress ? (
+          <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('donateWalletPending')}</AppText>
+        ) : !tokenSupported && walletConnected ? (
+          <AppText style={[styles.warn, { color: colors.warnText }]}>{t('tokenNotEnabled')}</AppText>
+        ) : null}
         <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('supportDonateBenefit')}</AppText>
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('supportPoolBenefit')}</AppText>
         {titleKey ? (
           <AppText style={[styles.title, { color: colors.primary }]}>
             {t('supportYourTitle', { title: t(titleKey) })}
@@ -50,15 +61,8 @@ export function DonateFounderSection({
           <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('supportBenefitLead')}</AppText>
         )}
         <AppText style={[styles.meta, { color: colors.textMuted }]}>
-          {t('donateGoesTo')} · {formatUSD(donatedUsd)} / {formatUSD(lpUsd)}
+          {t('donateSupportTotal')} · {formatUSD(donatedUsd)}
         </AppText>
-        {founderAddress ? (
-          <AppText selectable style={[styles.address, { color: colors.primary, backgroundColor: colors.surface }]}>
-            {founderAddress}
-          </AppText>
-        ) : (
-          <AppText style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
-        )}
         <AppText style={[styles.label, { color: colors.primary }]}>
           {t('donateAmount')} ({tokenSymbol})
         </AppText>
@@ -74,6 +78,11 @@ export function DonateFounderSection({
             { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
           ]}
         />
+        {fameGain > 0 ? (
+          <AppText style={[styles.meta, { color: colors.primary }]}>
+            {t('supportFamePreview', { points: String(fameGain) })}
+          </AppText>
+        ) : null}
         <TouchableOpacity
           disabled={blocked}
           onPress={() => onDonate(amount)}

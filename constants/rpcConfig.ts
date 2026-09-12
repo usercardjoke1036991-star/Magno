@@ -40,6 +40,28 @@ export function isCreditReady(): boolean {
   return isContractConfigured(productMode === 'live' ? 'mainnet' : 'testnet');
 }
 
+/** Donar se ve en Cuenta Real. Demo no dona. */
+export function donationVisibleInWorld(product: AppMode, runtime: AppMode): boolean {
+  return product === 'live' && runtime === 'live';
+}
+
+/** Enviar donación: solo Real con contrato mainnet. El destino es la billetera personal del fundador. */
+export function donationAllowedInWorld(
+  product: AppMode,
+  runtime: AppMode,
+  mainnetReady: boolean
+): boolean {
+  return donationVisibleInWorld(product, runtime) && mainnetReady;
+}
+
+export function isDonationVisible(): boolean {
+  return donationVisibleInWorld(productMode, runtimeMode);
+}
+
+export function isDonationEnabled(): boolean {
+  return donationAllowedInWorld(productMode, runtimeMode, isContractConfigured('mainnet'));
+}
+
 export function getProductMode(): AppMode {
   return productMode;
 }

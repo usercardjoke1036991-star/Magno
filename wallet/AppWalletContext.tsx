@@ -34,14 +34,23 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     let cancelled = false;
-    boot().catch(() => {
+    const watchdog = setTimeout(() => {
       if (!cancelled) {
         setFailed(true);
         setReady(true);
       }
-    });
+    }, 5000);
+    boot()
+      .catch(() => {
+        if (!cancelled) {
+          setFailed(true);
+          setReady(true);
+        }
+      })
+      .finally(() => clearTimeout(watchdog));
     return () => {
       cancelled = true;
+      clearTimeout(watchdog);
     };
   }, [boot]);
 

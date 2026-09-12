@@ -893,6 +893,7 @@ const watchChain = async () => {
 
   let lastDebtCheck = 0;
   let logWindow = 200;
+  let rateLimitStreak = 0;
   for (;;) {
     let scannedTo = Number(store.lastBlock || 0);
     try {
@@ -956,6 +957,7 @@ const watchChain = async () => {
         }
         store.lastBlock = to;
         saveStore(store);
+        rateLimitStreak = 0;
         if (logWindow < 200) logWindow = Math.min(200, logWindow + 20);
       }
       if (Date.now() - lastDebtCheck > 60_000) {
@@ -968,7 +970,11 @@ const watchChain = async () => {
           store.lastBlock = scannedTo;
           saveStore(store);
         }
-        console.warn('Avisos chain: RPC con cupo, se omite el barrido de eventos');
+        rateLimitStreak += 1;
+        const waitMs = Math.min(300_000, 45_000 * 2 ** Math.min(rateLimitStreak - 1, 3));
+        if (rateLimitStreak === 1 || rateLimitStreak % 4 === 0) {
+          console.warn(`Avisos chain: RPC con cupo, espera ${Math.round(waitMs / 1000)}s`);
+        }
         try {
           if (Date.now() - lastDebtCheck > 60_000) {
             lastDebtCheck = Date.now();
@@ -977,7 +983,7 @@ const watchChain = async () => {
         } catch {
           // los avisos de deuda se reintentan en el siguiente ciclo
         }
-        await new Promise((r) => setTimeout(r, 45000));
+        await new Promise((r) => setTimeout(r, waitMs));
         continue;
       }
       if (rpcUnhealthy(error)) {

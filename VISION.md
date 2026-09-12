@@ -62,6 +62,9 @@
 - Demo live redesplegado con protocolo 1000 niveles, mora del fundador, hitos y donar; Mainnet sigue sin contrato
 - Tres pantallas distintas: crear cuenta, iniciar sesion con correo y contrasena juntos mas el paso extra de Como confirma, y desbloquear solo si la sesion esta guardada
 - cambiar el nombre visible de la app a Quatrivium Finance
+- Donacion unicamente en Cuenta Real, no en Demo
+- Donar visible en Real hacia la billetera personal del fundador; pool es banco general
+- Sala Donar aparte en Real; bonos e hitos iguales en Demo y Real
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -99,3 +102,6 @@
 - [2026-09-12 15:10] Idea añadida al backlog: "Demo live redesplegado con protocolo 1000 niveles, mora del fundador, hitos y do"
 - [2026-09-12 15:52] Idea añadida al backlog: "Tres pantallas distintas: crear cuenta, iniciar sesion con correo y contrasena j"
 - [2026-09-12 16:21] Idea añadida al backlog: "cambiar el nombre visible de la app a Quatrivium Finance"
+- [2026-09-12 17:58] Idea añadida al backlog: "Donacion unicamente en Cuenta Real, no en Demo"
+- [2026-09-12 18:05] Idea añadida al backlog: "Donar visible en Real hacia la billetera personal del fundador; pool es banco ge"
+- [2026-09-12 18:11] Idea añadida al backlog: "Sala Donar aparte en Real; bonos e hitos iguales en Demo y Real"

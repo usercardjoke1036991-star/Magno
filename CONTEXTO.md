@@ -52,7 +52,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 801 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 809 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -96,7 +96,7 @@ Reglas:
 - **101–1000**: la tasa no sube (baja 1 bps/nivel hasta 4,06 % y luego se sostiene; si bajara más el interés $ se rompería)
 
 `requiredCount` (la velocidad de llegada marca la de pago): L1 → 3; L2–9 → 5; desde **$100 (L10)** cada nivel pide **5 más** (5, 10, 15…; L100 = 455; L999 = 4950). L1000 no sube.
-Bono de pool cada 100 niveles: **20 USDT × nivel del hito** (100 → 2000, 200 → 4000, 1000 → 20 000). Se cobra en la sala Bonos, de uno en uno, con caja libre sobre el piso del 20%. Donar va a la billetera fundadora; donar o inyectar al pool suma reputación y un título (Aliado / Patrono / Círculo).
+Bono de pool cada 100 niveles: **20 USDT × nivel del hito**. Sala **Bonos** en Demo y Real. **Donar** (sala aparte, solo Real) y **aportar liquidez** suman fama **proporcional al monto** (10 y 5 puntos por USDT). El pool es el banco común. Cuenta Real muestra el producto completo (KYC, niveles 1–1000, hitos, donar, pool) antes del lanzamiento; firmar espera mainnet.
 Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda → Zafiro → Rubí → Platino → Diamante → Maestro), cada uno con marco propio.
 
 | Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Solicitudes |
@@ -119,7 +119,7 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
 - 15 suites Hardhat (103 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 801 claves
+- i18n: 17 idiomas, 809 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
@@ -236,6 +236,13 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Arranque en vivo: AppKit ya no se crea al importar el bundle; el modo y el idioma no bloquean el primer frame. Worker de avisos con backoff activo. | — |
+| 2026-09-12 | Auditoria: arranque con tope de espera (fuentes, idioma, mundo, candado, billetera, usuario, biometria Xiaomi). Donar muestra vista previa sin firmar. Pool bloqueado en Demo. Worker de avisos con backoff si el RPC tiene cupo. | — |
+| 2026-09-12 | Fama proporcional al USDT donado o aportado al pool. Preview en Donar y Pool. | — |
+| 2026-09-12 | Real visible al 100 por ciento antes del lanzamiento. Fama por donar y por liquidez. Copy profesional sin destino de donacion. | — |
+| 2026-09-12 | Bonos en ambos mundos. Donar sala aparte solo Real (fama). Catalogo Real completo 1000 niveles / 10 hitos. | — |
+| 2026-09-12 | Donar visible en Real con destino pendiente (DEPLOYED_MAINNET.founder vacio). Pool = banco general. Envio solo con mainnet. | — |
+| 2026-09-12 | Donar solo en Real: UI oculta en Demo, servicio y handler bloqueados, isDonationEnabled exige mainnet. | — |
 | 2026-09-12 | Inicio de sesion: correo ya verificado no pide codigo. Guardar sesion en la misma pantalla. | — |
 | 2026-09-12 | Auditoria profunda: Demo 0xD2d2A9 operativo (1000 niveles, pool 2000 USDT). Si la huella esta marcada pero el sensor no responde, se salta y se pide el siguiente metodo. | — |
 | 2026-09-12 | Nombre visible de la app: Quatrivium Finance. Paquete Android/iOS y firmas EIP-712 sin cambiar. | — |

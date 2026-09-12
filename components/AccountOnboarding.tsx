@@ -40,12 +40,27 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   const [usernameReady, setUsernameReady] = useState(false);
 
   useEffect(() => {
+    let done = false;
+    const finish = (value = '') => {
+      if (done) return;
+      done = true;
+      setUsername(value);
+      setUsernameReady(true);
+    };
+    const watchdog = setTimeout(() => finish(''), 3000);
     loadClaimedUsername()
       .then((value) => {
-        setUsername(value);
-        setUsernameReady(true);
+        clearTimeout(watchdog);
+        finish(value);
       })
-      .catch(() => setUsernameReady(true));
+      .catch(() => {
+        clearTimeout(watchdog);
+        finish('');
+      });
+    return () => {
+      done = true;
+      clearTimeout(watchdog);
+    };
   }, [walletAddress]);
 
   if (!walletReady || !usernameReady) {

@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from './AppText';
-import { isContractConfigured } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useAppMode } from '../wallet/AppModeContext';
@@ -12,15 +11,10 @@ export const AccountWorldCard: React.FC = () => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const demo = mode === 'demo';
-  const liveReady = isContractConfigured('mainnet');
   const title = demo ? t('accountWorldDemo') : t('accountWorldLive');
-  const tag = demo
-    ? t('accountWorldDemoTag')
-    : liveReady
-      ? t('accountWorldLiveTag')
-      : t('accountWorldLivePendingTag');
-  const accent = demo ? colors.warnText : liveReady ? colors.success : colors.warnText;
-  const bg = demo || !liveReady ? colors.warnBg : colors.chip;
+  const tag = demo ? t('accountWorldDemoTag') : t('accountWorldLiveTag');
+  const accent = demo ? colors.warnText : colors.success;
+  const bg = demo ? colors.warnBg : colors.chip;
 
   return (
     <View

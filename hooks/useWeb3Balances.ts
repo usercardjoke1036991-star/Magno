@@ -2,11 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Contract, formatEther, formatUnits, isAddress } from 'ethers';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
-import { assertTrustedRpc, isContractConfigured, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
+import { getRealDonationWallet } from '../constants/deployedAddresses';
+import { assertTrustedRpc, isContractConfigured, isDonationVisible, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { getTokenMeta, isOfficialWorldToken, type Token } from '../constants/tokens';
 import {
   LOAN_TIERS,
   CORE_LOAN_LEVEL,
+  MAX_LOAN_LEVEL,
   ONCHAIN_TIER_SCAN,
   overlayOnChainTier,
   requiredCountForLiveLevel,
@@ -140,7 +142,7 @@ const EMPTY_USER_INFO: UserInfo = {
   creditHistory: { paidOnTime: 0, missedLoans: 0, penalties: 0 },
   userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0, bonusPending: 0, nextMilestone: 100, lastHito: 0 },
   donatedUsd: 0,
-  maxLoanLevel: CORE_LOAN_LEVEL,
+  maxLoanLevel: MAX_LOAN_LEVEL,
   canClaimHitos: false,
   canDonate: false,
   isOwner: false,
@@ -174,7 +176,7 @@ function formatDue(amountWei: bigint, decimals: number, symbol: string): string 
 export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => {
   const [balances, setBalances] = useState<UserBalances>(EMPTY_BALANCES);
   const [userInfo, setUserInfo] = useState<UserInfo>(EMPTY_USER_INFO);
-  const [loanTiers, setLoanTiers] = useState<LoanTier[]>(() => visibleLoanTiers(CORE_LOAN_LEVEL));
+  const [loanTiers, setLoanTiers] = useState<LoanTier[]>(() => visibleLoanTiers(MAX_LOAN_LEVEL));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
@@ -248,7 +250,14 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
       if (!walletAddress || !isAddress(walletAddress)) {
         if (!live()) return;
-        setUserInfo({ ...EMPTY_USER_INFO, isTokenSupported, curveRateBps, kycExigido });
+        setUserInfo({
+          ...EMPTY_USER_INFO,
+          isTokenSupported,
+          curveRateBps,
+          kycExigido,
+          canDonate: isDonationVisible(),
+          founderAddress: getRealDonationWallet(),
+        });
         setBalances({ ...EMPTY_BALANCES, poolBalance, poolOutstanding, poolCash });
         return;
       }
@@ -292,18 +301,26 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
       if (!isContractConfigured()) {
         setUserInfo((prev) => {
-          if (
+          const keep =
             !prev.isRegistered &&
             !prev.hasActiveLoan &&
             !prev.kycDeclarado &&
             !prev.identityBound &&
-            prev.userProgress.solicitudesCompletadas === 0
-          ) {
-            return prev;
-          }
-          return { ...EMPTY_USER_INFO };
+            prev.userProgress.solicitudesCompletadas === 0;
+          const base = keep ? prev : { ...EMPTY_USER_INFO };
+          return {
+            ...base,
+            curveRateBps,
+            canDonate: isDonationVisible(),
+            founderAddress: getRealDonationWallet(),
+            maxLoanLevel: MAX_LOAN_LEVEL,
+            canClaimHitos: false,
+            isTokenSupported: isOfficialWorldToken(tokenAddress) || isTokenSupported,
+            kycExigido: isDonationVisible() || kycExigido,
+            identidadExigida: isDonationVisible(),
+          };
         });
-        setLoanTiers(visibleLoanTiers(CORE_LOAN_LEVEL));
+        setLoanTiers(visibleLoanTiers(MAX_LOAN_LEVEL));
         setBalances((prev) => {
           if (
             prev.poolBalance === EMPTY_BALANCES.poolBalance &&
@@ -340,7 +357,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             ...prev,
             maxLoanLevel: caps.maxLevel,
             canClaimHitos: caps.canClaimHitos,
-            canDonate: caps.canDonate,
+            canDonate: isDonationVisible(),
           }));
         }
 
@@ -730,7 +747,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }
           setUserInfo((prev) => ({
             ...prev,
-            founderAddress: fundador,
+            founderAddress: fundador || getRealDonationWallet(),
             referral: {
               padre,
               fundador,
@@ -763,7 +780,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }
           return { ...EMPTY_USER_INFO };
         });
-        setLoanTiers(visibleLoanTiers(CORE_LOAN_LEVEL));
+        setLoanTiers(visibleLoanTiers(MAX_LOAN_LEVEL));
       }
     } finally {
       if (live()) setIsLoading(false);
@@ -811,7 +828,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     onChainTiersReadyRef.current = false;
     setUserInfo({ ...EMPTY_USER_INFO });
     setBalances({ ...EMPTY_BALANCES });
-    setLoanTiers(visibleLoanTiers(CORE_LOAN_LEVEL));
+    setLoanTiers(visibleLoanTiers(MAX_LOAN_LEVEL));
     void fetchBalances();
   }), [fetchBalances]);
 

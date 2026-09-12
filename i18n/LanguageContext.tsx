@@ -45,10 +45,17 @@ function applyRtl(next: Lang): boolean {
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [lang, setLangState] = useState<Lang>(detectDeviceLang);
-  const [langReady, setLangReady] = useState(false);
+  const [langReady, setLangReady] = useState(true);
   const [langChosen, setLangChosen] = useState(false);
 
   useEffect(() => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      setLangReady(true);
+    };
+    const watchdog = setTimeout(finish, 3000);
     Promise.all([AsyncStorage.getItem(STORAGE_KEY), AsyncStorage.getItem(CHOSEN_KEY)])
       .then(([saved, chosen]) => {
         if (saved && LANGUAGES.some((item) => item.code === saved)) {
@@ -59,7 +66,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLangChosen(chosen === '1');
       })
       .catch(() => {})
-      .finally(() => setLangReady(true));
+      .finally(() => {
+        clearTimeout(watchdog);
+        finish();
+      });
+    return () => {
+      done = true;
+      clearTimeout(watchdog);
+    };
   }, []);
 
   const persistLang = useCallback((next: Lang, announceRtl: boolean) => {

@@ -3,14 +3,13 @@ import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useAppMode } from '../wallet/AppModeContext';
-import { isContractConfigured, type AppMode } from '../constants/rpcConfig';
+import { type AppMode } from '../constants/rpcConfig';
 import { AppText } from './AppText';
 
 export const ModeToggle: React.FC = () => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { mode, setMode } = useAppMode();
-  const liveReady = isContractConfigured('mainnet');
 
   const choose = (next: AppMode) => {
     if (next === mode) return;
@@ -39,7 +38,7 @@ export const ModeToggle: React.FC = () => {
     tag: string;
   }) => {
     const active = mode === world;
-    const accent = world === 'demo' ? colors.warnText : liveReady ? colors.success : colors.warnText;
+    const accent = world === 'demo' ? colors.warnText : colors.success;
     return (
       <TouchableOpacity
         onPress={() => choose(world)}
@@ -77,7 +76,7 @@ export const ModeToggle: React.FC = () => {
       <Card
         world="live"
         title={t('accountWorldLive')}
-        tag={liveReady ? t('accountWorldLiveTag') : t('accountWorldLivePendingTag')}
+        tag={t('accountWorldLiveTag')}
       />
     </View>
   );

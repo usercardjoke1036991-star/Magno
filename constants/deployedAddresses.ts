@@ -10,8 +10,14 @@ export const DEPLOYED_MAINNET = {
   chainId: 56,
   contract: '',
   usdt: '0x55d398326f99059ff775485246999027b3197955',
+  /** Billetera personal Real (donaciones). Vacía hasta que el fundador la agregue. */
+  founder: '',
   startBlock: 0,
 } as const;
+
+export function getRealDonationWallet(): string {
+  return String(DEPLOYED_MAINNET.founder || '').trim();
+}
 
 export function getKnownStartBlock(contractAddress: string): number {
   const addr = String(contractAddress || '').toLowerCase();

@@ -37,7 +37,7 @@ import { ReferralHistory } from '../components/ReferralHistory';
 import { MovementHistory } from '../components/MovementHistory';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
-import { isContractConfigured, isCreditReady } from '../constants/rpcConfig';
+import { isContractConfigured, isCreditReady, isDonationEnabled } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { usePendingInvite } from '../hooks/usePendingInvite';
@@ -108,7 +108,7 @@ function HomeScreenWithHooks() {
   );
   const debtReminder = useLoanPaymentReminders(userInfo);
   const creditReady = isCreditReady();
-  const creditPaused = userInfo.paused || !creditReady;
+  const creditPaused = userInfo.paused;
   const activeLoan = userInfo.activeLoan;
   const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
   const lockedTiers = loanTiers.filter((tier) => tier.id > userInfo.userProgress.nivelActual);
@@ -179,10 +179,10 @@ function HomeScreenWithHooks() {
   }, [room, adminInfo.isAdmin, adminInfo.isOwner]);
 
   useEffect(() => {
-    if (room === 'bonuses' && !userInfo.canClaimHitos && !userInfo.canDonate) {
+    if (room === 'donate' && mode === 'demo') {
       setRoom(null);
     }
-  }, [room, userInfo.canClaimHitos, userInfo.canDonate]);
+  }, [room, mode]);
 
   return (
     <AccountOnboarding
@@ -246,7 +246,7 @@ function HomeScreenWithHooks() {
           </View>
         ) : null}
 
-        {mode === 'demo' || !isContractConfigured('mainnet') ? null : (
+        {mode === 'demo' ? null : (
           <KycAccessBanner
             kycDone={userInfo.kycDeclarado}
             phoneDone={userInfo.identityBound}
@@ -284,22 +284,22 @@ function HomeScreenWithHooks() {
             {
               id: 'credit',
               title: t('sectionCreditLine'),
-              lead: !creditReady
-                ? t('hubCreditLeadPending')
-                : userInfo.isRegistered || userInfo.hasActiveLoan
+              lead:
+                userInfo.isRegistered || userInfo.hasActiveLoan
                   ? t('hubCreditLeadActive')
                   : t('hubCreditLead'),
               icon: 'id',
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
-            ...(userInfo.canClaimHitos || userInfo.canDonate
-              ? [{ id: 'bonuses' as const, title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' as const }]
-              : []),
+            { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' },
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
             { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
             ...(mode === 'demo'
               ? []
-              : [{ id: 'pool' as const, title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' as const }]),
+              : [
+                  { id: 'donate' as const, title: t('donateTitle'), lead: t('hubDonateLead'), icon: 'deposit' as const },
+                  { id: 'pool' as const, title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' as const },
+                ]),
             ...(adminInfo.isOwner || adminInfo.isAdmin
               ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const }]
               : []),
@@ -355,11 +355,6 @@ function HomeScreenWithHooks() {
           title={userInfo.isRegistered || userInfo.hasActiveLoan ? t('subsectionCreditStatus') : t('subsectionActivate')}
           icon="id"
         >
-          {!creditReady ? (
-            <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
-              {t('liveCreditNotReady')}
-            </AppText>
-          ) : null}
           <ActivateCreditSection
             isRegistered={userInfo.isRegistered || userInfo.hasActiveLoan}
             checking={creditChecking && !userInfo.isRegistered && !userInfo.hasActiveLoan}
@@ -405,11 +400,6 @@ function HomeScreenWithHooks() {
         lead={t('sectionLoansLead')}
         onClose={() => setRoom(null)}
       >
-        {!creditReady ? (
-          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
-            {t('liveCreditNotReady')}
-          </AppText>
-        ) : null}
         {tokens.length > 1 ? (
           <TokenSelector
             tokens={tokens}
@@ -445,7 +435,7 @@ function HomeScreenWithHooks() {
               onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}
               onPayCount={(count) => handlePagar(count)}
-              showMilestoneBonus={userInfo.canClaimHitos}
+              showMilestoneBonus
             />
           ))}
         </AppSubsection>
@@ -470,35 +460,37 @@ function HomeScreenWithHooks() {
               onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}
               onPayCount={(count) => handlePagar(count)}
-              showMilestoneBonus={userInfo.canClaimHitos}
+              showMilestoneBonus
             />
           </AppSubsection>
         ) : null}
       </AppWindow>
 
       <AppWindow
-        visible={room === 'bonuses' && (userInfo.canClaimHitos || userInfo.canDonate)}
+        visible={room === 'bonuses'}
         title={t('sectionBonuses')}
         lead={t('sectionBonusesLead')}
         onClose={() => setRoom(null)}
       >
-        {!creditReady ? (
-          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
-            {t('liveCreditNotReady')}
-          </AppText>
-        ) : null}
         <AppSubsection title={t('sectionBonuses')} icon="star">
           <MilestoneBonusCatalog
             userLevel={userInfo.userProgress.nivelActual}
             lastHito={userInfo.userProgress.lastHito}
             claimable={userInfo.userProgress.bonusPending}
-            canClaim={userInfo.canClaimHitos}
+            canClaim={Boolean(creditReady && userInfo.canClaimHitos)}
             maxLevel={userInfo.maxLoanLevel}
             isPaying={txLoading}
             onClaim={handleCobrarBonoHito}
           />
         </AppSubsection>
-        {userInfo.canDonate ? (
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'donate' && mode !== 'demo'}
+        title={t('donateTitle')}
+        lead={t('sectionDonateLead')}
+        onClose={() => setRoom(null)}
+      >
         <DonateFounderSection
           isLoading={txLoading}
           tokenSymbol={selectedToken.symbol}
@@ -507,9 +499,9 @@ function HomeScreenWithHooks() {
           founderAddress={userInfo.founderAddress}
           donatedUsd={userInfo.donatedUsd || 0}
           lpUsd={Number.parseFloat(balances.lpBalance) || 0}
+          canSend={isDonationEnabled()}
           onDonate={handleDonar}
         />
-        ) : null}
       </AppWindow>
 
       <AppWindow
@@ -552,16 +544,11 @@ function HomeScreenWithHooks() {
       </AppWindow>
 
       <AppWindow
-        visible={room === 'pool'}
+        visible={room === 'pool' && mode !== 'demo'}
         title={t('sectionPool')}
         lead={t('sectionPoolLead')}
         onClose={() => setRoom(null)}
       >
-        {!creditReady ? (
-          <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>
-            {t('liveCreditNotReady')}
-          </AppText>
-        ) : null}
         {tokens.length > 1 ? (
           <TokenSelector
             tokens={tokens}
@@ -580,18 +567,6 @@ function HomeScreenWithHooks() {
           paused={creditPaused}
           onDepositPool={handleDepositarPool}
         />
-        {userInfo.canDonate ? (
-        <DonateFounderSection
-          isLoading={txLoading}
-          tokenSymbol={selectedToken.symbol}
-          tokenSupported={userInfo.isTokenSupported}
-          walletConnected={Boolean(walletAddress)}
-          founderAddress={userInfo.founderAddress}
-          donatedUsd={userInfo.donatedUsd || 0}
-          lpUsd={Number.parseFloat(balances.lpBalance) || 0}
-          onDonate={handleDonar}
-        />
-        ) : null}
       </AppWindow>
 
       <AppWindow

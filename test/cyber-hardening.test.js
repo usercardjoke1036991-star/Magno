@@ -338,6 +338,55 @@ describe('demo credit gates', function () {
     expect(creditNeedsKyc(false, false, false)).to.equal(false);
   });
 
+  it('awards fame in proportion to donated or pooled USDT', function () {
+    const fameFromUsd = (usd, pointsPerUsdt) => {
+      if (!Number.isFinite(usd) || usd <= 0 || !Number.isFinite(pointsPerUsdt) || pointsPerUsdt <= 0) {
+        return 0;
+      }
+      return Math.floor(usd * pointsPerUsdt);
+    };
+    expect(fameFromUsd(1, 10)).to.equal(10);
+    expect(fameFromUsd(25, 10)).to.equal(250);
+    expect(fameFromUsd(4, 5)).to.equal(20);
+    expect(fameFromUsd(20, 5)).to.equal(100);
+    expect(fameFromUsd(0.4, 10)).to.equal(4);
+    expect(fameFromUsd(0, 10)).to.equal(0);
+  });
+
+  it('shows the full 1000-level catalog when the live cap is unknown', function () {
+    function displayMaxLoanLevel(detected) {
+      const value = Math.floor(Number(detected) || 0);
+      if (value === 100) return 100;
+      return 1000;
+    }
+    expect(displayMaxLoanLevel(0)).to.equal(1000);
+    expect(displayMaxLoanLevel(1000)).to.equal(1000);
+    expect(displayMaxLoanLevel(100)).to.equal(100);
+  });
+
+  it('allows donations only in Real when mainnet is ready', function () {
+    function donationVisibleInWorld(product, runtime) {
+      return product === 'live' && runtime === 'live';
+    }
+    function donationAllowedInWorld(product, runtime, mainnetReady) {
+      return donationVisibleInWorld(product, runtime) && mainnetReady;
+    }
+    expect(donationVisibleInWorld('demo', 'demo')).to.equal(false);
+    expect(donationVisibleInWorld('live', 'live')).to.equal(true);
+    expect(donationAllowedInWorld('demo', 'demo', true)).to.equal(false);
+    expect(donationAllowedInWorld('live', 'live', false)).to.equal(false);
+    expect(donationAllowedInWorld('live', 'live', true)).to.equal(true);
+  });
+
+  it('blocks pool deposits from Demo', function () {
+    function poolAllowed(product, runtime) {
+      return product === 'live' && runtime === 'live';
+    }
+    expect(poolAllowed('demo', 'demo')).to.equal(false);
+    expect(poolAllowed('live', 'demo')).to.equal(false);
+    expect(poolAllowed('live', 'live')).to.equal(true);
+  });
+
   it('does not let a live account reuse demo testnet credit', function () {
     function worlds(pref, mainnetConfigured, testnetConfigured) {
       const account = pref === 'demo' ? 'demo' : 'live';

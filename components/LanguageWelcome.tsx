@@ -14,6 +14,10 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
   const { colors } = useTheme();
   const align = rtl ? ('right' as const) : ('left' as const);
 
+  if (__DEV__) {
+    console.log('[boot] LanguageWelcome', { langReady, langChosen, lang });
+  }
+
   if (!langReady) {
     return (
       <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center' }]}>

@@ -53,38 +53,47 @@ const metadata = {
   },
 };
 
-export const appKit = createAppKit({
-  projectId: PROJECT_ID || (__DEV__ ? 'missing-project-id' : ''),
-  metadata,
-  networks: [bscTestnetNetwork, bscMainnetNetwork],
-  defaultNetwork,
-  adapters: [new EthersAdapter()],
-  storage: appKitStorage,
-  themeMode: 'light',
-  themeVariables: {
-    accent: '#007AFF',
-  },
-  enableAnalytics: false,
-  debug: __DEV__,
-  features: {
-    swaps: false,
-    onramp: false,
-    socials: false,
-  },
-});
+type AppKitInstance = ReturnType<typeof createAppKit>;
+
+let appKitSingleton: AppKitInstance | null = null;
+
+function getAppKit(): AppKitInstance {
+  if (appKitSingleton) return appKitSingleton;
+  appKitSingleton = createAppKit({
+    projectId: PROJECT_ID || (__DEV__ ? 'missing-project-id' : ''),
+    metadata,
+    networks: [bscTestnetNetwork, bscMainnetNetwork],
+    defaultNetwork,
+    adapters: [new EthersAdapter()],
+    storage: appKitStorage,
+    themeMode: 'light',
+    themeVariables: {
+      accent: '#007AFF',
+    },
+    enableAnalytics: false,
+    debug: __DEV__,
+    features: {
+      swaps: false,
+      onramp: false,
+      socials: false,
+    },
+  });
+  return appKitSingleton;
+}
 
 export function Web3Provider({ children }: { children: ReactNode }) {
+  const kit = getAppKit();
+
   useEffect(() => subscribeRuntimeMode(() => {
     const next = getRuntimeMode() === 'live' ? bscMainnetNetwork : bscTestnetNetwork;
-    const kit = appKit as { switchNetwork?: (network: AppKitNetwork) => Promise<unknown> | unknown };
     try {
-      void kit.switchNetwork?.(next);
+      void (kit as { switchNetwork?: (network: AppKitNetwork) => Promise<unknown> | unknown }).switchNetwork?.(next);
     } catch {
       // AppKit de admin: si no expone switch, el signer de la app ya usa la red activa.
     }
-  }), []);
+  }), [kit]);
 
-  return <AppKitProvider instance={appKit}>{children}</AppKitProvider>;
+  return <AppKitProvider instance={kit}>{children}</AppKitProvider>;
 }
 
 export function toEthersWeb3Provider(eip1193Provider: Eip1193Provider) {

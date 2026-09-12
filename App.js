@@ -1,14 +1,7 @@
-import React, { useEffect } from 'react';
-import { Linking as RNLinking, View } from 'react-native';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
-} from '@expo-google-fonts/inter';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Linking as RNLinking, View } from 'react-native';
+import { Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Web3Provider } from './web3Config';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { ThemeProvider } from './theme/ThemeContext';
 import { ProfileProvider } from './profile/ProfileContext';
@@ -22,14 +15,47 @@ import { AppModeProvider } from './wallet/AppModeContext';
 import { AppWalletProvider } from './wallet/AppWalletContext';
 import * as Linking from 'expo-linking';
 import { rememberAppUrl } from './utils/pendingDeepLink';
+
+function DeferredWeb3({ children }) {
+  const [Box, setBox] = useState(null);
+  useEffect(() => {
+    let live = true;
+    import('./web3Config')
+      .then((mod) => {
+        if (live) setBox(() => mod.Web3Provider);
+      })
+      .catch(() => {
+        if (live) setBox(() => ({ children: inner }) => inner);
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
+  if (__DEV__) {
+    console.log('[boot] DeferredWeb3', { ready: Boolean(Box) });
+  }
+  if (!Box) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+  const Provider = Box;
+  return <Provider>{children}</Provider>;
+}
+
 export default function App() {
+  // Arranque a prueba de colgados: fuentes, idioma y candado tienen tope de espera.
   const [fontsLoaded] = useFonts({
-    Inter: Inter_400Regular,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    QvSans: Inter_400Regular,
   });
+  const [fontWaitOver, setFontWaitOver] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setFontWaitOver(true), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     migrateLegacyStorage().catch(() => {});
@@ -44,7 +70,11 @@ export default function App() {
     };
   }, []);
 
-  if (!fontsLoaded) {
+  if (__DEV__) {
+    console.log('[boot] App render', { fontsLoaded, fontWaitOver });
+  }
+
+  if (!fontsLoaded && !fontWaitOver) {
     return null;
   }
 
@@ -57,13 +87,13 @@ export default function App() {
               <LanguageWelcome>
                 <AppLockGate>
                   <FundsConfirmHost>
-                    <Web3Provider>
+                    <DeferredWeb3>
                       <AppWalletProvider>
                         <ProfileProvider>
                           <HomeScreen />
                         </ProfileProvider>
                       </AppWalletProvider>
-                    </Web3Provider>
+                    </DeferredWeb3>
                   </FundsConfirmHost>
                 </AppLockGate>
               </LanguageWelcome>

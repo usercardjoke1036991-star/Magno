@@ -1,6 +1,10 @@
 {
   "enfoque": "Nombre visible Quatrivium Finance; paquete y contratos sin cambiar",
   "decisiones": [
+    "- [2026-09-12] Cuenta Real se muestra completa antes del lanzamiento. Donar y aportar liquidez suman fama. La UI de donar no menciona destino ni USDT real.",
+    "- [2026-09-12] Bonos de hito en Demo y Real. Donar es sala aparte solo Real y solo suma fama. Real muestra el catalogo completo de 1000 niveles y 10 hitos aunque mainnet no este listo.",
+    "- [2026-09-12] Donar se ve en Cuenta Real aunque la billetera personal aun no este agregada. El pool es el banco general; donar no entra al pool.",
+    "- [2026-09-12] Donar es solo Cuenta Real (USDT de verdad). Demo no dona.",
     "- [2026-09-12] Si el correo ya esta verificado en el telefono, iniciar sesion es solo contrasena. El codigo se pide una vez. Guardar sesion queda en esa pantalla y se aplica al entrar.",
     "- [2026-09-12] El nombre visible es Quatrivium Finance. El paquete com.quatrivium.credit y el dominio EIP-712 Quatrivium Credit se mantienen.",
     "- [2026-09-12] En Como confirma se pueden marcar varios sistemas por accion. Se piden todos, uno detras de otro.",
@@ -28,6 +32,13 @@
     "- [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico"
   ],
   "cambios": [
+    "- [2026-09-12] Auditoria en vivo: la app no pintaba por AppKit al importar y SecureStore/MIUI. AppKit diferido, boot fail-open, worker de avisos reiniciado con backoff.",
+    "- [2026-09-12] Auditoria profunda: tests y Demo live OK; corregido arranque colgado y gates de donar/pool",
+    "- [2026-09-12] Fama proporcional al monto: donar 10 pts/USDT, pool 5 pts/USDT. La UI muestra la fama al escribir la cantidad.",
+    "- [2026-09-12] Textos de donar/pool centrados en fama. Real sin avisos de oculto: KYC, catalogo, donar y pool visibles.",
+    "- [2026-09-12] Sala Donar separada. Bonos siempre visibles. Catalogo Real 1000 niveles y hitos 100-1000.",
+    "- [2026-09-12] Donar visible en Real (Pool y Bonos) con destino pendiente. Envio bloqueado hasta mainnet y billetera fundadora.",
+    "- [2026-09-12] Donar oculto y bloqueado en Demo; solo Real cuando mainnet este listo.",
     "- [2026-09-12] Inicio de sesion sin OTP si el correo ya esta en el telefono. Guardar sesion en la misma pantalla; al entrar se persiste para no pedir codigo otra vez.",
     "- [2026-09-12] Auditoria: salud 14/14, Hardhat 103/103, Demo live operativo. Huella sin sensor ya no bloquea el desbloqueo.",
     "- [2026-09-12] Nombre visible cambiado a Quatrivium Finance en launcher, UI, i18n, avisos y listados. EIP-712 y package id intactos.",
@@ -70,15 +81,8 @@
     "- [2026-09-12] En espera entre prestamos solo se ve la cuenta atras en vivo, no Solicitar.",
     "- [2026-09-12] Revert vacio en Demo ya no pide pasar a Demo: avisa la espera de 48h.",
     "- [2026-09-12] Signer interno se recupera si HMR lo limpia. errNoWallet ya no pide billetera externa. gitignore cubre __pycache__ y .venv.",
-    "- [2026-09-12] Textos Demo/Real recortados a lo esencial: que cuenta es y si vale dinero.",
-    "- [2026-09-12] Cuentas Demo y Real visibles y aisladas. Token oficial no se apaga si cae el RPC. Cooldown antes que aviso de token.",
-    "- [2026-09-12] Auditoria: Demo alineado con contrato live 3/5. Escalera nueva en QuatriviumLeveling. eas.json production sin testnet. Salud 14/14, Hardhat 85/85.",
-    "- [2026-09-12] Ficha de nivel bloqueado: toda la tarjeta es pulsable para desplegar o plegar la info.",
-    "- [2026-09-12] Niveles bloqueados: catalogo completo plegable con ficha (monto, tasa, plazo, interes).",
-    "- [2026-09-12] Perfil: se quito la paleta de color del avatar; quedan foto y marco de rango.",
-    "- [2026-09-12] Primera cuenta: Real. Demo/Real se persiste al cerrar. El APK de tienda ya no fuerza Real ni oculta Demo.",
-    "- [2026-09-11] Demo productivo: identidad local si ngrok falla; worker reinicia barrido al cambiar de contrato; ficha de nivel pide Activar si no hay registro; aviso si el atestado demo falla."
+    "- [2026-09-12] Textos Demo/Real recortados a lo esencial: que cuenta es y si vale dinero."
   ],
   "no_olvidar": "(puntos críticos)",
-  "ultima_sesion": "[2026-09-12] Cambio: Inicio de sesion sin OTP si el correo ya esta en el telefono. Guardar sesion en la misma pantalla; al entrar se persiste para no pedir codigo otra vez."
+  "ultima_sesion": "[2026-09-12] Cambio: Auditoria en vivo: la app no pintaba por AppKit al importar y SecureStore/MIUI. AppKit diferido, boot fail-open, worker de avisos reiniciado con backoff."
 }

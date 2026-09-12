@@ -1,10 +1,10 @@
 import * as Linking from 'expo-linking';
 
 export type AppDeepLink =
-  | { kind: 'room'; room: 'wallet' | 'credit' | 'loans' | 'bonuses' | 'network' | 'pool' | 'admin' | 'history' }
+  | { kind: 'room'; room: 'wallet' | 'credit' | 'loans' | 'bonuses' | 'donate' | 'network' | 'pool' | 'admin' | 'history' }
   | { kind: 'settings'; panel: 'home' | 'profile' };
 
-const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'network', 'pool', 'admin', 'history']);
+const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'pool', 'admin', 'history']);
 
 function tokenFromUrl(url?: string | null): string {
   if (!url) return '';

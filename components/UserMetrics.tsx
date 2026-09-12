@@ -85,7 +85,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
             </View>
           </View>
 
-          {userInfo.canClaimHitos && nextMilestone > 0 ? (
+          {nextMilestone > 0 ? (
             <View style={[styles.loanBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <AppText style={[styles.loanMeta, { color: colors.text, marginTop: 0 }]}>
                 {claimableMilestone > 0
