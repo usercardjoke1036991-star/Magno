@@ -10,7 +10,7 @@ import { ERC20_ABI } from '../constants/contractConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { useWeb3Transactions } from './useWeb3Transactions';
-import { NOTIFY_API } from '../constants/appLinks';
+import { notifyApiBases } from '../constants/appLinks';
 import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
@@ -83,7 +83,7 @@ async function postAutoFund(base: string, address: string): Promise<AutoFundResu
 /** Intenta fondear la wallet con BNB testnet desde el notify-worker. */
 async function tryAutoFund(address: string): Promise<AutoFundResult> {
   if (!address) return 'fail';
-  const bases = [NOTIFY_API, __DEV__ ? 'http://127.0.0.1:8787' : ''].filter(Boolean);
+  const bases = notifyApiBases();
   for (const base of bases) {
     const result = await postAutoFund(base, address);
     if (result !== 'fail') return result;
@@ -217,6 +217,13 @@ export const useHomeHandlers = ({
     const result = await registrarHumano(walletAddress, padre);
     if (result.success) {
       await clearPendingInvite();
+      if (isDemoAccount()) {
+        try {
+          await QuatriviumCreditService.prepareDemoCredit();
+        } catch (caught) {
+          Alert.alert(t('error'), humanizeTxError(caught) || t('demoPrepFailed'));
+        }
+      }
       refetch();
     }
   };

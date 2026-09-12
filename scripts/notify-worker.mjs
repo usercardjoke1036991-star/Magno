@@ -218,6 +218,8 @@ const emptyStore = () => ({
   telegramByWallet: {},
   walletByChat: {},
   lastBlock: 0,
+  watchedContract: '',
+  startBlock: 0,
   reminded: {},
   usedAuth: {},
   pendingBinds: {},
@@ -298,6 +300,25 @@ const persist = () => {
 };
 
 let store = loadStore();
+if (CONTRACT) {
+  const prevContract = String(store.watchedContract || '').toLowerCase();
+  const nextContract = CONTRACT.toLowerCase();
+  const prevStart = Number(store.startBlock || 0);
+  const contractChanged = Boolean(prevContract) && prevContract !== nextContract;
+  const startChanged = prevStart > 0 && START_BLOCK > 0 && prevStart !== START_BLOCK;
+  if (contractChanged || startChanged) {
+    store.lastBlock = START_BLOCK > 0 ? START_BLOCK : 0;
+    console.log('Avisos chain: contrato o bloque de inicio nuevo, se reinicia el barrido');
+  }
+  store.watchedContract = CONTRACT;
+  store.startBlock = START_BLOCK;
+  if (!store.lastBlock && START_BLOCK > 0) store.lastBlock = START_BLOCK;
+  try {
+    saveStore(store);
+  } catch {
+    // El watcher sigue; persistirá en el siguiente evento.
+  }
+}
 if (!isMainnet) {
   store.rateHits = store.rateHits || {};
   for (const key of Object.keys(store.rateHits)) {

@@ -159,7 +159,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `components/WalletSection.tsx` — módulo JS/TS
   - Funciones/clases: WalletSection
 - `constants/appLinks.ts` — módulo JS/TS
-  - Funciones/clases: PLAY_STORE_URL, INVITE_WEB_BASE, TELEGRAM_BOT, NOTIFY_API
+  - Funciones/clases: PLAY_STORE_URL, INVITE_WEB_BASE, TELEGRAM_BOT, NOTIFY_API, notifyApiBases
 - `constants/bsc.ts` — módulo JS/TS
   - Funciones/clases: ZERO_ADDRESS, BSC_MAINNET, BSC_TESTNET, isZeroAddress, isTestnetOnlyToken
 - `constants/commissions.ts` — módulo JS/TS

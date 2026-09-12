@@ -267,13 +267,7 @@ export const QuatriviumCreditService = {
     const { signer } = await requireInternalSigner();
     const sponsor = padre && isAddress(padre) ? padre : ZeroAddress;
     const tx = await contractWith(signer).registrarHumanoConPadre(sponsor);
-    const receipt = await tx.wait();
-    try {
-      await prepareDemoCreditOnChain();
-    } catch (error) {
-      logWarn('prepareDemoCredit after register failed', error);
-    }
-    return receipt;
+    return tx.wait();
   },
 
   /**

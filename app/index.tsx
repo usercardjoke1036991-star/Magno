@@ -389,6 +389,8 @@ function HomeScreenWithHooks() {
               isLoading={txLoading}
               curveRateBps={userInfo.curveRateBps}
               ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
+              isRegistered={userInfo.isRegistered}
+              onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}
@@ -410,6 +412,8 @@ function HomeScreenWithHooks() {
                 isLoading={txLoading}
                 curveRateBps={userInfo.curveRateBps}
                 ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
+                isRegistered={userInfo.isRegistered}
+                onActivateCredit={() => setRoom('credit')}
                 onRequestLoan={handleSolicitarCredito}
                 onPayLoan={() => handlePagar('installment')}
               onPayAll={() => handlePagar('all')}

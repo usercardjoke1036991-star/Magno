@@ -27,6 +27,8 @@ interface LoanTierCardProps {
   paused?: boolean;
   curveRateBps?: number;
   ultimoPrestamoTimestamp?: number;
+  isRegistered?: boolean;
+  onActivateCredit?: () => void;
   onRequestLoan: (tier: LoanTier) => void;
   onPayLoan: () => void;
   onPayAll?: () => void;
@@ -48,6 +50,8 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   paused = false,
   curveRateBps = 0,
   ultimoPrestamoTimestamp = 0,
+  isRegistered = true,
+  onActivateCredit,
   onRequestLoan,
   onPayAll,
   onPayCount,
@@ -70,6 +74,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const remainingInstallments = Math.max(0, cuotasTotales - cuotasPagadas);
   const cooldownLeft = useLiveCooldown(ultimoPrestamoTimestamp);
   const waitingNextLoan = cooldownLeft > 0 && !hasActiveLoan && !locked;
+  const needsActivate = !isRegistered && unlocked && !hasActiveLoan;
   const requestBlocked = isLoading || locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan;
 
   return (
@@ -188,11 +193,17 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
           </>
         ) : (
           <TouchableOpacity
-            disabled={requestBlocked}
-            onPress={() => onRequestLoan(tier)}
+            disabled={needsActivate ? isLoading : requestBlocked}
+            onPress={() => {
+              if (needsActivate) {
+                onActivateCredit?.();
+                return;
+              }
+              onRequestLoan(tier);
+            }}
             style={[
               styles.btn,
-              locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan
+              !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan)
                 ? { backgroundColor: colors.chip }
                 : { backgroundColor: colors.primary },
             ]}
@@ -202,10 +213,16 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
             ) : (
               <View style={styles.btnRow}>
                 <AppIcon
-                  name={locked || isDelinquent || paused || waitingNextLoan ? 'lock' : 'bank'}
+                  name={
+                    needsActivate
+                      ? 'id'
+                      : locked || isDelinquent || paused || waitingNextLoan
+                        ? 'lock'
+                        : 'bank'
+                  }
                   size={16}
                   color={
-                    locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan
+                    !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan)
                       ? colors.textMuted
                       : colors.onPrimary
                   }
@@ -215,21 +232,23 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                     styles.btnText,
                     {
                       color:
-                        locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan
+                        !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan)
                           ? colors.textMuted
                           : colors.onPrimary,
                     },
                   ]}
                 >
-                  {paused
-                    ? t('actionPaused')
-                    : isDelinquent
-                      ? t('delinquent')
-                      : waitingNextLoan
-                        ? t('requestWait', { time: formatCountdownClock(cooldownLeft) })
-                        : hasActiveLoan && unlocked
-                          ? t('loanBusy')
-                          : t('requestUncollateralized')}
+                  {needsActivate
+                    ? t('activateCredit')
+                    : paused
+                      ? t('actionPaused')
+                      : isDelinquent
+                        ? t('delinquent')
+                        : waitingNextLoan
+                          ? t('requestWait', { time: formatCountdownClock(cooldownLeft) })
+                          : hasActiveLoan && unlocked
+                            ? t('loanBusy')
+                            : t('requestUncollateralized')}
                 </AppText>
               </View>
             )}

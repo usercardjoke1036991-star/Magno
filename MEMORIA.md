@@ -7,6 +7,7 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-11] Demo productivo: identidad local si ngrok falla; worker reinicia barrido al cambiar de contrato; ficha de nivel pide Activar si no hay registro; aviso si el atestado demo falla.
 - [2026-09-11] Auditoria live del contrato 0x1E5118: mundo nuevo pide Activar (no hereda linea vieja). Cache de credito ahora incluye la direccion del contrato y no barre 100 niveles cada 30s.
 - [2026-09-11] Redeploy testnet 100 niveles 0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3 bloque 130526896
 - [2026-09-11] 100 niveles de credito hasta 10000 USDT: tasa del anterior siempre mayor, interes en dolares creciente
@@ -18,4 +19,4 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 (puntos críticos)
 
 ## Última sesión
-[2026-09-11] Cambio: Auditoria live del contrato 0x1E5118: mundo nuevo pide Activar (no hereda linea vieja). Cache de credito ahora incluye la direccion del contrato y no barre 100 niveles cada 30s.
+[2026-09-11] Cambio: Demo productivo: identidad local si ngrok falla; worker reinicia barrido al cambiar de contrato; ficha de nivel pide Activar si no hay registro; aviso si el atestado demo falla.
