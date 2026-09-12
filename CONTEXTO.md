@@ -27,7 +27,9 @@ Magno/
 ├── hooks/                         # useWeb3Balances, useWeb3Transactions, useHomeHandlers
 ├── services/                      # quatriviumCreditService, appWallet, deviceBinding, kycDeclaration…
 ├── contracts/
-│   ├── QuatriviumCredit.sol       # Contrato principal (1309 líneas)
+│   ├── QuatriviumCredit.sol       # Núcleo (EIP-170 ≤ 24576)
+│   ├── QuatriviumLeveling.sol     # Hermano: solicitudes/hitos
+│   ├── libraries/QuatriviumFamaLib.sol # Fama de línea (delegatecall)
 │   ├── Groth16Verifier.sol        # ZK experimental (no en producción)
 │   ├── interfaces/                # AggregatorV3Interface (Chainlink)
 │   └── mocks/                     # ERC20Mock, MockV3Aggregator (testnet)
@@ -78,7 +80,7 @@ Magno/
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
 - **Fama y dinero no se mezclan**: al registrar, la reputación recorre toda la línea (misma escala 15/8/6/4/2/0,8/0,4 %) y el fundador suma de cada alta. El USDT solo se mueve al pagar (interés + bono de activación). Los puntos de red y el bono del pool son solo del referidor directo, para no drenar la caja.
-- **Mora con mes de gracia**: al vencer se cobra de la billetera. Si no hay saldo, 30 días sigue cobrando para poder pagar. Luego la reputación baja 10 × nivel por día y sus comisiones/bonos van al pool hasta que pague. No se recorta el núcleo por EIP-170: el protocolo crece con hermanos.
+- **Mora con mes de gracia**: al vencer se cobra de la billetera. Si no hay saldo, 30 días sigue cobrando para poder pagar. Luego la reputación baja 10 × nivel por día y sus comisiones/bonos van al pool hasta que pague. El **fundador no entra en mora ni gracia**: si al vencer no hay saldo, el pool cubre el principal restante (se perdona el interés). Sigue sujeto a la espera de 48 h entre préstamos y no se le puede liquidar. La fama de línea vive en `QuatriviumFamaLib` (delegatecall) para no romper EIP-170.
 
 ---
 
@@ -115,7 +117,7 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — código de 1000 niveles ($1 a $1 000 000). Live Demo sigue en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles) hasta redeploy testnet
-- 15 suites Hardhat (101 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
+- 15 suites Hardhat (103 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
 - i18n: 17 idiomas, 799 claves
 - Referidos Unilevel en contrato y UI
@@ -216,7 +218,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
 | `check-i18n.mjs` | ✅ OK | 756 claves · 17 locales · sin BOM · sin discrepancias |
 | `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
-| `hardhat test` | ✅ 91/91 | Incluye 1000 niveles + destroy + mora + identidad demo + gates |
+| `hardhat test` | ✅ 103/103 | Incluye mora del fundador (pool cubre, 48h intacta) + FamaLib |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
 | `npm audit` (devDeps) | ⚠️ ~66 vulns | hardhat / solidity-coverage / expo SDK — **no van al APK** · no correr `--force` |
 | `production:check` | 🟡 **12/14** | Faltan 2 acciones **manuales**: deploy mainnet + Twilio/WhatsApp |
@@ -234,6 +236,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Fundador exento de mora/gracia: el pool cubre su principal al vencer sin saldo. Espera 48h intacta. QuatriviumFamaLib por delegatecall. Nucleo 24457/24576. | — |
+| 2026-09-12 | Fundador exento de mora/gracia: si no hay saldo al vencer, el pool cubre el principal. Sigue la espera de 48h. Fama de linea en QuatriviumFamaLib. Nucleo 24457/24576. | — |
 | 2026-09-12 | Mora: debito al vencimiento, 30 dias de gracia cobrando, luego 10x nivel/dia y ganancias al pool. Nucleo 24474/24576. | — |
 | 2026-09-12 | Fama unilevel decreciente al registrar (misma escala que comisiones). Fundador suma de cada alta. Puntos de red/bono pool solo del referidor directo. | — |
 | 2026-09-12 | Auditoria: unlock por defecto OFF al migrar prefs; signer estable ante remount; Bonos solo si el contrato tiene hitos o donar. | — |

@@ -229,6 +229,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/deploy.cjs` — módulo JS/TS
 - `scripts/fetch-wallet-logos.py` — módulo Python
   - Funciones/clases: fetch, to_png, is_github_identicon, save_square, main
+- `scripts/linkCredit.cjs` — módulo JS/TS
 - `scripts/notify-worker.mjs` — módulo JS/TS
 - `scripts/paint-wallet-icons.py` — módulo Python
   - Funciones/clases: save, coinbase_wallet, rainbow_mark, main

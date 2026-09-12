@@ -1,6 +1,16 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { deployProtocol, seedPool, registerAndFund, drainToken } = require('./helpers.cjs');
+const { deployProtocol, seedPool, registerAndFund, drainToken, attestIdentity } = require('./helpers.cjs');
+
+async function advanceCooldown() {
+  await ethers.provider.send('evm_increaseTime', [48 * 60 * 60]);
+  await ethers.provider.send('evm_mine');
+}
+
+async function enableFounderBorrow(contract, owner) {
+  await contract.connect(owner).declararKyc();
+  await attestIdentity(contract, owner, 'founder-phone', 'founder-device');
+}
 
 describe('QuatriviumCredit - Morosity', function () {
   it('does not stack reputation penalties if marcarMorosoSiVencido is called twice', async () => {
@@ -110,5 +120,45 @@ describe('QuatriviumCredit - Morosity', function () {
 
     expect(await contract.prestamosMorosos(user.address)).to.equal(1n);
     expect((await contract.obtenerProgresoUsuario(user.address)).solicitudesCompletadas).to.equal(0n);
+  });
+
+  it('lets the pool cover the founder loan without mora and still enforces the 48h wait', async () => {
+    const { token, contract, owner, extra, tokenAddr, contractAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await enableFounderBorrow(contract, owner);
+    await contract.connect(owner).solicitarPrestamo(tokenAddr, 0);
+    await drainToken(token, owner, extra);
+
+    const info = await contract.usuarios(owner.address);
+    await ethers.provider.send('evm_setNextBlockTimestamp', [Number(info.vencimiento) + 10]);
+    await ethers.provider.send('evm_mine');
+
+    const liqBefore = await contract.totalLiquidity(tokenAddr);
+    await contract.marcarMorosoSiVencido(owner.address);
+
+    expect(await contract.esMoroso(owner.address)).to.equal(false);
+    expect(await contract.dispersionCongelada(owner.address)).to.equal(false);
+    expect((await contract.usuarios(owner.address)).montoActivo).to.equal(0n);
+    expect(liqBefore - (await contract.totalLiquidity(tokenAddr))).to.equal(ethers.parseUnits('1', 18));
+    await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
+    const cash = await token.balanceOf(contractAddr);
+    const outstanding = await contract.outstandingLoans(tokenAddr);
+    const liquidity = await contract.totalLiquidity(tokenAddr);
+    const fees = await contract.collectedFees(tokenAddr);
+    expect(cash + outstanding).to.equal(liquidity + fees);
+  });
+
+  it('does not waive the founder 48h wait between loans', async () => {
+    const { token, contract, owner, tokenAddr, contractAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await enableFounderBorrow(contract, owner);
+    await contract.connect(owner).solicitarPrestamo(tokenAddr, 0);
+    const debt = await contract.obtenerDeuda(owner.address);
+    await contract.connect(owner).pagarPrestamo(tokenAddr, debt.total);
+    expect(await contract.obtenerCooldownRestante(owner.address)).to.be.gt(0n);
+    await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
+    await advanceCooldown();
+    await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
+    expect(await token.balanceOf(contractAddr)).to.be.gt(0n);
   });
 });

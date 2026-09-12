@@ -13,7 +13,7 @@
 
 ### Qué funciona
 - Contrato `QuatriviumCredit.sol` — código de 1000 niveles ($1 a $1 000 000). Live Demo sigue en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles) hasta redeploy testnet
-- 15 suites Hardhat (101 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
+- 15 suites Hardhat (103 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
 - i18n: 17 idiomas, 799 claves
 - Referidos Unilevel en contrato y UI

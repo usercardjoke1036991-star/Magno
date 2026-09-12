@@ -3,6 +3,7 @@ const path = require('path');
 const hre = require('hardhat');
 const { ethers } = hre;
 const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = require('./bscNetworks.cjs');
+const { getLinkedCreditFactory } = require('./linkCredit.cjs');
 
 const TESTNET_ONLY_USDT = new Set([
   BSC_TESTNET.usdt.toLowerCase(),
@@ -118,10 +119,11 @@ async function main() {
   console.log('Admins:', admins);
   console.log('Confirmations:', confirms);
 
-  const QuatriviumCredit = await ethers.getContractFactory('QuatriviumCredit');
+  const QuatriviumCredit = await getLinkedCreditFactory(ethers);
   const artifact = await hre.artifacts.readArtifact('QuatriviumCredit');
   const runtimeBytes = (artifact.deployedBytecode.length - 2) / 2;
   console.log('QuatriviumCredit runtime bytecode (bytes):', runtimeBytes);
+  console.log('QuatriviumFamaLib:', QuatriviumCredit.famaLibAddress);
   if (chainId !== 31337 && runtimeBytes > 24576) {
     throw new Error(
       `QuatriviumCredit mide ${runtimeBytes} bytes y supera el límite EIP-170 (24576). No se puede desplegar en BSC hasta reducir el contrato.`

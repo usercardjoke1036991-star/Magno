@@ -4,6 +4,7 @@
 Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmaciones es opcional
 
 ## Decisiones
+- [2026-09-12] El fundador no entra en mora ni gracia. Si al vencer se debita y no hay saldo, el pool cubre el principal. Sigue la espera de 48h. No se le liquida.
 - [2026-09-12] No recortar funciones del nucleo por EIP-170. El tope de 24 KB es de Ethereum. Lo nuevo va a contratos hermanos. Gracia 30d con ganancias; despues freeze al pool y penalizacion proporcional al nivel.
 - [2026-09-12] Fama al registrar (no USDT). Puntos de red y bono del pool solo al directo cuando pagan el primer nivel, para no desequilibrar el capital.
 - [2026-09-12] Si el contrato live no tiene hitos ni donar, la sala Bonos no aparece en el hub.
@@ -25,6 +26,7 @@ Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmac
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] Fundador exento de mora: pool cubre su prestamo. Fama de linea en QuatriviumFamaLib. Nucleo 24457/24576. Hardhat 103/103.
 - [2026-09-12] Mora con mes de gracia: siguen cobrando 30 dias para poder pagar. Luego 10 de reputacion por nivel y dia; comisiones y bonos van al pool hasta saldar.
 - [2026-09-12] La reputacion recorre la linea de referidos con la misma escala decreciente que las comisiones; el fundador suma fama de cada alta. Los puntos de red USDT siguen solo al referidor directo.
 - [2026-09-12] El emblema conserva el relieve 3D y se pinta con el color mineral de cada rango; la piedra sigue en el centro.
@@ -78,4 +80,4 @@ Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmac
 (puntos críticos)
 
 ## Última sesión
-[2026-09-12] Decisión: No recortar funciones del nucleo por EIP-170. El tope de 24 KB es de Ethereum. Lo nuevo va a contratos hermanos. Gracia 30d con ganancias; despues freeze al pool y penalizacion proporcional al nivel.
+[2026-09-12] Cambio: Fundador exento de mora: pool cubre su prestamo. Fama de linea en QuatriviumFamaLib. Nucleo 24457/24576. Hardhat 103/103.

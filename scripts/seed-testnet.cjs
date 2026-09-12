@@ -37,7 +37,8 @@ async function main() {
 
   const Token = await ethers.getContractFactory('ERC20Mock');
   const Aggregator = await ethers.getContractFactory('MockV3Aggregator');
-  const QuatriviumCredit = await ethers.getContractFactory('QuatriviumCredit');
+  const { getLinkedCreditFactory } = require('./linkCredit.cjs');
+  const QuatriviumCredit = await getLinkedCreditFactory(ethers);
 
   const token = await Token.deploy();
   await token.waitForDeployment();

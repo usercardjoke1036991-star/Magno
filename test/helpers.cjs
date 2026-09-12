@@ -1,4 +1,5 @@
 const { ethers } = require('hardhat');
+const { getLinkedCreditFactory } = require('../scripts/linkCredit.cjs');
 
 async function deployProtocol(opts = {}) {
   const pegAnswer = opts.pegAnswer ?? 100000000;
@@ -10,7 +11,7 @@ async function deployProtocol(opts = {}) {
 
   const Token = await ethers.getContractFactory('ERC20Mock');
   const Aggregator = await ethers.getContractFactory('MockV3Aggregator');
-  const QuatriviumCredit = await ethers.getContractFactory('QuatriviumCredit');
+  const QuatriviumCredit = await getLinkedCreditFactory(ethers);
 
   const token = await Token.deploy();
   const feed = await Aggregator.deploy(8, pegAnswer);

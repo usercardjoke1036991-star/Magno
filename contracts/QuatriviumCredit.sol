@@ -7,6 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AggregatorV3Interface} from "./interfaces/AggregatorV3Interface.sol";
 import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
+import {QuatriviumFamaLib, Usuario} from "./libraries/QuatriviumFamaLib.sol";
 
 /**
  * @title Quatrivium Credit
@@ -25,8 +26,8 @@ import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
  * del referidor directo, para no drenar la caja.
  *
  * EIP-170: ESTE archivo no puede pasar de 24576 bytes (límite de Ethereum, no nuestro).
- * El protocolo no se recorta: cada pieza nueva vive en un contrato hermano
- * (QuatriviumLeveling, etc.), cada uno con su propio tope de 24 KB.
+ * El protocolo no se recorta: cada pieza nueva vive en un hermano o librería
+ * (QuatriviumLeveling, QuatriviumFamaLib, etc.), cada uno con su propio tope.
  */
 contract QuatriviumCredit is ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -110,10 +111,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     mapping(address => PosicionCredito) public usuarios;
 
     /// @notice Nodo Unilevel. Registro orgánico cuelga del `fundador`.
-    struct Usuario {
-        address padre;
-        bool bonoActivacionCobrado;
-    }
     mapping(address => Usuario) public redGenealogica;
     mapping(address => uint256) public prestamosCerrados;
 
@@ -173,7 +170,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     event BonoActivacionPagado(address indexed padre, address indexed referido, uint256 monto, address indexed token);
     event ComisionGeneracional(address indexed beneficiario, address indexed deudor, uint8 generacion, uint256 monto, address indexed token);
     event InteresRetenidoPool(address indexed token, uint256 monto);
-    event DispersionCongelada(address indexed deudor, address indexed token, uint256 montoAlPool);
     event InteresDistribuido(
         address indexed deudor,
         address indexed token,
@@ -183,7 +179,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         bool bonoActivacion
     );
     event LiquidezAportada(address indexed proveedor, uint256 monto, address indexed token);
-    event LiquidezRetirada(address indexed proveedor, uint256 monto, address indexed token);
     event PrestamoEmitido(address indexed usuario, uint256 monto, uint256 vencimiento, address indexed token);
     event PrestamoPagado(address indexed usuario, uint256 montoPrincipal, uint256 fee, address indexed token);
     event LiquidationExecuted(address indexed liquidator, address indexed user, address indexed token, uint256 paidAmount, uint256 reward);
@@ -577,7 +572,14 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
         redGenealogica[msg.sender] = Usuario({ padre: padre, bonoActivacionCobrado: false });
         humanosVerificados[msg.sender] = true;
-        _acreditarFama(msg.sender, padre);
+        QuatriviumFamaLib.acreditarFama(
+            reputacion,
+            cuentaDestruida,
+            redGenealogica,
+            msg.sender,
+            padre,
+            fundador
+        );
         emit HumanoVerificado(msg.sender);
         emit AfiliadoRegistrado(msg.sender, padre);
     }
@@ -932,7 +934,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     /// @notice Tras el mes de gracia las comisiones y bonos del usuario van al pool.
     function _fueraDeGracia(address usuario) internal view returns (bool) {
-        if (!esMoroso[usuario]) return false;
+        if (usuario == fundador || !esMoroso[usuario]) return false;
         uint256 desde = moraDesde[usuario];
         return desde != 0 && block.timestamp > desde + GRACIA_MORA;
     }
@@ -1047,33 +1049,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return liq > out ? liq - out : 0;
     }
 
-    function _famaPts(uint256 bp) internal pure returns (uint256) {
-        return (PUNTOS_POR_REFERIDO * bp) / GEN1_BP;
-    }
-
-    /// @notice Fama de toda la línea al registrar. No mueve USDT.
-    function _acreditarFama(address nuevo, address padre) internal {
-        address founder = fundador;
-        if (founder != address(0) && founder != nuevo && !cuentaDestruida[founder]) {
-            reputacion[founder] += _famaPts(FUNDADOR_BP);
-            emit ReputationUpdated(founder, reputacion[founder]);
-        }
-        address cursor = padre;
-        for (uint8 gen = 1; gen <= MAX_LINEA; ) {
-            if (cursor == address(0) || cursor == nuevo) {
-                break;
-            }
-            if (!cuentaDestruida[cursor]) {
-                reputacion[cursor] += _famaPts(_bpGeneracion(gen));
-                emit ReputationUpdated(cursor, reputacion[cursor]);
-            }
-            cursor = redGenealogica[cursor].padre;
-            unchecked {
-                gen++;
-            }
-        }
-    }
-
     function _acreditarRed(address padre, address token) internal {
         if (padre == address(0) || cuentaDestruida[padre]) {
             return;
@@ -1159,7 +1134,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function _aplicarMoraSiVencido(address usuario) internal {
-        if (!_estaVencido(usuario) || esMoroso[usuario]) return;
+        if (usuario == fundador || !_estaVencido(usuario) || esMoroso[usuario]) return;
         esMoroso[usuario] = true;
         usuarios[usuario].enMora = true;
         moraDesde[usuario] = block.timestamp;
@@ -1183,6 +1158,14 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         IERC20 erc = stableTokens[token];
         if (erc.balanceOf(usuario) >= amount && erc.allowance(usuario, address(this)) >= amount) {
             _pagarComo(usuario, token, amount);
+        } else if (usuario == fundador) {
+            uint256 principal = usuarios[usuario].montoActivo;
+            uint256 prinRest = principal - ((principal * pagado) / totalDue);
+            _reducirOutstanding(token, prinRest);
+            uint256 liq = totalLiquidity[token];
+            totalLiquidity[token] = liq > prinRest ? liq - prinRest : 0;
+            _limpiarPrestamo(usuario);
+            emit PrestamoPagado(usuario, principal, 0, token);
         } else {
             _aplicarMoraSiVencido(usuario);
         }
@@ -1192,7 +1175,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(tx.origin == msg.sender, "no contracts");
         require(usuarios[deudor].montoActivo > 0, "no active loan");
         require(usuarios[deudor].monedaActivo == tokenAddress, "token mismatch");
-        require(_estaVencido(deudor), "not defaulted");
+        require(deudor != fundador && _estaVencido(deudor), "not defaulted");
 
         uint256 principal = usuarios[deudor].montoActivo;
         (, uint256 interest, uint256 totalDue, ) = _deudaActual(deudor);
