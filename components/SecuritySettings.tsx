@@ -300,8 +300,8 @@ export const SecuritySettings: React.FC = () => {
             onDeclare={declareKyc}
           />
         ) : null}
-        {panel === 'password' ? <LockSettings hideLead mode="password" onChanged={() => void refreshPhrase()} /> : null}
-        {panel === 'pin' ? <LockSettings hideLead mode="pin" onChanged={() => void refreshPhrase()} /> : null}
+        {panel === 'password' ? <LockSettings mode="password" onChanged={() => void refreshPhrase()} /> : null}
+        {panel === 'pin' ? <LockSettings mode="pin" onChanged={() => void refreshPhrase()} /> : null}
         {panel === 'phone' && !demoAccount ? (
           <PhoneOtpSection
             walletAddress={address}
@@ -313,7 +313,7 @@ export const SecuritySettings: React.FC = () => {
           />
         ) : null}
         {panel === 'fingerprint' ? (
-          <BiometricLockSection compact leadKey="securityFingerprintLead" onChanged={setBioOn} />
+          <BiometricLockSection compact onChanged={setBioOn} />
         ) : null}
         {panel === 'access' ? (
           <BiometricLockSection compact onChanged={setBioOn} />
@@ -321,7 +321,6 @@ export const SecuritySettings: React.FC = () => {
         {panel === 'phrase' ? (
           <View>
             <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedLead')}</AppText>
-            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('securityPhraseReplaceOnly')}</AppText>
             {!hasPhrase ? (
               <AppText style={[styles.lead, { color: colors.warnText }]}>{t('seedMissing')}</AppText>
             ) : shown && phrase ? (

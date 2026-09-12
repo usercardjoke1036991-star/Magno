@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { Appearance, AppState, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { palettes, type ThemeColors, type ThemeName, type ThemePreference } from './palette';
 
@@ -16,12 +16,22 @@ interface ThemeValue {
 const ThemeContext = createContext<ThemeValue | null>(null);
 
 function isPreference(value: string | null): value is ThemePreference {
-  return value === 'light' || value === 'dark' || value === 'system';
+  return value === 'light' || value === 'dark' || value === 'minimalist' || value === 'system';
+}
+
+function nativeScheme(preference: ThemePreference): 'light' | 'dark' | null {
+  if (preference === 'system') return null;
+  return preference === 'dark' ? 'dark' : 'light';
+}
+
+function resolveScheme(value: string | null | undefined): ThemeName {
+  return value === 'dark' ? 'dark' : 'light';
 }
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const systemScheme = useColorScheme();
+  const hookScheme = useColorScheme();
   const [preference, setPreference] = useState<ThemePreference>('system');
+  const [systemTheme, setSystemTheme] = useState<ThemeName>(() => resolveScheme(Appearance.getColorScheme()));
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
@@ -31,13 +41,34 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       .catch(() => {});
   }, []);
 
+  const syncSystem = useCallback(() => {
+    setSystemTheme(resolveScheme(Appearance.getColorScheme() ?? hookScheme));
+  }, [hookScheme]);
+
+  useEffect(() => {
+    Appearance.setColorScheme(nativeScheme(preference));
+    syncSystem();
+  }, [preference, syncSystem]);
+
+  useEffect(() => {
+    const appearance = Appearance.addChangeListener(({ colorScheme }) => {
+      setSystemTheme(resolveScheme(colorScheme));
+    });
+    const app = AppState.addEventListener('change', (state) => {
+      if (state === 'active') syncSystem();
+    });
+    return () => {
+      appearance.remove();
+      app.remove();
+    };
+  }, [syncSystem]);
+
   const setTheme = useCallback((next: ThemePreference) => {
     setPreference(next);
     AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
   }, []);
 
-  const theme: ThemeName =
-    preference === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : preference;
+  const theme: ThemeName = preference === 'system' ? systemTheme : preference;
 
   const value = useMemo(
     () => ({

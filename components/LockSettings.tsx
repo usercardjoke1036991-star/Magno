@@ -28,10 +28,9 @@ import { AppText } from './AppText';
 type LockSettingsMode = 'pin' | 'password';
 
 export const LockSettings: React.FC<{
-  hideLead?: boolean;
   mode?: LockSettingsMode;
   onChanged?: () => void;
-}> = ({ hideLead = false, mode = 'pin', onChanged }) => {
+}> = ({ mode = 'pin', onChanged }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [current, setCurrent] = useState('');
@@ -171,7 +170,6 @@ export const LockSettings: React.FC<{
 
   const pinBlock = (
     <View>
-      {hideLead ? null : <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockCreateOptional')}</AppText>}
       {hasPin ? (
         <>
           <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPin')}</AppText>
@@ -183,9 +181,7 @@ export const LockSettings: React.FC<{
             placeholder="••••••"
           />
         </>
-      ) : (
-        <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockCreateOptional')}</AppText>
-      )}
+      ) : null}
       <AppText style={[styles.label, { color: colors.text }]}>{t('lockNewPin')}</AppText>
       <SecretInput
         value={next}
@@ -232,11 +228,6 @@ export const LockSettings: React.FC<{
 
   const passwordBlock = (
     <View>
-      {hideLead ? null : <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordLead')}</AppText>}
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordReplaceOnly')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNotSeed')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNoEmail')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordMin')}</AppText>
       {hasPin ? (
         <>
           <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPin')}</AppText>

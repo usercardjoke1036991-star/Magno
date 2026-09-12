@@ -67,8 +67,7 @@ async function openPhoneSecuritySettings(): Promise<void> {
 export const BiometricLockSection: React.FC<{
   onChanged?: (enabled: boolean) => void;
   compact?: boolean;
-  leadKey?: TranslationKey;
-}> = ({ onChanged, compact = false, leadKey }) => {
+}> = ({ onChanged, compact = false }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [bioOn, setBioOn] = useState(false);
@@ -121,9 +120,8 @@ export const BiometricLockSection: React.FC<{
       {compact ? null : (
         <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockBiometricLead')}</AppText>
       )}
-      {compact ? <AppText style={[styles.lead, { color: colors.textMuted }]}>{t(leadKey || 'securityAccessKeyLead')}</AppText> : null}
-      {reason === 'ok' && !bioOn ? null : (
-        <AppText style={[styles.note, { color: bioOn ? colors.success : colors.warnText }]}>{hint}</AppText>
+      {reason === 'ok' ? null : (
+        <AppText style={[styles.note, { color: colors.warnText }]}>{hint}</AppText>
       )}
       {available || bioOn ? (
         <TouchableOpacity

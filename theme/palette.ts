@@ -1,4 +1,4 @@
-export type ThemeName = 'light' | 'dark';
+export type ThemeName = 'light' | 'dark' | 'minimalist';
 export type ThemePreference = ThemeName | 'system';
 
 export interface SectionTone {
@@ -102,6 +102,34 @@ export const palettes: Record<ThemeName, ThemeColors> = {
       green: section('#2C2C28', '#F3F3EE', '#171716', '#9A9A93'),
       blue: section('#2C2C28', '#F3F3EE', '#171716', '#9A9A93'),
       gold: section('#2C2C28', '#F3F3EE', '#171716', '#9A9A93'),
+    },
+  },
+  minimalist: {
+    bg: '#FFFFFF',
+    surface: '#FFFFFF',
+    card: '#FFFFFF',
+    text: '#000000',
+    textMuted: '#6B6B6B',
+    border: '#000000',
+    primary: '#000000',
+    onPrimary: '#FFFFFF',
+    connect: '#000000',
+    disconnect: '#000000',
+    inputBg: '#FFFFFF',
+    inputBorder: '#000000',
+    warnBg: '#F5F5F5',
+    warnText: '#000000',
+    success: '#000000',
+    danger: '#111111',
+    chip: '#F2F2F2',
+    chipText: '#000000',
+    modalBg: '#FFFFFF',
+    overlay: 'rgba(0,0,0,0.5)',
+    section: {
+      default: section('#000000', '#000000', '#FFFFFF', '#6B6B6B'),
+      green: section('#000000', '#000000', '#FFFFFF', '#6B6B6B'),
+      blue: section('#000000', '#000000', '#FFFFFF', '#6B6B6B'),
+      gold: section('#000000', '#000000', '#FFFFFF', '#6B6B6B'),
     },
   },
 };

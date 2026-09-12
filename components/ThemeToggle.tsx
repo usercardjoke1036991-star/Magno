@@ -2,38 +2,83 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import type { ThemePreference } from '../theme/palette';
-import { AppIcon } from './icons';
+import { palettes, type ThemePreference } from '../theme/palette';
+import { AppIcon, type IconName } from './icons';
 import { AppText } from './AppText';
+
+const previews: Record<
+  ThemePreference,
+  { bg: string; fg: string; border: string; icon: IconName }
+> = {
+  light: {
+    bg: palettes.light.card,
+    fg: palettes.light.text,
+    border: palettes.light.border,
+    icon: 'sun',
+  },
+  dark: {
+    bg: palettes.dark.card,
+    fg: palettes.dark.text,
+    border: palettes.dark.border,
+    icon: 'moon',
+  },
+  system: {
+    bg: palettes.light.card,
+    fg: palettes.light.text,
+    border: palettes.dark.border,
+    icon: 'gear',
+  },
+  minimalist: {
+    bg: palettes.minimalist.card,
+    fg: palettes.minimalist.text,
+    border: palettes.minimalist.border,
+    icon: 'contrast',
+  },
+};
 
 export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = false }) => {
   const { t } = useI18n();
   const { preference, setTheme, colors } = useTheme();
 
-  const options: { value: ThemePreference; label: string; icon: 'sun' | 'moon' | 'gear' }[] = [
-    { value: 'system', label: t('themeSystem'), icon: 'gear' },
-    { value: 'light', label: t('themeLight'), icon: 'sun' },
-    { value: 'dark', label: t('themeDark'), icon: 'moon' },
+  const options: { value: ThemePreference; label: string }[] = [
+    { value: 'system', label: t('themeSystem') },
+    { value: 'light', label: t('themeLight') },
+    { value: 'dark', label: t('themeDark') },
+    { value: 'minimalist', label: t('themeMinimalist') },
   ];
 
   return (
     <View style={styles.wrap}>
       {!hideLabel && <AppText style={[styles.label, { color: colors.textMuted }]}>{t('appearance')}</AppText>}
-      <View style={[styles.track, { backgroundColor: colors.chip, borderColor: colors.border }]}>
+      <View style={styles.row}>
         {options.map((item) => {
           const active = preference === item.value;
+          const preview = previews[item.value];
           return (
             <TouchableOpacity
               key={item.value}
-              style={[styles.option, active && { backgroundColor: colors.card }]}
+              style={[
+                styles.option,
+                {
+                  backgroundColor: item.value === 'system' ? 'transparent' : preview.bg,
+                  borderColor: active ? preview.fg : preview.border,
+                  borderWidth: active ? 2 : 1,
+                },
+              ]}
               onPress={() => setTheme(item.value)}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
             >
-              <AppIcon name={item.icon} size={14} color={active ? colors.text : colors.textMuted} />
-              <AppText style={[styles.optionText, { color: active ? colors.text : colors.textMuted }]}>
-                {item.label}
-              </AppText>
+              {item.value === 'system' ? (
+                <View style={styles.split} pointerEvents="none">
+                  <View style={[styles.splitHalf, { backgroundColor: palettes.light.bg }]} />
+                  <View style={[styles.splitHalf, { backgroundColor: palettes.dark.bg }]} />
+                </View>
+              ) : null}
+              <View style={item.value === 'system' ? styles.systemBadge : styles.stack}>
+                <AppIcon name={preview.icon} size={16} color={preview.fg} />
+                <AppText style={[styles.optionText, { color: preview.fg }]}>{item.label}</AppText>
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -51,24 +96,41 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontWeight: '500',
   },
-  track: {
+  row: {
     flexDirection: 'row',
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 3,
-    gap: 2,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   option: {
-    flex: 1,
-    borderRadius: 9,
-    paddingVertical: 10,
+    width: '47%',
+    flexGrow: 1,
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: 'center',
-    flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
+    overflow: 'hidden',
+  },
+  stack: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  split: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
+  },
+  splitHalf: {
+    flex: 1,
   },
   optionText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  systemBadge: {
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(244,244,241,0.92)',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
 });

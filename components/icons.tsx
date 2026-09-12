@@ -34,6 +34,7 @@ export type IconName =
   | 'star'
   | 'warning'
   | 'user'
+  | 'contrast'
   | 'copy'
   | 'eye'
   | 'eyeOff'
@@ -287,6 +288,13 @@ export const AppIcon: React.FC<AppIconProps> = ({ name, size = 22, color = '#146
         <Svg width={size} height={size} viewBox="0 0 24 24">
           <Circle cx="12" cy="8.5" r="2.8" {...s} />
           <Path d="M6 18.5c.7-3 2.8-4.6 6-4.6s5.3 1.6 6 4.6" {...s} />
+        </Svg>
+      );
+    case 'contrast':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Circle cx="12" cy="12" r="8" {...s} />
+          <Path d="M12 4a8 8 0 000 16V4z" fill={color} />
         </Svg>
       );
     case 'copy':

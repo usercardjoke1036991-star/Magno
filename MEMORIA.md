@@ -10,6 +10,9 @@ App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% 
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] Tema Minimalista blanco y negro. Foto de perfil por defecto: silueta gris estilo Facebook.
+- [2026-09-12] Apariencia: Claro, Oscuro y Sistema se ven distintos en el selector. Sistema sigue el tema del telefono.
+- [2026-09-12] Panel de seguridad sin avisos de reemplazar o no eliminar. La interfaz se entiende por los botones.
 - [2026-09-12] Panel de seguridad: contraseña aparte; PIN se puede quitar; huella y llave se apagan; confirmar fondos acepta contraseña.
 - [2026-09-12] En espera entre prestamos solo se ve la cuenta atras en vivo, no Solicitar.
 - [2026-09-12] Revert vacio en Demo ya no pide pasar a Demo: avisa la espera de 48h.
