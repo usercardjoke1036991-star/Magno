@@ -10,12 +10,17 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { authenticateBiometric, matchPassword, matchPin } from '../services/appLock';
 import { verifyAuthenticator } from '../services/authenticator';
-import { getAuthMethod, type AuthMethod } from '../services/authPrefs';
+import { getAuthMethod, isAuthEnabled, isMethodReady, type AuthMethod, type AuthPurpose } from '../services/authPrefs';
+import { loadVerifiedEmail } from '../services/accountEmail';
+import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
+import { ensureAppWallet } from '../services/appWallet';
+import type { FundsConfirmPurpose } from '../services/fundsConfirm';
 import { SecretInput } from './SecretInput';
 import { AppText } from './AppText';
+import type { TranslationKey } from '../i18n/translations';
 
 interface FundsConfirmValue {
-  confirmFunds: () => Promise<boolean>;
+  confirmFunds: (purpose?: FundsConfirmPurpose) => Promise<boolean>;
 }
 
 const FundsConfirmContext = createContext<FundsConfirmValue | null>(null);
@@ -28,6 +33,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [method, setMethod] = useState<AuthMethod>('password');
+  const [purpose, setPurpose] = useState<FundsConfirmPurpose>('transfer');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const resolver = useRef<((ok: boolean) => void) | null>(null);
@@ -44,17 +50,35 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
     setError('');
   }, []);
 
+  const sendEmailCode = async () => {
+    try {
+      const [wallet, email] = await Promise.all([ensureAppWallet(), loadVerifiedEmail()]);
+      if (!email) throw new Error('email');
+      await requestEmailOtp(wallet.address, email);
+    } catch (caught) {
+      const reason = String((caught as Error)?.message || '');
+      if (reason.includes('rate')) setError(t('otpRate'));
+      else if (reason.includes('notify')) setError(t('emailNeedApi'));
+      else setError(t('otpRequestFailed'));
+    }
+  };
+
   const askSecret = (next: AuthMethod) =>
     new Promise<boolean>((resolve) => {
       resolver.current = resolve;
       setMethod(next);
       setOpen(true);
+      if (next === 'email') void sendEmailCode();
     });
 
-  const confirmFunds = useCallback(async () => {
+  const confirmFunds = useCallback(async (nextPurpose: FundsConfirmPurpose = 'transfer') => {
     if (inflight.current) return inflight.current;
     const run = (async () => {
-      const chosen = await getAuthMethod('funds');
+      const slot: AuthPurpose = nextPurpose === 'transfer' ? 'funds' : nextPurpose;
+      if (!(await isAuthEnabled(slot))) return true;
+      setPurpose(nextPurpose);
+      const preferred = await getAuthMethod(slot);
+      const chosen = (await isMethodReady(preferred)) ? preferred : 'password';
       if (chosen === 'biometric') {
         const bio = await authenticateBiometric();
         if (bio) return true;
@@ -98,6 +122,21 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       finish(true);
       return;
     }
+    if (method === 'email') {
+      if (code.length !== 6) return;
+      setBusy(true);
+      try {
+        const [wallet, email] = await Promise.all([ensureAppWallet(), loadVerifiedEmail()]);
+        if (!email) throw new Error('email');
+        await verifyEmailOtp(wallet.address, email, code);
+        finish(true);
+      } catch {
+        setError(t('emailCodeWrong'));
+        setCode('');
+        setBusy(false);
+      }
+      return;
+    }
     if (!password) return;
     setBusy(true);
     const ok = await matchPassword(password);
@@ -111,14 +150,26 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const value = useMemo(() => ({ confirmFunds }), [confirmFunds]);
+  const titleKey: TranslationKey =
+    purpose === 'loanRequest'
+      ? 'loanConfirmRequestTitle'
+      : purpose === 'loanPay'
+        ? 'loanConfirmPayTitle'
+        : 'fundsConfirmTitle';
   const prompt =
     method === 'pin'
       ? t('fundsConfirmPrompt')
       : method === 'authenticator'
         ? t('fundsConfirmPromptAuth')
-        : t('fundsConfirmPromptPassword');
+        : method === 'email'
+          ? t('fundsConfirmPromptEmail')
+          : t('fundsConfirmPromptPassword');
   const canSubmit =
-    method === 'pin' ? pin.length === 6 : method === 'authenticator' ? code.length === 6 : Boolean(password);
+    method === 'pin'
+      ? pin.length === 6
+      : method === 'authenticator' || method === 'email'
+        ? code.length === 6
+        : Boolean(password);
 
   return (
     <FundsConfirmContext.Provider value={value}>
@@ -126,7 +177,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => finish(false)}>
         <View style={styles.backdrop}>
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <AppText style={[styles.title, { color: colors.text }]}>{t('fundsConfirmTitle')}</AppText>
+            <AppText style={[styles.title, { color: colors.text }]}>{t(titleKey)}</AppText>
             <AppText style={[styles.lead, { color: colors.textMuted }]}>{prompt}</AppText>
             {method === 'pin' ? (
               <SecretInput
@@ -136,13 +187,13 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
                 maxLength={6}
                 placeholder="••••••"
               />
-            ) : method === 'authenticator' ? (
+            ) : method === 'authenticator' || method === 'email' ? (
               <SecretInput
                 value={code}
                 onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
                 keyboardType="number-pad"
                 maxLength={6}
-                placeholder={t('authenticatorCode')}
+                placeholder={method === 'email' ? t('emailCode') : t('authenticatorCode')}
               />
             ) : (
               <SecretInput

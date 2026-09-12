@@ -27,14 +27,13 @@ const logInfo = __DEV__ ? console.log : () => {};
 let walletSigner: Signer | null = null;
 
 export const setWalletSigner = (signer: Signer) => {
+  if (walletSigner === signer) return;
   walletSigner = signer;
-  logInfo('Wallet signer configurado');
 };
 
 export const clearWalletSigner = () => {
   walletSigner = null;
-  logInfo('Wallet signer limpio');
-};
+}
 
 export const getWalletSigner = () => walletSigner;
 
@@ -110,10 +109,14 @@ export type ProtocolCaps = {
 };
 
 const DEFAULT_CAPS: ProtocolCaps = {
-  maxLevel: MAX_LOAN_LEVEL,
+  maxLevel: CORE_LOAN_LEVEL,
   canClaimHitos: false,
   canDonate: false,
 };
+
+export function cachedProtocolCaps(): ProtocolCaps {
+  return capsCache?.caps || DEFAULT_CAPS;
+}
 
 let capsCache: { addr: string; caps: ProtocolCaps } | null = null;
 
@@ -476,26 +479,32 @@ export const QuatriviumCreditService = {
   obtenerProgresoUsuario: async (userAddress: string) => {
     const { provider } = await getProviderAndSigner();
     const progress = await contractWith(provider).obtenerProgresoUsuario(userAddress);
-    const nivelActual = Number(progress.nivelActual);
-    const solicitudesCompletadas = Number(progress.solicitudesCompletadas);
+    const nivelActual = Number(progress.nivelActual ?? progress[0]);
+    const solicitudesCompletadas = Number(progress.solicitudesCompletadas ?? progress[1]);
+    const ultimoPrestamoTimestamp = Number(progress.ultimoPrestamoTimestamp ?? progress[2]);
     let lastHito = 0;
     let hitoSupported = false;
     let donatedWei = '0';
-    try {
-      lastHito = Number(await contractWith(provider).hitoCobrado(userAddress));
-      hitoSupported = true;
-    } catch {
-      lastHito = 0;
+    const caps = capsCache?.caps;
+    if (caps?.canClaimHitos !== false) {
+      try {
+        lastHito = Number(await contractWith(provider).hitoCobrado(userAddress));
+        hitoSupported = true;
+      } catch {
+        lastHito = 0;
+      }
     }
-    try {
-      donatedWei = (await contractWith(provider).donado(userAddress)).toString();
-    } catch {
-      donatedWei = '0';
+    if (caps?.canDonate !== false) {
+      try {
+        donatedWei = (await contractWith(provider).donado(userAddress)).toString();
+      } catch {
+        donatedWei = '0';
+      }
     }
     return {
       nivelActual,
       solicitudesCompletadas,
-      ultimoPrestamoTimestamp: Number(progress.ultimoPrestamoTimestamp),
+      ultimoPrestamoTimestamp,
       lastHito,
       bonusPending: hitoSupported ? nextClaimableMilestone(nivelActual, lastHito) : 0,
       nextMilestone: nextUpcomingMilestone(nivelActual, lastHito),

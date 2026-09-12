@@ -6,11 +6,14 @@ function nowSec(): number {
 }
 
 function endFromInputs(ultimoPrestamoTimestamp: number, cooldownHintSec: number): number {
-  if (Number.isFinite(ultimoPrestamoTimestamp) && ultimoPrestamoTimestamp > 0) {
-    return Math.floor(ultimoPrestamoTimestamp) + PRESTAMO_COOLDOWN_SECS;
-  }
+  const now = nowSec();
+  const fromTs =
+    Number.isFinite(ultimoPrestamoTimestamp) && ultimoPrestamoTimestamp > 0
+      ? Math.floor(ultimoPrestamoTimestamp) + PRESTAMO_COOLDOWN_SECS
+      : 0;
   const hint = Math.max(0, Math.floor(cooldownHintSec || 0));
-  return hint > 0 ? nowSec() + hint : 0;
+  const fromHint = hint > 0 ? now + hint : 0;
+  return Math.max(fromTs, fromHint);
 }
 
 /** Seconds left until the next loan can be requested. Ticks every second. */

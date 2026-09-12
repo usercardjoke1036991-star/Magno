@@ -22,6 +22,7 @@ import { milestoneBonusUsd } from '../constants/loanTiers';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { useI18n } from '../i18n/LanguageContext';
 import { humanizeTxError } from '../utils/txErrors';
+import type { FundsConfirmPurpose } from '../services/fundsConfirm';
 import type { LoanTier, UserInfo } from './useWeb3Balances';
 import type { Token } from '../constants/tokens';
 
@@ -102,7 +103,7 @@ export interface HomeHandlersParams {
   appSigner: Signer | null | undefined;
   adminConnected: boolean;
   adminProvider: unknown;
-  confirmFunds: () => Promise<boolean>;
+  confirmFunds: (purpose?: FundsConfirmPurpose) => Promise<boolean>;
   refetch: () => void;
   clearPendingInvite: () => Promise<void>;
 }
@@ -239,7 +240,6 @@ export const useHomeHandlers = ({
       return;
     }
     if (!ensureCreditReady()) return;
-    if (!(await confirmFunds())) return;
     if (!userInfo.isRegistered) {
       Alert.alert(t('register'), t('activateBeforeLoan'));
       return;
@@ -268,7 +268,10 @@ export const useHomeHandlers = ({
       Alert.alert(t('delinquent'), t('moraBlocked'));
       return;
     }
-    const wait = cooldownRestanteDesdeTimestamp(userInfo.userProgress.ultimoPrestamoTimestamp);
+    const wait = Math.max(
+      cooldownRestanteDesdeTimestamp(userInfo.userProgress.ultimoPrestamoTimestamp),
+      Number(userInfo.userProgress.cooldownRestante) || 0,
+    );
     if (wait > 0) {
       Alert.alert(
         t('cooldownTitle'),
@@ -282,6 +285,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('token'), t('tokenNotEnabledAlert'));
       return;
     }
+    if (!(await confirmFunds('loanRequest'))) return;
     if (!(await ensureGasForTx())) return;
     if (isDemoAccount()) {
       try {
@@ -354,13 +358,13 @@ export const useHomeHandlers = ({
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
     }
-    if (!(await confirmFunds())) return;
     if (!ensureCreditReady()) return;
 
     if (!userInfo.activeLoan || userInfo.activeLoan.totalDueWei === '0') {
       Alert.alert(t('noDebt'), t('noActiveLoan'));
       return;
     }
+    if (!(await confirmFunds('loanPay'))) return;
     if (!(await ensureGasForTx())) return;
 
     const loanToken = userInfo.activeLoan.token;

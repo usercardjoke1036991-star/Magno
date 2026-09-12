@@ -5,6 +5,7 @@ import {
   Linking,
   Platform,
   StyleSheet,
+  Switch,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -72,6 +73,7 @@ export const BiometricLockSection: React.FC<{
   const { t } = useI18n();
   const { colors } = useTheme();
   const [bioOn, setBioOn] = useState(false);
+  const [draft, setDraft] = useState(false);
   const [busy, setBusy] = useState(false);
   const [kinds, setKinds] = useState<BiometricKind[]>([]);
   const [reason, setReason] = useState<'ok' | 'native-missing' | 'no-hardware' | 'not-enrolled'>('ok');
@@ -83,6 +85,7 @@ export const BiometricLockSection: React.FC<{
     setReason(status.reason);
     setAvailable(status.available);
     setBioOn(enabled);
+    setDraft(enabled);
   }, []);
 
   useEffect(() => {
@@ -93,20 +96,24 @@ export const BiometricLockSection: React.FC<{
     return () => sub.remove();
   }, [refresh]);
 
-  const onToggle = async () => {
+  const save = async () => {
     if (busy) return;
+    if (draft === bioOn) {
+      Alert.alert(t('ready'), t('settingsSaved'));
+      return;
+    }
     setBusy(true);
     try {
-      const result = await toggleBiometric(!bioOn);
+      const result = await toggleBiometric(draft);
       if (!result.ok) {
-        Alert.alert(t('securityAccessKey'), t(toggleErrorKey(result.reason)));
+        Alert.alert(t('securityFingerprint'), t(toggleErrorKey(result.reason)));
         await refresh();
         return;
       }
-      const next = !bioOn;
-      setBioOn(next);
-      if (!next) await fallbackAuthIfNeeded('biometric');
-      onChanged?.(next);
+      setBioOn(draft);
+      if (!draft) await fallbackAuthIfNeeded('biometric');
+      onChanged?.(draft);
+      Alert.alert(t('ready'), t('settingsSaved'));
     } finally {
       setBusy(false);
     }
@@ -126,21 +133,27 @@ export const BiometricLockSection: React.FC<{
         <AppText style={[styles.note, { color: colors.warnText }]}>{hint}</AppText>
       )}
       {available || bioOn ? (
-        <TouchableOpacity
-          disabled={busy}
-          onPress={() => void onToggle()}
-          style={[
-            styles.button,
-            { backgroundColor: bioOn ? colors.surface : colors.connect, borderWidth: bioOn ? 1 : 0, borderColor: colors.border },
-            busy && { opacity: 0.6 },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel={t(unlockLabel(kinds))}
-        >
-          <AppText style={[styles.buttonText, bioOn && { color: colors.text }]}>
-            {bioOn ? t('securityAccessKeyDisable') : t('securityAccessKeyEnable')}
-          </AppText>
-        </TouchableOpacity>
+        <>
+          <View style={styles.switchRow}>
+            <AppText style={[styles.switchLabel, { color: colors.text }]}>{t(unlockLabel(kinds))}</AppText>
+            <Switch
+              value={draft}
+              onValueChange={setDraft}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#fff"
+              accessibilityLabel={t(unlockLabel(kinds))}
+            />
+          </View>
+          <TouchableOpacity
+            disabled={busy}
+            onPress={() => void save()}
+            style={[styles.button, { backgroundColor: colors.connect }, busy && { opacity: 0.6 }]}
+            accessibilityRole="button"
+            accessibilityLabel={t('settingsSave')}
+          >
+            <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>
+          </TouchableOpacity>
+        </>
       ) : reason === 'not-enrolled' ? (
         <TouchableOpacity
           onPress={() => void openPhoneSecuritySettings()}
@@ -171,6 +184,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     marginBottom: 10,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 12,
+  },
+  switchLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
   },
   button: {
     borderRadius: 12,

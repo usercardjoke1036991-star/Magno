@@ -8,7 +8,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
-import { MAX_LOAN_LEVEL, milestoneBonusUsd, requiredCountForLiveLevel } from '../constants/loanTiers';
+import { displayMaxLoanLevel, milestoneBonusUsd, requiredCountForLiveLevel } from '../constants/loanTiers';
 import { supportKind, supportNameKey } from '../constants/support';
 import { ProfileAvatar } from './ProfileAvatar';
 import { useUserProfile } from '../profile/ProfileContext';
@@ -49,11 +49,15 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   const remainingInstallments = userInfo.activeLoan
     ? Math.max(0, userInfo.activeLoan.cuotasTotales - userInfo.activeLoan.cuotasPagadas)
     : 0;
-  const cooldownLeft = useLiveCooldown(userInfo.userProgress.ultimoPrestamoTimestamp);
+  const cooldownLeft = useLiveCooldown(
+    userInfo.userProgress.ultimoPrestamoTimestamp,
+    userInfo.userProgress.cooldownRestante,
+  );
   const claimableMilestone = userInfo.userProgress.bonusPending;
   const nextMilestone = userInfo.userProgress.nextMilestone;
   const bonusAmount = formatUSD(milestoneBonusUsd(claimableMilestone || nextMilestone));
   const supportKey = supportNameKey(supportKind(userInfo.donatedUsd || 0, lpUsd));
+  const maxLevel = displayMaxLoanLevel(userInfo.maxLoanLevel);
 
   return (
     <View>
@@ -72,7 +76,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               <AppText style={[styles.rankEyebrow, { color: colors.textMuted }]}>{t('rankYourRank')}</AppText>
               <AppText style={[styles.rankTitle, { color: colors.text }]}>{rankLabel}</AppText>
               <AppText style={[styles.rankMeta, { color: colors.textMuted }]}>
-                {t('level')} {userInfo.userProgress.nivelActual}/{userInfo.maxLoanLevel || MAX_LOAN_LEVEL}
+                {t('level')} {userInfo.userProgress.nivelActual}/{displayMaxLoanLevel(userInfo.maxLoanLevel)}
               </AppText>
               <AppText style={[styles.rankHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
               {supportKey ? (
@@ -81,7 +85,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
             </View>
           </View>
 
-          {nextMilestone > 0 ? (
+          {userInfo.canClaimHitos && nextMilestone > 0 ? (
             <View style={[styles.loanBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <AppText style={[styles.loanMeta, { color: colors.text, marginTop: 0 }]}>
                 {claimableMilestone > 0
@@ -120,7 +124,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
                 <AppIcon name="star" size={14} color={colors.textMuted} />
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('level')}</AppText>
               </View>
-              <AppText style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/{userInfo.maxLoanLevel || MAX_LOAN_LEVEL}</AppText>
+              <AppText style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/{maxLevel}</AppText>
             </View>
 
             <View style={styles.metricItem}>
@@ -147,13 +151,13 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               <View style={styles.metricLabelRow}>
                 <AppIcon name="chart" size={14} color={colors.textMuted} />
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>
-                  {userInfo.userProgress.nivelActual >= (userInfo.maxLoanLevel || MAX_LOAN_LEVEL) ? t('maxLevelReached') : t('toLevelUp')}
+                  {userInfo.userProgress.nivelActual >= (maxLevel) ? t('maxLevelReached') : t('toLevelUp')}
                 </AppText>
               </View>
               <AppText style={[styles.metricValue, { color: colors.text }]}>
-                {userInfo.userProgress.nivelActual >= (userInfo.maxLoanLevel || MAX_LOAN_LEVEL)
+                {userInfo.userProgress.nivelActual >= (maxLevel)
                   ? t('maxLevelReached')
-                  : `${userInfo.userProgress.solicitudesCompletadas}/${requiredCountForLiveLevel(userInfo.userProgress.nivelActual, userInfo.maxLoanLevel || MAX_LOAN_LEVEL)} ${t('onTimePayments')}`}
+                  : `${userInfo.userProgress.solicitudesCompletadas}/${requiredCountForLiveLevel(userInfo.userProgress.nivelActual, maxLevel)} ${t('onTimePayments')}`}
               </AppText>
             </View>
 

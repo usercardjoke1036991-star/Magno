@@ -58,6 +58,7 @@ export const AuthenticatorSetup: React.FC<{
       setSecret('');
       setCode('');
       onChanged?.();
+      Alert.alert(t('ready'), t('settingsSaved'));
     } finally {
       setBusy(false);
     }
@@ -126,7 +127,7 @@ export const AuthenticatorSetup: React.FC<{
           {busy ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <AppText style={styles.buttonText}>{secret ? t('ready') : t('authenticatorActivate')}</AppText>
+            <AppText style={styles.buttonText}>{secret ? t('settingsSave') : t('authenticatorActivate')}</AppText>
           )}
         </TouchableOpacity>
       ) : (

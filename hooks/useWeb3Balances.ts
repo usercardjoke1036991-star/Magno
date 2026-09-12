@@ -6,7 +6,7 @@ import { assertTrustedRpc, isContractConfigured, NETWORK_CONFIG, subscribeRuntim
 import { getTokenMeta, isOfficialWorldToken, type Token } from '../constants/tokens';
 import {
   LOAN_TIERS,
-  MAX_LOAN_LEVEL,
+  CORE_LOAN_LEVEL,
   ONCHAIN_TIER_SCAN,
   overlayOnChainTier,
   requiredCountForLiveLevel,
@@ -140,7 +140,7 @@ const EMPTY_USER_INFO: UserInfo = {
   creditHistory: { paidOnTime: 0, missedLoans: 0, penalties: 0 },
   userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0, bonusPending: 0, nextMilestone: 100, lastHito: 0 },
   donatedUsd: 0,
-  maxLoanLevel: MAX_LOAN_LEVEL,
+  maxLoanLevel: CORE_LOAN_LEVEL,
   canClaimHitos: false,
   canDonate: false,
   isOwner: false,
@@ -174,7 +174,7 @@ function formatDue(amountWei: bigint, decimals: number, symbol: string): string 
 export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => {
   const [balances, setBalances] = useState<UserBalances>(EMPTY_BALANCES);
   const [userInfo, setUserInfo] = useState<UserInfo>(EMPTY_USER_INFO);
-  const [loanTiers, setLoanTiers] = useState<LoanTier[]>(LOAN_TIERS);
+  const [loanTiers, setLoanTiers] = useState<LoanTier[]>(() => visibleLoanTiers(CORE_LOAN_LEVEL));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
@@ -265,7 +265,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }));
       } catch (e) {
         logErr('Error fetching BNB balance:', e);
-        setBalances((prev) => ({ ...prev, bnbBalance: '0.00', poolBalance, poolOutstanding, poolCash }));
+        setBalances((prev) => ({ ...prev, poolBalance, poolOutstanding, poolCash }));
       }
 
       try {
@@ -303,7 +303,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }
           return { ...EMPTY_USER_INFO };
         });
-        setLoanTiers(LOAN_TIERS);
+        setLoanTiers(visibleLoanTiers(CORE_LOAN_LEVEL));
         setBalances((prev) => {
           if (
             prev.poolBalance === EMPTY_BALANCES.poolBalance &&
@@ -329,11 +329,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       try {
         const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
         if (!live()) return;
-        let caps = { maxLevel: MAX_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
+        let caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
         try {
           caps = await QuatriviumCreditService.detectarCapacidadProtocolo();
         } catch {
-          caps = { maxLevel: MAX_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
+          caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
         }
         if (live()) {
           setUserInfo((prev) => ({
@@ -447,12 +447,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
           const lastTs = Number(progress.ultimoPrestamoTimestamp);
           let cooldown = cooldownRestanteDesdeTimestamp(lastTs);
-          if (lastTs <= 0) {
-            try {
-              cooldown = Number(await creditContract.obtenerCooldownRestante(walletAddress));
-            } catch {
-              cooldown = 0;
-            }
+          try {
+            const chainCd = Number(await creditContract.obtenerCooldownRestante(walletAddress));
+            if (Number.isFinite(chainCd) && chainCd > cooldown) cooldown = chainCd;
+          } catch {
+            // se usa el cálculo local
           }
           const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
           if (live()) {
@@ -764,7 +763,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }
           return { ...EMPTY_USER_INFO };
         });
-        setLoanTiers(LOAN_TIERS);
+        setLoanTiers(visibleLoanTiers(CORE_LOAN_LEVEL));
       }
     } finally {
       if (live()) setIsLoading(false);
@@ -811,7 +810,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     onChainTiersReadyRef.current = false;
     setUserInfo({ ...EMPTY_USER_INFO });
     setBalances({ ...EMPTY_BALANCES });
-    setLoanTiers(LOAN_TIERS);
+    setLoanTiers(visibleLoanTiers(CORE_LOAN_LEVEL));
     void fetchBalances();
   }), [fetchBalances]);
 

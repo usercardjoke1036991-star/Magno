@@ -82,6 +82,7 @@ export const LockSettings: React.FC<{
       setConfirm('');
       setMessage(t('lockPinChanged'));
       onChanged?.();
+      Alert.alert(t('ready'), t('settingsSaved'));
     } catch (error) {
       setMessage(
         error instanceof Error && error.message === 'weak-pin'
@@ -162,6 +163,7 @@ export const LockSettings: React.FC<{
       setConfirmPassword('');
       setPasswordMessage(t('lockPasswordChanged'));
       onChanged?.();
+      Alert.alert(t('ready'), t('settingsSaved'));
       try {
         const wallet = await loadAppWallet();
         if (wallet?.address) await storePasswordRecovery(wallet.address);
@@ -215,7 +217,7 @@ export const LockSettings: React.FC<{
           (busy || (hasPin && current.length !== 6) || next.length !== 6) && { backgroundColor: colors.chip },
         ]}
       >
-        {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{hasPin ? t('lockChangePin') : t('lockCreatePin')}</AppText>}
+        {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>}
       </TouchableOpacity>
       {hasPin ? (
         <TouchableOpacity
@@ -287,7 +289,7 @@ export const LockSettings: React.FC<{
         {passwordBusy ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <AppText style={styles.buttonText}>{hasPassword ? t('lockChangePassword') : t('lockPasswordTitle')}</AppText>
+          <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>
         )}
       </TouchableOpacity>
       {passwordMessage ? <AppText style={[styles.note, { color: colors.textMuted }]}>{passwordMessage}</AppText> : null}

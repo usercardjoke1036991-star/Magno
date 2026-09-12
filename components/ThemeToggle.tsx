@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { palettes, type ThemePreference } from '../theme/palette';
@@ -39,6 +39,11 @@ const previews: Record<
 export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = false }) => {
   const { t } = useI18n();
   const { preference, setTheme, colors } = useTheme();
+  const [draft, setDraft] = useState<ThemePreference>(preference);
+
+  useEffect(() => {
+    setDraft(preference);
+  }, [preference]);
 
   const options: { value: ThemePreference; label: string }[] = [
     { value: 'system', label: t('themeSystem') },
@@ -52,7 +57,7 @@ export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = fal
       {!hideLabel && <AppText style={[styles.label, { color: colors.textMuted }]}>{t('appearance')}</AppText>}
       <View style={styles.row}>
         {options.map((item) => {
-          const active = preference === item.value;
+          const active = draft === item.value;
           const preview = previews[item.value];
           return (
             <TouchableOpacity
@@ -65,7 +70,7 @@ export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = fal
                   borderWidth: active ? 2 : 1,
                 },
               ]}
-              onPress={() => setTheme(item.value)}
+              onPress={() => setDraft(item.value)}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
             >
@@ -83,6 +88,17 @@ export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = fal
           );
         })}
       </View>
+      <TouchableOpacity
+        onPress={() => {
+          setTheme(draft);
+          Alert.alert(t('ready'), t('settingsSaved'));
+        }}
+        style={[styles.save, { backgroundColor: colors.connect }]}
+        accessibilityRole="button"
+        accessibilityLabel={t('settingsSave')}
+      >
+        <AppText style={styles.saveText}>{t('settingsSave')}</AppText>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -132,5 +148,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 6,
+  },
+  save: {
+    marginTop: 12,
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: 'center',
+  },
+  saveText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

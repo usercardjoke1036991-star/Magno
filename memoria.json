@@ -1,6 +1,13 @@
 {
-  "enfoque": "Demo productivo alineado al contrato live; 1000 niveles, bonos y donar quedan listos para el redespliegue",
+  "enfoque": "Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmaciones es opcional",
   "decisiones": [
+    "- [2026-09-12] Si el contrato live no tiene hitos ni donar, la sala Bonos no aparece en el hub.",
+    "- [2026-09-12] Correo y contrasena son obligatorios solo para iniciar sesion. Tambien son metodos opcionales para desbloquear, pedir, pagar y transferir, junto a PIN, huella y autenticador si estan registrados.",
+    "- [2026-09-12] En Como confirma solo aparecen metodos ya registrados: PIN, huella o autenticador no se pueden elegir si no estan activos.",
+    "- [2026-09-12] Lo unico obligatorio para iniciar sesion es contrasena y correo. Desbloquear, pedir, pagar y transferir siguen opcionales.",
+    "- [2026-09-12] Desbloquear, iniciar sesion, pedir, pagar y transferir son opcionales. Interruptor + metodo (contrasena, PIN, huella, autenticador). Huella y llave son lo mismo. Cada ajuste editable tiene Guardar.",
+    "- [2026-09-12] Desbloquear e iniciar sesion siempre piden contrasena. Huella o llave son opcionales y son lo mismo. Confirmar al pedir o pagar prestamo es opcional y esta apagado por defecto.",
+    "- [2026-09-12] La clave de fondos solo confirma envios y recepciones entre billeteras. Pedir o pagar un prestamo no la pide.",
     "- [2026-09-12] Donar e inyectar dan reputacion y titulo visible. No hay descuento de prestamo para no farmear el pool.",
     "- [2026-09-12] Tras 100 USDT cada nivel pide 5 prestamos mas. Rangos: 12 piedras/metales con marco SVG distinto.",
     "- [2026-09-12] 1000 niveles. 1-100 intactos. 101-1000 formula en runtime para caber en EIP-170. Live Demo sigue en contrato de 100 hasta redeploy testnet.",
@@ -13,6 +20,14 @@
     "- [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico"
   ],
   "cambios": [
+    "- [2026-09-12] Auditoria live: desbloqueo apagado ya no se fuerza por error; el signer no se limpia al remount; Bonos se oculta en el Demo de 100 niveles.",
+    "- [2026-09-12] Correo anadido como metodo en Como confirma y en el desbloqueo, si el correo ya esta verificado.",
+    "- [2026-09-12] Como confirma oculta PIN, huella y autenticador hasta que el usuario los registre en Seguridad.",
+    "- [2026-09-12] Inicio de sesion fijo: contrasena y correo. Sin interruptor. El alta ya no salta el correo.",
+    "- [2026-09-12] Como confirma sin textos extra: interruptor, metodo y Guardar. Quitada la fila duplicada de llave de acceso.",
+    "- [2026-09-12] Confirmacion de prestamo opcional en Seguridad. Contraseña obligatoria al entrar. Huella o llave siguen siendo atajo opcional.",
+    "- [2026-09-12] Quito la confirmacion de clave al solicitar o pagar prestamo. Sigue en transferencias entre billeteras, pool y donar.",
+    "- [2026-09-12] Auditoria live: Credito y Perfil mostraban 1/1000 y Solicitar. El tope por defecto pasa a 100 hasta que el contrato confirme 1000.",
     "- [2026-09-12] Auditoria en vivo: Metro y worker estaban caidos; ADB colgado; RPC Ankr y getLogs tumbaron avisos. Se reanimaron y se filtraron nodos publicos.",
     "- [2026-09-12] Auditoria: la app detecta si el contrato live es de 100 o 1000 niveles; no ofrece donar/cobrar si el ABI no existe",
     "- [2026-09-12] Sala Bonos, bono proporcional 20xnivel, donacion al fundador y titulos de apoyo",
@@ -50,5 +65,5 @@
     "- [2026-09-11] Unificado el reloj suizo en salud_proyecto.py (npm run salud / --watch)"
   ],
   "no_olvidar": "(puntos críticos)",
-  "ultima_sesion": "[2026-09-12] Cambio: Auditoria en vivo: Metro y worker estaban caidos; ADB colgado; RPC Ankr y getLogs tumbaron avisos. Se reanimaron y se filtraron nodos publicos."
+  "ultima_sesion": "[2026-09-12] Decisión: Si el contrato live no tiene hitos ni donar, la sala Bonos no aparece en el hub."
 }

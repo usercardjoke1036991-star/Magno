@@ -17,7 +17,8 @@ import { ProfileAvatar } from './ProfileAvatar';
 import { UsernameSection } from './UsernameSection';
 import { useWalletLevel } from '../hooks/useWalletLevel';
 import { getRankForLevel } from '../constants/ranks';
-import { MAX_LOAN_LEVEL } from '../constants/loanTiers';
+import { displayMaxLoanLevel } from '../constants/loanTiers';
+import { cachedProtocolCaps } from '../services/quatriviumCreditService';
 import { loadClaimedUsername } from '../services/accountUsername';
 import { AppText } from './AppText';
 
@@ -99,7 +100,7 @@ export const ProfileSettings: React.FC = () => {
           <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('profileLead')}</AppText>
           {walletAddress ? (
             <AppText style={[styles.heroHint, { color: colors.textMuted }]}>
-              {t('level')} {level}/{MAX_LOAN_LEVEL} · {t(getRankForLevel(level).nameKey)}
+              {t('level')} {level}/{displayMaxLoanLevel(cachedProtocolCaps().maxLevel)} · {t(getRankForLevel(level).nameKey)}
             </AppText>
           ) : null}
           <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>

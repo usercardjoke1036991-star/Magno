@@ -50,7 +50,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 783 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 799 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -71,8 +71,8 @@ Magno/
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
 - **Alta de cuenta**: idioma → crear o iniciar sesión → contraseña + confirmar → correo OTP → **usuario** → entrar. El nombre real se pide en KYC (no en demo).
 - **Frase secreta BIP-39**: solo respaldo (ver y anotar). No cierra la cuenta. Cerrar o restaurar otra frase está en **Reemplazar esta cuenta**, y exige pagar mora/deuda antes.
-- **Correo**: crear cuenta, iniciar sesión, recuperar contraseña y avisos de pago. Tras **Guardar sesión** el teléfono pide el método elegido en Seguridad (contraseña, PIN, huella o autenticador). El correo se reemplaza en Seguridad.
-- **Métodos de seguridad**: el usuario elige por separado cómo desbloquea la pantalla, cómo confirma un movimiento de dinero y cómo inicia sesión. El autenticador TOTP se suma a contraseña, PIN y huella.
+- **Correo y contraseña son obligatorios para iniciar sesión.** No se pueden apagar. El correo se reemplaza solo en Seguridad. Esos mismos dos también sirven, si el usuario los elige, para desbloquear, pedir, pagar o transferir.
+- **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: contraseña, correo, PIN, huella o autenticador). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar.
 - **Historial de movimientos**: sala en el hub con préstamos, pagos y transferencias (billeteras, plataforma, fecha y hora).
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
@@ -115,11 +115,11 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 - Contrato `QuatriviumCredit.sol` — código de 1000 niveles ($1 a $1 000 000). Live Demo sigue en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles) hasta redeploy testnet
 - 15 suites Hardhat (97 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 783 claves
+- i18n: 17 idiomas, 799 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
-- App lock: contraseña y frase solo se reemplazan; PIN, huella y llave de acceso se pueden cambiar o quitar (huella y llave usan el mismo sensor)
+- App lock: contraseña y frase solo se reemplazan; PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
 - Frase secreta BIP-39: ver/anotar; rotar o restaurar vive en Reemplazar cuenta (no se elimina suelta)
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
@@ -232,6 +232,11 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Auditoria: unlock por defecto OFF al migrar prefs; signer estable ante remount; Bonos solo si el contrato tiene hitos o donar. | — |
+| 2026-09-12 | Correo y contrasena obligatorios al iniciar sesion; ambos tambien eligibles para desbloquear, pedir, pagar y transferir. | — |
+| 2026-09-12 | Inicio de sesion obligatorio con contrasena y correo. Como confirma ya no permite apagar eso. | — |
+| 2026-09-12 | Como confirma: 5 acciones opcionales con interruptor y metodo. Huella unica. Boton Guardar en ajustes editables. i18n 794 claves. | — |
+| 2026-09-12 | Contraseña obligatoria al desbloquear e iniciar sesion. Huella o llave opcionales. Confirmar pedir o pagar prestamo es opcional (apagado por defecto). i18n 792 claves. | — |
 | 2026-09-12 | Auditoria live 12-sep: stack caido (8081/8787), ADB trabado, Ankr 401 y eth_getLogs rate-limit. Worker ahora sondea RPC, salta atraso y no rota por cupo. App en telefono abre candado. | — |
 | 2026-09-12 | Bonos 20 USDT x nivel de hito, sala Bonos, donar() al fundador y reputacion por donar o inyectar pool | — |
 | 2026-09-12 | Bono de hito: 2000 USDT del pool al llegar a cada 100 niveles, cobro uno a uno con caja libre sobre el piso del 20% | — |

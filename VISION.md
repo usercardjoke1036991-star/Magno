@@ -54,6 +54,8 @@
 - subida +5 solicitudes por nivel desde 100 USDT y 12 rangos de piedras con marcos
 - Bono de pool de 2000 USDT cada 100 niveles alcanzados (100, 200... 1000), el mismo que el hito original del nivel 100
 - Bonos de hito proporcionales al nivel, ventana Bonos para reclamar y donacion a la billetera fundadora con titulo Aliado/Patrono/Circulo
+- Confirmacion opcional al pedir o pagar prestamo; contraseña obligatoria al desbloquear; huella o llave opcionales
+- Como confirma con interruptores on/off, metodo a eleccion y boton Guardar en cada ajuste
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -83,3 +85,5 @@
 - [2026-09-12 10:24] Idea añadida al backlog: "subida +5 solicitudes por nivel desde 100 USDT y 12 rangos de piedras con marcos"
 - [2026-09-12 10:37] Idea añadida al backlog: "Bono de pool de 2000 USDT cada 100 niveles alcanzados (100, 200... 1000), el mis"
 - [2026-09-12 10:48] Idea añadida al backlog: "Bonos de hito proporcionales al nivel, ventana Bonos para reclamar y donacion a "
+- [2026-09-12 12:06] Idea añadida al backlog: "Confirmacion opcional al pedir o pagar prestamo; contraseña obligatoria al desbl"
+- [2026-09-12 12:25] Idea añadida al backlog: "Como confirma con interruptores on/off, metodo a eleccion y boton Guardar en cad"

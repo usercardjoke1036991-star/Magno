@@ -285,7 +285,9 @@ function HomeScreenWithHooks() {
               icon: 'id',
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
-            { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' },
+            ...(userInfo.canClaimHitos || userInfo.canDonate
+              ? [{ id: 'bonuses' as const, title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' as const }]
+              : []),
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
             { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
             ...(mode === 'demo'

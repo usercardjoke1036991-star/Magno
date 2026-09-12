@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { LANGUAGES } from '../i18n/languages';
+import React, { useEffect, useState } from 'react';
+import { Alert, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { LANGUAGES, type Lang } from '../i18n/languages';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
@@ -9,6 +9,11 @@ import { AppText } from './AppText';
 export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = false }) => {
   const { lang, setLang, t, rtl } = useI18n();
   const { colors } = useTheme();
+  const [draft, setDraft] = useState<Lang>(lang);
+
+  useEffect(() => {
+    setDraft(lang);
+  }, [lang]);
 
   return (
     <View style={styles.wrap}>
@@ -16,7 +21,7 @@ export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel 
         <AppText style={[styles.label, rtl && styles.rtlText, { color: colors.textMuted }]}>{t('language')}</AppText>
       )}
       {LANGUAGES.map((item) => {
-        const active = item.code === lang;
+        const active = item.code === draft;
         return (
           <TouchableOpacity
             key={item.code}
@@ -28,7 +33,7 @@ export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel 
                 flexDirection: rtl ? 'row-reverse' : 'row',
               },
             ]}
-            onPress={() => setLang(item.code)}
+            onPress={() => setDraft(item.code)}
           >
             <AppText style={styles.flag}>{item.flag}</AppText>
             <View style={styles.optionTextWrap}>
@@ -39,6 +44,17 @@ export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel 
           </TouchableOpacity>
         );
       })}
+      <TouchableOpacity
+        onPress={() => {
+          setLang(draft);
+          Alert.alert(t('ready'), t('settingsSaved'));
+        }}
+        style={[styles.save, { backgroundColor: colors.connect }]}
+        accessibilityRole="button"
+        accessibilityLabel={t('settingsSave')}
+      >
+        <AppText style={styles.saveText}>{t('settingsSave')}</AppText>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -80,5 +96,16 @@ const styles = StyleSheet.create({
   optionSub: {
     fontSize: 11,
     marginTop: 1,
+  },
+  save: {
+    marginTop: 8,
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: 'center',
+  },
+  saveText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

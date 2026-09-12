@@ -186,7 +186,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
-  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
+  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/ranks.ts` — módulo JS/TS
   - Funciones/clases: RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
 - `constants/reputation.ts` — módulo JS/TS
@@ -253,7 +253,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/authenticator.ts` — módulo JS/TS
   - Funciones/clases: isAuthenticatorEnabled, loadAuthenticatorSecret, createAuthenticatorSecret, authenticatorUri, persistAuthenticatorWrap, confirmAuthenticator, verifyAuthenticator, unlockWithAuthenticator, clearAuthenticator
 - `services/authPrefs.ts` — módulo JS/TS
-  - Funciones/clases: getAvailableMethods, isMethodReady, loadAuthPrefs, getAuthMethod, setAuthMethod, fallbackAuthIfNeeded
+  - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethod, isAuthEnabled, setAuthMethod, fallbackAuthIfNeeded
 - `services/demoIdentity.ts` — módulo JS/TS
   - Funciones/clases: requestDemoIdentity
 - `services/deviceBinding.ts` — módulo JS/TS
@@ -261,7 +261,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/emailOtp.ts` — módulo JS/TS
   - Funciones/clases: requestEmailOtp, verifyEmailOtp
 - `services/fundsConfirm.ts` — módulo JS/TS
-  - Funciones/clases: isFundsConfirmEnabled, setFundsConfirmEnabled
+  - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
   - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration
 - `services/movementHistory.ts` — módulo JS/TS
@@ -273,7 +273,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/phoneOtp.ts` — módulo JS/TS
   - Funciones/clases: notifyApiConfigured, requestPhoneOtp, verifyPhoneOtp
 - `services/quatriviumCreditService.ts` — módulo JS/TS
-  - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, asWeiString, QuatriviumCreditService
+  - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, cachedProtocolCaps, asWeiString, QuatriviumCreditService
 - `services/referralNetwork.ts` — módulo JS/TS
   - Funciones/clases: loadReferralNetwork
 - `services/secureStorageService.ts` — módulo JS/TS

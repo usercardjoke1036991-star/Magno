@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -71,6 +72,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
       setEditing(false);
       setSent(false);
       setCode('');
+      Alert.alert(t('ready'), t('settingsSaved'));
     } catch (caught) {
       const reason = String((caught as Error)?.message || '');
       if (reason.includes('code')) setError(t('emailCodeWrong'));
@@ -133,7 +135,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
                 onPress={() => void confirmCode()}
                 style={[styles.button, { backgroundColor: colors.connect }]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('emailConfirm')}</AppText>}
+                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>}
               </TouchableOpacity>
             </>
           ) : null}

@@ -228,8 +228,16 @@ export const LOAN_TIERS: LoanTier[] = LOAN_TIER_ROWS.map((row) => ({
   term: `${row.termDays} días`,
 }));
 
-export function visibleLoanTiers(maxLevel = MAX_LOAN_LEVEL): LoanTier[] {
-  const cap = Math.min(MAX_LOAN_LEVEL, Math.max(1, Math.floor(maxLevel) || MAX_LOAN_LEVEL));
+/** Tope a mostrar si aún no se preguntó al contrato. El Demo live es 100. */
+export function displayMaxLoanLevel(detected?: number): number {
+  const value = Math.floor(Number(detected) || 0);
+  if (value === MAX_LOAN_LEVEL) return MAX_LOAN_LEVEL;
+  if (value === CORE_LOAN_LEVEL) return CORE_LOAN_LEVEL;
+  return CORE_LOAN_LEVEL;
+}
+
+export function visibleLoanTiers(maxLevel = CORE_LOAN_LEVEL): LoanTier[] {
+  const cap = displayMaxLoanLevel(maxLevel);
   return LOAN_TIERS.filter((tier) => tier.id <= cap).map((tier) => ({
     ...tier,
     requiredCount: requiredCountForLiveLevel(tier.id, cap),

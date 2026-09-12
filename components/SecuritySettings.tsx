@@ -21,7 +21,7 @@ import { BiometricLockSection } from './BiometricLockSection';
 import { AuthMethodPicker } from './AuthMethodPicker';
 import { AuthenticatorSetup } from './AuthenticatorSetup';
 import { isAuthenticatorEnabled } from '../services/authenticator';
-import { loadAuthPrefs, type AuthPrefs } from '../services/authPrefs';
+import { loadAuthPrefs, type AuthPrefs, type AuthPurpose } from '../services/authPrefs';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { SecretInput } from './SecretInput';
 import { humanizeTxError } from '../utils/txErrors';
@@ -41,7 +41,7 @@ import { EmailOtpSection } from './EmailOtpSection';
 import { AppText, AppTextInput } from './AppText';
 
 type RowStatus = 'done' | 'todo' | 'warn';
-type Panel = 'menu' | 'kyc' | 'password' | 'email' | 'pin' | 'fingerprint' | 'access' | 'phrase' | 'phone' | 'replace' | 'methods' | 'authenticator';
+type Panel = 'menu' | 'kyc' | 'password' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'replace' | 'methods' | 'authenticator';
 
 export const SecuritySettings: React.FC = () => {
   const { t } = useI18n();
@@ -73,7 +73,12 @@ export const SecuritySettings: React.FC = () => {
   const [passwordSet, setPasswordSet] = useState(false);
   const [bioOn, setBioOn] = useState(false);
   const [authOn, setAuthOn] = useState(false);
-  const [authPrefs, setAuthPrefs] = useState<AuthPrefs>({ unlock: 'password', funds: 'password', signin: 'password' });
+  const [authPrefs, setAuthPrefs] = useState<AuthPrefs>({
+    unlock: { on: false, method: 'password' },
+    funds: { on: true, method: 'password' },
+    loanRequest: { on: false, method: 'password' },
+    loanPay: { on: false, method: 'password' },
+  });
   const [email, setEmail] = useState('');
 
   const refreshPhrase = async () => {
@@ -292,7 +297,6 @@ export const SecuritySettings: React.FC = () => {
     email: 'securityEmail',
     pin: 'securityPin',
     fingerprint: 'securityFingerprint',
-    access: 'securityAccessKey',
     phrase: 'seedTitle',
     phone: 'securityPhone',
     replace: 'oneAccountTitle',
@@ -300,11 +304,13 @@ export const SecuritySettings: React.FC = () => {
     authenticator: 'authenticatorTitle',
   };
 
-  const methodHint = (purpose: keyof AuthPrefs) => {
-    const method = authPrefs[purpose];
-    if (method === 'pin') return t('authMethodPin');
-    if (method === 'biometric') return t('authMethodBiometric');
-    if (method === 'authenticator') return t('authMethodAuthenticator');
+  const methodHint = (purpose: AuthPurpose) => {
+    const slot = authPrefs[purpose];
+    if (!slot.on) return t('loanConfirmOff');
+    if (slot.method === 'email') return t('authMethodEmail');
+    if (slot.method === 'pin') return t('authMethodPin');
+    if (slot.method === 'biometric') return t('authMethodBiometric');
+    if (slot.method === 'authenticator') return t('authMethodAuthenticator');
     return t('authMethodPassword');
   };
 
@@ -354,12 +360,7 @@ export const SecuritySettings: React.FC = () => {
             onBound={refetch}
           />
         ) : null}
-        {panel === 'fingerprint' ? (
-          <BiometricLockSection compact onChanged={setBioOn} />
-        ) : null}
-        {panel === 'access' ? (
-          <BiometricLockSection compact onChanged={setBioOn} />
-        ) : null}
+        {panel === 'fingerprint' ? <BiometricLockSection compact onChanged={setBioOn} /> : null}
         {panel === 'methods' ? <AuthMethodPicker onChanged={() => void refreshPhrase()} /> : null}
         {panel === 'authenticator' ? (
           <AuthenticatorSetup account={address || email || 'cuenta'} onChanged={() => void refreshPhrase()} />
@@ -565,13 +566,6 @@ export const SecuritySettings: React.FC = () => {
         onPress={() => setPanel('fingerprint')}
       />
       <Row
-        icon="unlock"
-        label={t('securityAccessKey')}
-        hint={bioOn ? t('securityAccessKeyDone') : t('securityAccessKeyTodo')}
-        status={bioOn ? 'done' : 'todo'}
-        onPress={() => setPanel('access')}
-      />
-      <Row
         icon="shield"
         label={t('securityPhrase')}
         hint={backedUp ? t('securityPhraseDone') : t('securityPhraseTodo')}
@@ -590,7 +584,7 @@ export const SecuritySettings: React.FC = () => {
       <Row
         icon="lock"
         label={t('authMethodsTitle')}
-        hint={`${t('authUnlock')}: ${methodHint('unlock')} · ${t('authFunds')}: ${methodHint('funds')} · ${t('authSignIn')}: ${methodHint('signin')}`}
+        hint={`${t('authSignInRequired')} · ${t('authUnlock')} ${methodHint('unlock')} · ${t('authFunds')} ${methodHint('funds')}`}
         status="done"
         onPress={() => setPanel('methods')}
       />

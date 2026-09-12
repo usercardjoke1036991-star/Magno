@@ -42,7 +42,6 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
     return () => {
       cancelled = true;
-      clearWalletSigner();
     };
   }, [boot]);
 
