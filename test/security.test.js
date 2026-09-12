@@ -8,7 +8,7 @@ const {
   proposeAndExecute,
 } = require('./helpers.cjs');
 
-describe('Quatrivium Credit - uncollateralized credit and admin locks', function () {
+describe('Quatrivium Finance - uncollateralized credit and admin locks', function () {
   it('lets a user register and borrow without locking collateral', async () => {
     const { token, contract, owner, user, tokenAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');

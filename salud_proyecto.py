@@ -1,5 +1,5 @@
 """
-salud_proyecto.py — Reloj suizo de Quatrivium Credit
+salud_proyecto.py — Reloj suizo de Quatrivium Finance
 ====================================================
 Lee CONTEXTO.md y comprueba que el grafo crítico (UI → hooks → servicio →
 contrato → i18n → worker) siga conectado y compilable.
@@ -155,7 +155,7 @@ class Hallazgo:
 
 @dataclass
 class ReporteSalud:
-    proyecto: str = "Quatrivium Credit"
+    proyecto: str = "Quatrivium Finance"
     directorio: str = ""
     hallazgos: list[Hallazgo] = field(default_factory=list)
 
@@ -252,18 +252,18 @@ def _es_quatrivium(raiz: Path) -> bool:
 
 def verificar_identidad(raiz: Path, reporte: ReporteSalud) -> None:
     if _es_quatrivium(raiz):
-        reporte.add("identidad", "Proyecto detectado: Quatrivium Credit (RN + Solidity)", "ok")
+        reporte.add("identidad", "Proyecto detectado: Quatrivium Finance (RN + Solidity)", "ok")
     else:
         reporte.add(
             "identidad",
-            "Este directorio no parece Quatrivium Credit — el grafo específico puede no aplicar",
+            "Este directorio no parece Quatrivium Finance — el grafo específico puede no aplicar",
             "advertencia",
         )
 
     contexto = raiz / "CONTEXTO.md"
     if contexto.is_file():
         texto = _leer(contexto)
-        if "Quatrivium Credit" in texto and "Demo" in texto:
+        if "Quatrivium Finance" in texto and "Demo" in texto:
             reporte.add("contexto", "CONTEXTO.md presente y describe Demo/Real", "ok")
         else:
             reporte.add("contexto", "CONTEXTO.md existe pero no describe Quatrivium", "advertencia")
@@ -512,7 +512,7 @@ def imprimir_reporte(reporte: ReporteSalud, formato_json: bool) -> None:
         return
 
     print("\n" + "═" * 64)
-    print("  SALUD DEL PROYECTO — Quatrivium Credit")
+    print("  SALUD DEL PROYECTO — Quatrivium Finance")
     print(f"  {reporte.directorio}")
     print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("═" * 64)
@@ -555,7 +555,7 @@ def imprimir_reporte(reporte: ReporteSalud, formato_json: bool) -> None:
 
 
 def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Salud continua de Quatrivium Credit")
+    parser = argparse.ArgumentParser(description="Salud continua de Quatrivium Finance")
     parser.add_argument("--ruta", default=os.getcwd(), help="Directorio del proyecto")
     parser.add_argument("--json", action="store_true", help="Salida JSON")
     parser.add_argument("--tests", action="store_true", help="Incluye hardhat test")

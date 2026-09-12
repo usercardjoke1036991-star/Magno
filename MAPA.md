@@ -3,7 +3,7 @@
 **Ruta activa:** `C:\CURSORPLANTILLA-BASE\Magno`
 
 ## Qué es
-**Quatrivium Credit** es una app móvil de microcrédito on-chain sin colateral sobre BNB Smart Chain (BSC).
+**Quatrivium Finance** es una app móvil de microcrédito on-chain sin colateral sobre BNB Smart Chain (BSC).
 
 ## Tipo
 node — QA profundo (también: android, kotlin, python)
@@ -175,6 +175,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: WalletSection
 - `constants/appLinks.ts` — módulo JS/TS
   - Funciones/clases: PLAY_STORE_URL, INVITE_WEB_BASE, TELEGRAM_BOT, NOTIFY_API, notifyApiBases
+- `constants/brand.ts` — módulo JS/TS
+  - Funciones/clases: APP_DISPLAY_NAME
 - `constants/bsc.ts` — módulo JS/TS
   - Funciones/clases: ZERO_ADDRESS, BSC_MAINNET, BSC_TESTNET, isZeroAddress, isTestnetOnlyToken
 - `constants/commissions.ts` — módulo JS/TS

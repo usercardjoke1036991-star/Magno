@@ -1,5 +1,5 @@
 /**
- * Avisos Quatrivium Credit: Telegram y WhatsApp Cloud API.
+ * Avisos Quatrivium Finance: Telegram y WhatsApp Cloud API.
  * Uso: npm run notify          (demo / testnet, lee .env y .env.worker si existe)
  *      npm run notify:prod     (real / mainnet, exige .env.worker)
  *
@@ -609,7 +609,7 @@ const sendSms = async (phone, text) => {
 };
 
 const deliverOtp = async (phone, code) => {
-  const text = `Quatrivium Credit: su código de autenticación es ${code}. Caduca en 10 minutos. No lo comparta.`;
+  const text = `Quatrivium Finance: su código de autenticación es ${code}. Caduca en 10 minutos. No lo comparta.`;
   if (await sendSms(phone, text)) return 'sms';
   if (await sendWhatsApp(phone, text)) return 'whatsapp';
   return '';
@@ -644,8 +644,8 @@ const sendEmail = async (to, subject, text) => {
 };
 
 const deliverEmailOtp = async (email, code) => {
-  const text = `Quatrivium Credit: su código es ${code}. Caduca en 10 minutos. No lo comparta.`;
-  if (await sendEmail(email, 'Quatrivium Credit: código de verificación', text)) return 'email';
+  const text = `Quatrivium Finance: su código es ${code}. Caduca en 10 minutos. No lo comparta.`;
+  if (await sendEmail(email, 'Quatrivium Finance: código de verificación', text)) return 'email';
   return '';
 };
 
@@ -731,7 +731,7 @@ const notifyWallet = async (wallet, kind, text) => {
     await sendTelegram(chatId, text);
     if (profile) await sendWhatsApp(profile.whatsapp || profile.phone, text);
   }
-  if (emailOn) await sendEmail(profile.email, 'Quatrivium Credit', text);
+  if (emailOn) await sendEmail(profile.email, 'Quatrivium Finance', text);
 };
 
 const bindTelegram = (wallet, chatId) => {
@@ -771,9 +771,9 @@ const pollTelegram = async () => {
         const wallet = consumeBindCode(payload);
         if (wallet) {
           bindTelegram(wallet, chatId);
-          await sendTelegram(chatId, 'Quatrivium Credit: Telegram quedó vinculado. Recibirá los dos avisos de pago (mitad de plazo y antes del corte). El resto de avisos es opcional.');
+          await sendTelegram(chatId, 'Quatrivium Finance: Telegram quedó vinculado. Recibirá los dos avisos de pago (mitad de plazo y antes del corte). El resto de avisos es opcional.');
         } else {
-          await sendTelegram(chatId, 'Abra el vínculo desde Quatrivium Credit para vincular su billetera. No envíe una dirección a mano.');
+          await sendTelegram(chatId, 'Abra el vínculo desde Quatrivium Finance para vincular su billetera. No envíe una dirección a mano.');
         }
       }
     } catch {
@@ -845,7 +845,7 @@ const scanDebtReminders = async (contract) => {
         await notifyWallet(
           wallet,
           'debt',
-          'Quatrivium Credit: va a la mitad del plazo. Puede pagar ahora y no dejarlo para el corte.'
+          'Quatrivium Finance: va a la mitad del plazo. Puede pagar ahora y no dejarlo para el corte.'
         );
         store.reminded[midKey] = true;
         changed = true;
@@ -854,7 +854,7 @@ const scanDebtReminders = async (contract) => {
         await notifyWallet(
           wallet,
           'debt',
-          'Quatrivium Credit: el pago vence pronto. Regularice antes del corte para no entrar en mora.'
+          'Quatrivium Finance: el pago vence pronto. Regularice antes del corte para no entrar en mora.'
         );
         store.reminded[cutKey] = true;
         changed = true;
@@ -934,25 +934,25 @@ const watchChain = async () => {
           await notifyWallet(
             padre,
             'signup',
-            `Quatrivium Credit: una persona se registró con su código.\nCuenta: ${usuario.slice(0, 6)}…${usuario.slice(-4)}`
+            `Quatrivium Finance: una persona se registró con su código.\nCuenta: ${usuario.slice(0, 6)}…${usuario.slice(-4)}`
           );
         }
         for (const event of bonuses) {
           const padre = String(event.args?.padre || '');
-          await notifyWallet(padre, 'commission', 'Quatrivium Credit: recibió el bono de activación de un referido.');
+          await notifyWallet(padre, 'commission', 'Quatrivium Finance: recibió el bono de activación de un referido.');
         }
         for (const event of commissions) {
           const beneficiario = String(event.args?.beneficiario || '');
-          await notifyWallet(beneficiario, 'commission', 'Quatrivium Credit: recibió una comisión de su red.');
+          await notifyWallet(beneficiario, 'commission', 'Quatrivium Finance: recibió una comisión de su red.');
         }
         if (pausedEv.length) {
-          await alertAdmin('Quatrivium Credit ALERTA: el contrato fue PAUSADO. Préstamos y registros están detenidos.');
+          await alertAdmin('Quatrivium Finance ALERTA: el contrato fue PAUSADO. Préstamos y registros están detenidos.');
         }
         if (unpausedEv.length) {
-          await alertAdmin('Quatrivium Credit: el contrato fue despausado.');
+          await alertAdmin('Quatrivium Finance: el contrato fue despausado.');
         }
         for (const event of adminExec) {
-          await alertAdmin(`Quatrivium Credit: acción de admin ejecutada ${event.args?.selector || ''}`);
+          await alertAdmin(`Quatrivium Finance: acción de admin ejecutada ${event.args?.selector || ''}`);
         }
         store.lastBlock = to;
         saveStore(store);
@@ -1543,8 +1543,8 @@ const server = createServer(async (req, res) => {
       }
       const channel = await sendEmail(
         parsed.email,
-        'Quatrivium Credit: restablecer contraseña',
-        `Quatrivium Credit: su código para restablecer la contraseña es ${code}. Caduca en 10 minutos. No lo comparta.`
+        'Quatrivium Finance: restablecer contraseña',
+        `Quatrivium Finance: su código para restablecer la contraseña es ${code}. Caduca en 10 minutos. No lo comparta.`
       );
       if (!channel) {
         delete store.recoverOtps[emailHash];
@@ -1719,7 +1719,7 @@ server.requestTimeout = 45_000;
 server.headersTimeout = 46_000;
 server.maxHeadersCount = 40;
 server.listen(PORT, BIND, () => {
-  console.log(`Avisos Quatrivium Credit en http://${BIND}:${PORT}`);
+  console.log(`Avisos Quatrivium Finance en http://${BIND}:${PORT}`);
   console.log(`Correo Resend: ${hasEmail ? 'listo' : 'sin RESEND_API_KEY o EMAIL_FROM'}`);
   console.log(`SMS/WhatsApp: ${hasSms ? 'listo' : 'no configurado (OTP teléfono en demo)'}`);
   try {

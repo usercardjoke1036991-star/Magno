@@ -216,7 +216,7 @@ export async function assertTrustedRpc(provider?: AbstractProvider): Promise<Abs
     const code = await resolved.getCode(address);
     if (!code || code === '0x') {
       resetRpcCache();
-      throw new Error('El RPC no ve el contrato de Quatrivium Credit en esta red.');
+      throw new Error('El RPC no ve el contrato de Quatrivium Finance en esta red.');
     }
   }
 

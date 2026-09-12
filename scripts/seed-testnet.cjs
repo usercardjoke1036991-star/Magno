@@ -79,7 +79,7 @@ async function main() {
   console.log('Deployer:', deployer.address);
   console.log('Mock USDT:', tokenAddr);
   console.log('Mock feed:', feedAddr);
-  console.log('Quatrivium Credit (QuatriviumCredit):', protocolAddr);
+  console.log('Quatrivium Finance (QuatriviumCredit):', protocolAddr);
   console.log('Wallet USDT:', ethers.formatUnits(walletUsdt, 18));
   console.log('Pool USDT:', ethers.formatUnits(poolUsdt, 18));
   console.log('totalLiquidity:', ethers.formatUnits(liquidity, 18));

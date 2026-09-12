@@ -55,7 +55,7 @@ contract Groth16Verifier {
         // Para producción, reemplaza esto con el código generado por snarkjs.
         
         // Stub de desarrollo: nunca da por válida una prueba. Un verificador
-        // real debe generarse con snarkjs para el circuito de Quatrivium Credit.
+        // real debe generarse con snarkjs para el circuito de Quatrivium Finance.
         return false;
     }
     

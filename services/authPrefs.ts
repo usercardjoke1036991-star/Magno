@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { isAuthenticatorEnabled } from './authenticator';
-import { isBiometricEnabled, isPinSet } from './appLock';
+import { getBiometricStatus, isBiometricEnabled, isPinSet } from './appLock';
 import { isEmailVerified } from './accountEmail';
 
 const KEY = 'qc_auth_prefs_v2';
@@ -75,7 +75,7 @@ export async function getAvailableMethods(): Promise<AuthMethod[]> {
   const methods: AuthMethod[] = ['password'];
   if (await isEmailVerified()) methods.push('email');
   if (await isPinSet()) methods.push('pin');
-  if (await isBiometricEnabled()) methods.push('biometric');
+  if (await isMethodReady('biometric')) methods.push('biometric');
   if (await isAuthenticatorEnabled()) methods.push('authenticator');
   return methods;
 }
@@ -84,7 +84,10 @@ export async function isMethodReady(method: AuthMethod): Promise<boolean> {
   if (method === 'password') return true;
   if (method === 'email') return isEmailVerified();
   if (method === 'pin') return isPinSet();
-  if (method === 'biometric') return isBiometricEnabled();
+  if (method === 'biometric') {
+    if (!(await isBiometricEnabled())) return false;
+    return (await getBiometricStatus()).available;
+  }
   return isAuthenticatorEnabled();
 }
 

@@ -185,7 +185,7 @@ const youDo = checks.filter((item) => item.who === 'you' && !item.ok);
 const chainId = Number(local.EXPO_PUBLIC_CHAIN_ID || '97');
 const appEnv = local.EXPO_PUBLIC_APP_ENV || 'development';
 
-console.log('Quatrivium Credit — listo para lo real');
+console.log('Quatrivium Finance — listo para lo real');
 console.log(`App local ahora: APP_ENV=${appEnv || '(vacío)'}  chainId=${chainId}`);
 console.log(`.env.worker: ${existsSync(resolve(root, '.env.worker')) ? 'sí' : 'no (npm run production:prepare)'}`);
 console.log('');

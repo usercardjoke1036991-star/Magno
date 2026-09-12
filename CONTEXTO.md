@@ -1,7 +1,7 @@
-# 🧠 CONTEXTO DEL PROYECTO: Quatrivium Credit
+# 🧠 CONTEXTO DEL PROYECTO: Quatrivium Finance
 
 ## ¿Qué es este proyecto?
-**Quatrivium Credit** es una app móvil de microcrédito on-chain sin colateral sobre BNB Smart Chain (BSC).
+**Quatrivium Finance** es una app móvil de microcrédito on-chain sin colateral sobre BNB Smart Chain (BSC).
 El usuario activa una wallet interna, pide un préstamo en USDT del pool de liquidez, lo paga antes del vencimiento
 y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda bloqueado hasta regularizar.
 **No puede cerrar la cuenta mientras tenga deuda o esté en mora.**
@@ -52,7 +52,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 799 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 801 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -67,7 +67,7 @@ Magno/
 - **Cerrar cuenta exige deuda = 0 y !esMoroso**: el contrato y la UI bloquean a morosos
 - **ZK es experimental**: `snarkjs` hace stub en Metro; el registro real es `registrarHumanoConPadre()`
 - **Entornos separados en `eas.json`**: development/preview→chain 97, production→chain 56
-- **`slug: "magno"` en `app.json`**: el projectId EAS es `0a9b20f0-900a-4d35-8541-14b6202d84f5`; el nombre visible es Quatrivium Credit
+- **`slug: "magno"` en `app.json`**: el projectId EAS es `0a9b20f0-900a-4d35-8541-14b6202d84f5`; el nombre visible es Quatrivium Finance
 - **Liquidación en AdminPanel**: el servicio aprueba USDT automáticamente antes de `liquidate()`
 - **`useHomeHandlers` hook**: handlers extraídos de `app/index.tsx` para reducir complejidad
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
@@ -119,7 +119,7 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
 - 15 suites Hardhat (103 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 799 claves
+- i18n: 17 idiomas, 801 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
@@ -236,6 +236,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Auditoria profunda: Demo 0xD2d2A9 operativo (1000 niveles, pool 2000 USDT). Si la huella esta marcada pero el sensor no responde, se salta y se pide el siguiente metodo. | — |
+| 2026-09-12 | Nombre visible de la app: Quatrivium Finance. Paquete Android/iOS y firmas EIP-712 sin cambiar. | — |
 | 2026-09-12 | Como confirma permite varios metodos a la vez; se confirman en secuencia (AND). | — |
 | 2026-09-12 | Inicio de sesion (correo+contrasena juntos + paso extra de Como confirma) separado de desbloquear. La sesion guardada se persiste; sin ella no se muestra Desbloquear. | — |
 | 2026-09-12 | Demo live 0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f bloque 130652258: 1000 niveles, donar, hitos, mora fundador. FamaLib 0x6B98072a087B3fd856c24249232EE3fb40cB5003. Pool 2000 USDT NAV ok. | — |

@@ -39,7 +39,7 @@ import { ensureAppWallet } from '../services/appWallet';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
 import { isAuthenticatorEnabled, unlockWithAuthenticator } from '../services/authenticator';
-import { getAuthMethods, isAuthEnabled, type AuthMethod } from '../services/authPrefs';
+import { getAuthMethods, isAuthEnabled, isMethodReady, type AuthMethod } from '../services/authPrefs';
 import { getWalletWrapKey } from '../services/walletSession';
 import { isSessionSaved, markSessionSaved, restoreSavedSessionWrap } from '../services/savedSession';
 import { isValidEmail, normalizeEmail } from '../utils/emailPolicy';
@@ -138,7 +138,17 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     hasEmail: boolean;
     bioEnabled: boolean;
   }) => {
-    const methods = await getAuthMethods(purpose);
+    const preferred = await getAuthMethods(purpose);
+    const methods: AuthMethod[] = [];
+    for (const method of preferred) {
+      if (!(await isMethodReady(method))) continue;
+      if (method === 'biometric' && !flags.bioEnabled) continue;
+      if (method === 'pin' && !flags.pinSet) continue;
+      if (method === 'email' && !flags.hasEmail) continue;
+      if (method === 'authenticator' && !flags.authOn) continue;
+      methods.push(method);
+    }
+    if (!methods.length) methods.push('password');
     methodQueueRef.current = methods;
     setMethodQueue(methods);
     await applyQueuedMethod(methods[0] || 'password', flags);
@@ -187,9 +197,10 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     const bioStatus = await getBiometricStatus();
     const enrolled = bioStatus.available;
     const enabled = passwordSet || pinSet ? await isBiometricEnabled() : false;
+    const bioReadyNow = Boolean(enabled && enrolled);
     setBioReady(enrolled);
     setBioKinds(bioStatus.kinds);
-    setBioOn(enabled);
+    setBioOn(bioReadyNow);
     setHasPassword(passwordSet);
     setHasPin(pinSet);
     setHasAuth(authOn);
@@ -214,7 +225,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
         pinSet,
         authOn,
         hasEmail: Boolean(verifiedEmail),
-        bioEnabled: enabled,
+        bioEnabled: bioReadyNow,
       });
     } else {
       methodQueueRef.current = [];
@@ -284,10 +295,12 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
           isAuthenticatorEnabled(),
           isAuthEnabled('unlock'),
           isBiometricEnabled(),
+          getBiometricStatus(),
           loadVerifiedEmail(),
         ])
-          .then(async ([passwordSet, pinSet, authOn, unlockOn, bioEnabled, verifiedEmail]) => {
+          .then(async ([passwordSet, pinSet, authOn, unlockOn, bioOnPref, bioStatus, verifiedEmail]) => {
             if (!(passwordSet || pinSet)) return;
+            const bioEnabled = Boolean(bioOnPref && bioStatus.available);
             setNeedsSetup(false);
             setRecovering(false);
             setHasAuth(authOn);
@@ -540,7 +553,8 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     const passwordSet = await isPasswordSet();
     const authOn = await isAuthenticatorEnabled();
     const verifiedEmail = await loadVerifiedEmail();
-    const bioEnabled = await isBiometricEnabled();
+    const bioStatus = await getBiometricStatus();
+    const bioEnabled = (await isBiometricEnabled()) && bioStatus.available;
     await startMethodQueue('signin', {
       passwordSet,
       pinSet,

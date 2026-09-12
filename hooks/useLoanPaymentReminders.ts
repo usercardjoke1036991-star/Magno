@@ -6,6 +6,7 @@ import {
   visibleDebtReminder,
   type DebtReminderKind,
 } from '../utils/debtReminders';
+import { APP_DISPLAY_NAME } from '../constants/brand';
 import { useI18n } from '../i18n/LanguageContext';
 
 const CHANNEL_ID = 'quatrivium-debt';
@@ -27,7 +28,7 @@ async function syncScheduledReminders(
     });
     if (Notifications.setNotificationChannelAsync) {
       await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-        name: 'Quatrivium Credit pagos',
+        name: `${APP_DISPLAY_NAME} pagos`,
         importance: Notifications.AndroidImportance.DEFAULT,
         vibrationPattern: [0, 180],
         sound: undefined,
@@ -48,7 +49,7 @@ async function syncScheduledReminders(
       if (!Number.isFinite(fireAt) || fireAt <= now) continue;
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Quatrivium Credit',
+          title: APP_DISPLAY_NAME,
           body: bodies[trigger.kind],
           sound: undefined,
         },

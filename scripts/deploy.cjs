@@ -164,7 +164,7 @@ async function main() {
   await contract.waitForDeployment();
 
   const address = await contract.getAddress();
-  console.log('Quatrivium Credit (QuatriviumCredit) deployed:', address);
+  console.log('Quatrivium Finance (QuatriviumCredit) deployed:', address);
 
   if (isTestnet && process.env.SEED_POOL !== 'no') {
     const seedAmount = ethers.parseUnits(process.env.SEED_POOL || '500', 18);

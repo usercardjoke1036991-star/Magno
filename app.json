@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Quatrivium Credit",
+    "name": "Quatrivium Finance",
     "slug": "magno",
     "scheme": "quatrivium",
     "version": "1.0.1",
@@ -92,7 +92,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Quatrivium Credit usa su foto para el perfil de referidos.",
+          "photosPermission": "Quatrivium Finance usa su foto para el perfil de referidos.",
           "cameraPermission": false,
           "microphonePermission": false
         }
@@ -107,7 +107,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Quatrivium Credit usa Face ID o la huella para desbloquear la aplicación."
+          "faceIDPermission": "Quatrivium Finance usa Face ID o la huella para desbloquear la aplicación."
         }
       ],
       "expo-updates",

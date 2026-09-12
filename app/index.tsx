@@ -35,6 +35,7 @@ import { DonateFounderSection } from '../components/DonateFounderSection';
 import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
 import { MovementHistory } from '../components/MovementHistory';
+import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isContractConfigured, isCreditReady } from '../constants/rpcConfig';
 import { useI18n } from '../i18n/LanguageContext';
@@ -209,7 +210,7 @@ function HomeScreenWithHooks() {
           <BrandLogo size={44} />
           <View style={styles.topBarText}>
             <View style={styles.titleRow}>
-              <AppText style={[styles.title, { color: colors.text }]}>Quatrivium Credit</AppText>
+              <AppText style={[styles.title, { color: colors.text }]}>{APP_DISPLAY_NAME}</AppText>
               <View
                 style={[
                   styles.worldBadge,

@@ -1,4 +1,4 @@
-# 📱 Play Store Listing — Quatrivium Credit
+# 📱 Play Store Listing — Quatrivium Finance
 
 Copia y pega estos textos directamente en Google Play Console.
 
@@ -6,7 +6,7 @@ Copia y pega estos textos directamente en Google Play Console.
 
 ## TÍTULO DE LA APP
 ```
-Quatrivium Credit
+Quatrivium Finance
 ```
 
 ---
@@ -29,7 +29,7 @@ Blockchain microloans, no collateral. Start with $1 USDT, level up.
 ## DESCRIPCIÓN LARGA — ESPAÑOL (máx. 4000 caracteres)
 
 ```
-Quatrivium Credit es la primera app de microcrédito descentralizado sobre BNB Smart Chain. Sin banco, sin aval, sin historial crediticio tradicional. Solo tú, tu reputación on-chain y el contrato inteligente.
+Quatrivium Finance es la primera app de microcrédito descentralizado sobre BNB Smart Chain. Sin banco, sin aval, sin historial crediticio tradicional. Solo tú, tu reputación on-chain y el contrato inteligente.
 
 🔑 ¿CÓMO FUNCIONA?
 1. Descarga la app y se crea automáticamente tu wallet personal cifrada con tu PIN.
@@ -68,7 +68,7 @@ Invita a otras personas y gana comisiones automáticas en cada uno de sus pagos.
 Los préstamos son financiados por un pool de liquidez descentralizado. El protocolo calcula automáticamente las tasas según la utilización del pool, garantizando siempre la sostenibilidad del sistema.
 
 ⚠️ AVISO IMPORTANTE
-Quatrivium Credit opera sobre blockchain. Las transacciones son irreversibles. Asegúrate de entender los términos antes de solicitar un crédito. Los créditos no pagados afectan tu reputación on-chain permanentemente.
+Quatrivium Finance opera sobre blockchain. Las transacciones son irreversibles. Asegúrate de entender los términos antes de solicitar un crédito. Los créditos no pagados afectan tu reputación on-chain permanentemente.
 
 🌍 DISPONIBLE EN 16 IDIOMAS
 Español · English · 中文 · हिंदी · العربية · বাংলা · Português · Русский · اردو · Bahasa Indonesia · Français · 日本語 · Deutsch · 한국어 · Türkçe · Tiếng Việt · Italiano
@@ -80,7 +80,7 @@ Español · English · 中文 · हिंदी · العربية · বাং�
 ## DESCRIPCIÓN LARGA — ENGLISH (máx. 4000 caracteres)
 
 ```
-Quatrivium Credit is the first decentralized microloan app on BNB Smart Chain. No bank, no guarantor, no traditional credit history required. Just you, your on-chain reputation, and the smart contract.
+Quatrivium Finance is the first decentralized microloan app on BNB Smart Chain. No bank, no guarantor, no traditional credit history required. Just you, your on-chain reputation, and the smart contract.
 
 🔑 HOW IT WORKS
 1. Download the app — a personal wallet is automatically created and encrypted with your PIN.
@@ -119,7 +119,7 @@ Invite others and earn automatic commissions on every payment they make. Earning
 Loans are funded by a decentralized liquidity pool. The protocol automatically calculates rates based on pool utilization, always ensuring system sustainability.
 
 ⚠️ IMPORTANT NOTICE
-Quatrivium Credit operates on blockchain. Transactions are irreversible. Make sure you understand the terms before requesting a loan. Unpaid loans permanently affect your on-chain reputation.
+Quatrivium Finance operates on blockchain. Transactions are irreversible. Make sure you understand the terms before requesting a loan. Unpaid loans permanently affect your on-chain reputation.
 
 🌍 AVAILABLE IN 16 LANGUAGES
 Español · English · 中文 · हिंदी · العربية · বাংলা · Português · Русский · اردو · Bahasa Indonesia · Français · 日本語 · Deutsch · 한국어 · Türkçe · Tiếng Việt · Italiano

@@ -5,6 +5,7 @@ import { createAppKit, AppKitProvider, type AppKitNetwork } from '@reown/appkit-
 import { EthersAdapter } from '@reown/appkit-ethers-react-native';
 import { BrowserProvider, type Eip1193Provider, type Signer } from 'ethers';
 import { appKitStorage } from './utils/appKitStorage';
+import { APP_DISPLAY_NAME } from './constants/brand';
 import { NETWORK_CONFIG, RPC_URLS, getRuntimeMode, subscribeRuntimeMode } from './constants/rpcConfig';
 import { BSC_MAINNET, BSC_TESTNET } from './constants/bsc';
 
@@ -42,7 +43,7 @@ const bscTestnetNetwork = bscAppKitNetwork(false);
 const defaultNetwork = getRuntimeMode() === 'live' ? bscMainnetNetwork : bscTestnetNetwork;
 
 const metadata = {
-  name: 'Quatrivium Credit',
+  name: APP_DISPLAY_NAME,
   description: 'Unsecured on-chain credit. Pay on time and raise your limit.',
   url: 'https://quatriviumcredit.app',
   icons: ['https://quatriviumcredit.app/icon.png'],

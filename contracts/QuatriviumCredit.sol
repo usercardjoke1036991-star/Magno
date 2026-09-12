@@ -10,7 +10,7 @@ import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
 import {QuatriviumFamaLib, Usuario} from "./libraries/QuatriviumFamaLib.sol";
 
 /**
- * @title Quatrivium Credit
+ * @title Quatrivium Finance
  * @notice Microcrédito sin colateral + red Unilevel de flujo estrictamente ascendente.
  *         El principal vuelve íntegro al pool. El interés se reparte (red + pool) con suma cero.
  *         Oráculo, pausa de emergencia y admin con timelock + confirmaciones.

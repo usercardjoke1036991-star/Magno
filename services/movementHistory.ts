@@ -3,6 +3,7 @@ import { Contract, formatUnits, getAddress, type AbstractProvider } from 'ethers
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress, getUsdtAddress } from '../constants/contractConfig';
 import { getKnownStartBlock } from '../constants/deployedAddresses';
 import { assertTrustedRpc, getProviderWithFallback, getRuntimeMode, isContractConfigured } from '../constants/rpcConfig';
+import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getTokenMeta } from '../constants/tokens';
 
 const CHUNK = 4000;
@@ -263,7 +264,7 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
         to: self,
         amountLabel: amount.label,
         tokenSymbol: amount.symbol,
-        platform: 'Quatrivium Credit',
+        platform: APP_DISPLAY_NAME,
         world,
         timestamp: (stamps.get(event.blockNumber) || 0) * 1000,
         txHash: hash,
@@ -285,7 +286,7 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
         to: contractAddress,
         amountLabel: amount.label,
         tokenSymbol: amount.symbol,
-        platform: 'Quatrivium Credit',
+        platform: APP_DISPLAY_NAME,
         world,
         timestamp: (stamps.get(event.blockNumber) || 0) * 1000,
         txHash: hash,

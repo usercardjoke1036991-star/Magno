@@ -52,7 +52,7 @@
 ---
 
 ### PASO 5: Completar el listing en Play Console
-- [ ] **Título:** Quatrivium Credit
+- [ ] **Título:** Quatrivium Finance
 - [ ] **Descripción corta:** (copiar de `play-store-listing.md`)
 - [ ] **Descripción larga:** (copiar de `play-store-listing.md`)
 - [ ] **Categoría:** Finanzas

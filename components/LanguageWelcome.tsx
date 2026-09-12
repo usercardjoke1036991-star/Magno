@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LANGUAGES } from '../i18n/languages';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { APP_DISPLAY_NAME } from '../constants/brand';
 import { BrandLogo } from './BrandLogo';
 import { AppIcon } from './icons';
 
@@ -29,7 +30,7 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <BrandLogo size={72} style={styles.logo} />
-        <AppText style={[styles.brand, { color: colors.text, textAlign: align }]}>Quatrivium Credit</AppText>
+        <AppText style={[styles.brand, { color: colors.text, textAlign: align }]}>{APP_DISPLAY_NAME}</AppText>
         <AppText style={[styles.title, { color: colors.text, textAlign: align }]}>{t('chooseLanguage')}</AppText>
         <AppText style={[styles.lead, { color: colors.textMuted, textAlign: align }]}>{t('chooseLanguageLead')}</AppText>
         <AppText style={[styles.hint, { color: colors.textMuted, textAlign: align }]}>{t('chooseLanguageHint')}</AppText>

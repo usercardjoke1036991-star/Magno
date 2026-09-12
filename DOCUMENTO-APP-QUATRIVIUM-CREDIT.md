@@ -1,6 +1,6 @@
-# Quatrivium Credit — Resumen del producto, funciones y características
+# Quatrivium Finance — Resumen del producto, funciones y características
 
-Documento de referencia de la app **Quatrivium Credit**. Describe lo que existe hoy en el código y en el contrato, no un pitch de marketing.
+Documento de referencia de la app **Quatrivium Finance**. Describe lo que existe hoy en el código y en el contrato, no un pitch de marketing.
 
 Última actualización: 12 de septiembre de 2026.
 
@@ -8,13 +8,13 @@ Documento de referencia de la app **Quatrivium Credit**. Describe lo que existe 
 
 ## 1. Qué es
 
-Quatrivium Credit es una app móvil de **microcrédito on-chain sin colateral**. El usuario conecta una wallet, se registra, pide un préstamo en stablecoin (USDT) y lo paga. Si paga **antes del vencimiento**, sube de nivel y puede pedir más. Si se atrasa, queda en mora y el protocolo le bloquea nuevos préstamos.
+Quatrivium Finance es una app móvil de **microcrédito on-chain sin colateral**. El usuario conecta una wallet, se registra, pide un préstamo en stablecoin (USDT) y lo paga. Si paga **antes del vencimiento**, sube de nivel y puede pedir más. Si se atrasa, queda en mora y el protocolo le bloquea nuevos préstamos.
 
 No es un banco, no es un exchange y no es un DEX. Es un **pool de liquidez + motor de crédito** en un contrato inteligente, con una interfaz Expo / React Native.
 
 | Concepto | Realidad actual |
 |---|---|
-| Nombre de producto | Quatrivium Credit |
+| Nombre de producto | Quatrivium Finance |
 | Contrato | `QuatriviumCredit.sol` (Solidity 0.8.24, OpenZeppelin v5) |
 | Colateral / fianza | No hay. El préstamo es 100 % sin garantía |
 | Identidad ZK | No está en producción. El botón de registro es `registrarHumano` (self-register) |
@@ -275,7 +275,7 @@ En la UI el bloque se llama algo como identidad / línea de crédito. En el cód
 - `services/zkService.ts` tiene carga de `snarkjs` / circuitos, pero **Metro no puede empaquetar snarkjs** en React Native (`readline` de Node). Hay un stub (`stubs/zk-node-stub.js`) para que la app no crashee.
 - Los contratos `zk-contracts/` (Groth16Verifier, QuatriviumCreditZK) son **experimentales** y Hardhat no los usa en el deploy de producción/testnet.
 
-**Conclusión:** hoy Quatrivium Credit no verifica humanidad con zero-knowledge. El registro es “yo firmo con mi wallet”. El copy de la app no debería prometer ZK real.
+**Conclusión:** hoy Quatrivium Finance no verifica humanidad con zero-knowledge. El registro es “yo firmo con mi wallet”. El copy de la app no debería prometer ZK real.
 
 ---
 
@@ -397,4 +397,4 @@ No sustituyen una prueba manual en el teléfono con WalletConnect.
 
 ## 15. En una frase
 
-**Quatrivium Credit es una app de microcrédito sin garantía sobre BSC: te registras con tu wallet, pides USDT del pool, pagas entero, y si llegas a tiempo subes de nivel; si no, quedas en mora y el pool asume el impago.**
+**Quatrivium Finance es una app de microcrédito sin garantía sobre BSC: te registras con tu wallet, pides USDT del pool, pagas entero, y si llegas a tiempo subes de nivel; si no, quedas en mora y el pool asume el impago.**

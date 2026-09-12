@@ -12,6 +12,7 @@ import {
   PASSWORD_LENGTH,
 } from '../utils/passwordPolicy';
 import { deriveWrapKey, isSealedBlob, openSecret, sealSecret, timingSafeEqualHex } from '../utils/secretBox';
+import { APP_DISPLAY_NAME } from '../constants/brand';
 import { clearWalletSession, getWalletWrapKey, setWalletWrapKey } from './walletSession';
 
 const PIN_KEY = 'quatrivium.lock.pin';
@@ -25,7 +26,7 @@ const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY
 const BIO_WRAP_OPTIONS = {
   ...OPTIONS,
   requireAuthentication: true,
-  authenticationPrompt: 'Quatrivium Credit',
+  authenticationPrompt: APP_DISPLAY_NAME,
 };
 
 export const PIN_LENGTH = 6;
@@ -547,7 +548,7 @@ export async function authenticateBiometric(): Promise<boolean> {
   try {
     const LocalAuth = await import('expo-local-authentication');
     const result = await LocalAuth.authenticateAsync({
-      promptMessage: 'Quatrivium Credit',
+      promptMessage: APP_DISPLAY_NAME,
       cancelLabel: 'Cancel',
       disableDeviceFallback: true,
       requireConfirmation: false,
