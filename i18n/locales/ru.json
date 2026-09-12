@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "Очки репутации",
-  "referralRepLead": "Каждый реферал добавляет очки. Накопите достаточно сетевых очков — и пул отправит вам бонус.",
+  "referralRepLead": "Кто входит с вашим кодом, добавляет вам {points} репутации. Если он приведёт ещё кого-то, вы тоже получаете, меньше чем дальше линия — та же шкала, что и комиссии. Основатель получает славу с каждой регистрации. Слава не двигает деньги: комиссии идут из процентов при оплате, а бонус пула ({bonus} за каждые {threshold} сетевых очков) идёт только прямому рефереру, когда человек оплачивает первый уровень ({network} сетевых очков).",
   "referralRepScore": "Репутация {score} · сеть {network}",
   "referralRepScoreShort": "Сеть {network}",
   "referralRepNext": "До следующего бонуса {bonus} не хватает {left} сетевых очков.",

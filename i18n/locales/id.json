@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "Poin reputasi",
-  "referralRepLead": "Setiap referral menambah poin. Kumpulkan cukup poin jaringan dan pool akan mengirimkan bonus.",
+  "referralRepLead": "Orang yang masuk dengan kode Anda menambah {points} reputasi. Jika mereka membawa orang lain, Anda juga mendapat, makin jauh makin kecil — skala yang sama dengan komisi. Pendiri mendapat ketenaran dari setiap pendaftaran. Reputasi tidak menggerakkan uang: komisi dari bunga saat bayar, dan bonus pool ({bonus} setiap {threshold} poin jaringan) hanya untuk perujuk langsung saat orang itu membayar level pertama ({network} poin jaringan).",
   "referralRepScore": "Reputasi {score} · poin jaringan {network}",
   "referralRepScoreShort": "Jaringan {network}",
   "referralRepNext": "Butuh {left} poin jaringan lagi untuk bonus {bonus} berikutnya.",

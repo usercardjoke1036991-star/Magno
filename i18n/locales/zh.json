@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "声誉积分",
-  "referralRepLead": "每个推荐人增加积分。积累足够的网络积分，资金池会向您发送奖金。",
+  "referralRepLead": "用您的邀请码加入的人给您 {points} 声誉。如果对方再邀请别人，您也会获得，越远越少——与佣金同一比例。创始人从每一次注册获得名声。名声不移动资金：佣金来自还款利息，资金池奖金（每 {threshold} 网络积分 {bonus}）只给直接推荐人，且仅在对方还清第一级时（{network} 网络积分）。",
   "referralRepScore": "声誉 {score} · 网络积分 {network}",
   "referralRepScoreShort": "网络 {network}",
   "referralRepNext": "再获得 {left} 点网络积分即可领取下一笔 {bonus} 奖励。",

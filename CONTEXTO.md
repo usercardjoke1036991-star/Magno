@@ -77,6 +77,7 @@ Magno/
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
+- **Fama y dinero no se mezclan**: al registrar, la reputación recorre toda la línea (misma escala 15/8/6/4/2/0,8/0,4 %) y el fundador suma de cada alta. El USDT solo se mueve al pagar (interés + bono de activación). Los puntos de red y el bono del pool son solo del referidor directo, para no drenar la caja.
 
 ---
 
@@ -113,7 +114,7 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — código de 1000 niveles ($1 a $1 000 000). Live Demo sigue en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles) hasta redeploy testnet
-- 15 suites Hardhat (97 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
+- 15 suites Hardhat (98 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
 - i18n: 17 idiomas, 799 claves
 - Referidos Unilevel en contrato y UI
@@ -232,6 +233,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Fama unilevel decreciente al registrar (misma escala que comisiones). Fundador suma de cada alta. Puntos de red/bono pool solo del referidor directo. | — |
 | 2026-09-12 | Auditoria: unlock por defecto OFF al migrar prefs; signer estable ante remount; Bonos solo si el contrato tiene hitos o donar. | — |
 | 2026-09-12 | Correo y contrasena obligatorios al iniciar sesion; ambos tambien eligibles para desbloquear, pedir, pagar y transferir. | — |
 | 2026-09-12 | Inicio de sesion obligatorio con contrasena y correo. Como confirma ya no permite apagar eso. | — |

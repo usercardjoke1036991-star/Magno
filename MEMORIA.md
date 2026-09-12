@@ -4,6 +4,7 @@
 Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmaciones es opcional
 
 ## Decisiones
+- [2026-09-12] Fama al registrar (no USDT). Puntos de red y bono del pool solo al directo cuando pagan el primer nivel, para no desequilibrar el capital.
 - [2026-09-12] Si el contrato live no tiene hitos ni donar, la sala Bonos no aparece en el hub.
 - [2026-09-12] Correo y contrasena son obligatorios solo para iniciar sesion. Tambien son metodos opcionales para desbloquear, pedir, pagar y transferir, junto a PIN, huella y autenticador si estan registrados.
 - [2026-09-12] En Como confirma solo aparecen metodos ya registrados: PIN, huella o autenticador no se pueden elegir si no estan activos.
@@ -23,6 +24,7 @@ Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmac
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] La reputacion recorre la linea de referidos con la misma escala decreciente que las comisiones; el fundador suma fama de cada alta. Los puntos de red USDT siguen solo al referidor directo.
 - [2026-09-12] El emblema conserva el relieve 3D y se pinta con el color mineral de cada rango; la piedra sigue en el centro.
 - [2026-09-12] Las medallas conservan la textura 3D original y llevan en el centro la piedra o metal de su rango.
 - [2026-09-12] Cada rango usa el color mineral real de su metal o piedra. Las medallas ya no repiten cobre, oro ni celeste.
@@ -74,4 +76,4 @@ Demo productivo; iniciar sesion exige contrasena y correo; el resto de confirmac
 (puntos críticos)
 
 ## Última sesión
-[2026-09-12] Cambio: El emblema conserva el relieve 3D y se pinta con el color mineral de cada rango; la piedra sigue en el centro.
+[2026-09-12] Decisión: Fama al registrar (no USDT). Puntos de red y bono del pool solo al directo cuando pagan el primer nivel, para no desequilibrar el capital.

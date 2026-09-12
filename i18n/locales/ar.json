@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "نقاط السمعة",
-  "referralRepLead": "يضيف كل إحالة نقاطاً. عند تجميع نقاط كافية في الشبكة، يرسل لك المجمع مكافأة.",
+  "referralRepLead": "من ينضم برمزك يضيف لك {points} من السمعة. إذا أحضر آخر تكسب أيضاً، أقل كلما طال الصف — نفس مقياس العمولات. المؤسس ينال الشهرة من كل تسجيل. الشهرة لا تحرّك المال: العمولات من الفائدة عند السداد، ومكافأة المجمع ({bonus} كل {threshold} نقاط شبكة) تذهب فقط للمُحيل المباشر عند سداد المستوى الأول ({network} نقاط شبكة).",
   "referralRepScore": "السمعة {score} · نقاط الشبكة {network}",
   "referralRepScoreShort": "الشبكة {network}",
   "referralRepNext": "تحتاج {left} نقطة شبكة إضافية للمكافأة التالية البالغة {bonus}.",

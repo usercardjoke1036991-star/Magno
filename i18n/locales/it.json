@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Impronta di identita: {fingerprint}",
   "referralRepTitle": "Punti reputazione",
-  "referralRepLead": "Ogni referral aggiunge punti. Accumula abbastanza punti rete e il pool ti invia un bonus.",
+  "referralRepLead": "Chi entra con il tuo codice ti aggiunge {points} di reputazione. Se porta qualcun altro, guadagni anche tu, meno più è lontana la fila — stessa scala delle commissioni. Il fondatore riceve fama da ogni iscrizione. La fama non muove denaro: le commissioni escono dagli interessi al pagamento, e il bonus del pool ({bonus} ogni {threshold} punti rete) va solo al referente diretto quando la persona paga il primo livello ({network} punti rete).",
   "referralRepScore": "Reputazione {score} · rete {network}",
   "referralRepScoreShort": "Rete {network}",
   "referralRepNext": "Servono ancora {left} punti rete per il prossimo bonus di {bonus}.",

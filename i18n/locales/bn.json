@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "খ্যাতির পয়েন্ট",
-  "referralRepLead": "প্রতিটি রেফারেল পয়েন্ট যোগ করে। যথেষ্ট নেটওয়ার্ক পয়েন্ট জমলে পুল বোনাস পাঠায়।",
+  "referralRepLead": "আপনার কোড দিয়ে কেউ ঢুকলে আপনি {points} খ্যাতি পান। সে অন্যকে আনলে আপনিও পান, দূরে হলে কম — কমিশনের মতোই। প্রতিষ্ঠাতা প্রতিটি নিবন্ধন থেকে খ্যাতি পান। খ্যাতি টাকা নাড়ে না: কমিশন সুদ থেকে পরিশোধে, আর পুল বোনাস ({bonus} প্রতি {threshold} নেটওয়ার্ক পয়েন্ট) শুধু সরাসরি রেফারারকে, যখন সে প্রথম স্তর শোধ করে ({network} নেটওয়ার্ক পয়েন্ট)।",
   "referralRepScore": "খ্যাতি {score} · নেটওয়ার্ক {network}",
   "referralRepScoreShort": "নেটওয়ার্ক {network}",
   "referralRepNext": "পরের {bonus} বোনাসের জন্য আর {left} নেটওয়ার্ক পয়েন্ট লাগবে।",

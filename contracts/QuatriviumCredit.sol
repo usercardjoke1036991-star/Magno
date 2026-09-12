@@ -20,6 +20,9 @@ import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
  * El fundador cobra un recorte fijo de cada interés. Si una llave se compromete,
  * las otras fundadoras pueden reasignar fundador y owner (timelock + confirmaciones).
  * Las comisiones de red recorren toda la línea hacia arriba (no se cortan a 5).
+ * La reputación usa la misma escala decreciente al registrar; el fundador
+ * suma fama de cada alta. Los puntos de red (bono USDT del pool) son solo
+ * del referidor directo, para no drenar la caja.
  *
  * EIP-170: ESTE archivo no puede pasar de 24576 bytes. El protocolo sí puede crecer:
  * cada pieza nueva (niveles, bonos, identidad, red) vive en un contrato hermano
@@ -570,10 +573,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
         redGenealogica[msg.sender] = Usuario({ padre: padre, bonoActivacionCobrado: false });
         humanosVerificados[msg.sender] = true;
-        if (padre != address(0) && !cuentaDestruida[padre]) {
-            reputacion[padre] += PUNTOS_POR_REFERIDO;
-            emit ReputationUpdated(padre, reputacion[padre]);
-        }
+        _acreditarFama(msg.sender, padre);
         emit HumanoVerificado(msg.sender);
         emit AfiliadoRegistrado(msg.sender, padre);
     }
@@ -1045,14 +1045,39 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return liq > out ? liq - out : 0;
     }
 
+    function _famaPts(uint256 bp) internal pure returns (uint256) {
+        return (PUNTOS_POR_REFERIDO * bp) / GEN1_BP;
+    }
+
+    /// @notice Fama de toda la línea al registrar. No mueve USDT.
+    function _acreditarFama(address nuevo, address padre) internal {
+        address founder = fundador;
+        if (founder != address(0) && founder != nuevo && !cuentaDestruida[founder]) {
+            reputacion[founder] += _famaPts(FUNDADOR_BP);
+            emit ReputationUpdated(founder, reputacion[founder]);
+        }
+        address cursor = padre;
+        for (uint8 gen = 1; gen <= MAX_LINEA; ) {
+            if (cursor == address(0) || cursor == nuevo) {
+                break;
+            }
+            if (!cuentaDestruida[cursor]) {
+                reputacion[cursor] += _famaPts(_bpGeneracion(gen));
+                emit ReputationUpdated(cursor, reputacion[cursor]);
+            }
+            cursor = redGenealogica[cursor].padre;
+            unchecked {
+                gen++;
+            }
+        }
+    }
+
     function _acreditarRed(address padre, address token) internal {
         if (padre == address(0) || cuentaDestruida[padre]) {
             return;
         }
         puntosRed[padre] += PUNTOS_POR_REFERIDO;
-        reputacion[padre] += PUNTOS_POR_REFERIDO;
         emit PuntosRed(padre, puntosRed[padre]);
-        emit ReputationUpdated(padre, reputacion[padre]);
         _pagarBonosRed(padre, token);
     }
 

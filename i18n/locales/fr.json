@@ -620,7 +620,7 @@
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
   "kycFingerprint": "Empreinte d identite : {fingerprint}",
   "referralRepTitle": "Points de réputation",
-  "referralRepLead": "Chaque parrainage ajoute des points. Accumulez assez de points réseau et le pool vous envoie un bonus.",
+  "referralRepLead": "Quelqu’un qui rejoint avec votre code vous ajoute {points} de réputation. S’il en amène un autre, vous gagnez aussi, moins à mesure que la ligne s’allonge — même échelle que les commissions. Le fondateur reçoit de la gloire à chaque inscription. La réputation ne déplace pas l’argent : les commissions viennent des intérêts au remboursement, et le bonus du pool ({bonus} tous les {threshold} points réseau) va seulement au parrain direct quand la personne rembourse son premier niveau ({network} points réseau).",
   "referralRepScore": "Réputation {score} · réseau {network}",
   "referralRepScoreShort": "Réseau {network}",
   "referralRepNext": "Il vous manque {left} points réseau pour le prochain bonus de {bonus}.",

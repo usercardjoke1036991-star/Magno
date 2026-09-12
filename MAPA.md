@@ -141,6 +141,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: ProfileSettings
 - `components/RankFrame.tsx` — módulo JS/TS
   - Funciones/clases: RankFrame
+- `components/RankGem.tsx` — módulo JS/TS
+  - Funciones/clases: RankGem
 - `components/RankLadder.tsx` — módulo JS/TS
   - Funciones/clases: RankLadder
 - `components/RankMedal.tsx` — módulo JS/TS
@@ -188,9 +190,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/loanTiers.ts` — módulo JS/TS
   - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/ranks.ts` — módulo JS/TS
-  - Funciones/clases: RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
+  - Funciones/clases: colorizeTextureFilters, RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
 - `constants/reputation.ts` — módulo JS/TS
-  - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, referralsForNextBonus, formatPoolBonus
+  - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, generationBps, fameForGeneration, founderFamePoints, referralsForNextBonus, formatPoolBonus
 - `constants/rpcConfig.ts` — módulo JS/TS
   - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
 - `constants/support.ts` — módulo JS/TS
