@@ -656,8 +656,10 @@
   "demoPrepFailed": "Could not prepare the demo credit line. Check the connection and try again.",
   "liveNetworkPending": "Live network being prepared",
   "liveNetworkPendingLead": "Live credit turns on when the contract is on the main network. Nothing you did in Demo is copied here.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
   "liveCreditNotReady": "Live credit is not active yet. Use Demo to try it, or wait for the main-network launch.",
   "appModeLiveBannerLead": "Real money. KYC and phone are required to request credit.",
   "demoUsdtTopUp": "Demo added test USDT to cover the interest. You can repay and keep leveling up.",
-  "demoUsdtTopUpFailed": "Could not add test USDT. Try paying again or top up test BNB."
+  "demoUsdtTopUpFailed": "Could not add test USDT. Try paying again or top up test BNB.",
+  "termDays": "{days} days"
 }

@@ -659,5 +659,7 @@
   "creditLineActiveNext": "К займам",
   "checkingCredit": "Проверяем, активна ли линия…",
   "subsectionCreditStatus": "Состояние линии",
-  "hubCreditLeadActive": "Активна. Берите или платите здесь."
+  "hubCreditLeadActive": "Активна. Берите или платите здесь.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} дн."
 }

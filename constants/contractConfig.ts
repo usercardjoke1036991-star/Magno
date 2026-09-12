@@ -92,6 +92,7 @@ export const CONTRACT_ABI = [
   'function marcarMorosoSiVencido(address usuario)',
   'function liquidate(address deudor, address tokenAddress)',
   'event AfiliadoRegistrado(address indexed usuario, address indexed padre)',
+  'event BonoActivacionPagado(address indexed padre, address indexed referido, uint256 monto, address indexed token)',
   'event BonoRedPagado(address indexed usuario, uint256 umbral, uint256 monto, address indexed token)',
   'event PuntosRed(address indexed usuario, uint256 puntos)',
   'event ComisionGeneracional(address indexed beneficiario, address indexed deudor, uint8 generacion, uint256 monto, address indexed token)',

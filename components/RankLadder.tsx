@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { formatRankLabel, RANK_LADDER } from '../constants/ranks';
+import { formatRankLabel, getRankForLevel, RANK_LADDER } from '../constants/ranks';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { RankMedal } from './RankMedal';
@@ -13,7 +13,8 @@ interface RankLadderProps {
 export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const current = Math.min(10, Math.max(1, userLevel || 1));
+  const current = Math.min(100, Math.max(1, userLevel || 1));
+  const currentFamily = getRankForLevel(current).family;
 
   return (
     <View style={styles.wrap}>
@@ -21,7 +22,7 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {RANK_LADDER.map((rank) => {
           const reached = rank.level <= current;
-          const active = rank.level === current;
+          const active = rank.family === currentFamily;
           const label = formatRankLabel(rank, t(rank.nameKey));
           return (
             <View

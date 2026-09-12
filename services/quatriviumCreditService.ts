@@ -16,6 +16,7 @@ import { isTestnetOnlyToken } from '../constants/bsc';
 import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
+import { MAX_LOAN_LEVEL } from '../constants/loanTiers';
 import { cobrarComisionIntermediario, loadAppWallet } from './appWallet';
 import { requestDemoIdentity } from './demoIdentity';
 
@@ -206,7 +207,7 @@ export const QuatriviumCreditService = {
 
   solicitar: async (tokenAddress: string, nivel = 0) => {
     assertToken(tokenAddress);
-    if (!Number.isInteger(nivel) || nivel < 0 || nivel > 10) {
+    if (!Number.isInteger(nivel) || nivel < 0 || nivel > MAX_LOAN_LEVEL) {
       throw new Error('invalid-level');
     }
     const { signer } = await requireInternalSigner();

@@ -658,6 +658,8 @@
   "demoPrepFailed": "No se pudo preparar el crédito de prueba. Revise la conexión e inténtelo de nuevo.",
   "liveNetworkPending": "Red real en preparación",
   "liveNetworkPendingLead": "El crédito real se activa cuando el contrato esté en la red principal. Nada de lo hecho en Demo se copia aquí.",
+  "errEmptyRevert": "La red rechazó la operación. En Real el crédito aún no está activo: use Demo en Ajustes. En Demo, intente de nuevo.",
   "liveCreditNotReady": "El crédito real aún no está activo. Use Demo para probar, o espere el lanzamiento en la red principal.",
-  "appModeLiveBannerLead": "Dinero real. KYC y teléfono son obligatorios para pedir crédito."
+  "appModeLiveBannerLead": "Dinero real. KYC y teléfono son obligatorios para pedir crédito.",
+  "termDays": "{days} días"
 }

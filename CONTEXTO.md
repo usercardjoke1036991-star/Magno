@@ -77,31 +77,36 @@ Magno/
 
 ---
 
-## Niveles de crédito (fuente: `constants/loanTiers.ts` + constructor del contrato)
+## Niveles de crédito (fuente: `constants/loanTiers.ts` + `LoanTierSeed.sol`)
 
-`requiredCount` = préstamos **de este nivel** que hay que pagar a tiempo para desbloquear el siguiente.
-El contrato usa la misma regla: nivel 1 → 3 pagos; niveles 2–9 → 5 pagos.
+**100 niveles**, del **$1** al **$10 000**. Reglas de la escalera (todas estrictas):
+- el **principal** del siguiente > el anterior
+- la **tasa** del anterior > la del siguiente (el préstamo viejo siempre es más caro en %)
+- el **interés en $** del siguiente > el anterior (cada subida cobra más interés en dólares)
+- el **total a devolver** también sube
 
-| Nivel | Nombre | Principal | Plazo | Interés (bps) | Cuotas | Pagos para subir |
-|------:|:-------|----------:|------:|--------------:|:------:|:----------------:|
-| 1 | Semilla | **$1 USDT** | 7 días | 10 000 bps (100%) | 1 | 3 |
-| 2 | Inicial | **$2 USDT** | 10 días | 10 000 bps (100%) | 1 | 5 |
-| 3 | Micro | **$5 USDT** | 15 días | 8 000 bps (80%) | 1 | 5 |
-| 4 | Plus | **$10 USDT** | 20 días | 7 000 bps (70%) | 1 | 5 |
-| 5 | Avance | **$20 USDT** | 25 días | 5 000 bps (50%) | 1 | 5 |
-| 6 | Crecimiento | **$35 USDT** | 30 días | 5 714 bps (~57%) | 1 | 5 |
-| 7 | Escala | **$50 USDT** | 35 días | 4 000 bps (40%) | 2 | 5 |
-| 8 | Avanzado | **$60 USDT** | 40 días | 5 000 bps (50%) | 3 | 5 |
-| 9 | Elite | **$80 USDT** | 45 días | 5 000 bps (50%) | 3 | 5 |
-| 10 | Máximo | **$100 USDT** | 50 días | 5 000 bps (50%) | 3 | — (nivel final) |
+`requiredCount` = préstamos **de este nivel** a tiempo para desbloquear el siguiente.
+Contrato: nivel 1 → 3 pagos; niveles 2–99 → 5 pagos; 100 es el tope.
 
-> Los bps son tasa plana sobre el principal por el plazo del préstamo (no APR anual).
-> Niveles 7–10 se pagan en cuotas. A partir de $50 se habilitan 2 pagos; a partir de $60, 3.
+| Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Para subir |
+|------:|----------:|------:|-----:|----------:|:------:|:-----------|
+| 1 | $1 | 7 días | 100% | $1.00 | 1 | 3 |
+| 2 | $2 | 10 días | 95% | $1.90 | 1 | 5 |
+| 5 | $20 | 25 días | 50% | $10.00 | 1 | 5 |
+| 6 | $35 | 30 días | 48% | $16.80 | 1 | 5 |
+| 7 | $50 | 35 días | 40% | $20.00 | 2 | 5 |
+| 10 | $100 | 50 días | 34% | $34.00 | 3 | 5 |
+| 50 | $825 | 68 días | 22.44% | $185.13 | 3 | 5 |
+| 100 | **$10 000** | 90 días | 8% | $800.00 | 3 | — |
+
+> Los bps son tasa plana sobre el principal por el plazo (no APR anual).
+> A partir de $50: 2 cuotas. A partir de $60: 3. Tabla completa: `constants/loanTiers.ts`.
+> Redeploy testnet 2026-09-11: `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3`. Demo es un mundo nuevo: hay que volver a activar la línea. Pool semilla 2000 USDT.
 
 ---
 
 ## Lo que está funcionando ✅
-- Contrato `QuatriviumCredit.sol` (1309 líneas) — testnet en `0x5eB6c65f3e3b7DC555e690A83d61205F66700cC2`
+- Contrato `QuatriviumCredit.sol` — testnet en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles, bloque 130526896)
 - 15 suites Hardhat (81 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity…
 - App móvil con 43 componentes React Native
 - i18n: 17 idiomas, 640 claves
@@ -200,9 +205,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Verificación | Estado | Detalle |
 |---|---|---|
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
-| `check-i18n.mjs` | ✅ OK | 661 claves · 17 locales · sin BOM · sin discrepancias |
+| `check-i18n.mjs` | ✅ OK | 663 claves · 17 locales · sin BOM · sin discrepancias |
 | `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
-| `hardhat test` | ✅ 81/81 | Incluye destroy + mora + identidad demo + gates + cooldown local |
+| `hardhat test` | ✅ 83/83 | Incluye 100 niveles + destroy + mora + identidad demo + gates |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
 | `npm audit` (devDeps) | ⚠️ ~66 vulns | hardhat / solidity-coverage / expo SDK — **no van al APK** · no correr `--force` |
 | `production:check` | 🟡 **12/14** | Faltan 2 acciones **manuales**: deploy mainnet + Twilio/WhatsApp |
@@ -220,6 +225,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-11 | Auditoria live post-redeploy 100 niveles: UI pide Activar, L1  / L2 bloqueado, historial vacio. Cache de credito keyed por contrato; refresh silencioso no reescanea niveles. | — |
+| 2026-09-11 | Escalera de 100 niveles hasta $10 000: tasa del anterior siempre mayor; interés $ y monto siempre suben | Completar la línea de crédito y corregir el desorden de tasas 5→6 y 7→8 |
+| 2026-09-11 | Historial de referidos: ABI con `BonoActivacionPagado`, bloque de deploy en `deployedAddresses`, fechas de actividad y sección abierta | El historial fallaba al abrir y solo miraba ~3 días de bloques |
 | 2026-09-11 | Auditoría final productividad: hidratación de caché no revierte préstamo/registro on-chain; assertEnoughToPay en todas las cuotas; worker rota RPC y no tumba el HTTP | — |
 | 2026-09-11 | salud_proyecto.py orquesta grafo critico + i18n/tsc/security/conectores (npm run salud) | — |
 | 2026-09-11 | Auditoría final: caché de préstamo se limpia al pagar; ficha activa por `tierId`; saldo de pago usa el token de la deuda; AppKit sigue Demo/Real; worker rota RPC | Evitar deuda fantasma, botón Pagar en la ficha equivocada y avisos parados por Ankr |

@@ -659,5 +659,7 @@
   "creditLineActiveNext": "Kredilere git",
   "checkingCredit": "Hattınızın aktif olup olmadığı kontrol ediliyor…",
   "subsectionCreditStatus": "Hattınızın durumu",
-  "hubCreditLeadActive": "Aktif. Buradan isteyin veya ödeyin."
+  "hubCreditLeadActive": "Aktif. Buradan isteyin veya ödeyin.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} gün"
 }

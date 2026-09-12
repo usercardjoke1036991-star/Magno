@@ -659,5 +659,7 @@
   "creditLineActiveNext": "Đến khoản vay",
   "checkingCredit": "Đang kiểm tra hạn mức đã kích hoạt chưa…",
   "subsectionCreditStatus": "Trạng thái hạn mức",
-  "hubCreditLeadActive": "Đã bật. Xin hoặc trả tại đây."
+  "hubCreditLeadActive": "Đã bật. Xin hoặc trả tại đây.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} ngày"
 }

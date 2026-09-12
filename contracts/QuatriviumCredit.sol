@@ -6,6 +6,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AggregatorV3Interface} from "./interfaces/AggregatorV3Interface.sol";
+import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
 
 /**
  * @title Quatrivium Credit
@@ -262,16 +263,14 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         }
         _syncQuorum();
 
-        _niveles[1] = Level({ montoPrestamo: 1 * 1e18, plazo: 7 days, tasaInteresBP: 10000 });
-        _niveles[2] = Level({ montoPrestamo: 2 * 1e18, plazo: 10 days, tasaInteresBP: 10000 });
-        _niveles[3] = Level({ montoPrestamo: 5 * 1e18, plazo: 15 days, tasaInteresBP: 8000 });
-        _niveles[4] = Level({ montoPrestamo: 10 * 1e18, plazo: 20 days, tasaInteresBP: 7000 });
-        _niveles[5] = Level({ montoPrestamo: 20 * 1e18, plazo: 25 days, tasaInteresBP: 5000 });
-        _niveles[6] = Level({ montoPrestamo: 35 * 1e18, plazo: 30 days, tasaInteresBP: 5714 });
-        _niveles[7] = Level({ montoPrestamo: 50 * 1e18, plazo: 35 days, tasaInteresBP: 4000 });
-        _niveles[8] = Level({ montoPrestamo: 60 * 1e18, plazo: 40 days, tasaInteresBP: 5000 });
-        _niveles[9] = Level({ montoPrestamo: 80 * 1e18, plazo: 45 days, tasaInteresBP: 5000 });
-        _niveles[10] = Level({ montoPrestamo: 100 * 1e18, plazo: 50 days, tasaInteresBP: 5000 });
+        (uint16[100] memory usd, uint16[100] memory bps, uint8[100] memory dias) = LoanTierSeed.tables();
+        for (uint256 i = 0; i < LoanTierSeed.MAX_NIVEL; i++) {
+            _niveles[i + 1] = Level({
+                montoPrestamo: uint256(usd[i]) * 1e18,
+                plazo: uint256(dias[i]) * 1 days,
+                tasaInteresBP: uint256(bps[i])
+            });
+        }
         _assertAntiSybilNivel1(_niveles[1].montoPrestamo, _niveles[1].tasaInteresBP);
         require(
             POOL_RECURRENTE_BP + FUNDADOR_BP + GEN1_BP + GEN2_BP + GEN3_BP + GEN4_BP + GEN5_BP == 10000,
@@ -392,8 +391,8 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function setNivel(uint256 id, uint256 montoPrestamo, uint256 plazo, uint256 tasaInteresBP) external onlySelf {
-        require(id >= 1 && id <= 10, "invalid tier");
-        require(montoPrestamo > 0 && montoPrestamo <= 1000 * 1e18, "invalid amount");
+        require(id >= 1 && id <= LoanTierSeed.MAX_NIVEL, "invalid tier");
+        require(montoPrestamo > 0 && montoPrestamo <= LoanTierSeed.MAX_MONTO, "invalid amount");
         require(plazo >= 1 days && plazo <= 365 days, "invalid term");
         require(tasaInteresBP <= 10000, "tier rate too high");
         if (id == 1) {
@@ -719,7 +718,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         }
         uint256 desbloqueado = progreso.nivelActual;
         uint256 pedido = nivel == 0 ? desbloqueado : nivel;
-        require(pedido >= 1 && pedido <= desbloqueado && pedido <= 10, "nivel locked");
+        require(pedido >= 1 && pedido <= desbloqueado && pedido <= LoanTierSeed.MAX_NIVEL, "nivel locked");
         require(
             block.timestamp >= progreso.ultimoPrestamoTimestamp + COOLDOWN_PRESTAMO,
             "cooldown 48h"
@@ -820,7 +819,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         }
         progresoPago.solicitudesCompletadas++;
         uint256 solicitudesRequeridas = unlocked <= 1 ? 3 : 5;
-        if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas && unlocked < 10) {
+        if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas && unlocked < LoanTierSeed.MAX_NIVEL) {
             progresoPago.nivelActual++;
             progresoPago.solicitudesCompletadas = 0;
             emit NivelActualizado(msg.sender, progresoPago.nivelActual);

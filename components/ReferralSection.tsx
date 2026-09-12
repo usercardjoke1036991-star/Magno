@@ -222,6 +222,8 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         </AppText>
       </AppSubsection>
 
+      {children}
+
       <AppSubsection title={t('referralEarnTitle')} defaultOpen={false} icon="pay">
         <AppText style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralLead')}</AppText>
         <View style={styles.earnHead}>
@@ -229,7 +231,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1 }]}>{t('referralEarnColLoan')}</AppText>
           <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</AppText>
         </View>
-        {LOAN_TIERS.map((tier) => {
+        {LOAN_TIERS.filter((tier) => tier.id === 1 || tier.id === 10 || tier.id % 10 === 0).map((tier) => {
           const rank = getRankForLevel(tier.id);
           const rankLabel = formatRankLabel(rank, t(rank.nameKey));
           const appliedBps = Math.max(tier.interestBps, curveRateBps || 0);
@@ -247,7 +249,6 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           );
         })}
       </AppSubsection>
-      {children}
     </View>
   );
 };

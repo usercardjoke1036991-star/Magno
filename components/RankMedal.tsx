@@ -34,7 +34,15 @@ export const RankMedal: React.FC<RankMedalProps> = ({
   label,
 }) => {
   const style = rank || getRankForLevel(level);
-  const clamped = Math.min(10, Math.max(1, Math.floor(style.level) || 1)) as keyof typeof RANK_LOGOS;
+  const logoByFamily = {
+    bronze: 1,
+    silver: 3,
+    gold: 5,
+    platinum: 7,
+    diamond: 9,
+    master: 10,
+  } as const;
+  const clamped = logoByFamily[style.family];
   return (
     <View style={[styles.wrap, { opacity: dimmed ? 0.38 : 1 }]}>
       <Image source={RANK_LOGOS[clamped]} style={{ width: size, height: size }} resizeMode="contain" />

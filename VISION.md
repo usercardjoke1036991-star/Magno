@@ -36,6 +36,7 @@
 - al solicitar un prestamo el boton Solicitar se bloquea con cuenta regresiva en tiempo real hasta poder pedir el siguiente
 - cuenta atras del boton Solicitar solo despues de pagar el prestamo, no al pedirlo
 - orquestador de salud que entiende Quatrivium y verifica que cada pieza este conectada
+- 100 niveles de credito hasta 10000 USDT con tasa decreciente e interes en dolares creciente
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -47,3 +48,4 @@
 - [2026-09-11 18:05] Idea añadida al backlog: "cuenta atras del boton Solicitar solo despues de pagar el prestamo, no al pedirl"
 - [2026-09-11 19:35] Idea añadida al backlog: "orquestador de salud que entiende Quatrivium y verifica que cada pieza este cone"
 - [2026-09-11 19:39] Módulo completado: 'salud_proyecto.py'
+- [2026-09-11 23:18] Idea añadida al backlog: "100 niveles de credito hasta 10000 USDT con tasa decreciente e interes en dolare"

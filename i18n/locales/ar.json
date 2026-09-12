@@ -659,5 +659,7 @@
   "creditLineActiveNext": "الذهاب إلى القروض",
   "checkingCredit": "جارٍ التحقق مما إذا كان الخط نشطاً…",
   "subsectionCreditStatus": "حالة خطك",
-  "hubCreditLeadActive": "نشط. اطلب أو ادفع هنا."
+  "hubCreditLeadActive": "نشط. اطلب أو ادفع هنا.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} يومًا"
 }

@@ -60,7 +60,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               <AppText style={[styles.rankEyebrow, { color: colors.textMuted }]}>{t('rankYourRank')}</AppText>
               <AppText style={[styles.rankTitle, { color: colors.text }]}>{rankLabel}</AppText>
               <AppText style={[styles.rankMeta, { color: colors.textMuted }]}>
-                {t('level')} {userInfo.userProgress.nivelActual}/10
+                {t('level')} {userInfo.userProgress.nivelActual}/100
               </AppText>
               <AppText style={[styles.rankHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
             </View>
@@ -72,7 +72,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
                 <AppIcon name="star" size={14} color={colors.textMuted} />
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('level')}</AppText>
               </View>
-              <AppText style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/10</AppText>
+              <AppText style={[styles.metricValue, { color: colors.text }]}>{userInfo.userProgress.nivelActual}/100</AppText>
             </View>
 
             <View style={styles.metricItem}>
@@ -94,7 +94,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>{t('toLevelUp')}</AppText>
               </View>
               <AppText style={[styles.metricValue, { color: colors.text }]}>
-                {userInfo.userProgress.nivelActual >= 10
+                {userInfo.userProgress.nivelActual >= 100
                   ? t('maxLevelReached')
                   : `${userInfo.userProgress.solicitudesCompletadas}/${
                       userInfo.userProgress.nivelActual <= 1 ? 3 : 5

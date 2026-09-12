@@ -104,6 +104,14 @@ function HomeScreenWithHooks() {
   const creditPaused = userInfo.paused || !creditReady;
   const activeLoan = userInfo.activeLoan;
   const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
+  const lockedTiers = loanTiers.filter((tier) => tier.id > userInfo.userProgress.nivelActual);
+  const visibleUnlocked = unlockedTiers.slice(-3);
+  const visibleLocked = lockedTiers.slice(0, 2);
+  const labelTier = (tier: (typeof loanTiers)[number]) => ({
+    ...tier,
+    name: `${t('level')} ${tier.id}`,
+    term: t('termDays' as TranslationKey, { days: String(tier.termDays || 7) }),
+  });
   const matchesActiveLoan = (tier: (typeof loanTiers)[number]) => {
     if (!activeLoan) return false;
     if (activeLoan.tierId > 0 && activeLoan.tierId === tier.id) return true;
@@ -364,14 +372,10 @@ function HomeScreenWithHooks() {
           <RankLadder userLevel={userInfo.userProgress.nivelActual} />
         </AppSubsection>
         <AppSubsection title={t('subsectionUnlocked')} icon="bank">
-          {loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual).map((tier) => (
+          {visibleUnlocked.map((tier) => (
             <LoanTierCard
               key={tier.id}
-              tier={{
-                ...tier,
-                name: t(`tier${tier.id}` as TranslationKey),
-                term: t(`term${tier.id}` as TranslationKey),
-              }}
+              tier={labelTier(tier)}
               userLevel={userInfo.userProgress.nivelActual}
               hasActiveLoan={userInfo.hasActiveLoan}
                 isDelinquent={userInfo.isDelinquent}
@@ -392,16 +396,12 @@ function HomeScreenWithHooks() {
             />
           ))}
         </AppSubsection>
-        {loanTiers.some((tier) => tier.id > userInfo.userProgress.nivelActual) ? (
+        {visibleLocked.length ? (
           <AppSubsection title={t('subsectionLocked')} icon="lock">
-            {loanTiers.filter((tier) => tier.id > userInfo.userProgress.nivelActual).map((tier) => (
+            {visibleLocked.map((tier) => (
               <LoanTierCard
                 key={tier.id}
-                tier={{
-                  ...tier,
-                  name: t(`tier${tier.id}` as TranslationKey),
-                  term: t(`term${tier.id}` as TranslationKey),
-                }}
+                tier={labelTier(tier)}
                 userLevel={userInfo.userProgress.nivelActual}
                 hasActiveLoan={userInfo.hasActiveLoan}
                 isDelinquent={userInfo.isDelinquent}
@@ -443,7 +443,7 @@ function HomeScreenWithHooks() {
           networkBonusThreshold={userInfo.networkBonusThreshold}
         >
           {isConnected ? (
-            <AppSubsection title={t('referralHistoryTitle')} defaultOpen={false} icon="history">
+            <AppSubsection title={t('referralHistoryTitle')} defaultOpen icon="history">
               <ReferralHistory walletAddress={walletAddress} enabled={userInfo.isRegistered} />
             </AppSubsection>
           ) : null}

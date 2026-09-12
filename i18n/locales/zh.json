@@ -659,5 +659,7 @@
   "creditLineActiveNext": "前往贷款",
   "checkingCredit": "正在检查额度是否已开通…",
   "subsectionCreditStatus": "额度状态",
-  "hubCreditLeadActive": "已开通。在此申请或还款。"
+  "hubCreditLeadActive": "已开通。在此申请或还款。",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} 天"
 }

@@ -10,6 +10,7 @@ import { RankMedal } from './RankMedal';
 import { AppIcon } from './icons';
 import { directCommissionFromLoan, formatCommissionUSD, ACTIVATION_BONUS_USD } from '../constants/commissions';
 import { AppText } from './AppText';
+import { MAX_LOAN_LEVEL } from '../constants/loanTiers';
 
 interface LoanTierCardProps {
   tier: LoanTier;
@@ -61,7 +62,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const totalRepay = tier.usdAmount + interest;
   const installments = tier.installments || 1;
   const cuotaPreview = formatUSD(totalRepay / installments);
-  const isMaxLevel = tier.id === 10;
+  const isMaxLevel = tier.id >= MAX_LOAN_LEVEL;
   const rank = getRankForLevel(tier.id);
   const rankLabel = formatRankLabel(rank, t(rank.nameKey));
   const referralEarn = formatCommissionUSD(directCommissionFromLoan(tier.usdAmount, appliedBps));

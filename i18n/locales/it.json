@@ -659,5 +659,7 @@
   "creditLineActiveNext": "Vai ai prestiti",
   "checkingCredit": "Controllo se la linea è già attiva…",
   "subsectionCreditStatus": "Stato della linea",
-  "hubCreditLeadActive": "Attiva. Chiedi o paga qui."
+  "hubCreditLeadActive": "Attiva. Chiedi o paga qui.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} giorni"
 }

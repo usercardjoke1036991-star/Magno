@@ -17,13 +17,17 @@ const logErr = __DEV__ ? console.log.bind(console) : () => {};
 const logWarn = __DEV__ ? console.warn.bind(console) : () => {};
 
 function creditStatusKey(wallet: string): string {
-  return `quatrivium.creditStatus.${NETWORK_CONFIG.chainId}.${wallet.toLowerCase()}`;
+  return `quatrivium.creditStatus.${NETWORK_CONFIG.chainId}.${getContractAddress().toLowerCase()}.${wallet.toLowerCase()}`;
 }
 
 function persistCreditStatus(wallet: string, isRegistered: boolean, hasActiveLoan: boolean) {
   AsyncStorage.setItem(
     creditStatusKey(wallet),
-    JSON.stringify({ isRegistered, hasActiveLoan })
+    JSON.stringify({
+      isRegistered,
+      hasActiveLoan,
+      contract: getContractAddress().toLowerCase(),
+    })
   ).catch(() => {});
 }
 
@@ -156,6 +160,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
   const chainStatusReadyRef = useRef(false);
+  const onChainTiersReadyRef = useRef(false);
   const tokenAddress = selectedToken.address;
   const tokenDecimals = selectedToken.decimals;
 
@@ -406,17 +411,37 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }
 
         try {
-          const rows = await Promise.all(
-            LOAN_TIERS.map(async (base) => {
-              try {
-                const row = await creditContract.niveles(base.id);
-                return overlayOnChainTier(base, BigInt(row[0]), BigInt(row[1]), BigInt(row[2]));
-              } catch {
-                return base;
+          if (opts?.silent && onChainTiersReadyRef.current) {
+            // El barrido de 100 niveles cada 30 s satura el RPC público.
+          } else {
+            const discovered: LoanTier[] = [];
+            for (let start = 0; start < LOAN_TIERS.length && live(); start += 20) {
+              const batch = LOAN_TIERS.slice(start, start + 20);
+              const rows = await Promise.all(
+                batch.map(async (base) => {
+                  try {
+                    const row = await creditContract.niveles(base.id);
+                    const monto = BigInt(row[0] ?? 0);
+                    if (monto === 0n) return null;
+                    return overlayOnChainTier(base, monto, BigInt(row[1]), BigInt(row[2]));
+                  } catch {
+                    return null;
+                  }
+                })
+              );
+              const good = rows.filter((item): item is LoanTier => Boolean(item));
+              discovered.push(...good);
+              if (good.length < batch.length) break;
+            }
+            if (live()) {
+              if (discovered.length) {
+                onChainTiersReadyRef.current = true;
+                setLoanTiers(discovered);
+              } else {
+                setLoanTiers(LOAN_TIERS.slice(0, 10));
               }
-            })
-          );
-          if (live()) setLoanTiers(rows);
+            }
+          }
         } catch {
           if (live()) setLoanTiers(LOAN_TIERS);
         }
@@ -700,20 +725,34 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
   useEffect(() => {
     chainStatusReadyRef.current = false;
+    onChainTiersReadyRef.current = false;
     if (!walletAddress || !isAddress(walletAddress)) return;
     const wallet = walletAddress.toLowerCase();
-    AsyncStorage.getItem(creditStatusKey(walletAddress))
-      .then((raw) => {
-        if (!raw || chainStatusReadyRef.current) return;
-        const saved = JSON.parse(raw) as { isRegistered?: boolean; hasActiveLoan?: boolean };
-        if (walletAddress.toLowerCase() !== wallet) return;
-        setUserInfo((prev) => ({
-          ...prev,
-          isRegistered: Boolean(saved.isRegistered),
-          hasActiveLoan: Boolean(saved.hasActiveLoan),
-        }));
-      })
-      .catch(() => {});
+    const hydrate = () => {
+      AsyncStorage.getItem(creditStatusKey(walletAddress))
+        .then((raw) => {
+          if (!raw || chainStatusReadyRef.current) return;
+          const saved = JSON.parse(raw) as {
+            isRegistered?: boolean;
+            hasActiveLoan?: boolean;
+            contract?: string;
+          };
+          if (walletAddress.toLowerCase() !== wallet) return;
+          if (saved.contract && saved.contract !== getContractAddress().toLowerCase()) return;
+          setUserInfo((prev) => ({
+            ...prev,
+            isRegistered: Boolean(saved.isRegistered),
+            hasActiveLoan: Boolean(saved.hasActiveLoan),
+          }));
+        })
+        .catch(() => {});
+    };
+    hydrate();
+    return subscribeRuntimeMode(() => {
+      chainStatusReadyRef.current = false;
+      onChainTiersReadyRef.current = false;
+      hydrate();
+    });
   }, [walletAddress]);
 
   useEffect(() => {

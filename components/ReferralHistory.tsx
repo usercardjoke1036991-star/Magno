@@ -121,6 +121,9 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
                       name,
                       amount: item.amountLabel || '',
                     })}
+                    {item.timestamp > 0
+                      ? ` · ${new Date(item.timestamp * 1000).toLocaleDateString()}`
+                      : ''}
                   </AppText>
                 );
               })}

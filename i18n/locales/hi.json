@@ -659,5 +659,7 @@
   "creditLineActiveNext": "ऋण पर जाएँ",
   "checkingCredit": "जाँच कि लाइन पहले से सक्रिय है या नहीं…",
   "subsectionCreditStatus": "आपकी लाइन की स्थिति",
-  "hubCreditLeadActive": "सक्रिय। यहाँ माँगें या चुकाएँ।"
+  "hubCreditLeadActive": "सक्रिय। यहाँ माँगें या चुकाएँ।",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} दिन"
 }

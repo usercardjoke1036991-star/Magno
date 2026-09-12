@@ -659,5 +659,7 @@
   "creditLineActiveNext": "Ke pinjaman",
   "checkingCredit": "Memeriksa apakah jalur sudah aktif…",
   "subsectionCreditStatus": "Status jalur Anda",
-  "hubCreditLeadActive": "Aktif. Ajukan atau bayar di sini."
+  "hubCreditLeadActive": "Aktif. Ajukan atau bayar di sini.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} hari"
 }

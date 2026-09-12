@@ -659,5 +659,7 @@
   "creditLineActiveNext": "대출로 이동",
   "checkingCredit": "한도가 이미 활성화됐는지 확인 중…",
   "subsectionCreditStatus": "한도 상태",
-  "hubCreditLeadActive": "활성. 여기서 신청하거나 상환."
+  "hubCreditLeadActive": "활성. 여기서 신청하거나 상환.",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days}일"
 }

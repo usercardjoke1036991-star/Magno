@@ -659,5 +659,7 @@
   "creditLineActiveNext": "ローンへ",
   "checkingCredit": "与信枠が有効か確認しています…",
   "subsectionCreditStatus": "枠の状態",
-  "hubCreditLeadActive": "有効。ここで申込または返済。"
+  "hubCreditLeadActive": "有効。ここで申込または返済。",
+  "errEmptyRevert": "The network rejected the transaction. In Real, live credit is not active yet — switch to Demo in Settings. In Demo, try again.",
+  "termDays": "{days} 日"
 }

@@ -97,6 +97,9 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['appWalletBadAddress', 'appWalletBadAddress'],
   ['notify', 'otpNeedApi'],
   ['Contrato no configurado', 'configureContract'],
+  ['no data present', 'errEmptyRevert'],
+  ['missing revert data', 'errEmptyRevert'],
+  ['require(false)', 'errEmptyRevert'],
 ];
 
 let errorLang: Lang = 'es';
@@ -111,6 +114,9 @@ export function humanizeTxError(error: unknown): string {
   const match = REVERT_KEYS.find(([needle]) => raw.includes(needle));
   if (match) {
     return table[match[1]];
+  }
+  if (/execution reverted/i.test(raw) && !/execution reverted:\s+\S/i.test(raw)) {
+    return table.errEmptyRevert;
   }
   const trimmed = raw.replace(/^Error:\s*/i, '').trim();
   return trimmed.slice(0, 280) || table.txFailed;

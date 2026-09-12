@@ -1,7 +1,7 @@
 import { FallbackProvider, JsonRpcProvider, isAddress, type AbstractProvider } from 'ethers';
 import { isHttpsUrl } from '../utils/sanitize';
 import { BSC_MAINNET, BSC_TESTNET, ZERO_ADDRESS } from './bsc';
-import { DEPLOYED_TESTNET } from './deployedAddresses';
+import { DEPLOYED_MAINNET, DEPLOYED_TESTNET } from './deployedAddresses';
 
 export type AppMode = 'demo' | 'live';
 
@@ -224,6 +224,17 @@ export const getContractAddress = (network: 'mainnet' | 'testnet' = getActiveCon
 };
 
 export const isContractConfigured = (network?: 'mainnet' | 'testnet'): boolean => {
-  const address = getContractAddress(network ?? getActiveContractNetwork());
-  return Boolean(address) && address.toLowerCase() !== ZERO_ADDRESS;
+  const net = network ?? getActiveContractNetwork();
+  const address = getContractAddress(net);
+  if (!address || address.toLowerCase() === ZERO_ADDRESS || !isAddress(address)) {
+    return false;
+  }
+  // Real no está listo hasta el deploy oficial. Una dirección suelta en .env
+  // no debe mandar transacciones a mainnet (revert vacío / require(false)).
+  if (net === 'mainnet') {
+    const official = String(DEPLOYED_MAINNET.contract || '').toLowerCase();
+    if (!official || official === ZERO_ADDRESS.toLowerCase()) return false;
+    return address.toLowerCase() === official;
+  }
+  return true;
 };

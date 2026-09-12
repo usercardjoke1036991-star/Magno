@@ -169,13 +169,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/contractConfig.ts` — módulo JS/TS
   - Funciones/clases: getUsdtAddress, ERC20_ABI, CONTRACT_ABI
 - `constants/deployedAddresses.ts` — módulo JS/TS
-  - Funciones/clases: DEPLOYED_TESTNET, DEPLOYED_MAINNET
+  - Funciones/clases: DEPLOYED_TESTNET, DEPLOYED_MAINNET, getKnownStartBlock
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
-  - Funciones/clases: LOAN_TIERS, installmentsForPrincipalWei, overlayOnChainTier
+  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, LOAN_TIER_ROWS, LOAN_TIERS, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/ranks.ts` — módulo JS/TS
-  - Funciones/clases: LEVEL_RANKS, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
+  - Funciones/clases: clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
 - `constants/reputation.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, referralsForNextBonus, formatPoolBonus
 - `constants/rpcConfig.ts` — módulo JS/TS
@@ -221,6 +221,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/security-check.mjs` — módulo JS/TS
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
+- `scripts/_dump_ui.py` — módulo Python
+- `scripts/_gen_loan_tiers.py` — módulo Python
+  - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
 - `services/accountEmail.ts` — módulo JS/TS
   - Funciones/clases: loadVerifiedEmail, isEmailVerified, saveVerifiedEmail, clearVerifiedEmail
 - `services/accountReset.ts` — módulo JS/TS
@@ -277,6 +280,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/identity.test.js` — módulo JS/TS
 - `test/kyc.test.js` — módulo JS/TS
 - `test/liquidation.test.js` — módulo JS/TS
+- `test/loanLevels.test.js` — módulo JS/TS
 - `test/mlm.test.js` — módulo JS/TS
 - `test/morosity.test.js` — módulo JS/TS
 - `test/peg.test.js` — módulo JS/TS
