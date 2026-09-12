@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { authenticateBiometric, isBiometricEnabled, verifyPin } from '../services/appLock';
+import { authenticateBiometric, checkPassword, isBiometricEnabled, isPinSet, verifyPin } from '../services/appLock';
 import { isFundsConfirmEnabled } from '../services/fundsConfirm';
 import { SecretInput } from './SecretInput';
 import { AppText } from './AppText';
@@ -24,6 +24,8 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
   const [pin, setPin] = useState('');
+  const [password, setPassword] = useState('');
+  const [usePin, setUsePin] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const resolver = useRef<((ok: boolean) => void) | null>(null);
@@ -33,6 +35,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
     resolver.current = null;
     setOpen(false);
     setPin('');
+    setPassword('');
     setBusy(false);
     setError('');
   }, []);
@@ -43,19 +46,35 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       const bio = await authenticateBiometric();
       if (bio) return true;
     }
+    const pinSet = await isPinSet();
+    setUsePin(pinSet);
     return new Promise<boolean>((resolve) => {
       resolver.current = resolve;
       setOpen(true);
     });
   }, []);
 
-  const submitPin = async () => {
-    if (pin.length !== 6 || busy) return;
+  const submitSecret = async () => {
+    if (busy) return;
+    if (usePin) {
+      if (pin.length !== 6) return;
+      setBusy(true);
+      const ok = await verifyPin(pin);
+      if (!ok) {
+        setError(t('lockPinWrong'));
+        setPin('');
+        setBusy(false);
+        return;
+      }
+      finish(true);
+      return;
+    }
+    if (!password) return;
     setBusy(true);
-    const ok = await verifyPin(pin);
-    if (!ok) {
-      setError(t('lockPinWrong'));
-      setPin('');
+    const result = await checkPassword(password);
+    if (!result.ok) {
+      setError(t('lockPasswordWrong'));
+      setPassword('');
       setBusy(false);
       return;
     }
@@ -71,18 +90,28 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
         <View style={styles.backdrop}>
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <AppText style={[styles.title, { color: colors.text }]}>{t('fundsConfirmTitle')}</AppText>
-            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('fundsConfirmPrompt')}</AppText>
-            <SecretInput
-              value={pin}
-              onChangeText={(value) => setPin(value.replace(/\D/g, '').slice(0, 6))}
-              keyboardType="number-pad"
-              maxLength={6}
-              placeholder="••••••"
-            />
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>
+              {t(usePin ? 'fundsConfirmPrompt' : 'fundsConfirmPromptPassword')}
+            </AppText>
+            {usePin ? (
+              <SecretInput
+                value={pin}
+                onChangeText={(value) => setPin(value.replace(/\D/g, '').slice(0, 6))}
+                keyboardType="number-pad"
+                maxLength={6}
+                placeholder="••••••"
+              />
+            ) : (
+              <SecretInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder={t('lockCurrentPassword')}
+              />
+            )}
             {error ? <AppText style={[styles.error, { color: colors.danger }]}>{error}</AppText> : null}
             <TouchableOpacity
-              disabled={busy || pin.length !== 6}
-              onPress={() => void submitPin()}
+              disabled={busy || (usePin ? pin.length !== 6 : !password)}
+              onPress={() => void submitSecret()}
               style={[styles.button, { backgroundColor: colors.connect }]}
             >
               {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('ready')}</AppText>}

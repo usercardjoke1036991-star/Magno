@@ -336,6 +336,27 @@ export async function changePin(current: string, next: string): Promise<boolean>
   }
 }
 
+export async function clearPin(current: string): Promise<boolean> {
+  if (!(await isPasswordSet())) {
+    throw new Error('need-password');
+  }
+  const checked = await checkPin(current);
+  if (!checked.ok) return false;
+  try {
+    await SecureStore.deleteItemAsync(PIN_KEY);
+  } catch {
+    // ignore
+  }
+  try {
+    await SecureStore.deleteItemAsync(PIN_WRAP_KEY);
+  } catch {
+    // ignore
+  }
+  await setLockOnOpenEnabled(false);
+  await writeGate({ fails: 0, until: 0 });
+  return true;
+}
+
 export async function setPassword(password: string, conveniencePin?: string): Promise<string> {
   if (!isValidMasterPassword(password)) {
     throw passwordError(password);

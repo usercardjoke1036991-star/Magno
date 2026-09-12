@@ -4,11 +4,13 @@
 App DeFi Quatrivium Credit: Demo/Real separados, grafo credito conectado y 100% funcional
 
 ## Decisiones
+- [2026-09-12] Contraseña y frase secreta solo se reemplazan. PIN, huella y llave de acceso se pueden cambiar o quitar.
 - [2026-09-12] La UI nombra Cuenta Demo y Cuenta Real. Cada mundo limpia saldo y credito al cambiar. El USDT oficial no se trata como apagado por un RPC caido.
 - [2026-09-12] No recortar funciones del nucleo por EIP-170. El protocolo crece con contratos hermanos, cada uno con su propio tope de 24 KB.
 - [2026-09-11] La salud continua de Quatrivium se orquesta con python salud_proyecto.py, no solo qa_autonomo generico
 
 ## Cambios realizados
+- [2026-09-12] Panel de seguridad: contraseña aparte; PIN se puede quitar; huella y llave se apagan; confirmar fondos acepta contraseña.
 - [2026-09-12] En espera entre prestamos solo se ve la cuenta atras en vivo, no Solicitar.
 - [2026-09-12] Revert vacio en Demo ya no pide pasar a Demo: avisa la espera de 48h.
 - [2026-09-12] Signer interno se recupera si HMR lo limpia. errNoWallet ya no pide billetera externa. gitignore cubre __pycache__ y .venv.

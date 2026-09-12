@@ -17,7 +17,7 @@ import { useAppWallet } from '../wallet/AppWalletContext';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { useWeb3Transactions } from '../hooks/useWeb3Transactions';
 import { getSupportedTokens } from '../constants/tokens';
-import { verifyPin, isPinSet, isBiometricEnabled, getBiometricStatus, checkPassword } from '../services/appLock';
+import { verifyPin, isPinSet, isPasswordSet, isBiometricEnabled, getBiometricStatus, checkPassword } from '../services/appLock';
 import { BiometricLockSection } from './BiometricLockSection';
 import { isFundsConfirmEnabled, setFundsConfirmEnabled } from '../services/fundsConfirm';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
@@ -37,7 +37,7 @@ import type { TranslationKey } from '../i18n/translations';
 import { AppText, AppTextInput } from './AppText';
 
 type RowStatus = 'done' | 'todo' | 'warn';
-type Panel = 'menu' | 'kyc' | 'pin' | 'access' | 'phrase' | 'phone' | 'replace';
+type Panel = 'menu' | 'kyc' | 'password' | 'pin' | 'fingerprint' | 'access' | 'phrase' | 'phone' | 'replace';
 
 export const SecuritySettings: React.FC = () => {
   const { t } = useI18n();
@@ -64,14 +64,16 @@ export const SecuritySettings: React.FC = () => {
   const [shown, setShown] = useState(false);
   const [showRestore, setShowRestore] = useState(false);
   const [pinSet, setPinSet] = useState(false);
+  const [passwordSet, setPasswordSet] = useState(false);
   const [bioOn, setBioOn] = useState(false);
   const [fundsOn, setFundsOn] = useState(false);
 
   const refreshPhrase = async () => {
-    const [exists, ack, pin, bioStatus, bioEnabled, funds] = await Promise.all([
+    const [exists, ack, pin, password, bioStatus, bioEnabled, funds] = await Promise.all([
       hasSecretPhrase(),
       isPhraseBackedUp(),
       isPinSet(),
+      isPasswordSet(),
       getBiometricStatus(),
       isBiometricEnabled(),
       isFundsConfirmEnabled(),
@@ -79,6 +81,7 @@ export const SecuritySettings: React.FC = () => {
     setHasPhrase(exists);
     setBackedUp(ack);
     setPinSet(pin);
+    setPasswordSet(password);
     setBioOn(bioEnabled && bioStatus.available);
     setFundsOn(funds);
     setPhrase(null);
@@ -265,7 +268,9 @@ export const SecuritySettings: React.FC = () => {
 
   const panelTitle: Record<Exclude<Panel, 'menu'>, TranslationKey> = {
     kyc: 'securityKyc',
+    password: 'lockPasswordTitle',
     pin: 'securityPin',
+    fingerprint: 'securityFingerprint',
     access: 'securityAccessKey',
     phrase: 'seedTitle',
     phone: 'securityPhone',
@@ -295,7 +300,8 @@ export const SecuritySettings: React.FC = () => {
             onDeclare={declareKyc}
           />
         ) : null}
-        {panel === 'pin' ? <LockSettings hideLead /> : null}
+        {panel === 'password' ? <LockSettings hideLead mode="password" onChanged={() => void refreshPhrase()} /> : null}
+        {panel === 'pin' ? <LockSettings hideLead mode="pin" onChanged={() => void refreshPhrase()} /> : null}
         {panel === 'phone' && !demoAccount ? (
           <PhoneOtpSection
             walletAddress={address}
@@ -306,12 +312,16 @@ export const SecuritySettings: React.FC = () => {
             onBound={refetch}
           />
         ) : null}
+        {panel === 'fingerprint' ? (
+          <BiometricLockSection compact leadKey="securityFingerprintLead" onChanged={setBioOn} />
+        ) : null}
         {panel === 'access' ? (
           <BiometricLockSection compact onChanged={setBioOn} />
         ) : null}
         {panel === 'phrase' ? (
           <View>
             <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedLead')}</AppText>
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('securityPhraseReplaceOnly')}</AppText>
             {!hasPhrase ? (
               <AppText style={[styles.lead, { color: colors.warnText }]}>{t('seedMissing')}</AppText>
             ) : shown && phrase ? (
@@ -470,10 +480,24 @@ export const SecuritySettings: React.FC = () => {
       )}
       <Row
         icon="lock"
+        label={t('securityPassword')}
+        hint={passwordSet ? t('securityPasswordDone') : t('securityPasswordTodo')}
+        status={passwordSet ? 'done' : 'warn'}
+        onPress={() => setPanel('password')}
+      />
+      <Row
+        icon="lock"
         label={t('securityPin')}
-        hint={pinSet && bioOn ? t('securityPinHintBoth') : pinSet ? t('securityPinHint') : t('securityPinTodo')}
+        hint={pinSet ? t('securityPinHint') : t('securityPinTodo')}
         status={pinSet ? 'done' : 'todo'}
         onPress={() => setPanel('pin')}
+      />
+      <Row
+        icon="unlock"
+        label={t('securityFingerprint')}
+        hint={bioOn ? t('securityFingerprintDone') : t('securityFingerprintTodo')}
+        status={bioOn ? 'done' : 'todo'}
+        onPress={() => setPanel('fingerprint')}
       />
       <Row
         icon="unlock"

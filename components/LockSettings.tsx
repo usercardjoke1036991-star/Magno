@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -11,6 +12,7 @@ import {
   PASSWORD_LENGTH,
   changePassword,
   changePin,
+  clearPin,
   isPasswordSet,
   isPinSet,
   isValidMasterPassword,
@@ -20,11 +22,16 @@ import {
 import { isWeakPin } from '../utils/pinPolicy';
 import { loadAppWallet } from '../services/appWallet';
 import { storePasswordRecovery } from '../services/passwordRecovery';
-import { BiometricLockSection } from './BiometricLockSection';
 import { SecretInput } from './SecretInput';
 import { AppText } from './AppText';
 
-export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = false }) => {
+type LockSettingsMode = 'pin' | 'password';
+
+export const LockSettings: React.FC<{
+  hideLead?: boolean;
+  mode?: LockSettingsMode;
+  onChanged?: () => void;
+}> = ({ hideLead = false, mode = 'pin', onChanged }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [current, setCurrent] = useState('');
@@ -74,11 +81,50 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
       setNext('');
       setConfirm('');
       setMessage(t('lockPinChanged'));
+      onChanged?.();
     } catch (error) {
       setMessage(error instanceof Error && error.message === 'weak-pin' ? t('lockPinWeak') : t('lockPinWrong'));
     } finally {
       setBusy(false);
     }
+  };
+
+  const removePin = async () => {
+    if (current.length !== 6) {
+      setMessage(t('lockPinWrong'));
+      return;
+    }
+    Alert.alert(t('lockRemovePin'), t('lockRemovePinConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('lockRemovePin'),
+        style: 'destructive',
+        onPress: async () => {
+          setBusy(true);
+          try {
+            const ok = await clearPin(current);
+            if (!ok) {
+              setMessage(t('lockPinWrong'));
+              return;
+            }
+            setHasPin(false);
+            setCurrent('');
+            setNext('');
+            setConfirm('');
+            setMessage(t('lockPinRemoved'));
+            onChanged?.();
+          } catch (error) {
+            setMessage(
+              error instanceof Error && error.message === 'need-password'
+                ? t('lockPinNeedPassword')
+                : t('lockPinWrong')
+            );
+          } finally {
+            setBusy(false);
+          }
+        },
+      },
+    ]);
   };
 
   const passwordFail = (error: unknown) => {
@@ -108,6 +154,7 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
       setNextPassword('');
       setConfirmPassword('');
       setPasswordMessage(t('lockPasswordChanged'));
+      onChanged?.();
       try {
         const wallet = await loadAppWallet();
         if (wallet?.address) await storePasswordRecovery(wallet.address);
@@ -122,9 +169,9 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
     }
   };
 
-  return (
+  const pinBlock = (
     <View>
-      {hideLead ? null : <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockSettingsLead')}</AppText>}
+      {hideLead ? null : <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockCreateOptional')}</AppText>}
       {hasPin ? (
         <>
           <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPin')}</AppText>
@@ -166,15 +213,42 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
       >
         {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{hasPin ? t('lockChangePin') : t('lockCreatePin')}</AppText>}
       </TouchableOpacity>
+      {hasPin ? (
+        <TouchableOpacity
+          disabled={busy || current.length !== 6}
+          onPress={() => void removePin()}
+          style={[
+            styles.button,
+            styles.remove,
+            (busy || current.length !== 6) && styles.removeDisabled,
+          ]}
+        >
+          <AppText style={styles.buttonText}>{t('lockRemovePin')}</AppText>
+        </TouchableOpacity>
+      ) : null}
       {message ? <AppText style={[styles.note, { color: colors.textMuted }]}>{message}</AppText> : null}
+    </View>
+  );
 
-      <BiometricLockSection />
-
-      <AppText style={[styles.section, { color: colors.text }]}>{t('lockPasswordTitle')}</AppText>
-      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordLead')}</AppText>
+  const passwordBlock = (
+    <View>
+      {hideLead ? null : <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordLead')}</AppText>}
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordReplaceOnly')}</AppText>
       <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNotSeed')}</AppText>
       <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordNoEmail')}</AppText>
       <AppText style={[styles.note, { color: colors.textMuted }]}>{t('lockPasswordMin')}</AppText>
+      {hasPin ? (
+        <>
+          <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPin')}</AppText>
+          <SecretInput
+            value={current}
+            onChangeText={(value) => setCurrent(value.replace(/\D/g, '').slice(0, 6))}
+            keyboardType="number-pad"
+            maxLength={6}
+            placeholder="••••••"
+          />
+        </>
+      ) : null}
       {hasPassword ? (
         <>
           <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPassword')}</AppText>
@@ -220,6 +294,8 @@ export const LockSettings: React.FC<{ hideLead?: boolean }> = ({ hideLead = fals
       {passwordMessage ? <AppText style={[styles.note, { color: colors.textMuted }]}>{passwordMessage}</AppText> : null}
     </View>
   );
+
+  return <View>{mode === 'password' ? passwordBlock : pinBlock}</View>;
 };
 
 const styles = StyleSheet.create({
@@ -278,5 +354,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '600',
+  },
+  remove: {
+    backgroundColor: '#B42318',
+  },
+  removeDisabled: {
+    backgroundColor: '#9CA3AF',
   },
 });

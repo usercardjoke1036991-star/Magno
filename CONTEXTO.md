@@ -109,12 +109,12 @@ La escalera nueva (3 hasta L5, +5 desde $100, bono 2.000 USDT en L100) vive en `
 - Contrato `QuatriviumCredit.sol` — testnet en `0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3` (100 niveles, bloque 130526896)
 - 15 suites Hardhat (89 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld…
 - App móvil con 43 componentes React Native
-- i18n: 17 idiomas, 686 claves
+- i18n: 17 idiomas, 701 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
-- App lock: PIN 6 dígitos + huella real (detección por `expo-local-authentication`, no por NativeModules; PIN y llave de acceso comparten el mismo interruptor)
-- Frase secreta BIP-39: ver/guardar; rotar o restaurar vive en Reemplazar cuenta
+- App lock: contraseña y frase solo se reemplazan; PIN, huella y llave de acceso se pueden cambiar o quitar (huella y llave usan el mismo sensor)
+- Frase secreta BIP-39: ver/anotar; rotar o restaurar vive en Reemplazar cuenta (no se elimina suelta)
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
 - Auto-refresh de balances cada 30 s
@@ -205,7 +205,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Verificación | Estado | Detalle |
 |---|---|---|
 | `tsc --noEmit` | ✅ 0 errores | TypeScript strict, noUnusedLocals, noImplicitReturns |
-| `check-i18n.mjs` | ✅ OK | 663 claves · 17 locales · sin BOM · sin discrepancias |
+| `check-i18n.mjs` | ✅ OK | 701 claves · 17 locales · sin BOM · sin discrepancias |
 | `security-check.mjs` | ✅ OK | .env fuera de git · sin credenciales hardcodeadas |
 | `hardhat test` | ✅ 83/83 | Incluye 100 niveles + destroy + mora + identidad demo + gates |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
@@ -225,6 +225,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Panel de seguridad: contraseña y frase solo se reemplazan; PIN, huella y llave se pueden quitar. | — |
 | 2026-09-12 | Auditoria: recoverAppSigner ante signer nulo; i18n errNoWallet; gitignore Python; Hardhat 89/89; salud 14/14. | — |
 | 2026-09-12 | UI de Cuenta Demo/Real inconfundible; isOfficialWorldToken evita falso token apagado; cooldown se muestra antes. | — |
 | 2026-09-12 | Auditoria productiva: UI y nucleo coinciden con 0x1E5118 (L1=3, resto=5). QuatriviumLeveling guarda la escalera+bono para el proximo deploy. eas.json production ya no inyecta testnet. | — |
