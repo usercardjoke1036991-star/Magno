@@ -263,5 +263,7 @@ export const isContractConfigured = (network?: 'mainnet' | 'testnet'): boolean =
     if (!official || official === ZERO_ADDRESS.toLowerCase()) return false;
     return address.toLowerCase() === official;
   }
-  return true;
+  const officialTestnet = String(DEPLOYED_TESTNET.contract || '').toLowerCase();
+  if (!officialTestnet || officialTestnet === ZERO_ADDRESS.toLowerCase()) return false;
+  return address.toLowerCase() === officialTestnet;
 };

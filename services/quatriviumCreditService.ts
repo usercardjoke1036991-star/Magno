@@ -303,7 +303,7 @@ export const QuatriviumCreditService = {
       } catch {
         kycDeclarado = false;
       }
-      let deviceMatches = true;
+      let deviceMatches = false;
       try {
         const phoneHash = String((await credit.phoneHashOf(userAddress)) || '');
         const deviceHash = String((await credit.deviceHashOf(userAddress)) || '');
@@ -312,7 +312,7 @@ export const QuatriviumCreditService = {
         deviceMatches = walletRunsOnThisDevice(deviceHash, localHash);
       } catch {
         identityBound = false;
-        deviceMatches = true;
+        deviceMatches = false;
       }
       if (!liveCreditReady(false, {
         kycDeclarado,

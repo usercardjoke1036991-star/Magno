@@ -253,7 +253,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/accountUsername.ts` — módulo JS/TS
   - Funciones/clases: loadClaimedUsername, saveClaimedUsername, checkUsernameAvailable, claimUsername, clearClaimedUsername
 - `services/appLock.ts` — módulo JS/TS
-  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, isPinSet, getPinLockRemaining, setPin, checkPin, matchPin, verifyPin, changePin, clearPin, setPassword, checkPassword, matchPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
+  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, probePasswordSet, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, probePinSet, isPinSet, getPinLockRemaining, setPin, checkPin, matchPin, verifyPin, changePin, clearPin, setPassword, abortPasswordSetup, checkPassword, matchPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
 - `services/appWallet.ts` — módulo JS/TS
   - Funciones/clases: rewrapWalletWithNewKey, withCurrentRpc, isValidSecretPhrase, loadAppWallet, createAppWallet, ensureAppWallet, wipeAppWallet, recreateAppWallet, generateSecretPhrase, addressFromPhrase, importFromPhrase, getSecretPhrase, hasSecretPhrase, isPhraseBackedUp, markPhraseBackedUp, cobrarComisionIntermediario, enviarToken, enviarBnb
 - `services/authenticator.ts` — módulo JS/TS
@@ -332,7 +332,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `types/zkTypes.ts` — módulo JS/TS
   - Funciones/clases: asFieldElement, ZKTypeValidator, ZK_SECURITY_CONSTANTS
 - `utils/accountEntry.ts` — módulo JS/TS
-  - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase
+  - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, accountOnPhoneFromProbes, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase
 - `utils/adminProposal.ts` — módulo JS/TS
   - Funciones/clases: describeAdminCalldata
 - `utils/appDeepLink.ts` — módulo JS/TS
@@ -372,7 +372,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/sanitize.ts` — módulo JS/TS
   - Funciones/clases: stripUnsafeText, isHttpsUrl, isAllowedWei, isHexAddress
 - `utils/secretBox.ts` — módulo JS/TS
-  - Funciones/clases: timingSafeEqualBytes, timingSafeEqualHex, hmacSha256, deriveWrapKey, isSealedBlob, sealSecret, openSecret
+  - Funciones/clases: timingSafeEqualBytes, timingSafeEqualHex, hmacSha256, deriveWrapKey, deriveWrapKeyAsync, isSealedBlob, sealSecret, openSecret
 - `utils/totp.ts` — módulo JS/TS
   - Funciones/clases: bytesToBase32, base32ToBytes, totpAt, verifyTotp, otpauthUrl
 - `utils/txErrors.ts` — módulo JS/TS
@@ -382,7 +382,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `wallet/AppModeContext.tsx` — módulo JS/TS
   - Funciones/clases: AppModeProvider, useAppMode
 - `wallet/appModePersist.ts` — módulo JS/TS
-  - Funciones/clases: APP_MODE_STORAGE_KEY, resolvePersistedMode
+  - Funciones/clases: APP_MODE_STORAGE_KEY, resolvePersistedMode, isFirstAppMode
 - `wallet/AppWalletContext.tsx` — módulo JS/TS
   - Funciones/clases: AppWalletProvider, useAppWallet
 

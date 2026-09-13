@@ -62,7 +62,7 @@ Magno/
 - **Pool no redimible**: `retirarLiquidez` hace `revert("pool locked")` — el capital queda para prestar
 - **`tx.origin == msg.sender`**: bloquea contratos intermediarios en registro, préstamo, pago, depósito, liquidación y destrucción
 - **Timelock de 72h + multisig** para todas las acciones admin (excepto pausa que es inmediata)
-- **Wallet interna (app wallet)**: cada instalación genera una wallet HD (frase de 12 palabras BIP-39) cifrada en SecureStore
+- **Wallet interna (app wallet)**: cada instalación genera una wallet HD (frase de 24 palabras BIP-39) cifrada en SecureStore. Recuperar aún acepta 12 palabras de cuentas antiguas.
 - **Identidad KYC inmutable**: nombre legal y tipo de documento se congelan en el primer submit on-chain; ciudad/región siguen editables
 - **Cerrar cuenta exige deuda = 0 y !esMoroso**: el contrato y la UI bloquean a morosos
 - **ZK es experimental**: `snarkjs` hace stub en Metro; el registro real es `registrarHumanoConPadre()`
@@ -71,12 +71,12 @@ Magno/
 - **Liquidación en AdminPanel**: el servicio aprueba USDT automáticamente antes de `liquidate()`
 - **`useHomeHandlers` hook**: handlers extraídos de `app/index.tsx` para reducir complejidad
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
-- **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 12 palabras. En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide las 12 palabras y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal. Antes de pedir crédito hay que anotar las 12 palabras. En Real también correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain.
+- **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. En Real también correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain.
 - **Frase secreta BIP-39**: alta y respaldo. No cierra la cuenta. No hay destruir ni generar otra cuenta en la app.
 - **Usuario y contraseña son el candado de este teléfono.** El correo sigue para Real, recuperar contraseña y OTP. Desbloquear, pedir, pagar o transferir pueden usar contraseña, correo, PIN, huella o autenticador si el usuario los elige.
 - **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: contraseña, correo, PIN, huella o autenticador). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar.
 - **Historial de movimientos**: sala en el hub con préstamos, pagos y transferencias (billeteras, plataforma, fecha y hora).
-- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
+- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
 - **Fama y dinero no se mezclan**: al registrar, la reputación recorre toda la línea (misma escala 15/8/6/4/2/0,8/0,4 %) y el fundador suma de cada alta. El USDT solo se mueve al pagar (interés + bono de activación). Los puntos de red y el bono del pool son solo del referidor directo, para no drenar la caja.
@@ -117,9 +117,9 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- 15 suites Hardhat (103 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos y donación…
+- 15 suites Hardhat (116 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 809 claves
+- i18n: 17 idiomas, 856 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados
@@ -128,6 +128,7 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
 - Auto-refresh de balances cada 30 s
+- Primera apertura en Cuenta Real; al cambiar a Demo o Real se restaura ese modo al reabrir (`wallet/AppModeContext.tsx`)
 
 ## Lo que está en progreso 🔄 (solo el fundador puede completar)
 - Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)
@@ -189,7 +190,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Contrato | `constants/contractConfig.ts` | ABI + dirección según entorno |
 | Tokens | `constants/tokens.ts` | Lista de stables soportados |
 | ABI/contrato | `contracts/QuatriviumCredit.sol` | Lógica de crédito on-chain |
-| Tests | `test/*.test.js` | 15 suites Hardhat · 81 tests |
+| Tests | `test/*.test.js` | 15 suites Hardhat · 116 tests |
 | Errores tx | `utils/txErrors.ts` | Mensajes legibles de revert |
 
 ---
@@ -236,6 +237,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-13 | Primera apertura en Real; AppMode espera AsyncStorage y recuerda el ultimo modo abierto. | — |
+| 2026-09-13 | Auditoria 2026-09-13: probePasswordSet distingue vacio de almacén colgado. Hardhat 116/116, cyber 28/28, Demo 0xD2d2A9 OPERATIVO. Mainnet y Twilio siguen siendo acciones del fundador. | — |
+| 2026-09-12 | Auditoria profunda: 116 tests Hardhat, Demo live OPERATIVO. failOpen no abre Crear frase si el candado no responde. | — |
 | 2026-09-12 | Auditoria 2026-09-12: TypeScript sin errores. Alta frase-primero. Sesion exclusiva viva en notify-worker. Metro y worker restaurados. Demo 0xD2d2A9eF operativo. Mainnet sigue sin desplegar. | — |
 | 2026-09-12 | Sesion exclusiva por dispositivo via notify-worker /session/claim. Al recuperar o entrar en otro telefono, el anterior se bloquea. | — |
 | 2026-09-12 | Onboarding: crear o recuperar frase BIP-39, luego usuario y contrasena. Reinstalar en el mismo telefono pide frase+usuario+clave. Telefono perdido se recupera con las 12 palabras. | — |

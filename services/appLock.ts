@@ -12,7 +12,7 @@ import {
   masterPasswordReject,
   PASSWORD_LENGTH,
 } from '../utils/passwordPolicy';
-import { deriveWrapKey, isSealedBlob, openSecret, sealSecret, timingSafeEqualHex } from '../utils/secretBox';
+import { deriveWrapKeyAsync, isSealedBlob, openSecret, sealSecret, timingSafeEqualHex } from '../utils/secretBox';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { clearWalletSession, getWalletWrapKey, setWalletWrapKey } from './walletSession';
 import { sha256, toUtf8Bytes } from 'ethers';
@@ -56,11 +56,14 @@ interface GateRecord {
   until: number;
 }
 
-function hashSecret(secret: string, salt: string, rounds: number): string {
+async function hashSecret(secret: string, salt: string, rounds: number): Promise<string> {
   let digest = `${salt}:${secret}`;
   const n = Math.max(1, Math.min(rounds, 20_000));
   for (let i = 0; i < n; i += 1) {
     digest = sha256(toUtf8Bytes(digest)).slice(2);
+    if (i % 250 === 249) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
   }
   return digest;
 }
@@ -114,20 +117,60 @@ function parsePasswordRecord(raw: string | null): PasswordRecord | null {
   }
 }
 
+const STORE_UNKNOWN = Symbol('store-unknown');
+
+function timedRead<T>(promise: Promise<T>, ms: number): Promise<T | typeof STORE_UNKNOWN> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(STORE_UNKNOWN), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(STORE_UNKNOWN);
+      }
+    );
+  });
+}
+
 async function readPasswordRecord(): Promise<PasswordRecord | null> {
-  const secure = parsePasswordRecord(
-    await withTimeout(SecureStore.getItemAsync(PASSWORD_KEY).catch(() => null), 1500, null)
+  const probed = await probePasswordRecord(1500);
+  return probed === STORE_UNKNOWN ? null : probed;
+}
+
+async function probePasswordRecord(
+  timeoutMs: number
+): Promise<PasswordRecord | null | typeof STORE_UNKNOWN> {
+  const secureRaw = await timedRead(
+    SecureStore.getItemAsync(PASSWORD_KEY).catch(() => {
+      throw new Error('secure-store');
+    }),
+    timeoutMs
   );
-  if (secure) return secure;
-  try {
-    return parsePasswordRecord(await AsyncStorage.getItem(PASSWORD_FALLBACK));
-  } catch {
-    return null;
+  if (secureRaw !== STORE_UNKNOWN) {
+    const parsed = parsePasswordRecord(secureRaw);
+    if (parsed) return parsed;
   }
+  try {
+    const fallback = parsePasswordRecord(await AsyncStorage.getItem(PASSWORD_FALLBACK));
+    if (fallback) return fallback;
+  } catch {
+    /* ignore */
+  }
+  return secureRaw === STORE_UNKNOWN ? STORE_UNKNOWN : null;
+}
+
+/** true = hay clave, false = vacío, null = el almacén no respondió. */
+export async function probePasswordSet(timeoutMs = 1500): Promise<boolean | null> {
+  const probed = await probePasswordRecord(timeoutMs);
+  if (probed === STORE_UNKNOWN) return null;
+  return Boolean(probed);
 }
 
 export async function isPasswordSet(): Promise<boolean> {
-  return Boolean(await readPasswordRecord());
+  return (await probePasswordSet()) === true;
 }
 
 function passwordRounds(record: PasswordRecord): number {
@@ -139,7 +182,7 @@ function passwordRounds(record: PasswordRecord): number {
 async function pinHashMatches(pin: string): Promise<boolean> {
   const record = await readPinRecord();
   if (!record || !isSixDigits(pin)) return false;
-  const hash = hashSecret(pin, record.salt, pinRoundsForRecord(record));
+  const hash = await hashSecret(pin, record.salt, pinRoundsForRecord(record));
   return timingSafeEqualHex(digestHex(hash), digestHex(record.hash));
 }
 
@@ -147,7 +190,7 @@ async function persistPinWrap(pin: string): Promise<void> {
   const wrap = getWalletWrapKey();
   const record = await readPinRecord();
   if (!wrap || !record || !isSixDigits(pin)) return;
-  const pinKey = deriveWrapKey(pin, record.salt, pinRoundsForRecord(record));
+  const pinKey = await deriveWrapKeyAsync(pin, record.salt, pinRoundsForRecord(record));
   await SecureStore.setItemAsync(PIN_WRAP_KEY, sealSecret(wrap, pinKey), OPTIONS);
 }
 
@@ -155,7 +198,7 @@ async function unlockWithPinWrap(pin: string, record: PinRecord): Promise<boolea
   try {
     const raw = await SecureStore.getItemAsync(PIN_WRAP_KEY);
     if (!raw || !isSealedBlob(raw)) return false;
-    const pinKey = deriveWrapKey(pin, record.salt, pinRoundsForRecord(record));
+    const pinKey = await deriveWrapKeyAsync(pin, record.salt, pinRoundsForRecord(record));
     const wrap = openSecret(raw, pinKey);
     setWalletWrapKey(wrap);
     return Boolean(getWalletWrapKey());
@@ -189,9 +232,9 @@ function pinRoundsForRecord(record: PinRecord): number {
   return Math.min(20_000, Math.max(1, Math.floor(n)));
 }
 
-function activateSession(pin: string, record: PinRecord): string {
+async function activateSession(pin: string, record: PinRecord): Promise<string> {
   const rounds = record.v === 2 ? pinRoundsForRecord(record) : PIN_ROUNDS;
-  const wrap = deriveWrapKey(pin, record.salt, rounds);
+  const wrap = await deriveWrapKeyAsync(pin, record.salt, rounds);
   setWalletWrapKey(wrap);
   return wrap;
 }
@@ -259,8 +302,26 @@ async function persistCompanionWraps(wrap = getWalletWrapKey()): Promise<void> {
   );
 }
 
+/** true = hay PIN, false = vacío, null = el almacén no respondió. */
+export async function probePinSet(timeoutMs = 1500): Promise<boolean | null> {
+  const raw = await timedRead(
+    SecureStore.getItemAsync(PIN_KEY).catch(() => {
+      throw new Error('secure-store');
+    }),
+    timeoutMs
+  );
+  if (raw === STORE_UNKNOWN) return null;
+  if (!raw) return false;
+  try {
+    const parsed = JSON.parse(raw) as PinRecord;
+    return Boolean(parsed?.salt && parsed?.hash);
+  } catch {
+    return false;
+  }
+}
+
 export async function isPinSet(): Promise<boolean> {
-  return Boolean(await readPinRecord());
+  return (await probePinSet()) === true;
 }
 
 export async function getPinLockRemaining(): Promise<number> {
@@ -273,7 +334,7 @@ export async function setPin(pin: string): Promise<string> {
     throw new Error('weak-pin');
   }
   const salt = Crypto.randomUUID();
-  const hash = hashSecret(pin, salt, PIN_ROUNDS);
+  const hash = await hashSecret(pin, salt, PIN_ROUNDS);
   const record: PinRecord = { v: 2, salt, hash, rounds: PIN_ROUNDS };
   await SecureStore.setItemAsync(PIN_KEY, JSON.stringify(record), OPTIONS);
   await setLockOnOpenEnabled(true);
@@ -291,7 +352,7 @@ export async function setPin(pin: string): Promise<string> {
     await persistCompanionWraps(existingWrap);
     return existingWrap;
   }
-  const wrap = activateSession(pin, record);
+  const wrap = await activateSession(pin, record);
   if (await isBiometricEnabled()) {
     await persistWrapForBiometric(wrap);
   }
@@ -314,7 +375,7 @@ export async function checkPin(pin: string): Promise<PinCheck> {
     return { ok: false, remainingMs: 0, locked: false };
   }
   const rounds = pinRoundsForRecord(record);
-  const hash = hashSecret(pin, record.salt, rounds);
+  const hash = await hashSecret(pin, record.salt, rounds);
   if (!timingSafeEqualHex(digestHex(hash), digestHex(record.hash))) {
     const gate = await readGate();
     const fails = gate.fails + 1;
@@ -331,7 +392,7 @@ export async function checkPin(pin: string): Promise<PinCheck> {
     }
     await writeGate({ fails: 0, until: 0 });
   } else {
-    activateSession(pin, record);
+    await activateSession(pin, record);
     await writeGate({ fails: 0, until: 0 });
   }
   await persistCompanionWraps();
@@ -406,9 +467,9 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
     throw new Error('wrong-pin');
   }
   const salt = Crypto.randomUUID();
-  const hash = hashSecret(password, salt, PIN_ROUNDS);
+  const hash = await hashSecret(password, salt, PIN_ROUNDS);
   const record: PasswordRecord = { v: 1, salt, hash, rounds: PIN_ROUNDS };
-  const nextWrap = deriveWrapKey(password, salt, PIN_ROUNDS);
+  const nextWrap = await deriveWrapKeyAsync(password, salt, PIN_ROUNDS);
   const previousWrap = getWalletWrapKey();
   if (previousWrap) {
     const { rewrapWalletWithNewKey } = await import('./appWallet');
@@ -433,6 +494,21 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
   return nextWrap;
 }
 
+/** Si el alta falla después de guardar la clave, no dejar candado huérfano. */
+export async function abortPasswordSetup(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(PASSWORD_FALLBACK);
+  } catch {
+    /* ignore */
+  }
+  try {
+    await SecureStore.deleteItemAsync(PASSWORD_KEY);
+  } catch {
+    /* ignore */
+  }
+  clearWalletSession();
+}
+
 export async function checkPassword(password: string): Promise<PinCheck> {
   if (!password) {
     return { ok: false, remainingMs: 0, locked: false };
@@ -446,7 +522,7 @@ export async function checkPassword(password: string): Promise<PinCheck> {
     return { ok: false, remainingMs: 0, locked: false };
   }
   const rounds = passwordRounds(record);
-  const hash = hashSecret(password, record.salt, rounds);
+  const hash = await hashSecret(password, record.salt, rounds);
   if (!timingSafeEqualHex(digestHex(hash), digestHex(record.hash))) {
     const gate = await readGate();
     const fails = gate.fails + 1;
@@ -454,9 +530,9 @@ export async function checkPassword(password: string): Promise<PinCheck> {
     await writeGate({ fails, until });
     return { ok: false, remainingMs: remainingLockMs(until), locked: remainingLockMs(until) > 0 };
   }
-  setWalletWrapKey(deriveWrapKey(password, record.salt, rounds));
+  setWalletWrapKey(await deriveWrapKeyAsync(password, record.salt, rounds));
   await writeGate({ fails: 0, until: 0 });
-  await persistCompanionWraps();
+  void persistCompanionWraps();
   return { ok: true };
 }
 
@@ -465,7 +541,7 @@ export async function matchPassword(password: string): Promise<boolean> {
   const record = await readPasswordRecord();
   if (!record) return false;
   const rounds = passwordRounds(record);
-  const hash = hashSecret(password, record.salt, rounds);
+  const hash = await hashSecret(password, record.salt, rounds);
   return timingSafeEqualHex(digestHex(hash), digestHex(record.hash));
 }
 

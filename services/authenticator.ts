@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
-import { deriveWrapKey, isSealedBlob, openSecret, sealSecret } from '../utils/secretBox';
+import { deriveWrapKeyAsync, isSealedBlob, openSecret, sealSecret } from '../utils/secretBox';
 import { bytesToBase32, otpauthUrl, verifyTotp } from '../utils/totp';
 import { getWalletWrapKey, setWalletWrapKey } from './walletSession';
 
@@ -40,7 +40,7 @@ export async function persistAuthenticatorWrap(wrap = getWalletWrapKey()): Promi
   const secret = await loadAuthenticatorSecret();
   if (!wrap || !secret) return false;
   try {
-    const key = deriveWrapKey(secret, WRAP_SALT, WRAP_ROUNDS);
+    const key = await deriveWrapKeyAsync(secret, WRAP_SALT, WRAP_ROUNDS);
     await SecureStore.setItemAsync(WRAP_KEY, sealSecret(wrap, key), OPTIONS);
     return true;
   } catch {
@@ -67,7 +67,7 @@ export async function unlockWithAuthenticator(code: string): Promise<boolean> {
   try {
     const raw = await SecureStore.getItemAsync(WRAP_KEY);
     if (!raw || !isSealedBlob(raw)) return false;
-    const key = deriveWrapKey(secret, WRAP_SALT, WRAP_ROUNDS);
+    const key = await deriveWrapKeyAsync(secret, WRAP_SALT, WRAP_ROUNDS);
     setWalletWrapKey(openSecret(raw, key));
     return Boolean(getWalletWrapKey());
   } catch {

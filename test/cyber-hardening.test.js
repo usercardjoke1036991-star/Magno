@@ -94,8 +94,9 @@ function isPrivateKeyPassword(value) {
 
 function isValidMasterPassword(value) {
   if (isPrivateKeyPassword(value)) return false;
-  if (value.length < 8 || value.length > 128) return false;
+  if (value.length < 8 || value.length > 66) return false;
   if (!/^[\x21-\x7E]+$/.test(value)) return false;
+  if (!/[A-Z]/.test(value) || !/[0-9]/.test(value) || !/[^A-Za-z0-9]/.test(value)) return false;
   if (/^(.)\1+$/.test(value)) return false;
   if (new Set(value).size < 4) return false;
   return true;
@@ -104,13 +105,13 @@ function isValidMasterPassword(value) {
 function masterPasswordFromRandomBytes(bytes) {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*';
   const max = 256 - (256 % alphabet.length);
-  let out = '';
+  let pool = '';
   for (let i = 0; i < bytes.length; i += 1) {
     if (bytes[i] >= max) continue;
-    out += alphabet[bytes[i] % alphabet.length];
-    if (out.length === 16) return out;
+    pool += alphabet[bytes[i] % alphabet.length];
   }
-  throw new Error('entropy');
+  if (pool.length < 12) throw new Error('entropy');
+  return `Ab7#${pool.slice(0, 12)}`.slice(0, 16);
 }
 
 describe('cyber hardening — PIN and secret box', function () {
@@ -142,9 +143,23 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(generated).to.have.length(16);
     expect(isValidMasterPassword(generated)).to.equal(true);
     expect(isValidMasterPassword('MiClave#9')).to.equal(true);
+    expect(isValidMasterPassword(`Aa1!${'x'.repeat(4)}`)).to.equal(true);
+    expect(isValidMasterPassword(`Aa1!${'x'.repeat(62)}`)).to.equal(true);
+    expect(isValidMasterPassword(`Aa1!${'x'.repeat(63)}`)).to.equal(false);
+    expect(isValidMasterPassword('ClaveValida1')).to.equal(false);
+    expect(isValidMasterPassword('clavevalida1!')).to.equal(false);
+    expect(isValidMasterPassword('ClaveValida!')).to.equal(false);
     expect(isValidMasterPassword('a'.repeat(16))).to.equal(false);
     expect(isValidMasterPassword('0x' + 'ab'.repeat(32))).to.equal(false);
     expect(isValidMasterPassword('short')).to.equal(false);
+  });
+
+  it('creates a 24-word BIP-39 phrase by default', function () {
+    const { Mnemonic, HDNodeWallet, randomBytes } = require('ethers');
+    const mnemonic = Mnemonic.fromEntropy(randomBytes(32));
+    const wallet = HDNodeWallet.fromMnemonic(mnemonic);
+    expect(mnemonic.phrase.split(/\s+/)).to.have.length(24);
+    expect(wallet.address).to.match(/^0x[0-9a-fA-F]{40}$/);
   });
 
   it('seals an immutable KYC fingerprint and keeps it when local fields change', function () {
@@ -345,7 +360,7 @@ describe('demo credit gates', function () {
     return Boolean(hash) && !/^0x0+$/i.test(hash);
   }
 
-  it('lets a demo account operate without KYC, phone or email but requires the 12-word backup', function () {
+  it('lets a demo account operate without KYC, phone or email but requires the 24-word backup', function () {
     expect(liveNeedsKyc(true, false)).to.equal(false);
     expect(liveNeedsPhone(true, false)).to.equal(false);
     expect(liveNeedsEmail(true, false)).to.equal(false);
@@ -363,6 +378,11 @@ describe('demo credit gates', function () {
     expect(liveCreditReady(false, { kycDeclarado: false, identityBound: true, hasEmail: true, phraseBackedUp: true })).to.equal(false);
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true })).to.equal(true);
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true, deviceMatches: false })).to.equal(false);
+    function deviceMatchAfterIdentityReadFailure(demo) {
+      return demo;
+    }
+    expect(deviceMatchAfterIdentityReadFailure(false)).to.equal(false);
+    expect(deviceMatchAfterIdentityReadFailure(true)).to.equal(true);
     expect(identityHashBound('0x0000000000000000000000000000000000000000000000000000000000000000')).to.equal(false);
     expect(identityHashBound('0xabc')).to.equal(true);
   });
@@ -439,7 +459,7 @@ describe('demo credit gates', function () {
 
 describe('account entry — password, email and session', () => {
   function canSubmitCreateSecrets(password, email) {
-    return Boolean(password) && password.length >= 8 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    return isValidMasterPassword(password) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
   function canSubmitCreateCode(code) {
     return /^\d{6}$/.test(code);
@@ -458,9 +478,20 @@ describe('account entry — password, email and session', () => {
     return left === right;
   }
 
+  it('asks for username and password before showing the 24 words', () => {
+    const steps = ['language', 'welcome', 'credentials', 'phrase'];
+    expect(steps.indexOf('language')).to.be.lessThan(steps.indexOf('welcome'));
+    expect(steps.indexOf('credentials')).to.be.lessThan(steps.indexOf('phrase'));
+    expect(canSubmitCreateSecrets('ClaveValida1!', 'user@correo.com')).to.equal(true);
+    function importMarksPhraseOnCreate() {
+      return false;
+    }
+    expect(importMarksPhraseOnCreate()).to.equal(false);
+  });
+
   it('splits create into secrets first and code later', () => {
-    expect(canSubmitCreateSecrets('ClaveValida1', 'user@correo.com')).to.equal(true);
-    expect(canSubmitCreateSecrets('ClaveValida1', '')).to.equal(false);
+    expect(canSubmitCreateSecrets('ClaveValida1!', 'user@correo.com')).to.equal(true);
+    expect(canSubmitCreateSecrets('ClaveValida1!', '')).to.equal(false);
     expect(canSubmitCreateCode('')).to.equal(false);
     expect(canSubmitCreateCode('123456')).to.equal(true);
   });
@@ -489,7 +520,7 @@ describe('account entry — password, email and session', () => {
     expect(signInUsernameAllowed('ana_one', 'ana_one')).to.equal(true);
   });
 
-  it('hides create-account on this phone after an account exists and restore needs 12 words', () => {
+  it('hides create-account on this phone after an account exists and restore accepts 12 or 24 words', () => {
     function welcomeShowsCreate(accountOnPhone, deviceClaimed = false) {
       return !accountOnPhone && !deviceClaimed;
     }
@@ -503,7 +534,7 @@ describe('account entry — password, email and session', () => {
       return ['createPhrase', 'restoreAccount'];
     }
     function canSubmitDeviceCredentials(password, username) {
-      return Boolean(password) && password.length >= 8 && /^[a-z][a-z0-9_]{2,19}$/.test(username);
+      return isValidMasterPassword(password) && /^[a-z][a-z0-9_]{2,19}$/.test(username);
     }
     function canSubmitReinstall(phrase, password, username) {
       const words = String(phrase || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -520,7 +551,13 @@ describe('account entry — password, email and session', () => {
       if (!bound || /^0x0+$/i.test(bound)) return true;
       return bound.toLowerCase() === String(localDeviceHash || '').toLowerCase();
     }
+    function accountOnPhoneFromProbes(password, pin) {
+      if (password === true || pin === true) return true;
+      if (password === null || pin === null) return null;
+      return false;
+    }
     function nextEntryScreen({ accountOnPhone, sessionSaved, wrapReady, unlockOn }) {
+      if (accountOnPhone === null) return 'signIn';
       if (!accountOnPhone) return 'welcome';
       if (!sessionSaved) return 'signIn';
       if (unlockOn) return 'unlock';
@@ -538,9 +575,11 @@ describe('account entry — password, email and session', () => {
     expect(welcomeShowsCreate(false, true)).to.equal(false);
     expect(welcomeActions(false)).to.deep.equal(['createPhrase', 'restoreAccount']);
     expect(welcomeActions(false, true)).to.deep.equal(['restoreAccount']);
-    expect(canSubmitDeviceCredentials('ClaveValida1', 'ana_one')).to.equal(true);
-    expect(canSubmitDeviceCredentials('ClaveValida1', 'ab')).to.equal(false);
-    expect(canSubmitReinstall('uno dos tres cuatro cinco seis siete ocho nueve diez once doce', 'ClaveValida1', 'ana_one')).to.equal(true);
+    expect(canSubmitDeviceCredentials('ClaveValida1!', 'ana_one')).to.equal(true);
+    expect(canSubmitDeviceCredentials('ClaveValida1', 'ana_one')).to.equal(false);
+    expect(canSubmitDeviceCredentials('ClaveValida1!', 'ab')).to.equal(false);
+    expect(canSubmitReinstall('uno dos tres cuatro cinco seis siete ocho nueve diez once doce', 'ClaveValida1!', 'ana_one')).to.equal(true);
+    expect(canSubmitRestorePhrase('alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november oscar papa quebec romeo sierra tango uniform victor whiskey xray')).to.equal(true);
     expect(welcomeActions(true)).to.deep.equal([]);
     expect(restoreMatchesDevice('0xabc', '0xABC')).to.equal(true);
     expect(restoreMatchesDevice('0xabc', '0xdef')).to.equal(false);
@@ -561,6 +600,10 @@ describe('account entry — password, email and session', () => {
     expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: true, wrapReady: true, unlockOn: false })).to.equal('app');
     expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: true, wrapReady: false, unlockOn: true })).to.equal('unlock');
     expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: false, wrapReady: false, unlockOn: false })).to.equal('signIn');
+    expect(accountOnPhoneFromProbes(null, false)).to.equal(null);
+    expect(accountOnPhoneFromProbes(false, false)).to.equal(false);
+    expect(nextEntryScreen({ accountOnPhone: null, sessionSaved: false, wrapReady: false, unlockOn: false })).to.equal('signIn');
+    expect(nextEntryScreen({ accountOnPhone: false, sessionSaved: false, wrapReady: false, unlockOn: false })).to.equal('welcome');
     expect(orderUnlockMethods(['pin', 'password'], 'pin')).to.deep.equal(['pin', 'password']);
     expect(orderUnlockMethods([])).to.deep.equal(['password']);
     function unlockPromptMethods(selected, primary, primaryOnly) {

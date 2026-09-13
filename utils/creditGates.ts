@@ -23,7 +23,7 @@ export function liveNeedsEmail(demo: boolean, hasEmail: boolean): boolean {
   return !demo && !hasEmail;
 }
 
-/** Anotar las 12 palabras antes de pedir crédito. Demo y Real. */
+/** Anotar las 24 palabras antes de pedir crédito. Demo y Real. */
 export function liveNeedsPhrase(phraseBackedUp: boolean): boolean {
   return !phraseBackedUp;
 }

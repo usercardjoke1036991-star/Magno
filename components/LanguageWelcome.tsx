@@ -14,7 +14,7 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
   const { colors } = useTheme();
   const align = rtl ? ('right' as const) : ('left' as const);
 
-  if (__DEV__) {
+  if (__DEV__ && !langChosen) {
     console.log('[boot] LanguageWelcome', { langReady, langChosen, lang });
   }
 
@@ -37,7 +37,6 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
         <AppText style={[styles.brand, { color: colors.text, textAlign: align }]}>{APP_DISPLAY_NAME}</AppText>
         <AppText style={[styles.title, { color: colors.text, textAlign: align }]}>{t('chooseLanguage')}</AppText>
         <AppText style={[styles.lead, { color: colors.textMuted, textAlign: align }]}>{t('chooseLanguageLead')}</AppText>
-        <AppText style={[styles.hint, { color: colors.textMuted, textAlign: align }]}>{t('chooseLanguageHint')}</AppText>
         {LANGUAGES.map((item) => {
           const active = item.code === lang;
           return (

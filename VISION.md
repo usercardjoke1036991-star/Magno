@@ -67,11 +67,13 @@
 - Sala Donar aparte en Real; bonos e hitos iguales en Demo y Real
 - Alta con contraseña y correo juntos, código solo la primera vez, inicio de sesión sin código y guardar sesión real
 - En Cuenta Real no se puede pulsar Solicitar hasta tener correo, telefono y KYC atados. Demo sigue sin esos requisitos.
-- Si pierde o cambia el telefono recupera la misma cuenta con las 12 palabras. En este telefono, al crear la cuenta desaparece Crear cuenta.
+- Si pierde o cambia el telefono recupera la misma cuenta con las 24 palabras. En este telefono, al crear la cuenta desaparece Crear cuenta.
 - Con sesion guardada no volver a crear/iniciar/recuperar: pantalla de bloqueo, contraseña por defecto, el usuario elige metodos y el principal. Cerrar sesion solo en Seguridad.
-- Desbloqueo: contraseña principal y correo guardado. Una o varias opciones. Frase 12 palabras obligatoria antes de credito. Sin cerrar sesion. Recuperar con 12 palabras abre la cuenta on-chain.
-- Quitar destruir cuenta. Una persona una cuenta. Formatear o cambiar VPN no crea otra: se recupera con las 12 palabras.
-- Alta: crear frase secreta o recuperar cuenta; luego usuario y contrasena del dispositivo. Si se pierde el celular se recupera con las 12 palabras en un telefono nuevo.
+- Desbloqueo: contraseña principal (8 a 66, mayúscula, número y símbolo) y correo guardado. Una o varias opciones. Frase 24 palabras obligatoria antes de credito. Sin cerrar sesion. Recuperar con la frase abre la cuenta on-chain.
+- Quitar destruir cuenta. Una persona una cuenta. Formatear o cambiar VPN no crea otra: se recupera con las 24 palabras.
+- Alta: crear frase secreta de 24 palabras o recuperar cuenta; luego usuario y contrasena del dispositivo (8 a 66, mayúscula, número y símbolo). Si se pierde el celular se recupera con las 24 palabras en un telefono nuevo.
+- Contraseña del celular 8 a 66 con mayuscula, numero y simbolo. Frase secreta nueva de 24 palabras.
+- primera apertura entra en Real; luego la app recuerda el ultimo modo abierto (Demo o Real)
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -119,3 +121,5 @@
 - [2026-09-12 20:58] Idea añadida al backlog: "Desbloqueo: contraseña principal y correo guardado. Una o varias opciones. Frase"
 - [2026-09-12 21:05] Idea añadida al backlog: "Quitar destruir cuenta. Una persona una cuenta. Formatear o cambiar VPN no crea "
 - [2026-09-12 21:40] Idea añadida al backlog: "Alta: crear frase secreta o recuperar cuenta; luego usuario y contrasena del dis"
+- [2026-09-12 22:40] Idea añadida al backlog: "Contraseña del celular 8 a 66 con mayuscula, numero y simbolo. Frase secreta nue"
+- [2026-09-13 01:08] Idea añadida al backlog: "primera apertura entra en Real; luego la app recuerda el ultimo modo abierto (De"

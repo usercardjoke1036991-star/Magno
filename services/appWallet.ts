@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Contract, HDNodeWallet, JsonRpcProvider, Mnemonic, Wallet, type Signer } from 'ethers';
+import { Contract, HDNodeWallet, JsonRpcProvider, Mnemonic, Wallet, randomBytes, type Signer } from 'ethers';
 import * as SecureStore from 'expo-secure-store';
 import { ERC20_ABI } from '../constants/contractConfig';
 import { NETWORK_CONFIG, RPC_URLS } from '../constants/rpcConfig';
@@ -135,7 +135,7 @@ export async function createAppWallet(): Promise<HDNodeWallet> {
   if (claimed) {
     throw new Error('device-bound');
   }
-  const created = HDNodeWallet.createRandom();
+  const created = createTwentyFourWordWallet();
   await writeStored({
     address: created.address.toLowerCase(),
     privateKey: created.privateKey,
@@ -178,9 +178,14 @@ export async function recreateAppWallet(): Promise<HDNodeWallet> {
   return createAppWallet();
 }
 
-/** Genera 12 palabras sin guardarlas. Se persisten al poner usuario y contraseña. */
+function createTwentyFourWordWallet(): HDNodeWallet {
+  const mnemonic = Mnemonic.fromEntropy(randomBytes(32));
+  return HDNodeWallet.fromMnemonic(mnemonic);
+}
+
+/** Genera 24 palabras sin guardarlas. Se persisten al poner usuario y contraseña. */
 export function generateSecretPhrase(): { phrase: string; address: string } {
-  const created = HDNodeWallet.createRandom();
+  const created = createTwentyFourWordWallet();
   const phrase = created.mnemonic?.phrase;
   if (!phrase) {
     throw new Error('phrase');
@@ -196,7 +201,10 @@ export function addressFromPhrase(phrase: string): string {
   return HDNodeWallet.fromPhrase(normalized).address.toLowerCase();
 }
 
-export async function importFromPhrase(phrase: string): Promise<HDNodeWallet> {
+export async function importFromPhrase(
+  phrase: string,
+  options: { markBackedUp?: boolean } = {}
+): Promise<HDNodeWallet> {
   const normalized = normalizePhrase(phrase);
   if (!isValidSecretPhrase(normalized)) {
     throw new Error('phrase');
@@ -210,7 +218,9 @@ export async function importFromPhrase(phrase: string): Promise<HDNodeWallet> {
     privateKey: imported.privateKey,
     mnemonic: imported.mnemonic?.phrase || normalized,
   });
-  await markPhraseBackedUp();
+  if (options.markBackedUp !== false) {
+    await markPhraseBackedUp();
+  }
   return imported.connect(writeProvider()) as HDNodeWallet;
 }
 

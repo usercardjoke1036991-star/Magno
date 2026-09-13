@@ -41,13 +41,24 @@ export function welcomeShowsSignIn(_accountOnPhone: boolean): boolean {
 
 export type EntryScreen = 'welcome' | 'signIn' | 'unlock' | 'app';
 
+/** SecureStore/MIUI: true hay cuenta, false vacío, null no se pudo leer. */
+export function accountOnPhoneFromProbes(
+  password: boolean | null,
+  pin: boolean | null
+): boolean | null {
+  if (password === true || pin === true) return true;
+  if (password === null || pin === null) return null;
+  return false;
+}
+
 /** Tras Guardar sesión no se vuelve a crear/iniciar/recuperar. */
 export function nextEntryScreen(input: {
-  accountOnPhone: boolean;
+  accountOnPhone: boolean | null;
   sessionSaved: boolean;
   wrapReady: boolean;
   unlockOn: boolean;
 }): EntryScreen {
+  if (input.accountOnPhone === null) return 'signIn';
   if (!input.accountOnPhone) return 'welcome';
   if (!input.sessionSaved) return 'signIn';
   if (input.unlockOn) return 'unlock';

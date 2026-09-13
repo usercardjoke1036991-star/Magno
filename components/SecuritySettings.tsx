@@ -125,17 +125,20 @@ export const SecuritySettings: React.FC = () => {
   const phoneOk = userInfo.identityBound;
 
   const reveal = async () => {
-    if (pinSet) {
-      if (!(await verifyPin(revealPin))) {
-        Alert.alert(t('error'), t('lockPinWrong'));
-        return;
-      }
-    } else {
+    if (passwordSet) {
       const checked = await checkPassword(revealPassword);
       if (!checked.ok) {
         Alert.alert(t('error'), t('lockPasswordWrong'));
         return;
       }
+    } else if (pinSet) {
+      if (!(await verifyPin(revealPin))) {
+        Alert.alert(t('error'), t('lockPinWrong'));
+        return;
+      }
+    } else {
+      Alert.alert(t('error'), t('lockPasswordWrong'));
+      return;
     }
     const secret = await getSecretPhrase();
     if (!secret) {
@@ -171,12 +174,12 @@ export const SecuritySettings: React.FC = () => {
       Alert.alert(t('activeLoan'), t('appWalletDestroyBlocked'));
       return;
     }
-    if (pinSet && !(await verifyPin(restorePin))) {
-      Alert.alert(t('error'), t('lockPinWrong'));
+    if (passwordSet && !(await checkPassword(restorePassword)).ok) {
+      Alert.alert(t('error'), t('lockPasswordWrong'));
       return;
     }
-    if (!pinSet && passwordSet && !(await checkPassword(restorePassword)).ok) {
-      Alert.alert(t('error'), t('lockPasswordWrong'));
+    if (!passwordSet && pinSet && !(await verifyPin(restorePin))) {
+      Alert.alert(t('error'), t('lockPinWrong'));
       return;
     }
     if (!isValidSecretPhrase(restorePhrase)) {
@@ -250,7 +253,7 @@ export const SecuritySettings: React.FC = () => {
     fingerprint: 'securityFingerprint',
     phrase: 'seedTitle',
     phone: 'securityPhone',
-    replace: 'restoreAccount',
+    replace: 'seedRotate',
     methods: 'authMethodsTitle',
     authenticator: 'authenticatorTitle',
   };
@@ -346,7 +349,13 @@ export const SecuritySettings: React.FC = () => {
               </View>
             ) : (
               <>
-                {pinSet ? (
+                {passwordSet ? (
+                  <SecretInput
+                    value={revealPassword}
+                    onChangeText={setRevealPassword}
+                    placeholder={t('lockCurrentPassword')}
+                  />
+                ) : pinSet ? (
                   <SecretInput
                     value={revealPin}
                     onChangeText={(value) => setRevealPin(value.replace(/\D/g, '').slice(0, 6))}
@@ -354,23 +363,23 @@ export const SecuritySettings: React.FC = () => {
                     maxLength={6}
                     placeholder={t('lockCurrentPin')}
                   />
-                ) : (
-                  <SecretInput
-                    value={revealPassword}
-                    onChangeText={setRevealPassword}
-                    placeholder={t('lockCurrentPassword')}
-                  />
-                )}
+                ) : null}
                 <TouchableOpacity
-                  disabled={pinSet ? revealPin.length !== 6 : !revealPassword}
+                  disabled={passwordSet ? !revealPassword : pinSet ? revealPin.length !== 6 : true}
                   onPress={reveal}
                   style={[
                     styles.button,
                     { backgroundColor: colors.connect },
-                    (pinSet ? revealPin.length !== 6 : !revealPassword) && { backgroundColor: colors.chip },
+                    (passwordSet ? !revealPassword : pinSet ? revealPin.length !== 6 : true) && { backgroundColor: colors.chip },
                   ]}
                 >
                   <AppText style={styles.buttonText}>{t('seedReveal')}</AppText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setPanel('replace')}
+                  style={[styles.button, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}
+                >
+                  <AppText style={[styles.buttonText, { color: colors.text }]}>{t('seedRotate')}</AppText>
                 </TouchableOpacity>
               </>
             )}
@@ -378,11 +387,10 @@ export const SecuritySettings: React.FC = () => {
         ) : null}
         {panel === 'replace' ? (
           <View>
-            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountForeverLead')}</AppText>
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedRestoreLead')}</AppText>
             {accountBlocked ? (
               <AppText style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyBlocked')}</AppText>
             ) : null}
-            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('restoreAccountLead')}</AppText>
             <AppTextInput
               value={restorePhrase}
               onChangeText={setRestorePhrase}
@@ -394,7 +402,14 @@ export const SecuritySettings: React.FC = () => {
               placeholderTextColor={colors.textMuted}
               style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
             />
-            {pinSet ? (
+            {passwordSet ? (
+              <SecretInput
+                value={restorePassword}
+                onChangeText={setRestorePassword}
+                editable={!accountBlocked}
+                placeholder={t('lockCurrentPassword')}
+              />
+            ) : pinSet ? (
               <SecretInput
                 value={restorePin}
                 onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
@@ -403,21 +418,14 @@ export const SecuritySettings: React.FC = () => {
                 editable={!accountBlocked}
                 placeholder={t('lockCurrentPin')}
               />
-            ) : passwordSet ? (
-              <SecretInput
-                value={restorePassword}
-                onChangeText={setRestorePassword}
-                editable={!accountBlocked}
-                placeholder={t('lockCurrentPassword')}
-              />
             ) : null}
             <TouchableOpacity
-              disabled={busy || accountBlocked || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)}
+              disabled={busy || accountBlocked || (passwordSet && !restorePassword) || (!passwordSet && pinSet && restorePin.length !== 6)}
               onPress={() => void restoreWallet()}
               style={[
                 styles.button,
                 { backgroundColor: colors.connect },
-                (busy || accountBlocked || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)) && styles.destroyDisabled,
+                (busy || accountBlocked || (passwordSet && !restorePassword) || (!passwordSet && pinSet && restorePin.length !== 6)) && styles.destroyDisabled,
               ]}
             >
               {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRestoreAction')}</AppText>}
@@ -502,8 +510,8 @@ export const SecuritySettings: React.FC = () => {
       />
       <Row
         icon="shield"
-        label={t('restoreAccount')}
-        hint={t('oneAccountForeverLead')}
+        label={t('seedRotate')}
+        hint={t('seedRestoreLead')}
         status="done"
         onPress={() => setPanel('replace')}
       />

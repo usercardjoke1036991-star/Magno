@@ -634,7 +634,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
               identidadExigida: !isDemoAccount() || requiredIdentity,
               identityBound: false,
               deviceHash: '',
-              deviceMatches: true,
+              deviceMatches: isDemoAccount(),
             }));
           }
         } catch {
@@ -643,7 +643,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             identidadExigida: !isDemoAccount(),
             identityBound: false,
             deviceHash: '',
-            deviceMatches: true,
+            deviceMatches: isDemoAccount(),
           }));
         }
 

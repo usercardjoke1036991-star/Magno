@@ -44,6 +44,19 @@ export function deriveWrapKey(secret: string, salt: string, rounds: number): str
   return digest;
 }
 
+/** Misma clave que deriveWrapKey, sin congelar el hilo JS en 8000 vueltas. */
+export async function deriveWrapKeyAsync(secret: string, salt: string, rounds: number): Promise<string> {
+  const n = Math.max(1, Math.min(rounds, 20_000));
+  let digest = sha256(toUtf8Bytes(`quatrivium.wrap.v1:${salt}:${secret}`));
+  for (let i = 1; i < n; i += 1) {
+    digest = sha256(concat([getBytes(digest), toUtf8Bytes(`:${i}`)]));
+    if (i % 250 === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+  }
+  return digest;
+}
+
 function keystream(key: Uint8Array, iv: Uint8Array, length: number): Uint8Array {
   const out = new Uint8Array(length);
   let offset = 0;

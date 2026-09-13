@@ -7,7 +7,7 @@ import {
   setRuntimeMode,
   type AppMode,
 } from '../constants/rpcConfig';
-import { APP_MODE_STORAGE_KEY, resolvePersistedMode } from './appModePersist';
+import { APP_MODE_STORAGE_KEY, isFirstAppMode, resolvePersistedMode } from './appModePersist';
 
 interface AppModeValue {
   mode: AppMode;
@@ -25,9 +25,13 @@ function applyChain(pref: AppMode): AppMode {
   return account;
 }
 
+async function rememberOpenedMode(mode: AppMode): Promise<void> {
+  await AsyncStorage.setItem(APP_MODE_STORAGE_KEY, mode === 'demo' ? 'demo' : 'live').catch(() => {});
+}
+
 export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setModeState] = useState<AppMode>(() => applyChain('live'));
-  const [ready, setReady] = useState(true);
+  const [mode, setModeState] = useState<AppMode>('live');
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let done = false;
@@ -43,8 +47,9 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (pref === 'demo' && !isContractConfigured('testnet')) {
           pref = 'live';
         }
-        if (!saved) {
-          await AsyncStorage.setItem(APP_MODE_STORAGE_KEY, 'live').catch(() => {});
+        if (isFirstAppMode(saved)) {
+          pref = 'live';
+          await rememberOpenedMode('live');
         }
         finish(pref);
       })
@@ -60,15 +65,16 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (next === 'demo' && !isContractConfigured('testnet')) {
       return false;
     }
-    setModeState(applyChain(next));
-    await AsyncStorage.setItem(APP_MODE_STORAGE_KEY, next).catch(() => {});
+    const applied = applyChain(next);
+    setModeState(applied);
+    await rememberOpenedMode(applied);
     return true;
   }, []);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'background' || state === 'inactive') {
-        AsyncStorage.setItem(APP_MODE_STORAGE_KEY, mode).catch(() => {});
+        void rememberOpenedMode(mode);
       }
     });
     return () => sub.remove();
@@ -78,7 +84,10 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     applyChain(mode);
-  }, [mode]);
+    if (ready) {
+      void rememberOpenedMode(mode);
+    }
+  }, [mode, ready]);
 
   if (!ready) {
     return (

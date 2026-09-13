@@ -1,9 +1,12 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Frase primero. Usuario y contrasena son el candado del telefono. La frase recupera la misma billetera on-chain.
+Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y simbolo. Despues las 24 palabras. Esa misma frase se ve o se reemplaza en Ajustes y sirve para cambiar de telefono.
 
 ## Decisiones
+- [2026-09-13] Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real.
+- [2026-09-12] Contraseña del celular: minimo 8, maximo 66, con mayuscula, numero y simbolo. Frase nueva siempre 24 palabras BIP-39; recuperar acepta 12 si la cuenta es antigua.
+- [2026-09-12] Una sola frase BIP-39. Se revela solo tras el candado. En Ajustes se consulta o se sustituye. Cambiar de aparato exige esa frase.
 - [2026-09-12] Una sola sesion iniciada a la vez por cuenta. El ultimo telefono que entra echa al anterior.
 - [2026-09-12] Si se pierde el celular, Recuperar cuenta en uno nuevo con las 12 palabras. Luego usuario y contrasena de ese aparato y volver a vincular el numero. Una sola instalacion opera credito a la vez.
 - [2026-09-12] Una billetera Quatrivium solo opera credito en el dispositivo donde se vinculo. WiFi o VPN no son identidad. Recuperar en otro telefono pide volver a vincular numero y dispositivo.
@@ -31,11 +34,16 @@ Frase primero. Usuario y contrasena son el candado del telefono. La frase recupe
 - [2026-09-12] En Como confirma solo aparecen metodos ya registrados: PIN, huella o autenticador no se pueden elegir si no estan activos.
 - [2026-09-12] Lo unico obligatorio para iniciar sesion es contrasena y correo. Desbloquear, pedir, pagar y transferir siguen opcionales.
 - [2026-09-12] Desbloquear, iniciar sesion, pedir, pagar y transferir son opcionales. Interruptor + metodo (contrasena, PIN, huella, autenticador). Huella y llave son lo mismo. Cada ajuste editable tiene Guardar.
-- [2026-09-12] Desbloquear e iniciar sesion siempre piden contrasena. Huella o llave son opcionales y son lo mismo. Confirmar al pedir o pagar prestamo es opcional y esta apagado por defecto.
-- [2026-09-12] La clave de fondos solo confirma envios y recepciones entre billeteras. Pedir o pagar un prestamo no la pide.
-- [2026-09-12] Donar e inyectar dan reputacion y titulo visible. No hay descuento de prestamo para no farmear el pool.
 
 ## Cambios realizados
+- [2026-09-13] Primera apertura en Real. Luego se recuerda el ultimo modo (Demo o Real) en AsyncStorage.
+- [2026-09-13] Alta: no marca la frase hasta Confirmar; candado no pinta Crear antes de boot; wrap key async; identidad Real falla cerrada si el RPC no responde.
+- [2026-09-13] Auditoria: candado ya no trata un timeout de SecureStore como alta nueva; Demo live operativo; mainnet sigue sin contrato
+- [2026-09-12] Auditoria en vivo: Iniciar sesion se quedaba en spinner porque el hash de 8000 vueltas bloqueaba el hilo. Ahora cede el hilo y suelta el boton.
+- [2026-09-12] Auditoria: tsc/i18n/salud 14/14, Hardhat 116/116, Demo live operativo. failOpen ya no finge alta si SecureStore tarda. Alta muestra requisitos 8-66.
+- [2026-09-12] Politica de candado: contraseña 8-66 con mayuscula, numero y simbolo. Alta genera frase de 24 palabras.
+- [2026-09-12] Alta: idioma, luego usuario+contrasena, luego las 12 palabras. Ajustes pide contrasena para ver o reemplazar la misma frase.
+- [2026-09-12] Textos de alta recortados: una linea de accion y botones. Sin parrafos extras en bienvenida, frase y credenciales.
 - [2026-09-12] Auditoria: tsc verde (AppLockGate/authPrefs/LoanTierCard), Metro y notify restaurados, bundle Android OK, Hardhat 114/114, Demo live operativo. Inicio de sesion es usuario+contrasena.
 - [2026-09-12] Sesion exclusiva: al abrir la cuenta en otro telefono se cierra aqui. El aparato viejo no entra con la contrasena; recupera con las 12 palabras.
 - [2026-09-12] Alta empieza por las 12 palabras o Recuperar cuenta. Luego usuario y contrasena de este telefono. Al reinstalar pide frase, usuario y contrasena. Desbloqueo por defecto con contrasena.
@@ -78,17 +86,9 @@ Frase primero. Usuario y contrasena son el candado del telefono. La frase recupe
 - [2026-09-12] Confirmacion de prestamo opcional en Seguridad. Contraseña obligatoria al entrar. Huella o llave siguen siendo atajo opcional.
 - [2026-09-12] Quito la confirmacion de clave al solicitar o pagar prestamo. Sigue en transferencias entre billeteras, pool y donar.
 - [2026-09-12] Auditoria live: Credito y Perfil mostraban 1/1000 y Solicitar. El tope por defecto pasa a 100 hasta que el contrato confirme 1000.
-- [2026-09-12] Auditoria en vivo: Metro y worker estaban caidos; ADB colgado; RPC Ankr y getLogs tumbaron avisos. Se reanimaron y se filtraron nodos publicos.
-- [2026-09-12] Auditoria: la app detecta si el contrato live es de 100 o 1000 niveles; no ofrece donar/cobrar si el ABI no existe
-- [2026-09-12] Sala Bonos, bono proporcional 20xnivel, donacion al fundador y titulos de apoyo
-- [2026-09-12] Añadido cobrarBonoHito cada 100 niveles (2000 USDT) en núcleo, Leveling, UI e i18n
-- [2026-09-12] Curva +5 solicitudes desde 100 USDT y 12 rangos de piedras con marco propio
-- [2026-09-12] Escalera de 1000 niveles hasta 1000000 USDT: 1-100 iguales, 101-1000 por formula, cuotas 6/12 en montos altos
-- [2026-09-12] Auditoria: autenticador abre la billetera, destruir pide clave, cooldown e historial alineados.
-- [2026-09-12] Metodos de seguridad a eleccion, autenticador TOTP e historial de movimientos.
 
 ## No olvidar / no romper
 (puntos críticos)
 
 ## Última sesión
-[2026-09-12] Cambio: Auditoria: tsc verde (AppLockGate/authPrefs/LoanTierCard), Metro y notify restaurados, bundle Android OK, Hardhat 114/114, Demo live operativo. Inicio de sesion es usuario+contrasena.
+[2026-09-13] Decisión: Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real.

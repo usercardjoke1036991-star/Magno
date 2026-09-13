@@ -7,6 +7,10 @@ function resolvePersistedMode(saved) {
   return saved === 'demo' ? 'demo' : 'live';
 }
 
+function isFirstAppMode(saved) {
+  return saved == null || String(saved).trim() === '';
+}
+
 function isOfficialWorldToken(mode, address) {
   const needle = String(address || '').trim().toLowerCase();
   if (!needle.startsWith('0x') || needle.length !== 42) return false;
@@ -22,6 +26,13 @@ describe('mundos Demo y Real', function () {
 
   it('recuerda Demo si el usuario la eligio', function () {
     expect(resolvePersistedMode('demo')).to.equal('demo');
+  });
+
+  it('vuelve a Real si no hay ultimo modo guardado', function () {
+    expect(isFirstAppMode(null)).to.equal(true);
+    expect(isFirstAppMode('')).to.equal(true);
+    expect(isFirstAppMode('demo')).to.equal(false);
+    expect(resolvePersistedMode('otro')).to.equal('live');
   });
 
   it('no trata el USDT oficial de Demo como token apagado', function () {
