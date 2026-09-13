@@ -71,7 +71,7 @@ export const SecuritySettings: React.FC = () => {
   const [authPrefs, setAuthPrefs] = useState<AuthPrefs>({
     signin: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
     unlock: { on: true, methods: ['password'], method: 'password', primaryOnly: true },
-    funds: { on: true, methods: ['password'], method: 'password', primaryOnly: true },
+    funds: { on: false, methods: [], method: 'password', primaryOnly: true },
     loanRequest: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
     loanPay: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
   });
@@ -497,7 +497,7 @@ export const SecuritySettings: React.FC = () => {
       <Row
         icon="lock"
         label={t('authMethodsTitle')}
-        hint={`${t('authSignInRequired')} · ${t('authSignInStep')} ${methodHint('signin')} · ${t('authUnlock')} ${methodHint('unlock')} · ${t('authFunds')} ${methodHint('funds')}`}
+        hint={`${t('authUnlock')} ${methodHint('unlock')} · ${t('authFunds')} ${methodHint('funds')} · ${t('loanConfirmRequest')} ${methodHint('loanRequest')} · ${t('loanConfirmPay')} ${methodHint('loanPay')}`}
         status="done"
         onPress={() => setPanel('methods')}
       />

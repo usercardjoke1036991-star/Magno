@@ -35,6 +35,7 @@ import { DonateFounderSection } from '../components/DonateFounderSection';
 import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
 import { MovementHistory } from '../components/MovementHistory';
+import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
@@ -305,6 +306,12 @@ function HomeScreenWithHooks() {
           onPhraseSaved={() => setPhraseBackedUp(true)}
         />
 
+        <GraceMoraClock
+          hasActiveLoan={userInfo.hasActiveLoan}
+          vencimiento={userInfo.activeLoan?.vencimiento}
+          proximaCuota={userInfo.activeLoan?.proximaCuota}
+          isFounder={userInfo.referral.isFundador}
+        />
         <AccountWorldCard />
         {mode === 'demo' && !isContractConfigured() && (
           <AppText style={[styles.configWarn, rtl && styles.rtlText, { backgroundColor: colors.warnBg, color: colors.warnText }]}>{t('configWarn')}</AppText>
@@ -408,6 +415,7 @@ function HomeScreenWithHooks() {
             isLoading={txLoading}
             initialInviteCode={pendingInviteCode}
             paused={creditPaused}
+            contractReady={creditReady}
           />
         </AppSubsection>
         {userInfo.isRegistered || userInfo.hasActiveLoan || !creditChecking ? (
@@ -599,11 +607,14 @@ function HomeScreenWithHooks() {
 
       <AppWindow
         visible={room === 'history'}
-        title={t('historyTitle')}
-        lead={t('historyLead')}
+        title={`${t('historyTitle')} · ${mode === 'demo' ? t('appModeDemo') : t('appModeLive')}`}
         onClose={() => setRoom(null)}
       >
-        <MovementHistory walletAddress={walletAddress} enabled={room === 'history'} />
+        <MovementHistory
+          walletAddress={walletAddress}
+          enabled={room === 'history'}
+          level={userInfo.userProgress.nivelActual}
+        />
       </AppWindow>
 
       <AppWindow

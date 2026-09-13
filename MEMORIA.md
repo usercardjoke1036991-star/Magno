@@ -4,6 +4,8 @@
 Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y simbolo. Despues las 24 palabras. Esa misma frase se ve o se reemplaza en Ajustes y sirve para cambiar de telefono.
 
 ## Decisiones
+- [2026-09-13] Como confirma: las cuatro acciones tienen interruptor y chips PIN, autenticador, huella y contrasena. Sin encender no se aplica ningun metodo. No se muestra Principal; el desbloqueo por defecto se entiende como contrasena.
+- [2026-09-13] La contraseña es la unica principal del desbloqueo. En Confirmar el usuario suma PIN, huella o autenticador. Pedir, pagar y transferir (billeteras y plataformas) usan los mismos sistemas, sin correo.
 - [2026-09-13] Con cuenta en este telefono no se vuelve a Iniciar sesion; Iniciar sesion solo si el almacen no responde.
 - [2026-09-13] Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real.
 - [2026-09-12] Contraseña del celular: minimo 8, maximo 66, con mayuscula, numero y simbolo. Frase nueva siempre 24 palabras BIP-39; recuperar acepta 12 si la cuenta es antigua.
@@ -32,10 +34,20 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] Fama al registrar (no USDT). Puntos de red y bono del pool solo al directo cuando pagan el primer nivel, para no desequilibrar el capital.
 - [2026-09-12] Si el contrato live no tiene hitos ni donar, la sala Bonos no aparece en el hub.
 - [2026-09-12] Correo y contrasena son obligatorios solo para iniciar sesion. Tambien son metodos opcionales para desbloquear, pedir, pagar y transferir, junto a PIN, huella y autenticador si estan registrados.
-- [2026-09-12] En Como confirma solo aparecen metodos ya registrados: PIN, huella o autenticador no se pueden elegir si no estan activos.
-- [2026-09-12] Lo unico obligatorio para iniciar sesion es contrasena y correo. Desbloquear, pedir, pagar y transferir siguen opcionales.
 
 ## Cambios realizados
+- [2026-09-13] Auditoria de contratos y ABI: Demo live alineado con el repo (24457 B). ABI de cliente sin dispersionCongelada duplicada y con cancelAdminAction.
+- [2026-09-13] Auditoria en vivo: tablero de referidos arriba y visible, activar credito gris en Real sin contrato, onNewIntent para salas por enlace. Cuenta Real restaurada.
+- [2026-09-13] Auditoria en vivo: Metro caido, ADB colgado, app recargada. Hardhat 121/121, Demo live operativo. Texto MIUI: se quita fontWeight sintetizado.
+- [2026-09-13] Historial de referidos muestra comisiones, bono de primer pago y total generado
+- [2026-09-13] Historial Demo y Real separados. Reloj rojo en el hub: gracia cuenta atras, mora cuenta adelante hasta pagar.
+- [2026-09-13] Historial: transferencias y prestamos en ventanas aparte. Mora muestra dias, fama quitada, beneficios bloqueados y comisiones al pool.
+- [2026-09-13] Los avisos de frase, correo, KYC y telefono desaparecen de la pantalla principal al confirmarlos.
+- [2026-09-13] Eliminados dumps temporales .tmp, logs y capturas de auditoria que no usa la app. Anadidos al gitignore.
+- [2026-09-13] Autenticador muestra QR otpauth y la clave para copiar. El codigo de 6 digitos es TOTP real.
+- [2026-09-13] Como confirma muestra interruptor y las cuatro opciones en Desbloquear, Transferir, Pedir y Pagar. Guardar no aplica nada si el interruptor esta apagado.
+- [2026-09-13] Como confirma: solo titulos, chips y Guardar. Sin parrafos.
+- [2026-09-13] Confirmar: sin texto de contraseña y correo obligatorios. Desbloqueo principal es contraseña; PIN, huella y autenticador son extras. Pedir, pagar y transferir eligen esos sistemas.
 - [2026-09-13] Si hay contraseña en el telefono abre Desbloquear, no Iniciar sesion. Demo live 2000 USDT.
 - [2026-09-13] Auditoria en vivo: Metro se habia caido; app abre Iniciar sesion con cuenta en el telefono. Idioma ya no pinta el selector antes de leer AsyncStorage.
 - [2026-09-13] Primera apertura en Real. Luego se recuerda el ultimo modo (Demo o Real) en AsyncStorage.
@@ -74,21 +86,9 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] AppLockGate: iniciar sesion (correo+clave+OTP+paso extra) separado de desbloquear. Como confirma tiene signin. Sesion guardada persistida.
 - [2026-09-12] Al matar la app, si el desbloqueo estaba apagado se perdia la wrap key y la billetera fallaba. AppLockGate ahora pide contrasena si no hay sesion, aunque el desbloqueo este off.
 - [2026-09-12] Auditoria: UI hitos/deep link, caps antes de progreso, hidratar prestamo activo. Redeploy testnet 0xD2d2A9 + FamaLib 0x6B98072. Pool 2000 USDT. Hardhat 103/103.
-- [2026-09-12] Fundador exento de mora: pool cubre su prestamo. Fama de linea en QuatriviumFamaLib. Nucleo 24457/24576. Hardhat 103/103.
-- [2026-09-12] Mora con mes de gracia: siguen cobrando 30 dias para poder pagar. Luego 10 de reputacion por nivel y dia; comisiones y bonos van al pool hasta saldar.
-- [2026-09-12] La reputacion recorre la linea de referidos con la misma escala decreciente que las comisiones; el fundador suma fama de cada alta. Los puntos de red USDT siguen solo al referidor directo.
-- [2026-09-12] El emblema conserva el relieve 3D y se pinta con el color mineral de cada rango; la piedra sigue en el centro.
-- [2026-09-12] Las medallas conservan la textura 3D original y llevan en el centro la piedra o metal de su rango.
-- [2026-09-12] Cada rango usa el color mineral real de su metal o piedra. Las medallas ya no repiten cobre, oro ni celeste.
-- [2026-09-12] Auditoria live: desbloqueo apagado ya no se fuerza por error; el signer no se limpia al remount; Bonos se oculta en el Demo de 100 niveles.
-- [2026-09-12] Correo anadido como metodo en Como confirma y en el desbloqueo, si el correo ya esta verificado.
-- [2026-09-12] Como confirma oculta PIN, huella y autenticador hasta que el usuario los registre en Seguridad.
-- [2026-09-12] Inicio de sesion fijo: contrasena y correo. Sin interruptor. El alta ya no salta el correo.
-- [2026-09-12] Como confirma sin textos extra: interruptor, metodo y Guardar. Quitada la fila duplicada de llave de acceso.
-- [2026-09-12] Confirmacion de prestamo opcional en Seguridad. Contraseña obligatoria al entrar. Huella o llave siguen siendo atajo opcional.
 
 ## No olvidar / no romper
 (puntos críticos)
 
 ## Última sesión
-[2026-09-13] Decisión: Con cuenta en este telefono no se vuelve a Iniciar sesion; Iniciar sesion solo si el almacen no responde.
+[2026-09-13] Cambio: Auditoria de contratos y ABI: Demo live alineado con el repo (24457 B). ABI de cliente sin dispersionCongelada duplicada y con cancelAdminAction.

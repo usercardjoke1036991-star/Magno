@@ -16,6 +16,7 @@ import { AppText } from './AppText';
 import { SecretInput } from './SecretInput';
 import { checkPassword } from '../services/appLock';
 import { getSecretPhrase, hasSecretPhrase, markPhraseBackedUp } from '../services/appWallet';
+import { loanGateBannerRows } from '../utils/creditGates';
 
 interface KycAccessBannerProps {
   kycDone: boolean;
@@ -93,93 +94,99 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
     onPhraseSaved?.();
   };
 
+  const rows = loanGateBannerRows({
+    phraseDone,
+    showIdentity,
+    emailDone,
+    kycDone,
+    phoneDone,
+  });
+
+  if (!rows.length) return null;
+
   return (
     <View>
       <View style={[styles.box, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <TouchableOpacity
-          onPress={() => {
-            if (phraseDone) return;
-            setPhrasePassword('');
-            setPhraseText('');
-            setPhraseError('');
-            setOpen('phrase');
-          }}
-          style={[styles.kycBtn, { backgroundColor: phraseDone ? colors.surface : colors.primary, borderColor: phraseDone ? colors.border : colors.primary }]}
-          accessibilityRole="button"
-          accessibilityLabel={t('seedBannerTitle')}
-        >
-          <AppIcon name={phraseDone ? 'check' : 'shield'} size={18} color={phraseDone ? colors.success : '#fff'} />
-          <View style={styles.grow}>
-            <AppText style={[styles.title, { color: phraseDone ? colors.text : '#fff' }]}>
-              {phraseDone ? t('seedBannerDoneTitle') : t('seedBannerTitle')}
-            </AppText>
-            <AppText style={[styles.lead, { color: phraseDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
-              {phraseDone ? t('seedBannerDone') : t('seedBannerTodo')}
-            </AppText>
-          </View>
-          {phraseDone ? null : <AppText style={[styles.chevron, { color: '#fff' }]}>›</AppText>}
-        </TouchableOpacity>
-        {showIdentity ? (
-        <>
-        <View
-          style={[styles.kycBtn, { backgroundColor: emailDone ? colors.surface : colors.primary, borderColor: emailDone ? colors.border : colors.primary }]}
-          accessibilityRole="text"
-          accessibilityLabel={t('emailBannerTitle')}
-        >
-          <AppIcon name={emailDone ? 'check' : 'bell'} size={18} color={emailDone ? colors.success : '#fff'} />
-          <View style={styles.grow}>
-            <AppText style={[styles.title, { color: emailDone ? colors.text : '#fff' }]}>
-              {emailDone ? t('emailBannerDoneTitle') : t('emailBannerTitle')}
-            </AppText>
-            <AppText style={[styles.lead, { color: emailDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
-              {emailDone ? t('emailBannerDone') : t('emailBannerTodo')}
-            </AppText>
-          </View>
-        </View>
-        <TouchableOpacity
-          onPress={() => setOpen('kyc')}
-          style={[styles.kycBtn, { backgroundColor: kycDone ? colors.surface : colors.primary, borderColor: kycDone ? colors.border : colors.primary }]}
-          accessibilityRole="button"
-          accessibilityLabel={t('kycBannerTitle')}
-        >
-          <AppIcon name={kycDone ? 'check' : 'id'} size={18} color={kycDone ? colors.success : '#fff'} />
-          <View style={styles.grow}>
-            <AppText style={[styles.title, { color: kycDone ? colors.text : '#fff' }]}>
-              {kycDone ? t('kycBannerDoneTitle') : t('kycBannerTitle')}
-            </AppText>
-            <AppText style={[styles.lead, { color: kycDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
-              {kycDone ? t('kycBannerDone') : t('kycOpenHint')}
-            </AppText>
-          </View>
-          <AppText style={[styles.chevron, { color: kycDone ? colors.textMuted : '#fff' }]}>›</AppText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setOpen('phone')}
-          style={[styles.kycBtn, { backgroundColor: phoneDone ? colors.surface : colors.primary, borderColor: phoneDone ? colors.border : colors.primary, marginBottom: 0 }]}
-          accessibilityRole="button"
-          accessibilityLabel={identityBound && !deviceMatches ? t('deviceBannerTitle') : t('phoneBannerTitle')}
-        >
-          <AppIcon name={phoneDone ? 'check' : 'phone'} size={18} color={phoneDone ? colors.success : '#fff'} />
-          <View style={styles.grow}>
-            <AppText style={[styles.title, { color: phoneDone ? colors.text : '#fff' }]}>
-              {phoneDone
-                ? t('phoneBannerDoneTitle')
-                : identityBound && !deviceMatches
-                  ? t('deviceBannerTitle')
-                  : t('phoneBannerTitle')}
-            </AppText>
-            <AppText style={[styles.lead, { color: phoneDone ? colors.textMuted : 'rgba(255,255,255,0.86)' }]}>
-              {phoneDone
-                ? t('phoneBannerDone')
-                : identityBound && !deviceMatches
-                  ? t('seedNeedDevice')
-                  : t('phoneBannerTodo')}
-            </AppText>
-          </View>
-          <AppText style={[styles.chevron, { color: phoneDone ? colors.textMuted : '#fff' }]}>›</AppText>
-        </TouchableOpacity>
-        </>
-        ) : null}
+        {rows.map((row, index) => {
+          const last = index === rows.length - 1;
+          if (row === 'phrase') {
+            return (
+              <TouchableOpacity
+                key={row}
+                onPress={() => {
+                  setPhrasePassword('');
+                  setPhraseText('');
+                  setPhraseError('');
+                  setOpen('phrase');
+                }}
+                style={[styles.kycBtn, { backgroundColor: colors.primary, borderColor: colors.primary }, last && styles.lastBtn]}
+                accessibilityRole="button"
+                accessibilityLabel={t('seedBannerTitle')}
+              >
+                <AppIcon name="shield" size={18} color="#fff" />
+                <View style={styles.grow}>
+                  <AppText style={[styles.title, { color: '#fff' }]}>{t('seedBannerTitle')}</AppText>
+                  <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>{t('seedBannerTodo')}</AppText>
+                </View>
+                <AppText style={[styles.chevron, { color: '#fff' }]}>›</AppText>
+              </TouchableOpacity>
+            );
+          }
+          if (row === 'email') {
+            return (
+              <View
+                key={row}
+                style={[styles.kycBtn, { backgroundColor: colors.primary, borderColor: colors.primary }, last && styles.lastBtn]}
+                accessibilityRole="text"
+                accessibilityLabel={t('emailBannerTitle')}
+              >
+                <AppIcon name="bell" size={18} color="#fff" />
+                <View style={styles.grow}>
+                  <AppText style={[styles.title, { color: '#fff' }]}>{t('emailBannerTitle')}</AppText>
+                  <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>{t('emailBannerTodo')}</AppText>
+                </View>
+              </View>
+            );
+          }
+          if (row === 'kyc') {
+            return (
+              <TouchableOpacity
+                key={row}
+                onPress={() => setOpen('kyc')}
+                style={[styles.kycBtn, { backgroundColor: colors.primary, borderColor: colors.primary }, last && styles.lastBtn]}
+                accessibilityRole="button"
+                accessibilityLabel={t('kycBannerTitle')}
+              >
+                <AppIcon name="id" size={18} color="#fff" />
+                <View style={styles.grow}>
+                  <AppText style={[styles.title, { color: '#fff' }]}>{t('kycBannerTitle')}</AppText>
+                  <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>{t('kycOpenHint')}</AppText>
+                </View>
+                <AppText style={[styles.chevron, { color: '#fff' }]}>›</AppText>
+              </TouchableOpacity>
+            );
+          }
+          return (
+            <TouchableOpacity
+              key={row}
+              onPress={() => setOpen('phone')}
+              style={[styles.kycBtn, { backgroundColor: colors.primary, borderColor: colors.primary }, last && styles.lastBtn]}
+              accessibilityRole="button"
+              accessibilityLabel={identityBound && !deviceMatches ? t('deviceBannerTitle') : t('phoneBannerTitle')}
+            >
+              <AppIcon name="phone" size={18} color="#fff" />
+              <View style={styles.grow}>
+                <AppText style={[styles.title, { color: '#fff' }]}>
+                  {identityBound && !deviceMatches ? t('deviceBannerTitle') : t('phoneBannerTitle')}
+                </AppText>
+                <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>
+                  {identityBound && !deviceMatches ? t('seedNeedDevice') : t('phoneBannerTodo')}
+                </AppText>
+              </View>
+              <AppText style={[styles.chevron, { color: '#fff' }]}>›</AppText>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       <Modal visible={open !== null} animationType="slide" onRequestClose={() => setOpen(null)}>
@@ -272,6 +279,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     marginBottom: 12,
+  },
+  lastBtn: {
+    marginBottom: 0,
   },
   grow: {
     flex: 1,

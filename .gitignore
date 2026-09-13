@@ -56,3 +56,9 @@ typechain-types/
 
 # Debug screenshots
 store-assets/debug-screen*.png
+
+# Dumps locales de auditoría (no son del producto)
+.tmp*
+q-open*.png
+metro.log
+eas-dev-build.log

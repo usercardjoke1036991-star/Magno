@@ -14,6 +14,7 @@ interface ActivateCreditSectionProps {
   isLoading: boolean;
   initialInviteCode?: string;
   paused?: boolean;
+  contractReady?: boolean;
 }
 
 export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
@@ -25,6 +26,7 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
   isLoading,
   initialInviteCode = '',
   paused = false,
+  contractReady = true,
 }) => {
   const [showInfo, setShowInfo] = useState(false);
   const [padre, setPadre] = useState(initialInviteCode);
@@ -33,6 +35,7 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const busy = isLoading || localBusy;
+  const blocked = busy || paused || !contractReady;
 
   useEffect(() => {
     if (initialInviteCode) {
@@ -111,8 +114,13 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
               { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
             ]}
           />
+          {!contractReady ? (
+            <AppText style={[styles.note, { color: colors.warnText }]}>
+              {t('liveCreditNotReady')}
+            </AppText>
+          ) : null}
           <TouchableOpacity
-            disabled={busy || paused}
+            disabled={blocked}
             onPress={() => {
               setNote(t('activatingCredit'));
               setLocalBusy(true);
@@ -124,15 +132,15 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
             style={[
               styles.registerButton,
               { backgroundColor: colors.connect },
-              (busy || paused) && { backgroundColor: colors.chip },
+              blocked && { backgroundColor: colors.chip },
             ]}
           >
             {busy ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <View style={styles.btnRow}>
-                <AppIcon name="user" size={16} color={paused ? colors.textMuted : '#fff'} />
-                <AppText style={[styles.registerButtonText, paused && { color: colors.textMuted }]}>
+                <AppIcon name="user" size={16} color={blocked ? colors.textMuted : '#fff'} />
+                <AppText style={[styles.registerButtonText, blocked && { color: colors.textMuted }]}>
                   {paused ? t('actionPaused') : t('activateCredit')}
                 </AppText>
               </View>

@@ -31,9 +31,11 @@ export const AppWindow: React.FC<AppWindowProps> = ({ visible, title, lead, onCl
         </View>
         {lead ? <AppText style={[styles.lead, { color: colors.textMuted }]}>{lead}</AppText> : null}
         <ScrollView
+          style={styles.scroll}
           keyboardShouldPersistTaps="always"
           contentContainerStyle={styles.body}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator
+          nestedScrollEnabled
         >
           {children}
         </ScrollView>
@@ -72,6 +74,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 10,
+  },
+  scroll: {
+    flex: 1,
   },
   body: {
     paddingHorizontal: 20,

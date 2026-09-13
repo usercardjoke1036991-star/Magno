@@ -4,6 +4,7 @@ import { getKnownStartBlock } from '../constants/deployedAddresses';
 import { assertTrustedRpc, getProviderWithFallback, isContractConfigured } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { addressToInviteCode } from '../utils/inviteCode';
+import { sumReferralEarnings } from '../utils/referralEarnings';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
 const CHUNK = 4000;
@@ -23,7 +24,9 @@ export interface ReferralNode {
   earnedWei: string;
   earnedLabel: string;
   bonusWei: string;
+  bonusLabel: string;
   commissionWei: string;
+  commissionLabel: string;
   level: number;
   children: ReferralChild[];
 }
@@ -42,6 +45,10 @@ export interface ReferralNetworkSnapshot {
   directs: ReferralNode[];
   totalEarnedWei: string;
   totalEarnedLabel: string;
+  commissionTotalWei: string;
+  commissionTotalLabel: string;
+  bonusTotalWei: string;
+  bonusTotalLabel: string;
   activity: ReferralActivity[];
   partial: boolean;
 }
@@ -50,6 +57,10 @@ const EMPTY: ReferralNetworkSnapshot = {
   directs: [],
   totalEarnedWei: '0',
   totalEarnedLabel: '0.00 USDT',
+  commissionTotalWei: '0',
+  commissionTotalLabel: '0.00 USDT',
+  bonusTotalWei: '0',
+  bonusTotalLabel: '0.00 USDT',
   activity: [],
   partial: false,
 };
@@ -260,7 +271,9 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
         earnedWei: '0',
         earnedLabel: formatToken(0n),
         bonusWei: '0',
+        bonusLabel: formatToken(0n),
         commissionWei: '0',
+        commissionLabel: formatToken(0n),
         level: 1,
         children: [],
       });
@@ -302,8 +315,15 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     const next = BigInt(node.earnedWei) + amount;
     node.earnedWei = next.toString();
     node.earnedLabel = formatToken(next);
-    if (kind === 'bonus') node.bonusWei = (BigInt(node.bonusWei) + amount).toString();
-    else node.commissionWei = (BigInt(node.commissionWei) + amount).toString();
+    if (kind === 'bonus') {
+      const nextBonus = BigInt(node.bonusWei) + amount;
+      node.bonusWei = nextBonus.toString();
+      node.bonusLabel = formatToken(nextBonus);
+    } else {
+      const nextCommission = BigInt(node.commissionWei) + amount;
+      node.commissionWei = nextCommission.toString();
+      node.commissionLabel = formatToken(nextCommission);
+    }
   };
 
   const drafts: Array<ReferralActivity & { blockNumber: number }> = [];
@@ -372,7 +392,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   }));
 
   const directs = [...nodes.values()].sort((a, b) => Number(BigInt(b.earnedWei) - BigInt(a.earnedWei)));
-  const total = directs.reduce((sum, node) => sum + BigInt(node.earnedWei), 0n);
+  const totals = sumReferralEarnings(directs);
 
   const levelTargets = [
     ...directs.map((node) => node.address),
@@ -401,8 +421,12 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
 
   return {
     directs,
-    totalEarnedWei: total.toString(),
-    totalEarnedLabel: formatToken(total),
+    totalEarnedWei: totals.totalWei.toString(),
+    totalEarnedLabel: formatToken(totals.totalWei),
+    commissionTotalWei: totals.commissionWei.toString(),
+    commissionTotalLabel: formatToken(totals.commissionWei),
+    bonusTotalWei: totals.bonusWei.toString(),
+    bonusTotalLabel: formatToken(totals.bonusWei),
     activity,
     partial: lookbackPartial || failed > 0,
   };

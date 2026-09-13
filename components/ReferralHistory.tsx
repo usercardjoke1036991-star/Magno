@@ -36,19 +36,36 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
 
   return (
     <View>
-      <AppText style={[styles.lead, { color: colors.text }]}>{t('referralHistoryLead')}</AppText>
-
       {isLoading && <ActivityIndicator color="#146C2E" style={styles.spinner} />}
       {error && <AppText style={styles.warn}>{t('referralLoadError')}</AppText>}
 
+      {data.partial ? (
+        <AppText style={[styles.warn, { color: colors.warnText }]}>{t('referralHistoryPartial')}</AppText>
+      ) : null}
+
+      <View style={[styles.board, { borderColor: colors.border, backgroundColor: colors.card }]}>
+        <View style={styles.boardRow}>
+          <AppText style={[styles.boardLabel, { color: colors.text }]}>{t('referralEarnCommissions')}</AppText>
+          <AppText style={[styles.boardValue, { color: colors.primary }]}>{data.commissionTotalLabel}</AppText>
+        </View>
+        <View style={styles.boardRow}>
+          <AppText style={[styles.boardLabel, { color: colors.text }]}>{t('referralEarnBonus')}</AppText>
+          <AppText style={[styles.boardValue, { color: colors.primary }]}>{data.bonusTotalLabel}</AppText>
+        </View>
+        <View style={[styles.boardRow, styles.boardTotal]}>
+          <AppText style={[styles.boardLabel, styles.boardTotalText, { color: colors.text }]}>
+            {t('referralEarnGrand')}
+          </AppText>
+          <AppText style={[styles.boardValue, styles.boardTotalText, { color: colors.primary }]}>
+            {data.totalEarnedLabel}
+          </AppText>
+        </View>
+      </View>
+
       {!isLoading && !error && (
         <>
-          {data.partial ? (
-            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('referralHistoryPartial')}</AppText>
-          ) : null}
-
-          <AppText style={[styles.summary, { color: colors.primary }]}>
-            {t('referralDirects', { count: data.directs.length })} · {t('earnedTotal', { amount: data.totalEarnedLabel })}
+          <AppText style={[styles.summary, { color: colors.textMuted }]}>
+            {t('referralDirects', { count: data.directs.length })}
           </AppText>
 
           {data.directs.length === 0 ? (
@@ -73,6 +90,12 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
                       {name !== node.code ? (
                         <AppText style={[styles.code, { color: colors.textMuted }]}>{node.code}</AppText>
                       ) : null}
+                      <AppText style={styles.split}>
+                        {t('referralEarnFromOne', {
+                          commission: node.commissionLabel,
+                          bonus: node.bonusLabel,
+                        })}
+                      </AppText>
                       <AppText style={styles.earned}>{t('referralEarnedWith', { amount: node.earnedLabel })}</AppText>
                       <AppText style={styles.meta}>
                         {t('referralTheirCount', { count: node.children.length })}
@@ -141,11 +164,38 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
 };
 
 const styles = StyleSheet.create({
-  lead: {
-    fontSize: 12,
-    color: '#2d4a38',
-    lineHeight: 18,
-    marginBottom: 10,
+  board: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  boardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 10,
+  },
+  boardTotal: {
+    marginTop: 2,
+    marginBottom: 0,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e6f3eb',
+  },
+  boardLabel: {
+    fontSize: 13,
+    flex: 1,
+  },
+  boardValue: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  boardTotalText: {
+    fontSize: 15,
+    fontWeight: '800',
   },
   spinner: {
     marginVertical: 12,
@@ -185,8 +235,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 1,
   },
-  earned: {
+  split: {
     marginTop: 4,
+    fontSize: 12,
+    color: '#3d5c48',
+  },
+  earned: {
+    marginTop: 2,
     fontSize: 13,
     color: '#146C2E',
     fontWeight: '700',

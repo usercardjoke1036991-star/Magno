@@ -49,6 +49,7 @@ export default function App() {
   // Arranque a prueba de colgados: fuentes, idioma y candado tienen tope de espera.
   const [fontsLoaded] = useFonts({
     QvSans: Inter_400Regular,
+    Inter_400Regular,
   });
   const [fontWaitOver, setFontWaitOver] = useState(false);
 

@@ -13,11 +13,18 @@ export type AuthPrefs = Record<AuthPurpose, AuthSlot>;
 
 export const AUTH_PURPOSES: AuthPurpose[] = ['signin', 'unlock', 'funds', 'loanRequest', 'loanPay'];
 export const AUTH_METHODS: AuthMethod[] = ['password', 'email', 'pin', 'biometric', 'authenticator'];
+/** Pedir, pagar, transferir y desbloqueo: el usuario marca cuáles. */
+export const ACTION_AUTH_METHODS: AuthMethod[] = ['pin', 'authenticator', 'biometric', 'password'];
+
+export function methodsForPurpose(purpose: AuthPurpose, _available: AuthMethod[] = []): AuthMethod[] {
+  if (purpose === 'signin') return ['email', 'pin', 'biometric', 'authenticator'];
+  return [...ACTION_AUTH_METHODS];
+}
 
 const DEFAULTS: AuthPrefs = {
   signin: slot(false, ['password']),
   unlock: slot(true, ['password']),
-  funds: slot(true, ['password']),
+  funds: slot(false, ['password']),
   loanRequest: slot(false, ['password']),
   loanPay: slot(false, ['password']),
 };
@@ -32,9 +39,14 @@ function uniqueMethods(values: unknown): AuthMethod[] {
 }
 
 function slot(on: boolean, methods: AuthMethod[], primaryOnly = true): AuthSlot {
-  const next = uniqueMethods(methods);
+  const next = uniqueMethods(methods).filter((method) =>
+    method === 'email' ? true : ACTION_AUTH_METHODS.includes(method)
+  );
+  if (!on) {
+    return { on: false, methods: next, method: next[0] || 'password', primaryOnly };
+  }
   const list: AuthMethod[] = next.length ? next : ['password'];
-  return { on, methods: list, method: list[0], primaryOnly };
+  return { on: true, methods: list, method: list[0], primaryOnly: list.length <= 1 };
 }
 
 function asSlot(value: unknown, fallbackOn: boolean): AuthSlot {
@@ -53,7 +65,7 @@ function normalize(raw: Partial<AuthPrefs> | Record<string, unknown>): AuthPrefs
   return {
     signin: asSlot(legacy.signin, false),
     unlock: asSlot(legacy.unlock, true),
-    funds: asSlot(legacy.funds, true),
+    funds: asSlot(legacy.funds, false),
     loanRequest: asSlot(legacy.loanRequest, false),
     loanPay: asSlot(legacy.loanPay, false),
   };
@@ -94,11 +106,10 @@ export async function isMethodReady(method: AuthMethod): Promise<boolean> {
 async function sanitize(prefs: AuthPrefs): Promise<AuthPrefs> {
   const next = { ...prefs };
   for (const purpose of AUTH_PURPOSES) {
-    const ready: AuthMethod[] = [];
-    for (const method of next[purpose].methods) {
-      if (await isMethodReady(method)) ready.push(method);
-    }
-    next[purpose] = slot(next[purpose].on, ready, next[purpose].primaryOnly !== false);
+    const allowed = methodsForPurpose(purpose);
+    const chosen = next[purpose].methods.filter((method) => allowed.includes(method));
+    const on = Boolean(next[purpose].on) && chosen.length > 0;
+    next[purpose] = slot(on, chosen, chosen.length <= 1);
   }
   return next;
 }
@@ -118,14 +129,6 @@ export async function loadAuthPrefs(): Promise<AuthPrefs> {
 
 export async function saveAuthPrefs(prefs: AuthPrefs): Promise<AuthPrefs> {
   const next = await sanitize(prefs);
-  for (const purpose of AUTH_PURPOSES) {
-    if (!next[purpose].on) continue;
-    for (const method of next[purpose].methods) {
-      if (!(await isMethodReady(method))) {
-        throw new Error('method_not_ready');
-      }
-    }
-  }
   await persist(next);
   if (next.unlock.on) {
     const { purgePersistedWrap } = await import('./savedSession');
@@ -149,21 +152,9 @@ export async function isAuthEnabled(purpose: AuthPurpose): Promise<boolean> {
   return prefs[purpose].on;
 }
 
-/** Contraseña principal; correo entra como opción si ya está guardado. */
+/** El interruptor de Cómo confirma decide si el desbloqueo pide clave. */
 export async function ensureUnlockEnabled(): Promise<void> {
-  const prefs = await readRaw();
-  const emailReady = await isMethodReady('email');
-  const current = prefs.unlock.methods;
-  const stillDefault = current.length <= 1 && (!current[0] || current[0] === 'password');
-  const methods: AuthMethod[] = stillDefault
-    ? emailReady
-      ? ['password', 'email']
-      : ['password']
-    : current.includes('password')
-      ? current
-      : ['password', ...current];
-  prefs.unlock = slot(true, methods, prefs.unlock.primaryOnly !== false);
-  await persist(await sanitize(prefs));
+  return;
 }
 
 export async function setAuthMethod(purpose: AuthPurpose, method: AuthMethod): Promise<void> {

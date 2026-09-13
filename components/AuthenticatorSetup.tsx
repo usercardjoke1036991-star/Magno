@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import {
@@ -25,6 +26,7 @@ export const AuthenticatorSetup: React.FC<{
   const [secret, setSecret] = useState('');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const uri = secret ? authenticatorUri(secret, account) : '';
 
   const refresh = async () => {
     setEnabled(await isAuthenticatorEnabled());
@@ -97,8 +99,12 @@ export const AuthenticatorSetup: React.FC<{
       <AppText style={[styles.status, { color: colors.text }]}>
         {enabled ? t('authenticatorOn') : t('authenticatorOff')}
       </AppText>
-      {secret ? (
+      {secret && uri ? (
         <>
+          <AppText style={[styles.label, { color: colors.text }]}>{t('authenticatorQr')}</AppText>
+          <View style={styles.qrWrap} accessibilityLabel={t('authenticatorQr')}>
+            <QRCode value={uri} size={200} backgroundColor="#fff" color="#111" />
+          </View>
           <AppText style={[styles.label, { color: colors.text }]}>{t('authenticatorSecret')}</AppText>
           <AppText selectable style={[styles.secret, { color: colors.text, backgroundColor: colors.surface }]}>
             {secret}
@@ -106,9 +112,6 @@ export const AuthenticatorSetup: React.FC<{
           <TouchableOpacity onPress={() => void copySecret()} style={[styles.button, { backgroundColor: colors.primary }]}>
             <AppText style={styles.buttonText}>{t('copyAddress')}</AppText>
           </TouchableOpacity>
-          <AppText selectable style={[styles.uri, { color: colors.textMuted }]}>
-            {authenticatorUri(secret, account)}
-          </AppText>
         </>
       ) : null}
       <SecretInput
@@ -159,6 +162,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
   },
+  qrWrap: {
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 14,
+  },
   secret: {
     fontSize: 16,
     letterSpacing: 1,
@@ -166,11 +176,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
     fontWeight: '700',
-  },
-  uri: {
-    fontSize: 11,
-    lineHeight: 16,
-    marginBottom: 10,
   },
   button: {
     borderRadius: 12,

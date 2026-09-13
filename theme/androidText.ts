@@ -4,7 +4,7 @@ import { Platform, StyleSheet, type StyleProp, type TextStyle } from 'react-nati
  * MIUI reemplaza sans-serif por MiSans (variable). Fabric mide y pinta
  * con anchos distintos y duplica letras. Una sola cara embebida, sin peso.
  */
-const ANDROID_FACE = 'QvSans';
+const ANDROID_FACE = 'Inter_400Regular';
 
 /**
  * MIUI sintetiza pesos 500/600 y duplica letras. Inter ya está cargada
@@ -31,7 +31,9 @@ export function remapAndroidTextStyle(style: StyleProp<TextStyle>): StyleProp<Te
 
   if (!isCustom) {
     next.fontFamily = ANDROID_FACE;
-    next.fontWeight = '400';
+    // Cualquier fontWeight hace que MIUI sintetice la cara y pinte la letra dos veces
+    // (Desbloquear → Desbloqueeear, contraseña → contraseeña).
+    delete next.fontWeight;
   }
 
   if (typeof next.letterSpacing === 'number' && Math.abs(next.letterSpacing) < 2) {
@@ -40,6 +42,7 @@ export function remapAndroidTextStyle(style: StyleProp<TextStyle>): StyleProp<Te
   if (next.textTransform === 'uppercase' || next.textTransform === 'lowercase') {
     next.textTransform = 'none';
   }
+  next.includeFontPadding = false;
 
   return next;
 }

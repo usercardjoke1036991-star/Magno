@@ -2,9 +2,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Contract, formatUnits, getAddress, type AbstractProvider } from 'ethers';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress, getUsdtAddress } from '../constants/contractConfig';
 import { getKnownStartBlock } from '../constants/deployedAddresses';
-import { assertTrustedRpc, getProviderWithFallback, getRuntimeMode, isContractConfigured } from '../constants/rpcConfig';
+import {
+  assertTrustedRpc,
+  getProviderWithFallback,
+  getRuntimeMode,
+  isContractConfigured,
+  NETWORK_CONFIG,
+} from '../constants/rpcConfig';
+import { historyJournalSuffix, movementBelongsToWorld } from '../utils/historyWorld';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getTokenMeta } from '../constants/tokens';
+import { addPoolToSpells, buildMoraSpells, type MoraSpell } from '../utils/moraHistory';
 
 const CHUNK = 4000;
 const CHUNK_CONCURRENCY = 3;
@@ -44,15 +52,34 @@ function normalizeAddress(value: string): string {
 }
 
 function journalKey(address: string): string {
+  return `${JOURNAL_PREFIX}${historyJournalSuffix({
+    mode: getRuntimeMode(),
+    chainId: NETWORK_CONFIG.chainId,
+    contract: getContractAddress(),
+    address,
+  })}`;
+}
+
+function legacyJournalKey(address: string): string {
   return `${JOURNAL_PREFIX}${getRuntimeMode()}_${address.toLowerCase()}`;
+}
+
+function onlyThisWorld(items: Movement[]): Movement[] {
+  const world = getRuntimeMode() === 'live' ? 'live' : 'demo';
+  return items.filter((item) => movementBelongsToWorld(item, world));
 }
 
 async function readJournal(address: string): Promise<Movement[]> {
   try {
     const raw = await AsyncStorage.getItem(journalKey(address));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Movement[];
-    return Array.isArray(parsed) ? parsed : [];
+    if (raw) {
+      const parsed = JSON.parse(raw) as Movement[];
+      return onlyThisWorld(Array.isArray(parsed) ? parsed : []);
+    }
+    const legacy = await AsyncStorage.getItem(legacyJournalKey(address));
+    if (!legacy) return [];
+    const parsed = JSON.parse(legacy) as Movement[];
+    return onlyThisWorld(Array.isArray(parsed) ? parsed : []);
   } catch {
     return [];
   }
@@ -222,7 +249,9 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
   const self = normalizeAddress(walletAddress);
   if (!self) return { items: [], partial: false };
   const local = await readJournal(self);
-  if (!isContractConfigured()) return { items: local.sort((a, b) => b.timestamp - a.timestamp), partial: false };
+  if (!isContractConfigured()) {
+    return { items: onlyThisWorld(local).sort((a, b) => b.timestamp - a.timestamp), partial: false };
+  }
 
   try {
     const provider = await assertTrustedRpc(getProviderWithFallback());
@@ -340,10 +369,63 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
     }
 
     return {
-      items: mergeMovements(local, chain),
+      items: onlyThisWorld(mergeMovements(local, chain)),
       partial: partial || loanPack.failed + payPack.failed + outPack.failed + inPack.failed > 0,
     };
   } catch {
-    return { items: local.sort((a, b) => b.timestamp - a.timestamp), partial: true };
+    return { items: onlyThisWorld(local).sort((a, b) => b.timestamp - a.timestamp), partial: true };
+  }
+}
+
+export async function loadMoraHistory(walletAddress: string, level: number): Promise<{
+  items: MoraSpell[];
+  partial: boolean;
+}> {
+  const self = normalizeAddress(walletAddress);
+  if (!self || !isContractConfigured()) return { items: [], partial: false };
+  try {
+    const provider = await assertTrustedRpc(getProviderWithFallback());
+    const contractAddress = getContractAddress();
+    const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
+    const { fromBlock, toBlock, partial } = await resolveStartBlock(provider, contractAddress);
+    const moraFilter = eventFilter(contract, 'MorosityUpdated', self);
+    const childFilter = eventFilter(contract, 'AfiliadoRegistrado', null, self);
+    const [moraPack, childPack] = await Promise.all([
+      queryFilterChunked(contract, moraFilter, fromBlock, toBlock),
+      queryFilterChunked(contract, childFilter, fromBlock, toBlock),
+    ]);
+    const moraLogs = moraPack.events;
+    const childLogs = childPack.events;
+    const directs = [
+      ...new Set(
+        childLogs.map((event) => normalizeAddress(String(argValue(eventArgs(event), 'usuario', 0) || '')))
+      ),
+    ].filter(Boolean);
+    const interestPacks = await Promise.all(
+      directs.slice(0, 12).map((direct) =>
+        queryFilterChunked(contract, eventFilter(contract, 'InteresDistribuido', direct), fromBlock, toBlock)
+      )
+    );
+    const interestLogs = interestPacks.flatMap((pack) => pack.events);
+    const stamps = await resolveTimestamps(provider, [
+      ...moraLogs.map((event) => event.blockNumber),
+      ...interestLogs.map((event) => event.blockNumber),
+    ]);
+    const toggles = moraLogs.map((event) => ({
+      at: (stamps.get(event.blockNumber) || 0) * 1000,
+      on: Boolean(argValue(eventArgs(event), 'esMoroso', 1)),
+    }));
+    let spells = buildMoraSpells(toggles, Date.now(), level);
+    for (const event of interestLogs) {
+      const paidAt = (stamps.get(event.blockNumber) || 0) * 1000;
+      const interest = asBigInt(argValue(eventArgs(event), 'interes', 2));
+      spells = addPoolToSpells(spells, paidAt, interest);
+    }
+    return {
+      items: spells,
+      partial: partial || moraPack.failed + childPack.failed + interestPacks.reduce((sum, pack) => sum + pack.failed, 0) > 0,
+    };
+  } catch {
+    return { items: [], partial: true };
   }
 }

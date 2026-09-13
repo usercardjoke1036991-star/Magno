@@ -17,6 +17,7 @@
 - 💡 CI/CD — GitHub Actions (comprobacion.yml)
 - ✅ salud_proyecto.py — Marcado como completado manualmente
 - ✅ escalera de 1000 niveles — Marcado como completado manualmente
+- ✅ comisiones de referidos — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -75,6 +76,14 @@
 - Contraseña del celular 8 a 66 con mayuscula, numero y simbolo. Frase secreta nueva de 24 palabras.
 - primera apertura entra en Real; luego la app recuerda el ultimo modo abierto (Demo o Real)
 - auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo productivo
+- en Confirmar no decir que contraseña y correo son obligatorios; desbloqueo principal es contraseña y el usuario suma PIN huella autenticador; lo mismo en pedir pagar y transferir
+- En Como confirma cada accion (Desbloquear, Transferir, Pedir, Pagar) tiene interruptor y las opciones PIN, autenticador, huella y contrasena. Sin interruptor encendido esa funcion no pide nada. No hay etiqueta Principal.
+- QR TOTP real en Autenticador: escanear con Google Authenticator y confirmar con el codigo de 6 digitos
+- En el hub, cada requisito obligatorio de prestamo desaparece al confirmarse para no ocupar espacio
+- Historial en dos ventanas: transferencias y prestamos, mas mora con dias, fama, beneficios y comisiones al pool
+- Historial aislado Demo/Real. Reloj rojo de gracia (cuenta atras 30d) y luego mora hacia adelante hasta pagar
+- el usuario ya ve comisiones de referidos al cobrar y pagar, bono de primer pago y total generado
+- auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo 100 por ciento productivo
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -125,3 +134,12 @@
 - [2026-09-12 22:40] Idea añadida al backlog: "Contraseña del celular 8 a 66 con mayuscula, numero y simbolo. Frase secreta nue"
 - [2026-09-13 01:08] Idea añadida al backlog: "primera apertura entra en Real; luego la app recuerda el ultimo modo abierto (De"
 - [2026-09-13 13:12] Idea añadida al backlog: "auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo pro"
+- [2026-09-13 13:36] Idea añadida al backlog: "en Confirmar no decir que contraseña y correo son obligatorios; desbloqueo princ"
+- [2026-09-13 13:56] Idea añadida al backlog: "En Como confirma cada accion (Desbloquear, Transferir, Pedir, Pagar) tiene inter"
+- [2026-09-13 14:04] Idea añadida al backlog: "QR TOTP real en Autenticador: escanear con Google Authenticator y confirmar con "
+- [2026-09-13 14:22] Idea añadida al backlog: "En el hub, cada requisito obligatorio de prestamo desaparece al confirmarse para"
+- [2026-09-13 14:35] Idea añadida al backlog: "Historial en dos ventanas: transferencias y prestamos, mas mora con dias, fama, "
+- [2026-09-13 14:44] Idea añadida al backlog: "Historial aislado Demo/Real. Reloj rojo de gracia (cuenta atras 30d) y luego mor"
+- [2026-09-13 14:52] Idea añadida al backlog: "el usuario ya ve comisiones de referidos al cobrar y pagar, bono de primer pago "
+- [2026-09-13 14:53] Módulo completado: 'comisiones de referidos'
+- [2026-09-13 15:17] Idea añadida al backlog: "auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo 100"

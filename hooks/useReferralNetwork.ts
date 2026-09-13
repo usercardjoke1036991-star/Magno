@@ -8,6 +8,10 @@ const EMPTY: ReferralNetworkSnapshot = {
   directs: [],
   totalEarnedWei: '0',
   totalEarnedLabel: '0.00 USDT',
+  commissionTotalWei: '0',
+  commissionTotalLabel: '0.00 USDT',
+  bonusTotalWei: '0',
+  bonusTotalLabel: '0.00 USDT',
   activity: [],
   partial: false,
 };

@@ -123,6 +123,8 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         <AppText style={styles.warn}>{t('moraBlocked')}</AppText>
       )}
 
+      {children}
+
       <AppSubsection title={t('subsectionInvite')} defaultOpen icon="share">
           {isFundador && (
         <View style={[styles.founderBadge, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -225,8 +227,6 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           })}
         </AppText>
       </AppSubsection>
-
-      {children}
 
       <AppSubsection title={t('referralEarnTitle')} defaultOpen={false} icon="pay">
         <AppText style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralLead')}</AppText>

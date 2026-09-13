@@ -62,7 +62,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `android/app/src/main/AndroidManifest.xml` — manifiesto Android
   - Funciones/clases: .MainActivity
 - `android/app/src/main/java/com/quatrivium/credit/MainActivity.kt` — Activity Android
-  - Funciones/clases: MainActivity, onCreate, getMainComponentName, createReactActivityDelegate, invokeDefaultOnBackPressed
+  - Funciones/clases: MainActivity, onCreate, onNewIntent, getMainComponentName, createReactActivityDelegate, invokeDefaultOnBackPressed
 - `android/app/src/main/java/com/quatrivium/credit/MainApplication.kt` — módulo Kotlin
   - Funciones/clases: MainApplication, getPackages, getJSMainModuleName, getUseDeveloperSupport, onCreate, onConfigurationChanged
 - `app/index.tsx` — módulo JS/TS
@@ -103,6 +103,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: EmailOtpSection
 - `components/FundsConfirmHost.tsx` — módulo JS/TS
   - Funciones/clases: FundsConfirmHost, useFundsConfirm
+- `components/GraceMoraClock.tsx` — módulo JS/TS
+  - Funciones/clases: GraceMoraClock
 - `components/HomeHub.tsx` — módulo JS/TS
   - Funciones/clases: HomeHub
 - `components/icons.tsx` — módulo JS/TS
@@ -243,9 +245,14 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
+- `scripts/_dump-ui-nodes.py` — módulo Python
+- `scripts/_dump-ui-texts.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
   - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
 - `scripts/_probe-live-health.cjs` — módulo JS/TS
+- `scripts/_pull-rkstorage.py` — módulo Python
+- `scripts/_read-rkstorage.py` — módulo Python
+- `scripts/_set-demo-mode.py` — módulo Python
 - `services/accountEmail.ts` — módulo JS/TS
   - Funciones/clases: loadVerifiedEmail, isEmailVerified, saveVerifiedEmail, clearVerifiedEmail
 - `services/accountReset.ts` — módulo JS/TS
@@ -259,7 +266,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/authenticator.ts` — módulo JS/TS
   - Funciones/clases: isAuthenticatorEnabled, loadAuthenticatorSecret, createAuthenticatorSecret, authenticatorUri, persistAuthenticatorWrap, confirmAuthenticator, verifyAuthenticator, unlockWithAuthenticator, clearAuthenticator
 - `services/authPrefs.ts` — módulo JS/TS
-  - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethods, getAuthMethod, isAuthEnabled, ensureUnlockEnabled, setAuthMethod, setAuthMethods, fallbackAuthIfNeeded
+  - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, ACTION_AUTH_METHODS, methodsForPurpose, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethods, getAuthMethod, isAuthEnabled, ensureUnlockEnabled, setAuthMethod, setAuthMethods, fallbackAuthIfNeeded
 - `services/demoIdentity.ts` — módulo JS/TS
   - Funciones/clases: requestDemoIdentity
 - `services/deviceBinding.ts` — módulo JS/TS
@@ -275,7 +282,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/kycDeclaration.ts` — módulo JS/TS
   - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration
 - `services/movementHistory.ts` — módulo JS/TS
-  - Funciones/clases: recordMovement, loadMovementHistory
+  - Funciones/clases: recordMovement, loadMovementHistory, loadMoraHistory
 - `services/notificationProfile.ts` — módulo JS/TS
   - Funciones/clases: normalizePhone, isValidPhone, loadNotificationProfile, saveNotificationProfile
 - `services/passwordRecovery.ts` — módulo JS/TS
@@ -348,23 +355,31 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
   - Funciones/clases: normalizeEmail, isAllowedEmailProvider, canonicalEmail, isValidEmail
 - `utils/formatters.ts` — módulo JS/TS
   - Funciones/clases: formatCooldown, formatCountdownClock, formatAddress, formatUSD, formatDueDate, parsePositiveDecimal, calculateLoanWithInterest
+- `utils/graceClock.ts` — módulo JS/TS
+  - Funciones/clases: GRACE_SECONDS, paymentDueAt, graceEndsAt, graceMoraPhase, graceRemainingSeconds, moraElapsedSeconds, graceMoraSeconds
+- `utils/historyWorld.ts` — módulo JS/TS
+  - Funciones/clases: historyJournalSuffix, movementBelongsToWorld
 - `utils/inviteCode.ts` — módulo JS/TS
   - Funciones/clases: INVITE_STORAGE_KEY, formatInviteCode, addressToInviteCode, inviteCodeToAddress, extractInviteFromText, extractInviteFromUrl, extractInviteNameFromUrl, parseInviteInput, buildInviteLink
 - `utils/legacyStorage.ts` — módulo JS/TS
   - Funciones/clases: migrateLegacyStorage
+- `utils/moraHistory.ts` — módulo JS/TS
+  - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement
 - `utils/passwordPolicy.ts` — módulo JS/TS
   - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, PASSWORD_ALPHABET, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, masterPasswordFromRandomBytes
 - `utils/pendingDeepLink.ts` — módulo JS/TS
   - Funciones/clases: rememberAppUrl, takePendingAppUrl
 - `utils/pinPolicy.ts` — módulo JS/TS
   - Funciones/clases: isWeakPin, lockoutMs, remainingLockMs
+- `utils/referralEarnings.ts` — módulo JS/TS
+  - Funciones/clases: asWei, sumReferralEarnings
 - `utils/safeFetch.ts` — módulo JS/TS
   - Funciones/clases: safeJsonFetch, readJsonLimited
 - `utils/safeOpenUrl.ts` — módulo JS/TS

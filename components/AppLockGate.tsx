@@ -205,7 +205,8 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       if (method === 'authenticator' && !flags.authOn) continue;
       methods.push(method);
     }
-    if (!methods.length) methods.push('password');
+    if (!methods.length && preferred.includes('password')) methods.push('password');
+    if (!methods.length) return false;
     if (purpose === 'unlock') {
       const primaryOnly = prefs?.unlock.primaryOnly !== false;
       const prompt = unlockPromptMethods(methods, methods[0], primaryOnly) as AuthMethod[];
@@ -214,13 +215,14 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       setUnlockChoices(methods);
       setUnlockPrimaryOnly(primaryOnly);
       await applyQueuedMethod(prompt[0] || 'password', flags);
-      return;
+      return true;
     }
     methodQueueRef.current = methods;
     setMethodQueue(methods);
     setUnlockChoices(methods);
     setUnlockPrimaryOnly(false);
     await applyQueuedMethod(methods[0] || 'password', flags);
+    return true;
   };
 
   const kickIfSessionMoved = async () => {
@@ -371,16 +373,20 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     });
     setNeedsSetup(false);
     if (entry === 'unlock') {
-      await startMethodQueue('unlock', {
+      const asked = await startMethodQueue('unlock', {
         passwordSet,
         pinSet,
         authOn,
         hasEmail: Boolean(verifiedEmail),
         bioEnabled: bioReadyNow,
       });
-      lockNow();
       setAskingSignIn(false);
-      setLocked(true);
+      if (asked) {
+        lockNow();
+        setLocked(true);
+      } else {
+        setLocked(false);
+      }
     } else {
       methodQueueRef.current = [];
       setMethodQueue([]);
@@ -501,15 +507,17 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
             setHasEmail(Boolean(verifiedEmail));
             setError('');
             if (unlockOn) {
-              await startMethodQueue('unlock', {
+              const asked = await startMethodQueue('unlock', {
                 passwordSet,
                 pinSet,
                 authOn,
                 hasEmail: Boolean(verifiedEmail),
                 bioEnabled,
               });
-              lockNow();
-              setLocked(true);
+              if (asked) {
+                lockNow();
+                setLocked(true);
+              }
             }
           })
           .catch(() => {

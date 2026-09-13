@@ -52,7 +52,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 856 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 873 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -74,8 +74,8 @@ Magno/
 - **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. En Real también correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain.
 - **Frase secreta BIP-39**: alta y respaldo. No cierra la cuenta. No hay destruir ni generar otra cuenta en la app.
 - **Usuario y contraseña son el candado de este teléfono.** El correo sigue para Real, recuperar contraseña y OTP. Desbloquear, pedir, pagar o transferir pueden usar contraseña, correo, PIN, huella o autenticador si el usuario los elige.
-- **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: contraseña, correo, PIN, huella o autenticador). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar.
-- **Historial de movimientos**: sala en el hub con préstamos, pagos y transferencias (billeteras, plataforma, fecha y hora).
+- **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: contraseña, correo, PIN, huella o autenticador). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar. El autenticador es TOTP real: al activarlo muestra un QR `otpauth://` escaneable y la clave por si la cámara no enfoca.
+- **Historial**: Demo y Real tienen diarios distintos (modo + chain + contrato + billetera). Dos ventanas (transferencias y préstamos) y mora. En el hub, al vencer empieza un reloj rojo: 30 días de gracia en cuenta atrás; al acabarse, cuenta hacia adelante hasta que pague. El fundador no entra en gracia ni mora.
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
@@ -237,6 +237,16 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-13 | Auditoria contratos: nucleo + FamaLib + Leveling, 123 tests, Demo 0xD2d2 alineado. ABI cliente con cancelAdminAction; mainnet sin deploy. | — |
+| 2026-09-13 | Auditoria en vivo: el tablero de comisiones/bono/total queda arriba en Red; Activar linea se desactiva si no hay contrato; MainActivity reenvia onNewIntent. | — |
+| 2026-09-13 | Auditoria: Hardhat 121 tests, i18n 877 claves, Demo live operativo. gradle.properties newArchEnabled alineado con app.json (false). remapAndroidText ya no sintetiza fontWeight en MIUI. | — |
+| 2026-09-13 | Red: tablero de comisiones, bono de primer pago y total generado a partir de eventos on-chain | — |
+| 2026-09-13 | Historial aislado por mundo. Reloj de gracia/mora en pantalla principal. | — |
+| 2026-09-13 | Historial partido en transferencias y prestamos. Mora on-chain: dias, fama, freeze y pool. | — |
+| 2026-09-13 | KycAccessBanner: solo muestra requisitos de prestamo pendientes. Al confirmar, desaparecen. | — |
+| 2026-09-13 | Como confirma: interruptor por accion y chips PIN, autenticador, huella y contrasena. Sin interruptor no se pide confirmacion. | — |
+| 2026-09-13 | Como confirma recortado: Desbloquear, Transferir, Pedir, Pagar y metodos. Sin texto extra. | — |
+| 2026-09-13 | Cómo confirma ya no dice que contraseña y correo son obligatorios. Desbloqueo fija contraseña como principal. Pedir, pagar y transferir eligen PIN, huella, autenticador o contraseña. | — |
 | 2026-09-13 | Auditoria profunda: nextEntryScreen va a desbloqueo si hay cuenta local. Demo 2000 USDT operativo. Real y Twilio siguen del fundador. | — |
 | 2026-09-13 | Auditoria 2026-09-13: Demo live 2000 USDT operativo; Real sin contrato; LanguageWelcome espera el idioma guardado. | — |
 | 2026-09-13 | Primera apertura en Real; AppMode espera AsyncStorage y recuerda el ultimo modo abierto. | — |

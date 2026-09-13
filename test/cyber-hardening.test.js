@@ -385,6 +385,138 @@ describe('demo credit gates', function () {
     expect(deviceMatchAfterIdentityReadFailure(true)).to.equal(true);
     expect(identityHashBound('0x0000000000000000000000000000000000000000000000000000000000000000')).to.equal(false);
     expect(identityHashBound('0xabc')).to.equal(true);
+    function loanGateBannerRows({ phraseDone, showIdentity, emailDone, kycDone, phoneDone }) {
+      const rows = [];
+      if (!phraseDone) rows.push('phrase');
+      if (!showIdentity) return rows;
+      if (!emailDone) rows.push('email');
+      if (!kycDone) rows.push('kyc');
+      if (!phoneDone) rows.push('phone');
+      return rows;
+    }
+    expect(loanGateBannerRows({
+      phraseDone: false, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
+    })).to.deep.equal(['phrase', 'email', 'kyc', 'phone']);
+    expect(loanGateBannerRows({
+      phraseDone: true, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
+    })).to.deep.equal(['email', 'kyc', 'phone']);
+    expect(loanGateBannerRows({
+      phraseDone: true, showIdentity: true, emailDone: true, kycDone: true, phoneDone: false,
+    })).to.deep.equal(['phone']);
+    expect(loanGateBannerRows({
+      phraseDone: false, showIdentity: false, emailDone: false, kycDone: false, phoneDone: false,
+    })).to.deep.equal(['phrase']);
+    expect(loanGateBannerRows({
+      phraseDone: true, showIdentity: false, emailDone: false, kycDone: false, phoneDone: false,
+    })).to.deep.equal([]);
+    expect(loanGateBannerRows({
+      phraseDone: true, showIdentity: true, emailDone: true, kycDone: true, phoneDone: true,
+    })).to.deep.equal([]);
+  });
+
+  it('keeps Demo and Real history apart and runs grace down then mora up', function () {
+    function historyJournalSuffix({ mode, chainId, contract, address }) {
+      return `${mode === 'live' ? 'live' : 'demo'}_${Number(chainId) || 0}_${String(contract || '').toLowerCase()}_${String(address || '').toLowerCase()}`;
+    }
+    function movementBelongsToWorld(item, mode) {
+      const world = mode === 'live' ? 'live' : 'demo';
+      return !item.world || item.world === world;
+    }
+    const demoKey = historyJournalSuffix({ mode: 'demo', chainId: 97, contract: '0xD2', address: '0xAA' });
+    const liveKey = historyJournalSuffix({ mode: 'live', chainId: 56, contract: '0x00', address: '0xAA' });
+    expect(demoKey).to.not.equal(liveKey);
+    expect(movementBelongsToWorld({ world: 'demo' }, 'live')).to.equal(false);
+    expect(movementBelongsToWorld({ world: 'live' }, 'live')).to.equal(true);
+    const GRACE = 30 * 86400;
+    function paymentDueAt(loan) {
+      if (!loan) return 0;
+      const due = Number(loan.vencimiento) || 0;
+      const next = Number(loan.proximaCuota) || 0;
+      if (due > 0 && next > 0) return Math.min(due, next);
+      return due || next;
+    }
+    function graceMoraPhase({ hasActiveLoan, dueAt, isFounder }, now) {
+      if (isFounder || !hasActiveLoan || dueAt <= 0 || now < dueAt) return 'none';
+      if (now < dueAt + GRACE) return 'grace';
+      return 'mora';
+    }
+    function graceMoraSeconds(phase, dueAt, now) {
+      if (phase === 'grace') return Math.max(0, dueAt + GRACE - now);
+      if (phase === 'mora') return Math.max(0, now - (dueAt + GRACE));
+      return 0;
+    }
+    const due = 1_700_000_000;
+    expect(paymentDueAt({ vencimiento: due, proximaCuota: due - 100 })).to.equal(due - 100);
+    expect(graceMoraPhase({ hasActiveLoan: true, dueAt: due }, due - 1)).to.equal('none');
+    expect(graceMoraPhase({ hasActiveLoan: true, dueAt: due }, due)).to.equal('grace');
+    expect(graceMoraPhase({ hasActiveLoan: true, dueAt: due }, due + GRACE - 1)).to.equal('grace');
+    expect(graceMoraPhase({ hasActiveLoan: true, dueAt: due }, due + GRACE)).to.equal('mora');
+    expect(graceMoraPhase({ hasActiveLoan: true, dueAt: due, isFounder: true }, due + 10)).to.equal('none');
+    expect(graceMoraSeconds('grace', due, due + 10)).to.equal(GRACE - 10);
+    expect(graceMoraSeconds('mora', due, due + GRACE + 90)).to.equal(90);
+  });
+
+  it('splits history windows and computes mora days, fame, freeze and pool share', function () {
+    function isTransferMovement(kind) {
+      return kind === 'transfer_in' || kind === 'transfer_out' || kind === 'bonus' || kind === 'donation';
+    }
+    function isLoanMovement(kind) {
+      return kind === 'loan' || kind === 'payment';
+    }
+    function moraDays(startedAt, endedAt) {
+      if (!startedAt || endedAt <= startedAt) return 0;
+      return Math.max(0, Math.floor((endedAt - startedAt) / 86_400_000));
+    }
+    function moraPenaltyDays(days) {
+      return Math.max(0, Math.floor(days) - 30);
+    }
+    function moraFameLost(penaltyDays, level) {
+      const safeLevel = Number.isFinite(level) && level > 0 ? Math.floor(level) : 1;
+      return Math.max(0, Math.floor(penaltyDays)) * 10 * safeLevel;
+    }
+    function gen1ShareWei(interestWei) {
+      return (interestWei * 1500n) / 10000n;
+    }
+    function buildMoraSpells(toggles, now, level) {
+      const ordered = [...toggles].filter((item) => item.at > 0).sort((a, b) => a.at - b.at);
+      const spells = [];
+      let openAt = 0;
+      for (const item of ordered) {
+        if (item.on) {
+          if (!openAt) openAt = item.at;
+          continue;
+        }
+        if (!openAt) continue;
+        const days = moraDays(openAt, item.at);
+        const penaltyDays = moraPenaltyDays(days);
+        spells.push({ startedAt: openAt, endedAt: item.at, days, penaltyDays, fameLost: moraFameLost(penaltyDays, level), benefitsBlocked: penaltyDays > 0 });
+        openAt = 0;
+      }
+      if (openAt) {
+        const days = moraDays(openAt, now);
+        const penaltyDays = moraPenaltyDays(days);
+        spells.push({ startedAt: openAt, endedAt: null, days, penaltyDays, fameLost: moraFameLost(penaltyDays, level), benefitsBlocked: penaltyDays > 0 });
+      }
+      return spells.reverse();
+    }
+    expect(isTransferMovement('transfer_in')).to.equal(true);
+    expect(isTransferMovement('loan')).to.equal(false);
+    expect(isLoanMovement('payment')).to.equal(true);
+    expect(isLoanMovement('transfer_out')).to.equal(false);
+    const day = 86_400_000;
+    const start = 1_700_000_000_000;
+    const spells = buildMoraSpells(
+      [{ at: start, on: true }, { at: start + 40 * day, on: false }],
+      start + 50 * day,
+      2
+    );
+    expect(spells).to.have.length(1);
+    expect(spells[0].days).to.equal(40);
+    expect(spells[0].penaltyDays).to.equal(10);
+    expect(spells[0].fameLost).to.equal(200);
+    expect(spells[0].benefitsBlocked).to.equal(true);
+    expect(gen1ShareWei(10000n)).to.equal(1500n);
+    expect(moraFameLost(0, 5)).to.equal(0);
   });
 
   it('awards fame in proportion to donated or pooled USDT', function () {
@@ -627,6 +759,35 @@ describe('account entry — password, email and session', () => {
     expect(liveSecondCreditAllowed({ phoneTaken: false, deviceTaken: false })).to.equal(true);
     expect(canSubmitRestorePhrase('uno dos tres')).to.equal(false);
     expect(canSubmitRestorePhrase('uno dos tres cuatro cinco seis siete ocho nueve diez once doce')).to.equal(true);
+    function methodsForPurpose(purpose) {
+      if (purpose === 'signin') return ['email', 'pin', 'biometric', 'authenticator'];
+      return ['pin', 'authenticator', 'biometric', 'password'];
+    }
+    expect(methodsForPurpose('unlock')).to.deep.equal(['pin', 'authenticator', 'biometric', 'password']);
+    expect(methodsForPurpose('funds')).to.deep.equal(['pin', 'authenticator', 'biometric', 'password']);
+    expect(methodsForPurpose('loanRequest')).to.deep.equal(['pin', 'authenticator', 'biometric', 'password']);
+    expect(methodsForPurpose('loanPay')).to.deep.equal(['pin', 'authenticator', 'biometric', 'password']);
+    function actionApplies(on, methods) {
+      return Boolean(on) && Array.isArray(methods) && methods.length > 0;
+    }
+    expect(actionApplies(false, ['password'])).to.equal(false);
+    expect(actionApplies(false, ['pin', 'authenticator', 'biometric', 'password'])).to.equal(false);
+    expect(actionApplies(true, [])).to.equal(false);
+    expect(actionApplies(true, ['pin', 'password'])).to.equal(true);
+  });
+
+  it('builds a standard otpauth URL so authenticator apps can scan the QR', () => {
+    function otpauthUrl(secret, account) {
+      const label = encodeURIComponent(`Quatrivium:${account || 'cuenta'}`);
+      return `otpauth://totp/${label}?secret=${secret}&issuer=Quatrivium&digits=6&period=30`;
+    }
+    const url = otpauthUrl('JBSWY3DPEHPK3PXP', 'ana');
+    expect(url.startsWith('otpauth://totp/')).to.equal(true);
+    expect(url).to.include('secret=JBSWY3DPEHPK3PXP');
+    expect(url).to.include('issuer=Quatrivium');
+    expect(url).to.include('digits=6');
+    expect(url).to.include('period=30');
+    expect(url).to.include(encodeURIComponent('Quatrivium:ana'));
   });
 
   it('hashes the password locally so sign-in does not wait on native digest hops', () => {
@@ -644,5 +805,86 @@ describe('account entry — password, email and session', () => {
     expect(first).to.equal(same);
     expect(first).to.not.equal(other);
     expect(first).to.match(/^[0-9a-f]{64}$/);
+  });
+
+  it('splits referral earnings into commissions, first-payment bonus and total', () => {
+    function asWei(value) {
+      try {
+        if (typeof value === 'bigint') return value;
+        if (typeof value === 'number') return BigInt(Math.max(0, Math.floor(value)));
+        if (!value) return 0n;
+        return BigInt(value);
+      } catch {
+        return 0n;
+      }
+    }
+    function sumReferralEarnings(nodes) {
+      let commissionWei = 0n;
+      let bonusWei = 0n;
+      for (const node of nodes || []) {
+        commissionWei += asWei(node.commissionWei);
+        bonusWei += asWei(node.bonusWei);
+      }
+      return { commissionWei, bonusWei, totalWei: commissionWei + bonusWei };
+    }
+    expect(asWei(undefined)).to.equal(0n);
+    expect(asWei('')).to.equal(0n);
+    expect(asWei('not-a-number')).to.equal(0n);
+    expect(asWei('1500000000000000000')).to.equal(1500000000000000000n);
+    const totals = sumReferralEarnings([
+      { commissionWei: '3000000000000000000', bonusWei: '500000000000000000' },
+      { commissionWei: '1000000000000000000', bonusWei: '500000000000000000' },
+      { commissionWei: 'bad', bonusWei: '' },
+    ]);
+    expect(totals.commissionWei).to.equal(4000000000000000000n);
+    expect(totals.bonusWei).to.equal(1000000000000000000n);
+    expect(totals.totalWei).to.equal(5000000000000000000n);
+    expect(sumReferralEarnings([]).totalWei).to.equal(0n);
+  });
+
+  it('keeps referral earnings board visible while the scan is still loading', () => {
+    function referralBoardVisible({ isLoading, error }) {
+      return !error || Boolean(isLoading);
+    }
+    function activateCreditCanPress({ busy, paused, contractReady }) {
+      return !busy && !paused && contractReady !== false;
+    }
+    function roomFromAppUrl(url) {
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol !== 'quatrivium:') return '';
+        const host = String(parsed.hostname || '').toLowerCase();
+        const path = String(parsed.pathname || '').replace(/^\/+|\/+$/g, '').toLowerCase();
+        if (host === 'room') return path.split('/')[0] || '';
+        return host;
+      } catch {
+        return '';
+      }
+    }
+    expect(referralBoardVisible({ isLoading: true, error: null })).to.equal(true);
+    expect(referralBoardVisible({ isLoading: false, error: null })).to.equal(true);
+    expect(activateCreditCanPress({ busy: false, paused: false, contractReady: true })).to.equal(true);
+    expect(activateCreditCanPress({ busy: false, paused: false, contractReady: false })).to.equal(false);
+    expect(activateCreditCanPress({ busy: true, paused: false, contractReady: true })).to.equal(false);
+    expect(roomFromAppUrl('quatrivium://room/credit?n=1730000000')).to.equal('credit');
+    expect(roomFromAppUrl('quatrivium://room/history')).to.equal('history');
+    expect(roomFromAppUrl('quatrivium://room/network')).to.equal('network');
+  });
+
+  it('strips Android fontWeight so MIUI cannot double-paint letters', () => {
+    function remapAndroidTextStyle(style, os = 'android') {
+      if (os !== 'android') return style;
+      const next = { ...style };
+      delete next.fontWeight;
+      next.fontFamily = 'QvSans';
+      next.includeFontPadding = false;
+      return next;
+    }
+    const painted = remapAndroidTextStyle({ fontSize: 22, fontWeight: '600' });
+    expect(painted.fontWeight).to.equal(undefined);
+    expect(painted.fontFamily).to.equal('QvSans');
+    expect(painted.includeFontPadding).to.equal(false);
+    expect(painted.opacity).to.equal(undefined);
+    expect(remapAndroidTextStyle({ fontWeight: '700' }, 'ios').fontWeight).to.equal('700');
   });
 });

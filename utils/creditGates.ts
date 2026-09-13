@@ -43,6 +43,25 @@ export function liveCreditReady(demo: boolean, flags: LiveCreditFlags): boolean 
   );
 }
 
+export type LoanGateBannerRow = 'phrase' | 'email' | 'kyc' | 'phone';
+
+/** En el hub solo quedan los requisitos de préstamo que aún no están confirmados. */
+export function loanGateBannerRows(input: {
+  phraseDone: boolean;
+  showIdentity: boolean;
+  emailDone: boolean;
+  kycDone: boolean;
+  phoneDone: boolean;
+}): LoanGateBannerRow[] {
+  const rows: LoanGateBannerRow[] = [];
+  if (!input.phraseDone) rows.push('phrase');
+  if (!input.showIdentity) return rows;
+  if (!input.emailDone) rows.push('email');
+  if (!input.kycDone) rows.push('kyc');
+  if (!input.phoneDone) rows.push('phone');
+  return rows;
+}
+
 export function liveCreditBlockReason(
   demo: boolean,
   flags: LiveCreditFlags

@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   subCard: {
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   subHeader: {
     flexDirection: 'row',

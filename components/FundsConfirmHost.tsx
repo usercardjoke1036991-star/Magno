@@ -82,7 +82,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       for (const method of preferred) {
         if (await isMethodReady(method)) queue.push(method);
       }
-      if (!queue.length) queue.push('password');
+      if (!queue.length) return true;
       for (const chosen of queue) {
         if (chosen === 'biometric') {
           const bio = await authenticateBiometric();
