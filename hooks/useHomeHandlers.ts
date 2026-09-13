@@ -15,7 +15,9 @@ import { notifyApiBases } from '../constants/appLinks';
 import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode, isDonationEnabled, isDonationVisible } from '../constants/rpcConfig';
 import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
-import { creditNeedsKyc, creditNeedsPhone } from '../utils/creditGates';
+import { creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
+import { loadVerifiedEmail } from '../services/accountEmail';
+import { isPhraseBackedUp } from '../services/appWallet';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 import { formatCooldown, formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { milestoneBonusUsd } from '../constants/loanTiers';
@@ -244,12 +246,28 @@ export const useHomeHandlers = ({
       Alert.alert(t('register'), t('activateBeforeLoan'));
       return;
     }
+    const [hasEmail, phraseOk] = await Promise.all([
+      loadVerifiedEmail().then((email) => Boolean(email)).catch(() => false),
+      isPhraseBackedUp().catch(() => false),
+    ]);
+    if (creditNeedsPhrase(phraseOk)) {
+      Alert.alert(t('seedBannerTitle'), t('seedNeedBeforeLoan'));
+      return;
+    }
+    if (creditNeedsEmail(hasEmail)) {
+      Alert.alert(t('emailTitle'), t('emailNeedBeforeLoan'));
+      return;
+    }
     if (creditNeedsKyc(userInfo)) {
       Alert.alert(t('kycTitle'), t('kycNeedBeforeLoan'));
       return;
     }
     if (creditNeedsPhone(userInfo)) {
       Alert.alert(t('otpTitle'), t('otpNeedBeforeLoan'));
+      return;
+    }
+    if (creditNeedsDeviceMatch(userInfo.deviceMatches)) {
+      Alert.alert(t('deviceBannerTitle'), t('seedNeedDevice'));
       return;
     }
     if (userInfo.hasActiveLoan) {

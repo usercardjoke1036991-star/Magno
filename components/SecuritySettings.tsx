@@ -23,7 +23,6 @@ import { AuthMethodPicker } from './AuthMethodPicker';
 import { AuthenticatorSetup } from './AuthenticatorSetup';
 import { isAuthenticatorEnabled } from '../services/authenticator';
 import { loadAuthPrefs, type AuthMethod, type AuthPrefs, type AuthPurpose } from '../services/authPrefs';
-import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { SecretInput } from './SecretInput';
 import { humanizeTxError } from '../utils/txErrors';
 import {
@@ -35,7 +34,6 @@ import {
   markPhraseBackedUp,
 } from '../services/appWallet';
 import { useAppMode } from '../wallet/AppModeContext';
-import { isCreditReady } from '../constants/rpcConfig';
 import type { TranslationKey } from '../i18n/translations';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { EmailOtpSection } from './EmailOtpSection';
@@ -50,7 +48,7 @@ export const SecuritySettings: React.FC = () => {
   const { mode } = useAppMode();
   const demoAccount = mode === 'demo';
   const primaryToken = useMemo(() => getSupportedTokens()[0], [mode]);
-  const { address, recreate, restore } = useAppWallet();
+  const { address, restore } = useAppWallet();
   const { userInfo, refetch } = useWeb3Balances(address, primaryToken);
   const accountBlocked = userInfo.hasActiveLoan || userInfo.isDelinquent;
   const { declararKyc, isLoading: kycBusy } = useWeb3Transactions();
@@ -64,22 +62,18 @@ export const SecuritySettings: React.FC = () => {
   const [restorePhrase, setRestorePhrase] = useState('');
   const [restorePin, setRestorePin] = useState('');
   const [restorePassword, setRestorePassword] = useState('');
-  const [destroyWord, setDestroyWord] = useState('');
-  const [destroyPin, setDestroyPin] = useState('');
-  const [destroyPassword, setDestroyPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState(false);
-  const [showRestore, setShowRestore] = useState(false);
   const [pinSet, setPinSet] = useState(false);
   const [passwordSet, setPasswordSet] = useState(false);
   const [bioOn, setBioOn] = useState(false);
   const [authOn, setAuthOn] = useState(false);
   const [authPrefs, setAuthPrefs] = useState<AuthPrefs>({
-    signin: { on: false, methods: ['password'], method: 'password' },
-    unlock: { on: false, methods: ['password'], method: 'password' },
-    funds: { on: true, methods: ['password'], method: 'password' },
-    loanRequest: { on: false, methods: ['password'], method: 'password' },
-    loanPay: { on: false, methods: ['password'], method: 'password' },
+    signin: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
+    unlock: { on: true, methods: ['password'], method: 'password', primaryOnly: true },
+    funds: { on: true, methods: ['password'], method: 'password', primaryOnly: true },
+    loanRequest: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
+    loanPay: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
   });
   const [email, setEmail] = useState('');
 
@@ -201,11 +195,6 @@ export const SecuritySettings: React.FC = () => {
           Alert.alert(t('activeLoan'), t('destroyDelinquent'));
           return;
         }
-        if (!isCreditReady()) {
-          Alert.alert(t('error'), t('liveCreditNotReady'));
-          return;
-        }
-        await QuatriviumCreditService.destruirCuenta(primaryToken.address);
       }
       await restore(restorePhrase);
       await refreshPhrase();
@@ -219,62 +208,6 @@ export const SecuritySettings: React.FC = () => {
     } finally {
       setBusy(false);
     }
-  };
-
-  const destroyAccount = async () => {
-    if (accountBlocked) {
-      Alert.alert(t('activeLoan'), t('appWalletDestroyBlocked'));
-      return;
-    }
-    if (userInfo.hasActiveLoan) {
-      Alert.alert(t('activeLoan'), t('appWalletDestroyLoan'));
-      return;
-    }
-    if (userInfo.isDelinquent) {
-      Alert.alert(t('activeLoan'), t('destroyDelinquent'));
-      return;
-    }
-    if (destroyWord.trim().toUpperCase() !== 'DESTRUIR') {
-      Alert.alert(t('error'), t('appWalletDestroyType'));
-      return;
-    }
-    if (pinSet && !(await verifyPin(destroyPin))) {
-      Alert.alert(t('error'), t('lockPinWrong'));
-      return;
-    }
-    if (!pinSet && passwordSet && !(await checkPassword(destroyPassword)).ok) {
-      Alert.alert(t('error'), t('lockPasswordWrong'));
-      return;
-    }
-    Alert.alert(t('appWalletDestroyTitle'), t('appWalletDestroyConfirm'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('appWalletDestroy'),
-        style: 'destructive',
-        onPress: async () => {
-          setBusy(true);
-          try {
-            if (userInfo.isRegistered) {
-              if (!isCreditReady()) {
-                Alert.alert(t('error'), t('liveCreditNotReady'));
-                return;
-              }
-              await QuatriviumCreditService.destruirCuenta(primaryToken.address);
-            }
-            await recreate();
-            await refreshPhrase();
-            refetch();
-            setDestroyWord('');
-            setDestroyPin('');
-            Alert.alert(t('ready'), t('appWalletDestroyed'));
-          } catch (error) {
-            Alert.alert(t('error'), humanizeTxError(error));
-          } finally {
-            setBusy(false);
-          }
-        },
-      },
-    ]);
   };
 
   const Row = ({
@@ -317,7 +250,7 @@ export const SecuritySettings: React.FC = () => {
     fingerprint: 'securityFingerprint',
     phrase: 'seedTitle',
     phone: 'securityPhone',
-    replace: 'oneAccountTitle',
+    replace: 'restoreAccount',
     methods: 'authMethodsTitle',
     authenticator: 'authenticatorTitle',
   };
@@ -445,23 +378,26 @@ export const SecuritySettings: React.FC = () => {
         ) : null}
         {panel === 'replace' ? (
           <View>
-            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountLead')}</AppText>
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('oneAccountForeverLead')}</AppText>
             {accountBlocked ? (
               <AppText style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyBlocked')}</AppText>
             ) : null}
+            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('restoreAccountLead')}</AppText>
             <AppTextInput
-              value={destroyWord}
-              onChangeText={setDestroyWord}
-              autoCapitalize="characters"
+              value={restorePhrase}
+              onChangeText={setRestorePhrase}
+              autoCapitalize="none"
+              autoCorrect={false}
               editable={!accountBlocked}
-              placeholder="DESTRUIR"
+              multiline
+              placeholder={t('seedRestorePlaceholder')}
               placeholderTextColor={colors.textMuted}
-              style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+              style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
             />
             {pinSet ? (
               <SecretInput
-                value={destroyPin}
-                onChangeText={(value) => setDestroyPin(value.replace(/\D/g, '').slice(0, 6))}
+                value={restorePin}
+                onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
                 keyboardType="number-pad"
                 maxLength={6}
                 editable={!accountBlocked}
@@ -469,77 +405,23 @@ export const SecuritySettings: React.FC = () => {
               />
             ) : passwordSet ? (
               <SecretInput
-                value={destroyPassword}
-                onChangeText={setDestroyPassword}
+                value={restorePassword}
+                onChangeText={setRestorePassword}
                 editable={!accountBlocked}
                 placeholder={t('lockCurrentPassword')}
               />
             ) : null}
             <TouchableOpacity
-              disabled={busy || accountBlocked || (pinSet && destroyPin.length !== 6) || (!pinSet && passwordSet && !destroyPassword)}
-              onPress={destroyAccount}
-              accessibilityState={{ disabled: busy || accountBlocked }}
+              disabled={busy || accountBlocked || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)}
+              onPress={() => void restoreWallet()}
               style={[
                 styles.button,
-                styles.destroy,
-                (busy || accountBlocked || (pinSet && destroyPin.length !== 6) || (!pinSet && passwordSet && !destroyPassword)) && styles.destroyDisabled,
+                { backgroundColor: colors.connect },
+                (busy || accountBlocked || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)) && styles.destroyDisabled,
               ]}
             >
-              <AppText style={[styles.buttonText, accountBlocked && styles.destroyDisabledText]}>
-                {t('appWalletDestroy')}
-              </AppText>
+              {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRestoreAction')}</AppText>}
             </TouchableOpacity>
-            <TouchableOpacity
-              disabled={accountBlocked}
-              onPress={() => setShowRestore((value) => !value)}
-              accessibilityRole="button"
-              accessibilityState={{ disabled: accountBlocked, expanded: showRestore }}
-            >
-              <AppText style={[styles.label, { color: accountBlocked ? colors.textMuted : colors.primary }]}>
-                {t('seedRestoreToggle')}
-              </AppText>
-            </TouchableOpacity>
-            {showRestore && !accountBlocked ? (
-              <>
-                <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedRestoreLead')}</AppText>
-                <AppTextInput
-                  value={restorePhrase}
-                  onChangeText={setRestorePhrase}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  multiline
-                  placeholder={t('seedRestorePlaceholder')}
-                  placeholderTextColor={colors.textMuted}
-                  style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-                />
-                {pinSet ? (
-                  <SecretInput
-                    value={restorePin}
-                    onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
-                    keyboardType="number-pad"
-                    maxLength={6}
-                    placeholder={t('lockCurrentPin')}
-                  />
-                ) : passwordSet ? (
-                  <SecretInput
-                    value={restorePassword}
-                    onChangeText={setRestorePassword}
-                    placeholder={t('lockCurrentPassword')}
-                  />
-                ) : null}
-                <TouchableOpacity
-                  disabled={busy || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)}
-                  onPress={() => void restoreWallet()}
-                  style={[
-                    styles.button,
-                    { backgroundColor: colors.connect },
-                    (busy || (pinSet && restorePin.length !== 6) || (!pinSet && passwordSet && !restorePassword)) && styles.destroyDisabled,
-                  ]}
-                >
-                  {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRestoreAction')}</AppText>}
-                </TouchableOpacity>
-              </>
-            ) : null}
           </View>
         ) : null}
       </View>
@@ -619,10 +501,10 @@ export const SecuritySettings: React.FC = () => {
         onPress={() => setPanel('authenticator')}
       />
       <Row
-        icon="warning"
-        label={t('oneAccountTitle')}
-        hint={t('appWalletReplaceHint')}
-        status="todo"
+        icon="shield"
+        label={t('restoreAccount')}
+        hint={t('oneAccountForeverLead')}
+        status="done"
         onPress={() => setPanel('replace')}
       />
     </View>

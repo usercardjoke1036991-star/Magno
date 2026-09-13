@@ -65,6 +65,13 @@
 - Donacion unicamente en Cuenta Real, no en Demo
 - Donar visible en Real hacia la billetera personal del fundador; pool es banco general
 - Sala Donar aparte en Real; bonos e hitos iguales en Demo y Real
+- Alta con contraseña y correo juntos, código solo la primera vez, inicio de sesión sin código y guardar sesión real
+- En Cuenta Real no se puede pulsar Solicitar hasta tener correo, telefono y KYC atados. Demo sigue sin esos requisitos.
+- Si pierde o cambia el telefono recupera la misma cuenta con las 12 palabras. En este telefono, al crear la cuenta desaparece Crear cuenta.
+- Con sesion guardada no volver a crear/iniciar/recuperar: pantalla de bloqueo, contraseña por defecto, el usuario elige metodos y el principal. Cerrar sesion solo en Seguridad.
+- Desbloqueo: contraseña principal y correo guardado. Una o varias opciones. Frase 12 palabras obligatoria antes de credito. Sin cerrar sesion. Recuperar con 12 palabras abre la cuenta on-chain.
+- Quitar destruir cuenta. Una persona una cuenta. Formatear o cambiar VPN no crea otra: se recupera con las 12 palabras.
+- Alta: crear frase secreta o recuperar cuenta; luego usuario y contrasena del dispositivo. Si se pierde el celular se recupera con las 12 palabras en un telefono nuevo.
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -105,3 +112,10 @@
 - [2026-09-12 17:58] Idea añadida al backlog: "Donacion unicamente en Cuenta Real, no en Demo"
 - [2026-09-12 18:05] Idea añadida al backlog: "Donar visible en Real hacia la billetera personal del fundador; pool es banco ge"
 - [2026-09-12 18:11] Idea añadida al backlog: "Sala Donar aparte en Real; bonos e hitos iguales en Demo y Real"
+- [2026-09-12 19:24] Idea añadida al backlog: "Alta con contraseña y correo juntos, código solo la primera vez, inicio de sesió"
+- [2026-09-12 20:12] Idea añadida al backlog: "En Cuenta Real no se puede pulsar Solicitar hasta tener correo, telefono y KYC a"
+- [2026-09-12 20:22] Idea añadida al backlog: "Si pierde o cambia el telefono recupera la misma cuenta con las 12 palabras. En "
+- [2026-09-12 20:40] Idea añadida al backlog: "Con sesion guardada no volver a crear/iniciar/recuperar: pantalla de bloqueo, co"
+- [2026-09-12 20:58] Idea añadida al backlog: "Desbloqueo: contraseña principal y correo guardado. Una o varias opciones. Frase"
+- [2026-09-12 21:05] Idea añadida al backlog: "Quitar destruir cuenta. Una persona una cuenta. Formatear o cambiar VPN no crea "
+- [2026-09-12 21:40] Idea añadida al backlog: "Alta: crear frase secreta o recuperar cuenta; luego usuario y contrasena del dis"

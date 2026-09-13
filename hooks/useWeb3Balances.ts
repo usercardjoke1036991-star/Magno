@@ -3,7 +3,10 @@ import { Contract, formatEther, formatUnits, isAddress } from 'ethers';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
 import { getRealDonationWallet } from '../constants/deployedAddresses';
-import { assertTrustedRpc, isContractConfigured, isDonationVisible, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
+import { assertTrustedRpc, isContractConfigured, isDemoAccount, isDonationVisible, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
+import { walletRunsOnThisDevice } from '../utils/accountEntry';
+import { identityHashBound } from '../utils/creditGates';
+import { getDeviceHash } from '../services/deviceBinding';
 import { getTokenMeta, isOfficialWorldToken, type Token } from '../constants/tokens';
 import {
   LOAN_TIERS,
@@ -104,6 +107,8 @@ export interface UserInfo {
   kycDeclarado: boolean;
   kycExigido: boolean;
   identityBound: boolean;
+  deviceHash: string;
+  deviceMatches: boolean;
   identidadExigida: boolean;
   adminRoster: string[];
   requiredConfirmations: number;
@@ -152,6 +157,8 @@ const EMPTY_USER_INFO: UserInfo = {
   kycDeclarado: false,
   kycExigido: false,
   identityBound: false,
+  deviceHash: '',
+  deviceMatches: true,
   identidadExigida: false,
   adminRoster: [],
   requiredConfirmations: 1,
@@ -254,7 +261,8 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           ...EMPTY_USER_INFO,
           isTokenSupported,
           curveRateBps,
-          kycExigido,
+          kycExigido: !isDemoAccount() || kycExigido,
+          identidadExigida: !isDemoAccount(),
           canDonate: isDonationVisible(),
           founderAddress: getRealDonationWallet(),
         });
@@ -316,8 +324,8 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             maxLoanLevel: MAX_LOAN_LEVEL,
             canClaimHitos: false,
             isTokenSupported: isOfficialWorldToken(tokenAddress) || isTokenSupported,
-            kycExigido: isDonationVisible() || kycExigido,
-            identidadExigida: isDonationVisible(),
+            kycExigido: !isDemoAccount() || kycExigido,
+            identidadExigida: !isDemoAccount(),
           };
         });
         setLoanTiers(visibleLoanTiers(MAX_LOAN_LEVEL));
@@ -585,9 +593,13 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           } catch {
             declared = false;
           }
-          setUserInfo((prev) => ({ ...prev, kycDeclarado: declared, kycExigido: required }));
+          setUserInfo((prev) => ({
+            ...prev,
+            kycDeclarado: declared,
+            kycExigido: !isDemoAccount() || required,
+          }));
         } catch {
-          setUserInfo((prev) => ({ ...prev, kycDeclarado: false, kycExigido: false }));
+          setUserInfo((prev) => ({ ...prev, kycDeclarado: false, kycExigido: !isDemoAccount() }));
         }
 
         try {
@@ -599,14 +611,40 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             requiredIdentity = false;
           }
           try {
-            const phoneHash = String(await creditContract.phoneHashOf(walletAddress) || '');
-            bound = Boolean(phoneHash) && !/^0x0+$/.test(phoneHash);
+            const phoneHash = String((await creditContract.phoneHashOf(walletAddress)) || '');
+            const deviceHash = String((await creditContract.deviceHashOf(walletAddress)) || '');
+            bound = identityHashBound(phoneHash) && identityHashBound(deviceHash);
+            let localHash = '';
+            try {
+              localHash = await getDeviceHash();
+            } catch {
+              localHash = '';
+            }
+            setUserInfo((prev) => ({
+              ...prev,
+              identidadExigida: !isDemoAccount() || requiredIdentity,
+              identityBound: bound,
+              deviceHash,
+              deviceMatches: walletRunsOnThisDevice(deviceHash, localHash),
+            }));
           } catch {
             bound = false;
+            setUserInfo((prev) => ({
+              ...prev,
+              identidadExigida: !isDemoAccount() || requiredIdentity,
+              identityBound: false,
+              deviceHash: '',
+              deviceMatches: true,
+            }));
           }
-          setUserInfo((prev) => ({ ...prev, identidadExigida: requiredIdentity, identityBound: bound }));
         } catch {
-          setUserInfo((prev) => ({ ...prev, identidadExigida: false, identityBound: false }));
+          setUserInfo((prev) => ({
+            ...prev,
+            identidadExigida: !isDemoAccount(),
+            identityBound: false,
+            deviceHash: '',
+            deviceMatches: true,
+          }));
         }
 
         try {

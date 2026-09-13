@@ -47,8 +47,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     Appearance.setColorScheme(nativeScheme(preference));
-    syncSystem();
-  }, [preference, syncSystem]);
+  }, [preference]);
 
   useEffect(() => {
     const appearance = Appearance.addChangeListener(({ colorScheme }) => {

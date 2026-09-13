@@ -26,9 +26,13 @@ function extractRawError(error: unknown): string {
 const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['kyc required', 'errKycRequired'],
   ['identity required', 'errIdentityRequired'],
+  ['email-required', 'errEmailRequired'],
+  ['phrase-required', 'seedNeedBeforeLoan'],
   ['phone taken', 'errPhoneTaken'],
   ['device taken', 'errDeviceTaken'],
   ['device-bound', 'errDeviceBound'],
+  ['wallet-other-app', 'errWalletOtherApp'],
+  ['device-mismatch', 'seedNeedDevice'],
   ['already bound', 'errAlreadyBound'],
   ['already registered', 'errAlreadyRegistered'],
   ['padre not registered', 'errPadreNotRegistered'],

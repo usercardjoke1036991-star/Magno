@@ -3,7 +3,14 @@ import { getContractAddress } from '../constants/contractConfig';
 import { NETWORK_CONFIG } from '../constants/rpcConfig';
 import { getDeviceHash } from './deviceBinding';
 
-export type AuthPurpose = 'vincular-avisos' | 'perfil' | 'otp' | 'email' | 'username' | 'demo-identity';
+export type AuthPurpose =
+  | 'vincular-avisos'
+  | 'perfil'
+  | 'otp'
+  | 'email'
+  | 'username'
+  | 'demo-identity'
+  | 'session';
 
 const ZERO_PLACEHOLDER = '0x0000000000000000000000000000000000000001';
 const ZERO_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';

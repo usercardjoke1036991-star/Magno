@@ -52,7 +52,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 809 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 856 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -71,9 +71,9 @@ Magno/
 - **Liquidación en AdminPanel**: el servicio aprueba USDT automáticamente antes de `liquidate()`
 - **`useHomeHandlers` hook**: handlers extraídos de `app/index.tsx` para reducir complejidad
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
-- **Alta de cuenta**: idioma → crear o iniciar sesión → contraseña + confirmar → correo OTP → **usuario** → entrar. El nombre real se pide en KYC (no en demo).
-- **Frase secreta BIP-39**: solo respaldo (ver y anotar). No cierra la cuenta. Cerrar o restaurar otra frase está en **Reemplazar esta cuenta**, y exige pagar mora/deuda antes.
-- **Correo y contraseña son obligatorios para iniciar sesión.** No se pueden apagar. El correo se reemplaza solo en Seguridad. Esos mismos dos también sirven, si el usuario los elige, para desbloquear, pedir, pagar o transferir.
+- **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 12 palabras. En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide las 12 palabras y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal. Antes de pedir crédito hay que anotar las 12 palabras. En Real también correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain.
+- **Frase secreta BIP-39**: alta y respaldo. No cierra la cuenta. No hay destruir ni generar otra cuenta en la app.
+- **Usuario y contraseña son el candado de este teléfono.** El correo sigue para Real, recuperar contraseña y OTP. Desbloquear, pedir, pagar o transferir pueden usar contraseña, correo, PIN, huella o autenticador si el usuario los elige.
 - **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: contraseña, correo, PIN, huella o autenticador). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar.
 - **Historial de movimientos**: sala en el hub con préstamos, pagos y transferencias (billeteras, plataforma, fecha y hora).
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
@@ -236,6 +236,19 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-12 | Auditoria 2026-09-12: TypeScript sin errores. Alta frase-primero. Sesion exclusiva viva en notify-worker. Metro y worker restaurados. Demo 0xD2d2A9eF operativo. Mainnet sigue sin desplegar. | — |
+| 2026-09-12 | Sesion exclusiva por dispositivo via notify-worker /session/claim. Al recuperar o entrar en otro telefono, el anterior se bloquea. | — |
+| 2026-09-12 | Onboarding: crear o recuperar frase BIP-39, luego usuario y contrasena. Reinstalar en el mismo telefono pide frase+usuario+clave. Telefono perdido se recupera con las 12 palabras. | — |
+| 2026-09-12 | Vinculo dispositivo-billetera: walletOfDevice oculta Crear al reinstalar; restore solo de esa billetera; Solicitar Real exige deviceMatches. | — |
+| 2026-09-12 | Sin destruir cuenta en la app. Recuperar con 12 palabras. Formatear o VPN no crean segunda linea: telefono y KYC on-chain la bloquean. | — |
+| 2026-09-12 | Desbloqueo: contraseña principal, correo guardado, una o varias opciones. Frase 12 palabras obligatoria antes de credito. Sin cerrar sesion. Recuperar 12 palabras abre la cuenta on-chain. | — |
+| 2026-09-12 | Guardar sesion ya no vuelve a Crear/Iniciar/Recuperar. Abre bloqueo; contraseña por defecto; metodos y principal en Como confirma. Cerrar sesion en Seguridad. | — |
+| 2026-09-12 | Inicio sin cuenta: tres botones Crear cuenta, Recuperar cuenta e Iniciar sesion. Recuperar pide las 12 palabras. | — |
+| 2026-09-12 | Recuperacion: 12 palabras traen el mismo nivel, saldo y credito. Crear cuenta se oculta cuando este telefono ya tiene cuenta. | — |
+| 2026-09-12 | En Cuenta Real, Solicitar exige correo de la cuenta, telefono+dispositivo on-chain y KYC. El boton se bloquea; Demo no cambia. | — |
+| 2026-09-12 | Login: hash de contrasena local (ya no 8000 hops nativos) y tope en checkPassword/guardar sesion para que Iniciar sesion no se quede girando en MIUI. | — |
+| 2026-09-12 | Crear cuenta e iniciar sesion son flujos distintos. El codigo de correo es una pantalla aparte. El login ya no se queda girando si el keystore de MIUI no responde. | — |
+| 2026-09-12 | Alta: contraseña y correo en la misma pantalla, OTP solo la primera vez. Inicio de sesión sin código. Guardar sesión persiste la wrap. | — |
 | 2026-09-12 | Arranque en vivo: AppKit ya no se crea al importar el bundle; el modo y el idioma no bloquean el primer frame. Worker de avisos con backoff activo. | — |
 | 2026-09-12 | Auditoria: arranque con tope de espera (fuentes, idioma, mundo, candado, billetera, usuario, biometria Xiaomi). Donar muestra vista previa sin firmar. Pool bloqueado en Demo. Worker de avisos con backoff si el RPC tiene cupo. | — |
 | 2026-09-12 | Fama proporcional al USDT donado o aportado al pool. Preview en Donar y Pool. | — |

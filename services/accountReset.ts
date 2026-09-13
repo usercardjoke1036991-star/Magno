@@ -4,7 +4,7 @@ import { clearKycDeclaration } from './kycDeclaration';
 import { clearOwnProfile } from './userProfile';
 import { clearSavedSession } from './savedSession';
 
-/** Solo al destruir la cuenta para crear otra. Editar KYC o el usuario no llama esto. */
+/** Solo al recuperar otra frase en este teléfono. No hay destruir cuenta en la app. */
 export async function wipeLocalAccount(wallet: string): Promise<void> {
   await Promise.all([
     clearKycDeclaration(wallet),

@@ -37,7 +37,10 @@ import { ReferralHistory } from '../components/ReferralHistory';
 import { MovementHistory } from '../components/MovementHistory';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
-import { isContractConfigured, isCreditReady, isDonationEnabled } from '../constants/rpcConfig';
+import { isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
+import { liveCreditReady } from '../utils/creditGates';
+import { loadVerifiedEmail } from '../services/accountEmail';
+import { isPhraseBackedUp } from '../services/appWallet';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { usePendingInvite } from '../hooks/usePendingInvite';
@@ -67,6 +70,8 @@ function HomeScreenWithHooks() {
   const extraStables = useMemo(() => getConfigurableStables(), [mode]);
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
   const [room, setRoom] = useState<HomeRoom | null>(null);
+  const [hasVerifiedEmail, setHasVerifiedEmail] = useState(false);
+  const [phraseBackedUp, setPhraseBackedUp] = useState(false);
 
   useEffect(() => {
     if (mode === 'demo' && room === 'pool') {
@@ -98,6 +103,34 @@ function HomeScreenWithHooks() {
   const walletAddress = appAddress;
   const isConnected = Boolean(walletAddress);
 
+  useEffect(() => {
+    let live = true;
+    loadVerifiedEmail()
+      .then((email) => {
+        if (live) setHasVerifiedEmail(Boolean(email));
+      })
+      .catch(() => {
+        if (live) setHasVerifiedEmail(false);
+      });
+    return () => {
+      live = false;
+    };
+  }, [walletAddress, room, mode]);
+
+  useEffect(() => {
+    let live = true;
+    isPhraseBackedUp()
+      .then((ok) => {
+        if (live) setPhraseBackedUp(ok);
+      })
+      .catch(() => {
+        if (live) setPhraseBackedUp(false);
+      });
+    return () => {
+      live = false;
+    };
+  }, [walletAddress, room]);
+
   const { balances, userInfo, loanTiers, isLoading: creditChecking, refetch } = useWeb3Balances(
     walletAddress,
     selectedToken
@@ -113,6 +146,14 @@ function HomeScreenWithHooks() {
   const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
   const lockedTiers = loanTiers.filter((tier) => tier.id > userInfo.userProgress.nivelActual);
   const visibleUnlocked = unlockedTiers.slice(-3);
+  const liveIdentityReady = liveCreditReady(isDemoAccount(), {
+    kycDeclarado: userInfo.kycDeclarado,
+    identityBound: userInfo.identityBound,
+    hasEmail: hasVerifiedEmail,
+    phraseBackedUp,
+    deviceMatches: userInfo.deviceMatches,
+  });
+  const identityBlocked = !liveIdentityReady;
   const labelTier = (tier: (typeof loanTiers)[number]) => ({
     ...tier,
     name: `${t('level')} ${tier.id}`,
@@ -246,20 +287,23 @@ function HomeScreenWithHooks() {
           </View>
         ) : null}
 
-        {mode === 'demo' ? null : (
-          <KycAccessBanner
-            kycDone={userInfo.kycDeclarado}
-            phoneDone={userInfo.identityBound}
-            walletAddress={walletAddress}
-            isRegistered={userInfo.isRegistered}
-            kycDeclarado={userInfo.kycDeclarado}
-            identityBound={userInfo.identityBound}
-            isLoading={txLoading}
-            paused={userInfo.paused}
-            onDeclare={handleDeclararKyc}
-            onPhoneBound={refetch}
-          />
-        )}
+        <KycAccessBanner
+          kycDone={userInfo.kycDeclarado}
+          phoneDone={userInfo.identityBound && userInfo.deviceMatches}
+          emailDone={hasVerifiedEmail}
+          phraseDone={phraseBackedUp}
+          showIdentity={mode !== 'demo'}
+          deviceMatches={userInfo.deviceMatches}
+          walletAddress={walletAddress || ''}
+          isRegistered={userInfo.isRegistered}
+          kycDeclarado={userInfo.kycDeclarado}
+          identityBound={userInfo.identityBound}
+          isLoading={txLoading}
+          paused={userInfo.paused}
+          onDeclare={handleDeclararKyc}
+          onPhoneBound={refetch}
+          onPhraseSaved={() => setPhraseBackedUp(true)}
+        />
 
         <AccountWorldCard />
         {mode === 'demo' && !isContractConfigured() && (
@@ -400,6 +444,23 @@ function HomeScreenWithHooks() {
         lead={t('sectionLoansLead')}
         onClose={() => setRoom(null)}
       >
+        <KycAccessBanner
+          kycDone={userInfo.kycDeclarado}
+          phoneDone={userInfo.identityBound && userInfo.deviceMatches}
+          emailDone={hasVerifiedEmail}
+          phraseDone={phraseBackedUp}
+          showIdentity={mode !== 'demo'}
+          deviceMatches={userInfo.deviceMatches}
+          walletAddress={walletAddress || ''}
+          isRegistered={userInfo.isRegistered}
+          kycDeclarado={userInfo.kycDeclarado}
+          identityBound={userInfo.identityBound}
+          isLoading={txLoading}
+          paused={userInfo.paused}
+          onDeclare={handleDeclararKyc}
+          onPhoneBound={refetch}
+          onPhraseSaved={() => setPhraseBackedUp(true)}
+        />
         {tokens.length > 1 ? (
           <TokenSelector
             tokens={tokens}
@@ -430,6 +491,7 @@ function HomeScreenWithHooks() {
               ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
               cooldownRestante={userInfo.userProgress.cooldownRestante}
               isRegistered={userInfo.isRegistered}
+              identityBlocked={identityBlocked}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}
@@ -455,6 +517,7 @@ function HomeScreenWithHooks() {
               curveRateBps={userInfo.curveRateBps}
               ultimoPrestamoTimestamp={0}
               isRegistered={userInfo.isRegistered}
+              identityBlocked={identityBlocked}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}

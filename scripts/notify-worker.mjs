@@ -255,6 +255,7 @@ const emptyStore = () => ({
   phoneClaims: {},
   emailClaims: {},
   usernameClaims: {},
+  exclusiveSessions: {},
   rateHits: {},
   recoveryWraps: {},
   recoverOtps: {},
@@ -454,7 +455,8 @@ const requireAuth = (body) => {
     purpose !== 'otp' &&
     purpose !== 'email' &&
     purpose !== 'username' &&
-    purpose !== 'demo-identity'
+    purpose !== 'demo-identity' &&
+    purpose !== 'session'
   ) {
     throw new Error('purpose');
   }
@@ -1366,6 +1368,51 @@ const server = createServer(async (req, res) => {
     delete store.emailOtps[wallet];
     persist();
     json(res, 200, { ok: true });
+    return;
+  }
+  if (path === '/session/check' || path === '/session/claim') {
+    if (!rateLimit(`session:${ip}`, 40, 15 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      json(res, 413, { error: 'payload' });
+      return;
+    }
+    store.exclusiveSessions = store.exclusiveSessions || {};
+    if (path === '/session/check') {
+      const wallet = String(body.wallet || '').toLowerCase();
+      const deviceHash = String(body.deviceHash || '').toLowerCase();
+      if (!wallet.startsWith('0x') || wallet.length !== 42) {
+        json(res, 400, { error: 'wallet' });
+        return;
+      }
+      if (!/^0x[0-9a-f]{64}$/.test(deviceHash)) {
+        json(res, 400, { error: 'device' });
+        return;
+      }
+      const current = store.exclusiveSessions[wallet];
+      const owner = !current?.deviceHash || current.deviceHash === deviceHash;
+      json(res, 200, { owner, vacant: !current?.deviceHash });
+      return;
+    }
+    let authn;
+    try {
+      authn = requireAuth(body);
+    } catch (error) {
+      json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    if (String(body.purpose) !== 'session') {
+      json(res, 401, { error: 'purpose' });
+      return;
+    }
+    store.exclusiveSessions[authn.wallet] = { deviceHash: authn.deviceHash, at: Date.now() };
+    persist();
+    json(res, 200, { ok: true, owner: true });
     return;
   }
   if (path === '/username/check' || path === '/username/claim') {

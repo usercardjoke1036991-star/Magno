@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Contract, HDNodeWallet, JsonRpcProvider, Mnemonic, Wallet, type Signer } from 'ethers';
 import * as SecureStore from 'expo-secure-store';
 import { ERC20_ABI } from '../constants/contractConfig';
@@ -5,12 +6,30 @@ import { NETWORK_CONFIG, RPC_URLS } from '../constants/rpcConfig';
 import { estimateNetworkGasWei, resolveFeeCollector } from '../constants/feeConfig';
 import { isAllowedWei, isHexAddress } from '../utils/sanitize';
 import { isSealedBlob, openSecret, sealSecret } from '../utils/secretBox';
-import { bindAppWallet, claimDeviceWallet, clearBoundWallet, getBoundWallet } from './deviceBinding';
+import { assertRestoreFitsThisDevice, lookupBoundWalletOnThisDevice } from './deviceClaim';
+import { bindAppWallet, claimDeviceWallet, clearBoundWallet } from './deviceBinding';
 import { getWalletWrapKey } from './walletSession';
 
 const WALLET_KEY = 'quatrivium.appWallet.v1';
+const WALLET_FALLBACK = 'quatrivium.appWallet.v1.fallback';
 const PHRASE_ACK_KEY = 'quatrivium.appWallet.phraseAck';
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
+
+async function withLimit<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      }
+    );
+  });
+}
 
 interface StoredWallet {
   address: string;
@@ -29,7 +48,9 @@ function parseStored(raw: string): StoredWallet | null {
 }
 
 async function readStored(): Promise<StoredWallet | null> {
-  const raw = await SecureStore.getItemAsync(WALLET_KEY);
+  const raw =
+    (await withLimit(SecureStore.getItemAsync(WALLET_KEY).catch(() => null), 1500, null))
+    || (await AsyncStorage.getItem(WALLET_FALLBACK).catch(() => null));
   if (!raw) return null;
   if (isSealedBlob(raw)) {
     const wrap = getWalletWrapKey();
@@ -50,7 +71,8 @@ async function persistRecord(record: StoredWallet): Promise<void> {
     throw new Error('locked');
   }
   const sealed = sealSecret(JSON.stringify(record), wrap);
-  await SecureStore.setItemAsync(WALLET_KEY, sealed, OPTIONS);
+  await AsyncStorage.setItem(WALLET_FALLBACK, sealed).catch(() => {});
+  await withLimit(SecureStore.setItemAsync(WALLET_KEY, sealed, OPTIONS), 2500, undefined);
 }
 
 async function writeStored(record: StoredWallet): Promise<void> {
@@ -109,6 +131,10 @@ export async function loadAppWallet(): Promise<HDNodeWallet | Wallet | null> {
 }
 
 export async function createAppWallet(): Promise<HDNodeWallet> {
+  const claimed = await lookupBoundWalletOnThisDevice();
+  if (claimed) {
+    throw new Error('device-bound');
+  }
   const created = HDNodeWallet.createRandom();
   await writeStored({
     address: created.address.toLowerCase(),
@@ -130,6 +156,11 @@ export async function ensureAppWallet(): Promise<HDNodeWallet | Wallet> {
 
 export async function wipeAppWallet(): Promise<void> {
   try {
+    await AsyncStorage.removeItem(WALLET_FALLBACK);
+  } catch {
+    // ignore
+  }
+  try {
     await SecureStore.deleteItemAsync(WALLET_KEY);
   } catch {
     // ignore
@@ -147,6 +178,16 @@ export async function recreateAppWallet(): Promise<HDNodeWallet> {
   return createAppWallet();
 }
 
+/** Genera 12 palabras sin guardarlas. Se persisten al poner usuario y contraseña. */
+export function generateSecretPhrase(): { phrase: string; address: string } {
+  const created = HDNodeWallet.createRandom();
+  const phrase = created.mnemonic?.phrase;
+  if (!phrase) {
+    throw new Error('phrase');
+  }
+  return { phrase: normalizePhrase(phrase), address: created.address.toLowerCase() };
+}
+
 export function addressFromPhrase(phrase: string): string {
   const normalized = normalizePhrase(phrase);
   if (!isValidSecretPhrase(normalized)) {
@@ -162,10 +203,8 @@ export async function importFromPhrase(phrase: string): Promise<HDNodeWallet> {
   }
   const imported = HDNodeWallet.fromPhrase(normalized);
   const next = imported.address.toLowerCase();
-  const bound = await getBoundWallet();
-  if (bound && bound !== next) {
-    await wipeAppWallet();
-  }
+  await assertRestoreFitsThisDevice(next);
+  await wipeAppWallet();
   await writeStored({
     address: next,
     privateKey: imported.privateKey,

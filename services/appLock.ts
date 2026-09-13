@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 import { isWeakPin, lockoutMs, remainingLockMs } from '../utils/pinPolicy';
@@ -14,9 +15,11 @@ import {
 import { deriveWrapKey, isSealedBlob, openSecret, sealSecret, timingSafeEqualHex } from '../utils/secretBox';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { clearWalletSession, getWalletWrapKey, setWalletWrapKey } from './walletSession';
+import { sha256, toUtf8Bytes } from 'ethers';
 
 const PIN_KEY = 'quatrivium.lock.pin';
 const PASSWORD_KEY = 'quatrivium.lock.password';
+const PASSWORD_FALLBACK = 'quatrivium.lock.password.fallback';
 const PIN_WRAP_KEY = 'quatrivium.lock.pinWrap';
 const BIO_KEY = 'quatrivium.lock.bio';
 const LOCK_OPEN_KEY = 'quatrivium.lock.onOpen';
@@ -53,11 +56,11 @@ interface GateRecord {
   until: number;
 }
 
-async function hashSecret(secret: string, salt: string, rounds: number): Promise<string> {
+function hashSecret(secret: string, salt: string, rounds: number): string {
   let digest = `${salt}:${secret}`;
-  const n = Math.max(1, rounds);
+  const n = Math.max(1, Math.min(rounds, 20_000));
   for (let i = 0; i < n; i += 1) {
-    digest = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, digest);
+    digest = sha256(toUtf8Bytes(digest)).slice(2);
   }
   return digest;
 }
@@ -72,7 +75,7 @@ function isSixDigits(pin: string): boolean {
 
 async function readPinRecord(): Promise<PinRecord | null> {
   try {
-    const raw = await SecureStore.getItemAsync(PIN_KEY);
+    const raw = await withTimeout(SecureStore.getItemAsync(PIN_KEY).catch(() => null), 1500, null);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as PinRecord;
     if (!parsed?.salt || !parsed?.hash) return null;
@@ -84,7 +87,7 @@ async function readPinRecord(): Promise<PinRecord | null> {
 
 async function readGate(): Promise<GateRecord> {
   try {
-    const raw = await SecureStore.getItemAsync(GATE_KEY);
+    const raw = await withTimeout(SecureStore.getItemAsync(GATE_KEY).catch(() => null), 1500, null);
     if (!raw) return { fails: 0, until: 0 };
     const parsed = JSON.parse(raw) as GateRecord;
     return {
@@ -97,16 +100,27 @@ async function readGate(): Promise<GateRecord> {
 }
 
 async function writeGate(next: GateRecord): Promise<void> {
-  await SecureStore.setItemAsync(GATE_KEY, JSON.stringify(next), OPTIONS);
+  await withTimeout(SecureStore.setItemAsync(GATE_KEY, JSON.stringify(next), OPTIONS), 1500, undefined);
 }
 
-async function readPasswordRecord(): Promise<PasswordRecord | null> {
+function parsePasswordRecord(raw: string | null): PasswordRecord | null {
+  if (!raw) return null;
   try {
-    const raw = await SecureStore.getItemAsync(PASSWORD_KEY);
-    if (!raw) return null;
     const parsed = JSON.parse(raw) as PasswordRecord;
     if (parsed?.v !== 1 || !parsed.salt || !parsed.hash) return null;
     return parsed;
+  } catch {
+    return null;
+  }
+}
+
+async function readPasswordRecord(): Promise<PasswordRecord | null> {
+  const secure = parsePasswordRecord(
+    await withTimeout(SecureStore.getItemAsync(PASSWORD_KEY).catch(() => null), 1500, null)
+  );
+  if (secure) return secure;
+  try {
+    return parsePasswordRecord(await AsyncStorage.getItem(PASSWORD_FALLBACK));
   } catch {
     return null;
   }
@@ -125,7 +139,7 @@ function passwordRounds(record: PasswordRecord): number {
 async function pinHashMatches(pin: string): Promise<boolean> {
   const record = await readPinRecord();
   if (!record || !isSixDigits(pin)) return false;
-  const hash = await hashSecret(pin, record.salt, pinRoundsForRecord(record));
+  const hash = hashSecret(pin, record.salt, pinRoundsForRecord(record));
   return timingSafeEqualHex(digestHex(hash), digestHex(record.hash));
 }
 
@@ -229,14 +243,20 @@ export async function clearBiometricWrap(): Promise<void> {
 
 async function persistCompanionWraps(wrap = getWalletWrapKey()): Promise<void> {
   if (!wrap) return;
-  try {
-    const { isAuthenticatorEnabled, persistAuthenticatorWrap } = await import('./authenticator');
-    if (await isAuthenticatorEnabled()) {
-      await persistAuthenticatorWrap(wrap);
-    }
-  } catch {
-    /* ignore */
-  }
+  await withTimeout(
+    (async () => {
+      try {
+        const { isAuthenticatorEnabled, persistAuthenticatorWrap } = await import('./authenticator');
+        if (await isAuthenticatorEnabled()) {
+          await persistAuthenticatorWrap(wrap);
+        }
+      } catch {
+        /* ignore */
+      }
+    })(),
+    1500,
+    undefined
+  );
 }
 
 export async function isPinSet(): Promise<boolean> {
@@ -253,7 +273,7 @@ export async function setPin(pin: string): Promise<string> {
     throw new Error('weak-pin');
   }
   const salt = Crypto.randomUUID();
-  const hash = await hashSecret(pin, salt, PIN_ROUNDS);
+  const hash = hashSecret(pin, salt, PIN_ROUNDS);
   const record: PinRecord = { v: 2, salt, hash, rounds: PIN_ROUNDS };
   await SecureStore.setItemAsync(PIN_KEY, JSON.stringify(record), OPTIONS);
   await setLockOnOpenEnabled(true);
@@ -294,7 +314,7 @@ export async function checkPin(pin: string): Promise<PinCheck> {
     return { ok: false, remainingMs: 0, locked: false };
   }
   const rounds = pinRoundsForRecord(record);
-  const hash = await hashSecret(pin, record.salt, rounds);
+  const hash = hashSecret(pin, record.salt, rounds);
   if (!timingSafeEqualHex(digestHex(hash), digestHex(record.hash))) {
     const gate = await readGate();
     const fails = gate.fails + 1;
@@ -386,7 +406,7 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
     throw new Error('wrong-pin');
   }
   const salt = Crypto.randomUUID();
-  const hash = await hashSecret(password, salt, PIN_ROUNDS);
+  const hash = hashSecret(password, salt, PIN_ROUNDS);
   const record: PasswordRecord = { v: 1, salt, hash, rounds: PIN_ROUNDS };
   const nextWrap = deriveWrapKey(password, salt, PIN_ROUNDS);
   const previousWrap = getWalletWrapKey();
@@ -399,7 +419,9 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
   } else {
     setWalletWrapKey(nextWrap);
   }
-  await SecureStore.setItemAsync(PASSWORD_KEY, JSON.stringify(record), OPTIONS);
+  const serialized = JSON.stringify(record);
+  await AsyncStorage.setItem(PASSWORD_FALLBACK, serialized).catch(() => {});
+  await withTimeout(SecureStore.setItemAsync(PASSWORD_KEY, serialized, OPTIONS), 2500, undefined);
   if (conveniencePin) {
     await persistPinWrap(conveniencePin);
   }
@@ -424,7 +446,7 @@ export async function checkPassword(password: string): Promise<PinCheck> {
     return { ok: false, remainingMs: 0, locked: false };
   }
   const rounds = passwordRounds(record);
-  const hash = await hashSecret(password, record.salt, rounds);
+  const hash = hashSecret(password, record.salt, rounds);
   if (!timingSafeEqualHex(digestHex(hash), digestHex(record.hash))) {
     const gate = await readGate();
     const fails = gate.fails + 1;
@@ -443,7 +465,7 @@ export async function matchPassword(password: string): Promise<boolean> {
   const record = await readPasswordRecord();
   if (!record) return false;
   const rounds = passwordRounds(record);
-  const hash = await hashSecret(password, record.salt, rounds);
+  const hash = hashSecret(password, record.salt, rounds);
   return timingSafeEqualHex(digestHex(hash), digestHex(record.hash));
 }
 

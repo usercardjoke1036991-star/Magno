@@ -19,7 +19,11 @@ import { getTokenMeta } from '../constants/tokens';
 import { isAllowedWei } from '../utils/sanitize';
 import { CORE_LOAN_LEVEL, MAX_LOAN_LEVEL, nextClaimableMilestone, nextUpcomingMilestone } from '../constants/loanTiers';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
-import { cobrarComisionIntermediario, loadAppWallet } from './appWallet';
+import { walletRunsOnThisDevice } from '../utils/accountEntry';
+import { identityHashBound, liveCreditReady } from '../utils/creditGates';
+import { getDeviceHash } from './deviceBinding';
+import { cobrarComisionIntermediario, isPhraseBackedUp, loadAppWallet } from './appWallet';
+import { loadVerifiedEmail } from './accountEmail';
 import { requestDemoIdentity } from './demoIdentity';
 
 const logWarn = __DEV__ ? console.warn : () => {};
@@ -284,6 +288,45 @@ export const QuatriviumCreditService = {
       throw new Error('invalid-level');
     }
     const { signer } = await requireInternalSigner();
+    const phraseOk = await isPhraseBackedUp().catch(() => false);
+    if (!phraseOk) {
+      throw new Error('phrase-required');
+    }
+    if (!isDemoAccount()) {
+      const email = await loadVerifiedEmail();
+      const userAddress = await signer.getAddress();
+      const credit = contractWith(signer);
+      let kycDeclarado = false;
+      let identityBound = false;
+      try {
+        kycDeclarado = Boolean(await credit.kycDeclarado(userAddress));
+      } catch {
+        kycDeclarado = false;
+      }
+      let deviceMatches = true;
+      try {
+        const phoneHash = String((await credit.phoneHashOf(userAddress)) || '');
+        const deviceHash = String((await credit.deviceHashOf(userAddress)) || '');
+        identityBound = identityHashBound(phoneHash) && identityHashBound(deviceHash);
+        const localHash = await getDeviceHash().catch(() => '');
+        deviceMatches = walletRunsOnThisDevice(deviceHash, localHash);
+      } catch {
+        identityBound = false;
+        deviceMatches = true;
+      }
+      if (!liveCreditReady(false, {
+        kycDeclarado,
+        identityBound,
+        hasEmail: Boolean(email),
+        phraseBackedUp: true,
+        deviceMatches,
+      })) {
+        if (!email) throw new Error('email-required');
+        if (!identityBound) throw new Error('identity required');
+        if (!deviceMatches) throw new Error('device-mismatch');
+        throw new Error('kyc required');
+      }
+    }
     const credit = contractWith(signer);
     await credit.solicitarPrestamo.staticCall(tokenAddress, nivel);
     await cobrarComisionIntermediario(signer, true);

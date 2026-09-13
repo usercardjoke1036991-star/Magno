@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { keccak256, toUtf8Bytes } from 'ethers';
 import { Platform } from 'react-native';
 import * as Application from 'expo-application';
@@ -5,8 +6,26 @@ import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 
 const INSTALL_KEY = 'quatrivium.device.installId';
+const INSTALL_FALLBACK = 'quatrivium.device.installId.fallback';
 const BOUND_WALLET_KEY = 'quatrivium.device.boundWallet';
+const BOUND_FALLBACK = 'quatrivium.device.boundWallet.fallback';
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
+
+async function withLimit<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      }
+    );
+  });
+}
 
 export type DeviceClaim = { ok: true; wallet: string } | { ok: false; bound: string };
 
@@ -25,10 +44,13 @@ async function hardwareSeed(): Promise<string> {
 }
 
 async function installSeed(): Promise<string> {
-  const existing = await SecureStore.getItemAsync(INSTALL_KEY);
+  const existing =
+    (await withLimit(SecureStore.getItemAsync(INSTALL_KEY).catch(() => null), 1500, null))
+    || (await AsyncStorage.getItem(INSTALL_FALLBACK).catch(() => null));
   if (existing) return existing;
   const next = Crypto.randomUUID();
-  await SecureStore.setItemAsync(INSTALL_KEY, next, OPTIONS);
+  await AsyncStorage.setItem(INSTALL_FALLBACK, next).catch(() => {});
+  await withLimit(SecureStore.setItemAsync(INSTALL_KEY, next, OPTIONS), 2500, undefined);
   return next;
 }
 
@@ -36,24 +58,30 @@ export async function getDeviceHash(): Promise<string> {
   const hardware = await hardwareSeed();
   const install = await installSeed();
   const seed = hardware || install;
+  // La red o una VPN no entran en este hash. No crean otra cuenta.
   return keccak256(toUtf8Bytes(`quatrivium:${seed}`));
 }
 
 export async function getBoundWallet(): Promise<string> {
-  try {
-    return ((await SecureStore.getItemAsync(BOUND_WALLET_KEY)) || '').toLowerCase();
-  } catch {
-    return '';
-  }
+  const raw =
+    (await withLimit(SecureStore.getItemAsync(BOUND_WALLET_KEY).catch(() => null), 1500, null))
+    || (await AsyncStorage.getItem(BOUND_FALLBACK).catch(() => null));
+  return (raw || '').toLowerCase();
 }
 
 export async function bindAppWallet(address: string): Promise<void> {
   const next = address.toLowerCase();
   if (!/^0x[0-9a-f]{40}$/.test(next)) return;
-  await SecureStore.setItemAsync(BOUND_WALLET_KEY, next, OPTIONS);
+  await AsyncStorage.setItem(BOUND_FALLBACK, next).catch(() => {});
+  await withLimit(SecureStore.setItemAsync(BOUND_WALLET_KEY, next, OPTIONS), 2500, undefined);
 }
 
 export async function clearBoundWallet(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(BOUND_FALLBACK);
+  } catch {
+    // ignore
+  }
   try {
     await SecureStore.deleteItemAsync(BOUND_WALLET_KEY);
   } catch {
@@ -68,7 +96,7 @@ export async function claimDeviceWallet(address: string): Promise<DeviceClaim> {
   }
   const bound = await getBoundWallet();
   if (!bound) {
-    await SecureStore.setItemAsync(BOUND_WALLET_KEY, next, OPTIONS);
+    await bindAppWallet(next);
     return { ok: true, wallet: next };
   }
   if (bound === next) {

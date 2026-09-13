@@ -32,11 +32,11 @@ function purposeKey(purpose: AuthPurpose): TranslationKey {
 
 function emptyPrefs(): AuthPrefs {
   return {
-    signin: { on: false, methods: ['password'], method: 'password' },
-    unlock: { on: false, methods: ['password'], method: 'password' },
-    funds: { on: true, methods: ['password'], method: 'password' },
-    loanRequest: { on: false, methods: ['password'], method: 'password' },
-    loanPay: { on: false, methods: ['password'], method: 'password' },
+    signin: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
+    unlock: { on: true, methods: ['password'], method: 'password', primaryOnly: true },
+    funds: { on: true, methods: ['password'], method: 'password', primaryOnly: true },
+    loanRequest: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
+    loanPay: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
   };
 }
 
@@ -61,7 +61,7 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
     setDraft((current) => {
       const methods = current[purpose].methods.filter((method) => available.includes(method));
       const next = methods.length ? methods : ['password'];
-      return { ...current, [purpose]: { on, methods: next, method: next[0] } };
+      return { ...current, [purpose]: { on, methods: next, method: next[0], primaryOnly: current[purpose].primaryOnly !== false } };
     });
   };
 
@@ -70,10 +70,22 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
     setDraft((current) => {
       const selected = current[purpose].methods;
       const has = selected.includes(method);
+      const isPrimary = selected[0] === method;
+      if (has && !isPrimary) {
+        const next = [method, ...selected.filter((item) => item !== method)];
+        return { ...current, [purpose]: { on: true, methods: next, method: next[0], primaryOnly: current[purpose].primaryOnly !== false } };
+      }
       let next = has ? selected.filter((item) => item !== method) : [...selected, method];
       if (!next.length) next = [method];
-      return { ...current, [purpose]: { on: true, methods: next, method: next[0] } };
+      return { ...current, [purpose]: { on: true, methods: next, method: next[0], primaryOnly: current[purpose].primaryOnly !== false } };
     });
+  };
+
+  const setPrimaryOnly = (purpose: AuthPurpose, primaryOnly: boolean) => {
+    setDraft((current) => ({
+      ...current,
+      [purpose]: { ...current[purpose], primaryOnly },
+    }));
   };
 
   const save = async () => {
@@ -114,9 +126,11 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
             {slot.on ? (
               <>
                 <AppText style={[styles.pickHint, { color: colors.primary }]}>{t('authMethodsPickMany')}</AppText>
+                <AppText style={[styles.required, { color: colors.textMuted }]}>{t('authMethodPrimaryHint')}</AppText>
                 <View style={styles.row}>
                   {available.map((method) => {
                     const selected = slot.methods.includes(method);
+                    const primary = selected && slot.methods[0] === method;
                     return (
                       <TouchableOpacity
                         key={method}
@@ -129,11 +143,29 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
                         accessibilityRole="button"
                         accessibilityState={{ selected }}
                       >
-                        <AppText style={[styles.chipText, { color: colors.text }]}>{t(methodKey(method))}</AppText>
+                        <AppText style={[styles.chipText, { color: colors.text }]}>
+                          {t(methodKey(method))}
+                          {primary ? ` · ${t('authMethodPrimary')}` : ''}
+                        </AppText>
                       </TouchableOpacity>
                     );
                   })}
                 </View>
+                {purpose === 'unlock' ? (
+                  <View style={[styles.header, { marginTop: 12 }]}>
+                    <View style={{ flex: 1 }}>
+                      <AppText style={[styles.title, { color: colors.text }]}>{t('authUnlockPrimaryOnly')}</AppText>
+                      <AppText style={[styles.required, { color: colors.textMuted }]}>{t('authUnlockPrimaryOnlyHint')}</AppText>
+                    </View>
+                    <Switch
+                      value={slot.primaryOnly !== false}
+                      onValueChange={(value) => setPrimaryOnly(purpose, value)}
+                      trackColor={{ false: colors.border, true: colors.primary }}
+                      thumbColor="#fff"
+                      accessibilityLabel={t('authUnlockPrimaryOnly')}
+                    />
+                  </View>
+                ) : null}
               </>
             ) : null}
           </View>

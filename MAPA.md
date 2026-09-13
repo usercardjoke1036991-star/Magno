@@ -243,7 +243,6 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
-- `scripts/_dump_ui.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
   - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
 - `scripts/_probe-live-health.cjs` — módulo JS/TS
@@ -256,17 +255,21 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/appLock.ts` — módulo JS/TS
   - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, isPinSet, getPinLockRemaining, setPin, checkPin, matchPin, verifyPin, changePin, clearPin, setPassword, checkPassword, matchPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
 - `services/appWallet.ts` — módulo JS/TS
-  - Funciones/clases: rewrapWalletWithNewKey, withCurrentRpc, isValidSecretPhrase, loadAppWallet, createAppWallet, ensureAppWallet, wipeAppWallet, recreateAppWallet, addressFromPhrase, importFromPhrase, getSecretPhrase, hasSecretPhrase, isPhraseBackedUp, markPhraseBackedUp, cobrarComisionIntermediario, enviarToken, enviarBnb
+  - Funciones/clases: rewrapWalletWithNewKey, withCurrentRpc, isValidSecretPhrase, loadAppWallet, createAppWallet, ensureAppWallet, wipeAppWallet, recreateAppWallet, generateSecretPhrase, addressFromPhrase, importFromPhrase, getSecretPhrase, hasSecretPhrase, isPhraseBackedUp, markPhraseBackedUp, cobrarComisionIntermediario, enviarToken, enviarBnb
 - `services/authenticator.ts` — módulo JS/TS
   - Funciones/clases: isAuthenticatorEnabled, loadAuthenticatorSecret, createAuthenticatorSecret, authenticatorUri, persistAuthenticatorWrap, confirmAuthenticator, verifyAuthenticator, unlockWithAuthenticator, clearAuthenticator
 - `services/authPrefs.ts` — módulo JS/TS
-  - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethods, getAuthMethod, isAuthEnabled, setAuthMethod, setAuthMethods, fallbackAuthIfNeeded
+  - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethods, getAuthMethod, isAuthEnabled, ensureUnlockEnabled, setAuthMethod, setAuthMethods, fallbackAuthIfNeeded
 - `services/demoIdentity.ts` — módulo JS/TS
   - Funciones/clases: requestDemoIdentity
 - `services/deviceBinding.ts` — módulo JS/TS
   - Funciones/clases: getDeviceHash, getBoundWallet, bindAppWallet, clearBoundWallet, claimDeviceWallet
+- `services/deviceClaim.ts` — módulo JS/TS
+  - Funciones/clases: lookupBoundWalletOnThisDevice, lookupDeviceHashOf, assertRestoreFitsThisDevice
 - `services/emailOtp.ts` — módulo JS/TS
   - Funciones/clases: requestEmailOtp, verifyEmailOtp
+- `services/exclusiveSession.ts` — módulo JS/TS
+  - Funciones/clases: thisDeviceOwnsSession, claimExclusiveSession
 - `services/fundsConfirm.ts` — módulo JS/TS
   - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
@@ -284,7 +287,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/referralNetwork.ts` — módulo JS/TS
   - Funciones/clases: loadReferralNetwork
 - `services/savedSession.ts` — módulo JS/TS
-  - Funciones/clases: isSessionSaved, purgePersistedWrap, markSessionSaved, restoreSavedSessionWrap, clearSavedSession
+  - Funciones/clases: subscribeSessionCleared, isSessionSaved, purgePersistedWrap, markSessionSaved, restoreSavedSessionWrap, clearSavedSession, signOutSavedSession
 - `services/secureStorageService.ts` — módulo JS/TS
   - Funciones/clases: SecureStorageService
 - `services/userProfile.ts` — módulo JS/TS
@@ -328,6 +331,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `types/zk-modules.d.ts` — módulo JS/TS
 - `types/zkTypes.ts` — módulo JS/TS
   - Funciones/clases: asFieldElement, ZKTypeValidator, ZK_SECURITY_CONSTANTS
+- `utils/accountEntry.ts` — módulo JS/TS
+  - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase
 - `utils/adminProposal.ts` — módulo JS/TS
   - Funciones/clases: describeAdminCalldata
 - `utils/appDeepLink.ts` — módulo JS/TS
@@ -343,7 +348,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: creditNeedsKyc, creditNeedsPhone
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
