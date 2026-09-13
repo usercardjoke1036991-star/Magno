@@ -45,7 +45,7 @@ function applyRtl(next: Lang): boolean {
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [lang, setLangState] = useState<Lang>(detectDeviceLang);
-  const [langReady, setLangReady] = useState(true);
+  const [langReady, setLangReady] = useState(false);
   const [langChosen, setLangChosen] = useState(false);
 
   useEffect(() => {

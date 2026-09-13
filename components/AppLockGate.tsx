@@ -356,7 +356,11 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     }
     await restoreSavedSessionWrap();
     const wrapReady = Boolean(getWalletWrapKey());
-    const sessionSaved = await isSessionSaved();
+    let sessionSaved = await isSessionSaved();
+    if (!sessionSaved) {
+      await raceMs(markSessionSaved(), 2000, undefined);
+      sessionSaved = true;
+    }
     if (sessionSaved) await raceMs(ensureUnlockEnabled().catch(() => undefined), 2000, undefined);
     const unlockOn = await isAuthEnabled('unlock');
     const entry = nextEntryScreen({

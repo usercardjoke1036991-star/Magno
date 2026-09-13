@@ -74,6 +74,7 @@
 - Alta: crear frase secreta de 24 palabras o recuperar cuenta; luego usuario y contrasena del dispositivo (8 a 66, mayúscula, número y símbolo). Si se pierde el celular se recupera con las 24 palabras en un telefono nuevo.
 - Contraseña del celular 8 a 66 con mayuscula, numero y simbolo. Frase secreta nueva de 24 palabras.
 - primera apertura entra en Real; luego la app recuerda el ultimo modo abierto (Demo o Real)
+- auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo productivo
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -123,3 +124,4 @@
 - [2026-09-12 21:40] Idea añadida al backlog: "Alta: crear frase secreta o recuperar cuenta; luego usuario y contrasena del dis"
 - [2026-09-12 22:40] Idea añadida al backlog: "Contraseña del celular 8 a 66 con mayuscula, numero y simbolo. Frase secreta nue"
 - [2026-09-13 01:08] Idea añadida al backlog: "primera apertura entra en Real; luego la app recuerda el ultimo modo abierto (De"
+- [2026-09-13 13:12] Idea añadida al backlog: "auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo pro"

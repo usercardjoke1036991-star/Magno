@@ -51,7 +51,7 @@ export function accountOnPhoneFromProbes(
   return false;
 }
 
-/** Tras Guardar sesión no se vuelve a crear/iniciar/recuperar. */
+/** Hay cuenta en este teléfono: desbloqueo. Iniciar sesión solo si el almacén no responde. */
 export function nextEntryScreen(input: {
   accountOnPhone: boolean | null;
   sessionSaved: boolean;
@@ -60,7 +60,6 @@ export function nextEntryScreen(input: {
 }): EntryScreen {
   if (input.accountOnPhone === null) return 'signIn';
   if (!input.accountOnPhone) return 'welcome';
-  if (!input.sessionSaved) return 'signIn';
   if (input.unlockOn) return 'unlock';
   if (input.wrapReady) return 'app';
   return 'unlock';

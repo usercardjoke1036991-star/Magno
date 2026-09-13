@@ -559,7 +559,6 @@ describe('account entry — password, email and session', () => {
     function nextEntryScreen({ accountOnPhone, sessionSaved, wrapReady, unlockOn }) {
       if (accountOnPhone === null) return 'signIn';
       if (!accountOnPhone) return 'welcome';
-      if (!sessionSaved) return 'signIn';
       if (unlockOn) return 'unlock';
       if (wrapReady) return 'app';
       return 'unlock';
@@ -599,7 +598,7 @@ describe('account entry — password, email and session', () => {
     expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: true, wrapReady: false, unlockOn: false })).to.equal('unlock');
     expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: true, wrapReady: true, unlockOn: false })).to.equal('app');
     expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: true, wrapReady: false, unlockOn: true })).to.equal('unlock');
-    expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: false, wrapReady: false, unlockOn: false })).to.equal('signIn');
+    expect(nextEntryScreen({ accountOnPhone: true, sessionSaved: false, wrapReady: false, unlockOn: false })).to.equal('unlock');
     expect(accountOnPhoneFromProbes(null, false)).to.equal(null);
     expect(accountOnPhoneFromProbes(false, false)).to.equal(false);
     expect(nextEntryScreen({ accountOnPhone: null, sessionSaved: false, wrapReady: false, unlockOn: false })).to.equal('signIn');

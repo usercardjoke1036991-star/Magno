@@ -237,6 +237,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-13 | Auditoria profunda: nextEntryScreen va a desbloqueo si hay cuenta local. Demo 2000 USDT operativo. Real y Twilio siguen del fundador. | — |
+| 2026-09-13 | Auditoria 2026-09-13: Demo live 2000 USDT operativo; Real sin contrato; LanguageWelcome espera el idioma guardado. | — |
 | 2026-09-13 | Primera apertura en Real; AppMode espera AsyncStorage y recuerda el ultimo modo abierto. | — |
 | 2026-09-13 | Auditoria 2026-09-13: probePasswordSet distingue vacio de almacén colgado. Hardhat 116/116, cyber 28/28, Demo 0xD2d2A9 OPERATIVO. Mainnet y Twilio siguen siendo acciones del fundador. | — |
 | 2026-09-12 | Auditoria profunda: 116 tests Hardhat, Demo live OPERATIVO. failOpen no abre Crear frase si el candado no responde. | — |
