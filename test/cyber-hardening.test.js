@@ -162,6 +162,24 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(wallet.address).to.match(/^0x[0-9a-fA-F]{40}$/);
   });
 
+  it('derives the same address fromMnemonic and fromPhrase for 12 and 24 words', function () {
+    const { Mnemonic, HDNodeWallet, randomBytes } = require('ethers');
+    const normalize = (phrase) => phrase.trim().toLowerCase().split(/\s+/).filter(Boolean).join(' ');
+    const twentyFour = Mnemonic.fromEntropy(randomBytes(32));
+    const twelve = Mnemonic.fromEntropy(randomBytes(16));
+    expect(twentyFour.phrase.split(/\s+/)).to.have.length(24);
+    expect(twelve.phrase.split(/\s+/)).to.have.length(12);
+    expect(HDNodeWallet.fromMnemonic(twentyFour).address).to.equal(
+      HDNodeWallet.fromPhrase(normalize(twentyFour.phrase)).address
+    );
+    expect(HDNodeWallet.fromMnemonic(twelve).address).to.equal(
+      HDNodeWallet.fromPhrase(normalize(twelve.phrase)).address
+    );
+    expect(HDNodeWallet.fromPhrase(twentyFour.phrase.toUpperCase()).address).to.equal(
+      HDNodeWallet.fromPhrase(normalize(twentyFour.phrase)).address
+    );
+  });
+
   it('seals an immutable KYC fingerprint and keeps it when local fields change', function () {
     const { keccak256, toUtf8Bytes } = require('ethers');
     const fingerprint = (wallet, snap) =>
@@ -853,6 +871,24 @@ describe('account entry — password, email and session', () => {
     expect(walletRunsOnThisDevice('', '0x11')).to.equal(true);
     expect(walletRunsOnThisDevice('0x11', '0x11')).to.equal(true);
     expect(walletRunsOnThisDevice('0x11', '0x22')).to.equal(false);
+    function restoreAllowedOnThisDevice({ claimedWallet, phraseWallet }) {
+      return restoreMatchesDevice(claimedWallet, phraseWallet);
+    }
+    function phoneVerifiedOnThisDevice(identityBound, deviceMatches) {
+      return Boolean(identityBound) && Boolean(deviceMatches);
+    }
+    expect(restoreAllowedOnThisDevice({ claimedWallet: '', phraseWallet: '0xdef', onChainDeviceHash: '0x11', localDeviceHash: '0x22' })).to.equal(true);
+    expect(restoreAllowedOnThisDevice({ claimedWallet: '0xabc', phraseWallet: '0xdef' })).to.equal(false);
+    expect(phoneVerifiedOnThisDevice(true, false)).to.equal(false);
+    expect(phoneVerifiedOnThisDevice(true, true)).to.equal(true);
+    expect(phoneVerifiedOnThisDevice(false, true)).to.equal(false);
+    const fs = require('fs');
+    const path = require('path');
+    const phoneUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'PhoneOtpSection.tsx'), 'utf8');
+    expect(phoneUi).to.include('identityBound && deviceMatches && !editing');
+    expect(phoneUi).to.include("t('seedNeedDevice')");
+    const banner = fs.readFileSync(path.join(__dirname, '..', 'components', 'KycAccessBanner.tsx'), 'utf8');
+    expect(banner).to.include('deviceMatches={deviceMatches}');
     function sessionOwnedHere(claimedDeviceHash, localDeviceHash) {
       const claimed = String(claimedDeviceHash || '').toLowerCase();
       const local = String(localDeviceHash || '').toLowerCase();
@@ -1326,6 +1362,13 @@ describe('account entry — password, email and session', () => {
     const walletSvc = fs.readFileSync(path.join(__dirname, '..', 'services', 'appWallet.ts'), 'utf8');
     expect(walletSvc).to.include('readRawWallet');
     expect(walletSvc).to.include("throw new Error('locked')");
+    const ensureFn = walletSvc.slice(
+      walletSvc.indexOf('export async function ensureAppWallet'),
+      walletSvc.indexOf('export async function wipeAppWallet')
+    );
+    expect(ensureFn).to.include("throw new Error('missing')");
+    expect(ensureFn).to.not.include('createAppWallet');
+    expect(walletSvc).to.include('wallet-persist');
     const panel = fs.readFileSync(path.join(__dirname, '..', 'components', 'AdminPanel.tsx'), 'utf8');
     expect(panel).to.include('onProposeConfirmations');
   });

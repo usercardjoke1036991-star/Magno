@@ -47,7 +47,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   emailDone = true,
   phraseDone = false,
   showIdentity = true,
-  deviceMatches = true,
+  deviceMatches = false,
   walletAddress,
   isRegistered,
   kycDeclarado,
@@ -239,7 +239,9 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
             </TouchableOpacity>
             <AppText style={[styles.screenTitle, { color: colors.text }]}>
               {open === 'phone'
-                ? t('otpTitle')
+                ? identityBound && !deviceMatches
+                  ? t('deviceBannerTitle')
+                  : t('otpTitle')
                 : open === 'phrase'
                   ? t('seedBannerTitle')
                   : open === 'email'
@@ -279,6 +281,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                 walletAddress={walletAddress}
                 isRegistered={isRegistered}
                 identityBound={identityBound}
+                deviceMatches={deviceMatches}
                 isLoading={isLoading}
                 paused={paused}
                 onBound={() => {

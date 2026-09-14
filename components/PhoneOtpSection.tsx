@@ -19,6 +19,7 @@ interface PhoneOtpSectionProps {
   walletAddress: string;
   isRegistered: boolean;
   identityBound: boolean;
+  deviceMatches?: boolean;
   isLoading: boolean;
   paused?: boolean;
   onBound: () => void;
@@ -28,6 +29,7 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   walletAddress,
   isRegistered,
   identityBound,
+  deviceMatches = false,
   isLoading,
   paused = false,
   onBound,
@@ -41,7 +43,8 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
 
-  const done = identityBound && !editing;
+  const done = identityBound && deviceMatches && !editing;
+  const needsThisDevice = identityBound && !deviceMatches;
   const blocked = isLoading || paused || !isRegistered || !walletAddress || busy;
   const apiReady = notifyApiConfigured();
   const phoneOk = isValidPhone(normalizePhone(phone)) && Boolean(normalizePhone(phone));
@@ -98,6 +101,9 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   return (
     <View>
       <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('otpLead')}</AppText>
+      {needsThisDevice ? (
+        <AppText style={[styles.warn, { color: colors.warnText }]}>{t('seedNeedDevice')}</AppText>
+      ) : null}
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />

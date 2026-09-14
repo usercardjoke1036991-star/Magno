@@ -44,4 +44,24 @@ describe('CONTRACT_ABI', function () {
       'despausarContrato'
     );
   });
+
+  it('encodes every money and identity path the app calls', function () {
+    const iface = clientInterface();
+    for (const name of [
+      'solicitarPrestamo',
+      'pagarPrestamo',
+      'donar',
+      'depositarLiquidez',
+      'retirarLiquidez',
+      'vincularIdentidad',
+      'declararKyc',
+      'registrarHumanoConPadre',
+      'phoneHashOf',
+      'deviceHashOf',
+      'walletOfDevice',
+      'kycDeclarado',
+    ]) {
+      expect(() => iface.getFunction(name), name).to.not.throw();
+    }
+  });
 });

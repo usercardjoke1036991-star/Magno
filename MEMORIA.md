@@ -4,6 +4,7 @@
 Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y simbolo. Despues las 24 palabras. Esa frase se consulta en Ajustes y sirve para cambiar de telefono; no se reemplaza.
 
 ## Decisiones
+- [2026-09-14] La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta.
 - [2026-09-14] Las politicas al usuario explican como trabaja la app, con que esta de acuerdo y que beneficios tiene. No incluyen detalle interno de proveedores, Demo ni codigo.
 - [2026-09-14] Politicas de privacidad y terminos se aceptan una vez tras el idioma y quedan en Ajustes para releer. El boton se activa al final del texto.
 - [2026-09-14] La wrap de sesion nunca vive en AsyncStorage. Apagar Desbloquear sigue abriendo sin PIN; la llave queda solo en SecureStore del aparato.
@@ -33,9 +34,9 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad.
 - [2026-09-12] Cuenta Real se muestra completa antes del lanzamiento. Donar y aportar liquidez suman fama. La UI de donar no menciona destino ni USDT real.
 - [2026-09-12] Bonos de hito en Demo y Real. Donar es sala aparte solo Real y solo suma fama. Real muestra el catalogo completo de 1000 niveles y 10 hitos aunque mainnet no este listo.
-- [2026-09-12] Donar se ve en Cuenta Real aunque la billetera personal aun no este agregada. El pool es el banco general; donar no entra al pool.
 
 ## Cambios realizados
+- [2026-09-14] Auditoria alta-hub: ensureAppWallet ya no crea otra frase si falta el blob; persistencia de billetera falla cerrado; OTP de telefono se reabre si el dispositivo no coincide; misma direccion BIP-39 12/24 en cualquier aparato. Hardhat 143/143. Demo live 24457 B alineado.
 - [2026-09-14] Auditoria en vivo: politicas, hub, credito, red, historial, donar, pool y ajustes sin crash. Codigo de invitacion por grupos. Watchdog legal ya no pisa el consentimiento. Demo se consulta y Real queda restaurado.
 - [2026-09-14] Textos legales de usuario: tono prestigioso, secciones cortas. Play sigue cubierto (datos, 18+, red irreversible, camara local).
 - [2026-09-14] Alta: idioma, luego politicas con aceptar al leer el final, luego cuenta. Ajustes muestra privacidad y terminos.
@@ -85,11 +86,10 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-13] Auditoria de contratos y ABI: Demo live alineado con el repo (24457 B). ABI de cliente sin dispersionCongelada duplicada y con cancelAdminAction.
 - [2026-09-13] Auditoria en vivo: tablero de referidos arriba y visible, activar credito gris en Real sin contrato, onNewIntent para salas por enlace. Cuenta Real restaurada.
 - [2026-09-13] Auditoria en vivo: Metro caido, ADB colgado, app recargada. Hardhat 121/121, Demo live operativo. Texto MIUI: se quita fontWeight sintetizado.
-- [2026-09-13] Historial de referidos muestra comisiones, bono de primer pago y total generado
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-14] Enfoque del usuario actualizado
+[2026-09-14] Decisión: La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta.

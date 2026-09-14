@@ -338,7 +338,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/contract-abi.test.js` — módulo JS/TS
 - `test/cuotas.test.js` — módulo JS/TS
 - `test/cyber-hardening.test.js` — módulo JS/TS
-  - Funciones/clases: loadReferralChildren
+  - Funciones/clases: loadReferralChildren, ensureAppWallet, wipeAppWallet
 - `test/demo-identity.test.js` — módulo JS/TS
 - `test/destroy.test.js` — módulo JS/TS
 - `test/hardening-security.test.js` — módulo JS/TS
@@ -383,7 +383,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS

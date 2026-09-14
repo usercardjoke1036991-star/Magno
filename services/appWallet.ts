@@ -75,8 +75,21 @@ async function persistRecord(record: StoredWallet): Promise<void> {
     throw new Error('locked');
   }
   const sealed = sealSecret(JSON.stringify(record), wrap);
-  await AsyncStorage.setItem(WALLET_FALLBACK, sealed).catch(() => {});
-  await withLimit(SecureStore.setItemAsync(WALLET_KEY, sealed, OPTIONS), 2500, undefined);
+  let fallbackOk = false;
+  try {
+    await AsyncStorage.setItem(WALLET_FALLBACK, sealed);
+    fallbackOk = true;
+  } catch {
+    fallbackOk = false;
+  }
+  const secureOk = await withLimit(
+    SecureStore.setItemAsync(WALLET_KEY, sealed, OPTIONS).then(() => true as const),
+    2500,
+    false as const
+  );
+  if (!fallbackOk && !secureOk) {
+    throw new Error('wallet-persist');
+  }
 }
 
 async function writeStored(record: StoredWallet): Promise<void> {
@@ -155,10 +168,13 @@ export async function ensureAppWallet(): Promise<HDNodeWallet | Wallet> {
     await bindAppWallet(existing.address);
     return existing;
   }
-  if (!getWalletWrapKey() || (await readRawWallet())) {
+  if (!getWalletWrapKey()) {
     throw new Error('locked');
   }
-  return createAppWallet();
+  if (await readRawWallet()) {
+    throw new Error('locked');
+  }
+  throw new Error('missing');
 }
 
 export async function wipeAppWallet(): Promise<void> {

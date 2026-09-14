@@ -41,7 +41,7 @@ import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
-import { canPayCreditAccess, creditNeedsAccess, liveCreditReady } from '../utils/creditGates';
+import { canPayCreditAccess, creditNeedsAccess, liveCreditReady, phoneVerifiedOnThisDevice } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhraseBackedUp } from '../services/appWallet';
 import { useI18n } from '../i18n/LanguageContext';
@@ -305,7 +305,7 @@ function HomeScreenWithHooks() {
 
         <KycAccessBanner
           kycDone={userInfo.kycDeclarado}
-          phoneDone={userInfo.identityBound && userInfo.deviceMatches}
+          phoneDone={phoneVerifiedOnThisDevice(userInfo.identityBound, userInfo.deviceMatches)}
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}
@@ -519,7 +519,7 @@ function HomeScreenWithHooks() {
         />
         <KycAccessBanner
           kycDone={userInfo.kycDeclarado}
-          phoneDone={userInfo.identityBound && userInfo.deviceMatches}
+          phoneDone={phoneVerifiedOnThisDevice(userInfo.identityBound, userInfo.deviceMatches)}
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}

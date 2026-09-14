@@ -239,6 +239,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-14 | Alta y recuperacion: no se auto-crea otra billetera si el wrap existe y el blob falta; PhoneOtpSection exige deviceMatches; contrato Demo 0xD2d2 con kyc e identidad exigidos, selectores de prestamo/pago/donar/pool/KYC presentes. Hardhat 143/143, tsc 0, i18n 962. | — |
 | 2026-09-14 | Auditoria profunda visual y de codigo: LegalDocuments estable, politicas en Ajustes, codigo de invitacion sin partir grupos, Demo/Real verificados en el telefono. tsc 0, i18n 962, salud 14/14. | — |
 | 2026-09-14 | Privacidad y condiciones reescritas con tono de casa financiera: como trabaja, que acepta y que obtiene. Sin jerga interna ni proveedores en el texto al usuario. | — |
 | 2026-09-14 | Tras el idioma, privacidad y terminos con Acepto al llegar al final. Las mismas politicas se leen en Ajustes. | — |

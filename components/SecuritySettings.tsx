@@ -261,6 +261,7 @@ export const SecuritySettings: React.FC = () => {
             walletAddress={address}
             isRegistered={userInfo.isRegistered}
             identityBound={userInfo.identityBound}
+            deviceMatches={userInfo.deviceMatches}
             isLoading={kycBusy}
             paused={userInfo.paused}
             onBound={refetch}

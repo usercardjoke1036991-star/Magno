@@ -86,16 +86,14 @@ export function walletRunsOnThisDevice(onChainDeviceHash: string, localDeviceHas
   return bound.toLowerCase() === String(localDeviceHash || '').toLowerCase();
 }
 
-/** Recuperar en este aparato: si el dispositivo ya tiene dueño, solo esa billetera. */
+/** Recuperar: si este aparato ya tiene dueño on-chain, solo esa frase. Un teléfono nuevo (hash distinto) sí recupera y luego vuelve a vincular. */
 export function restoreAllowedOnThisDevice(input: {
   claimedWallet: string;
   phraseWallet: string;
   onChainDeviceHash?: string;
   localDeviceHash?: string;
 }): boolean {
-  if (!restoreMatchesDevice(input.claimedWallet, input.phraseWallet)) return false;
-  if (input.onChainDeviceHash == null || input.localDeviceHash == null) return true;
-  return walletRunsOnThisDevice(input.onChainDeviceHash, input.localDeviceHash);
+  return restoreMatchesDevice(input.claimedWallet, input.phraseWallet);
 }
 
 /** El primero es el principal. Si no hay ninguno, contraseña. */

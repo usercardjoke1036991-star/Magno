@@ -124,4 +124,42 @@ describe('QuatriviumCredit - identity binding', function () {
     await expect(contract.connect(extra).vincularIdentidad(oldPhone, extraDevice, deadline, sig.v, sig.r, sig.s)).to.not
       .be.reverted;
   });
+
+  it('lets the same wallet move to a new device and frees the old hash', async () => {
+    const { contract, user, extra } = await deployProtocol();
+    await contract.connect(user).registrarHumanoConPadre(ethers.ZeroAddress);
+    await attestIdentity(contract, user, 'phone-keep', 'device-old');
+    const oldDevice = await contract.deviceHashOf(user.address);
+    const phone = await contract.phoneHashOf(user.address);
+    await attestIdentity(contract, user, 'phone-keep', 'device-new');
+    const nextDevice = await contract.deviceHashOf(user.address);
+    expect(nextDevice).to.not.equal(oldDevice);
+    expect(await contract.walletOfDevice(oldDevice)).to.equal(ethers.ZeroAddress);
+    expect(await contract.walletOfDevice(nextDevice)).to.equal(user.address);
+    expect(await contract.walletOfPhone(phone)).to.equal(user.address);
+
+    await contract.connect(extra).registrarHumanoConPadre(ethers.ZeroAddress);
+    const latest = await ethers.provider.getBlock('latest');
+    const deadline = BigInt((latest?.timestamp || 0) + 3600);
+    const extraPhone = ethers.keccak256(ethers.toUtf8Bytes(`${extra.address}:phone`));
+    const [attester] = await ethers.getSigners();
+    const packed = ethers.keccak256(
+      ethers.AbiCoder.defaultAbiCoder().encode(
+        ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'address'],
+        [
+          extra.address,
+          extraPhone,
+          oldDevice,
+          deadline,
+          (await ethers.provider.getNetwork()).chainId,
+          await contract.getAddress(),
+        ]
+      )
+    );
+    const raw = await attester.signMessage(ethers.getBytes(packed));
+    const sig = ethers.Signature.from(raw);
+    await expect(
+      contract.connect(extra).vincularIdentidad(extraPhone, oldDevice, deadline, sig.v, sig.r, sig.s)
+    ).to.not.be.reverted;
+  });
 });

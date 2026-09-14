@@ -18,6 +18,11 @@ export function liveNeedsPhone(demo: boolean, identityBound: boolean): boolean {
   return !demo && !identityBound;
 }
 
+/** Teléfono listo en ESTE aparato: on-chain y el hash de dispositivo coincide. */
+export function phoneVerifiedOnThisDevice(identityBound: boolean, deviceMatches: boolean): boolean {
+  return Boolean(identityBound) && Boolean(deviceMatches);
+}
+
 /** Cuenta Real: correo de la cuenta en este teléfono. Demo no lo pide. */
 export function liveNeedsEmail(demo: boolean, hasEmail: boolean): boolean {
   return !demo && !hasEmail;
