@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import { parseAppDeepLink } from '../utils/appDeepLink';
 import { rememberAppUrl, takePendingAppUrl } from '../utils/pendingDeepLink';
-import { AppKit, useAccount, useProvider } from '@reown/appkit-react-native';
+import { AppKit, useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
 import { parseUnits } from 'ethers';
 import { setWalletSigner } from '../services/quatriviumCreditService';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
@@ -29,6 +29,7 @@ import { SettingsButton } from '../components/SettingsButton';
 import { AppSubsection } from '../components/AppSection';
 import { AppWindow } from '../components/AppWindow';
 import { HomeHub, type HomeRoom } from '../components/HomeHub';
+import { LinkedWalletCard } from '../components/LinkedWalletCard';
 import { AppText } from '../components/AppText';
 import { PoolSupportSection } from '../components/PoolSupportSection';
 import { MilestoneBonusCatalog } from '../components/MilestoneBonusCatalog';
@@ -65,6 +66,7 @@ function HomeScreenWithHooks() {
   const { address: appAddress, signer: appSigner, ready: walletReady, failed: walletFailed, retry: retryWallet } = useAppWallet();
   const { address: adminAddress, isConnected: adminConnected } = useAccount();
   const { provider: adminProvider } = useProvider();
+  const { open: openExternalWallet } = useAppKit();
 
   const { mode } = useAppMode();
   const { confirmFunds } = useFundsConfirm();
@@ -74,12 +76,6 @@ function HomeScreenWithHooks() {
   const [room, setRoom] = useState<HomeRoom | null>(null);
   const [hasVerifiedEmail, setHasVerifiedEmail] = useState(false);
   const [phraseBackedUp, setPhraseBackedUp] = useState(false);
-
-  useEffect(() => {
-    if (mode === 'demo' && room === 'pool') {
-      setRoom(null);
-    }
-  }, [mode, room]);
 
   useEffect(() => {
     const apply = (url?: string | null) => {
@@ -198,6 +194,8 @@ function HomeScreenWithHooks() {
     handleProposeAttester,
     handleProposeSetTokenConfig,
     handlePausarProtocolo,
+    handleDespausarProtocolo,
+    handleCancelProposal,
     handleLiquidarDeudor,
     handleMarcarMorosoSiVencido,
   } = useHomeHandlers({
@@ -208,6 +206,8 @@ function HomeScreenWithHooks() {
     appSigner,
     adminConnected,
     adminProvider,
+    adminAddress,
+    openExternalWallet,
     confirmFunds,
     refetch,
     clearPendingInvite,
@@ -338,6 +338,7 @@ function HomeScreenWithHooks() {
         )}
 
         <AppText style={[styles.hubTitle, { color: colors.text }]}>{t('hubChoose')}</AppText>
+        {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
         <HomeHub
           onOpen={setRoom}
           tiles={[
@@ -357,14 +358,15 @@ function HomeScreenWithHooks() {
               icon: 'id',
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
+            { id: 'ranks', title: t('rankGalleryTitle'), lead: t('hubRanksLead'), icon: 'star' },
             { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' },
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
             { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
+            { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' },
             ...(mode === 'demo'
               ? []
               : [
                   { id: 'donate' as const, title: t('donateTitle'), lead: t('hubDonateLead'), icon: 'deposit' as const },
-                  { id: 'pool' as const, title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' as const },
                 ]),
             ...(adminInfo.isOwner || adminInfo.isAdmin
               ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const }]
@@ -451,6 +453,7 @@ function HomeScreenWithHooks() {
               reminder={debtReminder}
               showDebt={false}
               onOpenBonuses={() => setRoom('bonuses')}
+              onOpenRanks={() => setRoom('ranks')}
               lpUsd={Number.parseFloat(balances.lpBalance) || 0}
               isPaying={txLoading}
             />
@@ -513,9 +516,6 @@ function HomeScreenWithHooks() {
             onSelectToken={setSelectedToken}
           />
         ) : null}
-        <AppSubsection title={t('subsectionLadder')} icon="chart">
-          <RankLadder userLevel={userInfo.userProgress.nivelActual} />
-        </AppSubsection>
         <AppSubsection title={t('subsectionUnlocked')} icon="bank">
           {visibleUnlocked.map((tier) => (
             <LoanTierCard
@@ -538,6 +538,7 @@ function HomeScreenWithHooks() {
               isRegistered={userInfo.isRegistered}
               identityBlocked={identityBlocked}
               accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
+              contractReady={creditReady}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}
@@ -565,6 +566,7 @@ function HomeScreenWithHooks() {
               isRegistered={userInfo.isRegistered}
               identityBlocked={identityBlocked}
               accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
+              contractReady={creditReady}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}
@@ -574,6 +576,15 @@ function HomeScreenWithHooks() {
             />
           </AppSubsection>
         ) : null}
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'ranks'}
+        title={t('rankGalleryTitle')}
+        lead={t('rankGalleryLead')}
+        onClose={() => setRoom(null)}
+      >
+        <RankLadder userLevel={userInfo.userProgress.nivelActual} />
       </AppWindow>
 
       <AppWindow
@@ -675,11 +686,14 @@ function HomeScreenWithHooks() {
       </AppWindow>
 
       <AppWindow
-        visible={room === 'pool' && mode !== 'demo'}
+        visible={room === 'pool'}
         title={t('sectionPool')}
         lead={t('sectionPoolLead')}
         onClose={() => setRoom(null)}
       >
+        {mode !== 'demo' && walletAddress ? (
+          <LinkedWalletCard internalWallet={walletAddress} compact />
+        ) : null}
         {tokens.length > 1 ? (
           <TokenSelector
             tokens={tokens}
@@ -694,6 +708,7 @@ function HomeScreenWithHooks() {
           poolBalance={balances.poolBalance}
           poolOutstanding={balances.poolOutstanding}
           poolCash={balances.poolCash}
+          lpBalance={balances.lpBalance}
           walletConnected={Boolean(walletAddress)}
           paused={creditPaused}
           onDepositPool={handleDepositarPool}
@@ -723,8 +738,10 @@ function HomeScreenWithHooks() {
           onWithdrawFees={handleRetirarComisiones}
           onWithdrawTokenFees={handleRetirarComisionesToken}
           onPause={handlePausarProtocolo}
+          onUnpause={handleDespausarProtocolo}
           onExecuteProposal={handleExecuteProposal}
           onConfirmProposal={handleConfirmProposal}
+          onCancelProposal={handleCancelProposal}
           onProposeAddAdmin={handleProposeAddAdmin}
           onProposeRemoveAdmin={handleProposeRemoveAdmin}
           onProposeFeeCollector={handleProposeFeeCollector}

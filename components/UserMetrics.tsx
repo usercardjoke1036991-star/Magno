@@ -24,6 +24,7 @@ interface UserMetricsProps {
   onPayCount?: (count: number) => void;
   onClaimBonus?: () => void;
   onOpenBonuses?: () => void;
+  onOpenRanks?: () => void;
   lpUsd?: number;
   isPaying?: boolean;
 }
@@ -38,6 +39,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   onPayCount,
   onClaimBonus,
   onOpenBonuses,
+  onOpenRanks,
   lpUsd = 0,
   isPaying = false,
 }) => {
@@ -78,12 +80,21 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               <AppText style={[styles.rankMeta, { color: colors.textMuted }]}>
                 {t('level')} {userInfo.userProgress.nivelActual}/{displayMaxLoanLevel(userInfo.maxLoanLevel)}
               </AppText>
-              <AppText style={[styles.rankHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
               {supportKey ? (
                 <AppText style={[styles.rankHint, { color: colors.primary }]}>{t(supportKey)}</AppText>
               ) : null}
             </View>
           </View>
+          {onOpenRanks ? (
+            <TouchableOpacity
+              onPress={onOpenRanks}
+              style={[styles.payBtn, { backgroundColor: colors.primary, marginTop: 10 }]}
+              accessibilityRole="button"
+              accessibilityLabel={t('openRankGallery')}
+            >
+              <AppText style={[styles.payBtnText, { color: colors.onPrimary }]}>{t('openRankGallery')}</AppText>
+            </TouchableOpacity>
+          ) : null}
 
           {nextMilestone > 0 ? (
             <View style={[styles.loanBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>

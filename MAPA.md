@@ -119,6 +119,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: LanguageSelector
 - `components/LanguageWelcome.tsx` — módulo JS/TS
   - Funciones/clases: LanguageWelcome
+- `components/LinkedWalletCard.tsx` — módulo JS/TS
+  - Funciones/clases: LinkedWalletCard
 - `components/LinkWalletForm.tsx` — módulo JS/TS
   - Funciones/clases: LinkWalletForm
 - `components/LoanTierCard.tsx` — módulo JS/TS
@@ -137,6 +139,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: NetworkStatusBanner
 - `components/NotificationChannels.tsx` — módulo JS/TS
   - Funciones/clases: NotificationChannels
+- `components/PasswordRulesHint.tsx` — módulo JS/TS
+  - Funciones/clases: PasswordRulesHint
 - `components/PhoneOtpSection.tsx` — módulo JS/TS
   - Funciones/clases: PhoneOtpSection
 - `components/PoolSupportSection.tsx` — módulo JS/TS
@@ -164,7 +168,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `components/ReferralSection.tsx` — módulo JS/TS
   - Funciones/clases: ReferralSection
 - `components/ScreenGuard.tsx` — módulo JS/TS
-  - Funciones/clases: ScreenGuard
+  - Funciones/clases: subscribeScreenshot, ScreenGuard
 - `components/SecretInput.tsx` — módulo JS/TS
   - Funciones/clases: SecretInput
 - `components/SecuritySettings.tsx` — módulo JS/TS
@@ -204,7 +208,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/loanTiers.ts` — módulo JS/TS
   - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/ranks.ts` — módulo JS/TS
-  - Funciones/clases: colorizeTextureFilters, RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, romanDivision, formatRankLabel, RANK_LADDER
+  - Funciones/clases: FAMILY_BANDS, saturateHex, colorizeTextureFilters, RANK_GEM_ASSET, RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, rankFamilyIndex, romanDivision, rankDivisionTint, formatRankLabel, RANK_LADDER, rankGalleryRow, RANK_GALLERY
 - `constants/reputation.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, generationBps, fameForGeneration, founderFamePoints, referralsForNextBonus, formatPoolBonus
 - `constants/rpcConfig.ts` — módulo JS/TS
@@ -255,6 +259,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
+- `scripts/_audit-bytecode.cjs` — módulo JS/TS
 - `scripts/_dump-ui-nodes.py` — módulo Python
 - `scripts/_dump-ui-texts.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
@@ -290,9 +295,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/fundsConfirm.ts` — módulo JS/TS
   - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
-  - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration
+  - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration, loadKycDocPhoto, persistKycDocPhoto
 - `services/linkedWallet.ts` — módulo JS/TS
-  - Funciones/clases: WALLET_LINK_SKIPPED, linkedWalletStorageKey, hasLinkedExternalWallet, hasCompletedWalletLink, loadLinkedExternalWallet, saveLinkedExternalWallet, skipLinkedExternalWallet
+  - Funciones/clases: WALLET_LINK_SKIPPED, linkedWalletStorageKey, hasLinkedExternalWallet, hasCompletedWalletLink, loadLinkedExternalWallet, saveLinkedExternalWallet, skipLinkedExternalWallet, loadRequiredExternalWallet
 - `services/movementHistory.ts` — módulo JS/TS
   - Funciones/clases: recordMovement, loadMovementHistory, loadMoraHistory
 - `services/notificationProfile.ts` — módulo JS/TS
@@ -324,6 +329,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/accounting.test.js` — módulo JS/TS
 - `test/accountWorld.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
+- `test/contract-abi.test.js` — módulo JS/TS
 - `test/cuotas.test.js` — módulo JS/TS
 - `test/cyber-hardening.test.js` — módulo JS/TS
   - Funciones/clases: loadReferralChildren
@@ -388,7 +394,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/moraHistory.ts` — módulo JS/TS
   - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement
 - `utils/passwordPolicy.ts` — módulo JS/TS
-  - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, PASSWORD_ALPHABET, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, masterPasswordFromRandomBytes
+  - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, PASSWORD_ALPHABET, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, passwordRuleFlags, masterPasswordFromRandomBytes
 - `utils/pendingDeepLink.ts` — módulo JS/TS
   - Funciones/clases: rememberAppUrl, takePendingAppUrl
 - `utils/pinPolicy.ts` — módulo JS/TS
@@ -415,6 +421,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: setTxErrorLang, humanizeTxError
 - `utils/usernamePolicy.ts` — módulo JS/TS
   - Funciones/clases: normalizeUsername, isValidUsername
+- `utils/walletChain.ts` — módulo JS/TS
+  - Funciones/clases: parseEvmChainId, needsWalletAddChain, ensureExternalWalletOnAppChain
 - `wallet/AppModeContext.tsx` — módulo JS/TS
   - Funciones/clases: AppModeProvider, useAppMode
 - `wallet/appModePersist.ts` — módulo JS/TS
@@ -433,7 +441,7 @@ Sin desfases detectados entre docs y código.
 
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
-- detectar_logica: 0 crítico(s), 4 aviso(s)
+- detectar_logica: 0 crítico(s), 3 aviso(s)
 - verificar_modulos: 0 crítico(s), 13 aviso(s)
 
 ## Estado

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -10,19 +10,24 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { parseUnits } from 'ethers';
-import { COMPATIBLE_WALLETS } from '../constants/compatibleWallets';
+import { parseUnits, type Eip1193Provider } from 'ethers';
+import { useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
+import { getEthersSignerFromProvider } from '../web3Config';
 import { enviarBnb, enviarToken, loadAppWallet } from '../services/appWallet';
+import {
+  hasLinkedExternalWallet,
+  loadRequiredExternalWallet,
+  saveLinkedExternalWallet,
+} from '../services/linkedWallet';
 import { recordMovement } from '../services/movementHistory';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useFundsConfirm } from './FundsConfirmHost';
-import { parsePositiveDecimal } from '../utils/formatters';
-import { isHexAddress } from '../utils/sanitize';
+import { formatAddress, parsePositiveDecimal } from '../utils/formatters';
 import { humanizeTxError } from '../utils/txErrors';
 import { copyText } from '../utils/copyText';
-import { WalletMark } from './WalletMark';
 import { BrandLogo } from './BrandLogo';
+import { LinkWalletForm } from './LinkWalletForm';
 import type { Token } from '../constants/tokens';
 import { AppText, AppTextInput } from './AppText';
 
@@ -52,73 +57,106 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const { confirmFunds } = useFundsConfirm();
-  const [walletId, setWalletId] = useState<string | null>(null);
-  const [destination, setDestination] = useState('');
+  const { open } = useAppKit();
+  const { address, isConnected } = useAccount();
+  const { provider } = useProvider();
+  const [linked, setLinked] = useState('');
   const [amount, setAmount] = useState('');
   const [asset, setAsset] = useState<'token' | 'bnb'>('token');
   const [busy, setBusy] = useState(false);
 
-  const selected = useMemo(
-    () => COMPATIBLE_WALLETS.find((item) => item.id === walletId) || null,
-    [walletId]
-  );
+  useEffect(() => {
+    if (!visible) return;
+    let live = true;
+    loadRequiredExternalWallet(walletAddress)
+      .then(async (stored) => {
+        if (!live) return;
+        if (stored) {
+          setLinked(stored);
+          return;
+        }
+        if (isConnected && hasLinkedExternalWallet(address || '')) {
+          const saved = await saveLinkedExternalWallet(walletAddress, address || '');
+          if (live) setLinked(saved);
+          return;
+        }
+        setLinked('');
+      })
+      .catch(() => {
+        if (live) setLinked('');
+      });
+    return () => {
+      live = false;
+    };
+  }, [visible, walletAddress, address, isConnected]);
 
   const close = () => {
-    setWalletId(null);
-    setDestination('');
     setAmount('');
+    setAsset('token');
     onClose();
   };
 
-  const sendOut = async () => {
-    const to = destination.trim();
-    if (!isHexAddress(to)) {
-      Alert.alert(t('error'), t('appWalletBadAddress'));
-      return;
-    }
+  const send = async (direction: 'in' | 'out') => {
     const parsed = parsePositiveDecimal(amount);
     if (!parsed) {
       Alert.alert(t('amount'), t('invalidAmount'));
       return;
     }
+    if (!linked) {
+      Alert.alert(t('linkWalletTitle'), t('linkWalletNeedFunds'));
+      return;
+    }
+    const decimals = asset === 'bnb' ? 18 : selectedToken.decimals;
     try {
-      const decimals = asset === 'bnb' ? 18 : selectedToken.decimals;
-      const available = parseUnits(asset === 'bnb' ? bnbBalance || '0' : tokenBalance || '0', decimals);
-      if (parseUnits(parsed, decimals) > available) {
-        Alert.alert(t('amount'), t('amountExceedsBalance'));
-        return;
+      if (direction === 'out') {
+        const available = parseUnits(asset === 'bnb' ? bnbBalance || '0' : tokenBalance || '0', decimals);
+        if (parseUnits(parsed, decimals) > available) {
+          Alert.alert(t('amount'), t('amountExceedsBalance'));
+          return;
+        }
       }
     } catch {
       Alert.alert(t('amount'), t('invalidAmount'));
       return;
     }
-    const signer = await loadAppWallet();
-    if (!signer) {
-      Alert.alert(t('error'), t('appWalletNotReady'));
-      return;
-    }
     if (!(await confirmFunds())) return;
     setBusy(true);
     try {
-      const receipt =
-        asset === 'bnb'
-          ? await enviarBnb(signer, to, parseUnits(parsed, 18).toString())
-          : await enviarToken(
-              signer,
-              selectedToken.address,
-              to,
-              parseUnits(parsed, selectedToken.decimals).toString()
-            );
-      const hash = receipt && typeof receipt === 'object' && 'hash' in receipt ? String(receipt.hash || '') : '';
+      const amountWei = parseUnits(parsed, decimals).toString();
+      let from = walletAddress;
+      let to = linked;
+      if (direction === 'in') {
+        if (!isConnected || !provider || String(address || '').toLowerCase() !== linked.toLowerCase()) {
+          Alert.alert(t('linkWalletTitle'), t('linkWalletMismatch'));
+          void open();
+          return;
+        }
+        const signer = await getEthersSignerFromProvider(provider as Eip1193Provider);
+        if (!signer) {
+          Alert.alert(t('error'), t('appWalletNotReady'));
+          return;
+        }
+        from = linked;
+        to = walletAddress;
+        if (asset === 'bnb') await enviarBnb(signer, to, amountWei, true);
+        else await enviarToken(signer, selectedToken.address, to, amountWei, true);
+      } else {
+        const signer = await loadAppWallet();
+        if (!signer) {
+          Alert.alert(t('error'), t('appWalletNotReady'));
+          return;
+        }
+        if (asset === 'bnb') await enviarBnb(signer, to, amountWei);
+        else await enviarToken(signer, selectedToken.address, to, amountWei);
+      }
       await recordMovement(walletAddress, {
-        kind: 'transfer_out',
-        from: walletAddress,
+        kind: direction === 'in' ? 'transfer_in' : 'transfer_out',
+        from,
         to,
         amountLabel: `${parsed} ${asset === 'bnb' ? 'BNB' : selectedToken.symbol}`,
         tokenSymbol: asset === 'bnb' ? 'BNB' : selectedToken.symbol,
-        platform: selected?.name || 'BSC',
+        platform: 'BSC',
         timestamp: Date.now(),
-        txHash: hash || undefined,
       });
       Alert.alert(t('ready'), t('appWalletSent'));
       setAmount('');
@@ -138,51 +176,39 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
     <Modal visible={visible} animationType="slide" onRequestClose={close}>
       <SafeAreaView style={[styles.screen, { backgroundColor: colors.bg }]}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={selected ? () => setWalletId(null) : close}
-            accessibilityRole="button"
-          >
+          <TouchableOpacity onPress={close} accessibilityRole="button">
             <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
           </TouchableOpacity>
           <AppText style={[styles.title, { color: colors.text }]}>{title}</AppText>
           <View style={styles.spacer} />
         </View>
         <ScrollView keyboardShouldPersistTaps="always" contentContainerStyle={styles.body}>
-          {!selected ? (
+          {!linked ? (
             <>
-              <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('appWalletPickLead')}</AppText>
-              <View style={styles.grid}>
-                {COMPATIBLE_WALLETS.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => setWalletId(item.id)}
-                    style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                    accessibilityRole="button"
-                    accessibilityLabel={item.name}
-                  >
-                    <WalletMark wallet={item} size={48} />
-                    <AppText style={[styles.cardName, { color: colors.text }]} numberOfLines={2}>
-                      {item.name}
-                    </AppText>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('linkWalletNeedFunds')}</AppText>
+              <LinkWalletForm
+                internalWallet={walletAddress}
+                allowSkip={false}
+                onLinked={(external) => {
+                  if (hasLinkedExternalWallet(external)) setLinked(external);
+                }}
+              />
             </>
           ) : (
             <View>
               <View style={styles.chosen}>
-                <WalletMark wallet={selected} size={40} />
-                <AppText style={[styles.chosenName, { color: colors.text }]}>{selected.name}</AppText>
+                <BrandLogo size={40} />
+                <AppText style={[styles.chosenName, { color: colors.text }]}>{t('appWalletLabel')}</AppText>
               </View>
+              <AppText style={[styles.lead, { color: colors.textMuted }]}>
+                {mode === 'in' ? t('appWalletInLead') : t('appWalletSendLead')}
+              </AppText>
+              <AppText style={[styles.meta, { color: colors.text }]}>
+                {mode === 'in' ? t('yourWallet') : t('appWalletDestination')}{' '}
+                {formatAddress(mode === 'in' ? walletAddress : linked)}
+              </AppText>
               {mode === 'in' ? (
                 <>
-                  <View style={styles.chosen}>
-                    <BrandLogo size={40} />
-                    <AppText style={[styles.chosenName, { color: colors.text }]}>{t('appWalletLabel')}</AppText>
-                  </View>
-                  <AppText style={[styles.lead, { color: colors.textMuted }]}>
-                    {t('appWalletInLead', { wallet: selected.name })}
-                  </AppText>
                   <AppText selectable style={[styles.address, { color: colors.text, backgroundColor: colors.surface }]}>
                     {walletAddress}
                   </AppText>
@@ -203,60 +229,59 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                   >
                     <AppText style={styles.sendText}>{t('appWalletShare')}</AppText>
                   </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <AppText style={[styles.lead, { color: colors.textMuted }]}>
-                    {t('appWalletSendLead', { wallet: selected.name })}
-                  </AppText>
-                  <AppTextInput
-                    value={destination}
-                    onChangeText={setDestination}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    placeholder={t('appWalletDestination', { wallet: selected.name })}
-                    placeholderTextColor={colors.textMuted}
-                    style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-                  />
-                  <View style={styles.row}>
-                    <TouchableOpacity
-                      onPress={() => setAsset('token')}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border, backgroundColor: colors.surface },
-                        asset === 'token' && { borderColor: colors.primary, backgroundColor: colors.chip },
-                      ]}
-                    >
-                      <AppText style={[styles.chipText, { color: colors.text }]}>{selectedToken.symbol}</AppText>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setAsset('bnb')}
-                      style={[
-                        styles.chip,
-                        { borderColor: colors.border, backgroundColor: colors.surface },
-                        asset === 'bnb' && { borderColor: colors.primary, backgroundColor: colors.chip },
-                      ]}
-                    >
-                      <AppText style={[styles.chipText, { color: colors.text }]}>BNB</AppText>
-                    </TouchableOpacity>
-                  </View>
-                  <AppTextInput
-                    value={amount}
-                    onChangeText={setAmount}
-                    keyboardType="decimal-pad"
-                    placeholder={asset === 'bnb' ? '0.001' : tokenBalance}
-                    placeholderTextColor={colors.textMuted}
-                    style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-                  />
                   <TouchableOpacity
-                    disabled={blocked || !amount}
-                    onPress={sendOut}
-                    style={[styles.send, { backgroundColor: colors.primary }, (blocked || !amount) && { backgroundColor: colors.chip }]}
+                    style={[styles.send, { backgroundColor: colors.chip, marginTop: 8 }]}
+                    onPress={() => void open()}
                   >
-                    {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.sendText}>{t('appWalletSend')}</AppText>}
+                    <AppText style={[styles.sendText, { color: colors.text }]}>{t('connectWallet')}</AppText>
                   </TouchableOpacity>
                 </>
+              ) : (
+                <AppText selectable style={[styles.address, { color: colors.text, backgroundColor: colors.surface }]}>
+                  {linked}
+                </AppText>
               )}
+              <View style={styles.row}>
+                <TouchableOpacity
+                  onPress={() => setAsset('token')}
+                  style={[
+                    styles.chip,
+                    { borderColor: colors.border, backgroundColor: colors.surface },
+                    asset === 'token' && { borderColor: colors.primary, backgroundColor: colors.chip },
+                  ]}
+                >
+                  <AppText style={[styles.chipText, { color: colors.text }]}>{selectedToken.symbol}</AppText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setAsset('bnb')}
+                  style={[
+                    styles.chip,
+                    { borderColor: colors.border, backgroundColor: colors.surface },
+                    asset === 'bnb' && { borderColor: colors.primary, backgroundColor: colors.chip },
+                  ]}
+                >
+                  <AppText style={[styles.chipText, { color: colors.text }]}>BNB</AppText>
+                </TouchableOpacity>
+              </View>
+              <AppTextInput
+                value={amount}
+                onChangeText={setAmount}
+                keyboardType="decimal-pad"
+                placeholder={asset === 'bnb' ? '0.001' : '1'}
+                placeholderTextColor={colors.textMuted}
+                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
+              />
+              <TouchableOpacity
+                disabled={blocked || !amount}
+                onPress={() => void send(mode)}
+                style={[styles.send, { backgroundColor: colors.primary }, (blocked || !amount) && { backgroundColor: colors.chip }]}
+              >
+                {busy ? (
+                  <ActivityIndicator color="#111" />
+                ) : (
+                  <AppText style={styles.sendText}>{mode === 'in' ? t('appWalletInTitle') : t('appWalletSend')}</AppText>
+                )}
+              </TouchableOpacity>
             </View>
           )}
         </ScrollView>
@@ -299,24 +324,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 16,
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  card: {
-    width: '47.5%',
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    gap: 10,
-  },
-  cardName: {
+  meta: {
     fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'center',
+    marginBottom: 10,
   },
   chosen: {
     flexDirection: 'row',
@@ -363,7 +373,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sendText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

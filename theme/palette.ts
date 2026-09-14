@@ -56,7 +56,7 @@ export const palettes: Record<ThemeName, ThemeColors> = {
     textMuted: '#6F6F69',
     border: '#E4E4DE',
     primary: '#1B6B3A',
-    onPrimary: '#FFFFFF',
+    onPrimary: '#111111',
     connect: '#007AFF',
     disconnect: '#146C2E',
     inputBg: '#FFFFFF',

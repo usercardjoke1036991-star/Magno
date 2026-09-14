@@ -136,10 +136,10 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
             ]}
           >
             {busy ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#111" />
             ) : (
               <View style={styles.btnRow}>
-                <AppIcon name="user" size={16} color={blocked ? colors.textMuted : '#fff'} />
+                <AppIcon name="user" size={16} color={blocked ? colors.textMuted : '#111'} />
                 <AppText style={[styles.registerButtonText, blocked && { color: colors.textMuted }]}>
                   {paused ? t('actionPaused') : t('activateCredit')}
                 </AppText>
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerButtonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

@@ -17,6 +17,7 @@ import { AppIcon } from './icons';
 import { AppText, AppTextInput } from './AppText';
 import { BrandLogo } from './BrandLogo';
 import { SecretInput } from './SecretInput';
+import { PasswordRulesHint } from './PasswordRulesHint';
 import {
   PASSWORD_LENGTH,
   PIN_LENGTH,
@@ -1032,7 +1033,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                                   : t('lockUnlockLead')}
             </AppText>
             {credentialsStage ? (
-              <AppText style={[styles.emailNote, { color: colors.textMuted }]}>{t('lockPasswordMin')}</AppText>
+              <AppText style={[styles.emailNote, { color: colors.textMuted }]}>{t('createCredentialsLead')}</AppText>
             ) : null}
             {!phraseRevealStage && !credentialsStage && !welcomeStage && !restoreStage && !publicIdentityStage && !recovering && setup ? (
               <View style={styles.dots}>
@@ -1158,7 +1159,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 onPress={() => void submitSignIn()}
                 style={[styles.primary, { backgroundColor: colors.connect }]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('signIn')}</AppText>}
+                {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('signIn')}</AppText>}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
@@ -1243,7 +1244,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 maxLength={PASSWORD_LENGTH}
                 placeholder={t('lockNewPassword')}
               />
-              <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordMin')}</AppText>
+              <PasswordRulesHint value={passwordInput} />
               <TouchableOpacity
                 onPress={() => setKeepOnPhone((value) => !value)}
                 style={styles.switchMode}
@@ -1265,7 +1266,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                   },
                 ]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t(signInOnDevice ? 'signIn' : 'seedRestoreAction')}</AppText>}
+                {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t(signInOnDevice ? 'signIn' : 'seedRestoreAction')}</AppText>}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
@@ -1348,7 +1349,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 maxLength={PASSWORD_LENGTH}
                 placeholder={t('lockNewPassword')}
               />
-              <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('lockPasswordMin')}</AppText>
+              <PasswordRulesHint value={passwordInput} />
               <TouchableOpacity
                 onPress={() => setKeepOnPhone((value) => !value)}
                 style={styles.switchMode}
@@ -1368,7 +1369,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                   !canSubmitDeviceCredentials(passwordInput, accountUsername) && { backgroundColor: colors.chip },
                 ]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('createContinue')}</AppText>}
+                {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('createContinue')}</AppText>}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
@@ -1418,7 +1419,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 style={[styles.primary, { backgroundColor: colors.connect }]}
               >
                 {busy && !recoverSent ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color="#111" />
                 ) : (
                   <AppText style={styles.primaryText}>{t('lockRecoverSend')}</AppText>
                 )}
@@ -1449,12 +1450,13 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                     maxLength={PASSWORD_LENGTH}
                     placeholder={t('lockPasswordConfirm')}
                   />
+                  <PasswordRulesHint value={passwordInput} />
                   <TouchableOpacity
                     disabled={busy || recoverCode.length !== 6 || !passwordOk}
                     onPress={() => void submitRecover()}
                     style={[styles.primary, { backgroundColor: colors.connect }]}
                   >
-                    {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('saveSession')}</AppText>}
+                    {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('saveSession')}</AppText>}
                   </TouchableOpacity>
                 </>
               ) : null}
@@ -1489,7 +1491,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 onPress={() => void submitUnlockEmail()}
                 style={[styles.primary, { backgroundColor: colors.connect }]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('lockUnlock')}</AppText>}
+                {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('lockUnlock')}</AppText>}
               </TouchableOpacity>
               <TouchableOpacity disabled={busy || lockMs > 0} onPress={() => void sendUnlockEmail()} style={styles.switchMode}>
                 <AppText style={[styles.switchText, { color: colors.primary }]}>{t('emailResend')}</AppText>
@@ -1512,7 +1514,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 onPress={() => void submitUnlockAuthenticator()}
                 style={[styles.primary, { backgroundColor: colors.connect }]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('lockUnlock')}</AppText>}
+                {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('lockUnlock')}</AppText>}
               </TouchableOpacity>
             </View>
           ) : null}
@@ -1531,7 +1533,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 onPress={() => void submitUnlockPassword()}
                 style={[styles.primary, { backgroundColor: colors.connect }]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('lockUnlock')}</AppText>}
+                {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('lockUnlock')}</AppText>}
               </TouchableOpacity>
             </View>
           ) : null}
@@ -1782,7 +1784,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   primaryText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

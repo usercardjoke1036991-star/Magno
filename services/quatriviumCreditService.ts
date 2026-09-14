@@ -194,6 +194,25 @@ async function topUpDemoUsdtToDebt(tokenAddress: string, neededWei = '0'): Promi
   return true;
 }
 
+async function mintDemoUsdtTo(tokenAddress: string, to: string, amountWei: string): Promise<boolean> {
+  if (!isDemoAccount() || !isDemoMode()) return false;
+  if (!isTestnetOnlyToken(tokenAddress) || !isAddress(to)) return false;
+  let needed = 0n;
+  try {
+    needed = BigInt(amountWei || '0');
+  } catch {
+    return false;
+  }
+  if (needed <= 0n) return false;
+  const { signer } = await requireInternalSigner();
+  const token = new Contract(tokenAddress, DEMO_TOKEN_ABI, signer);
+  const balance = (await token.balanceOf(to)) as bigint;
+  if (balance >= needed) return false;
+  const tx = await token.mint(to, needed - balance);
+  await tx.wait();
+  return true;
+}
+
 async function prepareDemoCreditOnChain() {
   if (!isDemoAccount()) return;
   const { signer } = await requireInternalSigner();
@@ -420,6 +439,7 @@ export const QuatriviumCreditService = {
   prepareDemoCredit: prepareDemoCreditOnChain,
 
   topUpDemoUsdtToDebt,
+  mintDemoUsdtTo,
 
   declararKyc: async () => {
     const { signer } = await requireInternalSigner();
@@ -595,6 +615,15 @@ export const QuatriviumCreditService = {
   pausarContrato: async () => {
     const { signer } = await requireSigner();
     const tx = await contractWith(signer).pausarContrato();
+    return tx.wait();
+  },
+
+  despausarContrato: async () => proposeAdmin('despausarContrato', []),
+
+  cancelAdminAction: async (id: number) => {
+    assertProposalId(id);
+    const { signer } = await requireSigner();
+    const tx = await contractWith(signer).cancelAdminAction(id);
     return tx.wait();
   },
 

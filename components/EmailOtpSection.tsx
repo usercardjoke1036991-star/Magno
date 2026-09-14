@@ -116,7 +116,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
             onPress={() => void requestCode()}
             style={[styles.button, { backgroundColor: colors.connect }, (busy || !emailOk) && { backgroundColor: colors.chip }]}
           >
-            {busy && !sent ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{sent ? t('emailResend') : t('emailSend')}</AppText>}
+            {busy && !sent ? <ActivityIndicator color="#111" /> : <AppText style={styles.buttonText}>{sent ? t('emailResend') : t('emailSend')}</AppText>}
           </TouchableOpacity>
           {sent ? (
             <>
@@ -135,7 +135,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
                 onPress={() => void confirmCode()}
                 style={[styles.button, { backgroundColor: colors.connect }]}
               >
-                {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>}
+                {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>}
               </TouchableOpacity>
             </>
           ) : null}
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

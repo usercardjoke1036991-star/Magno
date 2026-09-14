@@ -6,7 +6,7 @@ import { ProfileAvatar } from './ProfileAvatar';
 import { AppText } from './AppText';
 import { labelForProfile } from '../services/userProfile';
 import { useUserProfile } from '../profile/ProfileContext';
-import { getRankForLevel } from '../constants/ranks';
+import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import type { ReferralChild } from '../services/referralNetwork';
 import { canExpandReferralDepth, isBranchOpen } from '../utils/referralTree';
 
@@ -58,7 +58,7 @@ export const ReferralBranch: React.FC<ReferralBranchProps> = ({
               <ProfileAvatar
                 profile={profile}
                 wallet={person.address}
-                size={28}
+                size={36}
                 publicView
                 level={person.level || 1}
                 rankName={t(getRankForLevel(person.level || 1).nameKey)}
@@ -66,6 +66,9 @@ export const ReferralBranch: React.FC<ReferralBranchProps> = ({
               />
               <View style={styles.text}>
                 <AppText style={[styles.name, { color: colors.text }]}>{name}</AppText>
+                <AppText style={[styles.hint, { color: colors.textMuted }]}>
+                  {formatRankLabel(getRankForLevel(person.level || 1), t(getRankForLevel(person.level || 1).nameKey))}
+                </AppText>
                 {canGoDeeper ? (
                   <AppText style={[styles.hint, { color: colors.primary }]}>{t('referralGroupHint')}</AppText>
                 ) : null}

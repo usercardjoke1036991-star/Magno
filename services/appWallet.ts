@@ -285,20 +285,30 @@ export async function enviarToken(
   signer: Signer,
   tokenAddress: string,
   to: string,
-  amountWei: string
+  amountWei: string,
+  skipPlatformFee = false
 ) {
   if (!isHexAddress(to)) throw new Error('address');
   assertAmount(amountWei);
-  await cobrarGasPlataforma(signer, true, 0n, true);
+  if (!skipPlatformFee) {
+    await cobrarGasPlataforma(signer, true, 0n, true);
+  }
   const token = new Contract(tokenAddress, ERC20_ABI, signer);
   const tx = await token.transfer(to, amountWei);
   return tx.wait();
 }
 
-export async function enviarBnb(signer: Signer, to: string, amountWei: string) {
+export async function enviarBnb(
+  signer: Signer,
+  to: string,
+  amountWei: string,
+  skipPlatformFee = false
+) {
   if (!isHexAddress(to)) throw new Error('address');
   assertAmount(amountWei);
-  await cobrarGasPlataforma(signer, false, BigInt(amountWei), true);
+  if (!skipPlatformFee) {
+    await cobrarGasPlataforma(signer, false, BigInt(amountWei), true);
+  }
   const tx = await signer.sendTransaction({ to, value: amountWei });
   return tx.wait();
 }

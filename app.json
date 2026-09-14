@@ -43,7 +43,8 @@
         "USE_FINGERPRINT",
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
-        "READ_MEDIA_IMAGES"
+        "READ_MEDIA_IMAGES",
+        "CAMERA"
       ],
       "intentFilters": [
         {
@@ -92,8 +93,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Quatrivium Finance usa su foto para el perfil de referidos.",
-          "cameraPermission": false,
+          "photosPermission": "Quatrivium Finance usa sus fotos para el perfil y el documento de identidad.",
+          "cameraPermission": "Quatrivium Finance usa la cámara para escanear su documento.",
           "microphonePermission": false
         }
       ],
@@ -111,7 +112,8 @@
         }
       ],
       "expo-updates",
-      "expo-font"
+      "expo-font",
+      "expo-screen-capture"
     ],
     "platforms": [
       "ios",

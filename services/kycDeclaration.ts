@@ -1,4 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { File, Paths } from 'expo-file-system';
 import { keccak256, toUtf8Bytes } from 'ethers';
 import { stripUnsafeText } from '../utils/sanitize';
 
@@ -21,6 +23,7 @@ export interface KycDeclaration {
 export type KycIdentitySnapshot = Pick<KycDeclaration, 'legalName' | 'country' | 'city' | 'docType'>;
 
 const PREFIX = 'quatrivium.kyc.';
+const PHOTO_KEY = 'quatrivium.kyc.photo.v1:';
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 function walletKey(wallet: string): string {
@@ -159,4 +162,62 @@ export async function clearKycDeclaration(wallet: string): Promise<void> {
   } catch {
     // ignore
   }
+  try {
+    await AsyncStorage.removeItem(PHOTO_KEY + walletKey(wallet));
+  } catch {
+    // ignore
+  }
+}
+
+export async function loadKycDocPhoto(wallet: string): Promise<string> {
+  if (!wallet) return '';
+  try {
+    return String((await AsyncStorage.getItem(PHOTO_KEY + walletKey(wallet))) || '').trim();
+  } catch {
+    return '';
+  }
+}
+
+export async function persistKycDocPhoto(
+  wallet: string,
+  asset: { uri?: string; mimeType?: string | null; base64?: string | null }
+): Promise<string> {
+  if (!wallet) return '';
+  const mime = asset.mimeType && /^image\/(jpeg|jpg|png|webp)$/i.test(asset.mimeType)
+    ? asset.mimeType
+    : 'image/jpeg';
+  const ext = mime.includes('png') ? 'png' : 'jpg';
+  const name = `quatrivium-kyc-${walletKey(wallet).slice(2, 10)}.${ext}`;
+  let uri = '';
+  try {
+    if (Paths.document) {
+      try {
+        for (const item of Paths.document.list()) {
+          if (item instanceof File && item.name.startsWith('quatrivium-kyc-')) {
+            item.delete();
+          }
+        }
+      } catch {
+        // Se escribe igual la foto nueva.
+      }
+      const dest = new File(Paths.document, name);
+      if (asset.base64) {
+        dest.create();
+        dest.write(asset.base64, { encoding: 'base64' });
+        uri = dest.uri || '';
+      } else if (asset.uri) {
+        new File(asset.uri).copy(dest);
+        uri = dest.uri || asset.uri;
+      }
+    }
+  } catch {
+    uri = String(asset.uri || '').trim();
+  }
+  if (!uri && asset.base64) {
+    uri = `data:${mime};base64,${asset.base64}`;
+  }
+  if (uri) {
+    await AsyncStorage.setItem(PHOTO_KEY + walletKey(wallet), uri);
+  }
+  return uri;
 }

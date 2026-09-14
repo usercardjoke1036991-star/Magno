@@ -1,8 +1,18 @@
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { clampLoanLevel, formatRankLabel, getRankForLevel, RANK_LADDER } from '../constants/ranks';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  clampLoanLevel,
+  FAMILY_BANDS,
+  formatRankLabel,
+  getRankForLevel,
+  rankGalleryRow,
+  romanDivision,
+  type RankFamily,
+} from '../constants/ranks';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { AnonymousFace } from './ProfileAvatar';
+import { RankFrame } from './RankFrame';
 import { RankMedal } from './RankMedal';
 import { AppText } from './AppText';
 
@@ -13,40 +23,61 @@ interface RankLadderProps {
 export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const current = clampLoanLevel(userLevel || 1);
-  const currentFamily = getRankForLevel(current).family;
+  const current = getRankForLevel(clampLoanLevel(userLevel || 1));
+  const [family, setFamily] = useState<RankFamily>(current.family);
+  const row = useMemo(() => rankGalleryRow(family), [family]);
 
   return (
     <View style={styles.wrap}>
-      <AppText style={[styles.title, { color: colors.text }]}>{t('rankLadderTitle')}</AppText>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-        {RANK_LADDER.map((rank) => {
-          const reached = rank.level <= current;
-          const active = rank.family === currentFamily;
-          const label = formatRankLabel(rank, t(rank.nameKey));
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+        {FAMILY_BANDS.map((band) => {
+          const sample = getRankForLevel(band.from);
+          const active = band.family === family;
+          const reached = band.from <= current.level;
           return (
-            <View
-              key={rank.level}
+            <TouchableOpacity
+              key={band.family}
+              onPress={() => setFamily(band.family)}
               style={[
-                styles.item,
-                { borderColor: 'transparent' },
-                active && { borderColor: rank.metal, backgroundColor: colors.surface },
+                styles.chip,
+                { borderColor: active ? sample.metal : colors.border, backgroundColor: colors.surface },
               ]}
+              accessibilityRole="button"
+              accessibilityLabel={t(sample.nameKey)}
             >
-              <RankMedal level={rank.level} rank={rank} size={36} dimmed={!reached} />
+              <RankMedal level={band.from} rank={sample} size={28} dimmed={!reached} />
               <AppText
-                style={[
-                  styles.caption,
-                  { color: reached ? rank.text : colors.textMuted },
-                ]}
+                style={[styles.chipText, { color: reached ? sample.text : colors.textMuted }]}
                 numberOfLines={1}
               >
-                {label}
+                {t(sample.nameKey)}
               </AppText>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>
+      <View style={styles.stage}>
+        {row.map((rank) => {
+          const reached = rank.level <= current.level;
+          const mine = rank.family === current.family && rank.division === current.division;
+          const caption = formatRankLabel(rank, t(rank.nameKey));
+          return (
+            <View
+              key={`${rank.family}-${rank.division}`}
+              style={[
+                styles.card,
+                { borderColor: mine ? rank.metal : colors.border, backgroundColor: colors.surface },
+                !reached && styles.dim,
+              ]}
+            >
+              <RankFrame level={rank.level} size={42} label={caption} showLabel>
+                <AnonymousFace size={42} square />
+              </RankFrame>
+              <AppText style={[styles.roman, { color: rank.text }]}>{romanDivision(rank.division)}</AppText>
+            </View>
+          );
+        })}
+      </View>
     </View>
   );
 };
@@ -54,29 +85,49 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
 const styles = StyleSheet.create({
   wrap: {
     paddingVertical: 4,
+    gap: 10,
   },
-  title: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginBottom: 8,
-    paddingHorizontal: 0,
+  chips: {
+    gap: 8,
+    paddingVertical: 2,
   },
-  row: {
-    paddingHorizontal: 2,
-    gap: 6,
-  },
-  item: {
-    width: 78,
+  chip: {
+    width: 72,
     alignItems: 'center',
-    borderRadius: 10,
-    paddingVertical: 6,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    gap: 4,
   },
-  caption: {
-    marginTop: 4,
+  chipText: {
     fontSize: 10,
-    fontWeight: '500',
+    fontWeight: '600',
     textAlign: 'center',
+  },
+  stage: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  card: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    overflow: 'visible',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 2,
+    minHeight: 188,
+  },
+  dim: {
+    opacity: 0.46,
+  },
+  roman: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '800',
   },
 });

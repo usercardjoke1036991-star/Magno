@@ -40,75 +40,75 @@ export interface RankStyle {
   division: 0 | 1 | 2;
 }
 
-/** Color mineral real de cada metal o piedra. Ningún tono se reutiliza. */
+/** Color mineral real de cada gema del catálogo. Ningún tono se reutiliza. */
 const FAMILY_STYLE: Record<RankFamily, Omit<RankStyle, 'level' | 'division'>> = {
   bronze: {
     family: 'bronze',
     nameKey: 'rankBronze',
-    metal: '#B87333',
-    dark: '#6B3A18',
-    light: '#E6B17A',
-    tint: '#F6E4D0',
-    text: '#5A2E12',
+    metal: '#9B1B30',
+    dark: '#4A0A12',
+    light: '#E85A6C',
+    tint: '#FAD6DA',
+    text: '#4A0A12',
   },
   silver: {
     family: 'silver',
     nameKey: 'rankSilver',
-    metal: '#A8B2BC',
-    dark: '#4A545C',
-    light: '#F3F5F7',
-    tint: '#EEF1F4',
-    text: '#3A4248',
+    metal: '#3DB7E0',
+    dark: '#0A4A68',
+    light: '#A8E8F8',
+    tint: '#DFF6FC',
+    text: '#0A3A50',
   },
   gold: {
     family: 'gold',
     nameKey: 'rankGold',
-    metal: '#D4AF37',
-    dark: '#7A5E10',
-    light: '#F6E392',
-    tint: '#FFF6D6',
-    text: '#5C4708',
+    metal: '#E8B923',
+    dark: '#8A5A00',
+    light: '#FFE08A',
+    tint: '#FFF4CC',
+    text: '#6B4500',
   },
   amber: {
     family: 'amber',
     nameKey: 'rankAmber',
-    metal: '#FF8C1A',
-    dark: '#9A4300',
-    light: '#FFD08A',
-    tint: '#FFE8C8',
-    text: '#7A3400',
+    metal: '#2EA8DC',
+    dark: '#0A4A70',
+    light: '#8FD4F5',
+    tint: '#D6F0FB',
+    text: '#083A58',
   },
   pearl: {
     family: 'pearl',
     nameKey: 'rankPearl',
-    metal: '#EDD5C8',
-    dark: '#8E6B5C',
-    light: '#FFF8F4',
-    tint: '#FBF3EE',
-    text: '#5C4338',
+    metal: '#2EC4B6',
+    dark: '#0A5A52',
+    light: '#8EEDE4',
+    tint: '#D4F7F4',
+    text: '#084840',
   },
   jade: {
     family: 'jade',
     nameKey: 'rankJade',
-    metal: '#5C9A5F',
-    dark: '#2A4F2C',
-    light: '#C5E0C4',
-    tint: '#E6F2E5',
-    text: '#1E3A20',
+    metal: '#A8C832',
+    dark: '#4A6210',
+    light: '#D4EC7A',
+    tint: '#F0F8D0',
+    text: '#3A4E0C',
   },
   emerald: {
     family: 'emerald',
     nameKey: 'rankEmerald',
-    metal: '#028A52',
+    metal: '#00A86B',
     dark: '#013D24',
-    light: '#6FCF97',
+    light: '#5EE0A0',
     tint: '#D4F3E4',
     text: '#012816',
   },
   sapphire: {
     family: 'sapphire',
     nameKey: 'rankSapphire',
-    metal: '#0F52BA',
+    metal: '#1E5AFF',
     dark: '#0A2A6E',
     light: '#8BB4FF',
     tint: '#DCE8FF',
@@ -117,20 +117,20 @@ const FAMILY_STYLE: Record<RankFamily, Omit<RankStyle, 'level' | 'division'>> = 
   ruby: {
     family: 'ruby',
     nameKey: 'rankRuby',
-    metal: '#9B111E',
-    dark: '#4A0810',
-    light: '#F07180',
+    metal: '#E0113A',
+    dark: '#6B0018',
+    light: '#FF6B86',
     tint: '#FAD6DA',
-    text: '#3D0610',
+    text: '#5A0014',
   },
   platinum: {
     family: 'platinum',
     nameKey: 'rankPlatinum',
-    metal: '#E5E4E2',
-    dark: '#6A6966',
-    light: '#FAFAF8',
-    tint: '#F4F3F0',
-    text: '#3F3E3C',
+    metal: '#C8C8C6',
+    dark: '#2A2A2A',
+    light: '#F2F2F0',
+    tint: '#EDEDEB',
+    text: '#1A1A1A',
   },
   diamond: {
     family: 'diamond',
@@ -144,7 +144,7 @@ const FAMILY_STYLE: Record<RankFamily, Omit<RankStyle, 'level' | 'division'>> = 
   master: {
     family: 'master',
     nameKey: 'rankMaster',
-    metal: '#9966CC',
+    metal: '#9B4EC8',
     dark: '#4A1F7A',
     light: '#E0C8F5',
     tint: '#F3E8FF',
@@ -152,7 +152,7 @@ const FAMILY_STYLE: Record<RankFamily, Omit<RankStyle, 'level' | 'division'>> = 
   },
 };
 
-const FAMILY_BANDS: Array<{ family: RankFamily; from: number; to: number }> = [
+export const FAMILY_BANDS: Array<{ family: RankFamily; from: number; to: number }> = [
   { family: 'bronze', from: 1, to: 83 },
   { family: 'silver', from: 84, to: 166 },
   { family: 'gold', from: 167, to: 249 },
@@ -167,27 +167,81 @@ const FAMILY_BANDS: Array<{ family: RankFamily; from: number; to: number }> = [
   { family: 'master', from: 914, to: 1000 },
 ];
 
-/** Convierte el emblema a escala de gris y lo pinta con el color mineral, sin aplastar el relieve. */
+function parseRgb(hex: string): { r: number; g: number; b: number } | null {
+  const raw = hex.replace('#', '');
+  if (raw.length < 6) return null;
+  const r = Number.parseInt(raw.slice(0, 2), 16);
+  const g = Number.parseInt(raw.slice(2, 4), 16);
+  const b = Number.parseInt(raw.slice(4, 6), 16);
+  if (![r, g, b].every((value) => Number.isFinite(value))) return null;
+  return { r, g, b };
+}
+
+function toHex(r: number, g: number, b: number): string {
+  const byte = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+  return `#${byte(r)}${byte(g)}${byte(b)}`;
+}
+
+function mixHex(a: string, b: string, t: number): string {
+  const left = parseRgb(a);
+  const right = parseRgb(b);
+  if (!left || !right) return a;
+  const k = Math.max(0, Math.min(1, t));
+  return toHex(
+    left.r + (right.r - left.r) * k,
+    left.g + (right.g - left.g) * k,
+    left.b + (right.b - left.b) * k,
+  );
+}
+
+/** Sube el croma para que el metal se vea nítido, no grisáceo. */
+export function saturateHex(hex: string, factor = 1.4): string {
+  const rgb = parseRgb(hex);
+  if (!rgb) return hex;
+  const avg = (rgb.r + rgb.g + rgb.b) / 3;
+  return toHex(
+    avg + (rgb.r - avg) * factor,
+    avg + (rgb.g - avg) * factor,
+    avg + (rgb.b - avg) * factor,
+  );
+}
+
+/** Pinta el emblema con el mineral y conserva el relieve (luma, no suma 3x). */
 export function colorizeTextureFilters(hex: string): Array<{
   name: 'feColorMatrix';
-  type: 'saturate' | 'matrix';
+  type: 'matrix';
   values: string;
 }> {
-  const raw = hex.replace('#', '');
-  if (raw.length < 6) return [];
-  const r = Number.parseInt(raw.slice(0, 2), 16) / 255;
-  const g = Number.parseInt(raw.slice(2, 4), 16) / 255;
-  const b = Number.parseInt(raw.slice(4, 6), 16) / 255;
-  if (![r, g, b].every((value) => Number.isFinite(value))) return [];
+  const rgb = parseRgb(saturateHex(hex, 1.72));
+  if (!rgb) return [];
+  const r = rgb.r / 255;
+  const g = rgb.g / 255;
+  const b = rgb.b / 255;
+  const lift = 0.14;
   return [
-    { name: 'feColorMatrix', type: 'saturate', values: '0' },
     {
       name: 'feColorMatrix',
       type: 'matrix',
-      values: `${r} ${r} ${r} 0 0 ${g} ${g} ${g} 0 0 ${b} ${b} ${b} 0 0 0 0 0 1 0`,
+      values: `${0.2126 * r} ${0.7152 * r} ${0.0722 * r} 0 ${lift * r} ${0.2126 * g} ${0.7152 * g} ${0.0722 * g} 0 ${lift * g} ${0.2126 * b} ${0.7152 * b} ${0.0722 * b} 0 ${lift * b} 0 0 0 1 0`,
     },
   ];
 }
+
+/** Foto real de la gema incrustada, según el catálogo de piedras. */
+export const RANK_GEM_ASSET: Record<RankFamily, 'garnet' | 'aquamarine' | 'citrine' | 'topaz' | 'tourmaline' | 'peridot' | 'emerald' | 'sapphire' | 'ruby' | 'onyx' | 'diamond' | 'amethyst'> = {
+  bronze: 'garnet',
+  silver: 'aquamarine',
+  gold: 'citrine',
+  amber: 'topaz',
+  pearl: 'tourmaline',
+  jade: 'peridot',
+  emerald: 'emerald',
+  sapphire: 'sapphire',
+  ruby: 'ruby',
+  platinum: 'onyx',
+  diamond: 'diamond',
+  master: 'amethyst',
+};
 
 /** Textura 3D original del emblema. El color del rango lo da el tinte mineral + la piedra. */
 export const RANK_MEDAL_ASSET: Record<RankFamily, 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10> = {
@@ -212,21 +266,52 @@ export function clampLoanLevel(level: number): number {
 export function getRankForLevel(level: number): RankStyle {
   const clamped = clampLoanLevel(level);
   const band = FAMILY_BANDS.find((item) => clamped >= item.from && clamped <= item.to) || FAMILY_BANDS[0];
+  const span = band.to - band.from + 1;
+  const third = Math.max(1, Math.floor(span / 3));
+  const offset = clamped - band.from;
+  const division: RankStyle['division'] = offset >= third * 2 ? 2 : offset >= third ? 1 : 0;
   return {
     ...FAMILY_STYLE[band.family],
     level: clamped,
-    division: 0,
+    division,
   };
 }
 
+export function rankFamilyIndex(family: RankFamily): number {
+  const index = FAMILY_BANDS.findIndex((item) => item.family === family);
+  return index < 0 ? 0 : index;
+}
+
 export function romanDivision(division: RankStyle['division']): string {
-  if (division === 1) return 'I';
-  if (division === 2) return 'II';
-  return '';
+  if (division === 2) return 'III';
+  if (division === 1) return 'II';
+  return 'I';
+}
+
+/** I, II y III en el color vivo de la piedra. Nunca se mezcla con el tono oscuro. */
+export function rankDivisionTint(rank: RankStyle): string {
+  const paint = saturateHex(mixHex(rank.metal, rank.light, 0.22), 1.58);
+  if (rank.division >= 2) return saturateHex(mixHex(rank.metal, rank.light, 0.5), 1.62);
+  if (rank.division >= 1) return saturateHex(mixHex(rank.metal, rank.light, 0.34), 1.6);
+  return paint;
 }
 
 export function formatRankLabel(rank: RankStyle, name: string): string {
-  return `${name} ${rank.level}`;
+  return `${name} ${romanDivision(rank.division)} · ${rank.level}`;
 }
 
 export const RANK_LADDER = FAMILY_BANDS.map((band) => getRankForLevel(band.from));
+
+/** I, II y III de cada piedra, para la vitrina de marcos. */
+export function rankGalleryRow(family: RankFamily): RankStyle[] {
+  const band = FAMILY_BANDS.find((item) => item.family === family) || FAMILY_BANDS[0];
+  const span = band.to - band.from + 1;
+  const third = Math.max(1, Math.floor(span / 3));
+  return [
+    getRankForLevel(band.from),
+    getRankForLevel(Math.min(band.to, band.from + third)),
+    getRankForLevel(Math.min(band.to, band.from + third * 2)),
+  ];
+}
+
+export const RANK_GALLERY = FAMILY_BANDS.map((band) => rankGalleryRow(band.family));

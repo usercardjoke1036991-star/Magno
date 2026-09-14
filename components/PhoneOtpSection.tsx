@@ -98,9 +98,6 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   return (
     <View>
       <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('otpLead')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>
-        {t('otpWorldNote')}
-      </AppText>
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
@@ -139,7 +136,7 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
             ]}
           >
             {busy && !sent ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#111" />
             ) : (
               <AppText style={styles.buttonText}>{sent ? t('otpResend') : t('otpSend')}</AppText>
             )}
@@ -167,7 +164,7 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
                 ]}
               >
                 {busy && sent ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color="#111" />
                 ) : (
                   <AppText style={styles.buttonText}>{paused ? t('actionPaused') : t('otpConfirm')}</AppText>
                 )}
@@ -218,7 +215,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

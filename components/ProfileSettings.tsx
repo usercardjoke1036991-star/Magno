@@ -109,7 +109,6 @@ export const ProfileSettings: React.FC = () => {
               {t('level')} {level}/{displayMaxLoanLevel(cachedProtocolCaps().maxLevel)} · {t(getRankForLevel(level).nameKey)}
             </AppText>
           ) : null}
-          <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('rankFrameHint')}</AppText>
         </View>
       </View>
 
@@ -148,7 +147,7 @@ export const ProfileSettings: React.FC = () => {
         onPress={() => void handleSave()}
         disabled={saving || (Boolean(username) && !draft.publicFace && draft.avatarId < 0)}
       >
-        <AppIcon name="save" size={16} color="#fff" />
+        <AppIcon name="save" size={16} color="#111" />
         <AppText style={styles.saveText}>{t('profileSave')}</AppText>
       </TouchableOpacity>
     </View>
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   saveText: {
-    color: '#fff',
+    color: '#111',
     fontWeight: '800',
     fontSize: 15,
   },

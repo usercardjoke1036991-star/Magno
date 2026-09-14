@@ -2,7 +2,6 @@ import { notifyApiBases } from '../constants/appLinks';
 import { isHttpsUrl } from '../utils/sanitize';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { loadAppWallet } from './appWallet';
-import { getBoundWallet, getDeviceHash } from './deviceBinding';
 import { signedAuthBody } from './walletAuth';
 
 function isLocalNotify(base: string): boolean {
@@ -39,9 +38,13 @@ async function postSession(path: string, body: Record<string, unknown>): Promise
 /** true = este aparato. false = otro aparato. null = no se pudo comprobar. */
 export async function thisDeviceOwnsSession(): Promise<boolean | null> {
   try {
-    const [wallet, deviceHash] = await Promise.all([getBoundWallet(), getDeviceHash()]);
-    if (!wallet || !deviceHash) return null;
-    const response = await postSession('/session/check', { wallet, deviceHash });
+    const signer = await loadAppWallet();
+    if (!signer) return null;
+    const wallet = (await signer.getAddress()).toLowerCase();
+    const response = await postSession(
+      '/session/check',
+      await signedAuthBody(signer, wallet, 'session')
+    );
     if (!response) return null;
     const data = await readJsonLimited<{ owner?: boolean }>(response);
     if (typeof data.owner !== 'boolean') return null;

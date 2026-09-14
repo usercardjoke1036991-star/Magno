@@ -12,7 +12,7 @@ import { AppIcon } from './icons';
 import { ProfileAvatar } from './ProfileAvatar';
 import { useUserProfile } from '../profile/ProfileContext';
 import { labelForProfile } from '../services/userProfile';
-import { getRankForLevel } from '../constants/ranks';
+import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { AppText, AppTextInput } from './AppText';
 
 interface ReferralHistoryProps {
@@ -243,9 +243,13 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
                       publicView
                       level={node.level || 1}
                       rankName={t(getRankForLevel(node.level || 1).nameKey)}
+                      showRankLabel
                     />
                     <View style={styles.personText}>
                       <AppText style={[styles.name, { color: colors.text }]}>{name}</AppText>
+                      <AppText style={[styles.meta, { color: colors.textMuted }]}>
+                        {formatRankLabel(getRankForLevel(node.level || 1), t(getRankForLevel(node.level || 1).nameKey))}
+                      </AppText>
                       {name !== node.code ? (
                         <AppText style={[styles.code, { color: colors.textMuted }]}>{node.code}</AppText>
                       ) : null}
@@ -319,7 +323,7 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
                         { borderColor: colors.border, backgroundColor: item === safePage ? colors.primary : colors.surface },
                       ]}
                     >
-                      <AppText style={[styles.pageChipText, { color: item === safePage ? '#fff' : colors.text }]}>
+                      <AppText style={[styles.pageChipText, { color: item === safePage ? colors.onPrimary : colors.text }]}>
                         {String(item)}
                       </AppText>
                     </TouchableOpacity>

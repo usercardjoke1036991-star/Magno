@@ -82,6 +82,25 @@ for (const folder of appSources) {
   }
 }
 
+const savedSessionPath = resolve(root, 'services/savedSession.ts');
+if (existsSync(savedSessionPath)) {
+  const savedSession = readFileSync(savedSessionPath, 'utf8');
+  if (savedSession.includes('AsyncStorage.setItem(WRAP_FALLBACK')) {
+    failures.push('La wrap de sesión no debe guardarse en AsyncStorage');
+  }
+}
+
+const exclusivePath = resolve(root, 'services/exclusiveSession.ts');
+if (existsSync(exclusivePath)) {
+  const exclusive = readFileSync(exclusivePath, 'utf8');
+  if (!exclusive.includes("signedAuthBody(signer, wallet, 'session')")) {
+    failures.push('/session/check y /session/claim deben firmarse con EIP-712');
+  }
+  if (/postSession\(\s*'\/session\/check'\s*,\s*\{\s*wallet/.test(exclusive)) {
+    failures.push('/session/check no puede ir sin firma');
+  }
+}
+
 if (failures.length) {
   console.error('security:check FALLÓ\n' + failures.join('\n'));
   process.exit(1);

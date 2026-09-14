@@ -128,7 +128,7 @@ export const AuthenticatorSetup: React.FC<{
           style={[styles.button, { backgroundColor: colors.connect }]}
         >
           {busy ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#111" />
           ) : (
             <AppText style={styles.buttonText}>{secret ? t('settingsSave') : t('authenticatorActivate')}</AppText>
           )}
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

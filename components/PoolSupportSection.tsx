@@ -23,6 +23,7 @@ interface PoolSupportSectionProps {
   poolBalance: string;
   poolOutstanding?: string;
   poolCash?: string;
+  lpBalance?: string;
   walletConnected: boolean;
   paused?: boolean;
   onDepositPool: (amount: string) => void;
@@ -35,6 +36,7 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
   poolBalance,
   poolOutstanding,
   poolCash,
+  lpBalance,
   walletConnected,
   paused = false,
   onDepositPool,
@@ -43,27 +45,40 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
   const { t } = useI18n();
   const parsedDeposit = parsePositiveDecimal(depositAmount);
   const fameGain = parsedDeposit ? fameFromPoolUsd(Number(parsedDeposit)) : 0;
-  // Sin retiro ni posición LP: el aporte queda en el contrato para prestar.
   const { colors } = useTheme();
   const { mode } = useAppMode();
   const allowDeposit = mode !== 'demo';
   const contractReady = isContractConfigured();
   const blocked = isLoading || !walletConnected || paused || !contractReady;
+  const lpValue = Number.parseFloat(lpBalance || '0');
+  const showNav = contractReady;
 
   return (
     <View style={styles.stack}>
-      <AppSubsection title={t('subsectionPoolInfo')} defaultOpen={false} icon="info">
+      <AppSubsection title={t('subsectionPoolInfo')} defaultOpen={!allowDeposit || !contractReady} icon="info">
         <AppText style={[styles.lead, { color: colors.text }]}>{t('poolPublicLead')}</AppText>
         <AppText style={[styles.locked, { color: colors.textMuted }]}>{t('supportPoolBenefit')}</AppText>
-        <AppText style={[styles.destination, { color: colors.textMuted, backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {t('poolDestination', { amount: `${poolBalance} ${tokenSymbol}` })}
-        </AppText>
-        {poolCash && poolOutstanding ? (
+        <AppText style={[styles.locked, { color: colors.textMuted }]}>{t('poolLockedNote')}</AppText>
+        {!allowDeposit ? (
+          <AppText style={[styles.warn, { color: colors.warnText }]}>{t('poolRealOnly')}</AppText>
+        ) : null}
+        {showNav ? (
+          <AppText style={[styles.destination, { color: colors.textMuted, backgroundColor: colors.surface, borderColor: colors.border }]}>
+            {t('poolDestination', { amount: `${poolBalance} ${tokenSymbol}` })}
+          </AppText>
+        ) : !contractReady ? (
+          <AppText style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
+        ) : null}
+        {showNav && poolCash && poolOutstanding ? (
           <AppText style={[styles.locked, { color: colors.textMuted }]}>
             {t('poolNavExplain', { cash: `${poolCash} ${tokenSymbol}`, loans: `${poolOutstanding} ${tokenSymbol}` })}
           </AppText>
         ) : null}
-        <AppText style={[styles.locked, { color: colors.textMuted }]}>{t('poolLockedNote')}</AppText>
+        {showNav && lpValue > 0 ? (
+          <AppText style={[styles.locked, { color: colors.primary }]}>
+            {t('yourLpPosition')}: {lpBalance} {tokenSymbol}
+          </AppText>
+        ) : null}
         {contractReady ? (
           <>
             <AppText style={[styles.label, { color: colors.primary }]}>{t('poolContractLabel')}</AppText>
@@ -74,10 +89,12 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
         ) : null}
       </AppSubsection>
       {allowDeposit ? (
-        <AppSubsection title={t('subsectionPoolDeposit')} defaultOpen icon="deposit">
-          {!contractReady && (
+        <AppSubsection title={t('subsectionPoolDeposit')} defaultOpen={contractReady} icon="deposit">
+          {!contractReady ? (
             <AppText style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
-          )}
+          ) : (
+            <>
+          <AppText style={[styles.locked, { color: colors.textMuted }]}>{t('externalPaysLead')}</AppText>
           {!walletConnected && <AppText style={[styles.warn, { color: colors.warnText }]}>{t('connectFirst')}</AppText>}
           {!tokenSupported && walletConnected && (
             <AppText style={[styles.warn, { color: colors.warnText }]}>{t('tokenNotEnabled')}</AppText>
@@ -110,14 +127,16 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
             style={[styles.button, { backgroundColor: colors.primary }, blocked && { backgroundColor: colors.chip }]}
           >
             {isLoading ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color="#111" size="small" />
             ) : (
               <View style={styles.buttonRow}>
-                <AppIcon name="deposit" size={18} color="#fff" />
+                <AppIcon name="deposit" size={18} color="#111" />
                 <AppText style={styles.buttonText}>{t('depositPool')}</AppText>
               </View>
             )}
           </TouchableOpacity>
+            </>
+          )}
         </AppSubsection>
       ) : null}
     </View>
@@ -184,7 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#9e9e9e',
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

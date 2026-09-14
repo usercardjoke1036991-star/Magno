@@ -42,7 +42,7 @@ export const RankMedal: React.FC<RankMedalProps> = ({
 }) => {
   const style = rank || getRankForLevel(level);
   const sculpt = RANK_MEDAL_ASSET[style.family];
-  const gem = Math.max(10, Math.round(size * 0.36));
+  const gem = Math.max(14, Math.round(size * 0.52));
   return (
     <View style={[styles.wrap, { opacity: dimmed ? 0.38 : 1 }]}>
       <View style={{ width: size, height: size }}>

@@ -45,3 +45,8 @@ export async function skipLinkedExternalWallet(internalWallet: string): Promise<
   await AsyncStorage.setItem(linkedWalletStorageKey(internalWallet), WALLET_LINK_SKIPPED);
   return WALLET_LINK_SKIPPED;
 }
+
+export async function loadRequiredExternalWallet(internalWallet: string): Promise<string> {
+  const stored = await loadLinkedExternalWallet(internalWallet);
+  return hasLinkedExternalWallet(stored) ? stored : '';
+}

@@ -23,7 +23,8 @@ Magno/
 ├── metro.config.js                # Metro + stub snarkjs
 ├── hardhat.config.cjs             # Hardhat: tests y deploy Solidity
 ├── zkService.ts                   # Reexport ZK experimental (stub Metro)
-├── components/ (43 archivos)      # UI: WalletSection, LoanTierCard, AdminPanel, SecuritySettings…
+├── web3Config.tsx                 # AppKit / WalletConnect (BSC Demo y Real)
+├── components/ (61 archivos)      # UI: WalletSection, LoanTierCard, AdminPanel, SecuritySettings…
 ├── hooks/                         # useWeb3Balances, useWeb3Transactions, useHomeHandlers
 ├── services/                      # quatriviumCreditService, appWallet, deviceBinding, kycDeclaration…
 ├── contracts/
@@ -52,7 +53,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 873 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 949 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -62,8 +63,8 @@ Magno/
 - **Pool no redimible**: `retirarLiquidez` hace `revert("pool locked")` — el capital queda para prestar
 - **`tx.origin == msg.sender`**: bloquea contratos intermediarios en registro, préstamo, pago, depósito, liquidación y destrucción
 - **Timelock de 72h + 2-de-3** para todas las acciones admin (excepto pausa, que es inmediata). Si una llave se pierde o la hackean, las otras 2 la echan.
-- **Wallet interna (app wallet)**: cada instalación genera una wallet HD (frase de 24 palabras BIP-39) cifrada en SecureStore. Recuperar aún acepta 12 palabras de cuentas antiguas.
-- **Identidad KYC inmutable**: nombre legal y tipo de documento se congelan en el primer submit on-chain; ciudad/región siguen editables
+- **Wallet interna (app wallet)**: cada instalación genera una wallet HD (frase de 24 palabras BIP-39) cifrada en SecureStore. Recuperar aún acepta 12 palabras de cuentas antiguas. Pedir y pagar préstamos y guardar el saldo viven en esa cuenta. Depositar, retirar, donar, aportar al pool y el 1 USDT de acceso se pagan con una billetera externa vinculada (WalletConnect); el USDT pasa a la interna y luego el contrato ve `msg.sender` = interna. Saltarse el vínculo en el alta no basta para mover fondos. La contraseña no se edita en Ajustes: se pide al desbloquear y para ver la frase. **La frase no se reemplaza**: es la llave de esa billetera; en otro teléfono se recupera con las mismas palabras.
+- **Identidad KYC inmutable**: nombre legal y tipo de documento se congelan en el primer submit on-chain; ciudad/región siguen editables. Verificar KYC permite escanear el documento con la cámara (foto local, sin OCR ni envío a la red). El contrato solo ve `declararKyc()`.
 - **Cerrar cuenta exige deuda = 0 y !esMoroso**: el contrato y la UI bloquean a morosos
 - **ZK es experimental**: `snarkjs` hace stub en Metro; el registro real es `registrarHumanoConPadre()`
 - **Entornos separados en `eas.json`**: development/preview→chain 97, production→chain 56
@@ -97,7 +98,7 @@ Reglas:
 
 `requiredCount` (la velocidad de llegada marca la de pago): L1 → 3; L2–9 → 5; desde **$100 (L10)** cada nivel pide **5 más** (5, 10, 15…; L100 = 455; L999 = 4950). L1000 no sube.
 Bono de pool cada 100 niveles: **20 USDT × nivel del hito**. Sala **Bonos** en Demo y Real. **Donar** (sala aparte, solo Real) y **aportar liquidez** suman fama **proporcional al monto** (10 y 5 puntos por USDT). El pool es el banco común. Cuenta Real muestra el producto completo (KYC, niveles 1–1000, hitos, donar, pool) antes del lanzamiento; firmar espera mainnet.
-Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda → Zafiro → Rubí → Platino → Diamante → Maestro), cada uno con marco propio.
+Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina, peridoto, esmeralda, zafiro, rubí, ónix, diamante, amatista). Cada banda se parte en I / II / III. El marco es el logo 3D, más ancho que la foto, con incrustaciones fotográficas de esa piedra.
 
 | Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Solicitudes |
 |------:|----------:|------:|-----:|----------:|:------:|:------------|
@@ -117,13 +118,14 @@ Rangos: 12 piedras/metales (Bronce → Ámbar → Perla → Jade → Esmeralda �
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- 15 suites Hardhat (116 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
+- 15 suites Hardhat (134 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 856 claves
+- i18n: 17 idiomas, 949 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
-- KYC on-chain + OTP de teléfono; nombre y documento congelados
-- App lock: contraseña y frase solo se reemplazan; PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
+- KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
+- App lock: la contraseña se pide al desbloquear y para ver o reemplazar la frase; ya no hay fila de contraseña en Ajustes. PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
+- Fondos: depositar, retirar, donar, aportar al pool y pagar el 1 USDT de acceso salen de una billetera externa vinculada. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero.
 - Frase secreta BIP-39: ver/anotar; rotar o restaurar vive en Reemplazar cuenta (no se elimina suelta)
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
@@ -190,7 +192,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | Contrato | `constants/contractConfig.ts` | ABI + dirección según entorno |
 | Tokens | `constants/tokens.ts` | Lista de stables soportados |
 | ABI/contrato | `contracts/QuatriviumCredit.sol` | Lógica de crédito on-chain |
-| Tests | `test/*.test.js` | 15 suites Hardhat · 116 tests |
+| Tests | `test/*.test.js` | 15 suites Hardhat · 131 tests |
 | Errores tx | `utils/txErrors.ts` | Mensajes legibles de revert |
 
 ---
@@ -237,6 +239,24 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-14 | Pool de liquidez: sala visible en Demo (caja publica, sin depositar). Real sin contrato no muestra 0 USDT ni el formulario. LP y aviso de no retiro visibles. Hardhat 135/135. Demo live NAV 2000.7 USDT, peg fresco. | — |
+| 2026-09-14 | Ciberseguridad: wrap de sesion migrada fuera de AsyncStorage; /session/check exige firma EIP-712 purpose session; plugin expo-screen-capture; frase no seleccionable y se oculta al recorte o al cerrar el panel. Hardhat 135/135. | — |
+| 2026-09-14 | Auditoria Demo vs Real: Demo live 0xD2d2 operativo 24457 B; worker /health OK; Real sin contrato. LoanTierCard respeta contractReady; billetera externa cambia a chain 97/56 antes de pagar. | — |
+| 2026-09-14 | Auditoria de contratos: bytecode Demo = repo. ABI de gobernanza completo (despausarContrato, setFeeBP, setNivel, cancelAdminAction). LoanLadder en lockstep con el nucleo. Mainnet sigue sin desplegar. | — |
+| 2026-09-14 | Catalogo de rangos restaurado: Granate, Aguamarina, Citrino, Topacio, Turmalina, Peridoto, Esmeralda, Zafiro, Rubi, Onix, Diamante, Amatista. Sin Bronce/Oro/Platino. Auditoria: tsc 0, Hardhat 131/131, i18n 943, salud 14/14, conectores 210. Telefono en vivo muestra Granate I II III. | — |
+| 2026-09-14 | Rangos usan las 12 gemas del catalogo (granate a amatista) como incrustaciones fotograficas en el marco. | — |
+| 2026-09-14 | Incrustaciones transparentes tipo cristal: luz interior, destellos y talla de vidrio. El metal del marco se ve a traves de la gema. | — |
+| 2026-09-14 | Incrustaciones de rango con talla de joyeria: cabujon, perla, corte esmeralda y talla brillante segun la piedra. Division I/II/III suma gemas, garras y fuego. | — |
+| 2026-09-14 | Marcos mas anchos que la foto con incrustaciones 4/8/12. Colores de I II III mas nitidos, sin mezclar con el tono oscuro. | — |
+| 2026-09-14 | El marco de rango es el logo 3D de la app pintado como metal de cada piedra. Entrelaza la foto. I denso, II vivo con mas agarre, III luminoso. Sin dibujos infantiles. | — |
+| 2026-09-14 | Marcos de rango recuperan el detalle creciente del boceto original (I sobrio, II anillos y esquinas, III diamantes y filigrana). El emblema 3D metalizado se mantiene. | — |
+| 2026-09-14 | Marcos: tinte por luma (no lava el metal), bisel con filigrana por division y gemas con talla y engaste. | — |
+| 2026-09-14 | Sala Marcos en el hub: vitrina I/II/III por piedra. Los referidos muestran marco y rango (Granate I · nivel). | — |
+| 2026-09-14 | Auditoria en vivo: banners de acceso usan onPrimary (texto negro sobre verde). Contraste KYC verificado en el telefono. Docs alineadas a 939 claves, 131 tests y 61 componentes. Demo live 24457 B. | — |
+| 2026-09-14 | Marcos de rango usan el emblema 3D original (assets/ranks) teñido por division I-III. Tarjeta externa solo dice Billetera y Vincular billetera. Botones verdes con texto negro. | — |
+| 2026-09-14 | KYC permite escanear el documento con la camara (foto local, sin OCR). Los marcos de rango son cuadrados y se enriquecen por division I-III y por familia. Copy recortado a tono financiero. | — |
+| 2026-09-14 | Frase secreta solo se consulta. Contraseña del alta con requisitos visibles. Billetera externa en el hub y en el panel de cuenta. | — |
+| 2026-09-14 | Ajustes ya no tiene panel de contraseña. Depositar, retirar, donar, pool y 1 USDT se pagan con la billetera externa vinculada; el USDT llega a la cuenta interna, que pide y paga prestamos. | — |
 | 2026-09-14 | Arranque: si falta la llave de la billetera se pide la contrasena una vez y se vuelve a guardar. Textos profesionales (Depositar/Retirar). | — |
 | 2026-09-14 | Textos recortados a tono financiero. Acceso Real sin botón gris. Errores de correo/SMS sin nombres de APIs. | Menos relleno en pantalla. |
 | 2026-09-14 | Gobernanza 2-de-3: una llave perdida o hackeada la echan las otras 2. Una sola no gobierna. Pausa inmediata. | El 3-de-3 dejaba el contrato muerto si una se perdía. |

@@ -8,6 +8,7 @@ import { useAppMode } from '../wallet/AppModeContext';
 import { BrandLogo } from './BrandLogo';
 import { AppIcon, TokenLogo } from './icons';
 import { TransferWalletsModal } from './TransferWalletsModal';
+import { LinkedWalletCard } from './LinkedWalletCard';
 import type { Token } from '../constants/tokens';
 import { AppText } from './AppText';
 
@@ -83,6 +84,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
           </View>
         </View>
       </View>
+      <LinkedWalletCard internalWallet={walletAddress} />
       {!isDemo && Number(bnbBalance) <= 0 ? (
         <AppText style={[styles.warn, { color: colors.warnText }]}>{t('appWalletNeedGas')}</AppText>
       ) : null}
@@ -94,7 +96,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
           accessibilityLabel={t('copyAddress')}
         >
           <View style={styles.actionRow}>
-            <AppIcon name="copy" size={16} color="#fff" />
+            <AppIcon name="copy" size={16} color="#111" />
             <AppText style={styles.actionText}>{t('copyAddress')}</AppText>
           </View>
         </TouchableOpacity>
@@ -105,49 +107,45 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
           accessibilityLabel={t('appWalletShare')}
         >
           <View style={styles.actionRow}>
-            <AppIcon name="share" size={16} color="#fff" />
+            <AppIcon name="share" size={16} color="#111" />
             <AppText style={styles.actionText}>{t('appWalletShare')}</AppText>
           </View>
         </TouchableOpacity>
       </View>
-      {isDemo ? null : (
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={[styles.modeButton, { backgroundColor: colors.primary }]}
-            onPress={() => setTransferMode('in')}
-            accessibilityRole="button"
-            accessibilityLabel={t('appWalletInTitle')}
-          >
-            <AppText style={styles.actionText}>{t('appWalletInTitle')}</AppText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.modeButton, { backgroundColor: colors.primary }]}
-            onPress={() => setTransferMode('out')}
-            accessibilityRole="button"
-            accessibilityLabel={t('appWalletSendTitle')}
-          >
-            <AppText style={styles.actionText}>{t('appWalletSendTitle')}</AppText>
-          </TouchableOpacity>
-        </View>
-      )}
+      <View style={styles.row}>
+        <TouchableOpacity
+          style={[styles.modeButton, { backgroundColor: colors.primary }]}
+          onPress={() => setTransferMode('in')}
+          accessibilityRole="button"
+          accessibilityLabel={t('appWalletInTitle')}
+        >
+          <AppText style={styles.actionText}>{t('appWalletInTitle')}</AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeButton, { backgroundColor: colors.primary }]}
+          onPress={() => setTransferMode('out')}
+          accessibilityRole="button"
+          accessibilityLabel={t('appWalletSendTitle')}
+        >
+          <AppText style={styles.actionText}>{t('appWalletSendTitle')}</AppText>
+        </TouchableOpacity>
+      </View>
       {onConnectAdmin ? (
         <TouchableOpacity onPress={onConnectAdmin} accessibilityRole="button">
           <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('appWalletAdminConnect')}</AppText>
         </TouchableOpacity>
       ) : null}
-      {isDemo ? null : (
-        <TransferWalletsModal
-          visible={transferMode !== null}
-          mode={transferMode || 'in'}
-          walletAddress={walletAddress}
-          tokenBalance={tokenBalance}
-          bnbBalance={bnbBalance}
-          selectedToken={selectedToken}
-          isLoading={isLoading}
-          onClose={() => setTransferMode(null)}
-          onSent={onSent}
-        />
-      )}
+      <TransferWalletsModal
+        visible={transferMode !== null}
+        mode={transferMode || 'in'}
+        walletAddress={walletAddress}
+        tokenBalance={tokenBalance}
+        bnbBalance={bnbBalance}
+        selectedToken={selectedToken}
+        isLoading={isLoading}
+        onClose={() => setTransferMode(null)}
+        onSent={onSent}
+      />
     </View>
   );
 };
@@ -165,7 +163,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   actionText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

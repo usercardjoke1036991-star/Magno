@@ -121,7 +121,7 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
             onPress={() => void save()}
             style={[styles.button, { backgroundColor: colors.connect }, (busy || !valid) && { backgroundColor: colors.chip }]}
           >
-            {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('usernameSave')}</AppText>}
+            {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.buttonText}>{t('usernameSave')}</AppText>}
           </TouchableOpacity>
           {!notifyApiConfigured() ? (
             <AppText style={[styles.hint, { color: colors.warnText }]}>{t('usernameLocalOnly')}</AppText>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

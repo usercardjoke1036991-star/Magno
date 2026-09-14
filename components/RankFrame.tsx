@@ -1,8 +1,18 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, G, Path, Polygon, Rect } from 'react-native-svg';
-import { getRankForLevel, type RankStyle } from '../constants/ranks';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { FilterImage } from 'react-native-svg/filter-image';
+import {
+  colorizeTextureFilters,
+  getRankForLevel,
+  rankDivisionTint,
+  rankFamilyIndex,
+  type RankStyle,
+} from '../constants/ranks';
 import { AppText } from './AppText';
+import { RankGem } from './RankGem';
+
+const APP_LOGO = require('../assets/logo.png');
 
 interface RankFrameProps {
   level: number;
@@ -12,232 +22,192 @@ interface RankFrameProps {
   showLabel?: boolean;
 }
 
-function FrameOrnaments({
+/** El metal es más ancho que la foto para que se vean las incrustaciones. */
+function framePad(size: number, rank: RankStyle, idx: number): number {
+  const ratio = 0.5 + rank.division * 0.08 + Math.min(idx, 9) * 0.012;
+  return Math.max(16, Math.round(size * ratio));
+}
+
+function jewelCount(rank: RankStyle): number {
+  return 4 + rank.division * 4;
+}
+
+function inlaySeats(box: number, pad: number, count: number): Array<{ x: number; y: number }> {
+  const outer = pad * 0.48;
+  const seats = [
+    { x: outer, y: outer },
+    { x: box - outer, y: outer },
+    { x: outer, y: box - outer },
+    { x: box - outer, y: box - outer },
+  ];
+  if (count >= 8) {
+    seats.push(
+      { x: box / 2, y: outer },
+      { x: box / 2, y: box - outer },
+      { x: outer, y: box / 2 },
+      { x: box - outer, y: box / 2 },
+    );
+  }
+  if (count >= 12) {
+    const inner = pad * 0.82;
+    seats.push(
+      { x: inner, y: inner },
+      { x: box - inner, y: inner },
+      { x: inner, y: box - inner },
+      { x: box - inner, y: box - inner },
+    );
+  }
+  return seats;
+}
+
+const Emblem: React.FC<{
+  box: number;
+  filters?: ReturnType<typeof colorizeTextureFilters>;
+  opacity?: number;
+  style?: object;
+}> = ({ box, filters, opacity = 1, style }) => (
+  <FilterImage
+    source={APP_LOGO}
+    filters={filters}
+    resizeMode="contain"
+    style={[{ width: box, height: box, opacity }, style]}
+  />
+);
+
+/** Puntas del logo por encima de la foto: el metal entrelaza el retrato. */
+function LogoWeave({
+  box,
+  pad,
   rank,
-  cx,
-  cy,
-  r,
+  filters,
 }: {
+  box: number;
+  pad: number;
   rank: RankStyle;
-  cx: number;
-  cy: number;
-  r: number;
+  filters: ReturnType<typeof colorizeTextureFilters>;
 }) {
-  const { metal, dark, light } = rank;
-
-  if (rank.family === 'master') {
-    const crown = [
-      [cx - r * 0.72, cy - r - 1],
-      [cx - r * 0.46, cy - r - r * 0.55],
-      [cx - r * 0.22, cy - r - r * 0.12],
-      [cx, cy - r - r * 0.72],
-      [cx + r * 0.22, cy - r - r * 0.12],
-      [cx + r * 0.46, cy - r - r * 0.55],
-      [cx + r * 0.72, cy - r - 1],
-    ];
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r + 5} fill={dark} />
-        <Circle cx={cx} cy={cy} r={r + 2} fill={metal} />
-        <Circle cx={cx} cy={cy} r={r - 0.5} fill="none" stroke={light} strokeWidth={1.6} />
-        <Path
-          d={`M ${crown.map((p) => p.join(' ')).join(' L ')} Z`}
-          fill={metal}
-          stroke={dark}
-          strokeWidth={0.9}
-        />
-        <Circle cx={cx} cy={cy - r - r * 0.72} r={2.4} fill={light} />
-        <Circle cx={cx - r * 0.46} cy={cy - r - r * 0.55} r={1.7} fill={light} />
-        <Circle cx={cx + r * 0.46} cy={cy - r - r * 0.55} r={1.7} fill={light} />
-        <Polygon
-          points={`${cx - 8},${cy + r + 1} ${cx + 8},${cy + r + 1} ${cx + 6},${cy + r + 8} ${cx - 6},${cy + r + 8}`}
-          fill={dark}
-        />
-        <Polygon
-          points={`${cx - 7},${cy + r + 2} ${cx + 7},${cy + r + 2} ${cx + 5},${cy + r + 7} ${cx - 5},${cy + r + 7}`}
-          fill={metal}
-        />
-      </G>
+  const corner = Math.round(pad * (1.02 + rank.division * 0.12));
+  const edge = rank.division >= 1 ? Math.round(pad * (0.34 + rank.division * 0.16)) : 0;
+  const clips: Array<{ key: string; wrap: object; img: object }> = [
+    { key: 'tl', wrap: { top: 0, left: 0, width: corner, height: corner }, img: { top: 0, left: 0 } },
+    { key: 'tr', wrap: { top: 0, right: 0, width: corner, height: corner }, img: { top: 0, right: 0 } },
+    { key: 'bl', wrap: { bottom: 0, left: 0, width: corner, height: corner }, img: { bottom: 0, left: 0 } },
+    { key: 'br', wrap: { bottom: 0, right: 0, width: corner, height: corner }, img: { bottom: 0, right: 0 } },
+  ];
+  if (edge > 0) {
+    const span = box - corner * 2;
+    clips.push(
+      { key: 'top', wrap: { top: 0, left: corner, width: span, height: edge }, img: { top: 0, left: -corner } },
+      { key: 'bot', wrap: { bottom: 0, left: corner, width: span, height: edge }, img: { bottom: 0, left: -corner } },
+      { key: 'left', wrap: { top: corner, left: 0, width: edge, height: span }, img: { top: -corner, left: 0 } },
+      { key: 'right', wrap: { top: corner, right: 0, width: edge, height: span }, img: { top: -corner, right: 0 } },
     );
   }
-
-  if (rank.family === 'diamond') {
-    const spikes = Array.from({ length: 8 }, (_, i) => {
-      const a = (i * Math.PI) / 4 - Math.PI / 2;
-      const x1 = cx + Math.cos(a - 0.2) * (r + 1);
-      const y1 = cy + Math.sin(a - 0.2) * (r + 1);
-      const x2 = cx + Math.cos(a) * (r + r * 0.38);
-      const y2 = cy + Math.sin(a) * (r + r * 0.38);
-      const x3 = cx + Math.cos(a + 0.2) * (r + 1);
-      const y3 = cy + Math.sin(a + 0.2) * (r + 1);
-      return `${x1},${y1} ${x2},${y2} ${x3},${y3}`;
-    });
-    return (
-      <G>
-        {spikes.map((points) => (
-          <Polygon key={points} points={points} fill={light} stroke={dark} strokeWidth={0.6} />
-        ))}
-        <Circle cx={cx} cy={cy} r={r + 2.5} fill={dark} />
-        <Circle cx={cx} cy={cy} r={r} fill={metal} />
-        <Circle cx={cx} cy={cy} r={r - 2} fill="none" stroke="#fff" strokeWidth={1} opacity={0.75} />
-      </G>
-    );
-  }
-
-  if (rank.family === 'platinum') {
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r + 4.5} fill={dark} />
-        <Circle cx={cx} cy={cy} r={r + 2} fill={light} />
-        <Circle cx={cx} cy={cy} r={r} fill={metal} />
-        <Rect x={cx - 8} y={cy - r - 8} width={16} height={3.2} rx={1.2} fill={dark} />
-        {rank.division >= 2 ? <Rect x={cx - 6} y={cy - r - 13} width={12} height={2.6} rx={1} fill={metal} /> : null}
-      </G>
-    );
-  }
-
-  if (rank.family === 'gold') {
-    return (
-      <G>
-        <Path
-          d={`M ${cx - r - 3} ${cy} C ${cx - r - 10} ${cy - 18}, ${cx - 10} ${cy - r - 12}, ${cx} ${cy - r - 5} C ${cx + 10} ${cy - r - 12}, ${cx + r + 10} ${cy - 18}, ${cx + r + 3} ${cy}`}
-          fill="none"
-          stroke={metal}
-          strokeWidth={2.4}
-        />
-        <Path
-          d={`M ${cx - r - 3} ${cy} C ${cx - r - 10} ${cy + 18}, ${cx - 10} ${cy + r + 12}, ${cx} ${cy + r + 5} C ${cx + 10} ${cy + r + 12}, ${cx + r + 10} ${cy + 18}, ${cx + r + 3} ${cy}`}
-          fill="none"
-          stroke={metal}
-          strokeWidth={2.4}
-        />
-        <Circle cx={cx} cy={cy} r={r + 3} fill={dark} />
-        <Circle cx={cx} cy={cy} r={r} fill={metal} />
-        <Circle cx={cx - (rank.division >= 2 ? 5 : 0)} cy={cy + r + 5} r={1.8} fill={light} />
-        {rank.division >= 2 ? <Circle cx={cx + 5} cy={cy + r + 5} r={1.8} fill={light} /> : null}
-      </G>
-    );
-  }
-
-  if (rank.family === 'silver') {
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r + 3.5} fill={dark} />
-        <Circle cx={cx} cy={cy} r={r} fill={metal} />
-        <Circle cx={cx - r + 3} cy={cy} r={1.7} fill={light} />
-        <Circle cx={cx + r - 3} cy={cy} r={1.7} fill={light} />
-        <Circle cx={cx} cy={cy - r + 3} r={1.7} fill={light} />
-        {rank.division >= 2 ? <Circle cx={cx} cy={cy + r - 3} r={1.7} fill={light} /> : null}
-      </G>
-    );
-  }
-
-  if (rank.family === 'amber') {
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r + 5} fill={dark} opacity={0.9} />
-        <Circle cx={cx} cy={cy} r={r + 2.2} fill={light} />
-        <Circle cx={cx} cy={cy} r={r} fill={metal} />
-        <Circle cx={cx - r * 0.25} cy={cy - r * 0.2} r={r * 0.22} fill={light} opacity={0.55} />
-        <Circle cx={cx + r * 0.55} cy={cy + r + 3} r={2.1} fill={dark} />
-        <Circle cx={cx + r * 0.55} cy={cy + r + 3} r={1.3} fill={light} />
-      </G>
-    );
-  }
-
-  if (rank.family === 'pearl') {
-    return (
-      <G>
-        <Circle cx={cx} cy={cy} r={r + 4} fill={dark} />
-        <Circle cx={cx} cy={cy} r={r + 1.6} fill={light} />
-        <Circle cx={cx} cy={cy} r={r} fill={metal} />
-        <Circle cx={cx - r * 0.28} cy={cy - r * 0.28} r={r * 0.18} fill="#fff" opacity={0.7} />
-        <Circle cx={cx - 6} cy={cy + r + 4} r={2.2} fill={light} stroke={dark} strokeWidth={0.6} />
-        <Circle cx={cx} cy={cy + r + 5} r={2.6} fill={light} stroke={dark} strokeWidth={0.6} />
-        <Circle cx={cx + 6} cy={cy + r + 4} r={2.2} fill={light} stroke={dark} strokeWidth={0.6} />
-      </G>
-    );
-  }
-
-  if (rank.family === 'jade') {
-    const cut = r + 3.2;
-    return (
-      <G>
-        <Rect x={cx - cut} y={cy - cut} width={cut * 2} height={cut * 2} rx={5} fill={dark} />
-        <Rect x={cx - r} y={cy - r} width={r * 2} height={r * 2} rx={4} fill={metal} />
-        <Rect x={cx - 7} y={cy - r - 7} width={14} height={2.4} rx={1} fill={light} />
-        <Rect x={cx - 5} y={cy + r + 3} width={10} height={2} rx={1} fill={light} />
-      </G>
-    );
-  }
-
-  if (rank.family === 'emerald') {
-    const w = r + 3;
-    const h = r + 1.5;
-    return (
-      <G>
-        <Polygon
-          points={`${cx - w * 0.55},${cy - h} ${cx + w * 0.55},${cy - h} ${cx + w},${cy} ${cx + w * 0.55},${cy + h} ${cx - w * 0.55},${cy + h} ${cx - w},${cy}`}
-          fill={dark}
-        />
-        <Polygon
-          points={`${cx - r * 0.5},${cy - r} ${cx + r * 0.5},${cy - r} ${cx + r},${cy} ${cx + r * 0.5},${cy + r} ${cx - r * 0.5},${cy + r} ${cx - r},${cy}`}
-          fill={metal}
-          stroke={light}
-          strokeWidth={1.1}
-        />
-      </G>
-    );
-  }
-
-  if (rank.family === 'sapphire') {
-    const hex = Array.from({ length: 6 }, (_, i) => {
-      const a = (i * Math.PI) / 3 - Math.PI / 6;
-      return `${cx + Math.cos(a) * (r + 4)},${cy + Math.sin(a) * (r + 4)}`;
-    }).join(' ');
-    const inner = Array.from({ length: 6 }, (_, i) => {
-      const a = (i * Math.PI) / 3 - Math.PI / 6;
-      return `${cx + Math.cos(a) * r},${cy + Math.sin(a) * r}`;
-    }).join(' ');
-    return (
-      <G>
-        <Polygon points={hex} fill={dark} />
-        <Polygon points={inner} fill={metal} stroke={light} strokeWidth={1.2} />
-        <Circle cx={cx} cy={cy} r={2.2} fill={light} />
-      </G>
-    );
-  }
-
-  if (rank.family === 'ruby') {
-    return (
-      <G>
-        <Polygon
-          points={`${cx},${cy - r - 6} ${cx + r + 3},${cy - r * 0.15} ${cx + r * 0.7},${cy + r + 3} ${cx - r * 0.7},${cy + r + 3} ${cx - r - 3},${cy - r * 0.15}`}
-          fill={dark}
-        />
-        <Polygon
-          points={`${cx},${cy - r - 1} ${cx + r - 1},${cy - r * 0.1} ${cx + r * 0.55},${cy + r - 1} ${cx - r * 0.55},${cy + r - 1} ${cx - r + 1},${cy - r * 0.1}`}
-          fill={metal}
-          stroke={light}
-          strokeWidth={1}
-        />
-        <Circle cx={cx} cy={cy - r * 0.15} r={1.8} fill={light} />
-      </G>
-    );
-  }
-
   return (
-    <G>
-      <Circle cx={cx} cy={cy} r={r + 3.5} fill={dark} />
-      <Circle cx={cx} cy={cy} r={r} fill={metal} />
-      <Circle cx={cx} cy={cy + r + 4} r={2} fill={light} />
-      {rank.division >= 2 ? (
-        <>
-          <Circle cx={cx - 6} cy={cy + r + 3} r={1.7} fill={light} />
-          <Circle cx={cx + 6} cy={cy + r + 3} r={1.7} fill={light} />
-        </>
+    <>
+      {clips.map((clip) => (
+        <View key={clip.key} style={[styles.clip, clip.wrap]} pointerEvents="none">
+          <Emblem box={box} filters={filters} style={[styles.clipImg, clip.img]} />
+        </View>
+      ))}
+    </>
+  );
+}
+
+function StoneInlays({
+  box,
+  pad,
+  rank,
+}: {
+  box: number;
+  pad: number;
+  rank: RankStyle;
+}) {
+  const n = jewelCount(rank);
+  const gem = Math.max(20, Math.round(pad * (0.82 + rank.division * 0.08)));
+  return (
+    <>
+      {inlaySeats(box, pad, n).map((seat, i) => (
+        <View
+          key={`inlay-${i}`}
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            width: gem,
+            height: gem,
+            left: seat.x - gem / 2,
+            top: seat.y - gem / 2,
+          }}
+        >
+          <RankGem rank={rank} size={gem} mark={String(i)} />
+        </View>
+      ))}
+    </>
+  );
+}
+
+function MetalBezel({
+  box,
+  pad,
+  size,
+  rank,
+  tint,
+}: {
+  box: number;
+  pad: number;
+  size: number;
+  rank: RankStyle;
+  tint: string;
+}) {
+  const gid = `bezel-${rank.family}-${rank.division}-${rank.level}`;
+  const metalId = `${gid}-metal`;
+  const inset = 0.8 + rank.division * 0.45;
+  return (
+    <Svg width={box} height={box} style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Defs>
+        <LinearGradient id={metalId} x1="18%" y1="0%" x2="82%" y2="100%">
+          <Stop offset="0%" stopColor={rank.light} />
+          <Stop offset="38%" stopColor={tint} />
+          <Stop offset="100%" stopColor={rank.dark} />
+        </LinearGradient>
+      </Defs>
+      <Rect
+        x={pad - inset}
+        y={pad - inset}
+        width={size + inset * 2}
+        height={size + inset * 2}
+        rx={3}
+        fill="none"
+        stroke={`url(#${metalId})`}
+        strokeWidth={1.15 + rank.division * 0.35}
+      />
+      {rank.division >= 1 ? (
+        <Rect
+          x={pad + 1.2}
+          y={pad + 1.2}
+          width={size - 2.4}
+          height={size - 2.4}
+          rx={2}
+          fill="none"
+          stroke={rank.light}
+          strokeWidth={0.55}
+          opacity={0.55}
+        />
       ) : null}
-    </G>
+      {rank.division >= 2 ? (
+        <Rect
+          x={pad - inset - 1.6}
+          y={pad - inset - 1.6}
+          width={size + (inset + 1.6) * 2}
+          height={size + (inset + 1.6) * 2}
+          rx={4}
+          fill="none"
+          stroke={tint}
+          strokeWidth={0.7}
+          opacity={0.7}
+        />
+      ) : null}
+    </Svg>
   );
 }
 
@@ -249,50 +219,35 @@ export const RankFrame: React.FC<RankFrameProps> = ({
   showLabel = size >= 36,
 }) => {
   const rank = getRankForLevel(level);
-  const ring = Math.max(4, Math.round(size * 0.08));
-  const wide =
-    rank.family === 'master' ||
-    rank.family === 'diamond' ||
-    rank.family === 'gold' ||
-    rank.family === 'emerald' ||
-    rank.family === 'sapphire' ||
-    rank.family === 'ruby' ||
-    rank.family === 'jade';
-  const outer = wide ? Math.round(size * 0.26) : Math.round(size * 0.14);
-  const crest =
-    rank.family === 'master'
-      ? Math.round(size * 0.42)
-      : rank.family === 'diamond' || rank.family === 'ruby'
-        ? Math.round(size * 0.28)
-        : Math.round(size * 0.16);
-  const box = size + (ring + outer) * 2;
-  const cx = box / 2;
-  const cy = crest + ring + outer + size / 2;
-  const r = size / 2 + ring;
+  const idx = rankFamilyIndex(rank.family);
+  const tint = rankDivisionTint(rank);
+  const filters = colorizeTextureFilters(tint);
+  const pad = framePad(size, rank, idx);
+  const box = size + pad * 2;
   const caption = label || '';
-  const captionH = showLabel && caption ? 13 : 0;
-  const svgH = cy + r + (rank.family === 'gold' || rank.family === 'master' ? 10 : 7);
-  const height = Math.max(svgH, cy + size / 2) + captionH;
-  const photoTop = cy - size / 2;
+  const captionH = showLabel && caption ? 14 : 0;
 
   return (
-    <View style={[styles.wrap, { width: box, height }]}>
-      <Svg width={box} height={svgH} style={styles.svg}>
-        <FrameOrnaments rank={rank} cx={cx} cy={cy} r={r} />
-      </Svg>
-      <View
-        style={[
-          styles.photo,
-          {
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            marginTop: photoTop,
-            borderColor: rank.light,
-          },
-        ]}
-      >
-        {children}
+    <View style={[styles.wrap, { width: box, height: box + captionH }]}>
+      <View style={{ width: box, height: box }}>
+        <Emblem box={box} filters={filters} style={styles.back} />
+        <View
+          style={[
+            styles.photo,
+            {
+              width: size,
+              height: size,
+              marginTop: pad,
+              marginLeft: pad,
+              borderColor: tint,
+            },
+          ]}
+        >
+          {children}
+        </View>
+        <MetalBezel box={box} pad={pad} size={size} rank={rank} tint={tint} />
+        <LogoWeave box={box} pad={pad} rank={rank} filters={filters} />
+        <StoneInlays box={box} pad={pad} rank={rank} />
       </View>
       {showLabel && caption ? (
         <AppText style={[styles.caption, { color: rank.text }]} numberOfLines={1}>
@@ -307,18 +262,26 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
   },
-  svg: {
+  back: {
     position: 'absolute',
     top: 0,
     left: 0,
   },
+  clip: {
+    position: 'absolute',
+    overflow: 'hidden',
+  },
+  clipImg: {
+    position: 'absolute',
+  },
   photo: {
     overflow: 'hidden',
-    borderWidth: 1.5,
     backgroundColor: '#111',
+    borderRadius: 3,
+    borderWidth: 0.8,
   },
   caption: {
-    marginTop: 2,
+    marginTop: 3,
     fontSize: 8,
     fontWeight: '800',
     textAlign: 'center',

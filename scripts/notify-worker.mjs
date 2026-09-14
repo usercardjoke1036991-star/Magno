@@ -1396,22 +1396,6 @@ const server = createServer(async (req, res) => {
       return;
     }
     store.exclusiveSessions = store.exclusiveSessions || {};
-    if (path === '/session/check') {
-      const wallet = String(body.wallet || '').toLowerCase();
-      const deviceHash = String(body.deviceHash || '').toLowerCase();
-      if (!wallet.startsWith('0x') || wallet.length !== 42) {
-        json(res, 400, { error: 'wallet' });
-        return;
-      }
-      if (!/^0x[0-9a-f]{64}$/.test(deviceHash)) {
-        json(res, 400, { error: 'device' });
-        return;
-      }
-      const current = store.exclusiveSessions[wallet];
-      const owner = !current?.deviceHash || current.deviceHash === deviceHash;
-      json(res, 200, { owner, vacant: !current?.deviceHash });
-      return;
-    }
     let authn;
     try {
       authn = requireAuth(body);
@@ -1421,6 +1405,12 @@ const server = createServer(async (req, res) => {
     }
     if (String(body.purpose) !== 'session') {
       json(res, 401, { error: 'purpose' });
+      return;
+    }
+    if (path === '/session/check') {
+      const current = store.exclusiveSessions[authn.wallet];
+      const owner = !current?.deviceHash || current.deviceHash === authn.deviceHash;
+      json(res, 200, { owner, vacant: !current?.deviceHash });
       return;
     }
     store.exclusiveSessions[authn.wallet] = { deviceHash: authn.deviceHash, at: Date.now() };

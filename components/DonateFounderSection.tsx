@@ -44,7 +44,6 @@ export function DonateFounderSection({
     <View style={styles.stack}>
       <AppSubsection title={t('donateTitle')} defaultOpen icon="star">
         <AppText style={[styles.lead, { color: colors.text }]}>{t('donateLead')}</AppText>
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('donateFameNote')}</AppText>
         {!canSend ? (
           <AppText style={[styles.meta, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
         ) : !founderAddress ? (
@@ -57,9 +56,7 @@ export function DonateFounderSection({
           <AppText style={[styles.title, { color: colors.primary }]}>
             {t('supportYourTitle', { title: t(titleKey) })}
           </AppText>
-        ) : (
-          <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('supportBenefitLead')}</AppText>
-        )}
+        ) : null}
         <AppText style={[styles.meta, { color: colors.textMuted }]}>
           {t('donateSupportTotal')} · {formatUSD(donatedUsd)}
         </AppText>

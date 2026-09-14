@@ -151,7 +151,10 @@ async function probePasswordRecord(
   );
   if (secureRaw !== STORE_UNKNOWN) {
     const parsed = parsePasswordRecord(secureRaw);
-    if (parsed) return parsed;
+    if (parsed) {
+      void AsyncStorage.removeItem(PASSWORD_FALLBACK).catch(() => {});
+      return parsed;
+    }
   }
   try {
     const fallback = parsePasswordRecord(await AsyncStorage.getItem(PASSWORD_FALLBACK));
@@ -481,8 +484,18 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
     setWalletWrapKey(nextWrap);
   }
   const serialized = JSON.stringify(record);
-  await AsyncStorage.setItem(PASSWORD_FALLBACK, serialized).catch(() => {});
-  await withTimeout(SecureStore.setItemAsync(PASSWORD_KEY, serialized, OPTIONS), 2500, undefined);
+  const stored = await withTimeout(
+    SecureStore.setItemAsync(PASSWORD_KEY, serialized, OPTIONS)
+      .then(() => true)
+      .catch(() => false),
+    2500,
+    false
+  );
+  if (stored) {
+    await AsyncStorage.removeItem(PASSWORD_FALLBACK).catch(() => {});
+  } else {
+    await AsyncStorage.setItem(PASSWORD_FALLBACK, serialized).catch(() => {});
+  }
   if (conveniencePin) {
     await persistPinWrap(conveniencePin);
   }

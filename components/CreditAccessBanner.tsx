@@ -4,6 +4,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { CREDIT_ACCESS_USDT, hasCreditAccess } from '../utils/creditGates';
 import { AppText } from './AppText';
+import { useAppMode } from '../wallet/AppModeContext';
 
 interface CreditAccessBannerProps {
   paidUsd: number;
@@ -22,15 +23,18 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { mode } = useAppMode();
   if (hasCreditAccess(paidUsd)) {
     return null;
   }
+
+  const pendingLead = mode === 'demo' ? t('configWarn') : t('creditAccessPending');
 
   return (
     <View style={[styles.box, { borderColor: colors.border, backgroundColor: colors.surface }]}>
       <AppText style={[styles.title, { color: colors.text }]}>{t('creditAccessTitle')}</AppText>
       <AppText style={[styles.lead, { color: colors.textMuted }]}>
-        {canPay ? t('creditAccessLead') : t('creditAccessPending')}
+        {canPay ? t('creditAccessLead') : pendingLead}
       </AppText>
       {canPay ? (
         <TouchableOpacity
@@ -41,7 +45,7 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
           accessibilityLabel={t('creditAccessPay')}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#111" />
           ) : (
             <AppText style={[styles.payText, { color: colors.onPrimary }]}>
               {t('creditAccessPay', { amount: String(CREDIT_ACCESS_USDT), symbol: tokenSymbol })}

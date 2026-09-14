@@ -748,6 +748,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
                 confirms: Number((row.confirms ?? row[3]) || 0),
                 executed,
                 cancelled,
+                proposer: String(row.proposer ?? row[0] ?? ''),
               };
               break;
             } catch {

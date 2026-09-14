@@ -217,7 +217,7 @@ export const LockSettings: React.FC<{
           (busy || (hasPin && current.length !== 6) || next.length !== 6) && { backgroundColor: colors.chip },
         ]}
       >
-        {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>}
+        {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>}
       </TouchableOpacity>
       {hasPin ? (
         <TouchableOpacity
@@ -282,7 +282,7 @@ export const LockSettings: React.FC<{
         style={[styles.button, { backgroundColor: colors.connect }]}
       >
         {passwordBusy ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color="#111" />
         ) : (
           <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>
         )}
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

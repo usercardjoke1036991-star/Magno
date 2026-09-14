@@ -6,6 +6,26 @@ function hasNativeCapture(): boolean {
   return Boolean(modules.ExpoScreenCapture || modules.ExpoScreenCaptureModule);
 }
 
+type ScreenshotListener = () => void;
+const screenshotListeners = new Set<ScreenshotListener>();
+
+export function subscribeScreenshot(listener: ScreenshotListener): () => void {
+  screenshotListeners.add(listener);
+  return () => {
+    screenshotListeners.delete(listener);
+  };
+}
+
+function notifyScreenshot(): void {
+  screenshotListeners.forEach((listener) => {
+    try {
+      listener();
+    } catch {
+      // Un panel no debe tumbar el resto.
+    }
+  });
+}
+
 /** FLAG_SECURE / ReplayKit y cubierta al ir a segundo plano: ninguna otra app debe ver esta pantalla. */
 export function ScreenGuard(): ReactElement | null {
   const [covered, setCovered] = useState(false);
@@ -18,12 +38,14 @@ export function ScreenGuard(): ReactElement | null {
     const arm = async () => {
       if (!hasNativeCapture()) return;
       try {
+        screenshot?.remove();
+        screenshot = undefined;
         const mod = await import('expo-screen-capture');
         if (!active) return;
         await mod.preventScreenCaptureAsync();
         restore = () => mod.allowScreenCaptureAsync();
         screenshot = mod.addScreenshotListener(() => {
-          // En iOS no se puede impedir el recorte; Android ya queda en negro.
+          notifyScreenshot();
         });
       } catch {
         // Build sin el módulo nativo; la cubierta de segundo plano sigue activa.

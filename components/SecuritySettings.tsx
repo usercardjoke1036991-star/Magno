@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   AppState,
   StyleSheet,
@@ -24,23 +23,21 @@ import { AuthenticatorSetup } from './AuthenticatorSetup';
 import { isAuthenticatorEnabled } from '../services/authenticator';
 import { loadAuthPrefs, type AuthMethod, type AuthPrefs, type AuthPurpose } from '../services/authPrefs';
 import { SecretInput } from './SecretInput';
-import { humanizeTxError } from '../utils/txErrors';
+import { subscribeScreenshot } from './ScreenGuard';
 import {
-  addressFromPhrase,
   getSecretPhrase,
   hasSecretPhrase,
   isPhraseBackedUp,
-  isValidSecretPhrase,
   markPhraseBackedUp,
 } from '../services/appWallet';
 import { useAppMode } from '../wallet/AppModeContext';
 import type { TranslationKey } from '../i18n/translations';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { EmailOtpSection } from './EmailOtpSection';
-import { AppText, AppTextInput } from './AppText';
+import { AppText } from './AppText';
 
 type RowStatus = 'done' | 'todo' | 'warn';
-type Panel = 'menu' | 'kyc' | 'password' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'methods' | 'authenticator';
+type Panel = 'menu' | 'kyc' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'methods' | 'authenticator';
 
 export const SecuritySettings: React.FC = () => {
   const { t } = useI18n();
@@ -48,9 +45,8 @@ export const SecuritySettings: React.FC = () => {
   const { mode } = useAppMode();
   const demoAccount = mode === 'demo';
   const primaryToken = useMemo(() => getSupportedTokens()[0], [mode]);
-  const { address, restore } = useAppWallet();
+  const { address } = useAppWallet();
   const { userInfo, refetch } = useWeb3Balances(address, primaryToken);
-  const accountBlocked = userInfo.hasActiveLoan || userInfo.isDelinquent;
   const { declararKyc, isLoading: kycBusy } = useWeb3Transactions();
 
   const [panel, setPanel] = useState<Panel>('menu');
@@ -59,10 +55,6 @@ export const SecuritySettings: React.FC = () => {
   const [hasPhrase, setHasPhrase] = useState(false);
   const [revealPin, setRevealPin] = useState('');
   const [revealPassword, setRevealPassword] = useState('');
-  const [restorePhrase, setRestorePhrase] = useState('');
-  const [restorePin, setRestorePin] = useState('');
-  const [restorePassword, setRestorePassword] = useState('');
-  const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState(false);
   const [pinSet, setPinSet] = useState(false);
   const [passwordSet, setPasswordSet] = useState(false);
@@ -115,9 +107,11 @@ export const SecuritySettings: React.FC = () => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state !== 'active') hide();
     });
+    const shot = subscribeScreenshot(hide);
     return () => {
       clearTimeout(timer);
       sub.remove();
+      shot();
     };
   }, [shown]);
 
@@ -169,50 +163,6 @@ export const SecuritySettings: React.FC = () => {
     return result.success;
   };
 
-  const restoreWallet = async () => {
-    if (accountBlocked) {
-      Alert.alert(t('activeLoan'), t('appWalletDestroyBlocked'));
-      return;
-    }
-    if (passwordSet && !(await checkPassword(restorePassword)).ok) {
-      Alert.alert(t('error'), t('lockPasswordWrong'));
-      return;
-    }
-    if (!passwordSet && pinSet && !(await verifyPin(restorePin))) {
-      Alert.alert(t('error'), t('lockPinWrong'));
-      return;
-    }
-    if (!isValidSecretPhrase(restorePhrase)) {
-      Alert.alert(t('error'), t('seedInvalid'));
-      return;
-    }
-    setBusy(true);
-    try {
-      const nextAddress = addressFromPhrase(restorePhrase);
-      if (nextAddress !== address && userInfo.isRegistered) {
-        if (userInfo.hasActiveLoan) {
-          Alert.alert(t('activeLoan'), t('appWalletDestroyLoan'));
-          return;
-        }
-        if (userInfo.isDelinquent) {
-          Alert.alert(t('activeLoan'), t('destroyDelinquent'));
-          return;
-        }
-      }
-      await restore(restorePhrase);
-      await refreshPhrase();
-      refetch();
-      setRestorePhrase('');
-      setRestorePin('');
-      setShown(false);
-      Alert.alert(t('ready'), t('seedRestored'));
-    } catch (error) {
-      Alert.alert(t('error'), humanizeTxError(error));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const Row = ({
     label,
     hint,
@@ -247,7 +197,6 @@ export const SecuritySettings: React.FC = () => {
 
   const panelTitle: Record<Exclude<Panel, 'menu'>, TranslationKey> = {
     kyc: 'securityKyc',
-    password: 'lockPasswordTitle',
     email: 'securityEmail',
     pin: 'securityPin',
     fingerprint: 'securityFingerprint',
@@ -290,12 +239,11 @@ export const SecuritySettings: React.FC = () => {
             walletAddress={address}
             isRegistered={userInfo.isRegistered}
             kycDeclarado={userInfo.kycDeclarado}
-            isLoading={busy || kycBusy}
+            isLoading={kycBusy}
             paused={userInfo.paused}
             onDeclare={declareKyc}
           />
         ) : null}
-        {panel === 'password' ? <LockSettings mode="password" onChanged={() => void refreshPhrase()} /> : null}
         {panel === 'email' ? (
           <EmailOtpSection
             walletAddress={address}
@@ -313,7 +261,7 @@ export const SecuritySettings: React.FC = () => {
             walletAddress={address}
             isRegistered={userInfo.isRegistered}
             identityBound={userInfo.identityBound}
-            isLoading={busy || kycBusy}
+            isLoading={kycBusy}
             paused={userInfo.paused}
             onBound={refetch}
           />
@@ -330,7 +278,7 @@ export const SecuritySettings: React.FC = () => {
               <AppText style={[styles.lead, { color: colors.warnText }]}>{t('seedMissing')}</AppText>
             ) : shown && phrase ? (
               <View style={[styles.phraseBox, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-                <AppText style={[styles.phrase, { color: colors.text }]}>
+                <AppText selectable={false} style={[styles.phrase, { color: colors.text }]}>
                   {phrase}
                 </AppText>
                 <TouchableOpacity onPress={confirmBackup} style={[styles.button, { backgroundColor: colors.primary }]}>
@@ -376,50 +324,6 @@ export const SecuritySettings: React.FC = () => {
                 </TouchableOpacity>
               </>
             )}
-            <AppText style={[styles.section, { color: colors.text }]}>{t('seedRotate')}</AppText>
-            <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedRestoreLead')}</AppText>
-            {accountBlocked ? (
-              <AppText style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyBlocked')}</AppText>
-            ) : null}
-            <AppTextInput
-              value={restorePhrase}
-              onChangeText={setRestorePhrase}
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!accountBlocked}
-              multiline
-              placeholder={t('seedRestorePlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-            />
-            {passwordSet ? (
-              <SecretInput
-                value={restorePassword}
-                onChangeText={setRestorePassword}
-                editable={!accountBlocked}
-                placeholder={t('lockCurrentPassword')}
-              />
-            ) : pinSet ? (
-              <SecretInput
-                value={restorePin}
-                onChangeText={(value) => setRestorePin(value.replace(/\D/g, '').slice(0, 6))}
-                keyboardType="number-pad"
-                maxLength={6}
-                editable={!accountBlocked}
-                placeholder={t('lockCurrentPin')}
-              />
-            ) : null}
-            <TouchableOpacity
-              disabled={busy || accountBlocked || (passwordSet && !restorePassword) || (!passwordSet && pinSet && restorePin.length !== 6)}
-              onPress={() => void restoreWallet()}
-              style={[
-                styles.button,
-                { backgroundColor: colors.connect },
-                (busy || accountBlocked || (passwordSet && !restorePassword) || (!passwordSet && pinSet && restorePin.length !== 6)) && styles.destroyDisabled,
-              ]}
-            >
-              {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRotateAction')}</AppText>}
-            </TouchableOpacity>
           </View>
         ) : null}
       </View>
@@ -440,13 +344,6 @@ export const SecuritySettings: React.FC = () => {
         onPress={() => setPanel('kyc')}
       />
       )}
-      <Row
-        icon="lock"
-        label={t('securityPassword')}
-        hint={passwordSet ? t('lockPasswordLocked') : t('securityPasswordTodo')}
-        status={passwordSet ? 'done' : 'warn'}
-        onPress={() => setPanel('password')}
-      />
       <Row
         icon="id"
         label={t('securityEmail')}
@@ -471,7 +368,7 @@ export const SecuritySettings: React.FC = () => {
       <Row
         icon="shield"
         label={t('securityPhrase')}
-        hint={`${backedUp ? t('securityPhraseDone') : t('securityPhraseTodo')} · ${t('seedRotateLead')}`}
+        hint={backedUp ? t('securityPhraseDone') : t('securityPhraseTodo')}
         status={backedUp ? 'done' : 'todo'}
         onPress={() => setPanel('phrase')}
       />
@@ -581,7 +478,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

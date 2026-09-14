@@ -10,6 +10,7 @@ export interface OpenAdminProposal {
   confirms: number;
   executed: boolean;
   cancelled: boolean;
+  proposer: string;
 }
 
 export function describeAdminCalldata(data: string): string {

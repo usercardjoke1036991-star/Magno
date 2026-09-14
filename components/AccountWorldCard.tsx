@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from './AppText';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { isContractConfigured } from '../constants/rpcConfig';
 import { useAppMode } from '../wallet/AppModeContext';
 
 /** Una línea: qué cuenta está abierta. Sin red, contrato ni cadena. */
@@ -11,10 +12,15 @@ export const AccountWorldCard: React.FC = () => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const demo = mode === 'demo';
+  const livePending = !demo && !isContractConfigured('mainnet');
   const title = demo ? t('accountWorldDemo') : t('accountWorldLive');
-  const tag = demo ? t('accountWorldDemoTag') : t('accountWorldLiveTag');
-  const accent = demo ? colors.warnText : colors.success;
-  const bg = demo ? colors.warnBg : colors.chip;
+  const tag = demo
+    ? t('accountWorldDemoTag')
+    : livePending
+      ? t('accountWorldLivePendingTag')
+      : t('accountWorldLiveTag');
+  const accent = demo ? colors.warnText : livePending ? colors.warnText : colors.success;
+  const bg = demo || livePending ? colors.warnBg : colors.chip;
 
   return (
     <View

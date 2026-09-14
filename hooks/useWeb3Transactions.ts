@@ -145,6 +145,22 @@ export const useWeb3Transactions = () => {
     );
   };
 
+  const despausarContrato = async () => {
+    return executeTransaction(
+      'despausarContrato',
+      () => QuatriviumCreditService.despausarContrato(),
+      t('unpauseProtocolDone')
+    );
+  };
+
+  const cancelAdminAction = async (id: number) => {
+    return executeTransaction(
+      'cancelAdminAction',
+      () => QuatriviumCreditService.cancelAdminAction(id),
+      t('cancelAdminDone')
+    );
+  };
+
   const declararKyc = async () => {
     return executeTransaction(
       'declararKyc',
@@ -280,6 +296,8 @@ export const useWeb3Transactions = () => {
     retirarComisiones,
     retirarComisionesToken,
     pausarContrato,
+    despausarContrato,
+    cancelAdminAction,
     declararKyc,
     setKycExigido,
     setIdentidadExigida,

@@ -17,7 +17,9 @@ import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
 import { CREDIT_ACCESS_USDT, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
-import { isPhraseBackedUp } from '../services/appWallet';
+import { enviarToken, isPhraseBackedUp } from '../services/appWallet';
+import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from '../services/linkedWallet';
+import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 import { formatCooldown, formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { milestoneBonusUsd } from '../constants/loanTiers';
@@ -105,6 +107,8 @@ export interface HomeHandlersParams {
   appSigner: Signer | null | undefined;
   adminConnected: boolean;
   adminProvider: unknown;
+  adminAddress?: string;
+  openExternalWallet?: () => void;
   confirmFunds: (purpose?: FundsConfirmPurpose) => Promise<boolean>;
   refetch: () => void;
   clearPendingInvite: () => Promise<void>;
@@ -118,6 +122,8 @@ export const useHomeHandlers = ({
   appSigner,
   adminConnected,
   adminProvider,
+  adminAddress,
+  openExternalWallet,
   confirmFunds,
   refetch,
   clearPendingInvite,
@@ -136,6 +142,8 @@ export const useHomeHandlers = ({
     retirarComisiones,
     retirarComisionesToken,
     pausarContrato,
+    despausarContrato,
+    cancelAdminAction,
     declararKyc,
     executeAdminAction,
     confirmAdminAction,
@@ -209,6 +217,81 @@ export const useHomeHandlers = ({
       t(isDemoAccount() ? 'configureContract' : 'liveCreditNotReady'),
     );
     return false;
+  };
+
+  const askToLinkExternal = (message: string) => {
+    showNotice(t('linkWalletTitle'), message, [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('connectWallet'), onPress: () => openExternalWallet?.() },
+    ]);
+  };
+
+  const requireLinkedExternal = async (): Promise<string> => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return '';
+    }
+    let linked = await loadRequiredExternalWallet(walletAddress);
+    if (!linked && adminConnected && hasLinkedExternalWallet(adminAddress || '')) {
+      try {
+        linked = await saveLinkedExternalWallet(walletAddress, adminAddress || '');
+      } catch {
+        linked = '';
+      }
+    }
+    if (!linked) {
+      askToLinkExternal(t('linkWalletNeedFunds'));
+      return '';
+    }
+    if (!adminConnected || !adminProvider) {
+      askToLinkExternal(t('linkWalletNeed'));
+      return '';
+    }
+    if (String(adminAddress || '').toLowerCase() !== linked.toLowerCase()) {
+      askToLinkExternal(t('linkWalletMismatch'));
+      return '';
+    }
+    return linked;
+  };
+
+  const fundInternalFromExternal = async (amountWei: string, tokenAddress: string): Promise<boolean> => {
+    const linked = await requireLinkedExternal();
+    if (!linked || !walletAddress || !adminProvider) return false;
+    try {
+      await ensureExternalWalletOnAppChain(adminProvider as Eip1193Provider);
+    } catch (error) {
+      Alert.alert(t('connect'), humanizeTxError(error));
+      return false;
+    }
+    const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
+    if (!signer) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return false;
+    }
+    if (isDemoAccount()) {
+      try {
+        await QuatriviumCreditService.mintDemoUsdtTo(tokenAddress, linked, amountWei);
+      } catch {
+        // Si no hay minteo, se intenta con el saldo de la billetera vinculada.
+      }
+    }
+    const extBal = await tokenBalanceOf(tokenAddress, linked);
+    if (extBal !== null && extBal < BigInt(amountWei)) {
+      Alert.alert(t('amountExceedsBalance'), t('poolNeedInternalFunds', { symbol: selectedToken.symbol }));
+      return false;
+    }
+    const extBnb = await readOnChainBnb(linked);
+    if (extBnb !== null && extBnb < MIN_GAS_WEI) {
+      showNotice(t('errNeedGas'), t('errNeedGas'));
+      return false;
+    }
+    try {
+      await enviarToken(signer, tokenAddress, walletAddress, amountWei, true);
+      return true;
+    } catch (error) {
+      Alert.alert(t('error'), humanizeTxError(error));
+      return false;
+    }
   };
 
   const handleRegistrarHumano = async (padre?: string) => {
@@ -463,14 +546,13 @@ export const useHomeHandlers = ({
 
   const handleDepositarPool = async (amountHuman: string) => {
     if (isDemoAccount()) {
-      Alert.alert(t('sectionPool'), t('liveCreditNotReady'));
+      Alert.alert(t('sectionPool'), t('poolRealOnly'));
       return;
     }
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
     }
-    if (!(await confirmFunds())) return;
     if (!ensureCreditReady()) return;
     if (userInfo.paused) {
       Alert.alert(t('admin'), t('protocolPaused'));
@@ -485,16 +567,11 @@ export const useHomeHandlers = ({
       Alert.alert(t('amount'), t('amountGreaterZero'));
       return;
     }
-    if (Number(parsed) > Number(balances.tokenBalance)) {
-      Alert.alert(
-        t('amountExceedsBalance'),
-        t('poolNeedInternalFunds', { symbol: selectedToken.symbol }),
-      );
-      return;
-    }
-    if (!(await ensureGasForTx())) return;
+    if (!(await confirmFunds())) return;
     try {
       const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
+      if (!(await fundInternalFromExternal(amountWei, selectedToken.address))) return;
+      if (!(await ensureGasForTx())) return;
       const result = await depositarLiquidez(amountWei, selectedToken.address);
       if (result.success) refetch();
     } catch {
@@ -526,21 +603,8 @@ export const useHomeHandlers = ({
     }
     const amount = String(CREDIT_ACCESS_USDT);
     const amountWei = parseUnits(amount, selectedToken.decimals).toString();
-    if (isDemoAccount()) {
-      try {
-        await QuatriviumCreditService.topUpDemoUsdtToDebt(selectedToken.address, amountWei);
-      } catch {
-        // Si no hay minteo, se intenta con el saldo real.
-      }
-    }
-    const raw = await tokenBalanceOf(selectedToken.address, walletAddress);
-    const available =
-      raw !== null ? Number(formatUnits(raw, selectedToken.decimals)) : Number(balances.tokenBalance);
-    if (Number(amount) > available + 1e-8) {
-      Alert.alert(t('amountExceedsBalance'), t('poolNeedInternalFunds', { symbol: selectedToken.symbol }));
-      return;
-    }
     if (!(await confirmFunds())) return;
+    if (!(await fundInternalFromExternal(amountWei, selectedToken.address))) return;
     if (!(await ensureGasForTx())) return;
     try {
       const result = await donarProyecto(amountWei, selectedToken.address);
@@ -578,7 +642,6 @@ export const useHomeHandlers = ({
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
     }
-    if (!(await confirmFunds())) return;
     if (!ensureCreditReady()) return;
     if (!userInfo.canDonate) {
       Alert.alert(t('donateTitle'), t('bonusLegacyContract'));
@@ -593,13 +656,11 @@ export const useHomeHandlers = ({
       Alert.alert(t('amount'), t('amountGreaterZero'));
       return;
     }
-    if (Number(parsed) > Number(balances.tokenBalance)) {
-      Alert.alert(t('amountExceedsBalance'), t('poolNeedInternalFunds', { symbol: selectedToken.symbol }));
-      return;
-    }
-    if (!(await ensureGasForTx())) return;
+    if (!(await confirmFunds())) return;
     try {
       const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
+      if (!(await fundInternalFromExternal(amountWei, selectedToken.address))) return;
+      if (!(await ensureGasForTx())) return;
       const result = await donarProyecto(amountWei, selectedToken.address);
       if (result.success) {
         void recordMovement(walletAddress, {
@@ -725,6 +786,20 @@ export const useHomeHandlers = ({
     });
   };
 
+  const handleDespausarProtocolo = async () => {
+    await runAsAdmin(async () => {
+      const result = await despausarContrato();
+      if (result.success) refetch();
+    });
+  };
+
+  const handleCancelProposal = async (id: number) => {
+    await runAsAdmin(async () => {
+      const result = await cancelAdminAction(id);
+      if (result.success) refetch();
+    });
+  };
+
   const handleLiquidarDeudor = async (debtorAddress: string, tokenAddr: string) => {
     await runAsAdmin(async () => {
       const result = await liquidarDeudor(debtorAddress, tokenAddr);
@@ -762,6 +837,8 @@ export const useHomeHandlers = ({
     handleProposeAttester,
     handleProposeSetTokenConfig,
     handlePausarProtocolo,
+    handleDespausarProtocolo,
+    handleCancelProposal,
     handleLiquidarDeudor,
     handleMarcarMorosoSiVencido,
   };

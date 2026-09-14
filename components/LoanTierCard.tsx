@@ -31,6 +31,7 @@ interface LoanTierCardProps {
   isRegistered?: boolean;
   identityBlocked?: boolean;
   accessBlocked?: boolean;
+  contractReady?: boolean;
   onActivateCredit?: () => void;
   onRequestLoan: (tier: LoanTier) => void;
   onPayLoan: () => void;
@@ -58,6 +59,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   isRegistered = true,
   identityBlocked = false,
   accessBlocked = false,
+  contractReady = true,
   onActivateCredit,
   onRequestLoan,
   onPayAll,
@@ -84,11 +86,12 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const remainingInstallments = Math.max(0, cuotasTotales - cuotasPagadas);
   const cooldownLeft = useLiveCooldown(ultimoPrestamoTimestamp, cooldownRestante);
   const waitingNextLoan = cooldownLeft > 0 && !hasActiveLoan && !locked;
-  const needsActivate = !isRegistered && unlocked && !hasActiveLoan;
-  const needsIdentity = identityBlocked && unlocked && !hasActiveLoan && !needsActivate;
-  const needsAccess = accessBlocked && unlocked && !hasActiveLoan && !needsActivate && !needsIdentity;
+  const protocolClosed = !contractReady && unlocked && !hasActiveLoan;
+  const needsActivate = !isRegistered && unlocked && !hasActiveLoan && !protocolClosed;
+  const needsIdentity = identityBlocked && unlocked && !hasActiveLoan && !needsActivate && !protocolClosed;
+  const needsAccess = accessBlocked && unlocked && !hasActiveLoan && !needsActivate && !needsIdentity && !protocolClosed;
   const requestBlocked =
-    isLoading || locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan || needsIdentity || needsAccess;
+    isLoading || locked || hasActiveLoan || isDelinquent || paused || waitingNextLoan || needsIdentity || needsAccess || protocolClosed;
   const toggleLockedDetails = () => setDetailsOpen((open) => !open);
 
   const card = (
@@ -229,6 +232,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
           <TouchableOpacity
             disabled={needsActivate ? isLoading : requestBlocked}
             onPress={() => {
+              if (protocolClosed) return;
               if (needsActivate) {
                 onActivateCredit?.();
                 return;
@@ -237,7 +241,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
             }}
             style={[
               styles.btn,
-              !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || needsIdentity || needsAccess)
+              !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || needsIdentity || needsAccess || protocolClosed)
                 ? { backgroundColor: colors.chip }
                 : { backgroundColor: colors.primary },
             ]}
@@ -247,10 +251,10 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
             ) : (
               <View style={styles.btnRow}>
                 <AppIcon
-                  name={needsActivate ? 'id' : locked || isDelinquent || paused || needsIdentity || needsAccess ? 'lock' : 'bank'}
+                  name={needsActivate ? 'id' : locked || isDelinquent || paused || needsIdentity || needsAccess || protocolClosed ? 'lock' : 'bank'}
                   size={16}
                   color={
-                    !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || needsIdentity || needsAccess)
+                    !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || needsIdentity || needsAccess || protocolClosed)
                       ? colors.textMuted
                       : colors.onPrimary
                   }
@@ -260,13 +264,15 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
                     styles.btnText,
                     {
                       color:
-                        !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || needsIdentity || needsAccess)
+                        !needsActivate && (locked || hasActiveLoan || isDelinquent || paused || needsIdentity || needsAccess || protocolClosed)
                           ? colors.textMuted
                           : colors.onPrimary,
                     },
                   ]}
                 >
-                  {needsActivate
+                  {protocolClosed
+                    ? t('liveCreditNotReady')
+                    : needsActivate
                     ? t('activateCredit')
                     : needsIdentity
                       ? t('requestNeedIdentity')
@@ -283,7 +289,9 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
               </View>
             )}
           </TouchableOpacity>
-          {needsIdentity ? (
+          {protocolClosed ? (
+            <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('liveNetworkPendingLead')}</AppText>
+          ) : needsIdentity ? (
             <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('liveIdentityBeforeLoan')}</AppText>
           ) : needsAccess ? (
             <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('creditAccessNeed')}</AppText>

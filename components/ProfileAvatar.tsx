@@ -22,10 +22,15 @@ interface ProfileAvatarProps {
 const FACEBOOK_BG = '#E4E6EB';
 const FACEBOOK_FG = '#B0B3B8';
 
-export const AnonymousFace: React.FC<{ size: number; avatarId?: number }> = ({ size, avatarId }) => {
+export const AnonymousFace: React.FC<{ size: number; avatarId?: number; square?: boolean }> = ({
+  size,
+  avatarId,
+  square = false,
+}) => {
   const preset = AVATAR_PRESETS[clampAvatarId(avatarId)];
   const bg = preset?.bg || FACEBOOK_BG;
   const fg = preset?.fg || FACEBOOK_FG;
+  const radius = square ? Math.max(3, Math.round(size * 0.08)) : size / 2;
   return (
     <View
       style={[
@@ -33,7 +38,7 @@ export const AnonymousFace: React.FC<{ size: number; avatarId?: number }> = ({ s
         {
           width: size,
           height: size,
-          borderRadius: size / 2,
+          borderRadius: radius,
           backgroundColor: bg,
         },
       ]}
@@ -67,14 +72,15 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   const rank = level ? getRankForLevel(level) : null;
   const caption = rank && rankName ? formatRankLabel(rank, rankName) : '';
 
+  const photoRadius = rank ? Math.max(3, Math.round(size * 0.08)) : size / 2;
   const photo = photoUri ? (
     <Image
       key={`${photoUri}-${profile?.updatedAt || 0}`}
       source={{ uri: photoUri }}
-      style={{ width: size, height: size, borderRadius: size / 2 }}
+      style={{ width: size, height: size, borderRadius: photoRadius }}
     />
   ) : (
-    <AnonymousFace size={size} avatarId={profile?.avatarId} />
+    <AnonymousFace size={size} avatarId={profile?.avatarId} square={Boolean(rank)} />
   );
 
   const framed = rank ? (

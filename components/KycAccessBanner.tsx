@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  AppState,
   Modal,
   ScrollView,
   StyleSheet,
@@ -17,6 +18,7 @@ import { SecretInput } from './SecretInput';
 import { checkPassword } from '../services/appLock';
 import { getSecretPhrase, hasSecretPhrase, markPhraseBackedUp } from '../services/appWallet';
 import { loanGateBannerRows } from '../utils/creditGates';
+import { subscribeScreenshot } from './ScreenGuard';
 
 interface KycAccessBannerProps {
   kycDone: boolean;
@@ -61,6 +63,31 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   const [phraseError, setPhraseError] = useState('');
   const [phraseBusy, setPhraseBusy] = useState(false);
 
+  const hidePhrase = () => {
+    setPhraseText('');
+    setPhrasePassword('');
+    setPhraseError('');
+  };
+
+  const closeModal = () => {
+    setOpen(null);
+    hidePhrase();
+  };
+
+  useEffect(() => {
+    if (!phraseText) return undefined;
+    const timer = setTimeout(hidePhrase, 45_000);
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') hidePhrase();
+    });
+    const shot = subscribeScreenshot(hidePhrase);
+    return () => {
+      clearTimeout(timer);
+      sub.remove();
+      shot();
+    };
+  }, [phraseText]);
+
   const revealPhrase = async () => {
     if (phraseBusy || !phrasePassword) return;
     setPhraseBusy(true);
@@ -102,6 +129,9 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
     phoneDone,
   });
 
+  const onGreen = colors.onPrimary;
+  const onGreenMuted = colors.onPrimary;
+
   if (!rows.length) return null;
 
   return (
@@ -123,12 +153,12 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                 accessibilityRole="button"
                 accessibilityLabel={t('seedBannerTitle')}
               >
-                <AppIcon name="shield" size={18} color="#fff" />
+                <AppIcon name="shield" size={18} color={onGreen} />
                 <View style={styles.grow}>
-                  <AppText style={[styles.title, { color: '#fff' }]}>{t('seedBannerTitle')}</AppText>
-                  <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>{t('seedBannerTodo')}</AppText>
+                  <AppText style={[styles.title, { color: onGreen }]}>{t('seedBannerTitle')}</AppText>
+                  <AppText style={[styles.lead, { color: onGreenMuted }]}>{t('seedBannerTodo')}</AppText>
                 </View>
-                <AppText style={[styles.chevron, { color: '#fff' }]}>›</AppText>
+                <AppText style={[styles.chevron, { color: onGreen }]}>›</AppText>
               </TouchableOpacity>
             );
           }
@@ -140,10 +170,10 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                 accessibilityRole="text"
                 accessibilityLabel={t('emailBannerTitle')}
               >
-                <AppIcon name="bell" size={18} color="#fff" />
+                <AppIcon name="bell" size={18} color={onGreen} />
                 <View style={styles.grow}>
-                  <AppText style={[styles.title, { color: '#fff' }]}>{t('emailBannerTitle')}</AppText>
-                  <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>{t('emailBannerTodo')}</AppText>
+                  <AppText style={[styles.title, { color: onGreen }]}>{t('emailBannerTitle')}</AppText>
+                  <AppText style={[styles.lead, { color: onGreenMuted }]}>{t('emailBannerTodo')}</AppText>
                 </View>
               </View>
             );
@@ -157,12 +187,12 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                 accessibilityRole="button"
                 accessibilityLabel={t('kycBannerTitle')}
               >
-                <AppIcon name="id" size={18} color="#fff" />
+                <AppIcon name="id" size={18} color={onGreen} />
                 <View style={styles.grow}>
-                  <AppText style={[styles.title, { color: '#fff' }]}>{t('kycBannerTitle')}</AppText>
-                  <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>{t('kycOpenHint')}</AppText>
+                  <AppText style={[styles.title, { color: onGreen }]}>{t('kycBannerTitle')}</AppText>
+                  <AppText style={[styles.lead, { color: onGreenMuted }]}>{t('kycOpenHint')}</AppText>
                 </View>
-                <AppText style={[styles.chevron, { color: '#fff' }]}>›</AppText>
+                <AppText style={[styles.chevron, { color: onGreen }]}>›</AppText>
               </TouchableOpacity>
             );
           }
@@ -174,25 +204,25 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
               accessibilityRole="button"
               accessibilityLabel={identityBound && !deviceMatches ? t('deviceBannerTitle') : t('phoneBannerTitle')}
             >
-              <AppIcon name="phone" size={18} color="#fff" />
+              <AppIcon name="phone" size={18} color={onGreen} />
               <View style={styles.grow}>
-                <AppText style={[styles.title, { color: '#fff' }]}>
+                <AppText style={[styles.title, { color: onGreen }]}>
                   {identityBound && !deviceMatches ? t('deviceBannerTitle') : t('phoneBannerTitle')}
                 </AppText>
-                <AppText style={[styles.lead, { color: 'rgba(255,255,255,0.86)' }]}>
+                <AppText style={[styles.lead, { color: onGreenMuted }]}>
                   {identityBound && !deviceMatches ? t('seedNeedDevice') : t('phoneBannerTodo')}
                 </AppText>
               </View>
-              <AppText style={[styles.chevron, { color: '#fff' }]}>›</AppText>
+              <AppText style={[styles.chevron, { color: onGreen }]}>›</AppText>
             </TouchableOpacity>
           );
         })}
       </View>
 
-      <Modal visible={open !== null} animationType="slide" onRequestClose={() => setOpen(null)}>
+      <Modal visible={open !== null} animationType="slide" onRequestClose={closeModal}>
         <SafeAreaView style={[styles.screen, { backgroundColor: colors.bg }]}>
           <View style={styles.screenHeader}>
-            <TouchableOpacity onPress={() => setOpen(null)} accessibilityRole="button">
+            <TouchableOpacity onPress={closeModal} accessibilityRole="button">
               <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
             </TouchableOpacity>
             <AppText style={[styles.screenTitle, { color: colors.text }]}>
@@ -234,7 +264,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                 {phraseError ? <AppText style={[styles.lead, { color: colors.danger }]}>{phraseError}</AppText> : null}
                 {phraseText ? (
                   <>
-                    <AppText style={[styles.phrase, { color: colors.text }]}>{phraseText}</AppText>
+                    <AppText selectable={false} style={[styles.phrase, { color: colors.text }]}>{phraseText}</AppText>
                     <TouchableOpacity onPress={() => void confirmPhrase()} style={[styles.save, { backgroundColor: colors.connect }]}>
                       <AppText style={styles.saveText}>{t('seedConfirmSaved')}</AppText>
                     </TouchableOpacity>
@@ -337,7 +367,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   saveText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

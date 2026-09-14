@@ -28,8 +28,10 @@ interface AdminPanelProps {
   onWithdrawFees: () => void;
   onWithdrawTokenFees: () => void;
   onPause?: () => void;
+  onUnpause?: () => void;
   onExecuteProposal?: (id: number) => void;
   onConfirmProposal?: (id: number) => void;
+  onCancelProposal?: (id: number) => void;
   onProposeAddAdmin?: (address: string) => void;
   onProposeRemoveAdmin?: (address: string) => void;
   onProposeFeeCollector?: (address: string) => void;
@@ -60,8 +62,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onWithdrawFees,
   onWithdrawTokenFees,
   onPause,
+  onUnpause,
   onExecuteProposal,
   onConfirmProposal,
+  onCancelProposal,
   onProposeAddAdmin,
   onProposeRemoveAdmin,
   onProposeFeeCollector,
@@ -90,6 +94,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     Alert.alert(t('pauseProtocol'), t('pauseProtocolConfirm'), [
       { text: t('cancel'), style: 'cancel' },
       { text: t('pauseProtocol'), style: 'destructive', onPress: onPause },
+    ]);
+  };
+
+  const confirmUnpause = () => {
+    Alert.alert(t('unpauseProtocol'), t('unpauseProtocolConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('unpauseProtocol'), onPress: onUnpause },
     ]);
   };
 
@@ -310,6 +321,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           )}
         </TouchableOpacity>
       ) : null}
+      {isAdmin && onCancelProposal && openProposal ? (
+        <TouchableOpacity
+          disabled={isLoading}
+          onPress={() => onCancelProposal(openProposal.id)}
+          style={[styles.button, { backgroundColor: colors.chip }]}
+        >
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('cancelAdminProposal')}</AppText>
+        </TouchableOpacity>
+      ) : null}
       {isAdmin && !paused && onPause ? (
         <TouchableOpacity disabled={isLoading} onPress={confirmPause} style={[styles.pause, { backgroundColor: '#B42318' }]}>
           {isLoading ? (
@@ -319,6 +339,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <AppIcon name="warning" size={16} color="#fff" />
               <AppText style={styles.buttonText}>{t('pauseProtocol')}</AppText>
             </View>
+          )}
+        </TouchableOpacity>
+      ) : null}
+      {isAdmin && paused && onUnpause ? (
+        <TouchableOpacity disabled={isLoading} onPress={confirmUnpause} style={[styles.button, { backgroundColor: colors.primary }]}>
+          {isLoading ? (
+            <ActivityIndicator color={colors.onPrimary} size="small" />
+          ) : (
+            <AppText style={[styles.buttonText, { color: colors.onPrimary }]}>{t('unpauseProtocol')}</AppText>
           )}
         </TouchableOpacity>
       ) : null}

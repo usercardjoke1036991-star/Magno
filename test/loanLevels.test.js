@@ -61,6 +61,18 @@ describe('QuatriviumCredit - 1000 loan levels', function () {
     expect(prevTasa).to.equal(406n);
   });
 
+  it('keeps LoanLadder in lockstep with the core formula', async () => {
+    const { contract } = await deployProtocol();
+    const ladder = await (await ethers.getContractFactory('LoanLadder')).deploy();
+    for (const id of [101, 500, 1000]) {
+      const [monto, plazo, tasa] = await contract.niveles(id);
+      const row = await ladder.params(id);
+      expect(row.monto).to.equal(monto);
+      expect(row.plazo).to.equal(plazo);
+      expect(row.tasa).to.equal(tasa);
+    }
+  });
+
   it('rejects a level above 1000', async () => {
     const { contract, user, tokenAddr } = await deployProtocol();
     await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 1001)).to.be.reverted;

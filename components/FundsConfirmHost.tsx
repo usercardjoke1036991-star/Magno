@@ -216,7 +216,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
               onPress={() => void submitSecret()}
               style={[styles.button, { backgroundColor: colors.connect }]}
             >
-              {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('ready')}</AppText>}
+              {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.buttonText}>{t('ready')}</AppText>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => finish(false)}>
               <AppText style={[styles.cancel, { color: colors.textMuted }]}>{t('fundsConfirmCancel')}</AppText>
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },

@@ -65,10 +65,10 @@ export async function markSessionSaved(): Promise<void> {
   await withTimeout(ensureUnlockEnabled().catch(() => undefined), 2000, undefined);
   const wrap = getWalletWrapKey();
   const unlockOn = await withTimeout(isAuthEnabled('unlock').catch(() => false), 1500, false);
-  // Si el desbloqueo está on, la wrap se deriva al desbloquear. No dejarla suelta en el almacén.
+  // Si el desbloqueo está on, la wrap se deriva al desbloquear. Nunca en AsyncStorage.
   if (wrap && !unlockOn) {
-    await AsyncStorage.setItem(WRAP_FALLBACK, wrap).catch(() => {});
     await withTimeout(SecureStore.setItemAsync(WRAP, wrap, OPTIONS), 2000, undefined);
+    await AsyncStorage.removeItem(WRAP_FALLBACK).catch(() => {});
     return;
   }
   await purgePersistedWrap();
@@ -76,17 +76,20 @@ export async function markSessionSaved(): Promise<void> {
 
 export async function restoreSavedSessionWrap(): Promise<boolean> {
   try {
-    const fallback = await AsyncStorage.getItem(WRAP_FALLBACK).catch(() => null);
-    let raw = fallback;
+    const leaked = await AsyncStorage.getItem(WRAP_FALLBACK).catch(() => null);
+    let raw = leaked;
     if (!raw) {
       raw = await withTimeout(SecureStore.getItemAsync(WRAP).catch(() => null), 12000, null);
     }
     if (__DEV__) {
-      console.log('[boot] wrap restore', { fromFallback: Boolean(fallback), fromSecure: Boolean(raw && !fallback) });
+      console.log('[boot] wrap restore', { migrated: Boolean(leaked), fromSecure: Boolean(raw && !leaked) });
     }
     if (!raw) return false;
     setWalletWrapKey(raw);
-    await AsyncStorage.setItem(WRAP_FALLBACK, raw).catch(() => {});
+    await withTimeout(SecureStore.setItemAsync(WRAP, raw, OPTIONS), 2000, undefined);
+    if (leaked) {
+      await AsyncStorage.removeItem(WRAP_FALLBACK).catch(() => {});
+    }
     return Boolean(getWalletWrapKey());
   } catch {
     return false;

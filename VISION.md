@@ -19,6 +19,10 @@
 - ✅ escalera de 1000 niveles — Marcado como completado manualmente
 - ✅ comisiones de referidos — Marcado como completado manualmente
 - ✅ historial de referidos — Marcado como completado manualmente
+- ✅ auditoria profunda del proyecto y correccion de todo lo que falle para dejar Demo 100 por ciento productivo — Marcado como completado manualmente
+- ✅ marcos de rango mas cargados con piedras preciosas por division I II III — Marcado como completado manualmente
+- ✅ apartado especial para ver los 36 marcos de rango y referidos se ven el marco entre ellos — Marcado como completado manualmente
+- ✅ Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -100,6 +104,13 @@
 - Tras foto y nombre anonimo, conectar cualquier billetera; si es la fundadora del contrato la app la reconoce sin menu Admin
 - cada cambio admin requiere confirmacion de las 3 fundadoras (quorum unanime, no 2-de-3)
 - textos profesionales cortos y auditoria en vivo para dejar Demo productivo
+- Quitar panel de contraseña en Ajustes. Depositar, retirar, donar, pool y 1 USDT se pagan con una billetera externa vinculada; el saldo pasa a la interna, que pide y paga prestamos.
+- No reemplazar la frase secreta: es la llave de la billetera interna. Requisitos de contraseña visibles en el alta. Vincular externa visible en el hub y en Cuenta.
+- Escanear documento en Verificar KYC con la camara; marcos de rango cuadrados mas ricos por division I II III; textos cortos de banca prestigiosa
+- Marcos de rango con relieve metalico 3D del logo, color por division; billetera externa solo Vincular; botones verdes con letras negras
+- marcos de rango mas cargados con piedras preciosas por division I II III
+- apartado especial para ver los 36 marcos de rango y referidos se ven el marco entre ellos
+- Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -175,3 +186,15 @@
 - [2026-09-14 03:43] Idea añadida al backlog: "Tras foto y nombre anonimo, conectar cualquier billetera; si es la fundadora del"
 - [2026-09-14 04:18] Idea añadida al backlog: "cada cambio admin requiere confirmacion de las 3 fundadoras (quorum unanime, no "
 - [2026-09-14 04:36] Idea añadida al backlog: "textos profesionales cortos y auditoria en vivo para dejar Demo productivo"
+- [2026-09-14 05:29] Idea añadida al backlog: "Quitar panel de contraseña en Ajustes. Depositar, retirar, donar, pool y 1 USDT "
+- [2026-09-14 05:56] Idea añadida al backlog: "No reemplazar la frase secreta: es la llave de la billetera interna. Requisitos "
+- [2026-09-14 06:16] Idea añadida al backlog: "Escanear documento en Verificar KYC con la camara; marcos de rango cuadrados mas"
+- [2026-09-14 06:30] Idea añadida al backlog: "Marcos de rango con relieve metalico 3D del logo, color por division; billetera "
+- [2026-09-14 06:54] Módulo completado: 'auditoria profunda del proyecto y correccion de todo lo que falle para dejar Demo 100 por ciento productivo'
+- [2026-09-14 07:04] Idea añadida al backlog: "marcos de rango mas cargados con piedras preciosas por division I II III"
+- [2026-09-14 07:05] Módulo completado: 'marcos de rango mas cargados con piedras preciosas por division I II III'
+- [2026-09-14 07:14] Idea añadida al backlog: "apartado especial para ver los 36 marcos de rango y referidos se ven el marco en"
+- [2026-09-14 07:14] Módulo completado: 'apartado especial para ver los 36 marcos de rango y referidos se ven el marco entre ellos'
+- [2026-09-14 07:30] Módulo completado: 'marcos de rango mas cargados con piedras preciosas por division I II III'
+- [2026-09-14 07:49] Idea añadida al backlog: "Marco de rango = logo de la app entrelazando la foto, metal pintado con color ni"
+- [2026-09-14 07:49] Módulo completado: 'Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III'

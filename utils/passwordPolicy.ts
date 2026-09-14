@@ -25,6 +25,17 @@ export function isValidMasterPassword(value: string): boolean {
   return masterPasswordReject(value) === null;
 }
 
+export function passwordRuleFlags(value: string) {
+  const text = String(value || '');
+  return {
+    min: text.length >= PASSWORD_MIN,
+    max: text.length > 0 && text.length <= PASSWORD_MAX,
+    upper: /[A-Z]/.test(text),
+    number: /[0-9]/.test(text),
+    symbol: /[^A-Za-z0-9\s]/.test(text),
+  };
+}
+
 export function masterPasswordFromRandomBytes(bytes: Uint8Array): string {
   const max = 256 - (256 % PASSWORD_ALPHABET.length);
   let pool = '';

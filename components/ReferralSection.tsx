@@ -145,7 +145,6 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           {inviteLink}
         </AppText>
       )}
-      <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('inviteLinkHint')}</AppText>
       <TouchableOpacity
         style={[styles.shareButton, { backgroundColor: colors.primary }, isRestricted && styles.shareDisabled]}
         onPress={handleShare}
@@ -174,7 +173,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
               <ProfileAvatar
                 profile={padreProfile}
                 wallet={padre}
-                size={32}
+                size={40}
                 publicView
                 level={padreLevel}
                 rankName={t(getRankForLevel(padreLevel).nameKey)}
@@ -182,6 +181,8 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
               />
               <AppText style={[styles.metaLine, { color: colors.text, flex: 1 }]}>
                 {t('invitedBy')}: {padreLabel}
+                {'\n'}
+                {formatRankLabel(getRankForLevel(padreLevel || 1), t(getRankForLevel(padreLevel || 1).nameKey))}
               </AppText>
             </View>
           ) : (

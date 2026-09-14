@@ -123,7 +123,7 @@ export const PublicIdentityForm: React.FC<PublicIdentityFormProps> = ({ walletAd
         onPress={() => void submit()}
         style={[styles.primary, { backgroundColor: colors.connect }, (!ready || busy) && { backgroundColor: colors.chip }]}
       >
-        {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.primaryText}>{t('publicFaceSave')}</AppText>}
+        {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('publicFaceSave')}</AppText>}
       </TouchableOpacity>
     </View>
   );
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 16,
     fontWeight: '700',
   },

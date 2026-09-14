@@ -10,9 +10,10 @@ import { AppText } from './AppText';
 interface LinkWalletFormProps {
   internalWallet: string;
   onLinked: (externalWallet: string) => void | Promise<void>;
+  allowSkip?: boolean;
 }
 
-export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, onLinked }) => {
+export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, onLinked, allowSkip = true }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { open } = useAppKit();
@@ -70,16 +71,17 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
         onPress={() => void submit()}
         style={[styles.btn, { backgroundColor: connected ? colors.primary : colors.chip, marginTop: 12 }]}
         accessibilityRole="button"
-        accessibilityLabel={t('linkWalletContinue')}
+        accessibilityLabel={t('linkWalletBind')}
       >
         {busy ? (
           <ActivityIndicator color={colors.onPrimary} />
         ) : (
           <AppText style={[styles.btnText, { color: connected ? colors.onPrimary : colors.textMuted }]}>
-            {t('linkWalletContinue')}
+            {t('linkWalletBind')}
           </AppText>
         )}
       </TouchableOpacity>
+      {allowSkip ? (
       <TouchableOpacity
         disabled={busy}
         onPress={() => void skip()}
@@ -89,6 +91,7 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
       >
         <AppText style={[styles.skipText, { color: colors.textMuted }]}>{t('linkWalletSkip')}</AppText>
       </TouchableOpacity>
+      ) : null}
     </View>
   );
 };

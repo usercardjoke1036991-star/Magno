@@ -17,6 +17,20 @@ function isOfficialWorldToken(mode, address) {
   return mode === 'demo' ? needle === DEMO_USDT : needle === LIVE_USDT;
 }
 
+function parseEvmChainId(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const text = String(value || '').trim();
+  if (!text) return 0;
+  if (/^0x[0-9a-f]+$/i.test(text)) return Number.parseInt(text, 16);
+  const asDec = Number.parseInt(text, 10);
+  return Number.isFinite(asDec) ? asDec : 0;
+}
+
+function needsWalletAddChain(error) {
+  const code = Number(error && error.code);
+  return code === 4902 || code === -32603;
+}
+
 describe('mundos Demo y Real', function () {
   it('primera instalacion entra en Real', function () {
     expect(resolvePersistedMode(null)).to.equal('live');
@@ -43,5 +57,14 @@ describe('mundos Demo y Real', function () {
   it('no mezcla el USDT de Real con el de Demo', function () {
     expect(isOfficialWorldToken('live', LIVE_USDT)).to.equal(true);
     expect(isOfficialWorldToken('live', DEMO_USDT)).to.equal(false);
+  });
+
+  it('reconoce la red de la billetera externa', function () {
+    expect(parseEvmChainId('0x61')).to.equal(97);
+    expect(parseEvmChainId('0x38')).to.equal(56);
+    expect(parseEvmChainId(97)).to.equal(97);
+    expect(parseEvmChainId('')).to.equal(0);
+    expect(needsWalletAddChain({ code: 4902 })).to.equal(true);
+    expect(needsWalletAddChain({ code: 4001 })).to.equal(false);
   });
 });

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Image } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { AppText, AppTextInput } from './AppText';
 import {
-  formatKycFingerprint,
   isValidKyc,
   loadKycDeclaration,
+  loadKycDocPhoto,
+  persistKycDocPhoto,
   saveKycDeclaration,
   type KycDocType,
 } from '../services/kycDeclaration';
@@ -39,7 +40,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
   const [region, setRegion] = useState('');
   const [docType, setDocType] = useState<KycDocType>('nationalId');
   const [accepted, setAccepted] = useState(false);
-  const [fingerprint, setFingerprint] = useState('');
+  const [docPhoto, setDocPhoto] = useState('');
   const [editing, setEditing] = useState(false);
   const [nameLocked, setNameLocked] = useState(false);
   const [docLocked, setDocLocked] = useState(false);
@@ -54,10 +55,10 @@ export const KycSection: React.FC<KycSectionProps> = ({
       setRegion(saved.region || '');
       setDocType(saved.docType);
       setAccepted(true);
-      setFingerprint(formatKycFingerprint(saved.identityFingerprint));
       setNameLocked(Boolean(saved.boundLegalName));
       setDocLocked(Boolean(saved.docLocked));
     }).catch(() => {});
+    loadKycDocPhoto(walletAddress).then(setDocPhoto).catch(() => setDocPhoto(''));
   }, [walletAddress]);
 
   const done = kycDeclarado && !editing;
@@ -74,7 +75,6 @@ export const KycSection: React.FC<KycSectionProps> = ({
       region,
       docType,
     });
-    setFingerprint(formatKycFingerprint(saved.identityFingerprint));
     setNameLocked(Boolean(saved.boundLegalName));
     setDocLocked(Boolean(saved.docLocked));
     if (!kycDeclarado) {
@@ -84,29 +84,77 @@ export const KycSection: React.FC<KycSectionProps> = ({
     setEditing(false);
   };
 
+  const scanDoc = async () => {
+    if (!walletAddress) return;
+    try {
+      const ImagePicker = await import('expo-image-picker');
+      const camera = await ImagePicker.requestCameraPermissionsAsync();
+      if (camera.granted) {
+        const shot = await ImagePicker.launchCameraAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.7,
+        });
+        if (shot.canceled || !shot.assets?.[0]) return;
+        const uri = await persistKycDocPhoto(walletAddress, shot.assets[0]);
+        if (uri) setDocPhoto(uri);
+        return;
+      }
+      const library = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!library.granted) {
+        Alert.alert(t('kycScreenTitle'), t('kycScanNeed'));
+        return;
+      }
+      const picked = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      if (picked.canceled || !picked.assets?.[0]) return;
+      const uri = await persistKycDocPhoto(walletAddress, picked.assets[0]);
+      if (uri) setDocPhoto(uri);
+    } catch {
+      Alert.alert(t('kycScreenTitle'), t('kycScanNeed'));
+    }
+  };
+
   const docLabel = (type: KycDocType) => {
     if (type === 'passport') return t('kycDocPassport');
     if (type === 'other') return t('kycDocOther');
     return t('kycDocNationalId');
   };
 
+  const scanButton = (
+    <TouchableOpacity
+      onPress={() => void scanDoc()}
+      disabled={!walletAddress}
+      style={[styles.scanBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
+    >
+      <AppIcon name="id" size={16} color={colors.primary} />
+      <AppText style={[styles.scanBtnText, { color: colors.text }]}>
+        {docPhoto ? t('kycScanRetake') : t('kycScan')}
+      </AppText>
+    </TouchableOpacity>
+  );
+
   return (
     <View>
       <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('kycLead')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycNotGov')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycLocationPrivate')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycBoundNote')}</AppText>
-      {fingerprint ? (
-        <AppText style={[styles.note, { color: colors.textMuted }]}>{t('kycFingerprint', { fingerprint })}</AppText>
-      ) : null}
 
       {done ? (
-        <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <AppIcon name="check" size={16} color={colors.success} />
-          <AppText style={[styles.doneText, { color: colors.text }]}>{t('kycDone')}</AppText>
-          <TouchableOpacity onPress={() => setEditing(true)}>
-            <AppText style={[styles.change, { color: colors.primary }]}>{t('kycEdit')}</AppText>
-          </TouchableOpacity>
+        <View>
+          {docPhoto ? (
+            <Image source={{ uri: docPhoto }} style={[styles.scanPreview, { borderColor: colors.border }]} />
+          ) : null}
+          <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <AppIcon name="check" size={16} color={colors.success} />
+            <AppText style={[styles.doneText, { color: colors.text }]}>{t('kycDone')}</AppText>
+            <TouchableOpacity onPress={() => setEditing(true)}>
+              <AppText style={[styles.change, { color: colors.primary }]}>{t('kycEdit')}</AppText>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <View>
@@ -183,6 +231,10 @@ export const KycSection: React.FC<KycSectionProps> = ({
               ))}
             </View>
           )}
+          {docPhoto ? (
+            <Image source={{ uri: docPhoto }} style={[styles.scanPreview, { borderColor: colors.border }]} />
+          ) : null}
+          {scanButton}
           <TouchableOpacity onPress={() => setAccepted((value) => !value)} style={styles.checkRow}>
             <View style={[styles.box, { borderColor: colors.border }, accepted && { backgroundColor: colors.primary, borderColor: colors.primary }]} />
             <AppText style={[styles.checkText, { color: colors.text }]}>{t('kycDeclare')}</AppText>
@@ -197,7 +249,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
             ]}
           >
             {isLoading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#111" />
             ) : (
               <AppText style={[styles.buttonText, (blocked || !accepted) && { color: colors.textMuted }]}>
                 {paused ? t('actionPaused') : t('kycSubmit')}
@@ -216,10 +268,28 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 6,
   },
-  note: {
-    fontSize: 12,
-    lineHeight: 17,
+  scanPreview: {
+    width: 132,
+    height: 132,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  scanBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
     marginBottom: 12,
+  },
+  scanBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   warn: {
     fontSize: 13,
@@ -297,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#111',
     fontSize: 15,
     fontWeight: '600',
   },
