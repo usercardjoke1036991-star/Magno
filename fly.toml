@@ -1,0 +1,40 @@
+# Worker de OTP/correo 24/7. No sube secretos: fly secrets.
+# Deploy: npm run notify:deploy
+
+app = "quatrivium-notify"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile.notify"
+
+[env]
+  PORT = "8787"
+  NOTIFY_BIND = "0.0.0.0"
+  NOTIFY_TRUST_PROXY = "1"
+  NOTIFY_CORS_ORIGIN = "https://quatriviumcredit.app"
+  EXPO_PUBLIC_CHAIN_ID = "97"
+  EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET = "0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f"
+  NOTIFY_DATA_FILE = "/data/.notify-data.json"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "15s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+[mounts]
+  source = "notify_data"
+  destination = "/data"

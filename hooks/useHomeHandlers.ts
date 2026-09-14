@@ -255,8 +255,15 @@ export const useHomeHandlers = ({
   };
 
   const fundInternalFromExternal = async (amountWei: string, tokenAddress: string): Promise<boolean> => {
+    if (!walletAddress) return false;
+    const need = BigInt(amountWei);
+    if (need <= 0n) return false;
+    const internalBal = await tokenBalanceOf(tokenAddress, walletAddress);
+    if (internalBal !== null && internalBal >= need) {
+      return true;
+    }
     const linked = await requireLinkedExternal();
-    if (!linked || !walletAddress || !adminProvider) return false;
+    if (!linked || !adminProvider) return false;
     try {
       await ensureExternalWalletOnAppChain(adminProvider as Eip1193Provider);
     } catch (error) {
@@ -276,7 +283,7 @@ export const useHomeHandlers = ({
       }
     }
     const extBal = await tokenBalanceOf(tokenAddress, linked);
-    if (extBal !== null && extBal < BigInt(amountWei)) {
+    if (extBal !== null && extBal < need) {
       Alert.alert(t('amountExceedsBalance'), t('poolNeedInternalFunds', { symbol: selectedToken.symbol }));
       return false;
     }

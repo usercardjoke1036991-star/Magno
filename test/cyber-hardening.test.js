@@ -162,6 +162,24 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(wallet.address).to.match(/^0x[0-9a-fA-F]{40}$/);
   });
 
+  it('listens the notify worker on PaaS PORT and accepts Real-mode auth before mainnet', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const worker = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'notify-worker.mjs'), 'utf8');
+    expect(worker).to.include('process.env.PORT || process.env.NOTIFY_PORT');
+    expect(worker).to.include("process.env.NOTIFY_BIND || (process.env.PORT ? '0.0.0.0'");
+    expect(worker).to.include('NOTIFY_DATA_FILE');
+    expect(worker).to.include('sms: hasSms');
+    expect(worker).to.include('BSC_MAINNET.chainId');
+    expect(worker).to.include('0x0000000000000000000000000000000000000001');
+    expect(worker).to.include('verify.twilio.com');
+    expect(worker).to.include('twilio-verify');
+    expect(worker).to.include('checkTwilioVerify');
+    const dockerfile = fs.readFileSync(path.join(__dirname, '..', 'Dockerfile.notify'), 'utf8');
+    expect(dockerfile).to.include('scripts/notify-worker.mjs');
+    expect(dockerfile).to.not.include('.env.worker');
+  });
+
   it('derives the same address fromMnemonic and fromPhrase for 12 and 24 words', function () {
     const { Mnemonic, HDNodeWallet, randomBytes } = require('ethers');
     const normalize = (phrase) => phrase.trim().toLowerCase().split(/\s+/).filter(Boolean).join(' ');
@@ -178,6 +196,18 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(HDNodeWallet.fromPhrase(twentyFour.phrase.toUpperCase()).address).to.equal(
       HDNodeWallet.fromPhrase(normalize(twentyFour.phrase)).address
     );
+  });
+
+  it('keeps production prepare on the live Demo contract, not the retired 0x1E5118', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const prepare = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'prepare-production-local.mjs'), 'utf8');
+    expect(prepare).to.include("TESTNET_CONTRACT = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f'");
+    expect(prepare).to.include("STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3'");
+    expect(prepare).to.not.match(/TESTNET_CONTRACT = '0x1E5118/);
+    const check = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'check-production.mjs'), 'utf8');
+    expect(check).to.include("LIVE_TESTNET = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f'");
+    expect(check).to.include('demo-contract');
   });
 
   it('seals an immutable KYC fingerprint and keeps it when local fields change', function () {
@@ -418,6 +448,8 @@ describe('demo credit gates', function () {
     expect(gate).to.include('isAccessPaymentEnabled');
     expect(gate).to.include('fundInternalFromExternal');
     expect(gate).to.include('mintDemoUsdtTo');
+    expect(gate).to.include('internalBal');
+    expect(gate).to.match(/internalBal !== null && internalBal >= need/);
     const balances = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useWeb3Balances.ts'), 'utf8');
     expect(balances).to.include('canDonate: caps.canDonate');
     expect(balances).to.not.include('canDonate: isDonationVisible()');

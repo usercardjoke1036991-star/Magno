@@ -114,6 +114,7 @@
 - Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III
 - ficha Play Store, privacidad y terminos alineados al producto real (1000 niveles, KYC, sin destruir cuenta)
 - privacidad y terminos tras elegir idioma con aceptar al leer, y las mismas politicas en Ajustes
+- Worker de OTP y correo en HTTPS 24/7 con Twilio SMS, sin tunel de prueba
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -204,3 +205,4 @@
 - [2026-09-14 16:09] Idea añadida al backlog: "ficha Play Store, privacidad y terminos alineados al producto real (1000 niveles"
 - [2026-09-14 16:26] Idea añadida al backlog: "privacidad y terminos tras elegir idioma con aceptar al leer, y las mismas polit"
 - [2026-09-14 17:10] Módulo completado: 'auditoria profunda visual y de codigo de toda la app'
+- [2026-09-14 17:55] Idea añadida al backlog: "Worker de OTP y correo en HTTPS 24/7 con Twilio SMS, sin tunel de prueba"

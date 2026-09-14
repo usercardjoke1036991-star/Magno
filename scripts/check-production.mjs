@@ -59,6 +59,8 @@ const set = (key) => {
 const https = (key) => /^https:\/\//i.test(get(key));
 
 const STALE_MAINNET = '0xa6aac9ce4923789a4095fbc0504db9a697f8a46d';
+const LIVE_TESTNET = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f';
+const STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3';
 
 const admins = get('ADMINS')
   .split(',')
@@ -83,6 +85,15 @@ const checks = [
       get('EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET').toLowerCase() === STALE_MAINNET
         ? 'El contrato mainnet guardado es de una versión vieja. Hay que desplegar QuatriviumCredit de nuevo (CONFIRM_MAINNET=yes)'
         : 'Desplegar QuatriviumCredit en BSC mainnet (CONFIRM_MAINNET=yes)',
+  },
+  {
+    id: 'demo-contract',
+    who: 'code',
+    ok:
+      !get('EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET') ||
+      (get('EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET').toLowerCase() === LIVE_TESTNET.toLowerCase() &&
+        get('EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET').toLowerCase() !== STALE_TESTNET),
+    need: 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET debe ser Demo live 0xD2d2… (no el retirado 0x1E5118)',
   },
   {
     id: 'admins',

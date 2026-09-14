@@ -4,6 +4,7 @@
 Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y simbolo. Despues las 24 palabras. Esa frase se consulta en Ajustes y sirve para cambiar de telefono; no se reemplaza.
 
 ## Decisiones
+- [2026-09-14] OTP de telefono usa Twilio SMS. El worker publico corre en Fly (min 1 maquina, sin ngrok). Hasta mainnet el worker Demo acepta firmas de Cuenta Real para correo/OTP.
 - [2026-09-14] La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta.
 - [2026-09-14] Las politicas al usuario explican como trabaja la app, con que esta de acuerdo y que beneficios tiene. No incluyen detalle interno de proveedores, Demo ni codigo.
 - [2026-09-14] Politicas de privacidad y terminos se aceptan una vez tras el idioma y quedan en Ajustes para releer. El boton se activa al final del texto.
@@ -33,9 +34,11 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] Crear cuenta: correo, contraseña y guardar sesión. Luego una pantalla aparte verifica el código. Iniciar sesión: solo correo, contraseña y guardar sesión. Son funciones distintas.
 - [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad.
 - [2026-09-12] Cuenta Real se muestra completa antes del lanzamiento. Donar y aportar liquidez suman fama. La UI de donar no menciona destino ni USDT real.
-- [2026-09-12] Bonos de hito en Demo y Real. Donar es sala aparte solo Real y solo suma fama. Real muestra el catalogo completo de 1000 niveles y 10 hitos aunque mainnet no este listo.
 
 ## Cambios realizados
+- [2026-09-14] Auditoria profunda: contrato Demo live al dia; script de produccion ya no escribe 0x1E5118; no se cobra USDT dos veces si donar falla; OTP Twilio trial via Verify. Falta mainnet y flyctl auth login.
+- [2026-09-14] Twilio SMS guardado en .env.worker (gitignored): FROM trial listo. production:check 13/14, solo falta contrato mainnet.
+- [2026-09-14] Worker de avisos listo para Fly 24/7 (Dockerfile.notify, fly.toml) y Twilio SMS. Falta login de Fly y las 3 claves Twilio del fundador.
 - [2026-09-14] Auditoria alta-hub: ensureAppWallet ya no crea otra frase si falta el blob; persistencia de billetera falla cerrado; OTP de telefono se reabre si el dispositivo no coincide; misma direccion BIP-39 12/24 en cualquier aparato. Hardhat 143/143. Demo live 24457 B alineado.
 - [2026-09-14] Auditoria en vivo: politicas, hub, credito, red, historial, donar, pool y ajustes sin crash. Codigo de invitacion por grupos. Watchdog legal ya no pisa el consentimiento. Demo se consulta y Real queda restaurado.
 - [2026-09-14] Textos legales de usuario: tono prestigioso, secciones cortas. Play sigue cubierto (datos, 18+, red irreversible, camara local).
@@ -83,13 +86,10 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-13] La fila de Ajustes que era Como confirma ahora se llama Candado
 - [2026-09-13] El boton de Ajustes para sustituir el respaldo dice Reemplazar; Entrar sigue en el alta
 - [2026-09-13] Ajustes: ver y sustituir el respaldo BIP-39 quedan en una sola fila
-- [2026-09-13] Auditoria de contratos y ABI: Demo live alineado con el repo (24457 B). ABI de cliente sin dispersionCongelada duplicada y con cancelAdminAction.
-- [2026-09-13] Auditoria en vivo: tablero de referidos arriba y visible, activar credito gris en Real sin contrato, onNewIntent para salas por enlace. Cuenta Real restaurada.
-- [2026-09-13] Auditoria en vivo: Metro caido, ADB colgado, app recargada. Hardhat 121/121, Demo live operativo. Texto MIUI: se quita fontWeight sintetizado.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-14] Decisión: La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta.
+[2026-09-14] Cambio: Auditoria profunda: contrato Demo live al dia; script de produccion ya no escribe 0x1E5118; no se cobra USDT dos veces si donar falla; OTP Twilio trial via Verify. Falta mainnet y flyctl auth login.

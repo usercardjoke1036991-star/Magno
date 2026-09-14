@@ -248,6 +248,8 @@ npm run deploy:bsc
 npm run deploy:testnet
 npm run notify
 npm run notify:prod
+npm run notify:sms
+npm run notify:deploy
 npm run tunnel
 npm run tunnel:ngrok
 npm run production:check

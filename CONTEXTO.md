@@ -239,6 +239,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-14 | Auditoria 2026-09-14: Demo live 0xD2d2 alineado (24457 B, 1000 niveles, pool 2000 USDT). prepare-production ya no pisa el contrato con 0x1E5118. fundInternalFromExternal no vuelve a sacar USDT si la interna ya tiene el monto. OTP trial usa Twilio Verify. Mainnet sigue sin desplegar. | — |
+| 2026-09-14 | Notify 24/7: Dockerfile.notify + fly.toml + npm run notify:sms / notify:deploy. Worker escucha PORT de PaaS. Twilio pendiente de SID/token/FROM. flyctl instalado, sin login. | — |
 | 2026-09-14 | Alta y recuperacion: no se auto-crea otra billetera si el wrap existe y el blob falta; PhoneOtpSection exige deviceMatches; contrato Demo 0xD2d2 con kyc e identidad exigidos, selectores de prestamo/pago/donar/pool/KYC presentes. Hardhat 143/143, tsc 0, i18n 962. | — |
 | 2026-09-14 | Auditoria profunda visual y de codigo: LegalDocuments estable, politicas en Ajustes, codigo de invitacion sin partir grupos, Demo/Real verificados en el telefono. tsc 0, i18n 962, salud 14/14. | — |
 | 2026-09-14 | Privacidad y condiciones reescritas con tono de casa financiera: como trabaja, que acepta y que obtiene. Sin jerga interna ni proveedores en el texto al usuario. | — |

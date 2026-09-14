@@ -10,9 +10,10 @@ const root = resolve(process.cwd());
 const envPath = resolve(root, '.env');
 const workerPath = resolve(root, '.env.worker');
 const STALE_MAINNET = '0xa6aac9ce4923789a4095fbc0504db9a697f8a46d';
+const STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3';
 const ZERO = '0x0000000000000000000000000000000000000000';
 const DEPLOYER = '0xdb135e9cd9be9bE262b3222eaD737c84d72Ef870';
-const TESTNET_CONTRACT = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3';
+const TESTNET_CONTRACT = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f';
 const INVITE = 'https://quatriviumcredit.app';
 const PLAY = 'https://play.google.com/store/apps/details?id=com.quatrivium.credit';
 
@@ -74,9 +75,14 @@ if (!mainnet || mainnet === STALE_MAINNET) {
   done.push('Contrato mainnet viejo anulado (0x000… hasta el deploy nuevo)');
 }
 
-if ((env.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET || '').toLowerCase() !== TESTNET_CONTRACT.toLowerCase()) {
+const testnetNow = (env.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET || '').toLowerCase();
+if (testnetNow === STALE_TESTNET.toLowerCase() || testnetNow !== TESTNET_CONTRACT.toLowerCase()) {
   upsert(envPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET', TESTNET_CONTRACT);
-  done.push('Contrato testnet actual escrito en .env');
+  done.push(
+    testnetNow === STALE_TESTNET.toLowerCase()
+      ? 'Contrato testnet retirado 0x1E5118 sustituido por Demo live 0xD2d2'
+      : 'Contrato testnet actual escrito en .env'
+  );
 }
 
 if (!env.ADMINS) {

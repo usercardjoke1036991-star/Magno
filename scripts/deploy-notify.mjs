@@ -1,0 +1,101 @@
+/**
+ * Publica el worker en Fly.io (HTTPS 24/7). No imprime secretos.
+ * Requiere: flyctl autenticado. Twilio ya en .env.worker si hay SMS.
+ */
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+
+const root = resolve(process.cwd());
+
+function loadEnv(filePath) {
+  const map = {};
+  if (!existsSync(filePath)) return map;
+  for (const line of readFileSync(filePath, 'utf8').split(/\r?\n/)) {
+    if (!line || line.startsWith('#')) continue;
+    const i = line.indexOf('=');
+    if (i < 0) continue;
+    let value = line.slice(i + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    map[line.slice(0, i).trim()] = value;
+  }
+  return map;
+}
+
+function fly(args, opts = {}) {
+  const result = spawnSync('flyctl', args, {
+    cwd: root,
+    stdio: opts.silent ? 'pipe' : 'inherit',
+    encoding: 'utf8',
+    shell: true,
+  });
+  if (result.status !== 0 && !opts.allowFail) {
+    process.exit(result.status || 1);
+  }
+  return result;
+}
+
+const flyctl = spawnSync('flyctl', ['version'], { encoding: 'utf8', shell: true });
+if (flyctl.status !== 0) {
+  console.error('Instale Fly: iwr https://fly.io/install.ps1 -useb | iex');
+  console.error('Luego: flyctl auth login');
+  process.exit(1);
+}
+
+const who = spawnSync('flyctl', ['auth', 'whoami'], { encoding: 'utf8', shell: true });
+if (who.status !== 0) {
+  console.error('Inicie sesión: flyctl auth login');
+  process.exit(1);
+}
+
+const local = loadEnv(resolve(root, '.env'));
+const worker = loadEnv(resolve(root, '.env.worker'));
+const env = { ...local, ...worker };
+
+const secrets = {
+  NOTIFY_DATA_KEY: env.NOTIFY_DATA_KEY,
+  RESEND_API_KEY: env.RESEND_API_KEY,
+  EMAIL_FROM: env.EMAIL_FROM,
+  TWILIO_ACCOUNT_SID: env.TWILIO_ACCOUNT_SID,
+  TWILIO_AUTH_TOKEN: env.TWILIO_AUTH_TOKEN,
+  TWILIO_FROM: env.TWILIO_FROM,
+  TWILIO_VERIFY_SERVICE_SID: env.TWILIO_VERIFY_SERVICE_SID,
+  ATTESTER_PRIVATE_KEY: env.ATTESTER_PRIVATE_KEY || env.PRIVATE_KEY,
+  PRIVATE_KEY: env.PRIVATE_KEY,
+  EXPO_PUBLIC_BSC_RPC_URL_PRIMARY: env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY,
+  BSC_TESTNET_RPC_URL: env.BSC_TESTNET_RPC_URL,
+};
+
+const pairs = Object.entries(secrets).filter(([, value]) => Boolean(value && String(value).trim()));
+if (!secrets.NOTIFY_DATA_KEY || String(secrets.NOTIFY_DATA_KEY).length < 16) {
+  console.error('Falta NOTIFY_DATA_KEY en .env.worker');
+  process.exit(1);
+}
+
+const apps = spawnSync('flyctl', ['apps', 'list'], { encoding: 'utf8', shell: true });
+if (!String(apps.stdout || '').includes('quatrivium-notify')) {
+  fly(['apps', 'create', 'quatrivium-notify'], { allowFail: true });
+}
+
+const volumes = spawnSync('flyctl', ['volumes', 'list', '-a', 'quatrivium-notify'], {
+  encoding: 'utf8',
+  shell: true,
+});
+if (!String(volumes.stdout || '').includes('notify_data')) {
+  fly(['volumes', 'create', 'notify_data', '--region', 'iad', '--size', '1', '-a', 'quatrivium-notify'], {
+    allowFail: true,
+  });
+}
+
+if (pairs.length) {
+  fly(['secrets', 'set', ...pairs.map(([key, value]) => `${key}=${value}`), '-a', 'quatrivium-notify']);
+}
+
+fly(['deploy', '-a', 'quatrivium-notify', '--ha=false']);
+console.log('Worker en https://quatrivium-notify.fly.dev/health');
+console.log('Ponga esa URL en EXPO_PUBLIC_NOTIFY_API (.env, .env.worker y eas.json production).');

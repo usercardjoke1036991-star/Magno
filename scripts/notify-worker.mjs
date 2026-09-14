@@ -28,8 +28,10 @@ if (existsSync(workerEnv)) {
 
 const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = createRequire(import.meta.url)('./bscNetworks.cjs');
 
-const PORT = Number(process.env.NOTIFY_PORT || 8787);
-const DATA_FILE = resolve(process.cwd(), '.notify-data.json');
+const PORT = Number(process.env.PORT || process.env.NOTIFY_PORT || 8787);
+const DATA_FILE = process.env.NOTIFY_DATA_FILE
+  ? resolve(process.env.NOTIFY_DATA_FILE)
+  : resolve(process.cwd(), '.notify-data.json');
 const CHAIN_ID = Number(process.env.EXPO_PUBLIC_CHAIN_ID || 97);
 const isMainnet = CHAIN_ID === BSC_MAINNET.chainId;
 const CONTRACT = (() => {
@@ -94,6 +96,7 @@ const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
 const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID || '';
 const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_FROM = process.env.TWILIO_FROM || '';
+let twilioVerifySid = process.env.TWILIO_VERIFY_SERVICE_SID || '';
 const RESEND_KEY = process.env.RESEND_API_KEY || '';
 const EMAIL_FROM = process.env.EMAIL_FROM || '';
 const ATTESTER_EXPLICIT = process.env.ATTESTER_PRIVATE_KEY || '';
@@ -122,8 +125,8 @@ const CORS_ORIGINS = (process.env.NOTIFY_CORS_ORIGIN || '*')
 const DATA_KEY_RAW = process.env.NOTIFY_DATA_KEY || '';
 const hashPhone = (phone) => keccak256(toUtf8Bytes(`quatrivium.phone.v1:${DATA_KEY_RAW}:${phone}`));
 const hashEmail = (email) => keccak256(toUtf8Bytes(`quatrivium.email.v1:${DATA_KEY_RAW}:${email}`));
-const BIND = process.env.NOTIFY_BIND || '127.0.0.1';
-const TRUST_PROXY = process.env.NOTIFY_TRUST_PROXY === '1';
+const BIND = process.env.NOTIFY_BIND || (process.env.PORT ? '0.0.0.0' : '127.0.0.1');
+const TRUST_PROXY = process.env.NOTIFY_TRUST_PROXY === '1' || Boolean(process.env.PORT);
 const hasSms =
   Boolean(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM) || Boolean(WHATSAPP_TOKEN && WHATSAPP_PHONE_ID);
 const hasEmail = Boolean(RESEND_KEY && EMAIL_FROM);
@@ -484,18 +487,35 @@ const requireAuth = (body) => {
           : '';
   const replayKey = createHash('sha256').update(`${wallet}:${purpose}:${timestamp}:${deviceHash}:${signature}`).digest('hex');
   if (store.usedAuth[replayKey]) throw new Error('replay');
-  const recovered = verifyTypedData(
-    AUTH_DOMAIN,
-    AUTH_TYPES,
-    {
-      wallet: getAddress(wallet),
-      purpose,
-      timestamp,
-      deviceHash,
-      phone: signedPhone,
-    },
-    signature
-  ).toLowerCase();
+  const authValue = {
+    wallet: getAddress(wallet),
+    purpose,
+    timestamp,
+    deviceHash,
+    phone: signedPhone,
+  };
+  const authDomains = [AUTH_DOMAIN];
+  // Hasta mainnet, la app en Cuenta Real firma chain 56 + contrato vacío. El worker Demo debe aceptar ese sello para correo/OTP.
+  if (!isMainnet) {
+    authDomains.push({
+      name: AUTH_DOMAIN.name,
+      version: AUTH_DOMAIN.version,
+      chainId: BSC_MAINNET.chainId,
+      verifyingContract: '0x0000000000000000000000000000000000000001',
+    });
+  }
+  let recovered = '';
+  for (const domain of authDomains) {
+    try {
+      const next = verifyTypedData(domain, AUTH_TYPES, authValue, signature).toLowerCase();
+      if (next === wallet) {
+        recovered = next;
+        break;
+      }
+    } catch {
+      // Probar el siguiente dominio.
+    }
+  }
   if (recovered !== wallet) throw new Error('signature');
   store.usedAuth[replayKey] = timestamp;
   const cutoff = Date.now() - 15 * 60 * 1000;
@@ -594,33 +614,105 @@ const sendWhatsApp = async (phone, text) => {
   }
 };
 
+const twilioBasic = () => Buffer.from(`${TWILIO_SID}:${TWILIO_TOKEN}`).toString('base64');
+
+const twilioJson = async (url, init = {}) => {
+  try {
+    const response = await fetch(url, {
+      ...init,
+      headers: {
+        Authorization: `Basic ${twilioBasic()}`,
+        ...(init.headers || {}),
+      },
+    });
+    let body = {};
+    try {
+      body = await response.json();
+    } catch {
+      body = {};
+    }
+    if (!response.ok) {
+      const detail = String(body.message || body.code || response.status).slice(0, 180);
+      console.error('Twilio HTTP', response.status, detail);
+    }
+    return { ok: response.ok, status: response.status, body };
+  } catch (error) {
+    console.error('Twilio red', error?.cause?.code || error?.name || 'fail');
+    return { ok: false, status: 0, body: {} };
+  }
+};
+
+const twilioForm = (url, params) =>
+  twilioJson(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(params),
+  });
+
 const sendSms = async (phone, text) => {
   if (!TWILIO_SID || !TWILIO_TOKEN || !TWILIO_FROM || !phone) return false;
-  try {
-    const auth = Buffer.from(`${TWILIO_SID}:${TWILIO_TOKEN}`).toString('base64');
-    const params = new URLSearchParams({ To: phone, From: TWILIO_FROM, Body: text });
-    const response = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${auth}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params,
-      }
-    );
-    return response.ok;
-  } catch {
-    return false;
+  const result = await twilioForm(
+    `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`,
+    { To: phone, From: TWILIO_FROM, Body: text }
+  );
+  return result.ok;
+};
+
+const ensureTwilioVerifyService = async () => {
+  if (twilioVerifySid) return twilioVerifySid;
+  if (!TWILIO_SID || !TWILIO_TOKEN) return '';
+  const listed = await twilioJson('https://verify.twilio.com/v2/Services?PageSize=50');
+  const services = Array.isArray(listed.body.services) ? listed.body.services : [];
+  const existing = services.find((row) => /quatrivium/i.test(String(row.friendly_name || '')));
+  if (existing?.sid) {
+    twilioVerifySid = existing.sid;
+    return twilioVerifySid;
   }
+  const created = await twilioForm('https://verify.twilio.com/v2/Services', {
+    FriendlyName: 'Quatrivium Finance',
+    CodeLength: '6',
+  });
+  if (created.ok && created.body.sid) {
+    twilioVerifySid = created.body.sid;
+    return twilioVerifySid;
+  }
+  return '';
+};
+
+const startTwilioVerify = async (phone, customCode) => {
+  const sid = await ensureTwilioVerifyService();
+  if (!sid || !phone) return { ok: false, custom: false };
+  const params = { To: phone, Channel: 'sms' };
+  if (customCode) params.CustomCode = customCode;
+  let result = await twilioForm(`https://verify.twilio.com/v2/Services/${sid}/Verifications`, params);
+  if (result.ok) return { ok: true, custom: Boolean(customCode) };
+  if (customCode) {
+    result = await twilioForm(`https://verify.twilio.com/v2/Services/${sid}/Verifications`, {
+      To: phone,
+      Channel: 'sms',
+    });
+    if (result.ok) return { ok: true, custom: false };
+  }
+  return { ok: false, custom: false };
+};
+
+const checkTwilioVerify = async (phone, code) => {
+  const sid = twilioVerifySid || (await ensureTwilioVerifyService());
+  if (!sid || !phone || !/^\d{6}$/.test(code)) return false;
+  const result = await twilioForm(`https://verify.twilio.com/v2/Services/${sid}/VerificationCheck`, {
+    To: phone,
+    Code: code,
+  });
+  return result.ok && String(result.body.status || '') === 'approved';
 };
 
 const deliverOtp = async (phone, code) => {
   const text = `Quatrivium Finance: su código de autenticación es ${code}. Caduca en 10 minutos. No lo comparta.`;
-  if (await sendSms(phone, text)) return 'sms';
-  if (await sendWhatsApp(phone, text)) return 'whatsapp';
-  return '';
+  if (await sendSms(phone, text)) return { channel: 'sms', via: 'body' };
+  const verified = await startTwilioVerify(phone, code);
+  if (verified.ok) return { channel: 'sms', via: verified.custom ? 'verify-custom' : 'twilio-verify' };
+  if (await sendWhatsApp(phone, text)) return { channel: 'whatsapp', via: 'body' };
+  return { channel: '', via: '' };
 };
 
 const sendEmail = async (to, subject, text) => {
@@ -1056,7 +1148,13 @@ const server = createServer(async (req, res) => {
   const path = requestPath(req);
   const ip = clientIp(req);
   if (req.method === 'GET' && path === '/health') {
-    json(res, 200, { ok: true, chainId: CHAIN_ID, rpc: Boolean(identityProvider) });
+    json(res, 200, {
+      ok: true,
+      chainId: CHAIN_ID,
+      rpc: Boolean(identityProvider),
+      email: hasEmail,
+      sms: hasSms,
+    });
     return;
   }
   if (req.method !== 'POST') {
@@ -1206,28 +1304,22 @@ const server = createServer(async (req, res) => {
         json(res, 429, { error: 'rate' });
         return;
       }
-      const code = (() => {
-        for (;;) {
-          const n = randomBytes(4).readUInt32BE(0);
-          if (n < 4_294_000_000) return String(n % 1_000_000).padStart(6, '0');
-        }
-      })();
+      const code = sixDigitCode();
+      const delivery = await deliverOtp(phone, code);
+      if (!delivery.channel) {
+        json(res, 503, { error: 'delivery' });
+        return;
+      }
       store.otps[wallet] = {
         phoneHash,
         deviceHash,
-        codeHash: hashOtp(code, phoneHash, wallet),
+        codeHash: delivery.via === 'twilio-verify' ? '' : hashOtp(code, phoneHash, wallet),
+        via: delivery.via,
         exp: now + 10 * 60 * 1000,
         attempts: 0,
       };
       persist();
-      const channel = await deliverOtp(phone, code);
-      if (!channel) {
-        delete store.otps[wallet];
-        persist();
-        json(res, 503, { error: 'delivery' });
-        return;
-      }
-      json(res, 200, { ok: true, channel });
+      json(res, 200, { ok: true, channel: delivery.channel });
       return;
     }
 
@@ -1250,7 +1342,11 @@ const server = createServer(async (req, res) => {
       json(res, 429, { error: 'rate' });
       return;
     }
-    if (!sameHash(pending.codeHash, hashOtp(code, phoneHash, wallet))) {
+    const usesTwilioVerify = pending.via === 'twilio-verify';
+    const codeOk = usesTwilioVerify
+      ? await checkTwilioVerify(phone, code)
+      : sameHash(pending.codeHash, hashOtp(code, phoneHash, wallet));
+    if (!codeOk) {
       persist();
       json(res, 401, { error: 'code' });
       return;
@@ -1779,7 +1875,7 @@ server.maxHeadersCount = 40;
 server.listen(PORT, BIND, () => {
   console.log(`Avisos Quatrivium Finance en http://${BIND}:${PORT}`);
   console.log(`Correo Resend: ${hasEmail ? 'listo' : 'sin RESEND_API_KEY o EMAIL_FROM'}`);
-  console.log(`SMS/WhatsApp: ${hasSms ? 'listo' : 'no configurado (OTP teléfono en demo)'}`);
+  console.log(`SMS Twilio: ${hasSms ? 'listo' : 'no configurado (falta SID, token o FROM)'}`);
   try {
     if (ATTESTER_KEY) console.log(`Attester de firma: ${new Wallet(ATTESTER_KEY).address}`);
   } catch {

@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: quatrivium-notify
+    runtime: docker
+    dockerfilePath: Dockerfile.notify
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8787"
+      - key: NOTIFY_BIND
+        value: "0.0.0.0"
+      - key: NOTIFY_TRUST_PROXY
+        value: "1"
+      - key: NOTIFY_CORS_ORIGIN
+        value: "https://quatriviumcredit.app"
+      - key: EXPO_PUBLIC_CHAIN_ID
+        value: "97"
+      - key: EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET
+        value: "0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f"
+      - key: NOTIFY_DATA_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM
+        sync: false
+      - key: ATTESTER_PRIVATE_KEY
+        sync: false
+      - key: PRIVATE_KEY
+        sync: false

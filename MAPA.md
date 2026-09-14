@@ -250,6 +250,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/bscNetworks.cjs` — módulo JS/TS
 - `scripts/check-i18n.mjs` — módulo JS/TS
 - `scripts/check-production.mjs` — módulo JS/TS
+- `scripts/deploy-notify.mjs` — módulo JS/TS
 - `scripts/deploy.cjs` — módulo JS/TS
   - Funciones/clases: DEPLOYED_TESTNET
 - `scripts/fetch-wallet-logos.py` — módulo Python
@@ -263,6 +264,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/prepare-production-local.mjs` — módulo JS/TS
 - `scripts/security-check.mjs` — módulo JS/TS
 - `scripts/seed-testnet.cjs` — módulo JS/TS
+- `scripts/set-sms-keys.mjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
 - `scripts/_audit-bytecode.cjs` — módulo JS/TS
