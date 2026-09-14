@@ -4,6 +4,8 @@
 Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y simbolo. Despues las 24 palabras. Esa frase se consulta en Ajustes y sirve para cambiar de telefono; no se reemplaza.
 
 ## Decisiones
+- [2026-09-14] Las politicas al usuario explican como trabaja la app, con que esta de acuerdo y que beneficios tiene. No incluyen detalle interno de proveedores, Demo ni codigo.
+- [2026-09-14] Politicas de privacidad y terminos se aceptan una vez tras el idioma y quedan en Ajustes para releer. El boton se activa al final del texto.
 - [2026-09-14] La wrap de sesion nunca vive en AsyncStorage. Apagar Desbloquear sigue abriendo sin PIN; la llave queda solo en SecureStore del aparato.
 - [2026-09-14] Los 12 rangos se muestran con nombres de gema. No volver a Bronce, Oro ni Platino.
 - [2026-09-14] El escaneo KYC es foto local del documento. No hay OCR. La declaracion on-chain sigue siendo declararKyc().
@@ -32,10 +34,11 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] Cuenta Real se muestra completa antes del lanzamiento. Donar y aportar liquidez suman fama. La UI de donar no menciona destino ni USDT real.
 - [2026-09-12] Bonos de hito en Demo y Real. Donar es sala aparte solo Real y solo suma fama. Real muestra el catalogo completo de 1000 niveles y 10 hitos aunque mainnet no este listo.
 - [2026-09-12] Donar se ve en Cuenta Real aunque la billetera personal aun no este agregada. El pool es el banco general; donar no entra al pool.
-- [2026-09-12] Donar es solo Cuenta Real (USDT de verdad). Demo no dona.
-- [2026-09-12] Si el correo ya esta verificado en el telefono, iniciar sesion es solo contrasena. El codigo se pide una vez. Guardar sesion queda en esa pantalla y se aplica al entrar.
 
 ## Cambios realizados
+- [2026-09-14] Textos legales de usuario: tono prestigioso, secciones cortas. Play sigue cubierto (datos, 18+, red irreversible, camara local).
+- [2026-09-14] Alta: idioma, luego politicas con aceptar al leer el final, luego cuenta. Ajustes muestra privacidad y terminos.
+- [2026-09-14] Textos legales y ficha Play reescritos: 1000 niveles, frase 24, KYC local, pool locked, sin destruir cuenta. Grafico e icono de tienda generados.
 - [2026-09-14] Auditoria en vivo Real: el nivel 1 ya no dice Disponible si mainnet no esta listo; muestra Pronto. Hub, credito, red, historial y donar abiertos sin crash.
 - [2026-09-14] Auditoria productiva: historial, referidos, credito, donar y cuenta corregidos para Demo y Real.
 - [2026-09-14] Auditoria del pool: Demo muestra el banco de 2000 USDT en solo lectura, sin aportar. Real no enseña NAV 0 ni formulario falso. El aporte no promete rendimiento retirable. LinkedWalletCard en la sala Pool.
@@ -83,13 +86,10 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-13] Auditoria en vivo: Metro caido, ADB colgado, app recargada. Hardhat 121/121, Demo live operativo. Texto MIUI: se quita fontWeight sintetizado.
 - [2026-09-13] Historial de referidos muestra comisiones, bono de primer pago y total generado
 - [2026-09-13] Historial Demo y Real separados. Reloj rojo en el hub: gracia cuenta atras, mora cuenta adelante hasta pagar.
-- [2026-09-13] Historial: transferencias y prestamos en ventanas aparte. Mora muestra dias, fama quitada, beneficios bloqueados y comisiones al pool.
-- [2026-09-13] Los avisos de frase, correo, KYC y telefono desaparecen de la pantalla principal al confirmarlos.
-- [2026-09-13] Eliminados dumps temporales .tmp, logs y capturas de auditoria que no usa la app. Anadidos al gitignore.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-14] Cambio: Auditoria en vivo Real: el nivel 1 ya no dice Disponible si mainnet no esta listo; muestra Pronto. Hub, credito, red, historial y donar abiertos sin crash.
+[2026-09-14] Decisión: Las politicas al usuario explican como trabaja la app, con que esta de acuerdo y que beneficios tiene. No incluyen detalle interno de proveedores, Demo ni codigo.

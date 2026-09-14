@@ -119,6 +119,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: LanguageSelector
 - `components/LanguageWelcome.tsx` — módulo JS/TS
   - Funciones/clases: LanguageWelcome
+- `components/LegalDocuments.tsx` — módulo JS/TS
+  - Funciones/clases: LegalDocuments
+- `components/LegalWelcome.tsx` — módulo JS/TS
+  - Funciones/clases: LegalWelcome
 - `components/LinkedWalletCard.tsx` — módulo JS/TS
   - Funciones/clases: LinkedWalletCard
 - `components/LinkWalletForm.tsx` — módulo JS/TS
@@ -237,6 +241,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: LanguageProvider, useI18n
 - `i18n/languages.ts` — módulo JS/TS
   - Funciones/clases: LANGUAGES, RTL_LANGS, isRtl, detectDeviceLang
+- `i18n/legalCopy.ts` — módulo JS/TS
+  - Funciones/clases: legalCopy, legalDocsFor
 - `i18n/translations.ts` — módulo JS/TS
   - Funciones/clases: translations
 - `profile/ProfileContext.tsx` — módulo JS/TS
@@ -340,6 +346,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/helpers.cjs` — módulo JS/TS
 - `test/identity.test.js` — módulo JS/TS
 - `test/kyc.test.js` — módulo JS/TS
+- `test/legal-consent.test.js` — módulo JS/TS
 - `test/levelProgress.test.js` — módulo JS/TS
 - `test/liquidation.test.js` — módulo JS/TS
 - `test/loanLevels.test.js` — módulo JS/TS
@@ -391,6 +398,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: INVITE_STORAGE_KEY, formatInviteCode, addressToInviteCode, inviteCodeToAddress, extractInviteFromText, extractInviteFromUrl, extractInviteNameFromUrl, parseInviteInput, buildInviteLink
 - `utils/legacyStorage.ts` — módulo JS/TS
   - Funciones/clases: migrateLegacyStorage
+- `utils/legalConsent.ts` — módulo JS/TS
+  - Funciones/clases: LEGAL_VERSION, LEGAL_STORAGE_KEY, parseLegalRecord, isCurrentLegalAccepted, makeLegalRecord, nextBootLegalScreen, hasReadToEnd
 - `utils/moraHistory.ts` — módulo JS/TS
   - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement, isSupportMovement
 - `utils/passwordPolicy.ts` — módulo JS/TS

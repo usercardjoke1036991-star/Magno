@@ -10,6 +10,7 @@ import HomeScreen from './app/index';
 import { ScreenGuard } from './components/ScreenGuard';
 import { AppLockGate } from './components/AppLockGate';
 import { LanguageWelcome } from './components/LanguageWelcome';
+import { LegalWelcome } from './components/LegalWelcome';
 import { FundsConfirmHost } from './components/FundsConfirmHost';
 import { AppModeProvider } from './wallet/AppModeContext';
 import { AppWalletProvider } from './wallet/AppWalletContext';
@@ -86,7 +87,8 @@ export default function App() {
           <LanguageProvider>
             <AppModeProvider>
               <LanguageWelcome>
-                <AppLockGate>
+                <LegalWelcome>
+                  <AppLockGate>
                   <FundsConfirmHost>
                     <DeferredWeb3>
                       <AppWalletProvider>
@@ -96,7 +98,8 @@ export default function App() {
                       </AppWalletProvider>
                     </DeferredWeb3>
                   </FundsConfirmHost>
-                </AppLockGate>
+                  </AppLockGate>
+                </LegalWelcome>
               </LanguageWelcome>
             </AppModeProvider>
           </LanguageProvider>

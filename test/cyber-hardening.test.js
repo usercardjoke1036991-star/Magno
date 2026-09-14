@@ -731,8 +731,9 @@ describe('account entry — password, email and session', () => {
   }
 
   it('asks for username and password before showing the 24 words', () => {
-    const steps = ['language', 'welcome', 'credentials', 'phrase'];
-    expect(steps.indexOf('language')).to.be.lessThan(steps.indexOf('welcome'));
+    const steps = ['language', 'legal', 'welcome', 'credentials', 'phrase'];
+    expect(steps.indexOf('language')).to.be.lessThan(steps.indexOf('legal'));
+    expect(steps.indexOf('legal')).to.be.lessThan(steps.indexOf('welcome'));
     expect(steps.indexOf('credentials')).to.be.lessThan(steps.indexOf('phrase'));
     expect(canSubmitCreateSecrets('ClaveValida1!', 'user@correo.com')).to.equal(true);
     const fs = require('fs');

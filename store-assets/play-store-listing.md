@@ -1,10 +1,14 @@
-# 📱 Play Store Listing — Quatrivium Finance
+# Play Store Listing — Quatrivium Finance
 
-Copia y pega estos textos directamente en Google Play Console.
+Copia estos textos en Google Play Console. **No envíes la app hasta que Cuenta Real tenga contrato en BSC mainnet.** No uses capturas de Demo ni pantallas con «Pronto».
+
+Paquete: `com.quatrivium.credit`  
+Versión actual del repo: `1.0.1`
 
 ---
 
 ## TÍTULO DE LA APP
+
 ```
 Quatrivium Finance
 ```
@@ -12,175 +16,159 @@ Quatrivium Finance
 ---
 
 ## DESCRIPCIÓN CORTA (máx. 80 caracteres)
+
 ### Español
+
 ```
-Microcréditos blockchain sin colateral. Empieza con $1 USDT, sube de nivel.
+Crédito USDT on-chain. 1000 niveles, sin aval. No es un banco.
 ```
-*75 caracteres ✅*
 
 ### English
+
 ```
-Blockchain microloans, no collateral. Start with $1 USDT, level up.
+On-chain USDT credit. 1,000 levels, no collateral. Not a bank.
 ```
-*67 characters ✅*
 
 ---
 
 ## DESCRIPCIÓN LARGA — ESPAÑOL (máx. 4000 caracteres)
 
 ```
-Quatrivium Finance es la primera app de microcrédito descentralizado sobre BNB Smart Chain. Sin banco, sin aval, sin historial crediticio tradicional. Solo tú, tu reputación on-chain y el contrato inteligente.
+Quatrivium Finance es una app de microcrédito on-chain en BNB Smart Chain. No es un banco, no es una financiera tradicional y no pide aval. El crédito vive en un contrato inteligente y en una billetera de la app.
 
-🔑 ¿CÓMO FUNCIONA?
-1. Descarga la app y se crea automáticamente tu wallet personal cifrada con tu PIN.
-2. Regístrate con tu número de teléfono (verificación OTP).
-3. Solicita tu primer microcrédito de $1 USDT.
-4. Págalo a tiempo y sube de nivel para pedir montos mayores.
+CÓMO EMPIEZA
+1. Creas una frase secreta de 24 palabras (BIP-39). Esa frase es tu cuenta de crédito. No se sustituye: en otro teléfono se recupera con las mismas palabras.
+2. Eliges usuario y contraseña de este aparato (8 a 66 caracteres, con mayúscula, número y símbolo).
+3. Vincular una billetera externa (WalletConnect) sirve para donar, aportar al pool, depositar, retirar y pagar el acceso.
+4. En Cuenta Real hace falta correo, teléfono del dispositivo, foto local del documento (KYC) y 1 USDT de acceso, una sola vez.
 
-📈 10 NIVELES DE CRÉDITO
-Empieza desde $1 USDT y escala hasta $100 USDT a medida que construyes tu historial:
-$1 → $2 → $5 → $10 → $20 → $35 → $50 → $60 → $80 → $100 USDT
+CRÉDITO
+Hay 1000 niveles, desde 1 USDT hasta 1 000 000 USDT. La tasa es plana sobre el principal durante el plazo del préstamo, no un APR bancario. Un préstamo a la vez. Tras pedir hay una espera de 48 horas antes del siguiente. El catálogo y las condiciones salen en la app antes de firmar.
 
-Cada pago a tiempo aumenta tu reputación en la blockchain. A partir del nivel 7, los pagos se dividen en cómodas cuotas.
+El interés, el plazo y las cuotas cambian con el nivel. Ejemplos:
+• Nivel 1: 1 USDT, 7 días, 100 % sobre el principal
+• Nivel 10: 100 USDT, 50 días, 34 %
+• Nivel 100: 10 000 USDT, 90 días, 8 %
+• Nivel 1000: 1 000 000 USDT, 180 días, 4,06 %
 
-🌐 SISTEMA DE REFERIDOS
-Invita a otras personas y gana comisiones automáticas en cada uno de sus pagos. Las ganancias se distribuyen en tiempo real directamente a tu wallet — sin intermediarios, sin esperas.
+Si no pagas al vencimiento hay un mes de gracia cobrando saldo. Después baja la reputación on-chain y las comisiones de esa línea van al pool hasta regularizar. No hay cobranza por contactos ni amenazas. Las transferencias en blockchain son irreversibles.
 
-• Bono de activación: $0.50 USDT cuando tu referido paga su primer crédito.
-• Royalties recurrentes: hasta 15% de cada interés pagado por tu línea de referidos.
-• Bono de red: $0.50 USDT extra por cada 250 puntos de red acumulados.
-• La red de comisiones recorre hasta 5 generaciones automáticamente.
+RED
+Puedes invitar con un código. Las comisiones las paga el contrato al liquidar interés, no un pagador humano. No son un sueldo ni una ganancia garantizada.
 
-🔒 SEGURIDAD DE NIVEL BANCARIO
-• Tu clave privada nunca sale de tu dispositivo — cifrada con tu PIN en el chip de seguridad de hardware.
-• Autenticación biométrica: huella dactilar o Face ID.
-• Vinculación dispositivo-wallet: nadie puede usar tu cuenta desde otro teléfono.
-• Bloqueo automático tras intentos fallidos.
-• Contratos inteligentes con timelock de 72h, multisig y auditoría de código abierto.
+POOL Y DONAR
+El pool financia los préstamos. Quien aporta liquidez no puede retirar: el capital queda para prestar. Donar es voluntario, solo en Cuenta Real, no entra al pool y no muestra destino en la app.
 
-⛓️ TECNOLOGÍA BLOCKCHAIN
-• 100% descentralizado — el protocolo vive en BSC y nadie puede cerrarlo.
-• Sin custodia — tus fondos nunca pasan por nuestros servidores.
-• Transparente — cualquiera puede auditar el contrato en BscScan.
-• Sin intermediarios — las comisiones se distribuyen automáticamente por el contrato inteligente.
+SEGURIDAD
+• La clave de la billetera interna se cifra en el teléfono (SecureStore). No la guardamos en un servidor.
+• Contraseña, PIN, huella o autenticador son opcionales según lo que actives.
+• En Real, teléfono y dispositivo quedan atados a esa cuenta. Formatear o cambiar de VPN no crea otra línea.
+• La app no destruye la cuenta. Los datos on-chain no se borran.
 
-📊 POOL DE LIQUIDEZ
-Los préstamos son financiados por un pool de liquidez descentralizado. El protocolo calcula automáticamente las tasas según la utilización del pool, garantizando siempre la sostenibilidad del sistema.
+IDIOMAS
+Español, English, 中文, हिंदी, العربية, বাংলা, Português, Русский, اردو, Indonesia, Français, 日本語, Deutsch, 한국어, Türkçe, Tiếng Việt, Italiano.
 
-⚠️ AVISO IMPORTANTE
-Quatrivium Finance opera sobre blockchain. Las transacciones son irreversibles. Asegúrate de entender los términos antes de solicitar un crédito. Los créditos no pagados afectan tu reputación on-chain permanentemente.
-
-🌍 DISPONIBLE EN 16 IDIOMAS
-Español · English · 中文 · हिंदी · العربية · বাংলা · Português · Русский · اردو · Bahasa Indonesia · Français · 日本語 · Deutsch · 한국어 · Türkçe · Tiếng Việt · Italiano
+AVISO
+Esto es un protocolo DeFi. Magno Technologies ofrece la interfaz. No somos tu banco. No hay seguro de depósitos. El pool puede no tener fondos para un nivel alto. USDT puede perder su paridad. Si pierdes la frase de 24 palabras, nadie puede recuperar esa cuenta.
 ```
-*~2800 caracteres ✅*
 
 ---
 
 ## DESCRIPCIÓN LARGA — ENGLISH (máx. 4000 caracteres)
 
 ```
-Quatrivium Finance is the first decentralized microloan app on BNB Smart Chain. No bank, no guarantor, no traditional credit history required. Just you, your on-chain reputation, and the smart contract.
+Quatrivium Finance is an on-chain microcredit app on BNB Smart Chain. It is not a bank, not a traditional lender, and it does not ask for collateral. Credit lives in a smart contract and in an in-app wallet.
 
-🔑 HOW IT WORKS
-1. Download the app — a personal wallet is automatically created and encrypted with your PIN.
-2. Register with your phone number (OTP verification).
-3. Request your first microloan of $1 USDT.
-4. Pay on time and level up to access higher amounts.
+GETTING STARTED
+1. You create a 24-word BIP-39 secret phrase. That phrase is your credit account. It is not replaced: on a new phone you recover the same words.
+2. You set a device username and password (8–66 characters, with an uppercase letter, a number and a symbol).
+3. An external wallet (WalletConnect) is used to donate, add to the pool, deposit, withdraw and pay access.
+4. Live accounts require email, the phone on this device, a local photo of an ID document (KYC), and a one-time 1 USDT access payment.
 
-📈 10 CREDIT LEVELS
-Start from $1 USDT and scale up to $100 USDT as you build your on-chain history:
-$1 → $2 → $5 → $10 → $20 → $35 → $50 → $60 → $80 → $100 USDT
+CREDIT
+There are 1,000 levels, from 1 USDT to 1,000,000 USDT. The rate is a flat fee on principal for the loan term, not a bank APR. One loan at a time. After you request a loan there is a 48-hour wait before the next one. Amounts, terms and fees are shown in the app before you sign.
 
-Every on-time payment increases your on-chain reputation. From level 7 onwards, payments are split into installments.
+Examples:
+• Level 1: 1 USDT, 7 days, 100% of principal
+• Level 10: 100 USDT, 50 days, 34%
+• Level 100: 10,000 USDT, 90 days, 8%
+• Level 1,000: 1,000,000 USDT, 180 days, 4.06%
 
-🌐 REFERRAL SYSTEM
-Invite others and earn automatic commissions on every payment they make. Earnings are distributed in real time directly to your wallet — no middlemen, no waiting.
+If you miss the due date there is a 30-day grace window while the app keeps trying to collect from the wallet. After that, on-chain reputation falls and that line’s commissions go to the pool until you catch up. There is no contact-list collection and no threats. Blockchain transfers cannot be reversed.
 
-• Activation bonus: $0.50 USDT when your referral pays their first loan.
-• Recurring royalties: up to 15% of every interest payment from your referral line.
-• Network bonus: $0.50 USDT for every 250 network points accumulated.
-• Commission network spans up to 5 generations automatically.
+NETWORK
+You can invite others with a code. Commissions are paid by the contract when interest is settled. They are not a salary and not a guaranteed return.
 
-🔒 BANK-GRADE SECURITY
-• Your private key never leaves your device — encrypted with your PIN in hardware secure storage.
-• Biometric authentication: fingerprint or Face ID.
-• Device-wallet binding: nobody can use your account from another phone.
-• Automatic lockout after failed attempts.
-• Smart contracts with 72h timelock, multisig, and open-source code audit.
+POOL AND DONATE
+The pool funds loans. Liquidity cannot be withdrawn: capital stays in the protocol to lend. Donations are voluntary, Live accounts only, do not enter the pool, and the app does not show a destination.
 
-⛓️ BLOCKCHAIN TECHNOLOGY
-• 100% decentralized — the protocol lives on BSC and cannot be shut down.
-• Non-custodial — your funds never pass through our servers.
-• Transparent — anyone can audit the contract on BscScan.
-• No intermediaries — commissions are distributed automatically by the smart contract.
+SECURITY
+• The internal wallet key is encrypted on the phone (SecureStore). We do not store it on a server.
+• Password, PIN, fingerprint or authenticator are optional depending on what you enable.
+• On Live accounts, phone and device are bound to that account. Factory reset or a VPN change does not create a second line.
+• The app does not destroy the account. On-chain data is permanent.
 
-📊 LIQUIDITY POOL
-Loans are funded by a decentralized liquidity pool. The protocol automatically calculates rates based on pool utilization, always ensuring system sustainability.
+LANGUAGES
+Spanish, English, 中文, हिंदी, العربية, বাংলা, Portuguese, Русский, اردو, Indonesian, French, 日本語, German, 한국어, Turkish, Vietnamese, Italian.
 
-⚠️ IMPORTANT NOTICE
-Quatrivium Finance operates on blockchain. Transactions are irreversible. Make sure you understand the terms before requesting a loan. Unpaid loans permanently affect your on-chain reputation.
-
-🌍 AVAILABLE IN 16 LANGUAGES
-Español · English · 中文 · हिंदी · العربية · বাংলা · Português · Русский · اردو · Bahasa Indonesia · Français · 日本語 · Deutsch · 한국어 · Türkçe · Tiếng Việt · Italiano
+NOTICE
+This is a DeFi protocol. Magno Technologies provides the interface. We are not your bank. There is no deposit insurance. The pool may not have funds for a high level. USDT can lose its peg. If you lose the 24-word phrase, nobody can restore that account.
 ```
-*~2700 characters ✅*
 
 ---
 
 ## CATEGORÍA
+
 ```
 Finanzas / Finance
 ```
 
-## ETIQUETAS (Tags)
+## ETIQUETAS
+
 ```
-microcrédito, blockchain, DeFi, préstamos, USDT, BNB, finanzas, crypto, referidos
+DeFi, blockchain, USDT, BSC, crédito, wallet, referidos
 ```
 
-## CLASIFICACIÓN DE CONTENIDO
-- Dirigido a: **Adultos (18+)**
-- Violencia: No
-- Contenido sexual: No
-- Juego de azar: No
-- Compras dentro de la app: No (las transacciones son directamente en blockchain)
-- Maneja dinero real: **Sí** → declarar en Financial Services
+No uses «banco», «APR garantizado», «ingresos pasivos» ni «MLM» en la ficha.
 
----
+## CLASIFICACIÓN
 
-## EMAIL DE SOPORTE (para Play Console)
+- Público: **18+**
+- Violencia / sexual / azar: No
+- Compras in-app de Google Play: **No** (el dinero se mueve on-chain)
+- Servicios financieros: **Sí**
+- Criptomonedas: **Sí** (no es un exchange ni rampa fiat)
+
+## CONTACTO PLAY CONSOLE
+
 ```
 soporte@quatriviumcredit.app
-```
-
-## SITIO WEB
-```
 https://quatriviumcredit.app
+https://quatriviumcredit.app/privacy-policy
+https://quatriviumcredit.app/terms
 ```
 
-## POLÍTICA DE PRIVACIDAD (URL)
-```
-https://quatriviumcredit.app/privacy-policy
-```
-*(Sube el archivo privacy-policy.html a esa URL antes de enviar la app a revisión)*
+Hospeda `privacy-policy.html` y `terms-of-service.html` en esas URLs **antes** de enviar.
 
 ---
 
-## NOTAS PARA SCREENSHOTS
-Play Store requiere **mínimo 2 screenshots**. Recomendado: 5-8.
+## CAPTURAS (mínimo 2; recomendado 6)
 
-Pantallas recomendadas para capturar:
-1. Pantalla de inicio — wallet conectada, saldo USDT visible
-2. Tarjetas de niveles de crédito ($1 → $100)
-3. Formulario de solicitud de crédito
-4. Pantalla de historial y reputación
-5. Sistema de referidos con árbol de comisiones
-6. Pantalla de configuración / seguridad (biometría)
-7. Panel de admin (si quieres mostrar transparencia del protocolo)
+Usa `store-assets/SCREENSHOTS.md`. Prohibido: frase de 24 palabras a la vista, Demo, «Pronto», panel Admin, datos de otra persona.
 
-**Especificaciones técnicas:**
-- Formato: JPG o PNG (sin transparencia)
-- Resolución mínima: 320px en el lado más corto
-- Resolución máxima: 3840px en cualquier lado
-- Relación de aspecto: 16:9 o 9:16
-- Tamaño máximo: 8 MB por imagen
+1. Hub de Cuenta Real con crédito activo
+2. Catálogo de niveles (gemas I / II / III)
+3. Red con botón Copiar código
+4. Historial (Transferencias / Apoyo y bonos / Préstamos)
+5. Seguridad sin revelar la frase
+6. Donar o pool con el aviso de que el pool no se retira
+
+Especificaciones Play: PNG o JPG, 16:9 o 9:16, lado corto ≥ 320 px, ≤ 8 MB.
+
+## GRÁFICO DE FUNCIÓN
+
+`store-assets/feature-graphic.png` — 1024×500, sin transparencia.
+
+## ICONO DE TIENDA
+
+`store-assets/play-icon-512.png` — 512×512 PNG, sin canal alfa si Play lo rechaza.

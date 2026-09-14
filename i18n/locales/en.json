@@ -954,5 +954,11 @@
   "linkedWalletAccount": "External wallet",
   "linkedWalletNone": "Not linked",
   "linkedWalletSave": "Register this wallet",
-  "linkWalletBind": "Link wallet"
+  "linkWalletBind": "Link wallet",
+  "legalTitle": "Before you continue",
+  "legalLead": "These pages explain how Quatrivium Finance works, what you agree to, and what you receive in return.",
+  "legalPrivacy": "Privacy",
+  "legalTerms": "Conditions",
+  "legalAccept": "I have read and I accept",
+  "legalMustRead": "Please continue to the end to confirm."
 }

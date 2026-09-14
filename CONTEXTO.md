@@ -239,6 +239,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-14 | Privacidad y condiciones reescritas con tono de casa financiera: como trabaja, que acepta y que obtiene. Sin jerga interna ni proveedores en el texto al usuario. | — |
+| 2026-09-14 | Tras el idioma, privacidad y terminos con Acepto al llegar al final. Las mismas politicas se leen en Ajustes. | — |
+| 2026-09-14 | Ficha Play, privacidad, terminos, Data safety y grafico 1024x500 alineados al producto real. Camera/fotos declaradas. Assetlinks plantilla pendiente de SHA-256. | — |
 | 2026-09-14 | Auditoria cuenta/credito/niveles/bonos/red/historial/donar: historial muestra acceso, bonos y donaciones sin destino; codigo de referido se copia; correo del banner abre verificacion; deposito de entrada cambia de red; donar no mezcla el 1 USDT de acceso. | — |
 | 2026-09-14 | Pool de liquidez: sala visible en Demo (caja publica, sin depositar). Real sin contrato no muestra 0 USDT ni el formulario. LP y aviso de no retiro visibles. Hardhat 135/135. Demo live NAV 2000.7 USDT, peg fresco. | — |
 | 2026-09-14 | Ciberseguridad: wrap de sesion migrada fuera de AsyncStorage; /session/check exige firma EIP-712 purpose session; plugin expo-screen-capture; frase no seleccionable y se oculta al recorte o al cerrar el panel. Hardhat 135/135. | — |

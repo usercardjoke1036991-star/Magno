@@ -25,8 +25,9 @@ import { isPhraseBackedUp } from '../services/appWallet';
 import { useAppMode } from '../wallet/AppModeContext';
 import type { TranslationKey } from '../i18n/translations';
 import { AppText } from './AppText';
+import { LegalDocuments } from './LegalDocuments';
 
-type Panel = 'home' | 'security' | 'appearance' | 'language' | 'mode' | 'admin';
+type Panel = 'home' | 'security' | 'appearance' | 'language' | 'mode' | 'admin' | 'privacy' | 'terms';
 
 export const SettingsButton: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -68,6 +69,8 @@ export const SettingsButton: React.FC = () => {
     language: 'language',
     mode: 'appModeTitle',
     admin: 'settingsAdminTitle',
+    privacy: 'legalPrivacy',
+    terms: 'legalTerms',
   };
 
   const MenuRow = ({
@@ -75,7 +78,7 @@ export const SettingsButton: React.FC = () => {
     label,
     onPress,
   }: {
-    icon: 'shield' | 'sun' | 'globe' | 'bank';
+    icon: 'shield' | 'sun' | 'globe' | 'bank' | 'info';
     label: string;
     onPress: () => void;
   }) => (
@@ -151,12 +154,16 @@ export const SettingsButton: React.FC = () => {
                     })}
                     onPress={() => setPanel('mode')}
                   />
+                  <MenuRow icon="info" label={t('legalPrivacy')} onPress={() => setPanel('privacy')} />
+                  <MenuRow icon="info" label={t('legalTerms')} onPress={() => setPanel('terms')} />
                 </View>
               ) : null}
               {panel === 'security' ? <SecuritySettings /> : null}
               {panel === 'appearance' ? <ThemeToggle hideLabel /> : null}
               {panel === 'language' ? <LanguageSelector hideLabel /> : null}
               {panel === 'mode' ? <ModeToggle /> : null}
+              {panel === 'privacy' ? <LegalDocuments mode="read" doc="privacy" /> : null}
+              {panel === 'terms' ? <LegalDocuments mode="read" doc="terms" /> : null}
               {panel === 'admin' ? <AdminAccess /> : null}
             </ScrollView>
           </View>

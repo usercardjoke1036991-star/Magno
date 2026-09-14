@@ -954,5 +954,11 @@
   "copyInvite": "Copy code",
   "inviteCopied": "Code copied.",
   "donateAccessNote": "The {amount} USDT access fee is separate.",
-  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone."
+  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone.",
+  "legalTitle": "계속하기 전에",
+  "legalLead": "Quatrivium Finance가 어떻게 일하는지, 무엇에 동의하는지, 무엇을 받는지 설명합니다.",
+  "legalPrivacy": "개인정보",
+  "legalTerms": "조건",
+  "legalAccept": "읽었으며 동의합니다",
+  "legalMustRead": "확인하려면 끝까지 이동하세요."
 }

@@ -954,5 +954,11 @@
   "copyInvite": "Copy code",
   "inviteCopied": "Code copied.",
   "donateAccessNote": "The {amount} USDT access fee is separate.",
-  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone."
+  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone.",
+  "legalTitle": "এগোবার আগে",
+  "legalLead": "এই পাতায় Quatrivium Finance কীভাবে কাজ করে, আপনি কীতে রাজি এবং বিনিময়ে কী পান।",
+  "legalPrivacy": "গোপনীয়তা",
+  "legalTerms": "শর্ত",
+  "legalAccept": "পড়েছি এবং মেনে নিই",
+  "legalMustRead": "নিশ্চিত করতে শেষ পর্যন্ত যান।"
 }

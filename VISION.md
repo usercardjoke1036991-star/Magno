@@ -111,6 +111,8 @@
 - marcos de rango mas cargados con piedras preciosas por division I II III
 - apartado especial para ver los 36 marcos de rango y referidos se ven el marco entre ellos
 - Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III
+- ficha Play Store, privacidad y terminos alineados al producto real (1000 niveles, KYC, sin destruir cuenta)
+- privacidad y terminos tras elegir idioma con aceptar al leer, y las mismas politicas en Ajustes
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -198,3 +200,5 @@
 - [2026-09-14 07:30] Módulo completado: 'marcos de rango mas cargados con piedras preciosas por division I II III'
 - [2026-09-14 07:49] Idea añadida al backlog: "Marco de rango = logo de la app entrelazando la foto, metal pintado con color ni"
 - [2026-09-14 07:49] Módulo completado: 'Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III'
+- [2026-09-14 16:09] Idea añadida al backlog: "ficha Play Store, privacidad y terminos alineados al producto real (1000 niveles"
+- [2026-09-14 16:26] Idea añadida al backlog: "privacidad y terminos tras elegir idioma con aceptar al leer, y las mismas polit"

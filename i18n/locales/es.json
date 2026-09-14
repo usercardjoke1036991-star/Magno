@@ -954,5 +954,11 @@
   "linkedWalletAccount": "Billetera externa",
   "linkedWalletNone": "Sin vincular",
   "linkedWalletSave": "Registrar esta billetera",
-  "linkWalletBind": "Vincular billetera"
+  "linkWalletBind": "Vincular billetera",
+  "legalTitle": "Antes de continuar",
+  "legalLead": "Estas páginas explican cómo trabaja Quatrivium Finance, con qué está de acuerdo y qué obtiene a cambio.",
+  "legalPrivacy": "Privacidad",
+  "legalTerms": "Condiciones",
+  "legalAccept": "He leído y acepto",
+  "legalMustRead": "Avance hasta el final para confirmar."
 }

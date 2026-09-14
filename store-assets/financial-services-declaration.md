@@ -1,103 +1,73 @@
-# 📋 Guía: Financial Services Declaration — Google Play Console
+# Guía: Servicios financieros — Google Play Console
 
-Google exige esta declaración para apps que manejan dinero real, préstamos o criptomonedas.
+Ruta: Política de la app → Contenido de la app → Servicios financieros.
 
----
+La app **no es un banco**. Si Google solo deja «préstamos personales» como casilla, rellena con honestidad y adjunta estos términos. Las tasas de Quatrivium son **planas sobre el principal durante el plazo**, no un APR de tarjeta.
 
-## ¿Dónde la encuentras?
-
-1. Ve a [play.google.com/console](https://play.google.com/console)
-2. Selecciona tu app
-3. Menú izquierdo → **Política de la app** → **Contenido de la app**
-4. Busca la sección **"Servicios financieros"**
+Marcar APR 40–100 % como si fuera anual **era un error** de la guía anterior (esas cifras eran la tasa del plazo del nivel 1–10 antiguo).
 
 ---
 
-## Cómo responder cada pregunta
+## Pregunta 1: ¿Ofrece servicios financieros?
 
-### Pregunta 1: ¿Tu app ofrece servicios financieros?
-**Respuesta: SÍ**
+**Sí.**
 
-### Pregunta 2: ¿Tu app ofrece préstamos o créditos?
-**Respuesta: SÍ**
+## Pregunta 2: ¿Préstamos o créditos?
 
-→ Google abrirá un formulario adicional. Responde así:
+**Sí** — microcrédito on-chain en USDT, sin colateral, ejecutado por contrato en BSC.
 
-| Campo | Respuesta |
-|---|---|
-| ¿Es una app de préstamos personales? | **Sí** |
-| Tasa de interés anual (APR) mínima | **40%** (Nivel 7, la más baja) |
-| Tasa de interés anual (APR) máxima | **100%** (Niveles 1 y 2) |
-| Plazo mínimo del préstamo (días) | **7** |
-| Plazo máximo del préstamo (días) | **50** |
-| ¿Requiere acceso a contactos del teléfono? | **No** |
-| ¿Requiere acceso a fotos/multimedia para aprobación? | **No** |
-| ¿Requiere acceso a ubicación para aprobación? | **No** |
-| País/países de operación | Los países donde distribuyes la app |
-| URL de política de privacidad | `https://quatriviumcredit.app/privacy-policy` |
-| URL de términos de servicio | `https://quatriviumcredit.app/terms` (crear) |
+### Si pide ficha de préstamo personal
 
-### Pregunta 3: ¿Tu app involucra criptomonedas?
-**Respuesta: SÍ** — la app usa USDT (stablecoin) sobre BNB Smart Chain.
+| Campo | Qué poner | Nota |
+|---|---|---|
+| ¿Préstamos personales? | Sí, con matiz DeFi (no licencia bancaria) | Riesgo alto de rechazo en IN / US si lo presentas como neobank |
+| Tasa | **Tasa plana del plazo**, no APR | Nivel 1: 100 % en 7 días. Nivel 1000: 4,06 % en 180 días |
+| Si Google obliga APR anualizado | Nivel 1 ≈ muy alto; nivel 100 ≈ ~32 %; nivel 1000 ≈ ~8 % | No redondees el nivel 1 a «100 % APR» |
+| Plazo mínimo | 7 días | Nivel 1 |
+| Plazo máximo | 180 días | Nivel 1000 |
+| ¿Contactos para cobrar? | **No** | |
+| ¿Fotos para aprobar? | **Sí** — KYC: foto local del documento, sin OCR ni subida a servidor | Antes decía No; el manifiesto tiene cámara |
+| ¿Ubicación para aprobar? | **No** | |
+| Privacidad | `https://quatriviumcredit.app/privacy-policy` | |
+| Términos | `https://quatriviumcredit.app/terms` | |
 
-→ Aclarar en el formulario:
-- No es una exchange de criptomonedas
-- No permite comprar/vender cripto con dinero fiat
-- El token USDT se usa como medio de pago en el protocolo de préstamos
+En comentarios libres, pega:
 
----
-
-## ⚠️ Política de Google sobre Apps de Préstamos Personales
-
-Google tiene políticas MUY estrictas para apps de préstamos. Los puntos críticos:
-
-### ✅ LO QUE DEBES CUMPLIR:
-- Mostrar APR, plazos y costos totales ANTES de que el usuario acepte
-- No acceder a contactos, fotos ni ubicación para gestión de deudas
-- No amenazar ni humillar a usuarios morosos
-- No compartir datos de usuarios con terceros sin consentimiento
-
-### ✅ LO QUE YA TIENE TU APP (puntos a favor):
-- Sin acceso a contactos (✅ no pedido en permisos)
-- Sin acceso a cámara para préstamos (✅)
-- Sin ubicación requerida (✅)
-- APR y plazos visibles en las tarjetas de niveles (✅)
-- Sistema de reputación en lugar de cobranza agresiva (✅)
-
----
-
-## Documentos adicionales que Google puede pedir
-
-Para apps de servicios financieros, Google puede solicitar durante la revisión:
-
-1. **Licencia o registro regulatorio** (si operas en países con regulación cripto)
-   - Si solo distribuyes globalmente sin apuntar a un país específico regulado, generalmente no es necesario
-   - Si apuntas a USA, UK o UE: requiere investigación legal adicional
-
-2. **Términos de Servicio** (URL pública obligatoria)
-   - Ver archivo `terms-of-service.html` en esta carpeta
-
-3. **Evidencia de que el protocolo es descentralizado**
-   - URL del contrato en BscScan: `https://bscscan.com/address/TU_CONTRATO_MAINNET`
-   - Código fuente verificado en BscScan (hacerlo tras el deploy)
-
----
-
-## Verificar el contrato en BscScan (hacer tras deploy mainnet)
-
-```bash
-npx hardhat verify --network bscMainnet TU_DIRECCION_CONTRATO
+```
+Quatrivium Finance is a non-custodial DeFi interface. Loans are USDT on BNB Smart Chain.
+Fees are a flat rate on principal for the listed term, shown in-app before signing.
+Not a bank. No fiat on-ramp. No contact-list collections. 18+.
+Camera is used only for a local ID photo (KYC); the image is not uploaded.
+Liquidity providers cannot withdraw (pool locked). Blockchain txs are irreversible.
 ```
 
-Esto hace el contrato de código abierto y verificado en BscScan — un punto MUY positivo para la revisión de Google ya que demuestra transparencia.
+## Pregunta 3: ¿Criptomonedas?
 
----
+**Sí.**
 
-## Países donde NO deberías distribuir (restricciones legales cripto)
+- No es un exchange.
+- No compra ni vende cripto por dinero fiat dentro de Play.
+- USDT es el medio de préstamo, acceso, donar y pool.
+- Wallet interna (24 palabras) + wallet externa WalletConnect.
 
-Considera excluir estos países en Play Console para evitar problemas regulatorios:
-- 🇨🇳 China (prohibición cripto total)
-- 🇷🇺 Rusia (restricciones)
-- 🇸🇦 Arabia Saudita (en revisión)
+## Lo que Google mira y ya cumple el código
 
-Para excluirlos: Play Console → Distribución → Países → Excluir
+- APR/coste visible en tarjetas de nivel antes de firmar.
+- Sin contactos.
+- Sin ubicación.
+- Mora on-chain, no acoso.
+- 18+ en ficha y política.
+
+## Lo que te puede tumbar
+
+- Ficha que diga «10 niveles hasta 100 USDT» (eso ya no es el producto).
+- Decir que no usas cámara teniendo `CAMERA` en el manifiesto.
+- Prometer auditoría bancaria o «nadie puede pausar el protocolo».
+- Subir un AAB de Demo / dev-client.
+- Distribuir en países con prohibición cripto sin excluirlos (p. ej. CN).
+
+## Tras el deploy mainnet
+
+1. Verificar el contrato en BscScan.
+2. Pegar la URL en Play y en los términos.
+3. No envíes revisión con contrato `0x000…000`.
