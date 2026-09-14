@@ -28,6 +28,10 @@ export interface ReferralNode {
   commissionWei: string;
   commissionLabel: string;
   level: number;
+  registeredBlock: number;
+  registeredAt: number;
+  lastEarnBlock: number;
+  lastEarnAt: number;
   children: ReferralChild[];
 }
 
@@ -231,6 +235,88 @@ async function nearestDirect(
   return '';
 }
 
+const branchCache = new Map<string, ReferralChild[]>();
+
+export function clearReferralBranchCache(): void {
+  branchCache.clear();
+}
+
+export async function loadReferralChildren(parentAddress: string): Promise<ReferralChild[]> {
+  const parent = normalizeAddress(parentAddress);
+  if (!parent || !isContractConfigured()) return [];
+  const cached = branchCache.get(parent.toLowerCase());
+  if (cached) return cached;
+
+  const provider = await assertTrustedRpc(getProviderWithFallback());
+  const contractAddress = getContractAddress();
+  const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
+  const { fromBlock, toBlock } = await resolveStartBlock(provider, contractAddress);
+  const pack = await queryFilterChunked(
+    contract,
+    eventFilter(contract, 'AfiliadoRegistrado', null, parent),
+    fromBlock,
+    toBlock
+  );
+  const seen = new Set<string>();
+  const people: ReferralChild[] = [];
+  for (const event of pack.events) {
+    const args = eventArgs(event);
+    const usuario = normalizeAddress(asText(argValue(args, 'usuario', 0)));
+    const key = usuario.toLowerCase();
+    if (!usuario || key === parent.toLowerCase() || seen.has(key)) continue;
+    seen.add(key);
+    people.push({ address: usuario, code: addressToInviteCode(usuario), level: 1 });
+  }
+  const levels = await Promise.all(
+    people.map(async (person) => {
+      try {
+        const progress = await contract.obtenerProgresoUsuario(person.address);
+        return Math.min(100, Math.max(1, Number(progress.nivelActual ?? progress[0] ?? 1) || 1));
+      } catch {
+        return 1;
+      }
+    })
+  );
+  const next = people.map((person, index) => ({ ...person, level: levels[index] || 1 }));
+  if (pack.failed === 0 || next.length > 0) {
+    branchCache.set(parent.toLowerCase(), next);
+  }
+  return next;
+}
+
+export async function fillReferralTimestamps(
+  nodes: ReferralNode[]
+): Promise<Map<string, { registeredAt: number; lastEarnAt: number }>> {
+  const out = new Map<string, { registeredAt: number; lastEarnAt: number }>();
+  const list = Array.isArray(nodes) ? nodes : [];
+  const blocks = list.flatMap((node) => [node.registeredBlock, node.lastEarnBlock].filter((block) => block > 0));
+  if (!blocks.length) {
+    for (const node of list) {
+      out.set(node.address.toLowerCase(), {
+        registeredAt: node.registeredAt || 0,
+        lastEarnAt: node.lastEarnAt || 0,
+      });
+    }
+    return out;
+  }
+  try {
+    const provider = await assertTrustedRpc(getProviderWithFallback());
+    const stamps = await resolveTimestamps(provider, blocks);
+    for (const node of list) {
+      out.set(node.address.toLowerCase(), {
+        registeredAt: stamps.get(node.registeredBlock) || node.registeredAt || 0,
+        lastEarnAt: stamps.get(node.lastEarnBlock) || node.lastEarnAt || 0,
+      });
+    }
+    return out;
+  } catch {
+    for (const node of list) {
+      out.set(node.address.toLowerCase(), { registeredAt: 0, lastEarnAt: 0 });
+    }
+    return out;
+  }
+}
+
 export async function loadReferralNetwork(walletAddress: string): Promise<ReferralNetworkSnapshot> {
   if (!walletAddress || !isContractConfigured()) return EMPTY;
 
@@ -241,6 +327,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const contractAddress = getContractAddress();
   const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
   const { fromBlock, toBlock, partial: lookbackPartial } = await resolveStartBlock(provider, contractAddress);
+  clearReferralBranchCache();
 
   const signupFilter = eventFilter(contract, 'AfiliadoRegistrado', null, self);
   const bonusFilter = eventFilter(contract, 'BonoActivacionPagado', self);
@@ -275,46 +362,34 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
         commissionWei: '0',
         commissionLabel: formatToken(0n),
         level: 1,
+        registeredBlock: event.blockNumber || 0,
+        registeredAt: 0,
+        lastEarnBlock: 0,
+        lastEarnAt: 0,
         children: [],
       });
+    } else {
+      const existing = nodes.get(key);
+      const block = event.blockNumber || 0;
+      if (existing && block > 0 && (!existing.registeredBlock || block < existing.registeredBlock)) {
+        existing.registeredBlock = block;
+      }
     }
   }
 
-  const childResults = await Promise.all(
-    [...nodes.values()].map(async (node) => {
-      const pack = await queryFilterChunked(
-        contract,
-        eventFilter(contract, 'AfiliadoRegistrado', null, node.address),
-        fromBlock,
-        toBlock
-      );
-      return { node, pack };
-    })
-  );
-  let failed = signupPack.failed + bonusPack.failed + commissionPack.failed;
-  for (const { node, pack } of childResults) {
-    failed += pack.failed;
-    node.children = pack.events
-      .map((event) => {
-        const args = eventArgs(event);
-        const usuario = normalizeAddress(asText(argValue(args, 'usuario', 0)));
-        return usuario
-          ? { address: usuario, code: addressToInviteCode(usuario), level: 1 }
-          : null;
-      })
-      .filter((item): item is ReferralChild => Boolean(item));
-  }
+  const failed = signupPack.failed + bonusPack.failed + commissionPack.failed;
 
   const parentCache = new Map<string, string>();
   parentCache.set(self.toLowerCase(), ZERO);
 
-  const addEarned = (address: string, amount: bigint, kind: 'bonus' | 'commission') => {
+  const addEarned = (address: string, amount: bigint, kind: 'bonus' | 'commission', blockNumber: number) => {
     const key = address.toLowerCase();
     const node = nodes.get(key);
     if (!node) return;
     const next = BigInt(node.earnedWei) + amount;
     node.earnedWei = next.toString();
     node.earnedLabel = formatToken(next);
+    if (blockNumber > node.lastEarnBlock) node.lastEarnBlock = blockNumber;
     if (kind === 'bonus') {
       const nextBonus = BigInt(node.bonusWei) + amount;
       node.bonusWei = nextBonus.toString();
@@ -347,7 +422,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     const referido = normalizeAddress(asText(argValue(args, 'referido', 1)));
     const amount = asBigInt(argValue(args, 'monto', 2));
     const token = asText(argValue(args, 'token', 3));
-    if (referido) addEarned(referido, amount, 'bonus');
+    if (referido) addEarned(referido, amount, 'bonus', event.blockNumber || 0);
     drafts.push({
       id: `${event.transactionHash}-bonus`,
       type: 'bonus',
@@ -369,7 +444,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
       const owner = directSet.has(deudor.toLowerCase())
         ? deudor
         : await nearestDirect(contract, deudor, self, directSet, parentCache);
-      if (owner) addEarned(owner, amount, 'commission');
+      if (owner) addEarned(owner, amount, 'commission', event.blockNumber || 0);
     }
     drafts.push({
       id: `${event.transactionHash}-commission-${generation}`,
@@ -391,13 +466,17 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     timestamp: stamps.get(blockNumber) || 0,
   }));
 
-  const directs = [...nodes.values()].sort((a, b) => Number(BigInt(b.earnedWei) - BigInt(a.earnedWei)));
+  const directs = [...nodes.values()].sort((a, b) => {
+    const byBlock = (b.registeredBlock || 0) - (a.registeredBlock || 0);
+    if (byBlock) return byBlock;
+    const byEarn = BigInt(b.earnedWei) - BigInt(a.earnedWei);
+    if (byEarn > 0n) return 1;
+    if (byEarn < 0n) return -1;
+    return 0;
+  });
   const totals = sumReferralEarnings(directs);
 
-  const levelTargets = [
-    ...directs.map((node) => node.address),
-    ...directs.flatMap((node) => node.children.map((child) => child.address)),
-  ];
+  const levelTargets = directs.map((node) => node.address);
   const uniqueLevels = [...new Set(levelTargets.map((item) => item.toLowerCase()))];
   const levelEntries = await Promise.all(
     uniqueLevels.map(async (address) => {
@@ -413,10 +492,6 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const levels = new Map(levelEntries);
   for (const node of directs) {
     node.level = levels.get(node.address.toLowerCase()) || 1;
-    node.children = node.children.map((child) => ({
-      ...child,
-      level: levels.get(child.address.toLowerCase()) || 1,
-    }));
   }
 
   return {

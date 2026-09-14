@@ -123,7 +123,7 @@ async function main() {
   }
   if (isMainnet && admins.length === 1) {
     console.warn(
-      'Mainnet con 1 fundadora. Las otras 2 se agregan desde la app (propuesta + 72 h). Al completar las 3, el contrato exige 2 firmas solo.'
+      'Mainnet con 1 fundadora. Las otras 2 se agregan desde la app (propuesta + 72 h). Al completar las 3, el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan.'
     );
   }
   if (isMainnet && admins.length >= 2 && confirms < 2) {

@@ -36,19 +36,18 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T
 }
 
 export async function isSessionSaved(): Promise<boolean> {
-  const secure = await withTimeout(
+  try {
+    if ((await AsyncStorage.getItem(FLAG_FALLBACK)) === '1') return true;
+  } catch {
+    // ignore
+  }
+  return withTimeout(
     SecureStore.getItemAsync(FLAG)
       .then((value) => value === '1')
       .catch(() => false),
-    1500,
+    12000,
     false
   );
-  if (secure) return true;
-  try {
-    return (await AsyncStorage.getItem(FLAG_FALLBACK)) === '1';
-  } catch {
-    return false;
-  }
 }
 
 export async function purgePersistedWrap(): Promise<void> {
@@ -76,14 +75,18 @@ export async function markSessionSaved(): Promise<void> {
 }
 
 export async function restoreSavedSessionWrap(): Promise<boolean> {
-  if (!(await isSessionSaved())) return false;
-  if (await withTimeout(isAuthEnabled('unlock').catch(() => false), 1500, false)) return false;
   try {
-    const raw =
-      (await withTimeout(SecureStore.getItemAsync(WRAP).catch(() => null), 1500, null)) ||
-      (await AsyncStorage.getItem(WRAP_FALLBACK));
+    const fallback = await AsyncStorage.getItem(WRAP_FALLBACK).catch(() => null);
+    let raw = fallback;
+    if (!raw) {
+      raw = await withTimeout(SecureStore.getItemAsync(WRAP).catch(() => null), 12000, null);
+    }
+    if (__DEV__) {
+      console.log('[boot] wrap restore', { fromFallback: Boolean(fallback), fromSecure: Boolean(raw && !fallback) });
+    }
     if (!raw) return false;
     setWalletWrapKey(raw);
+    await AsyncStorage.setItem(WRAP_FALLBACK, raw).catch(() => {});
     return Boolean(getWalletWrapKey());
   } catch {
     return false;

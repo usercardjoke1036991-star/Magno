@@ -11,7 +11,6 @@ import {
   saveOwnProfile,
   type UserProfile,
 } from '../services/userProfile';
-import { loadClaimedUsername } from '../services/accountUsername';
 
 interface ProfileValue {
   profile: UserProfile;
@@ -32,12 +31,28 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [directory, setDirectory] = useState<Record<string, UserProfile>>({});
 
   useEffect(() => {
-    Promise.all([
-      loadOwnProfile(walletAddress || undefined),
-      loadClaimedUsername(),
-    ])
-      .then(([stored, username]) => {
-        setProfile(username ? { ...stored, displayName: username } : stored);
+    loadOwnProfile(walletAddress || undefined)
+      .then(async (stored) => {
+        let next = stored;
+        if (walletAddress) {
+          const remote = await fetchPublicProfiles([walletAddress]).catch(
+            () => ({} as Record<string, UserProfile>)
+          );
+          const found = remote[walletAddress.toLowerCase()];
+          if (found) {
+            next = {
+              ...next,
+              displayName: next.publicFace ? next.displayName : found.displayName || next.displayName,
+              publicPhoto: next.publicFace ? next.publicPhoto : found.publicPhoto || next.publicPhoto,
+              avatarId: next.publicFace ? next.avatarId : found.avatarId,
+              publicFace: next.publicFace || found.publicFace || Boolean(found.displayName),
+            };
+            if (next.publicFace && !stored.publicFace) {
+              await saveOwnProfile(next, walletAddress).catch(() => {});
+            }
+          }
+        }
+        setProfile(next);
       })
       .catch(() => {});
     loadProfileDirectory().then(setDirectory).catch(() => {});
@@ -49,11 +64,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [walletAddress, profile]);
 
   const saveProfile = useCallback(async (next: UserProfile) => {
-    const username = await loadClaimedUsername().catch(() => '');
-    const stored = await saveOwnProfile(
-      { ...next, displayName: username || next.displayName },
-      walletAddress || undefined
-    );
+    const stored = await saveOwnProfile(next, walletAddress || undefined);
     setProfile(stored);
     if (walletAddress) {
       const updated = await rememberProfile(walletAddress, stored);

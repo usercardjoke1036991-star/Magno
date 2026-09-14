@@ -14,6 +14,7 @@ import {
 } from '../services/userProfile';
 import { AppIcon } from './icons';
 import { ProfileAvatar } from './ProfileAvatar';
+import { PublicFacePicker } from './PublicFacePicker';
 import { UsernameSection } from './UsernameSection';
 import { useWalletLevel } from '../hooks/useWalletLevel';
 import { getRankForLevel } from '../constants/ranks';
@@ -73,7 +74,11 @@ export const ProfileSettings: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveProfile({ ...draft, displayName: username || draft.displayName });
+      await saveProfile({
+        ...draft,
+        displayName: username || draft.displayName,
+        publicFace: draft.publicFace || Boolean(username),
+      });
       Alert.alert(t('ready'), t('profileSaved'));
     } catch {
       Alert.alert(t('error'), t('profileSaveError'));
@@ -89,6 +94,7 @@ export const ProfileSettings: React.FC = () => {
           profile={draft}
           wallet={walletAddress}
           size={72}
+          publicView
           level={walletAddress ? level : undefined}
           rankName={t(getRankForLevel(level).nameKey)}
           showRankLabel={Boolean(walletAddress)}
@@ -107,15 +113,15 @@ export const ProfileSettings: React.FC = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={[styles.photoBtn, { borderColor: colors.primary }]} onPress={pickPhoto}>
-        <AppIcon name="id" size={16} color={colors.primary} />
-        <AppText style={[styles.photoBtnText, { color: colors.primary }]}>{t('profilePickPhoto')}</AppText>
-      </TouchableOpacity>
-      {draft.photoUri ? (
-        <TouchableOpacity onPress={() => apply({ photoUri: '' })}>
-          <AppText style={[styles.remove, { color: colors.textMuted }]}>{t('profileRemovePhoto')}</AppText>
-        </TouchableOpacity>
-      ) : null}
+      <AppText style={[styles.section, { color: colors.text }]}>{t('publicFaceTitle')}</AppText>
+      <AppText style={[styles.heroHint, { color: colors.textMuted, marginBottom: 8 }]}>
+        {draft.publicFace ? t('publicFaceLocked') : t('publicFaceLead')}
+      </AppText>
+      <PublicFacePicker
+        value={draft.avatarId}
+        locked={draft.publicFace}
+        onChange={(avatarId) => apply({ avatarId })}
+      />
 
       <UsernameSection
         walletAddress={walletAddress}
@@ -126,10 +132,21 @@ export const ProfileSettings: React.FC = () => {
         }}
       />
 
+      <TouchableOpacity style={[styles.photoBtn, { borderColor: colors.border }]} onPress={pickPhoto}>
+        <AppIcon name="id" size={16} color={colors.textMuted} />
+        <AppText style={[styles.photoBtnText, { color: colors.textMuted }]}>{t('profilePickPhoto')}</AppText>
+      </TouchableOpacity>
+      <AppText style={[styles.remove, { color: colors.textMuted }]}>{t('profilePhotoPrivate')}</AppText>
+      {draft.photoUri ? (
+        <TouchableOpacity onPress={() => apply({ photoUri: '' })}>
+          <AppText style={[styles.remove, { color: colors.textMuted }]}>{t('profileRemovePhoto')}</AppText>
+        </TouchableOpacity>
+      ) : null}
+
       <TouchableOpacity
         style={[styles.save, { backgroundColor: colors.primary }, saving && styles.disabled]}
-        onPress={handleSave}
-        disabled={saving}
+        onPress={() => void handleSave()}
+        disabled={saving || (Boolean(username) && !draft.publicFace && draft.avatarId < 0)}
       >
         <AppIcon name="save" size={16} color="#fff" />
         <AppText style={styles.saveText}>{t('profileSave')}</AppText>
@@ -159,6 +176,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     marginTop: 2,
+  },
+  section: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
   },
   photoBtn: {
     borderWidth: 1,

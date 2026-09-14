@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { isAuthenticatorEnabled } from './authenticator';
 import { getBiometricStatus, isBiometricEnabled, isPinSet } from './appLock';
@@ -5,6 +6,7 @@ import { isEmailVerified } from './accountEmail';
 
 const KEY = 'qc_auth_prefs_v2';
 const LEGACY = 'qc_auth_prefs_v1';
+const KEY_FALLBACK = 'qc_auth_prefs_v2.fallback';
 
 export type AuthMethod = 'password' | 'email' | 'pin' | 'biometric' | 'authenticator';
 export type AuthPurpose = 'signin' | 'unlock' | 'funds' | 'loanRequest' | 'loanPay';
@@ -71,11 +73,31 @@ function normalize(raw: Partial<AuthPrefs> | Record<string, unknown>): AuthPrefs
   };
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      }
+    );
+  });
+}
+
 async function readRaw(): Promise<AuthPrefs> {
   try {
-    const raw = await SecureStore.getItemAsync(KEY);
+    const fallback = await AsyncStorage.getItem(KEY_FALLBACK).catch(() => null);
+    const secure = fallback
+      ? null
+      : await withTimeout(SecureStore.getItemAsync(KEY).catch(() => null), 12000, null);
+    const raw = fallback || secure;
     if (raw) return normalize(JSON.parse(raw) as Partial<AuthPrefs>);
-    const legacy = await SecureStore.getItemAsync(LEGACY);
+    const legacy = await withTimeout(SecureStore.getItemAsync(LEGACY).catch(() => null), 4000, null);
     if (legacy) return normalize(JSON.parse(legacy) as Record<string, unknown>);
     return { ...DEFAULTS };
   } catch {
@@ -115,7 +137,9 @@ async function sanitize(prefs: AuthPrefs): Promise<AuthPrefs> {
 }
 
 async function persist(prefs: AuthPrefs): Promise<void> {
-  await SecureStore.setItemAsync(KEY, JSON.stringify(prefs));
+  const payload = JSON.stringify(prefs);
+  await AsyncStorage.setItem(KEY_FALLBACK, payload).catch(() => {});
+  await withTimeout(SecureStore.setItemAsync(KEY, payload), 2500, undefined);
 }
 
 export async function loadAuthPrefs(): Promise<AuthPrefs> {
@@ -130,9 +154,11 @@ export async function loadAuthPrefs(): Promise<AuthPrefs> {
 export async function saveAuthPrefs(prefs: AuthPrefs): Promise<AuthPrefs> {
   const next = await sanitize(prefs);
   await persist(next);
+  const session = await import('./savedSession');
   if (next.unlock.on) {
-    const { purgePersistedWrap } = await import('./savedSession');
-    await purgePersistedWrap();
+    await session.purgePersistedWrap();
+  } else {
+    await session.markSessionSaved();
   }
   return next;
 }

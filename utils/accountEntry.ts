@@ -35,8 +35,9 @@ export function welcomeShowsCreate(accountOnPhone: boolean, deviceClaimed = fals
   return !accountOnPhone && !deviceClaimed;
 }
 
-export function welcomeShowsSignIn(_accountOnPhone: boolean): boolean {
-  return false;
+/** Si este aparato ya tuvo cuenta y no queda nada local, solo Iniciar sesión. */
+export function welcomeShowsSignIn(accountOnPhone: boolean, deviceClaimed = false): boolean {
+  return !accountOnPhone && deviceClaimed;
 }
 
 export type EntryScreen = 'welcome' | 'signIn' | 'unlock' | 'app';
@@ -60,17 +61,15 @@ export function nextEntryScreen(input: {
 }): EntryScreen {
   if (input.accountOnPhone === null) return 'signIn';
   if (!input.accountOnPhone) return 'welcome';
-  if (input.unlockOn) return 'unlock';
-  if (input.wrapReady) return 'app';
-  return 'unlock';
+  if (input.unlockOn || !input.wrapReady) return 'unlock';
+  return 'app';
 }
 
-export function welcomeActions(
-  accountOnPhone: boolean,
-  deviceClaimed = false
-): Array<'createPhrase' | 'restoreAccount'> {
+export type WelcomeAction = 'createPhrase' | 'restoreAccount' | 'signIn';
+
+export function welcomeActions(accountOnPhone: boolean, deviceClaimed = false): WelcomeAction[] {
   if (accountOnPhone) return [];
-  if (deviceClaimed) return ['restoreAccount'];
+  if (deviceClaimed) return ['signIn'];
   return ['createPhrase', 'restoreAccount'];
 }
 

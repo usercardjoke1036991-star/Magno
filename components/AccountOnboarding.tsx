@@ -5,7 +5,11 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { BrandLogo } from './BrandLogo';
 import { UsernameSection } from './UsernameSection';
+import { PublicIdentityForm } from './PublicIdentityForm';
+import { LinkWalletForm } from './LinkWalletForm';
 import { loadClaimedUsername } from '../services/accountUsername';
+import { hasLockedPublicIdentity, loadOwnProfile } from '../services/userProfile';
+import { hasCompletedWalletLink, loadLinkedExternalWallet } from '../services/linkedWallet';
 import { useUserProfile } from '../profile/ProfileContext';
 import { AppText } from './AppText';
 
@@ -35,9 +39,13 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const { profile, saveProfile } = useUserProfile();
+  const { profile } = useUserProfile();
   const [username, setUsername] = useState('');
   const [usernameReady, setUsernameReady] = useState(false);
+  const [hasFace, setHasFace] = useState(false);
+  const [faceReady, setFaceReady] = useState(false);
+  const [linkedWallet, setLinkedWallet] = useState('');
+  const [linkedReady, setLinkedReady] = useState(false);
 
   useEffect(() => {
     let done = false;
@@ -63,7 +71,52 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     };
   }, [walletAddress]);
 
-  if (!walletReady || !usernameReady) {
+  useEffect(() => {
+    let done = false;
+    loadOwnProfile(walletAddress || undefined)
+      .then((stored) => {
+        if (done) return;
+        setHasFace(hasLockedPublicIdentity(stored));
+        setFaceReady(true);
+      })
+      .catch(() => {
+        if (!done) setFaceReady(true);
+      });
+    return () => {
+      done = true;
+    };
+  }, [walletAddress]);
+
+  useEffect(() => {
+    if (hasLockedPublicIdentity(profile)) {
+      setHasFace(true);
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    let done = false;
+    if (!walletAddress) {
+      setLinkedWallet('');
+      setLinkedReady(true);
+      return;
+    }
+    setLinkedReady(false);
+    loadLinkedExternalWallet(walletAddress)
+      .then((stored) => {
+        if (!done) {
+          setLinkedWallet(stored);
+          setLinkedReady(true);
+        }
+      })
+      .catch(() => {
+        if (!done) setLinkedReady(true);
+      });
+    return () => {
+      done = true;
+    };
+  }, [walletAddress]);
+
+  if (!walletReady || !usernameReady || !faceReady || !linkedReady) {
     return (
       <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center' }]}>
         <ActivityIndicator color={colors.primary} />
@@ -84,23 +137,57 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     );
   }
 
-  if (username) {
+  if (username && hasFace && hasCompletedWalletLink(linkedWallet)) {
     return <>{children}</>;
+  }
+
+  if (username && hasFace && !hasCompletedWalletLink(linkedWallet)) {
+    return (
+      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <BrandLogo size={64} style={styles.logo} />
+          <AppText style={[styles.title, { color: colors.text }]}>{t('linkWalletTitle')}</AppText>
+          <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('linkWalletLead')}</AppText>
+          <LinkWalletForm
+            internalWallet={walletAddress}
+            onLinked={(external) => {
+              setLinkedWallet(external);
+            }}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  if (username && !hasFace) {
+    return (
+      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <BrandLogo size={64} style={styles.logo} />
+          <AppText style={[styles.title, { color: colors.text }]}>{t('publicIdentityTitle')}</AppText>
+          <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('publicIdentityLead')}</AppText>
+          <PublicIdentityForm
+            walletAddress={walletAddress}
+            onSaved={() => {
+              setHasFace(true);
+            }}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    );
   }
 
   return (
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <BrandLogo size={64} style={styles.logo} />
-        <AppText style={[styles.title, { color: colors.text }]}>{t('usernameTitle')}</AppText>
-        <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('usernameLead')}</AppText>
-        <AppText style={[styles.step, { color: colors.primary }]}>{t('onboardStepUsername')}</AppText>
+        <AppText style={[styles.title, { color: colors.text }]}>{t('createCredentialsTitle')}</AppText>
+        <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('createCredentialsLead')}</AppText>
         <UsernameSection
           walletAddress={walletAddress}
           claimedUsername={username}
           onClaimed={async (value) => {
             setUsername(value);
-            await saveProfile({ ...profile, displayName: value });
           }}
         />
       </ScrollView>
@@ -132,11 +219,5 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
     marginBottom: 10,
-  },
-  step: {
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 18,
   },
 });

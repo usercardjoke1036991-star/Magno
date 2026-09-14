@@ -94,6 +94,27 @@ export function creditNeedsDeviceMatch(deviceMatches: boolean): boolean {
   return liveNeedsDeviceMatch(isDemoAccount(), deviceMatches);
 }
 
+export const CREDIT_ACCESS_USDT = 1;
+
+/** 1 USDT de acceso, una vez. Demo y Real. */
+export function hasCreditAccess(paidUsd: number): boolean {
+  const paid = Number(paidUsd);
+  return Number.isFinite(paid) && paid + 1e-9 >= CREDIT_ACCESS_USDT;
+}
+
+export function creditNeedsAccess(paidUsd: number): boolean {
+  return !hasCreditAccess(paidUsd);
+}
+
+/** El botón de 1 USDT se enciende si el contrato puede donar y hay destino. No usa la sala Donar. */
+export function canPayCreditAccess(input: {
+  protocolCanDonate: boolean;
+  founderAddress: string;
+  accessEnabled: boolean;
+}): boolean {
+  return Boolean(input.protocolCanDonate && String(input.founderAddress || '').trim() && input.accessEnabled);
+}
+
 export function identityHashBound(value: string | null | undefined): boolean {
   const hash = String(value || '');
   return Boolean(hash) && !/^0x0+$/i.test(hash);

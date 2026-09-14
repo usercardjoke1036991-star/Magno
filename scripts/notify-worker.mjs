@@ -522,9 +522,15 @@ const alertAdmin = async (text) => {
   await sendTelegram(ADMIN_CHAT, text);
 };
 
-const readBody = (req) =>
+const sanitizePublicPhoto = (value) => {
+  const uri = String(value || '').replace(/\s/g, '');
+  if (!/^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(uri)) return '';
+  if (uri.length > 60_000) return '';
+  return uri;
+};
+
+const readBody = (req, limit = 32_768) =>
   new Promise((resolveBody, rejectBody) => {
-    const limit = 32_768;
     const timeout = setTimeout(() => {
       rejectBody(new Error('timeout'));
       req.destroy();
@@ -1068,7 +1074,7 @@ const server = createServer(async (req, res) => {
     }
     let body;
     try {
-      body = await readBody(req);
+      body = await readBody(req, 90_000);
     } catch {
       json(res, 413, { error: 'payload' });
       return;
@@ -1081,6 +1087,7 @@ const server = createServer(async (req, res) => {
       return;
     }
     const prev = store.profiles[wallet] || {};
+    const locked = Boolean(prev.publicFace || (prev.displayName && prev.publicPhoto));
     store.profiles[wallet] = {
       phone: stripUnsafe(body.contactPhone || prev.phone || '', 20),
       whatsapp: stripUnsafe(body.whatsapp || body.contactPhone || prev.whatsapp || '', 20),
@@ -1092,9 +1099,15 @@ const server = createServer(async (req, res) => {
         signup: body.prefs?.signup === true,
         email: body.prefs?.email !== false,
       },
-      displayName: stripUnsafe(body.displayName || prev.displayName || '', 24),
+      displayName: locked ? stripUnsafe(prev.displayName || '', 24) : stripUnsafe(body.displayName || prev.displayName || '', 24),
       username: prev.username || '',
-      avatarId: Number.isFinite(Number(body.avatarId)) ? Math.max(0, Math.min(7, Number(body.avatarId))) : prev.avatarId || 0,
+      avatarId: locked
+        ? prev.avatarId || 0
+        : Number.isFinite(Number(body.avatarId))
+          ? Math.max(0, Math.min(7, Number(body.avatarId)))
+          : prev.avatarId || 0,
+      publicPhoto: locked ? sanitizePublicPhoto(prev.publicPhoto) : sanitizePublicPhoto(body.publicPhoto || prev.publicPhoto),
+      publicFace: locked || Boolean(body.publicFace) || Boolean(body.displayName),
     };
     persist();
     json(res, 200, { ok: true });
@@ -1490,10 +1503,12 @@ const server = createServer(async (req, res) => {
     const profiles = {};
     for (const wallet of wallets) {
       const item = store.profiles[wallet];
-      if (!item?.displayName && !item?.username) continue;
+      if (!item?.displayName && !item?.publicPhoto && !item?.username) continue;
       profiles[wallet] = {
-        displayName: stripUnsafe(item.username || item.displayName, 24),
+        displayName: stripUnsafe(item.displayName || '', 24),
         avatarId: item.avatarId || 0,
+        publicPhoto: sanitizePublicPhoto(item.publicPhoto),
+        publicFace: Boolean(item.publicFace || item.displayName),
       };
     }
     json(res, 200, { profiles });

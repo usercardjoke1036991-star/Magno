@@ -70,7 +70,7 @@ async function registerAndFund(token, contract, user, amount = '50', padre = eth
   await token.connect(user).approve(contractAddr, ethers.MaxUint256);
 }
 
-async function proposeAndExecute(contract, signer, fragment, args = []) {
+async function proposeAndExecute(contract, signer, fragment, args = [], extraConfirmers = []) {
   const data = contract.interface.encodeFunctionData(fragment, args);
   const tx = await contract.connect(signer).proposeAdminAction(data);
   const receipt = await tx.wait();
@@ -84,6 +84,9 @@ async function proposeAndExecute(contract, signer, fragment, args = []) {
     })
     .find((e) => e && e.name === 'AdminActionProposed');
   const id = parsed.args.id;
+  for (const extra of extraConfirmers) {
+    await contract.connect(extra).confirmAdminAction(id);
+  }
   await ethers.provider.send('evm_increaseTime', [72 * 60 * 60]);
   await ethers.provider.send('evm_mine');
   await contract.connect(signer).executeAdminAction(id);

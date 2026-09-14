@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -14,7 +14,6 @@ import { useTheme } from '../theme/ThemeContext';
 import { LanguageSelector } from './LanguageSelector';
 import { ThemeToggle } from './ThemeToggle';
 import { ModeToggle } from './ModeToggle';
-import { ProfileSettings } from './ProfileSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { AdminAccess } from './AdminAccess';
 import { ProfileAvatar } from './ProfileAvatar';
@@ -23,14 +22,11 @@ import { BrandLogo } from './BrandLogo';
 import { useUserProfile } from '../profile/ProfileContext';
 import { useWalletLevel } from '../hooks/useWalletLevel';
 import { isPhraseBackedUp } from '../services/appWallet';
-import { useAccount } from '@reown/appkit-react-native';
 import { useAppMode } from '../wallet/AppModeContext';
-import { useWeb3Balances } from '../hooks/useWeb3Balances';
-import { getSupportedTokens } from '../constants/tokens';
 import type { TranslationKey } from '../i18n/translations';
 import { AppText } from './AppText';
 
-type Panel = 'home' | 'security' | 'profile' | 'appearance' | 'language' | 'mode' | 'admin';
+type Panel = 'home' | 'security' | 'appearance' | 'language' | 'mode' | 'admin';
 
 export const SettingsButton: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -41,13 +37,6 @@ export const SettingsButton: React.FC = () => {
   const { profile, walletAddress } = useUserProfile();
   const level = useWalletLevel(walletAddress);
   const { mode } = useAppMode();
-  const primaryToken = useMemo(() => getSupportedTokens()[0], [mode]);
-  const { address: adminAddress, isConnected: adminConnected } = useAccount();
-  const { userInfo: adminInfo } = useWeb3Balances(
-    adminConnected && adminAddress ? adminAddress.toLowerCase() : '',
-    primaryToken
-  );
-  const founderReady = Boolean(adminConnected && (adminInfo.isAdmin || adminInfo.isOwner));
 
   useEffect(() => {
     isPhraseBackedUp()
@@ -60,7 +49,7 @@ export const SettingsButton: React.FC = () => {
       const link = parseAppDeepLink(url);
       if (link?.kind !== 'settings') return;
       setOpen(true);
-      setPanel(link.panel === 'profile' ? 'profile' : 'home');
+      setPanel('home');
     };
     Linking.getInitialURL().then(apply).catch(() => {});
     const sub = Linking.addEventListener('url', ({ url }) => apply(url));
@@ -75,7 +64,6 @@ export const SettingsButton: React.FC = () => {
   const titles: Record<Panel, TranslationKey> = {
     home: 'settings',
     security: 'securityTitle',
-    profile: 'profile',
     appearance: 'appearance',
     language: 'language',
     mode: 'appModeTitle',
@@ -87,7 +75,7 @@ export const SettingsButton: React.FC = () => {
     label,
     onPress,
   }: {
-    icon: 'shield' | 'user' | 'sun' | 'globe' | 'bank';
+    icon: 'shield' | 'sun' | 'globe' | 'bank';
     label: string;
     onPress: () => void;
   }) => (
@@ -111,6 +99,7 @@ export const SettingsButton: React.FC = () => {
           wallet={walletAddress}
           size={40}
           badge
+          publicView
           level={walletAddress ? level : undefined}
           showRankLabel={false}
           onPress={() => setOpen(true)}
@@ -131,7 +120,9 @@ export const SettingsButton: React.FC = () => {
             <View style={[styles.handle, { backgroundColor: colors.border }]} />
             <View style={styles.sheetHeader}>
               {panel === 'home' ? (
-                <BrandLogo size={32} />
+                <Pressable onLongPress={() => setPanel('admin')} delayLongPress={1200}>
+                  <BrandLogo size={32} />
+                </Pressable>
               ) : (
                 <TouchableOpacity onPress={() => setPanel('home')} accessibilityRole="button" accessibilityLabel={t('settingsBack')}>
                   <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
@@ -151,7 +142,6 @@ export const SettingsButton: React.FC = () => {
               {panel === 'home' ? (
                 <View>
                   <MenuRow icon="shield" label={t('securityTitle')} onPress={() => setPanel('security')} />
-                  <MenuRow icon="user" label={t('profile')} onPress={() => setPanel('profile')} />
                   <MenuRow icon="sun" label={t('appearance')} onPress={() => setPanel('appearance')} />
                   <MenuRow icon="globe" label={t('language')} onPress={() => setPanel('language')} />
                   <MenuRow
@@ -161,21 +151,9 @@ export const SettingsButton: React.FC = () => {
                     })}
                     onPress={() => setPanel('mode')}
                   />
-                  {founderReady ? (
-                    <MenuRow icon="shield" label={t('settingsAdminTitle')} onPress={() => setPanel('admin')} />
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => setPanel('admin')}
-                      accessibilityRole="button"
-                      accessibilityLabel={t('settingsAdminConnect')}
-                    >
-                      <AppText style={[styles.adminLink, { color: colors.textMuted }]}>{t('settingsAdminConnect')}</AppText>
-                    </TouchableOpacity>
-                  )}
                 </View>
               ) : null}
               {panel === 'security' ? <SecuritySettings /> : null}
-              {panel === 'profile' ? <ProfileSettings /> : null}
               {panel === 'appearance' ? <ThemeToggle hideLabel /> : null}
               {panel === 'language' ? <LanguageSelector hideLabel /> : null}
               {panel === 'mode' ? <ModeToggle /> : null}
@@ -266,11 +244,5 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1.5,
     borderColor: '#fff',
-  },
-  adminLink: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 4,
   },
 });

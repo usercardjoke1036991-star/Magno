@@ -38,7 +38,8 @@ export type IconName =
   | 'copy'
   | 'eye'
   | 'eyeOff'
-  | 'close';
+  | 'close'
+  | 'search';
 
 interface AppIconProps {
   name: IconName;
@@ -323,6 +324,13 @@ export const AppIcon: React.FC<AppIconProps> = ({ name, size = 22, color = '#146
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24">
           <Path d="M7 7l10 10M17 7L7 17" {...s} />
+        </Svg>
+      );
+    case 'search':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Circle cx="10.5" cy="10.5" r="5.2" {...s} />
+          <Path d="M14.6 14.6L19 19" {...s} />
         </Svg>
       );
     default:

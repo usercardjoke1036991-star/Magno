@@ -22,6 +22,7 @@ import { ActivateCreditSection } from '../components/ActivateCreditSection';
 import { AccountWorldCard } from '../components/AccountWorldCard';
 import { AccountOnboarding } from '../components/AccountOnboarding';
 import { KycAccessBanner } from '../components/KycAccessBanner';
+import { CreditAccessBanner } from '../components/CreditAccessBanner';
 import { BrandLogo } from '../components/BrandLogo';
 import { ReferralSection } from '../components/ReferralSection';
 import { SettingsButton } from '../components/SettingsButton';
@@ -38,8 +39,8 @@ import { MovementHistory } from '../components/MovementHistory';
 import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
-import { isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
-import { liveCreditReady } from '../utils/creditGates';
+import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
+import { canPayCreditAccess, creditNeedsAccess, liveCreditReady } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhraseBackedUp } from '../services/appWallet';
 import { useI18n } from '../i18n/LanguageContext';
@@ -181,6 +182,7 @@ function HomeScreenWithHooks() {
     handleCobrarBonoHito,
     handlePagar,
     handleDepositarPool,
+    handlePagarAcceso,
     handleDonar,
     handleRetirarComisiones,
     handleRetirarComisionesToken,
@@ -193,6 +195,7 @@ function HomeScreenWithHooks() {
     handleProposeConfirmations,
     handleProposeFundador,
     handleProposeOwner,
+    handleProposeAttester,
     handleProposeSetTokenConfig,
     handlePausarProtocolo,
     handleLiquidarDeudor,
@@ -287,6 +290,18 @@ function HomeScreenWithHooks() {
             </AppText>
           </View>
         ) : null}
+
+        <CreditAccessBanner
+          paidUsd={userInfo.donatedUsd || 0}
+          canPay={canPayCreditAccess({
+            protocolCanDonate: userInfo.canDonate,
+            founderAddress: userInfo.founderAddress,
+            accessEnabled: isAccessPaymentEnabled(),
+          })}
+          isLoading={txLoading}
+          tokenSymbol={selectedToken.symbol}
+          onPay={() => void handlePagarAcceso()}
+        />
 
         <KycAccessBanner
           kycDone={userInfo.kycDeclarado}
@@ -406,6 +421,17 @@ function HomeScreenWithHooks() {
           title={userInfo.isRegistered || userInfo.hasActiveLoan ? t('subsectionCreditStatus') : t('subsectionActivate')}
           icon="id"
         >
+          <CreditAccessBanner
+            paidUsd={userInfo.donatedUsd || 0}
+            canPay={canPayCreditAccess({
+              protocolCanDonate: userInfo.canDonate,
+              founderAddress: userInfo.founderAddress,
+              accessEnabled: isAccessPaymentEnabled(),
+            })}
+            isLoading={txLoading}
+            tokenSymbol={selectedToken.symbol}
+            onPay={() => void handlePagarAcceso()}
+          />
           <ActivateCreditSection
             isRegistered={userInfo.isRegistered || userInfo.hasActiveLoan}
             checking={creditChecking && !userInfo.isRegistered && !userInfo.hasActiveLoan}
@@ -452,6 +478,17 @@ function HomeScreenWithHooks() {
         lead={t('sectionLoansLead')}
         onClose={() => setRoom(null)}
       >
+        <CreditAccessBanner
+          paidUsd={userInfo.donatedUsd || 0}
+          canPay={canPayCreditAccess({
+            protocolCanDonate: userInfo.canDonate,
+            founderAddress: userInfo.founderAddress,
+            accessEnabled: isAccessPaymentEnabled(),
+          })}
+          isLoading={txLoading}
+          tokenSymbol={selectedToken.symbol}
+          onPay={() => void handlePagarAcceso()}
+        />
         <KycAccessBanner
           kycDone={userInfo.kycDeclarado}
           phoneDone={userInfo.identityBound && userInfo.deviceMatches}
@@ -500,6 +537,7 @@ function HomeScreenWithHooks() {
               cooldownRestante={userInfo.userProgress.cooldownRestante}
               isRegistered={userInfo.isRegistered}
               identityBlocked={identityBlocked}
+              accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}
@@ -526,6 +564,7 @@ function HomeScreenWithHooks() {
               ultimoPrestamoTimestamp={0}
               isRegistered={userInfo.isRegistered}
               identityBlocked={identityBlocked}
+              accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={handleSolicitarCredito}
               onPayLoan={() => handlePagar('installment')}
@@ -599,10 +638,28 @@ function HomeScreenWithHooks() {
         >
           {isConnected ? (
             <AppSubsection title={t('referralHistoryTitle')} defaultOpen icon="history">
-              <ReferralHistory walletAddress={walletAddress} enabled={userInfo.isRegistered} />
+              <ReferralHistory
+                variant="board"
+                walletAddress={walletAddress}
+                enabled={userInfo.isRegistered}
+                onOpenPeople={() => setRoom('people')}
+              />
             </AppSubsection>
           ) : null}
         </ReferralSection>
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'people'}
+        title={t('referralPeopleTitle')}
+        lead={t('referralPeopleLead')}
+        onClose={() => setRoom('network')}
+      >
+        <ReferralHistory
+          variant="people"
+          walletAddress={walletAddress}
+          enabled={room === 'people' && userInfo.isRegistered}
+        />
       </AppWindow>
 
       <AppWindow
@@ -674,6 +731,7 @@ function HomeScreenWithHooks() {
           onProposeConfirmations={handleProposeConfirmations}
           onProposeFundador={handleProposeFundador}
           onProposeOwner={handleProposeOwner}
+          onProposeAttester={handleProposeAttester}
           extraStables={extraStables}
           onProposeSetTokenConfig={handleProposeSetTokenConfig}
           onLiquidar={handleLiquidarDeudor}
@@ -683,6 +741,8 @@ function HomeScreenWithHooks() {
           proposalCount={adminInfo.proposalCount || userInfo.proposalCount}
           openProposal={adminInfo.openProposal || userInfo.openProposal}
           founderAddress={adminInfo.founderAddress || userInfo.founderAddress}
+          ownerAddress={adminInfo.ownerAddress || userInfo.ownerAddress}
+          attesterAddress={adminInfo.attesterAddress || userInfo.attesterAddress}
         />
       </AppWindow>
       <AppKit />

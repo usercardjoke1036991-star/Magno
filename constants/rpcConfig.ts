@@ -62,6 +62,26 @@ export function isDonationEnabled(): boolean {
   return donationAllowedInWorld(productMode, runtimeMode, isContractConfigured('mainnet'));
 }
 
+/** El 1 USDT de acceso usa donar() por dentro. Demo puede; Real espera mainnet. La sala Donar sigue oculta en Demo. */
+export function accessPaymentAllowedInWorld(
+  product: AppMode,
+  runtime: AppMode,
+  testnetReady: boolean,
+  mainnetReady: boolean
+): boolean {
+  if (product === 'demo' && runtime === 'demo') return testnetReady;
+  return donationAllowedInWorld(product, runtime, mainnetReady);
+}
+
+export function isAccessPaymentEnabled(): boolean {
+  return accessPaymentAllowedInWorld(
+    productMode,
+    runtimeMode,
+    isContractConfigured('testnet'),
+    isContractConfigured('mainnet')
+  );
+}
+
 export function getProductMode(): AppMode {
   return productMode;
 }

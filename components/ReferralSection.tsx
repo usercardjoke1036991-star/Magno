@@ -175,6 +175,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                 profile={padreProfile}
                 wallet={padre}
                 size={32}
+                publicView
                 level={padreLevel}
                 rankName={t(getRankForLevel(padreLevel).nameKey)}
                 showRankLabel={false}

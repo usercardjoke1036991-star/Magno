@@ -47,10 +47,14 @@ function parseStored(raw: string): StoredWallet | null {
   }
 }
 
+async function readRawWallet(): Promise<string | null> {
+  const fallback = await AsyncStorage.getItem(WALLET_FALLBACK).catch(() => null);
+  if (fallback) return fallback;
+  return withLimit(SecureStore.getItemAsync(WALLET_KEY).catch(() => null), 12000, null);
+}
+
 async function readStored(): Promise<StoredWallet | null> {
-  const raw =
-    (await withLimit(SecureStore.getItemAsync(WALLET_KEY).catch(() => null), 1500, null))
-    || (await AsyncStorage.getItem(WALLET_FALLBACK).catch(() => null));
+  const raw = await readRawWallet();
   if (!raw) return null;
   if (isSealedBlob(raw)) {
     const wrap = getWalletWrapKey();
@@ -150,6 +154,9 @@ export async function ensureAppWallet(): Promise<HDNodeWallet | Wallet> {
   if (existing) {
     await bindAppWallet(existing.address);
     return existing;
+  }
+  if (!getWalletWrapKey() || (await readRawWallet())) {
+    throw new Error('locked');
   }
   return createAppWallet();
 }

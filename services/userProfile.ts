@@ -21,6 +21,8 @@ export interface UserProfile {
   displayName: string;
   avatarId: number;
   photoUri: string;
+  publicPhoto: string;
+  publicFace: boolean;
   updatedAt: number;
 }
 
@@ -28,8 +30,53 @@ export const EMPTY_PROFILE: UserProfile = {
   displayName: '',
   avatarId: 0,
   photoUri: '',
+  publicPhoto: '',
+  publicFace: false,
   updatedAt: 0,
 };
+
+export const PUBLIC_PHOTO_MAX = 60_000;
+
+export function clampAvatarId(value: unknown): number {
+  const id = Number(value);
+  if (!Number.isFinite(id)) return 0;
+  return Math.max(0, Math.min(AVATAR_PRESETS.length - 1, Math.floor(id)));
+}
+
+export function hasLockedPublicIdentity(profile?: UserProfile | null): boolean {
+  return Boolean(profile?.publicFace && isValidDisplayName(profile.displayName || ''));
+}
+
+export function isPublicIdentityLocked(profile?: UserProfile | null, _username = ''): boolean {
+  return hasLockedPublicIdentity(profile);
+}
+
+export function sanitizePublicPhoto(value: string): string {
+  const uri = sanitizePhotoUri(value);
+  if (!uri.startsWith('data:')) return '';
+  if (uri.length > PUBLIC_PHOTO_MAX) return '';
+  return uri;
+}
+
+export function canSubmitPublicIdentity(displayName: string, publicPhoto: string): boolean {
+  return isValidDisplayName(displayName) && Boolean(sanitizePublicPhoto(publicPhoto));
+}
+
+export async function publicPhotoFromAsset(asset: {
+  uri?: string;
+  mimeType?: string | null;
+  base64?: string | null;
+}): Promise<string> {
+  const mime = asset.mimeType && /^image\/(jpeg|jpg|png|webp|gif)$/i.test(asset.mimeType)
+    ? asset.mimeType
+    : 'image/jpeg';
+  if (asset.base64) {
+    const data = sanitizePublicPhoto(`data:${mime};base64,${asset.base64}`);
+    if (data) return data;
+  }
+  const persisted = await persistPickedPhoto(asset);
+  return sanitizePublicPhoto(persisted);
+}
 
 export function normalizeDisplayName(value: string): string {
   return stripUnsafeText(value, 24);
@@ -140,8 +187,10 @@ function parseProfile(raw: unknown): UserProfile | null {
   const value = raw as Partial<UserProfile>;
   return {
     displayName: normalizeDisplayName(String(value.displayName || '')),
-    avatarId: Number.isFinite(Number(value.avatarId)) ? Number(value.avatarId) : 0,
+    avatarId: clampAvatarId(value.avatarId),
     photoUri: typeof value.photoUri === 'string' ? sanitizePhotoUri(value.photoUri) : '',
+    publicPhoto: typeof value.publicPhoto === 'string' ? sanitizePublicPhoto(value.publicPhoto) : '',
+    publicFace: Boolean(value.publicFace),
     updatedAt: Number(value.updatedAt) || 0,
   };
 }
@@ -160,10 +209,14 @@ export async function loadOwnProfile(wallet?: string): Promise<UserProfile> {
 }
 
 export async function saveOwnProfile(profile: UserProfile, wallet?: string): Promise<UserProfile> {
+  const previous = await loadOwnProfile(wallet);
+  const locked = Boolean(previous.publicFace);
   const next: UserProfile = {
-    displayName: normalizeDisplayName(profile.displayName),
-    avatarId: profile.avatarId,
-    photoUri: sanitizePhotoUri(profile.photoUri || ''),
+    displayName: locked ? previous.displayName : normalizeDisplayName(profile.displayName),
+    avatarId: locked ? previous.avatarId : clampAvatarId(profile.avatarId),
+    photoUri: locked ? previous.photoUri : sanitizePhotoUri(profile.photoUri || ''),
+    publicPhoto: locked ? previous.publicPhoto : sanitizePublicPhoto(profile.publicPhoto || ''),
+    publicFace: locked || Boolean(profile.publicFace),
     updatedAt: Date.now(),
   };
   if (wallet) {
@@ -213,8 +266,10 @@ export async function rememberProfiles(entries: Record<string, UserProfile>): Pr
     if (!existing || (profile.updatedAt || 0) >= (existing.updatedAt || 0)) {
       next[key] = {
         displayName: normalizeDisplayName(profile.displayName),
-        avatarId: profile.avatarId,
+        avatarId: clampAvatarId(profile.avatarId),
         photoUri: directoryPhotoUri(profile.photoUri || '') || directoryPhotoUri(existing?.photoUri || ''),
+        publicPhoto: sanitizePublicPhoto(profile.publicPhoto || '') || existing?.publicPhoto || '',
+        publicFace: Boolean(profile.publicFace || existing?.publicFace),
         updatedAt: profile.updatedAt || Date.now(),
       };
     }
@@ -241,7 +296,9 @@ export async function publishOwnProfile(walletAddress: string, profile: UserProf
       body: JSON.stringify({
         ...auth,
         displayName: stripUnsafeText(profile.displayName, 24),
-        avatarId: profile.avatarId,
+        avatarId: clampAvatarId(profile.avatarId),
+        publicPhoto: sanitizePublicPhoto(profile.publicPhoto || ''),
+        publicFace: Boolean(profile.publicFace),
       }),
     });
   } catch {

@@ -18,6 +18,7 @@
 - ✅ salud_proyecto.py — Marcado como completado manualmente
 - ✅ escalera de 1000 niveles — Marcado como completado manualmente
 - ✅ comisiones de referidos — Marcado como completado manualmente
+- ✅ historial de referidos — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -84,6 +85,21 @@
 - Historial aislado Demo/Real. Reloj rojo de gracia (cuenta atras 30d) y luego mora hacia adelante hasta pagar
 - el usuario ya ve comisiones de referidos al cobrar y pagar, bono de primer pago y total generado
 - auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo 100 por ciento productivo
+- Frase secreta y reemplazar frase en un solo lugar de Ajustes
+- Historial de referidos en ventana propia con nombre foto fechas y paginas
+- Usuario e imagen publica se eligen una vez, deben ser anonimos y es lo que ve la red en el historial
+- Alta: idioma, crear o recuperar. Usuario de sesion cifrado en el celular, no editable. Frase luego imagen y nombre anonimos fijos en la red. Perfil de ajustes se quita. En este aparato si se pierden frase usuario y clave solo se abre en otro celular.
+- Usuario de sesion cifrado en el celular y usuario anonimo publico en la red son distintos; ambos se eligen al principio y no se editan
+- Alta con usuario de sesion distinto del nombre anonimo, imagen de galeria en la red, e Iniciar sesion solo en un telefono que ya tuvo cuenta
+- Pago unico de 1 USDT para acceder a la linea de credito, sin decir que va a la billetera fundadora
+- Historial de referidos: cada directo abre su grupo y las generaciones se expanden en linea descendente al toque, sin cargar el arbol mundial de golpe
+- auditoria profunda en tiempo real y correccion de fallos para dejar Demo productivo
+- Integrar el atestador en el panel admin: proponer la direccion 0x del sello, 72 h, sin pegar la clave privada
+- Tras foto y nombre anonimos, conectar MetaMask u otra plataforma y vincularla a la billetera interna para pagar, pedir y reconocer fundadora
+- Tras foto y nombre anonimos, pantalla para registrar una billetera externa de cualquier plataforma y que la app reconozca a la fundadora
+- Tras foto y nombre anonimo, conectar cualquier billetera; si es la fundadora del contrato la app la reconoce sin menu Admin
+- cada cambio admin requiere confirmacion de las 3 fundadoras (quorum unanime, no 2-de-3)
+- textos profesionales cortos y auditoria en vivo para dejar Demo productivo
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -143,3 +159,19 @@
 - [2026-09-13 14:52] Idea añadida al backlog: "el usuario ya ve comisiones de referidos al cobrar y pagar, bono de primer pago "
 - [2026-09-13 14:53] Módulo completado: 'comisiones de referidos'
 - [2026-09-13 15:17] Idea añadida al backlog: "auditoria profunda en vivo y correccion de todo lo que falle para dejar Demo 100"
+- [2026-09-13 23:52] Idea añadida al backlog: "Frase secreta y reemplazar frase en un solo lugar de Ajustes"
+- [2026-09-14 00:14] Idea añadida al backlog: "Historial de referidos en ventana propia con nombre foto fechas y paginas"
+- [2026-09-14 00:31] Idea añadida al backlog: "Usuario e imagen publica se eligen una vez, deben ser anonimos y es lo que ve la"
+- [2026-09-14 00:51] Idea añadida al backlog: "Alta: idioma, crear o recuperar. Usuario de sesion cifrado en el celular, no edi"
+- [2026-09-14 00:54] Idea añadida al backlog: "Usuario de sesion cifrado en el celular y usuario anonimo publico en la red son "
+- [2026-09-14 01:15] Idea añadida al backlog: "Alta con usuario de sesion distinto del nombre anonimo, imagen de galeria en la "
+- [2026-09-14 01:31] Idea añadida al backlog: "Pago unico de 1 USDT para acceder a la linea de credito, sin decir que va a la b"
+- [2026-09-14 01:31] Idea añadida al backlog: "Historial de referidos: cada directo abre su grupo y las generaciones se expande"
+- [2026-09-14 01:37] Módulo completado: 'historial de referidos'
+- [2026-09-14 02:04] Idea añadida al backlog: "auditoria profunda en tiempo real y correccion de fallos para dejar Demo product"
+- [2026-09-14 03:06] Idea añadida al backlog: "Integrar el atestador en el panel admin: proponer la direccion 0x del sello, 72 "
+- [2026-09-14 03:29] Idea añadida al backlog: "Tras foto y nombre anonimos, conectar MetaMask u otra plataforma y vincularla a "
+- [2026-09-14 03:34] Idea añadida al backlog: "Tras foto y nombre anonimos, pantalla para registrar una billetera externa de cu"
+- [2026-09-14 03:43] Idea añadida al backlog: "Tras foto y nombre anonimo, conectar cualquier billetera; si es la fundadora del"
+- [2026-09-14 04:18] Idea añadida al backlog: "cada cambio admin requiere confirmacion de las 3 fundadoras (quorum unanime, no "
+- [2026-09-14 04:36] Idea añadida al backlog: "textos profesionales cortos y auditoria en vivo para dejar Demo productivo"

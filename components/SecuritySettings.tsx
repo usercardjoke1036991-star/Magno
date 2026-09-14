@@ -40,7 +40,7 @@ import { EmailOtpSection } from './EmailOtpSection';
 import { AppText, AppTextInput } from './AppText';
 
 type RowStatus = 'done' | 'todo' | 'warn';
-type Panel = 'menu' | 'kyc' | 'password' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'replace' | 'methods' | 'authenticator';
+type Panel = 'menu' | 'kyc' | 'password' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'methods' | 'authenticator';
 
 export const SecuritySettings: React.FC = () => {
   const { t } = useI18n();
@@ -253,7 +253,6 @@ export const SecuritySettings: React.FC = () => {
     fingerprint: 'securityFingerprint',
     phrase: 'seedTitle',
     phone: 'securityPhone',
-    replace: 'seedRotate',
     methods: 'authMethodsTitle',
     authenticator: 'authenticatorTitle',
   };
@@ -375,18 +374,9 @@ export const SecuritySettings: React.FC = () => {
                 >
                   <AppText style={styles.buttonText}>{t('seedReveal')}</AppText>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setPanel('replace')}
-                  style={[styles.button, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}
-                >
-                  <AppText style={[styles.buttonText, { color: colors.text }]}>{t('seedRotate')}</AppText>
-                </TouchableOpacity>
               </>
             )}
-          </View>
-        ) : null}
-        {panel === 'replace' ? (
-          <View>
+            <AppText style={[styles.section, { color: colors.text }]}>{t('seedRotate')}</AppText>
             <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('seedRestoreLead')}</AppText>
             {accountBlocked ? (
               <AppText style={[styles.lead, { color: colors.danger }]}>{t('appWalletDestroyBlocked')}</AppText>
@@ -428,7 +418,7 @@ export const SecuritySettings: React.FC = () => {
                 (busy || accountBlocked || (passwordSet && !restorePassword) || (!passwordSet && pinSet && restorePin.length !== 6)) && styles.destroyDisabled,
               ]}
             >
-              {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRestoreAction')}</AppText>}
+              {busy ? <ActivityIndicator color="#fff" /> : <AppText style={styles.buttonText}>{t('seedRotateAction')}</AppText>}
             </TouchableOpacity>
           </View>
         ) : null}
@@ -453,7 +443,7 @@ export const SecuritySettings: React.FC = () => {
       <Row
         icon="lock"
         label={t('securityPassword')}
-        hint={passwordSet ? t('securityPasswordDone') : t('securityPasswordTodo')}
+        hint={passwordSet ? t('lockPasswordLocked') : t('securityPasswordTodo')}
         status={passwordSet ? 'done' : 'warn'}
         onPress={() => setPanel('password')}
       />
@@ -481,7 +471,7 @@ export const SecuritySettings: React.FC = () => {
       <Row
         icon="shield"
         label={t('securityPhrase')}
-        hint={backedUp ? t('securityPhraseDone') : t('securityPhraseTodo')}
+        hint={`${backedUp ? t('securityPhraseDone') : t('securityPhraseTodo')} · ${t('seedRotateLead')}`}
         status={backedUp ? 'done' : 'todo'}
         onPress={() => setPanel('phrase')}
       />
@@ -508,13 +498,6 @@ export const SecuritySettings: React.FC = () => {
         status={authOn ? 'done' : 'todo'}
         onPress={() => setPanel('authenticator')}
       />
-      <Row
-        icon="shield"
-        label={t('seedRotate')}
-        hint={t('seedRestoreLead')}
-        status="done"
-        onPress={() => setPanel('replace')}
-      />
     </View>
   );
 };
@@ -528,7 +511,7 @@ const styles = StyleSheet.create({
   section: {
     fontSize: 15,
     fontWeight: '700',
-    marginTop: 8,
+    marginTop: 16,
     marginBottom: 8,
   },
   back: {

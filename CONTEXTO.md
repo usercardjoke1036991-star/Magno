@@ -61,7 +61,7 @@ Magno/
 - **Sin colateral**: el pool absorbe el riesgo de impago (diseño intencional, no bug)
 - **Pool no redimible**: `retirarLiquidez` hace `revert("pool locked")` — el capital queda para prestar
 - **`tx.origin == msg.sender`**: bloquea contratos intermediarios en registro, préstamo, pago, depósito, liquidación y destrucción
-- **Timelock de 72h + multisig** para todas las acciones admin (excepto pausa que es inmediata)
+- **Timelock de 72h + 2-de-3** para todas las acciones admin (excepto pausa, que es inmediata). Si una llave se pierde o la hackean, las otras 2 la echan.
 - **Wallet interna (app wallet)**: cada instalación genera una wallet HD (frase de 24 palabras BIP-39) cifrada en SecureStore. Recuperar aún acepta 12 palabras de cuentas antiguas.
 - **Identidad KYC inmutable**: nombre legal y tipo de documento se congelan en el primer submit on-chain; ciudad/región siguen editables
 - **Cerrar cuenta exige deuda = 0 y !esMoroso**: el contrato y la UI bloquean a morosos
@@ -201,7 +201,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | ReentrancyGuard | ✅ Funciones de fondos |
 | SafeERC20 | ✅ Transfers/approvals |
 | Pausable (emergencia) | ✅ Inmediato (cualquier admin) · despausar con timelock |
-| Timelock 72h + multisig | ✅ Acciones admin · 2-de-3 al tercer fundador |
+| Timelock 72h + multisig | ✅ Acciones admin · 2-de-3 al tercer fundador. Si una se pierde o la hackean, las otras 2 la echan |
 | tx.origin == msg.sender | ✅ Registro, préstamo, pago, depósito, liquidación, destrucción |
 | Oráculo Chainlink (stale 1h) | ✅ Precio USDT/USD · peg ≥ 0.98 |
 | Pool locked | ✅ `retirarLiquidez` siempre revierte — no hay retiros LP |
@@ -237,6 +237,19 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-14 | Arranque: si falta la llave de la billetera se pide la contrasena una vez y se vuelve a guardar. Textos profesionales (Depositar/Retirar). | — |
+| 2026-09-14 | Textos recortados a tono financiero. Acceso Real sin botón gris. Errores de correo/SMS sin nombres de APIs. | Menos relleno en pantalla. |
+| 2026-09-14 | Gobernanza 2-de-3: una llave perdida o hackeada la echan las otras 2. Una sola no gobierna. Pausa inmediata. | El 3-de-3 dejaba el contrato muerto si una se perdía. |
+| 2026-09-14 | Alta: despues de la cara publica se registra una billetera externa (WalletConnect). El contrato reconoce a la fundadora por esa direccion. | — |
+| 2026-09-14 | Panel admin: proponer atestador (sello del telefono) con la direccion 0x; la clave privada no entra en la app. | — |
+| 2026-09-14 | Ajustes: contraseña no editable. Hub muestra acceso 1 USDT. Candado off persiste wrap. Personas: busqueda por nombre. | — |
+| 2026-09-14 | Auditoria 2026-09-14: 127 tests, Demo live operativo. Acceso 1 USDT usa capacidad on-chain, no la sala Donar. Metro reiniciado. | — |
+| 2026-09-14 | Personas: grupos por referido con generaciones expandibles al toque (loadReferralChildren). | — |
+| 2026-09-14 | Antes de Solicitar hay que pagar 1 USDT de acceso. Internamente usa donar() hacia el fundador. Los niveles desbloqueados siguen eligibles. | — |
+| 2026-09-14 | Alta separa credenciales de sesion e identidad publica. Perfil quitado de Ajustes. Directorio remoto guarda publicPhoto. | — |
+| 2026-09-14 | Perfil publico: nombre e imagen anonima fijos. El historial de referidos muestra esa cara, no la foto del celular. | — |
+| 2026-09-14 | Red: el historial de personas es una ventana aparte paginada (nombre, foto, alta y ganancias). El tablero de comisiones se queda en Red. | — |
+| 2026-09-13 | Seguridad: ver y reemplazar la frase BIP-39 viven en un solo panel de Ajustes | — |
 | 2026-09-13 | Auditoria contratos: nucleo + FamaLib + Leveling, 123 tests, Demo 0xD2d2 alineado. ABI cliente con cancelAdminAction; mainnet sin deploy. | — |
 | 2026-09-13 | Auditoria en vivo: el tablero de comisiones/bono/total queda arriba en Red; Activar linea se desactiva si no hay contrato; MainActivity reenvia onNewIntent. | — |
 | 2026-09-13 | Auditoria: Hardhat 121 tests, i18n 877 claves, Demo live operativo. gradle.properties newArchEnabled alineado con app.json (false). remapAndroidText ya no sintetiza fontWeight en MIUI. | — |

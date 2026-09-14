@@ -5,6 +5,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { formatAddress } from '../utils/formatters';
+import { attesterProposalError } from '../utils/adminAttester';
 import type { OpenAdminProposal } from '../utils/adminProposal';
 import type { ConfigurableStable } from '../constants/tokens';
 import { AppText, AppTextInput } from './AppText';
@@ -21,6 +22,8 @@ interface AdminPanelProps {
   proposalCount?: number;
   openProposal?: OpenAdminProposal | null;
   founderAddress?: string;
+  ownerAddress?: string;
+  attesterAddress?: string;
   extraStables?: ConfigurableStable[];
   onWithdrawFees: () => void;
   onWithdrawTokenFees: () => void;
@@ -33,6 +36,7 @@ interface AdminPanelProps {
   onProposeConfirmations?: (required: number) => void;
   onProposeFundador?: (address: string) => void;
   onProposeOwner?: (address: string) => void;
+  onProposeAttester?: (address: string) => void;
   onProposeSetTokenConfig?: (token: string, feed: string, enabled: boolean) => void;
   onLiquidar?: (debtorAddress: string, tokenAddress: string) => void;
   onMarcarMoroso?: (debtorAddress: string) => void;
@@ -50,6 +54,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   proposalCount = 0,
   openProposal = null,
   founderAddress = '',
+  ownerAddress = '',
+  attesterAddress = '',
   extraStables = [],
   onWithdrawFees,
   onWithdrawTokenFees,
@@ -62,6 +68,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onProposeConfirmations,
   onProposeFundador,
   onProposeOwner,
+  onProposeAttester,
   onProposeSetTokenConfig,
   onLiquidar,
   onMarcarMoroso,
@@ -110,6 +117,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
     confirmToggle(true, () => {
       fn(trimmed);
+      setDraft('');
+    });
+  };
+
+  const proposeAttesterAddress = () => {
+    if (!onProposeAttester) return;
+    const blocked = [...adminRoster, founderAddress, ownerAddress];
+    const error = attesterProposalError(trimmed, ownerAddress, blocked);
+    if (error === 'key') {
+      Alert.alert(t('admin'), t('adminAttesterNoKey'));
+      return;
+    }
+    if (error === 'role') {
+      Alert.alert(t('admin'), t('adminAttesterNotOwner'));
+      return;
+    }
+    if (error) {
+      Alert.alert(t('admin'), t('adminInvalidAddress'));
+      return;
+    }
+    confirmToggle(true, () => {
+      onProposeAttester(trimmed);
       setDraft('');
     });
   };
@@ -187,6 +216,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           style={[styles.button, { backgroundColor: colors.chip }]}
         >
           <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminFeeCollector')}</AppText>
+        </TouchableOpacity>
+      ) : null}
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminAttesterLead')}</AppText>
+      {attesterAddress ? (
+        <AppText style={[styles.meta, { color: colors.text }]}>
+          {t('adminAttesterCurrent', { address: formatAddress(attesterAddress) })}
+        </AppText>
+      ) : null}
+      {onProposeAttester ? (
+        <TouchableOpacity
+          disabled={isLoading}
+          onPress={proposeAttesterAddress}
+          style={[styles.button, { backgroundColor: colors.chip }]}
+        >
+          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminSetAttester')}</AppText>
         </TouchableOpacity>
       ) : null}
       {onProposeConfirmations && adminRoster.length < 3 ? (

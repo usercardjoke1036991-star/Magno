@@ -4,6 +4,8 @@ import { subscribeRuntimeMode } from '../constants/rpcConfig';
 import { setWalletSigner, clearWalletSigner } from '../services/quatriviumCreditService';
 import { loadAppWallet, ensureAppWallet, importFromPhrase, recreateAppWallet, addressFromPhrase, withCurrentRpc } from '../services/appWallet';
 import { wipeLocalAccount } from '../services/accountReset';
+import { restoreSavedSessionWrap } from '../services/savedSession';
+import { getWalletWrapKey } from '../services/walletSession';
 
 interface AppWalletValue {
   address: string;
@@ -25,6 +27,12 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   signerRef.current = signer;
 
   const boot = useCallback(async () => {
+    if (!getWalletWrapKey()) {
+      await restoreSavedSessionWrap();
+    }
+    if (__DEV__) {
+      console.log('[boot] wallet wrap', { wrapReady: Boolean(getWalletWrapKey()) });
+    }
     const wallet = await ensureAppWallet();
     setSigner(wallet);
     setWalletSigner(wallet);
@@ -34,20 +42,35 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     let cancelled = false;
+    let finished = false;
     const watchdog = setTimeout(() => {
+      if (!cancelled && !finished) {
+        setFailed(true);
+        setReady(true);
+      }
+    }, 40000);
+    const start = async () => {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          await boot();
+          finished = true;
+          clearTimeout(watchdog);
+          return;
+        } catch {
+          if (!getWalletWrapKey()) {
+            await restoreSavedSessionWrap();
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1200));
+        }
+      }
+      finished = true;
+      clearTimeout(watchdog);
       if (!cancelled) {
         setFailed(true);
         setReady(true);
       }
-    }, 5000);
-    boot()
-      .catch(() => {
-        if (!cancelled) {
-          setFailed(true);
-          setReady(true);
-        }
-      })
-      .finally(() => clearTimeout(watchdog));
+    };
+    void start();
     return () => {
       cancelled = true;
       clearTimeout(watchdog);

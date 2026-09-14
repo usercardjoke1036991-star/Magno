@@ -96,6 +96,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: BiometricLockSection
 - `components/BrandLogo.tsx` — módulo JS/TS
   - Funciones/clases: BrandLogo
+- `components/CreditAccessBanner.tsx` — módulo JS/TS
+  - Funciones/clases: CreditAccessBanner
 - `components/DemoModeBanner.tsx` — módulo JS/TS
 - `components/DonateFounderSection.tsx` — módulo JS/TS
   - Funciones/clases: DonateFounderSection
@@ -117,6 +119,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: LanguageSelector
 - `components/LanguageWelcome.tsx` — módulo JS/TS
   - Funciones/clases: LanguageWelcome
+- `components/LinkWalletForm.tsx` — módulo JS/TS
+  - Funciones/clases: LinkWalletForm
 - `components/LoanTierCard.tsx` — módulo JS/TS
   - Funciones/clases: LoanTierCard
 - `components/LockedLoanCatalog.tsx` — módulo JS/TS
@@ -138,9 +142,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `components/PoolSupportSection.tsx` — módulo JS/TS
   - Funciones/clases: PoolSupportSection
 - `components/ProfileAvatar.tsx` — módulo JS/TS
-  - Funciones/clases: ProfileAvatar
+  - Funciones/clases: AnonymousFace, ProfileAvatar
 - `components/ProfileSettings.tsx` — módulo JS/TS
   - Funciones/clases: ProfileSettings
+- `components/PublicFacePicker.tsx` — módulo JS/TS
+  - Funciones/clases: PublicFacePicker
+- `components/PublicIdentityForm.tsx` — módulo JS/TS
+  - Funciones/clases: PublicIdentityForm
 - `components/RankFrame.tsx` — módulo JS/TS
   - Funciones/clases: RankFrame
 - `components/RankGem.tsx` — módulo JS/TS
@@ -149,6 +157,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: RankLadder
 - `components/RankMedal.tsx` — módulo JS/TS
   - Funciones/clases: RankMedal
+- `components/ReferralBranch.tsx` — módulo JS/TS
+  - Funciones/clases: ReferralBranch
 - `components/ReferralHistory.tsx` — módulo JS/TS
   - Funciones/clases: ReferralHistory
 - `components/ReferralSection.tsx` — módulo JS/TS
@@ -198,7 +208,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/reputation.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, generationBps, fameForGeneration, founderFamePoints, referralsForNextBonus, formatPoolBonus
 - `constants/rpcConfig.ts` — módulo JS/TS
-  - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, donationVisibleInWorld, donationAllowedInWorld, isDonationVisible, isDonationEnabled, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
+  - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, donationVisibleInWorld, donationAllowedInWorld, isDonationVisible, isDonationEnabled, accessPaymentAllowedInWorld, isAccessPaymentEnabled, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
 - `constants/support.ts` — módulo JS/TS
   - Funciones/clases: SUPPORT_PATRON_USD, SUPPORT_CIRCLE_USD, FAME_PER_USDT_DONATE, FAME_PER_USDT_POOL, fameFromUsd, fameFromDonateUsd, fameFromPoolUsd, supportKind, supportNameKey
 - `constants/tokens.ts` — módulo JS/TS
@@ -281,6 +291,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
   - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration
+- `services/linkedWallet.ts` — módulo JS/TS
+  - Funciones/clases: WALLET_LINK_SKIPPED, linkedWalletStorageKey, hasLinkedExternalWallet, hasCompletedWalletLink, loadLinkedExternalWallet, saveLinkedExternalWallet, skipLinkedExternalWallet
 - `services/movementHistory.ts` — módulo JS/TS
   - Funciones/clases: recordMovement, loadMovementHistory, loadMoraHistory
 - `services/notificationProfile.ts` — módulo JS/TS
@@ -292,13 +304,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/quatriviumCreditService.ts` — módulo JS/TS
   - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, cachedProtocolCaps, asWeiString, QuatriviumCreditService
 - `services/referralNetwork.ts` — módulo JS/TS
-  - Funciones/clases: loadReferralNetwork
+  - Funciones/clases: clearReferralBranchCache, loadReferralChildren, fillReferralTimestamps, loadReferralNetwork
 - `services/savedSession.ts` — módulo JS/TS
   - Funciones/clases: subscribeSessionCleared, isSessionSaved, purgePersistedWrap, markSessionSaved, restoreSavedSessionWrap, clearSavedSession, signOutSavedSession
 - `services/secureStorageService.ts` — módulo JS/TS
   - Funciones/clases: SecureStorageService
 - `services/userProfile.ts` — módulo JS/TS
-  - Funciones/clases: AVATAR_PRESETS, EMPTY_PROFILE, normalizeDisplayName, isValidDisplayName, persistPickedPhoto, initialsFromName, avatarColorForWallet, labelForProfile, loadOwnProfile, saveOwnProfile, clearOwnProfile, loadProfileDirectory, rememberProfiles, rememberProfile, publishOwnProfile, fetchPublicProfiles
+  - Funciones/clases: AVATAR_PRESETS, EMPTY_PROFILE, PUBLIC_PHOTO_MAX, clampAvatarId, hasLockedPublicIdentity, isPublicIdentityLocked, sanitizePublicPhoto, canSubmitPublicIdentity, publicPhotoFromAsset, normalizeDisplayName, isValidDisplayName, persistPickedPhoto, initialsFromName, avatarColorForWallet, labelForProfile, loadOwnProfile, saveOwnProfile, clearOwnProfile, loadProfileDirectory, rememberProfiles, rememberProfile, publishOwnProfile, fetchPublicProfiles
 - `services/walletAuth.ts` — módulo JS/TS
   - Funciones/clases: AUTH_TYPES, authDomain, signWalletAuth, signedAuthBody, recoverWalletAuth, isFreshTimestamp
 - `services/walletSession.ts` — módulo JS/TS
@@ -314,6 +326,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/circuitBreaker.test.js` — módulo JS/TS
 - `test/cuotas.test.js` — módulo JS/TS
 - `test/cyber-hardening.test.js` — módulo JS/TS
+  - Funciones/clases: loadReferralChildren
 - `test/demo-identity.test.js` — módulo JS/TS
 - `test/destroy.test.js` — módulo JS/TS
 - `test/hardening-security.test.js` — módulo JS/TS
@@ -340,6 +353,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: asFieldElement, ZKTypeValidator, ZK_SECURITY_CONSTANTS
 - `utils/accountEntry.ts` — módulo JS/TS
   - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, accountOnPhoneFromProbes, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase
+- `utils/adminAttester.ts` — módulo JS/TS
+  - Funciones/clases: looksLikePrivateKey, attesterProposalError
 - `utils/adminProposal.ts` — módulo JS/TS
   - Funciones/clases: describeAdminCalldata
 - `utils/appDeepLink.ts` — módulo JS/TS
@@ -355,7 +370,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, creditNeedsAccess, canPayCreditAccess, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
@@ -380,6 +395,12 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: isWeakPin, lockoutMs, remainingLockMs
 - `utils/referralEarnings.ts` — módulo JS/TS
   - Funciones/clases: asWei, sumReferralEarnings
+- `utils/referralPages.ts` — módulo JS/TS
+  - Funciones/clases: REFERRAL_PAGE_SIZE, referralPageCount, clampReferralPage, sliceReferralPage, visibleReferralPages
+- `utils/referralSearch.ts` — módulo JS/TS
+  - Funciones/clases: normalizeReferralQuery, referralPersonMatches
+- `utils/referralTree.ts` — módulo JS/TS
+  - Funciones/clases: REFERRAL_MAX_DEPTH, normalizeBranchKey, canExpandReferralDepth, isBranchOpen, toggleBranchOpen, uniqueBranchAddresses
 - `utils/safeFetch.ts` — módulo JS/TS
   - Funciones/clases: safeJsonFetch, readJsonLimited
 - `utils/safeOpenUrl.ts` — módulo JS/TS

@@ -217,6 +217,14 @@ export const useWeb3Transactions = () => {
     );
   };
 
+  const proposeAttester = async (address: string) => {
+    return executeTransaction(
+      'setAttester',
+      () => QuatriviumCreditService.proposeAttester(address),
+      t('adminTimelockProposed')
+    );
+  };
+
   const proposeRequiredConfirmations = async (required: number) => {
     return executeTransaction(
       'setRequiredConfirmations',
@@ -284,6 +292,7 @@ export const useWeb3Transactions = () => {
     proposeSetTokenConfig,
     proposeFundador,
     proposeOwner,
+    proposeAttester,
     liquidarDeudor,
     marcarMorosoSiVencido,
   };

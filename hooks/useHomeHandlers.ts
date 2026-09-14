@@ -12,10 +12,10 @@ import { setWalletSigner, QuatriviumCreditService } from '../services/quatrivium
 import { recordMovement } from '../services/movementHistory';
 import { useWeb3Transactions } from './useWeb3Transactions';
 import { notifyApiBases } from '../constants/appLinks';
-import { getProviderWithFallback, isCreditReady, isDemoAccount, isDemoMode, isDonationEnabled, isDonationVisible } from '../constants/rpcConfig';
+import { getProviderWithFallback, isAccessPaymentEnabled, isCreditReady, isDemoAccount, isDemoMode, isDonationEnabled, isDonationVisible } from '../constants/rpcConfig';
 import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
-import { creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
+import { CREDIT_ACCESS_USDT, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhraseBackedUp } from '../services/appWallet';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
@@ -146,6 +146,7 @@ export const useHomeHandlers = ({
     proposeSetTokenConfig,
     proposeFundador,
     proposeOwner,
+    proposeAttester,
     liquidarDeudor,
     marcarMorosoSiVencido,
   } = useWeb3Transactions();
@@ -268,6 +269,10 @@ export const useHomeHandlers = ({
     }
     if (creditNeedsDeviceMatch(userInfo.deviceMatches)) {
       Alert.alert(t('deviceBannerTitle'), t('seedNeedDevice'));
+      return;
+    }
+    if (creditNeedsAccess(userInfo.donatedUsd || 0)) {
+      Alert.alert(t('creditAccessTitle'), t('creditAccessNeed'));
       return;
     }
     if (userInfo.hasActiveLoan) {
@@ -497,6 +502,65 @@ export const useHomeHandlers = ({
     }
   };
 
+  const handlePagarAcceso = async () => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!userInfo.founderAddress) {
+      Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
+      return;
+    }
+    if (!isAccessPaymentEnabled()) {
+      Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
+      return;
+    }
+    if (!ensureCreditReady()) return;
+    if (!userInfo.canDonate) {
+      Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
+      return;
+    }
+    if (!userInfo.isTokenSupported && !isOfficialWorldToken(selectedToken.address)) {
+      Alert.alert(t('token'), t('tokenNotEnabledAlert'));
+      return;
+    }
+    const amount = String(CREDIT_ACCESS_USDT);
+    const amountWei = parseUnits(amount, selectedToken.decimals).toString();
+    if (isDemoAccount()) {
+      try {
+        await QuatriviumCreditService.topUpDemoUsdtToDebt(selectedToken.address, amountWei);
+      } catch {
+        // Si no hay minteo, se intenta con el saldo real.
+      }
+    }
+    const raw = await tokenBalanceOf(selectedToken.address, walletAddress);
+    const available =
+      raw !== null ? Number(formatUnits(raw, selectedToken.decimals)) : Number(balances.tokenBalance);
+    if (Number(amount) > available + 1e-8) {
+      Alert.alert(t('amountExceedsBalance'), t('poolNeedInternalFunds', { symbol: selectedToken.symbol }));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    if (!(await ensureGasForTx())) return;
+    try {
+      const result = await donarProyecto(amountWei, selectedToken.address);
+      if (result.success) {
+        void recordMovement(walletAddress, {
+          kind: 'donation',
+          from: walletAddress,
+          to: userInfo.founderAddress,
+          amountLabel: `${amount} ${selectedToken.symbol}`,
+          tokenSymbol: selectedToken.symbol,
+          platform: 'Quatrivium',
+          timestamp: Date.now(),
+        });
+        refetch();
+      }
+    } catch {
+      Alert.alert(t('amount'), t('invalidAmount'));
+    }
+  };
+
   const handleDonar = async (amountHuman: string) => {
     if (!isDonationVisible()) {
       Alert.alert(t('donateTitle'), t('donateRealOnly'));
@@ -640,6 +704,13 @@ export const useHomeHandlers = ({
     });
   };
 
+  const handleProposeAttester = async (address: string) => {
+    await runAsAdmin(async () => {
+      const result = await proposeAttester(address);
+      if (result.success) refetch();
+    });
+  };
+
   const handleProposeSetTokenConfig = async (token: string, feed: string, enabled: boolean) => {
     await runAsAdmin(async () => {
       const result = await proposeSetTokenConfig(token, feed, enabled);
@@ -675,6 +746,7 @@ export const useHomeHandlers = ({
     handleCobrarBonoHito,
     handlePagar,
     handleDepositarPool,
+    handlePagarAcceso,
     handleDonar,
     handleRetirarComisiones,
     handleRetirarComisionesToken,
@@ -687,6 +759,7 @@ export const useHomeHandlers = ({
     handleProposeConfirmations,
     handleProposeFundador,
     handleProposeOwner,
+    handleProposeAttester,
     handleProposeSetTokenConfig,
     handlePausarProtocolo,
     handleLiquidarDeudor,

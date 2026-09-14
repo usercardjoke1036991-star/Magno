@@ -92,6 +92,7 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['Monto inválido', 'errInvalidAmount'],
   ['token-not-in-app', 'errTokenNotInApp'],
   ['donate-real-only', 'donateRealOnly'],
+  ['access-not-ready', 'creditAccessPending'],
   ['pool-real-only', 'liveCreditNotReady'],
   ['Este token no está habilitado en la aplicación', 'errTokenNotInApp'],
   ['invalid-level', 'errInvalidLevel'],

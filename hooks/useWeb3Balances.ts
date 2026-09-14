@@ -3,7 +3,7 @@ import { Contract, formatEther, formatUnits, isAddress } from 'ethers';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
 import { getRealDonationWallet } from '../constants/deployedAddresses';
-import { assertTrustedRpc, isContractConfigured, isDemoAccount, isDonationVisible, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
+import { assertTrustedRpc, isContractConfigured, isDemoAccount, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { walletRunsOnThisDevice } from '../utils/accountEntry';
 import { identityHashBound } from '../utils/creditGates';
 import { getDeviceHash } from '../services/deviceBinding';
@@ -115,6 +115,8 @@ export interface UserInfo {
   proposalCount: number;
   openProposal: OpenAdminProposal | null;
   founderAddress: string;
+  ownerAddress: string;
+  attesterAddress: string;
   activeLoan: ActiveLoan | null;
   referral: {
     padre: string;
@@ -165,6 +167,8 @@ const EMPTY_USER_INFO: UserInfo = {
   proposalCount: 0,
   openProposal: null,
   founderAddress: '',
+  ownerAddress: '',
+  attesterAddress: '',
   activeLoan: null,
   referral: {
     padre: '',
@@ -263,7 +267,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           curveRateBps,
           kycExigido: !isDemoAccount() || kycExigido,
           identidadExigida: !isDemoAccount(),
-          canDonate: isDonationVisible(),
+          canDonate: false,
           founderAddress: getRealDonationWallet(),
         });
         setBalances({ ...EMPTY_BALANCES, poolBalance, poolOutstanding, poolCash });
@@ -319,7 +323,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           return {
             ...base,
             curveRateBps,
-            canDonate: isDonationVisible(),
+            canDonate: false,
             founderAddress: getRealDonationWallet(),
             maxLoanLevel: MAX_LOAN_LEVEL,
             canClaimHitos: false,
@@ -365,7 +369,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             ...prev,
             maxLoanLevel: caps.maxLevel,
             canClaimHitos: caps.canClaimHitos,
-            canDonate: isDonationVisible(),
+            canDonate: caps.canDonate,
           }));
         }
 
@@ -706,6 +710,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             isOwner: walletAddress.toLowerCase() === String(ownerAddress).toLowerCase(),
             isAdmin: isAdmin || walletAddress.toLowerCase() === String(ownerAddress).toLowerCase(),
             paused,
+            ownerAddress: String(ownerAddress || ''),
           }));
           const roster: string[] = [];
           for (let i = 0; i < 3; i += 1) {
@@ -768,6 +773,12 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           } catch {
             fundador = '';
           }
+          let attester = '';
+          try {
+            attester = String(await creditContract.attester());
+          } catch {
+            attester = '';
+          }
           let padre = '';
           let bonoActivacionCobrado = false;
           try {
@@ -786,6 +797,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           setUserInfo((prev) => ({
             ...prev,
             founderAddress: fundador || getRealDonationWallet(),
+            attesterAddress: attester,
             referral: {
               padre,
               fundador,

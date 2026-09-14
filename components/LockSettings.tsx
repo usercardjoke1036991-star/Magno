@@ -236,7 +236,12 @@ export const LockSettings: React.FC<{
     </View>
   );
 
-  const passwordBlock = (
+  const passwordBlock = hasPassword ? (
+    <View style={[styles.locked, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+      <AppText style={[styles.lockedTitle, { color: colors.text }]}>{t('lockPasswordTitle')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted, marginBottom: 0 }]}>{t('lockPasswordLocked')}</AppText>
+    </View>
+  ) : (
     <View>
       {hasPin ? (
         <>
@@ -247,16 +252,6 @@ export const LockSettings: React.FC<{
             keyboardType="number-pad"
             maxLength={6}
             placeholder="••••••"
-          />
-        </>
-      ) : null}
-      {hasPassword ? (
-        <>
-          <AppText style={[styles.label, { color: colors.text }]}>{t('lockCurrentPassword')}</AppText>
-          <SecretInput
-            value={currentPassword}
-            onChangeText={(value) => setCurrentPassword(value.replace(/\s/g, '').slice(0, PASSWORD_LENGTH))}
-            maxLength={PASSWORD_LENGTH}
           />
         </>
       ) : null}
@@ -361,5 +356,15 @@ const styles = StyleSheet.create({
   },
   removeDisabled: {
     backgroundColor: '#9CA3AF',
+  },
+  locked: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+  },
+  lockedTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 6,
   },
 });

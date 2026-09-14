@@ -360,6 +360,56 @@ describe('demo credit gates', function () {
     return Boolean(hash) && !/^0x0+$/i.test(hash);
   }
 
+  it('requires a one-time 1 USDT access fee before any loan', function () {
+    function hasCreditAccess(paidUsd) {
+      const paid = Number(paidUsd);
+      return Number.isFinite(paid) && paid + 1e-9 >= 1;
+    }
+    expect(hasCreditAccess(0)).to.equal(false);
+    expect(hasCreditAccess(0.99)).to.equal(false);
+    expect(hasCreditAccess(1)).to.equal(true);
+    expect(hasCreditAccess(5)).to.equal(true);
+    function canPayCreditAccess({ protocolCanDonate, founderAddress, accessEnabled }) {
+      return Boolean(protocolCanDonate && String(founderAddress || '').trim() && accessEnabled);
+    }
+    expect(canPayCreditAccess({
+      protocolCanDonate: true,
+      founderAddress: '0xdb135e9cd9be9bE262b3222eaD737c84d72Ef870',
+      accessEnabled: true,
+    })).to.equal(true);
+    expect(canPayCreditAccess({
+      protocolCanDonate: false,
+      founderAddress: '0xdb135e9cd9be9bE262b3222eaD737c84d72Ef870',
+      accessEnabled: true,
+    })).to.equal(false);
+    expect(canPayCreditAccess({
+      protocolCanDonate: true,
+      founderAddress: '',
+      accessEnabled: true,
+    })).to.equal(false);
+    const fs = require('fs');
+    const path = require('path');
+    const loans = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
+    expect(loans).to.include('CreditAccessBanner');
+    expect((loans.match(/<CreditAccessBanner/g) || []).length).to.be.at.least(3);
+    expect(loans).to.include('handlePagarAcceso');
+    expect(loans).to.include('canPayCreditAccess');
+    expect(loans).to.include('isAccessPaymentEnabled');
+    const gate = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
+    expect(gate).to.include('creditNeedsAccess');
+    expect(gate).to.include('isAccessPaymentEnabled');
+    expect(gate).to.include('topUpDemoUsdtToDebt');
+    const balances = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useWeb3Balances.ts'), 'utf8');
+    expect(balances).to.include('canDonate: caps.canDonate');
+    expect(balances).to.not.include('canDonate: isDonationVisible()');
+    const service = fs.readFileSync(path.join(__dirname, '..', 'services', 'quatriviumCreditService.ts'), 'utf8');
+    expect(service).to.include('isAccessPaymentEnabled()');
+    expect(service).to.not.match(/donar:[\s\S]{0,80}!isDonationEnabled\(\)/);
+    const banner = fs.readFileSync(path.join(__dirname, '..', 'components', 'CreditAccessBanner.tsx'), 'utf8');
+    expect(banner).to.include("canPay ? t('creditAccessLead') : t('creditAccessPending')");
+    expect(banner).to.include('{canPay ? (');
+  });
+
   it('lets a demo account operate without KYC, phone or email but requires the 24-word backup', function () {
     expect(liveNeedsKyc(true, false)).to.equal(false);
     expect(liveNeedsPhone(true, false)).to.equal(false);
@@ -557,6 +607,14 @@ describe('demo credit gates', function () {
     expect(donationAllowedInWorld('demo', 'demo', true)).to.equal(false);
     expect(donationAllowedInWorld('live', 'live', false)).to.equal(false);
     expect(donationAllowedInWorld('live', 'live', true)).to.equal(true);
+    function accessPaymentAllowedInWorld(product, runtime, testnetReady, mainnetReady) {
+      if (product === 'demo' && runtime === 'demo') return testnetReady;
+      return donationAllowedInWorld(product, runtime, mainnetReady);
+    }
+    expect(accessPaymentAllowedInWorld('demo', 'demo', true, false)).to.equal(true);
+    expect(accessPaymentAllowedInWorld('demo', 'demo', false, false)).to.equal(false);
+    expect(accessPaymentAllowedInWorld('live', 'live', true, false)).to.equal(false);
+    expect(accessPaymentAllowedInWorld('live', 'live', true, true)).to.equal(true);
   });
 
   it('blocks pool deposits from Demo', function () {
@@ -660,9 +718,12 @@ describe('account entry — password, email and session', () => {
       const words = String(phrase || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
       return words.length === 12 || words.length === 24;
     }
+    function welcomeShowsSignIn(accountOnPhone, deviceClaimed = false) {
+      return !accountOnPhone && deviceClaimed;
+    }
     function welcomeActions(accountOnPhone, deviceClaimed = false) {
       if (accountOnPhone) return [];
-      if (deviceClaimed) return ['restoreAccount'];
+      if (deviceClaimed) return ['signIn'];
       return ['createPhrase', 'restoreAccount'];
     }
     function canSubmitDeviceCredentials(password, username) {
@@ -689,11 +750,10 @@ describe('account entry — password, email and session', () => {
       return false;
     }
     function nextEntryScreen({ accountOnPhone, sessionSaved, wrapReady, unlockOn }) {
-      if (accountOnPhone === null) return 'signIn';
-      if (!accountOnPhone) return 'welcome';
-      if (unlockOn) return 'unlock';
-      if (wrapReady) return 'app';
-      return 'unlock';
+      if (input.accountOnPhone === null) return 'signIn';
+      if (!input.accountOnPhone) return 'welcome';
+      if (input.unlockOn || !input.wrapReady) return 'unlock';
+      return 'app';
     }
     function orderUnlockMethods(selected, primary) {
       const unique = [...new Set((selected || []).filter(Boolean))];
@@ -704,8 +764,11 @@ describe('account entry — password, email and session', () => {
     expect(welcomeShowsCreate(false)).to.equal(true);
     expect(welcomeShowsCreate(true)).to.equal(false);
     expect(welcomeShowsCreate(false, true)).to.equal(false);
+    expect(welcomeShowsSignIn(false, true)).to.equal(true);
+    expect(welcomeShowsSignIn(false, false)).to.equal(false);
+    expect(welcomeShowsSignIn(true, true)).to.equal(false);
     expect(welcomeActions(false)).to.deep.equal(['createPhrase', 'restoreAccount']);
-    expect(welcomeActions(false, true)).to.deep.equal(['restoreAccount']);
+    expect(welcomeActions(false, true)).to.deep.equal(['signIn']);
     expect(canSubmitDeviceCredentials('ClaveValida1!', 'ana_one')).to.equal(true);
     expect(canSubmitDeviceCredentials('ClaveValida1', 'ana_one')).to.equal(false);
     expect(canSubmitDeviceCredentials('ClaveValida1!', 'ab')).to.equal(false);
@@ -842,6 +905,21 @@ describe('account entry — password, email and session', () => {
     expect(sumReferralEarnings([]).totalWei).to.equal(0n);
   });
 
+  it('keeps view and replace of the secret phrase in one settings place', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const source = fs.readFileSync(path.join(__dirname, '..', 'components', 'SecuritySettings.tsx'), 'utf8');
+    const menuRows = [...source.matchAll(/label=\{t\('([^']+)'\)\}/g)].map((match) => match[1]);
+    expect(menuRows.filter((key) => key === 'securityPhrase')).to.have.length(1);
+    expect(menuRows).to.not.include('seedRotate');
+    expect(source).to.include("panel === 'phrase'");
+    expect(source).to.include("t('seedReveal')");
+    expect(source).to.include("t('seedRotate')");
+    expect(source).to.include("t('seedRotateAction')");
+    expect(source).to.not.match(/setPanel\('replace'\)/);
+    expect(source).to.not.match(/panel === 'replace'/);
+  });
+
   it('keeps referral earnings board visible while the scan is still loading', () => {
     function referralBoardVisible({ isLoading, error }) {
       return !error || Boolean(isLoading);
@@ -869,6 +947,166 @@ describe('account entry — password, email and session', () => {
     expect(roomFromAppUrl('quatrivium://room/credit?n=1730000000')).to.equal('credit');
     expect(roomFromAppUrl('quatrivium://room/history')).to.equal('history');
     expect(roomFromAppUrl('quatrivium://room/network')).to.equal('network');
+    expect(roomFromAppUrl('quatrivium://room/people')).to.equal('people');
+  });
+
+  it('pages an unbounded referral people list eight at a time', () => {
+    const fs = require('fs');
+    const path = require('path');
+    function referralPageCount(total, pageSize = 8) {
+      if (!Number.isFinite(total) || total <= 0) return 0;
+      return Math.ceil(total / Math.max(1, pageSize));
+    }
+    function clampReferralPage(page, totalPages) {
+      if (totalPages <= 0) return 1;
+      if (!Number.isFinite(page) || page < 1) return 1;
+      return Math.min(Math.floor(page), totalPages);
+    }
+    function sliceReferralPage(items, page, pageSize = 8) {
+      const totalPages = referralPageCount(items.length, pageSize);
+      if (!totalPages) return [];
+      const safe = clampReferralPage(page, totalPages);
+      const start = (safe - 1) * pageSize;
+      return items.slice(start, start + pageSize);
+    }
+    function visibleReferralPages(current, totalPages) {
+      if (totalPages <= 0) return [];
+      const page = clampReferralPage(current, totalPages);
+      if (totalPages <= 11) return Array.from({ length: totalPages }, (_, index) => index + 1);
+      const picked = new Set([1, totalPages]);
+      for (let next = page - 2; next <= page + 2; next += 1) {
+        if (next >= 1 && next <= totalPages) picked.add(next);
+      }
+      const sorted = [...picked].sort((a, b) => a - b);
+      const out = [];
+      let previous = 0;
+      for (const value of sorted) {
+        if (previous && value - previous > 1) out.push('gap');
+        out.push(value);
+        previous = value;
+      }
+      return out;
+    }
+    const people = Array.from({ length: 25 }, (_, index) => `u${index + 1}`);
+    expect(referralPageCount(0)).to.equal(0);
+    expect(referralPageCount(8)).to.equal(1);
+    expect(referralPageCount(9)).to.equal(2);
+    expect(referralPageCount(25)).to.equal(4);
+    expect(sliceReferralPage(people, 1)).to.deep.equal(people.slice(0, 8));
+    expect(sliceReferralPage(people, 4)).to.deep.equal(people.slice(24));
+    expect(sliceReferralPage(people, 99)).to.deep.equal(people.slice(24));
+    expect(visibleReferralPages(1, 3)).to.deep.equal([1, 2, 3]);
+    expect(visibleReferralPages(20, 40)).to.deep.equal([1, 'gap', 18, 19, 20, 21, 22, 'gap', 40]);
+    const history = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReferralHistory.tsx'), 'utf8');
+    expect(history).to.include("variant === 'people'");
+    expect(history).to.include('sliceReferralPage');
+    expect(history).to.include('referralRegisteredOn');
+    expect(history).to.include('loadReferralChildren');
+    expect(history).to.include('ReferralBranch');
+    expect(history).to.include('referralSearchPlaceholder');
+    expect(history).to.include('referralPersonMatches');
+    function referralPersonMatches(query, person) {
+      const needle = String(query || '').trim().toLowerCase().replace(/^@+/, '');
+      if (!needle) return true;
+      return [person.name, person.code, person.address].some((value) =>
+        String(value || '').toLowerCase().includes(needle)
+      );
+    }
+    expect(referralPersonMatches('lobo', { name: 'Lobo', code: 'AB12', address: '0xabc' })).to.equal(true);
+    expect(referralPersonMatches('@lobo', { name: 'lobo', code: 'AB12', address: '0xabc' })).to.equal(true);
+    expect(referralPersonMatches('zorro', { name: 'Lobo', code: 'AB12', address: '0xabc' })).to.equal(false);
+    function canExpandReferralDepth(depth) {
+      return Number.isFinite(depth) && depth >= 1 && depth < 12;
+    }
+    function toggleBranchOpen(open, address) {
+      const key = String(address || '').toLowerCase();
+      return { ...open, [key]: !open[key] };
+    }
+    expect(canExpandReferralDepth(1)).to.equal(true);
+    expect(canExpandReferralDepth(11)).to.equal(true);
+    expect(canExpandReferralDepth(12)).to.equal(false);
+    expect(toggleBranchOpen({}, '0xAbC')).to.deep.equal({ '0xabc': true });
+    expect(toggleBranchOpen({ '0xabc': true }, '0xABC')).to.deep.equal({ '0xabc': false });
+    const network = fs.readFileSync(path.join(__dirname, '..', 'services', 'referralNetwork.ts'), 'utf8');
+    expect(network).to.include('export async function loadReferralChildren');
+    const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
+    expect(home).to.include("room === 'people'");
+    expect(home).to.include('variant="people"');
+  });
+
+  it('locks public username and anonymous face after the first choice', () => {
+    const fs = require('fs');
+    const path = require('path');
+    function isValidDisplayName(value) {
+      const name = String(value || '').trim();
+      return name.length >= 2 && name.length <= 24;
+    }
+    function isPublicIdentityLocked(profile) {
+      return Boolean(profile && profile.publicFace && isValidDisplayName(profile.displayName));
+    }
+    function nextPublicFace(previous, incoming) {
+      if (previous.publicFace) {
+        return {
+          displayName: previous.displayName,
+          publicPhoto: previous.publicPhoto,
+          publicFace: true,
+        };
+      }
+      return {
+        displayName: incoming.displayName,
+        publicPhoto: incoming.publicPhoto,
+        publicFace: Boolean(incoming.publicFace),
+      };
+    }
+    expect(isPublicIdentityLocked({ publicFace: false, displayName: '' })).to.equal(false);
+    expect(isPublicIdentityLocked({ publicFace: true, displayName: 'lobo' })).to.equal(true);
+    expect(
+      nextPublicFace(
+        { displayName: 'lobo', publicPhoto: 'data:image/jpeg;base64,aa', publicFace: true },
+        { displayName: 'otro', publicPhoto: 'data:image/jpeg;base64,bb', publicFace: true }
+      )
+    ).to.deep.equal({
+      displayName: 'lobo',
+      publicPhoto: 'data:image/jpeg;base64,aa',
+      publicFace: true,
+    });
+    const names = fs.readFileSync(path.join(__dirname, '..', 'components', 'UsernameSection.tsx'), 'utf8');
+    expect(names).to.include('usernameLocked');
+    expect(names).to.not.include('usernameChange');
+    const lock = fs.readFileSync(path.join(__dirname, '..', 'components', 'LockSettings.tsx'), 'utf8');
+    expect(lock).to.include('lockPasswordLocked');
+    expect(lock).to.include('hasPassword');
+    const avatar = fs.readFileSync(path.join(__dirname, '..', 'components', 'ProfileAvatar.tsx'), 'utf8');
+    expect(avatar).to.include('publicView');
+    expect(avatar).to.include('publicPhoto');
+    const people = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReferralHistory.tsx'), 'utf8');
+    expect(people).to.include('publicView');
+    const settings = fs.readFileSync(path.join(__dirname, '..', 'components', 'SettingsButton.tsx'), 'utf8');
+    expect(settings).to.not.include('ProfileSettings');
+    const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(gate).to.include('createAccount');
+    expect(gate).to.include('publicIdentity');
+    expect(gate).to.include("setupStage === 'signIn'");
+    const onboarding = fs.readFileSync(path.join(__dirname, '..', 'components', 'AccountOnboarding.tsx'), 'utf8');
+    expect(onboarding).to.include('LinkWalletForm');
+    expect(onboarding).to.include('hasCompletedWalletLink');
+    const linker = fs.readFileSync(path.join(__dirname, '..', 'components', 'LinkWalletForm.tsx'), 'utf8');
+    expect(linker).to.include('connectWallet');
+    expect(linker).to.include('linkWalletSkip');
+    expect(linker).to.not.include('settingsAdmin');
+    expect(linker).to.not.include('fundador');
+    const linked = fs.readFileSync(path.join(__dirname, '..', 'services', 'linkedWallet.ts'), 'utf8');
+    expect(linked).to.include('saveLinkedExternalWallet');
+    expect(linked).to.include('skipLinkedExternalWallet');
+    function hasLinkedExternalWallet(value) {
+      return /^0x[a-fA-F0-9]{40}$/.test(String(value || '')) && !/^0x0+$/i.test(value);
+    }
+    function hasCompletedWalletLink(value) {
+      return String(value || '').trim() === 'skipped' || hasLinkedExternalWallet(value);
+    }
+    expect(hasLinkedExternalWallet('')).to.equal(false);
+    expect(hasCompletedWalletLink('skipped')).to.equal(true);
+    expect(hasLinkedExternalWallet('0x1111111111111111111111111111111111111111')).to.equal(true);
   });
 
   it('strips Android fontWeight so MIUI cannot double-paint letters', () => {
@@ -886,5 +1124,73 @@ describe('account entry — password, email and session', () => {
     expect(painted.includeFontPadding).to.equal(false);
     expect(painted.opacity).to.equal(undefined);
     expect(remapAndroidTextStyle({ fontWeight: '700' }, 'ios').fontWeight).to.equal('700');
+  });
+
+  it('lets founders propose a phone stamp without pasting a private key', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const { getAddress } = require('ethers');
+    function looksLikePrivateKey(value) {
+      const raw = String(value || '').trim().replace(/^0x/i, '');
+      return /^[0-9a-fA-F]{64}$/.test(raw);
+    }
+    function attesterProposalError(value, ownerAddress, blockedAddresses) {
+      const trimmed = String(value || '').trim();
+      if (looksLikePrivateKey(trimmed)) return 'key';
+      if (!/^0x[0-9a-fA-F]{40}$/.test(trimmed) || /^0x0+$/i.test(trimmed)) return 'address';
+      const next = trimmed.toLowerCase();
+      if (ownerAddress && next === String(ownerAddress).toLowerCase()) return 'role';
+      if ((blockedAddresses || []).some((item) => String(item).toLowerCase() === next)) return 'role';
+      return null;
+    }
+    const owner = '0x1111111111111111111111111111111111111111';
+    const stamp = '0x2222222222222222222222222222222222222222';
+    expect(attesterProposalError('0x' + 'ab'.repeat(32), owner, [])).to.equal('key');
+    expect(attesterProposalError(owner, owner, [])).to.equal('role');
+    expect(attesterProposalError(stamp, owner, [owner])).to.equal(null);
+    expect(getAddress(stamp)).to.equal(getAddress('0x2222222222222222222222222222222222222222'));
+    const panel = fs.readFileSync(path.join(__dirname, '..', 'components', 'AdminPanel.tsx'), 'utf8');
+    expect(panel).to.include('onProposeAttester');
+    expect(panel).to.include('adminSetAttester');
+    expect(panel).to.not.include('ATTESTER_PRIVATE_KEY');
+    const service = fs.readFileSync(path.join(__dirname, '..', 'services', 'quatriviumCreditService.ts'), 'utf8');
+    expect(service).to.include("proposeAdmin('setAttester'");
+    const util = fs.readFileSync(path.join(__dirname, '..', 'utils', 'adminAttester.ts'), 'utf8');
+    expect(util).to.include('looksLikePrivateKey');
+  });
+
+  it('hides founder tools from the settings list', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const settings = fs.readFileSync(path.join(__dirname, '..', 'components', 'SettingsButton.tsx'), 'utf8');
+    expect(settings).to.not.include("label={t('settingsAdminTitle')}");
+    expect(settings).to.include("setPanel('admin')");
+    expect(settings).to.include('onLongPress');
+    const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
+    expect(home).to.include('adminInfo.isOwner || adminInfo.isAdmin');
+  });
+
+  it('lets two founders kick a lost or hacked key', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const sol = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'QuatriviumCredit.sol'), 'utf8');
+    expect(sol).to.include('if (n >= 3) return 2');
+    expect(sol).to.include('would break quorum');
+    const es = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'i18n', 'locales', 'es.json'), 'utf8'));
+    expect(es.adminTwoOfThree).to.include('2 firmas');
+    expect(es.adminTwoOfThree).to.match(/pierde|hackean/);
+    expect(es.emailNeedApi).to.not.match(/RESEND|EMAIL_FROM|worker/i);
+    expect(es.otpDeliveryFailed).to.not.match(/Twilio|WhatsApp Cloud/i);
+    expect(es.creditAccessLead.length).to.be.below(80);
+    expect(es.appWalletFailed.length).to.be.below(50);
+    expect(es.appWalletInTitle).to.equal('Depositar');
+    expect(es.yourLpPosition).to.match(/Su posici/);
+    const walletCtx = fs.readFileSync(path.join(__dirname, '..', 'wallet', 'AppWalletContext.tsx'), 'utf8');
+    expect(walletCtx).to.include('restoreSavedSessionWrap');
+    const walletSvc = fs.readFileSync(path.join(__dirname, '..', 'services', 'appWallet.ts'), 'utf8');
+    expect(walletSvc).to.include('readRawWallet');
+    expect(walletSvc).to.include("throw new Error('locked')");
+    const panel = fs.readFileSync(path.join(__dirname, '..', 'components', 'AdminPanel.tsx'), 'utf8');
+    expect(panel).to.include('onProposeConfirmations');
   });
 });

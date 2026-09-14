@@ -73,10 +73,10 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
-          <AppText style={[styles.doneText, { color: colors.text }]}>@{claimedUsername}</AppText>
-          <TouchableOpacity onPress={() => setEditing(true)}>
-            <AppText style={[styles.change, { color: colors.primary }]}>{t('usernameChange')}</AppText>
-          </TouchableOpacity>
+          <View style={styles.doneCopy}>
+            <AppText style={[styles.doneText, { color: colors.text }]}>@{claimedUsername}</AppText>
+            <AppText style={[styles.hint, { color: colors.textMuted, marginBottom: 0 }]}>{t('usernameLocked')}</AppText>
+          </View>
         </View>
       ) : (
         <View>
@@ -183,10 +183,8 @@ const styles = StyleSheet.create({
   doneText: {
     fontSize: 14,
     fontWeight: '600',
-    flex: 1,
   },
-  change: {
-    fontSize: 13,
-    fontWeight: '600',
+  doneCopy: {
+    flex: 1,
   },
 });
