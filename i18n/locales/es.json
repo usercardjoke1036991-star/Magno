@@ -874,7 +874,7 @@
   "lockPasswordUseEmail": "Usar correo",
   "authSignInStep": "Paso extra al iniciar sesión",
   "donateRealOnly": "Donar está en Cuenta Real.",
-  "poolRealOnly": "El pool está en Cuenta Real.",
+  "poolRealOnly": "En Demo se consulta. Aportar está en Cuenta Real.",
   "signInNoAccount": "Aún no hay cuenta en este teléfono. Créela primero.",
   "emailNeedBeforeLoan": "Vincule el correo de esta cuenta antes de pedir un préstamo.",
   "emailBannerTitle": "Verificar correo",

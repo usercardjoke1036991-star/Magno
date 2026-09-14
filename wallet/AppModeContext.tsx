@@ -1,12 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, AppState, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Linking from 'expo-linking';
 import {
   isContractConfigured,
   setProductMode,
   setRuntimeMode,
   type AppMode,
 } from '../constants/rpcConfig';
+import { parseAppDeepLink } from '../utils/appDeepLink';
 import { APP_MODE_STORAGE_KEY, isFirstAppMode, resolvePersistedMode } from './appModePersist';
 
 interface AppModeValue {
@@ -70,6 +72,19 @@ export const AppModeProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await rememberOpenedMode(applied);
     return true;
   }, []);
+
+  useEffect(() => {
+    if (!__DEV__ || !ready) return undefined;
+    const apply = (url?: string | null) => {
+      const link = parseAppDeepLink(url);
+      if (link?.kind === 'mode') {
+        void setMode(link.mode);
+      }
+    };
+    Linking.getInitialURL().then(apply).catch(() => {});
+    const sub = Linking.addEventListener('url', ({ url }) => apply(url));
+    return () => sub.remove();
+  }, [ready, setMode]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {

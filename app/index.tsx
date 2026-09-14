@@ -420,33 +420,57 @@ function HomeScreenWithHooks() {
         lead={t('sectionCreditLineLead')}
         onClose={() => setRoom(null)}
       >
-        <AppSubsection
-          title={userInfo.isRegistered || userInfo.hasActiveLoan ? t('subsectionCreditStatus') : t('subsectionActivate')}
-          icon="id"
-        >
-          <CreditAccessBanner
-            paidUsd={userInfo.donatedUsd || 0}
-            canPay={canPayCreditAccess({
-              protocolCanDonate: userInfo.canDonate,
-              founderAddress: userInfo.founderAddress,
-              accessEnabled: isAccessPaymentEnabled(),
-            })}
-            isLoading={txLoading}
-            tokenSymbol={selectedToken.symbol}
-            onPay={() => void handlePagarAcceso()}
-          />
-          <ActivateCreditSection
-            isRegistered={userInfo.isRegistered || userInfo.hasActiveLoan}
-            checking={creditChecking && !userInfo.isRegistered && !userInfo.hasActiveLoan}
-            hasActiveLoan={userInfo.hasActiveLoan}
-            onRegister={handleRegistrarHumano}
-            onGoLoans={() => setRoom('loans')}
-            isLoading={txLoading}
-            initialInviteCode={pendingInviteCode}
-            paused={creditPaused}
-            contractReady={creditReady}
-          />
-        </AppSubsection>
+        {userInfo.isRegistered || userInfo.hasActiveLoan ? (
+          <>
+            <CreditAccessBanner
+              paidUsd={userInfo.donatedUsd || 0}
+              canPay={canPayCreditAccess({
+                protocolCanDonate: userInfo.canDonate,
+                founderAddress: userInfo.founderAddress,
+                accessEnabled: isAccessPaymentEnabled(),
+              })}
+              isLoading={txLoading}
+              tokenSymbol={selectedToken.symbol}
+              onPay={() => void handlePagarAcceso()}
+            />
+            <ActivateCreditSection
+              isRegistered={userInfo.isRegistered || userInfo.hasActiveLoan}
+              checking={false}
+              hasActiveLoan={userInfo.hasActiveLoan}
+              onRegister={handleRegistrarHumano}
+              onGoLoans={() => setRoom('loans')}
+              isLoading={txLoading}
+              initialInviteCode={pendingInviteCode}
+              paused={creditPaused}
+              contractReady={creditReady}
+            />
+          </>
+        ) : (
+          <AppSubsection title={t('subsectionActivate')} icon="id">
+            <CreditAccessBanner
+              paidUsd={userInfo.donatedUsd || 0}
+              canPay={canPayCreditAccess({
+                protocolCanDonate: userInfo.canDonate,
+                founderAddress: userInfo.founderAddress,
+                accessEnabled: isAccessPaymentEnabled(),
+              })}
+              isLoading={txLoading}
+              tokenSymbol={selectedToken.symbol}
+              onPay={() => void handlePagarAcceso()}
+            />
+            <ActivateCreditSection
+              isRegistered={false}
+              checking={creditChecking}
+              hasActiveLoan={userInfo.hasActiveLoan}
+              onRegister={handleRegistrarHumano}
+              onGoLoans={() => setRoom('loans')}
+              isLoading={txLoading}
+              initialInviteCode={pendingInviteCode}
+              paused={creditPaused}
+              contractReady={creditReady}
+            />
+          </AppSubsection>
+        )}
         {userInfo.isRegistered || userInfo.hasActiveLoan || !creditChecking ? (
           <AppSubsection title={t('subsectionRank')} icon="star">
             <UserMetrics

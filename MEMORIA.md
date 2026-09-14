@@ -36,6 +36,7 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] Donar se ve en Cuenta Real aunque la billetera personal aun no este agregada. El pool es el banco general; donar no entra al pool.
 
 ## Cambios realizados
+- [2026-09-14] Auditoria en vivo: politicas, hub, credito, red, historial, donar, pool y ajustes sin crash. Codigo de invitacion por grupos. Watchdog legal ya no pisa el consentimiento. Demo se consulta y Real queda restaurado.
 - [2026-09-14] Textos legales de usuario: tono prestigioso, secciones cortas. Play sigue cubierto (datos, 18+, red irreversible, camara local).
 - [2026-09-14] Alta: idioma, luego politicas con aceptar al leer el final, luego cuenta. Ajustes muestra privacidad y terminos.
 - [2026-09-14] Textos legales y ficha Play reescritos: 1000 niveles, frase 24, KYC local, pool locked, sin destruir cuenta. Grafico e icono de tienda generados.
@@ -85,11 +86,10 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-13] Auditoria en vivo: tablero de referidos arriba y visible, activar credito gris en Real sin contrato, onNewIntent para salas por enlace. Cuenta Real restaurada.
 - [2026-09-13] Auditoria en vivo: Metro caido, ADB colgado, app recargada. Hardhat 121/121, Demo live operativo. Texto MIUI: se quita fontWeight sintetizado.
 - [2026-09-13] Historial de referidos muestra comisiones, bono de primer pago y total generado
-- [2026-09-13] Historial Demo y Real separados. Reloj rojo en el hub: gracia cuenta atras, mora cuenta adelante hasta pagar.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-14] Decisión: Las politicas al usuario explican como trabaja la app, con que esta de acuerdo y que beneficios tiene. No incluyen detalle interno de proveedores, Demo ni codigo.
+[2026-09-14] Enfoque del usuario actualizado

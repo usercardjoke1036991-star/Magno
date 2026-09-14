@@ -162,9 +162,17 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         accessibilityRole="button"
         accessibilityLabel={t('copyInvite')}
       >
-        <AppText selectable style={[styles.code, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {myCode || t('connectForCode')}
-        </AppText>
+        <View style={[styles.codeBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {myCode
+            ? myCode.split('-').map((part, index) => (
+                <AppText key={`${part}-${index}`} selectable style={[styles.codePart, { color: colors.text }]}>
+                  {part}
+                </AppText>
+              ))
+            : (
+                <AppText style={[styles.codePart, { color: colors.textMuted }]}>{t('connectForCode')}</AppText>
+              )}
+        </View>
       </TouchableOpacity>
       {Boolean(inviteLink) && (
         <AppText selectable style={[styles.link, { color: colors.primary }]}>
@@ -367,15 +375,20 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 4,
   },
-  code: {
-    fontFamily: 'monospace',
-    fontSize: 15,
-    letterSpacing: 0.4,
+  codeBox: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     borderRadius: 12,
     borderWidth: 1,
     padding: 12,
     marginBottom: 10,
-    fontWeight: '500',
+  },
+  codePart: {
+    fontFamily: 'monospace',
+    fontSize: 15,
+    letterSpacing: 0.6,
+    fontWeight: '600',
   },
   link: {
     fontSize: 12,

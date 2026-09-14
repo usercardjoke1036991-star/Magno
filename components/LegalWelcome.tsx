@@ -23,19 +23,23 @@ export const LegalWelcome: React.FC<{ children: React.ReactNode }> = ({ children
   const align = rtl ? ('right' as const) : ('left' as const);
 
   useEffect(() => {
-    let done = false;
-    const finish = (ok: boolean) => {
-      if (done) return;
-      done = true;
-      setAccepted(ok);
-      setReady(true);
-    };
-    const watchdog = setTimeout(() => finish(false), 3000);
+    let cancelled = false;
+    const watchdog = setTimeout(() => {
+      if (!cancelled) setReady(true);
+    }, 3000);
     AsyncStorage.getItem(LEGAL_STORAGE_KEY)
-      .then((raw) => finish(isCurrentLegalAccepted(parseLegalRecord(raw))))
-      .catch(() => finish(false));
+      .then((raw) => {
+        if (cancelled) return;
+        setAccepted(isCurrentLegalAccepted(parseLegalRecord(raw)));
+        setReady(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAccepted(false);
+        setReady(true);
+      });
     return () => {
-      done = true;
+      cancelled = true;
       clearTimeout(watchdog);
     };
   }, []);

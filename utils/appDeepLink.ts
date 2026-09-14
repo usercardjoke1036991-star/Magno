@@ -2,7 +2,8 @@ import * as Linking from 'expo-linking';
 
 export type AppDeepLink =
   | { kind: 'room'; room: 'wallet' | 'credit' | 'loans' | 'bonuses' | 'donate' | 'network' | 'people' | 'pool' | 'admin' | 'history' | 'ranks' }
-  | { kind: 'settings'; panel: 'home' | 'security' };
+  | { kind: 'settings'; panel: 'home' | 'security' | 'privacy' | 'terms' }
+  | { kind: 'mode'; mode: 'demo' | 'live' };
 
 const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'people', 'pool', 'admin', 'history', 'ranks']);
 
@@ -20,6 +21,8 @@ function tokenFromUrl(url?: string | null): string {
   const fromPath = pathHead === 'room' ? pathTail : pathHead;
   if (fromQuery) return fromQuery;
   if (host === 'room') return fromPath;
+  if (host === 'settings') return (pathHead || 'settings').toLowerCase();
+  if (host === 'mode') return (pathHead || '').toLowerCase();
   if (host && host !== 'expo-development-client') return host;
   try {
     const nested = String(parsed.queryParams?.url || '');
@@ -42,7 +45,11 @@ export function parseAppDeepLink(url?: string | null): AppDeepLink | null {
   if (ROOMS.has(token)) {
     return { kind: 'room', room: token as Extract<AppDeepLink, { kind: 'room' }>['room'] };
   }
+  if (token === 'privacy' || token === 'terms') return { kind: 'settings', panel: token };
   if (token === 'settings') return { kind: 'settings', panel: 'home' };
-  if (token === 'profile' || token === 'security') return { kind: 'settings', panel: 'home' };
+  if (token === 'security') return { kind: 'settings', panel: 'security' };
+  if (token === 'profile') return { kind: 'settings', panel: 'home' };
+  if (token === 'demo') return { kind: 'mode', mode: 'demo' };
+  if (token === 'live' || token === 'real') return { kind: 'mode', mode: 'live' };
   return null;
 }

@@ -22,6 +22,17 @@ type Props = {
   onAccept?: () => void;
 };
 
+function asSections(value: unknown): LegalSection[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is LegalSection =>
+      Boolean(item) &&
+      typeof item === 'object' &&
+      typeof (item as LegalSection).title === 'string' &&
+      typeof (item as LegalSection).body === 'string'
+  );
+}
+
 function padIndex(index: number): string {
   return index < 9 ? `0${index + 1}` : String(index + 1);
 }
@@ -48,15 +59,22 @@ export const LegalDocuments: React.FC<Props> = ({ mode, doc = 'all', onAccept })
     setContentH(e.nativeEvent.contentSize.height);
   }, []);
 
-  const renderSections = (title: string, items: LegalSection[]) => (
+  const renderSections = (title: string, items: unknown) => (
     <View style={styles.chapter}>
       <AppText style={[styles.chapterTitle, { color: colors.text, textAlign: align }]}>{title}</AppText>
-      <View style={[styles.chapterRule, { backgroundColor: colors.primary }]} />
-      {items.map((item, index) => (
+      <View
+        style={[
+          styles.chapterRule,
+          { backgroundColor: colors.primary, alignSelf: rtl ? 'flex-end' : 'flex-start' },
+        ]}
+      />
+      {asSections(items).map((item, index) => (
         <View key={`${title}-${item.title}`} style={styles.section}>
           <AppText style={[styles.kicker, { color: colors.primary, textAlign: align }]}>{padIndex(index)}</AppText>
           <AppText style={[styles.heading, { color: colors.text, textAlign: align }]}>{item.title}</AppText>
-          <AppText style={[styles.body, { color: colors.text, textAlign: align }]}>{item.body}</AppText>
+          <AppText selectable style={[styles.body, { color: colors.text, textAlign: align }]}>
+            {item.body}
+          </AppText>
         </View>
       ))}
     </View>

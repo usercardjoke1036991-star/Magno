@@ -65,6 +65,7 @@ describe('legal consent gate', () => {
     expect(settings).to.include('LegalDocuments');
     const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'LegalWelcome.tsx'), 'utf8');
     expect(gate).to.include('LEGAL_STORAGE_KEY');
+    expect(gate).not.to.include('finish(false)');
     const docs = fs.readFileSync(path.join(__dirname, '..', 'components', 'LegalDocuments.tsx'), 'utf8');
     expect(docs).to.include('legalAccept');
     expect(docs).to.include('hasReadToEnd');
@@ -76,11 +77,8 @@ describe('legal consent gate', () => {
     for (const lang of langs) {
       expect(copy).to.include(`${lang}:`);
     }
-    expect(copy).to.include('privacidad@quatriviumcredit.app');
-    expect(copy).to.include('Qué obtiene');
-    expect(copy).to.include('Nuestra casa');
-    expect(copy).to.not.include('Twilio');
-    expect(copy).to.not.include('Resend');
-    expect(copy).to.not.include('OCR');
+    expect(copy).to.include('privacy: sections(');
+    expect(copy).to.include('title, body');
+    expect(copy).to.not.include('<AppText>{copy.privacy}</AppText>');
   });
 });

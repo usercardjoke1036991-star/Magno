@@ -48,9 +48,14 @@ export const SettingsButton: React.FC = () => {
   useEffect(() => {
     const apply = (url?: string | null) => {
       const link = parseAppDeepLink(url);
+      if (link?.kind === 'room') {
+        setOpen(false);
+        setPanel('home');
+        return;
+      }
       if (link?.kind !== 'settings') return;
       setOpen(true);
-      setPanel('home');
+      setPanel(link.panel);
     };
     Linking.getInitialURL().then(apply).catch(() => {});
     const sub = Linking.addEventListener('url', ({ url }) => apply(url));

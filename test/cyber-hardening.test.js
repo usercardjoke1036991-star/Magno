@@ -1049,6 +1049,8 @@ describe('account entry — password, email and session', () => {
     const inviteUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReferralSection.tsx'), 'utf8');
     expect(inviteUi).to.include('copyInvite');
     expect(inviteUi).to.include('handleCopyCode');
+    expect(inviteUi).to.include("myCode.split('-')");
+    expect(inviteUi).to.include('codeBox');
     const kycBanner = fs.readFileSync(path.join(__dirname, '..', 'components', 'KycAccessBanner.tsx'), 'utf8');
     expect(kycBanner).to.include('EmailOtpSection');
     expect(kycBanner).to.include("setOpen('email')");
@@ -1061,6 +1063,9 @@ describe('account entry — password, email and session', () => {
     expect(roomFromAppUrl('quatrivium://room/history')).to.equal('history');
     expect(roomFromAppUrl('quatrivium://room/network')).to.equal('network');
     expect(roomFromAppUrl('quatrivium://room/people')).to.equal('people');
+    const deep = fs.readFileSync(path.join(__dirname, '..', 'utils', 'appDeepLink.ts'), 'utf8');
+    expect(deep).to.include("token === 'privacy'");
+    expect(deep).to.include("kind: 'mode'");
   });
 
   it('pages an unbounded referral people list eight at a time', () => {

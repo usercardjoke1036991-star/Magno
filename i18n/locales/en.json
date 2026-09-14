@@ -874,7 +874,7 @@
   "lockPasswordUseEmail": "Use email",
   "authSignInStep": "Extra step when signing in",
   "donateRealOnly": "Donating is available in the Real account.",
-  "poolRealOnly": "The pool is in the Real account.",
+  "poolRealOnly": "Demo is view-only. Contributing is on the live account.",
   "signInNoAccount": "There is no account on this phone yet. Create one first.",
   "emailNeedBeforeLoan": "Link this account email before requesting a loan.",
   "emailBannerTitle": "Verify email",
