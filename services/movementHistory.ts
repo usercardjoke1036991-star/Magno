@@ -12,6 +12,7 @@ import {
 import { historyJournalSuffix, movementBelongsToWorld } from '../utils/historyWorld';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getTokenMeta } from '../constants/tokens';
+import { classifyDonationKind } from '../utils/creditGates';
 import { addPoolToSpells, buildMoraSpells, type MoraSpell } from '../utils/moraHistory';
 
 const CHUNK = 4000;
@@ -20,7 +21,7 @@ const DEFAULT_LOOKBACK = 80_000;
 const MAX_SCAN_SPAN = 120_000;
 const JOURNAL_PREFIX = 'qc_movements_v1_';
 
-export type MovementKind = 'loan' | 'payment' | 'transfer_out' | 'transfer_in' | 'bonus' | 'donation';
+export type MovementKind = 'loan' | 'payment' | 'transfer_out' | 'transfer_in' | 'bonus' | 'donation' | 'access';
 
 export interface Movement {
   id: string;
@@ -64,9 +65,28 @@ function legacyJournalKey(address: string): string {
   return `${JOURNAL_PREFIX}${getRuntimeMode()}_${address.toLowerCase()}`;
 }
 
+function currentWorld(): 'demo' | 'live' {
+  return getRuntimeMode() === 'live' ? 'live' : 'demo';
+}
+
+function stampWorld(items: Movement[]): Movement[] {
+  const world = currentWorld();
+  return items.map((item) => ({
+    ...item,
+    world: item.world === 'live' || item.world === 'demo' ? item.world : world,
+  }));
+}
+
 function onlyThisWorld(items: Movement[]): Movement[] {
-  const world = getRuntimeMode() === 'live' ? 'live' : 'demo';
-  return items.filter((item) => movementBelongsToWorld(item, world));
+  const world = currentWorld();
+  return stampWorld(items).filter((item) => movementBelongsToWorld(item, world));
+}
+
+function similarMovement(a: Movement, b: Movement): boolean {
+  if (a.kind !== b.kind) return false;
+  if (Math.abs((a.timestamp || 0) - (b.timestamp || 0)) >= 20 * 60 * 1000) return false;
+  if (a.kind === 'access' || a.kind === 'donation' || a.kind === 'bonus') return true;
+  return Boolean(a.amountLabel) && a.amountLabel === b.amountLabel;
 }
 
 async function readJournal(address: string): Promise<Movement[]> {
@@ -99,7 +119,7 @@ export async function recordMovement(
   const next: Movement = {
     ...entry,
     id: entry.id || entry.txHash || `local-${Date.now()}-${items.length}`,
-    world: getRuntimeMode() === 'live' ? 'live' : 'demo',
+    world: currentWorld(),
   };
   const exists = items.some((item) => item.txHash && next.txHash && item.txHash === next.txHash);
   if (exists) return;
@@ -224,12 +244,14 @@ function mergeMovements(local: Movement[], chain: Movement[]): Movement[] {
     if (item.txHash) byHash.set(item.txHash, item);
     else extra.push(item);
   }
+  const hashed = [...byHash.values()];
   for (const item of local) {
     if (item.txHash) {
       const prev = byHash.get(item.txHash);
       if (prev) {
         byHash.set(item.txHash, {
           ...prev,
+          kind: item.kind === 'access' || item.kind === 'donation' || item.kind === 'bonus' ? item.kind : prev.kind,
           platform:
             item.platform && item.platform !== 'BSC' && item.platform !== prev.platform
               ? item.platform
@@ -238,9 +260,10 @@ function mergeMovements(local: Movement[], chain: Movement[]): Movement[] {
       } else {
         byHash.set(item.txHash, item);
       }
-    } else {
-      extra.push(item);
+      continue;
     }
+    const dup = hashed.some((prev) => similarMovement(prev, item)) || extra.some((prev) => similarMovement(prev, item));
+    if (!dup) extra.push(item);
   }
   return [...byHash.values(), ...extra].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 }
@@ -260,21 +283,32 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
     const tokenAddress = getUsdtAddress();
     const token = new Contract(tokenAddress, TRANSFER_ABI, provider);
     const { fromBlock, toBlock, partial } = await resolveStartBlock(provider, contractAddress);
-    const world = getRuntimeMode() === 'live' ? 'live' : 'demo';
+    const world = currentWorld();
 
     const loanFilter = eventFilter(contract, 'PrestamoEmitido', self);
     const payFilter = eventFilter(contract, 'PrestamoPagado', self);
+    const donateFilter = eventFilter(contract, 'Donacion', self);
+    const bonusFilter = eventFilter(contract, 'BonoHitoPagado', self);
     const outFilter = eventFilter(token, 'Transfer', self, null);
     const inFilter = eventFilter(token, 'Transfer', null, self);
 
-    const [loanPack, payPack, outPack, inPack] = await Promise.all([
+    const [loanPack, payPack, donatePack, bonusPack, outPack, inPack] = await Promise.all([
       queryFilterChunked(contract, loanFilter, fromBlock, toBlock),
       queryFilterChunked(contract, payFilter, fromBlock, toBlock),
+      queryFilterChunked(contract, donateFilter, fromBlock, toBlock),
+      queryFilterChunked(contract, bonusFilter, fromBlock, toBlock),
       queryFilterChunked(token, outFilter, fromBlock, toBlock),
       queryFilterChunked(token, inFilter, fromBlock, toBlock),
     ]);
 
-    const logs = [...loanPack.events, ...payPack.events, ...outPack.events, ...inPack.events];
+    const logs = [
+      ...loanPack.events,
+      ...payPack.events,
+      ...donatePack.events,
+      ...bonusPack.events,
+      ...outPack.events,
+      ...inPack.events,
+    ];
     const stamps = await resolveTimestamps(
       provider,
       logs.map((event) => event.blockNumber)
@@ -322,9 +356,54 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
       });
     }
 
+    const donateEvents = [...donatePack.events].sort(
+      (a, b) => a.blockNumber - b.blockNumber || a.transactionHash.localeCompare(b.transactionHash)
+    );
+    donateEvents.forEach((event, index) => {
+      const args = eventArgs(event);
+      const tokenAddr = String(argValue(args, 'token', 2) || tokenAddress);
+      const amountWei = asBigInt(argValue(args, 'monto', 1));
+      const amount = formatToken(amountWei, tokenAddr);
+      const usd = Number.parseFloat(amount.label) || 0;
+      const hash = event.transactionHash;
+      chain.push({
+        id: hash,
+        kind: classifyDonationKind(usd, index === 0),
+        from: self,
+        to: '',
+        amountLabel: amount.label,
+        tokenSymbol: amount.symbol,
+        platform: APP_DISPLAY_NAME,
+        world,
+        timestamp: (stamps.get(event.blockNumber) || 0) * 1000,
+        txHash: hash,
+      });
+    });
+
+    for (const event of bonusPack.events) {
+      const args = eventArgs(event);
+      const tokenAddr = String(argValue(args, 'token', 3) || tokenAddress);
+      const amount = formatToken(asBigInt(argValue(args, 'monto', 2)), tokenAddr);
+      const hash = event.transactionHash;
+      chain.push({
+        id: hash,
+        kind: 'bonus',
+        from: contractAddress,
+        to: self,
+        amountLabel: amount.label,
+        tokenSymbol: amount.symbol,
+        platform: APP_DISPLAY_NAME,
+        world,
+        timestamp: (stamps.get(event.blockNumber) || 0) * 1000,
+        txHash: hash,
+      });
+    }
+
     const skip = new Set([contractAddress.toLowerCase(), tokenAddress.toLowerCase()]);
     const creditHashes = new Set(
-      [...loanPack.events, ...payPack.events].map((event) => event.transactionHash)
+      [...loanPack.events, ...payPack.events, ...donatePack.events, ...bonusPack.events].map(
+        (event) => event.transactionHash
+      )
     );
     for (const event of outPack.events) {
       const args = eventArgs(event);
@@ -370,7 +449,9 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
 
     return {
       items: onlyThisWorld(mergeMovements(local, chain)),
-      partial: partial || loanPack.failed + payPack.failed + outPack.failed + inPack.failed > 0,
+      partial:
+        partial ||
+        loanPack.failed + payPack.failed + donatePack.failed + bonusPack.failed + outPack.failed + inPack.failed > 0,
     };
   } catch {
     return { items: onlyThisWorld(local).sort((a, b) => b.timestamp - a.timestamp), partial: true };

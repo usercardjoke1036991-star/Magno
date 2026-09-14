@@ -947,5 +947,12 @@
   "rankGalleryTitle": "Çerçeveler",
   "rankGalleryLead": "12 taş. Her birinde I, II ve III.",
   "hubRanksLead": "Tüm çerçeveleri görün.",
-  "openRankGallery": "Çerçeveleri gör"
+  "openRankGallery": "Çerçeveleri gör",
+  "historyAccess": "Credit access",
+  "historySupport": "Support and bonuses",
+  "historySupportEmpty": "No donations or bonuses yet.",
+  "copyInvite": "Copy code",
+  "inviteCopied": "Code copied.",
+  "donateAccessNote": "The {amount} USDT access fee is separate.",
+  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone."
 }

@@ -947,5 +947,12 @@
   "rankGalleryTitle": "Cornici",
   "rankGalleryLead": "12 pietre. Ognuna con I, II e III.",
   "hubRanksLead": "Vedi tutte le cornici.",
-  "openRankGallery": "Vedi cornici"
+  "openRankGallery": "Vedi cornici",
+  "historyAccess": "Credit access",
+  "historySupport": "Support and bonuses",
+  "historySupportEmpty": "No donations or bonuses yet.",
+  "copyInvite": "Copy code",
+  "inviteCopied": "Code copied.",
+  "donateAccessNote": "The {amount} USDT access fee is separate.",
+  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone."
 }

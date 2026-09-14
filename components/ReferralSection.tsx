@@ -27,6 +27,7 @@ import { formatUSD } from '../utils/formatters';
 import { openSafeUrl } from '../utils/safeOpenUrl';
 import { AppSubsection } from './AppSection';
 import { AppText } from './AppText';
+import { copyText } from '../utils/copyText';
 
 export interface ReferralInfo {
   padre: string;
@@ -94,6 +95,18 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
     return true;
   };
 
+  const handleCopyCode = async () => {
+    if (!guardShare()) return;
+    const result = await copyText(myCode);
+    if (result === 'copied') {
+      Alert.alert(t('ready'), t('inviteCopied'));
+      return;
+    }
+    if (result === 'failed') {
+      Alert.alert(t('invite'), myCode);
+    }
+  };
+
   const handleShare = async () => {
     if (!guardShare()) return;
     try {
@@ -133,18 +146,43 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         </View>
       )}
 
-          <View style={styles.labelRow}>
+          <TouchableOpacity
+            style={styles.labelRow}
+            onPress={() => void handleCopyCode()}
+            disabled={!myCode || isRestricted}
+            accessibilityRole="button"
+            accessibilityLabel={t('copyInvite')}
+          >
             <AppIcon name="copy" size={14} color={colors.textMuted} />
             <AppText style={[styles.label, { color: colors.textMuted }]}>{t('inviteCode')}</AppText>
-          </View>
-      <AppText selectable style={[styles.code, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}>
-        {myCode || t('connectForCode')}
-      </AppText>
+          </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => void handleCopyCode()}
+        disabled={!myCode || isRestricted}
+        accessibilityRole="button"
+        accessibilityLabel={t('copyInvite')}
+      >
+        <AppText selectable style={[styles.code, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {myCode || t('connectForCode')}
+        </AppText>
+      </TouchableOpacity>
       {Boolean(inviteLink) && (
         <AppText selectable style={[styles.link, { color: colors.primary }]}>
           {inviteLink}
         </AppText>
       )}
+      <TouchableOpacity
+        style={[styles.shareButton, { backgroundColor: colors.connect }, isRestricted && styles.shareDisabled]}
+        onPress={() => void handleCopyCode()}
+        disabled={!myCode || isRestricted}
+        accessibilityRole="button"
+        accessibilityLabel={t('copyInvite')}
+      >
+        <View style={styles.btnRow}>
+          <AppIcon name="copy" size={16} color="#111" />
+          <AppText style={[styles.shareButtonText, { color: '#111' }]}>{t('copyInvite')}</AppText>
+        </View>
+      </TouchableOpacity>
       <TouchableOpacity
         style={[styles.shareButton, { backgroundColor: colors.primary }, isRestricted && styles.shareDisabled]}
         onPress={handleShare}

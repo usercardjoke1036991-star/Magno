@@ -110,6 +110,8 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
             <AppText style={[styles.metaBadge, { color: colors.textMuted }]}>{t('loanLockedBadge')}</AppText>
             <AppText style={[styles.chevron, { color: colors.primary }]}>{detailsOpen ? '–' : '+'}</AppText>
           </View>
+        ) : protocolClosed ? (
+          <AppText style={[styles.metaBadge, { color: colors.warnText }]}>{t('accountWorldLivePendingTag')}</AppText>
         ) : (
           <AppText style={[styles.metaBadge, { color: colors.success }]}>{t('loanUnlockedBadge')}</AppText>
         )}

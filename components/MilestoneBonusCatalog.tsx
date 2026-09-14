@@ -60,9 +60,11 @@ export function MilestoneBonusCatalog({
                     ? t('bonusClaimed')
                     : ready
                       ? t('bonusReady')
-                      : unlocked
-                        ? t('poolBonusPending')
-                        : t('bonusLocked')}
+                      : unlocked && !canClaim
+                        ? t('bonusLegacyContract')
+                        : unlocked
+                          ? t('bonusUnlockedWait')
+                          : t('bonusLocked')}
                 </AppText>
               </View>
             </View>

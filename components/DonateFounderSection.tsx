@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-nat
 import { fameFromDonateUsd, supportKind, supportNameKey } from '../constants/support';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd } from '../utils/creditGates';
 import { formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { AppSubsection } from './AppSection';
 import { AppText, AppTextInput } from './AppText';
@@ -34,16 +35,19 @@ export function DonateFounderSection({
   const [amount, setAmount] = useState('5');
   const { t } = useI18n();
   const { colors } = useTheme();
-  const kind = supportKind(donatedUsd, lpUsd);
+  const kind = supportKind(voluntaryDonateUsd(donatedUsd), lpUsd);
   const titleKey = supportNameKey(kind);
   const blocked = isLoading || !walletConnected || !canSend || !founderAddress || !tokenSupported;
   const parsed = parsePositiveDecimal(amount);
   const fameGain = parsed ? fameFromDonateUsd(Number(parsed)) : 0;
+  const voluntary = voluntaryDonateUsd(donatedUsd);
+  const accessPaid = hasCreditAccess(donatedUsd);
 
   return (
     <View style={styles.stack}>
       <AppSubsection title={t('donateTitle')} defaultOpen icon="star">
         <AppText style={[styles.lead, { color: colors.text }]}>{t('donateLead')}</AppText>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('donateNotPool')}</AppText>
         {!canSend ? (
           <AppText style={[styles.meta, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
         ) : !founderAddress ? (
@@ -58,8 +62,13 @@ export function DonateFounderSection({
           </AppText>
         ) : null}
         <AppText style={[styles.meta, { color: colors.textMuted }]}>
-          {t('donateSupportTotal')} · {formatUSD(donatedUsd)}
+          {t('donateSupportTotal')} · {formatUSD(voluntary)}
         </AppText>
+        {accessPaid ? (
+          <AppText style={[styles.meta, { color: colors.textMuted }]}>
+            {t('donateAccessNote', { amount: String(CREDIT_ACCESS_USDT) })}
+          </AppText>
+        ) : null}
         <AppText style={[styles.label, { color: colors.primary }]}>
           {t('donateAmount')} ({tokenSymbol})
         </AppText>

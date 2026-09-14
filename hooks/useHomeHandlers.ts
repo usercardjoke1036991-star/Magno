@@ -610,9 +610,9 @@ export const useHomeHandlers = ({
       const result = await donarProyecto(amountWei, selectedToken.address);
       if (result.success) {
         void recordMovement(walletAddress, {
-          kind: 'donation',
+          kind: 'access',
           from: walletAddress,
-          to: userInfo.founderAddress,
+          to: '',
           amountLabel: `${amount} ${selectedToken.symbol}`,
           tokenSymbol: selectedToken.symbol,
           platform: 'Quatrivium',
@@ -666,7 +666,7 @@ export const useHomeHandlers = ({
         void recordMovement(walletAddress, {
           kind: 'donation',
           from: walletAddress,
-          to: userInfo.founderAddress,
+          to: '',
           amountLabel: `${parsed} ${selectedToken.symbol}`,
           tokenSymbol: selectedToken.symbol,
           platform: 'Quatrivium',

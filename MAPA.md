@@ -376,7 +376,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, creditNeedsAccess, canPayCreditAccess, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
@@ -392,7 +392,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/legacyStorage.ts` — módulo JS/TS
   - Funciones/clases: migrateLegacyStorage
 - `utils/moraHistory.ts` — módulo JS/TS
-  - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement
+  - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement, isSupportMovement
 - `utils/passwordPolicy.ts` — módulo JS/TS
   - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, PASSWORD_ALPHABET, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, passwordRuleFlags, masterPasswordFromRandomBytes
 - `utils/pendingDeepLink.ts` — módulo JS/TS

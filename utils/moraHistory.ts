@@ -95,9 +95,13 @@ export function addPoolToSpells(spells: MoraSpell[], paidAt: number, interestWei
 }
 
 export function isTransferMovement(kind: string): boolean {
-  return kind === 'transfer_in' || kind === 'transfer_out' || kind === 'bonus' || kind === 'donation';
+  return kind === 'transfer_in' || kind === 'transfer_out';
 }
 
 export function isLoanMovement(kind: string): boolean {
   return kind === 'loan' || kind === 'payment';
+}
+
+export function isSupportMovement(kind: string): boolean {
+  return kind === 'bonus' || kind === 'donation' || kind === 'access';
 }

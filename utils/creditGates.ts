@@ -102,6 +102,27 @@ export function hasCreditAccess(paidUsd: number): boolean {
   return Number.isFinite(paid) && paid + 1e-9 >= CREDIT_ACCESS_USDT;
 }
 
+/** Donaciones voluntarias: el 1 USDT de acceso no cuenta como apoyo extra. */
+export function voluntaryDonateUsd(paidUsd: number): number {
+  const paid = Number(paidUsd);
+  if (!Number.isFinite(paid) || paid <= 0) return 0;
+  return Math.max(0, paid - (hasCreditAccess(paid) ? CREDIT_ACCESS_USDT : 0));
+}
+
+/** Primera donación de 1 USDT = acceso. Cualquier monto mayor o posterior = donar. */
+export function classifyDonationKind(usdAmount: number, isFirstDonation: boolean): 'access' | 'donation' {
+  const usd = Number(usdAmount);
+  if (
+    isFirstDonation &&
+    Number.isFinite(usd) &&
+    usd > 0 &&
+    usd <= CREDIT_ACCESS_USDT + 1e-6
+  ) {
+    return 'access';
+  }
+  return 'donation';
+}
+
 export function creditNeedsAccess(paidUsd: number): boolean {
   return !hasCreditAccess(paidUsd);
 }

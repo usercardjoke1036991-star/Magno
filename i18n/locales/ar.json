@@ -947,5 +947,12 @@
   "rankGalleryTitle": "الإطارات",
   "rankGalleryLead": "12 حجرا. لكل منها I و II و III.",
   "hubRanksLead": "شاهد كل الإطارات.",
-  "openRankGallery": "عرض الإطارات"
+  "openRankGallery": "عرض الإطارات",
+  "historyAccess": "Credit access",
+  "historySupport": "Support and bonuses",
+  "historySupportEmpty": "No donations or bonuses yet.",
+  "copyInvite": "Copy code",
+  "inviteCopied": "Code copied.",
+  "donateAccessNote": "The {amount} USDT access fee is separate.",
+  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone."
 }

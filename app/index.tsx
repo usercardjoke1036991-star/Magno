@@ -319,6 +319,7 @@ function HomeScreenWithHooks() {
           onDeclare={handleDeclararKyc}
           onPhoneBound={refetch}
           onPhraseSaved={() => setPhraseBackedUp(true)}
+          onEmailVerified={() => setHasVerifiedEmail(true)}
         />
 
         <GraceMoraClock
@@ -508,6 +509,7 @@ function HomeScreenWithHooks() {
           onDeclare={handleDeclararKyc}
           onPhoneBound={refetch}
           onPhraseSaved={() => setPhraseBackedUp(true)}
+          onEmailVerified={() => setHasVerifiedEmail(true)}
         />
         {tokens.length > 1 ? (
           <TokenSelector
@@ -612,6 +614,7 @@ function HomeScreenWithHooks() {
         lead={t('sectionDonateLead')}
         onClose={() => setRoom(null)}
       >
+        {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
         <DonateFounderSection
           isLoading={txLoading}
           tokenSymbol={selectedToken.symbol}
@@ -676,6 +679,7 @@ function HomeScreenWithHooks() {
       <AppWindow
         visible={room === 'history'}
         title={`${t('historyTitle')} · ${mode === 'demo' ? t('appModeDemo') : t('appModeLive')}`}
+        lead={t('historyLead')}
         onClose={() => setRoom(null)}
       >
         <MovementHistory

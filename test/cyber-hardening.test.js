@@ -511,10 +511,29 @@ describe('demo credit gates', function () {
 
   it('splits history windows and computes mora days, fame, freeze and pool share', function () {
     function isTransferMovement(kind) {
-      return kind === 'transfer_in' || kind === 'transfer_out' || kind === 'bonus' || kind === 'donation';
+      return kind === 'transfer_in' || kind === 'transfer_out';
     }
     function isLoanMovement(kind) {
       return kind === 'loan' || kind === 'payment';
+    }
+    function isSupportMovement(kind) {
+      return kind === 'bonus' || kind === 'donation' || kind === 'access';
+    }
+    function movementBelongsToWorld(item, mode) {
+      const world = mode === 'live' ? 'live' : 'demo';
+      const itemWorld = item.world === 'live' || item.world === 'demo' ? item.world : '';
+      if (!itemWorld) return false;
+      return itemWorld === world;
+    }
+    function voluntaryDonateUsd(paidUsd) {
+      const paid = Number(paidUsd);
+      if (!Number.isFinite(paid) || paid <= 0) return 0;
+      return Math.max(0, paid - (paid + 1e-9 >= 1 ? 1 : 0));
+    }
+    function classifyDonationKind(usdAmount, isFirstDonation) {
+      const usd = Number(usdAmount);
+      if (isFirstDonation && Number.isFinite(usd) && usd > 0 && usd <= 1 + 1e-6) return 'access';
+      return 'donation';
     }
     function moraDays(startedAt, endedAt) {
       if (!startedAt || endedAt <= startedAt) return 0;
@@ -554,8 +573,22 @@ describe('demo credit gates', function () {
     }
     expect(isTransferMovement('transfer_in')).to.equal(true);
     expect(isTransferMovement('loan')).to.equal(false);
+    expect(isTransferMovement('bonus')).to.equal(false);
+    expect(isTransferMovement('donation')).to.equal(false);
     expect(isLoanMovement('payment')).to.equal(true);
     expect(isLoanMovement('transfer_out')).to.equal(false);
+    expect(isSupportMovement('access')).to.equal(true);
+    expect(isSupportMovement('bonus')).to.equal(true);
+    expect(isSupportMovement('transfer_in')).to.equal(false);
+    expect(movementBelongsToWorld({ world: 'demo' }, 'demo')).to.equal(true);
+    expect(movementBelongsToWorld({ world: 'demo' }, 'live')).to.equal(false);
+    expect(movementBelongsToWorld({}, 'demo')).to.equal(false);
+    expect(voluntaryDonateUsd(1)).to.equal(0);
+    expect(voluntaryDonateUsd(6)).to.equal(5);
+    expect(voluntaryDonateUsd(0)).to.equal(0);
+    expect(classifyDonationKind(1, true)).to.equal('access');
+    expect(classifyDonationKind(5, true)).to.equal('donation');
+    expect(classifyDonationKind(1, false)).to.equal('donation');
     const day = 86_400_000;
     const start = 1_700_000_000_000;
     const spells = buildMoraSpells(
@@ -996,11 +1029,33 @@ describe('account entry — password, email and session', () => {
     const card = fs.readFileSync(path.join(__dirname, '..', 'components', 'LoanTierCard.tsx'), 'utf8');
     expect(card).to.include('contractReady');
     expect(card).to.include("t('liveCreditNotReady')");
+    expect(card).to.include("t('accountWorldLivePendingTag')");
     const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
     expect(home).to.include('contractReady={creditReady}');
     const handlers = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
     expect(handlers).to.include('ensureExternalWalletOnAppChain');
     expect(handlers).to.include('poolRealOnly');
+    expect(handlers).to.include("kind: 'access'");
+    expect(handlers).not.to.match(/kind: 'donation'[\s\S]*to: userInfo\.founderAddress/);
+    const historyUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'MovementHistory.tsx'), 'utf8');
+    expect(historyUi).to.include('historySupport');
+    expect(historyUi).to.include('historyAccess');
+    expect(historyUi).to.include("item.kind === 'access'");
+    const historySvc = fs.readFileSync(path.join(__dirname, '..', 'services', 'movementHistory.ts'), 'utf8');
+    expect(historySvc).to.include("eventFilter(contract, 'Donacion'");
+    expect(historySvc).to.include("eventFilter(contract, 'BonoHitoPagado'");
+    expect(historySvc).to.include('classifyDonationKind');
+    const inviteUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReferralSection.tsx'), 'utf8');
+    expect(inviteUi).to.include('copyInvite');
+    expect(inviteUi).to.include('handleCopyCode');
+    const kycBanner = fs.readFileSync(path.join(__dirname, '..', 'components', 'KycAccessBanner.tsx'), 'utf8');
+    expect(kycBanner).to.include('EmailOtpSection');
+    expect(kycBanner).to.include("setOpen('email')");
+    const donateUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'DonateFounderSection.tsx'), 'utf8');
+    expect(donateUi).to.include('voluntaryDonateUsd');
+    expect(donateUi).to.include('donateAccessNote');
+    const transferUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'TransferWalletsModal.tsx'), 'utf8');
+    expect(transferUi).to.include('ensureExternalWalletOnAppChain');
     expect(roomFromAppUrl('quatrivium://room/credit?n=1730000000')).to.equal('credit');
     expect(roomFromAppUrl('quatrivium://room/history')).to.equal('history');
     expect(roomFromAppUrl('quatrivium://room/network')).to.equal('network');
@@ -1355,8 +1410,11 @@ describe('account entry — password, email and session', () => {
     expect(guard).to.include('subscribeScreenshot');
     expect(guard).to.include('preventScreenCaptureAsync');
     expect(guard).to.include('notifyScreenshot');
+    expect(guard).to.include("import('expo-screen-capture')");
     const appJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'app.json'), 'utf8'));
-    expect(JSON.stringify(appJson.expo.plugins)).to.include('expo-screen-capture');
+    expect(JSON.stringify(appJson.expo.plugins)).to.not.include('expo-screen-capture');
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+    expect(pkg.dependencies['expo-screen-capture']).to.be.ok;
     const security = fs.readFileSync(path.join(__dirname, '..', 'components', 'SecuritySettings.tsx'), 'utf8');
     expect(security).to.include('subscribeScreenshot');
     expect(security).to.include('selectable={false}');

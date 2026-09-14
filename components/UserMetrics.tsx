@@ -13,6 +13,7 @@ import { supportKind, supportNameKey } from '../constants/support';
 import { ProfileAvatar } from './ProfileAvatar';
 import { useUserProfile } from '../profile/ProfileContext';
 import type { DebtReminderKind } from '../utils/debtReminders';
+import { voluntaryDonateUsd } from '../utils/creditGates';
 
 interface UserMetricsProps {
   userInfo: UserInfo;
@@ -58,7 +59,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   const claimableMilestone = userInfo.userProgress.bonusPending;
   const nextMilestone = userInfo.userProgress.nextMilestone;
   const bonusAmount = formatUSD(milestoneBonusUsd(claimableMilestone || nextMilestone));
-  const supportKey = supportNameKey(supportKind(userInfo.donatedUsd || 0, lpUsd));
+  const supportKey = supportNameKey(supportKind(voluntaryDonateUsd(userInfo.donatedUsd || 0), lpUsd));
   const maxLevel = displayMaxLoanLevel(userInfo.maxLoanLevel);
 
   return (

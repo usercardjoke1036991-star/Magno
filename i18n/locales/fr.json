@@ -947,5 +947,12 @@
   "rankGalleryTitle": "Cadres",
   "rankGalleryLead": "12 pierres. Chacune a I, II et III.",
   "hubRanksLead": "Voir tous les cadres.",
-  "openRankGallery": "Voir les cadres"
+  "openRankGallery": "Voir les cadres",
+  "historyAccess": "Credit access",
+  "historySupport": "Support and bonuses",
+  "historySupportEmpty": "No donations or bonuses yet.",
+  "copyInvite": "Copy code",
+  "inviteCopied": "Code copied.",
+  "donateAccessNote": "The {amount} USDT access fee is separate.",
+  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone."
 }

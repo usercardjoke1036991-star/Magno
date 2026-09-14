@@ -112,8 +112,7 @@
         }
       ],
       "expo-updates",
-      "expo-font",
-      "expo-screen-capture"
+      "expo-font"
     ],
     "platforms": [
       "ios",

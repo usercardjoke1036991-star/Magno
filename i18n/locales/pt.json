@@ -947,5 +947,12 @@
   "rankGalleryTitle": "Molduras",
   "rankGalleryLead": "12 pedras. Cada uma com I, II e III.",
   "hubRanksLead": "Veja todas as molduras.",
-  "openRankGallery": "Ver molduras"
+  "openRankGallery": "Ver molduras",
+  "historyAccess": "Credit access",
+  "historySupport": "Support and bonuses",
+  "historySupportEmpty": "No donations or bonuses yet.",
+  "copyInvite": "Copy code",
+  "inviteCopied": "Code copied.",
+  "donateAccessNote": "The {amount} USDT access fee is separate.",
+  "bonusUnlockedWait": "Reached. Claim opens when the pool marks this milestone."
 }

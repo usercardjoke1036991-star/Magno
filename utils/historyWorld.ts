@@ -12,5 +12,7 @@ export function historyJournalSuffix(input: {
 
 export function movementBelongsToWorld(item: { world?: string }, mode: string): boolean {
   const world = mode === 'live' ? 'live' : 'demo';
-  return !item.world || item.world === world;
+  const itemWorld = item.world === 'live' || item.world === 'demo' ? item.world : '';
+  if (!itemWorld) return false;
+  return itemWorld === world;
 }

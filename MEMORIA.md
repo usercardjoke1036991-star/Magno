@@ -36,6 +36,8 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] Si el correo ya esta verificado en el telefono, iniciar sesion es solo contrasena. El codigo se pide una vez. Guardar sesion queda en esa pantalla y se aplica al entrar.
 
 ## Cambios realizados
+- [2026-09-14] Auditoria en vivo Real: el nivel 1 ya no dice Disponible si mainnet no esta listo; muestra Pronto. Hub, credito, red, historial y donar abiertos sin crash.
+- [2026-09-14] Auditoria productiva: historial, referidos, credito, donar y cuenta corregidos para Demo y Real.
 - [2026-09-14] Auditoria del pool: Demo muestra el banco de 2000 USDT en solo lectura, sin aportar. Real no enseña NAV 0 ni formulario falso. El aporte no promete rendimiento retirable. LinkedWalletCard en la sala Pool.
 - [2026-09-14] Auditoria Ajustes y ciber: wrap de sesion solo en SecureStore, /session/check con EIP-712, frase oculta ante captura y al cerrar. Hash de clave no se duplica en AsyncStorage si SecureStore responde.
 - [2026-09-14] Auditoria Demo/Real en vivo: contrato Demo operativo, worker y tunel levantados, UI Real sin credito fantasma, switch de red en billetera externa.
@@ -84,12 +86,10 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-13] Historial: transferencias y prestamos en ventanas aparte. Mora muestra dias, fama quitada, beneficios bloqueados y comisiones al pool.
 - [2026-09-13] Los avisos de frase, correo, KYC y telefono desaparecen de la pantalla principal al confirmarlos.
 - [2026-09-13] Eliminados dumps temporales .tmp, logs y capturas de auditoria que no usa la app. Anadidos al gitignore.
-- [2026-09-13] Autenticador muestra QR otpauth y la clave para copiar. El codigo de 6 digitos es TOTP real.
-- [2026-09-13] Como confirma muestra interruptor y las cuatro opciones en Desbloquear, Transferir, Pedir y Pagar. Guardar no aplica nada si el interruptor esta apagado.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-14] Cambio: Auditoria del pool: Demo muestra el banco de 2000 USDT en solo lectura, sin aportar. Real no enseña NAV 0 ni formulario falso. El aporte no promete rendimiento retirable. LinkedWalletCard en la sala Pool.
+[2026-09-14] Cambio: Auditoria en vivo Real: el nivel 1 ya no dice Disponible si mainnet no esta listo; muestra Pronto. Hub, credito, red, historial y donar abiertos sin crash.

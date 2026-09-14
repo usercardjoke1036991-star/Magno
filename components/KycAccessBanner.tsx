@@ -17,6 +17,8 @@ import { AppText } from './AppText';
 import { SecretInput } from './SecretInput';
 import { checkPassword } from '../services/appLock';
 import { getSecretPhrase, hasSecretPhrase, markPhraseBackedUp } from '../services/appWallet';
+import { loadVerifiedEmail } from '../services/accountEmail';
+import { EmailOtpSection } from './EmailOtpSection';
 import { loanGateBannerRows } from '../utils/creditGates';
 import { subscribeScreenshot } from './ScreenGuard';
 
@@ -36,6 +38,7 @@ interface KycAccessBannerProps {
   onDeclare: () => Promise<boolean>;
   onPhoneBound: () => void;
   onPhraseSaved?: () => void;
+  onEmailVerified?: () => void;
 }
 
 export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
@@ -54,10 +57,12 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   onDeclare,
   onPhoneBound,
   onPhraseSaved,
+  onEmailVerified,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const [open, setOpen] = useState<'kyc' | 'phone' | 'phrase' | null>(null);
+  const [open, setOpen] = useState<'kyc' | 'phone' | 'phrase' | 'email' | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
   const [phrasePassword, setPhrasePassword] = useState('');
   const [phraseText, setPhraseText] = useState('');
   const [phraseError, setPhraseError] = useState('');
@@ -164,10 +169,16 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
           }
           if (row === 'email') {
             return (
-              <View
+              <TouchableOpacity
                 key={row}
+                onPress={() => {
+                  void loadVerifiedEmail()
+                    .then((email) => setVerifiedEmail(email))
+                    .catch(() => setVerifiedEmail(''));
+                  setOpen('email');
+                }}
                 style={[styles.kycBtn, { backgroundColor: colors.primary, borderColor: colors.primary }, last && styles.lastBtn]}
-                accessibilityRole="text"
+                accessibilityRole="button"
                 accessibilityLabel={t('emailBannerTitle')}
               >
                 <AppIcon name="bell" size={18} color={onGreen} />
@@ -175,7 +186,8 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                   <AppText style={[styles.title, { color: onGreen }]}>{t('emailBannerTitle')}</AppText>
                   <AppText style={[styles.lead, { color: onGreenMuted }]}>{t('emailBannerTodo')}</AppText>
                 </View>
-              </View>
+                <AppText style={[styles.chevron, { color: onGreen }]}>›</AppText>
+              </TouchableOpacity>
             );
           }
           if (row === 'kyc') {
@@ -226,11 +238,28 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
               <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
             </TouchableOpacity>
             <AppText style={[styles.screenTitle, { color: colors.text }]}>
-              {open === 'phone' ? t('otpTitle') : open === 'phrase' ? t('seedBannerTitle') : t('kycScreenTitle')}
+              {open === 'phone'
+                ? t('otpTitle')
+                : open === 'phrase'
+                  ? t('seedBannerTitle')
+                  : open === 'email'
+                    ? t('emailBannerTitle')
+                    : t('kycScreenTitle')}
             </AppText>
             <View style={styles.headerSpacer} />
           </View>
           <ScrollView keyboardShouldPersistTaps="always">
+            {open === 'email' ? (
+              <EmailOtpSection
+                walletAddress={walletAddress}
+                verifiedEmail={verifiedEmail}
+                onVerified={(email) => {
+                  setVerifiedEmail(email);
+                  onEmailVerified?.();
+                  setOpen(null);
+                }}
+              />
+            ) : null}
             {open === 'kyc' ? (
               <KycSection
                 walletAddress={walletAddress}

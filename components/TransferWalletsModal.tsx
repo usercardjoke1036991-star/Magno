@@ -25,6 +25,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useFundsConfirm } from './FundsConfirmHost';
 import { formatAddress, parsePositiveDecimal } from '../utils/formatters';
 import { humanizeTxError } from '../utils/txErrors';
+import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { copyText } from '../utils/copyText';
 import { BrandLogo } from './BrandLogo';
 import { LinkWalletForm } from './LinkWalletForm';
@@ -138,6 +139,12 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
         }
         from = linked;
         to = walletAddress;
+        try {
+          await ensureExternalWalletOnAppChain(provider as Eip1193Provider);
+        } catch (error) {
+          Alert.alert(t('connect'), humanizeTxError(error));
+          return;
+        }
         if (asset === 'bnb') await enviarBnb(signer, to, amountWei, true);
         else await enviarToken(signer, selectedToken.address, to, amountWei, true);
       } else {

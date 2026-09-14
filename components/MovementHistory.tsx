@@ -7,7 +7,7 @@ import type { TranslationKey } from '../i18n/translations';
 import { getRuntimeMode, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { movementBelongsToWorld } from '../utils/historyWorld';
 import { loadMoraHistory, loadMovementHistory, type Movement, type MovementKind } from '../services/movementHistory';
-import { isLoanMovement, isTransferMovement, type MoraSpell } from '../utils/moraHistory';
+import { isLoanMovement, isSupportMovement, isTransferMovement, type MoraSpell } from '../utils/moraHistory';
 import { formatAddress } from '../utils/formatters';
 import { AppSubsection } from './AppSection';
 import { AppText } from './AppText';
@@ -19,6 +19,7 @@ const KIND_KEY: Record<MovementKind, TranslationKey> = {
   transfer_in: 'historyTransferIn',
   bonus: 'historyBonus',
   donation: 'historyDonation',
+  access: 'historyAccess',
 };
 
 function formatWhen(timestamp: number): string {
@@ -33,18 +34,19 @@ function poolLabel(wei: bigint): string {
 const MovementCard: React.FC<{ item: Movement }> = ({ item }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const peer = item.kind === 'transfer_out' || item.kind === 'donation' || item.kind === 'payment'
-    ? item.to
-    : item.from;
+  const hidePeer = item.kind === 'access' || item.kind === 'donation';
+  const peer = hidePeer
+    ? ''
+    : item.kind === 'transfer_out' || item.kind === 'payment'
+      ? item.to
+      : item.from;
   return (
     <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
       <AppText style={[styles.kind, { color: colors.primary }]}>{t(KIND_KEY[item.kind])}</AppText>
       <AppText style={[styles.amount, { color: colors.text }]}>{item.amountLabel}</AppText>
       {peer ? (
         <AppText style={[styles.meta, { color: colors.textMuted }]}>
-          {item.kind === 'transfer_out' || item.kind === 'donation' || item.kind === 'payment'
-            ? t('historyTo')
-            : t('historyFrom')}
+          {item.kind === 'transfer_out' || item.kind === 'payment' ? t('historyTo') : t('historyFrom')}
           {': '}
           {formatAddress(peer)}
         </AppText>
@@ -140,6 +142,10 @@ export const MovementHistory: React.FC<{
     () => items.filter((item) => isLoanMovement(item.kind) && movementBelongsToWorld(item, world)),
     [items, world]
   );
+  const support = useMemo(
+    () => items.filter((item) => isSupportMovement(item.kind) && movementBelongsToWorld(item, world)),
+    [items, world]
+  );
 
   return (
     <View>
@@ -151,6 +157,14 @@ export const MovementHistory: React.FC<{
           <AppText style={[styles.empty, { color: colors.textMuted }]}>{t('historyTransferEmpty')}</AppText>
         ) : null}
         {transfers.map((item) => (
+          <MovementCard key={item.id} item={item} />
+        ))}
+      </AppSubsection>
+      <AppSubsection title={t('historySupport')} defaultOpen icon="star">
+        {!loading && !support.length ? (
+          <AppText style={[styles.empty, { color: colors.textMuted }]}>{t('historySupportEmpty')}</AppText>
+        ) : null}
+        {support.map((item) => (
           <MovementCard key={item.id} item={item} />
         ))}
       </AppSubsection>
