@@ -42,7 +42,7 @@
     "circomlibjs": "^0.1.7",
     "ethers": "^6.15.0",
     "events": "^3.3.0",
-    "expo": "~54.0.36",
+    "expo": "~57.0.23",
     "expo-application": "~7.0.8",
     "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.13",
