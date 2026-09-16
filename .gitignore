@@ -72,3 +72,4 @@ _tmp*
 q-open*.png
 metro.log
 eas-dev-build.log
+.audit-phone/
