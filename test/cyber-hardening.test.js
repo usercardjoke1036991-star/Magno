@@ -262,7 +262,10 @@ describe('cyber hardening — PIN and secret box', function () {
       'android.permission.RECORD_AUDIO',
       'android.permission.WRITE_EXTERNAL_STORAGE',
       'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.USE_FINGERPRINT',
+      'android.permission.ACCESS_WIFI_STATE',
     ]);
+    expect(app.expo.android.permissions).to.not.include('USE_FINGERPRINT');
     expect(app.expo.plugins.flat()).to.include('./plugins/withQuatriviumAndroidSecurity.js');
     expect(JSON.stringify(app.expo.plugins)).to.include('minSdkVersion');
     const plugin = fs.readFileSync(
@@ -273,7 +276,11 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(plugin).to.include('network_security_config');
     expect(plugin).to.include('CropImageActivity');
     expect(plugin).to.include('DevLauncherActivity');
+    expect(plugin).to.include('FirebaseInstanceIdReceiver');
+    expect(plugin).to.include('ProfileInstallReceiver');
     expect(plugin).to.include('android.enableMinifyInReleaseBuilds');
+    expect(plugin).to.include("abiFilters 'armeabi-v7a', 'arm64-v8a'");
+    expect(plugin).to.include('public static *** *(...)');
     const scanner = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'scan-mobile.mjs'), 'utf8');
     expect(scanner).to.include('--purge');
     expect(scanner).to.include('/api/v1/delete_scan');

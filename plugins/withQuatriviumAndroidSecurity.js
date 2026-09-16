@@ -12,6 +12,26 @@ const BLOCKED_ALWAYS = [
   'android.permission.MODIFY_AUDIO_SETTINGS',
   'android.permission.WRITE_EXTERNAL_STORAGE',
   'android.permission.READ_EXTERNAL_STORAGE',
+  'android.permission.USE_FINGERPRINT',
+  'android.permission.ACCESS_WIFI_STATE',
+  'android.permission.SYSTEM_ALERT_WINDOW',
+  'com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE',
+  'com.sec.android.provider.badge.permission.READ',
+  'com.sec.android.provider.badge.permission.WRITE',
+  'com.htc.launcher.permission.READ_SETTINGS',
+  'com.htc.launcher.permission.UPDATE_SHORTCUT',
+  'com.sonyericsson.home.permission.BROADCAST_BADGE',
+  'com.sonymobile.home.permission.PROVIDER_INSERT_BADGE',
+  'com.anddoes.launcher.permission.UPDATE_COUNT',
+  'com.majeur.launcher.permission.UPDATE_BADGE',
+  'com.huawei.android.launcher.permission.CHANGE_BADGE',
+  'com.huawei.android.launcher.permission.READ_SETTINGS',
+  'com.huawei.android.launcher.permission.WRITE_SETTINGS',
+  'android.permission.READ_APP_BADGE',
+  'com.oppo.launcher.permission.READ_SETTINGS',
+  'com.oppo.launcher.permission.WRITE_SETTINGS',
+  'me.everything.badger.permission.BADGE_COUNT_READ',
+  'me.everything.badger.permission.BADGE_COUNT_WRITE',
 ];
 
 const NETWORK_XML = `<?xml version="1.0" encoding="utf-8"?>
@@ -32,6 +52,25 @@ const RELEASE_MANIFEST = `<?xml version="1.0" encoding="utf-8"?>
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" tools:node="remove" />
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
+  <uses-permission android:name="android.permission.USE_FINGERPRINT" tools:node="remove" />
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" tools:node="remove" />
+  <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" tools:node="remove" />
+  <uses-permission android:name="com.sec.android.provider.badge.permission.READ" tools:node="remove" />
+  <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE" tools:node="remove" />
+  <uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS" tools:node="remove" />
+  <uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT" tools:node="remove" />
+  <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE" tools:node="remove" />
+  <uses-permission android:name="com.sonymobile.home.permission.PROVIDER_INSERT_BADGE" tools:node="remove" />
+  <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT" tools:node="remove" />
+  <uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE" tools:node="remove" />
+  <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE" tools:node="remove" />
+  <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS" tools:node="remove" />
+  <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS" tools:node="remove" />
+  <uses-permission android:name="android.permission.READ_APP_BADGE" tools:node="remove" />
+  <uses-permission android:name="com.oppo.launcher.permission.READ_SETTINGS" tools:node="remove" />
+  <uses-permission android:name="com.oppo.launcher.permission.WRITE_SETTINGS" tools:node="remove" />
+  <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_READ" tools:node="remove" />
+  <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_WRITE" tools:node="remove" />
   <application
       android:usesCleartextTraffic="false"
       android:networkSecurityConfig="@xml/network_security_config"
@@ -43,6 +82,8 @@ const RELEASE_MANIFEST = `<?xml version="1.0" encoding="utf-8"?>
         android:name="com.canhub.cropper.CropImageActivity"
         android:exported="false"
         tools:replace="android:exported" />
+    <receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" tools:node="remove" />
+    <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver" tools:node="remove" />
   </application>
 </manifest>
 `;
@@ -101,6 +142,8 @@ function withQuatriviumAndroidSecurity(config) {
     return cfg;
   });
 
+  const versionName = String(config.version || '1.0.1');
+
   config = withDangerousMod(config, [
     'android',
     async (cfg) => {
@@ -111,6 +154,42 @@ function withQuatriviumAndroidSecurity(config) {
       const releaseDir = path.join(androidRoot, 'app/src/release');
       fs.mkdirSync(releaseDir, { recursive: true });
       fs.writeFileSync(path.join(releaseDir, 'AndroidManifest.xml'), RELEASE_MANIFEST, 'utf8');
+
+      const gradlePath = path.join(androidRoot, 'app/build.gradle');
+      if (fs.existsSync(gradlePath)) {
+        let gradle = fs.readFileSync(gradlePath, 'utf8');
+        gradle = gradle.replace(/versionName\s+"[^"]+"/, `versionName "${versionName}"`);
+        if (!gradle.includes("abiFilters 'armeabi-v7a', 'arm64-v8a'")) {
+          gradle = gradle.replace(
+            /(signingConfig signingConfigs\.release\.storeFile \? signingConfigs\.release : signingConfigs\.debug\r?\n)/,
+            `$1            ndk {\n                abiFilters 'armeabi-v7a', 'arm64-v8a'\n            }\n`
+          );
+        }
+        fs.writeFileSync(gradlePath, gradle, 'utf8');
+      }
+
+      const proguardPath = path.join(androidRoot, 'app/proguard-rules.pro');
+      if (fs.existsSync(proguardPath)) {
+        let rules = fs.readFileSync(proguardPath, 'utf8');
+        if (!rules.includes('public static *** *(...)')) {
+          rules = rules.replace(
+            /-assumenosideeffects class android\.util\.Log \{[\s\S]*?\}/,
+            `-assumenosideeffects class android.util.Log {
+    public static *** *(...);
+}`
+          );
+          if (!rules.includes('public static *** *(...)')) {
+            rules += `
+
+# Strip android.util.Log in release (MobSF CWE-532).
+-assumenosideeffects class android.util.Log {
+    public static *** *(...);
+}
+`;
+          }
+          fs.writeFileSync(proguardPath, rules, 'utf8');
+        }
+      }
       return cfg;
     },
   ]);

@@ -4,6 +4,7 @@
 Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anteriores. Sin mainnet ni Play hasta que el fundador lo pida.
 
 ## Decisiones
+- [2026-09-16] Analisis MobSF privado en localhost; no usar la instancia publica para que el APK no circule.
 - [2026-09-14] OTP de telefono usa Twilio SMS. El worker publico corre en Fly (min 1 maquina, sin ngrok). Hasta mainnet el worker Demo acepta firmas de Cuenta Real para correo/OTP.
 - [2026-09-14] La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta.
 - [2026-09-14] Las politicas al usuario explican como trabaja la app, con que esta de acuerdo y que beneficios tiene. No incluyen detalle interno de proveedores, Demo ni codigo.
@@ -33,9 +34,15 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - [2026-09-12] En Cuenta Real no se pide credito sin correo, telefono+dispositivo y KYC. Eso corta multicuentas faciles. Demo sigue libre para probar.
 - [2026-09-12] Crear cuenta: correo, contraseña y guardar sesión. Luego una pantalla aparte verifica el código. Iniciar sesión: solo correo, contraseña y guardar sesión. Son funciones distintas.
 - [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad.
-- [2026-09-12] Cuenta Real se muestra completa antes del lanzamiento. Donar y aportar liquidez suman fama. La UI de donar no menciona destino ni USDT real.
 
 ## Cambios realizados
+- [2026-09-16] Foundry 1.8.3 WSL: forge test NAV/EIP-170/anti-contrato + fuzz 256. Lint clasificado, sin cambio al nucleo ni mainnet.
+- [2026-09-16] Foundry 1.8.3 en WSL: overlay foundry.toml + forge-test. 6 tests (fuzz 256) + lint clasificado. Sin cambios al nucleo. No mainnet.
+- [2026-09-16] Auditoria PDF MobSF local del APK 1.0.1: nota 61 Grade A. El HIGH es la huella de Android. El JS del APK no lleva Twilio ni clave de deployer. No se regenera el APK.
+- [2026-09-16] Docker Desktop 4.91 reinstalado; MobSF local en 127.0.0.1:8000 (contenedor mobsf). El APK no se sube a mobsf.live.
+- [2026-09-16] APK release 1.0.1 arm-only firmado v3 SHA-256 CN=Quatrivium Finance copiado a Desktop Quatrivium-Finance-MobSF.apk (67.20 MB, SHA256 2e1e987a...)
+- [2026-09-16] Auditoria MobSF PDF 61/100 A: el HIGH CBC es androidx.biometric CryptoObjectUtils (huella), no el credito. Version 1.0.1, R8 sin logs, APK release sin x86. No se regenero APK: C: tiene 2.4 GB libres.
+- [2026-09-16] MobSF 53/100 del APK release: se quito certificado debug/SHA1 (keystore SHA256 Quatrivium), receivers exportados de Firebase IID y ProfileInstaller, permisos badge/wifi/huella legado. Nuevo APK en el Escritorio. El HIGH CBC PKCS7 es de una libreria ofuscada, no del credito.
 - [2026-09-16] Slither 0.11.6 en Windows: 18 contratos, 80 detectores, 0 hallazgos. Magno queda type commonjs y hardhat --config hardhat.config.cjs para no heredar el HH19 del padre ESM. Ubuntu WSL no arranca (error 6).
 - [2026-09-16] Limpieza de temporales Cursor/PC y APKs viejos. APK release para MobSF en el Escritorio: Quatrivium-Finance-MobSF.apk (minSdk 29, sin HTTP claro, sin debug, R8). El usuario lo sube a la pagina. Sigue firmado con el keystore de debug hasta EAS/Play.
 - [2026-09-16] Auditoria MobSF del APK debug: nota 37/100 esperada. Release endurecido: minSdk 29, sin HTTP claro, sin microfono ni storage legado, cropper no exportado, R8 en release. El APK escaneado sigue siendo debug con certificado de desarrollo.
@@ -79,17 +86,10 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - [2026-09-14] Gobernanza 2-de-3: si una fundadora se pierde o la hackean, las otras 2 la echan. Una sola llave no gobierna.
 - [2026-09-14] Gobernanza unanime: cada cambio admin exige las firmas de todas las fundadoras (3-de-3). La pausa de emergencia sigue inmediata.
 - [2026-09-14] Registrar billetera es opcional: se puede saltar con Ahora no.
-- [2026-09-14] Tras foto y nombre anonimo hay que conectar una billetera. Si es la fundadora del contrato, Admin aparece sin fila en Ajustes.
-- [2026-09-14] Fundadoras ya no aparece en Ajustes. Solo se abre manteniendo el logo. El panel Admin del inicio sigue solo si la MetaMask es la del contrato.
-- [2026-09-14] El panel admin ya propone el sello del telefono (setAttester). La clave sigue solo en el worker.
-- [2026-09-14] Contraseña de sesion bloqueada en Ajustes. 1 USDT visible en el hub. Apagar Desbloquear guarda y abre sin pedir clave. Lupa de personas por nombre.
-- [2026-09-14] Auditoria: el 1 USDT de acceso en Demo estaba bloqueado porque Donar es solo Real. Ahora el contrato Demo puede cobrar el acceso y Donar sigue oculto.
-- [2026-09-14] Historial de personas: cada referido abre su grupo al toque y las generaciones bajan bajo demanda, sin cargar el arbol mundial.
-- [2026-09-14] Requisito de 1 USDT de acceso antes de pedir prestamo. La UI dice pagar a la app; el envio va a la billetera fundadora.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-16] Cambio: Slither 0.11.6 en Windows: 18 contratos, 80 detectores, 0 hallazgos. Magno queda type commonjs y hardhat --config hardhat.config.cjs para no heredar el HH19 del padre ESM. Ubuntu WSL no arranca (error 6).
+[2026-09-16] Cambio: Foundry 1.8.3 WSL: forge test NAV/EIP-170/anti-contrato + fuzz 256. Lint clasificado, sin cambio al nucleo ni mainnet.

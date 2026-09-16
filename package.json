@@ -9,6 +9,7 @@
     "audit": "npm audit",
     "audit:fix": "npm audit fix",
     "test": "hardhat --config hardhat.config.cjs test",
+    "test:forge": "wsl -d Ubuntu-24.04 -u root -- bash -lc \"export PATH=/root/.foundry/bin:\\$PATH && cd /mnt/c/CURSORPLANTILLA-BASE/Magno && forge test --fuzz-runs 256\"",
     "test:coverage": "hardhat --config hardhat.config.cjs coverage",
     "typecheck": "node scripts/check-i18n.mjs && tsc --noEmit",
     "compile": "hardhat --config hardhat.config.cjs compile",
@@ -99,9 +100,13 @@
     "typechain": "^8.3.0",
     "typescript": "~5.9.2"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "commonjs",
   "overrides": {
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "postcss": "^8.5.12",
+    "fast-uri": "^3.1.8",
+    "decode-uri-component": "^0.5.0",
+    "elliptic": "npm:@mapped/elliptic@^6.6.9"
   }
 }

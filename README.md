@@ -14,6 +14,7 @@
 ### Qué funciona
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
 - 15 suites Hardhat (134 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
+- Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime Foundry 23954 B (margen 622). Live Demo sigue 24457 B.
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
 - i18n: 17 idiomas, 949 claves
 - Referidos Unilevel en contrato y UI
@@ -23,7 +24,6 @@
 - Fondos: depositar, retirar, donar, aportar al pool y pagar el 1 USDT de acceso salen de una billetera externa vinculada. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero.
 - Frase secreta BIP-39: ver/anotar; rotar o restaurar vive en Reemplazar cuenta (no se elimina suelta)
 - Device binding local + frase para recuperar en otro teléfono
-- Liquidación de deudores desde AdminPanel (approve automático)
 
 ### En progreso
 - Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)
@@ -239,12 +239,14 @@ npm run ios
 npm run audit
 npm run audit:fix
 npm run test
+npm run test:forge
 npm run test:coverage
 npm run typecheck
 npm run compile
 npm run security:check
 npm run security:slither
 npm run security:mobsf
+npm run security:mobsf:purge
 npm run deploy:bsc
 npm run deploy:testnet
 npm run notify
@@ -282,7 +284,7 @@ python actualizar_readme.py
 | `memoria_proyecto.py` | `python memoria_proyecto.py --mostrar` | Memoria de sesión (MEMORIA.md) |
 | `reestructurar_peticion.py` | `python reestructurar_peticion.py "texto"` | Reestructura una petición informal en prompt profesional |
 
-_Actualizado automáticamente el 2026-09-15 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
+_Actualizado automáticamente el 2026-09-16 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
 
 <!-- AUTO-README:END -->
 Quatrivium Finance es crédito on-chain **sin colateral**: pides un préstamo, lo pagas dentro del plazo y subes de nivel para pedir más.

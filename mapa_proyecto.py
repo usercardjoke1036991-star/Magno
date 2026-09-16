@@ -55,6 +55,7 @@ _DIRS_EXCLUIDOS = {
     "coverage", "typechain-types", "typechain", ".cache",
     ".next", ".nuxt", ".turbo", "out", "DerivedData", "Pods",
     ".expo", ".ruff_cache",
+    "lib", "forge-out", "forge-cache",
 }
 
 _DOCS = ("CONTEXTO.md", "VISION.md", "MEMORIA.md", "README.md")

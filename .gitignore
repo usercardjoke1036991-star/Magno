@@ -51,8 +51,15 @@ artifacts/
 cache/
 typechain-types/
 
-# APKs
+# Foundry (no mezclar con cache/ de Hardhat)
+forge-out/
+forge-cache/
+lib/
+
+# APKs / signing local
 *.apk
+*.keystore
+keystore.properties
 mobsf-report.json
 mobsf-report-extract.txt
 
