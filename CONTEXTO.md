@@ -53,6 +53,7 @@ Magno/
 - **Web3:** ethers v6 / Reown AppKit (WalletConnect) / wagmi
 - **Contratos:** Solidity 0.8.24 / OpenZeppelin v5 (`Pausable`, `ReentrancyGuard`, `SafeERC20`) — **owner/admin es propio, no usa Ownable**
 - **Auditoría on-chain:** Hardhat (suite JS) + Foundry 1.8.3 en WSL (`forge test` / `forge lint`). Caches separadas (`forge-out/`, `forge-cache/`).
+- **Tooling WSL (Ubuntu-24.04, usuario root):** Aderyn 0.6.8 · Trivy 0.74.0 · Semgrep 1.177.0 · Mythril 0.24.8 · OWASP ZAP 2.17.0 (OpenJDK 21). PATH en `/etc/profile.d/cyber-tools.sh`.
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
@@ -123,6 +124,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
 - 15 suites Hardhat (134 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
 - Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime Foundry 23954 B (margen 622). Live Demo sigue 24457 B.
+- Ciber WSL: Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8, ZAP 2.17.0. No se lanzó un escaneo de producto en esta instalación.
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
 - i18n: 17 idiomas, 949 claves
 - Referidos Unilevel en contrato y UI
@@ -244,6 +246,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-16 | WSL: inventario de la lista Gemini. Ya estaban Ubuntu 24.04.5 y Foundry 1.8.3. Instalados Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8 (setuptools 80.10 por pkg_resources) y OWASP ZAP 2.17.0 + OpenJDK 21. C: ~9.7 GB libres. | Tooling de ciberseguridad |
 | 2026-09-16 | Foundry 1.8.3 overlay en WSL (`foundry.toml`, `forge-test/`, caches aparte). `forge test` NAV/EIP-170/anti-contrato/pool locked + fuzz 256. Lint: tx.origin y timestamps son diseño, no pérdida de fondos. Runtime Foundry 23954 B; Demo live 24457 B. | Auditoría Foundry en vivo |
 | 2026-09-16 | MobSF local del APK 1.0.1 (67.2 MB, v3 SHA-256): 61/100 LOW RISK Grade A. Manifiesto 0 warning, exportados 0, sin HTTP claro. El HIGH restante es CBC de androidx.biometric (huella). Produccion: 14/15, falta mainnet CONFIRM_MAINNET=yes. | — |
 | 2026-09-16 | MobSF 61/100 Grade A. HIGH restante: AES/CBC en androidx.biometric (p/q.java CryptoObjectUtils). Plugin release: versionName 1.0.1, ABI armeabi-v7a+arm64, sin inspector de red, Log R8 completo. | — |
