@@ -116,6 +116,7 @@
 - privacidad y terminos tras elegir idioma con aceptar al leer, y las mismas politicas en Ajustes
 - Worker de OTP y correo en HTTPS 24/7 con Twilio SMS, sin tunel de prueba
 - Instalar en WSL las herramientas de ciberseguridad de la lista: Aderyn, Trivy, Semgrep, Mythril y OWASP ZAP (Ubuntu y Foundry ya estan)
+- Escanear Magno con Aderyn Trivy Semgrep Mythril y OWASP ZAP (Foundry Slither MobSF ya hechos)
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -208,3 +209,4 @@
 - [2026-09-14 17:10] Módulo completado: 'auditoria profunda visual y de codigo de toda la app'
 - [2026-09-14 17:55] Idea añadida al backlog: "Worker de OTP y correo en HTTPS 24/7 con Twilio SMS, sin tunel de prueba"
 - [2026-09-16 13:40] Idea añadida al backlog: "Instalar en WSL las herramientas de ciberseguridad de la lista: Aderyn, Trivy, S"
+- [2026-09-16 14:08] Idea añadida al backlog: "Escanear Magno con Aderyn Trivy Semgrep Mythril y OWASP ZAP (Foundry Slither Mob"

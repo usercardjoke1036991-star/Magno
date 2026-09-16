@@ -36,6 +36,7 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad.
 
 ## Cambios realizados
+- [2026-09-16] Escaneos restantes locales: Aderyn, Trivy, Semgrep, Mythril, ZAP. Un arreglo real: AES-GCM del notify-worker con `authTagLength: 16`. Sin mainnet ni APK.
 - [2026-09-16] WSL ciber: Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8, ZAP 2.17.0. Ubuntu y Foundry ya estaban. Sin escaneo de producto ni mainnet.
 - [2026-09-16] Foundry 1.8.3 WSL: forge test NAV/EIP-170/anti-contrato + fuzz 256. Lint clasificado, sin cambio al nucleo ni mainnet.
 - [2026-09-16] Foundry 1.8.3 en WSL: overlay foundry.toml + forge-test. 6 tests (fuzz 256) + lint clasificado. Sin cambios al nucleo. No mainnet.
@@ -93,4 +94,4 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-16] Instaladas en WSL las herramientas que faltaban: Aderyn, Trivy, Semgrep, Mythril y ZAP. Ubuntu y Foundry ya estaban.
+[2026-09-16] Hechos los escaneos que faltaban (Aderyn, Trivy, Semgrep, Mythril, ZAP). Foundry/Slither/MobSF ya estaban. Un arreglo: tag GCM de 16 bytes en el worker. Sin mainnet.

@@ -278,7 +278,7 @@ const loadStore = () => {
       const iv = raw.subarray(3, 15);
       const tag = raw.subarray(15, 31);
       const data = raw.subarray(31);
-      const decipher = createDecipheriv('aes-256-gcm', key, iv);
+      const decipher = createDecipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
       decipher.setAuthTag(tag);
       const plain = Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
       return { ...emptyStore(), ...JSON.parse(plain) };
@@ -311,7 +311,7 @@ const saveStore = (next) => {
     return;
   }
   const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const cipher = createCipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
   const enc = Buffer.concat([cipher.update(payload, 'utf8'), cipher.final()]);
   writeFileSync(DATA_FILE, Buffer.concat([Buffer.from('ENC'), iv, cipher.getAuthTag(), enc]));
 };
