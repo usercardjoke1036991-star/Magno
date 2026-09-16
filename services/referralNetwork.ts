@@ -1,7 +1,7 @@
 import { Contract, formatUnits, getAddress, type AbstractProvider } from 'ethers';
 import { CONTRACT_ABI, getContractAddress } from '../constants/contractConfig';
 import { getKnownStartBlock } from '../constants/deployedAddresses';
-import { assertTrustedRpc, getProviderWithFallback, isContractConfigured } from '../constants/rpcConfig';
+import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, NETWORK_CONFIG } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { addressToInviteCode } from '../utils/inviteCode';
 import { sumReferralEarnings } from '../utils/referralEarnings';
@@ -236,6 +236,22 @@ async function nearestDirect(
 }
 
 const branchCache = new Map<string, ReferralChild[]>();
+const snapshotCache = new Map<string, ReferralNetworkSnapshot>();
+
+function snapshotCacheKey(wallet: string): string {
+  return `${NETWORK_CONFIG.chainId}:${getContractAddress().toLowerCase()}:${wallet.toLowerCase()}`;
+}
+
+export function peekReferralNetwork(walletAddress: string): ReferralNetworkSnapshot | null {
+  if (!walletAddress || !isContractConfigured()) return null;
+  const self = normalizeAddress(walletAddress);
+  if (!self) return null;
+  return snapshotCache.get(snapshotCacheKey(self)) || null;
+}
+
+export function clearReferralNetworkCache(): void {
+  snapshotCache.clear();
+}
 
 export function clearReferralBranchCache(): void {
   branchCache.clear();
@@ -494,7 +510,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     node.level = levels.get(node.address.toLowerCase()) || 1;
   }
 
-  return {
+  const snapshot: ReferralNetworkSnapshot = {
     directs,
     totalEarnedWei: totals.totalWei.toString(),
     totalEarnedLabel: formatToken(totals.totalWei),
@@ -505,4 +521,6 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     activity,
     partial: lookbackPartial || failed > 0,
   };
+  snapshotCache.set(snapshotCacheKey(self), snapshot);
+  return snapshot;
 }

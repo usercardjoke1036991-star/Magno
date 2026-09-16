@@ -13,17 +13,17 @@
 
 ### Qué funciona
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- 15 suites Hardhat (134 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
+- 15 suites Hardhat (149 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
 - Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime Foundry 23954 B (margen 622). Live Demo sigue 24457 B.
 - Ciber WSL (producto, local): Aderyn High 1 CEI tras `balanceOf`/`transfer` en funciones con `nonReentrant` (se mantiene). Trivy lockfile 3 HIGH + 1 MEDIUM de deps Expo (`image-size`, `underscore`/`jsonpath`, `uuid@7`); Dockerfile DS-0002 USER no se aplica por el volumen Fly `/data`. Semgrep 1 hallazgo GCM sin `authTagLength` (corregido). Mythril 0 issues con cobertura baja (timeout 180s). ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 949 claves
+- i18n: 17 idiomas, 962 claves
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
-- App lock: la contraseña se pide al desbloquear y para ver o reemplazar la frase; ya no hay fila de contraseña en Ajustes. PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
+- App lock: la contraseña se pide al desbloquear y para ver la frase; ya no hay fila de contraseña en Ajustes. PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
 - Fondos: depositar, retirar, donar, aportar al pool y pagar el 1 USDT de acceso salen de una billetera externa vinculada. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero.
-- Frase secreta BIP-39: ver/anotar; rotar o restaurar vive en Reemplazar cuenta (no se elimina suelta)
+- Frase secreta BIP-39: ver/anotar. No se sustituye: cambiarla sería otra cuenta. Recuperar en otro teléfono usa las mismas 24 palabras.
 
 ### En progreso
 - Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)

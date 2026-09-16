@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   loadReferralNetwork,
+  peekReferralNetwork,
   type ReferralNetworkSnapshot,
 } from '../services/referralNetwork';
 
@@ -17,22 +18,31 @@ const EMPTY: ReferralNetworkSnapshot = {
 };
 
 export const useReferralNetwork = (walletAddress: string, enabled: boolean) => {
-  const [data, setData] = useState<ReferralNetworkSnapshot>(EMPTY);
-  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<ReferralNetworkSnapshot>(
+    () => (enabled ? peekReferralNetwork(walletAddress) : null) || EMPTY
+  );
+  const [isLoading, setIsLoading] = useState(() => enabled && !peekReferralNetwork(walletAddress));
   const [error, setError] = useState<string | null>(null);
 
   const refetch = useCallback(async () => {
     if (!enabled || !walletAddress) {
-      setData(EMPTY);
+      setData(peekReferralNetwork(walletAddress) || EMPTY);
+      setIsLoading(false);
       return;
     }
-    setIsLoading(true);
+    const warm = peekReferralNetwork(walletAddress);
+    if (warm) {
+      setData(warm);
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
     setError(null);
     try {
       setData(await loadReferralNetwork(walletAddress));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'network');
-      setData(EMPTY);
+      if (!warm) setData(EMPTY);
     } finally {
       setIsLoading(false);
     }

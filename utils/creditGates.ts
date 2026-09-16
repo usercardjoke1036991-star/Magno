@@ -141,6 +141,29 @@ export function canPayCreditAccess(input: {
   return Boolean(input.protocolCanDonate && String(input.founderAddress || '').trim() && input.accessEnabled);
 }
 
+/** Línea activa solo si el contrato del mundo actual existe. Real no hereda el registro de Demo. */
+export function creditLineLooksActive(
+  creditReady: boolean,
+  isRegistered: boolean,
+  hasActiveLoan: boolean
+): boolean {
+  return Boolean(creditReady && (isRegistered || hasActiveLoan));
+}
+
+/** No hidratar crédito cacheado si el mundo no tiene contrato o ya llegó el RPC. */
+export function canHydrateCreditStatus(input: {
+  configured: boolean;
+  chainReady: boolean;
+  savedContract?: string;
+  currentContract: string;
+}): boolean {
+  if (!input.configured || input.chainReady) return false;
+  const saved = String(input.savedContract || '').trim().toLowerCase();
+  const current = String(input.currentContract || '').trim().toLowerCase();
+  if (saved && current && saved !== current) return false;
+  return true;
+}
+
 export function identityHashBound(value: string | null | undefined): boolean {
   const hash = String(value || '');
   return Boolean(hash) && !/^0x0+$/i.test(hash);

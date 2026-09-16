@@ -5,7 +5,7 @@ import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contra
 import { getRealDonationWallet } from '../constants/deployedAddresses';
 import { assertTrustedRpc, isContractConfigured, isDemoAccount, NETWORK_CONFIG, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { walletRunsOnThisDevice } from '../utils/accountEntry';
-import { identityHashBound } from '../utils/creditGates';
+import { canHydrateCreditStatus, identityHashBound } from '../utils/creditGates';
 import { getDeviceHash } from '../services/deviceBinding';
 import { getTokenMeta, isOfficialWorldToken, type Token } from '../constants/tokens';
 import {
@@ -844,16 +844,26 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     if (!walletAddress || !isAddress(walletAddress)) return;
     const wallet = walletAddress.toLowerCase();
     const hydrate = () => {
+      if (!isContractConfigured()) return;
       AsyncStorage.getItem(creditStatusKey(walletAddress))
         .then((raw) => {
-          if (!raw || chainStatusReadyRef.current) return;
+          if (!raw) return;
           const saved = JSON.parse(raw) as {
             isRegistered?: boolean;
             hasActiveLoan?: boolean;
             contract?: string;
           };
           if (walletAddress.toLowerCase() !== wallet) return;
-          if (saved.contract && saved.contract !== getContractAddress().toLowerCase()) return;
+          if (
+            !canHydrateCreditStatus({
+              configured: isContractConfigured(),
+              chainReady: chainStatusReadyRef.current,
+              savedContract: saved.contract,
+              currentContract: getContractAddress(),
+            })
+          ) {
+            return;
+          }
           setUserInfo((prev) => ({
             ...prev,
             isRegistered: Boolean(saved.isRegistered),

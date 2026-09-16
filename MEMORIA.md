@@ -36,6 +36,7 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad.
 
 ## Cambios realizados
+- [2026-09-16] Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.
 - [2026-09-16] Auditoria en vivo USB: no se reinstalo el APK (dev client 1.0.0). Metro cargo el JS actual. Real=Pronto sin credito falso; Demo pide; Donar solo Real con boton apagado; pool Demo solo lectura 2000.70; gemas Granate no Bronce; Ajustes sin fila de contrasena.
 - [2026-09-16] Escaneos restantes locales: Aderyn, Trivy, Semgrep, Mythril, ZAP. Un arreglo real: AES-GCM del notify-worker con `authTagLength: 16`. Sin mainnet ni APK.
 - [2026-09-16] WSL ciber: Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8, ZAP 2.17.0. Ubuntu y Foundry ya estaban. Sin escaneo de producto ni mainnet.
@@ -85,14 +86,10 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - [2026-09-14] Sin fila de contraseña en Ajustes. Fondos (depositar, retirar, donar, pool, 1 USDT) salen de la externa vinculada hacia la interna.
 - [2026-09-14] Si la llave de la billetera no esta en el telefono, se pide la contrasena una vez y se vuelve a guardar. Textos recortados a tono financiero.
 - [2026-09-14] Lectura de billetera en frio: SecureStore 4s en paralelo con el respaldo local para que MIUI no deje Reintentar al abrir.
-- [2026-09-14] Textos recortados a tono financiero. Banner de acceso sin boton gris. Errores sin nombres de APIs internas.
-- [2026-09-14] Gobernanza 2-de-3: si una fundadora se pierde o la hackean, las otras 2 la echan. Una sola llave no gobierna.
-- [2026-09-14] Gobernanza unanime: cada cambio admin exige las firmas de todas las fundadoras (3-de-3). La pausa de emergencia sigue inmediata.
-- [2026-09-14] Registrar billetera es opcional: se puede saltar con Ahora no.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-16] App abierta en el POCO por USB. No se reinstalo: el APK nativo no cambio con los escaneos. Auditoria Real/Demo/credito/pool/donar/ajustes en vivo.
+[2026-09-16] Cambio: Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.

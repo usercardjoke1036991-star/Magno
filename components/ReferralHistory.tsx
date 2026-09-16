@@ -175,7 +175,7 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
         <AppText style={[styles.warn, { color: colors.warnText }]}>{t('referralHistoryPartial')}</AppText>
       ) : null}
       {board}
-      {!isLoading && !error && (
+      {!error && (
         <>
           <View style={[styles.search, { borderColor: colors.border, backgroundColor: colors.surface }]}>
             <AppIcon name="search" size={18} color={colors.textMuted} />
@@ -215,9 +215,11 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
           ) : null}
 
           {filteredDirects.length === 0 ? (
-            <AppText style={[styles.empty, { color: colors.textMuted }]}>
-              {query ? t('referralSearchEmpty') : t('referralNone')}
-            </AppText>
+            isLoading ? null : (
+              <AppText style={[styles.empty, { color: colors.textMuted }]}>
+                {query ? t('referralSearchEmpty') : t('referralNone')}
+              </AppText>
+            )
           ) : (
             pageNodes.map((node) => {
               const expanded = isBranchOpen(open, node.address);

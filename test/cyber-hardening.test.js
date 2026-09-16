@@ -557,6 +557,52 @@ describe('demo credit gates', function () {
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true })).to.equal(false);
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true, deviceMatches: true })).to.equal(true);
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true, deviceMatches: false })).to.equal(false);
+    function creditLineLooksActive(creditReady, isRegistered, hasActiveLoan) {
+      return Boolean(creditReady && (isRegistered || hasActiveLoan));
+    }
+    function canHydrateCreditStatus({ configured, chainReady, savedContract, currentContract }) {
+      if (!configured || chainReady) return false;
+      const saved = String(savedContract || '').trim().toLowerCase();
+      const current = String(currentContract || '').trim().toLowerCase();
+      if (saved && current && saved !== current) return false;
+      return true;
+    }
+    expect(creditLineLooksActive(false, true, true)).to.equal(false);
+    expect(creditLineLooksActive(true, false, false)).to.equal(false);
+    expect(creditLineLooksActive(true, true, false)).to.equal(true);
+    expect(creditLineLooksActive(true, false, true)).to.equal(true);
+    expect(canHydrateCreditStatus({
+      configured: false,
+      chainReady: false,
+      savedContract: '0xabc',
+      currentContract: '0xabc',
+    })).to.equal(false);
+    expect(canHydrateCreditStatus({
+      configured: true,
+      chainReady: true,
+      savedContract: '0xabc',
+      currentContract: '0xabc',
+    })).to.equal(false);
+    expect(canHydrateCreditStatus({
+      configured: true,
+      chainReady: false,
+      savedContract: '0xaaa',
+      currentContract: '0xbbb',
+    })).to.equal(false);
+    expect(canHydrateCreditStatus({
+      configured: true,
+      chainReady: false,
+      savedContract: '0xabc',
+      currentContract: '0xabc',
+    })).to.equal(true);
+    const fs = require('fs');
+    const path = require('path');
+    const homeGates = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
+    expect(homeGates).to.include('creditLineLooksActive');
+    expect(homeGates).to.include('creditOnChain');
+    const hydrateHook = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useWeb3Balances.ts'), 'utf8');
+    expect(hydrateHook).to.include('canHydrateCreditStatus');
+    expect(hydrateHook).to.match(/if \(!isContractConfigured\(\)\) return;/);
     function deviceMatchAfterIdentityReadFailure(demo) {
       return demo;
     }
@@ -1262,6 +1308,10 @@ describe('account entry — password, email and session', () => {
     const history = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReferralHistory.tsx'), 'utf8');
     expect(history).to.include("variant === 'people'");
     expect(history).to.include('sliceReferralPage');
+    expect(history).to.include('{!error && (');
+    expect(history).to.not.include('!isLoading && !error');
+    const netHook = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useReferralNetwork.ts'), 'utf8');
+    expect(netHook).to.include('peekReferralNetwork');
     expect(history).to.include('referralRegisteredOn');
     expect(history).to.include('loadReferralChildren');
     expect(history).to.include('ReferralBranch');

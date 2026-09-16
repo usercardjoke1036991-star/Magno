@@ -33,6 +33,10 @@
     "- [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad."
   ],
   "cambios": [
+    "- [2026-09-16] Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.",
+    "- [2026-09-16] Auditoria en vivo USB: no se reinstalo el APK (dev client 1.0.0). Metro cargo el JS actual. Real=Pronto sin credito falso; Demo pide; Donar solo Real con boton apagado; pool Demo solo lectura 2000.70; gemas Granate no Bronce; Ajustes sin fila de contrasena.",
+    "- [2026-09-16] Escaneos restantes locales: Aderyn, Trivy, Semgrep, Mythril, ZAP. Un arreglo real: AES-GCM del notify-worker con `authTagLength: 16`. Sin mainnet ni APK.",
+    "- [2026-09-16] WSL ciber: Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8, ZAP 2.17.0. Ubuntu y Foundry ya estaban. Sin escaneo de producto ni mainnet.",
     "- [2026-09-16] Foundry 1.8.3 WSL: forge test NAV/EIP-170/anti-contrato + fuzz 256. Lint clasificado, sin cambio al nucleo ni mainnet.",
     "- [2026-09-16] Foundry 1.8.3 en WSL: overlay foundry.toml + forge-test. 6 tests (fuzz 256) + lint clasificado. Sin cambios al nucleo. No mainnet.",
     "- [2026-09-16] Auditoria PDF MobSF local del APK 1.0.1: nota 61 Grade A. El HIGH es la huella de Android. El JS del APK no lleva Twilio ni clave de deployer. No se regenera el APK.",
@@ -78,12 +82,8 @@
     "- [2026-09-14] Ajustes solo muestra la frase. El alta lista minimo 8, hasta 66, mayuscula, numero y simbolo. Hub y Cuenta muestran la billetera externa.",
     "- [2026-09-14] Sin fila de contraseña en Ajustes. Fondos (depositar, retirar, donar, pool, 1 USDT) salen de la externa vinculada hacia la interna.",
     "- [2026-09-14] Si la llave de la billetera no esta en el telefono, se pide la contrasena una vez y se vuelve a guardar. Textos recortados a tono financiero.",
-    "- [2026-09-14] Lectura de billetera en frio: SecureStore 4s en paralelo con el respaldo local para que MIUI no deje Reintentar al abrir.",
-    "- [2026-09-14] Textos recortados a tono financiero. Banner de acceso sin boton gris. Errores sin nombres de APIs internas.",
-    "- [2026-09-14] Gobernanza 2-de-3: si una fundadora se pierde o la hackean, las otras 2 la echan. Una sola llave no gobierna.",
-    "- [2026-09-14] Gobernanza unanime: cada cambio admin exige las firmas de todas las fundadoras (3-de-3). La pausa de emergencia sigue inmediata.",
-    "- [2026-09-14] Registrar billetera es opcional: se puede saltar con Ahora no."
+    "- [2026-09-14] Lectura de billetera en frio: SecureStore 4s en paralelo con el respaldo local para que MIUI no deje Reintentar al abrir."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-16] Cambio: Foundry 1.8.3 WSL: forge test NAV/EIP-170/anti-contrato + fuzz 256. Lint clasificado, sin cambio al nucleo ni mainnet."
+  "ultima_sesion": "[2026-09-16] Cambio: Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK."
 }

@@ -41,7 +41,7 @@ import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
-import { canPayCreditAccess, creditNeedsAccess, liveCreditReady, phoneVerifiedOnThisDevice } from '../utils/creditGates';
+import { canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, liveCreditReady, phoneVerifiedOnThisDevice } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhraseBackedUp } from '../services/appWallet';
 import { useI18n } from '../i18n/LanguageContext';
@@ -139,6 +139,11 @@ function HomeScreenWithHooks() {
   );
   const debtReminder = useLoanPaymentReminders(userInfo);
   const creditReady = isCreditReady();
+  const creditOnChain = creditLineLooksActive(
+    creditReady,
+    userInfo.isRegistered,
+    userInfo.hasActiveLoan
+  );
   const creditPaused = userInfo.paused;
   const activeLoan = userInfo.activeLoan;
   const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
@@ -352,10 +357,7 @@ function HomeScreenWithHooks() {
             {
               id: 'credit',
               title: t('sectionCreditLine'),
-              lead:
-                userInfo.isRegistered || userInfo.hasActiveLoan
-                  ? t('hubCreditLeadActive')
-                  : t('hubCreditLead'),
+              lead: creditOnChain ? t('hubCreditLeadActive') : t('hubCreditLead'),
               icon: 'id',
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
@@ -420,7 +422,7 @@ function HomeScreenWithHooks() {
         lead={t('sectionCreditLineLead')}
         onClose={() => setRoom(null)}
       >
-        {userInfo.isRegistered || userInfo.hasActiveLoan ? (
+        {creditOnChain ? (
           <>
             <CreditAccessBanner
               paidUsd={userInfo.donatedUsd || 0}
@@ -434,7 +436,7 @@ function HomeScreenWithHooks() {
               onPay={() => void handlePagarAcceso()}
             />
             <ActivateCreditSection
-              isRegistered={userInfo.isRegistered || userInfo.hasActiveLoan}
+              isRegistered={creditOnChain}
               checking={false}
               hasActiveLoan={userInfo.hasActiveLoan}
               onRegister={handleRegistrarHumano}
@@ -471,7 +473,7 @@ function HomeScreenWithHooks() {
             />
           </AppSubsection>
         )}
-        {userInfo.isRegistered || userInfo.hasActiveLoan || !creditChecking ? (
+        {creditOnChain || !creditChecking ? (
           <AppSubsection title={t('subsectionRank')} icon="star">
             <UserMetrics
               userInfo={userInfo}
@@ -561,7 +563,7 @@ function HomeScreenWithHooks() {
               curveRateBps={userInfo.curveRateBps}
               ultimoPrestamoTimestamp={userInfo.userProgress.ultimoPrestamoTimestamp}
               cooldownRestante={userInfo.userProgress.cooldownRestante}
-              isRegistered={userInfo.isRegistered}
+              isRegistered={creditOnChain}
               identityBlocked={identityBlocked}
               accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
               contractReady={creditReady}
@@ -589,7 +591,7 @@ function HomeScreenWithHooks() {
               isLoading={txLoading}
               curveRateBps={userInfo.curveRateBps}
               ultimoPrestamoTimestamp={0}
-              isRegistered={userInfo.isRegistered}
+              isRegistered={creditOnChain}
               identityBlocked={identityBlocked}
               accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
               contractReady={creditReady}
@@ -660,7 +662,7 @@ function HomeScreenWithHooks() {
       >
         <ReferralSection
           walletAddress={walletAddress}
-          isRegistered={userInfo.isRegistered}
+          isRegistered={creditOnChain}
           isRestricted={userInfo.isDelinquent}
           curveRateBps={userInfo.curveRateBps}
           referral={userInfo.referral ?? {
@@ -679,7 +681,7 @@ function HomeScreenWithHooks() {
               <ReferralHistory
                 variant="board"
                 walletAddress={walletAddress}
-                enabled={userInfo.isRegistered}
+                enabled={creditOnChain}
                 onOpenPeople={() => setRoom('people')}
               />
             </AppSubsection>
@@ -696,7 +698,7 @@ function HomeScreenWithHooks() {
         <ReferralHistory
           variant="people"
           walletAddress={walletAddress}
-          enabled={room === 'people' && userInfo.isRegistered}
+          enabled={room === 'people' && creditOnChain}
         />
       </AppWindow>
 
