@@ -8,13 +8,14 @@
     "ios": "expo run:ios",
     "audit": "npm audit",
     "audit:fix": "npm audit fix",
-    "test": "hardhat test",
-    "test:coverage": "hardhat coverage",
+    "test": "hardhat --config hardhat.config.cjs test",
+    "test:coverage": "hardhat --config hardhat.config.cjs coverage",
     "typecheck": "node scripts/check-i18n.mjs && tsc --noEmit",
-    "compile": "hardhat compile",
+    "compile": "hardhat --config hardhat.config.cjs compile",
     "security:check": "node scripts/security-check.mjs",
     "security:slither": "node scripts/run-slither.mjs",
     "security:mobsf": "node scripts/scan-mobile.mjs",
+    "security:mobsf:purge": "node scripts/scan-mobile.mjs --purge",
     "deploy:bsc": "hardhat run scripts/deploy.cjs --network bscMainnet",
     "deploy:testnet": "hardhat run scripts/deploy.cjs --network bscTestnet",
     "notify": "node scripts/notify-worker.mjs",
@@ -99,6 +100,7 @@
     "typescript": "~5.9.2"
   },
   "version": "1.0.0",
+  "type": "commonjs",
   "overrides": {
     "ws": "^8.21.0"
   }

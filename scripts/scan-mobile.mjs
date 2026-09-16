@@ -7,6 +7,7 @@
  *
  * Clave: MOBSF_API_KEY (entorno o .env). Servidor: MOBSF_URL (por defecto http://localhost:8000).
  */
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,18 +15,30 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 loadDotEnv(resolve(root, '.env'));
 
+const extra = process.argv.slice(2);
+const wantPurge = extra.includes('--purge');
 const apiKey = String(process.env.MOBSF_API_KEY || '').trim();
 const baseUrl = String(process.env.MOBSF_URL || 'http://localhost:8000').replace(/\/+$/, '');
 const reportPath = resolve(root, 'mobsf-report.json');
-const apkPath = resolveApkPath(process.argv.slice(2));
+const apkPath = wantPurge ? '' : resolveApkPath(extra);
+const auth = { Authorization: apiKey };
 
 if (!apiKey) {
   console.error(`Falta MOBSF_API_KEY.
-Póngala en el entorno o en .env (está en Ajustes de MobSF → API Key).
-Ejemplo:
-  $env:MOBSF_API_KEY="su-clave"
-  npm run security:mobsf -- "${apkPath || './android/app/build/outputs/apk/debug/app-debug.apk'}"`);
+Póngala en el entorno o en .env (está en Ajustes de MobSF → API Key).`);
   process.exit(1);
+}
+
+if (wantPurge) {
+  try {
+    const removed = await purgeScans();
+    console.log(`MobSF: borrados ${removed} análisis. El disco del contenedor queda libre para el siguiente APK.`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`No se pudo vaciar MobSF: ${message}`);
+    process.exit(1);
+  }
+  process.exit(0);
 }
 
 if (!apkPath || !existsSync(apkPath)) {
@@ -34,8 +47,6 @@ Uso: node scripts/scan-mobile.mjs <ruta.apk>
 Ejemplo: node scripts/scan-mobile.mjs ./android/app/build/outputs/apk/release/app-release.apk`);
   process.exit(1);
 }
-
-const auth = { Authorization: apiKey };
 
 try {
   console.log(`MobSF ${baseUrl}`);
@@ -112,6 +123,48 @@ async function uploadApk(filePath) {
     body: form,
   });
   return readJson(res, 'upload');
+}
+
+async function purgeScans() {
+  let removed = 0;
+  try {
+    const listed = await fetchJson(
+      `${baseUrl}/api/v1/scans?page=1&page_size=100`,
+      { method: 'GET', headers: auth },
+      'scans'
+    );
+    const rows = Array.isArray(listed?.content) ? listed.content : Array.isArray(listed) ? listed : [];
+    for (const row of rows) {
+      const hash = String(row.MD5 || row.hash || row.FILE_HASH || '').trim();
+      if (!hash) continue;
+      await postForm(`${baseUrl}/api/v1/delete_scan`, { hash });
+      removed += 1;
+    }
+  } catch {
+    removed = 0;
+  }
+  const names = ['agitated_mcnulty'];
+  const dockerPs = spawnSync(
+    'docker',
+    ['ps', '--filter', 'ancestor=opensecurity/mobile-security-framework-mobsf', '--format', '{{.Names}}'],
+    { encoding: 'utf8', windowsHide: true }
+  );
+  for (const name of String(dockerPs.stdout || '').split(/\r?\n/).map((item) => item.trim()).filter(Boolean)) {
+    if (!names.includes(name)) names.push(name);
+  }
+  for (const name of names) {
+    spawnSync(
+      'docker',
+      ['exec', name, 'sh', '-c', 'rm -rf /home/mobsf/.MobSF/uploads/* /home/mobsf/.MobSF/downloads/*'],
+      { encoding: 'utf8', windowsHide: true }
+    );
+  }
+  return removed;
+}
+
+async function fetchJson(url, init, label) {
+  const res = await fetch(url, { ...init, signal: AbortSignal.timeout(12000) });
+  return readJson(res, label);
 }
 
 async function postForm(url, fields) {

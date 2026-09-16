@@ -274,6 +274,9 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(plugin).to.include('CropImageActivity');
     expect(plugin).to.include('DevLauncherActivity');
     expect(plugin).to.include('android.enableMinifyInReleaseBuilds');
+    const scanner = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'scan-mobile.mjs'), 'utf8');
+    expect(scanner).to.include('--purge');
+    expect(scanner).to.include('/api/v1/delete_scan');
   });
 
   it('seals an immutable KYC fingerprint and keeps it when local fields change', function () {

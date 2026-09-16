@@ -1,7 +1,7 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y simbolo. Despues las 24 palabras. Esa frase se consulta en Ajustes y sirve para cambiar de telefono; no se reemplaza.
+Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anteriores. Sin mainnet ni Play hasta que el fundador lo pida.
 
 ## Decisiones
 - [2026-09-14] OTP de telefono usa Twilio SMS. El worker publico corre en Fly (min 1 maquina, sin ngrok). Hasta mainnet el worker Demo acepta firmas de Cuenta Real para correo/OTP.
@@ -36,6 +36,8 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-12] Cuenta Real se muestra completa antes del lanzamiento. Donar y aportar liquidez suman fama. La UI de donar no menciona destino ni USDT real.
 
 ## Cambios realizados
+- [2026-09-16] Slither 0.11.6 en Windows: 18 contratos, 80 detectores, 0 hallazgos. Magno queda type commonjs y hardhat --config hardhat.config.cjs para no heredar el HH19 del padre ESM. Ubuntu WSL no arranca (error 6).
+- [2026-09-16] Limpieza de temporales Cursor/PC y APKs viejos. APK release para MobSF en el Escritorio: Quatrivium-Finance-MobSF.apk (minSdk 29, sin HTTP claro, sin debug, R8). El usuario lo sube a la pagina. Sigue firmado con el keystore de debug hasta EAS/Play.
 - [2026-09-16] Auditoria MobSF del APK debug: nota 37/100 esperada. Release endurecido: minSdk 29, sin HTTP claro, sin microfono ni storage legado, cropper no exportado, R8 en release. El APK escaneado sigue siendo debug con certificado de desarrollo.
 - [2026-09-15] Script scan-mobile para MobSF: sube el APK, lanza el analisis y guarda el informe JSON en la raiz. Comando npm run security:mobsf. La clave vive en el entorno, no en git.
 - [2026-09-15] npm run security:slither ya no usa el slither de Windows: entra a WSL/pipx, compila con hardhat.config.cjs y --hardhat-ignore-compile. Analisis: 0 hallazgos.
@@ -84,12 +86,10 @@ Idioma primero. Luego usuario y contrasena de 8 a 66 con mayuscula, numero y sim
 - [2026-09-14] Auditoria: el 1 USDT de acceso en Demo estaba bloqueado porque Donar es solo Real. Ahora el contrato Demo puede cobrar el acceso y Donar sigue oculto.
 - [2026-09-14] Historial de personas: cada referido abre su grupo al toque y las generaciones bajan bajo demanda, sin cargar el arbol mundial.
 - [2026-09-14] Requisito de 1 USDT de acceso antes de pedir prestamo. La UI dice pagar a la app; el envio va a la billetera fundadora.
-- [2026-09-14] Flujo de alta: crear/recuperar en telefono nuevo; iniciar sesion en aparato que ya tuvo cuenta; identidad publica de galeria y alias fijos en la red
-- [2026-09-14] Identidad publica: usuario e imagen anonima se eligen una vez y es lo que ve la red; la foto de galeria solo vive en este telefono
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-16] Cambio: Auditoria MobSF del APK debug: nota 37/100 esperada. Release endurecido: minSdk 29, sin HTTP claro, sin microfono ni storage legado, cropper no exportado, R8 en release. El APK escaneado sigue siendo debug con certificado de desarrollo.
+[2026-09-16] Cambio: Slither 0.11.6 en Windows: 18 contratos, 80 detectores, 0 hallazgos. Magno queda type commonjs y hardhat --config hardhat.config.cjs para no heredar el HH19 del padre ESM. Ubuntu WSL no arranca (error 6).
