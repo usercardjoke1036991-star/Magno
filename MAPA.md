@@ -66,7 +66,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `android/app/src/main/java/com/quatrivium/credit/MainApplication.kt` — módulo Kotlin
   - Funciones/clases: MainApplication, getPackages, getJSMainModuleName, getUseDeveloperSupport, onCreate, onConfigurationChanged
 - `android/app/src/release/AndroidManifest.xml` — manifiesto Android
-  - Funciones/clases: expo.modules.devlauncher.launcher.DevLauncherActivity, expo.modules.devlauncher.compose.AuthActivity, androidx.compose.ui.tooling.PreviewActivity, com.canhub.cropper.CropImageActivity
+  - Funciones/clases: expo.modules.devlauncher.launcher.DevLauncherActivity, expo.modules.devlauncher.compose.AuthActivity, androidx.compose.ui.tooling.PreviewActivity, .MainActivity, com.canhub.cropper.CropImageActivity
 - `app/index.tsx` — módulo JS/TS
   - Funciones/clases: HomeScreen
 - `app/_layout.tsx` — módulo JS/TS

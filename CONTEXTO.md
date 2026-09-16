@@ -246,6 +246,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-16 | Auditoria PDF MobSF 1.0.2 (SHA256 fea201d5): 61/100 Grade A, 0 exportados, sin HTTP claro, OFAC vacio, dominios ok, secretos=nombres C++. HIGH CBC p/q.java = huella (se mantiene). Release overlay quita exp+quatrivium-credit. Regenerar APK no sube la nota. | — |
+| 2026-09-16 | APK MobSF 1.0.2 en Escritorio (arm-only, v3 SHA-256 CN=Quatrivium Finance, SHA256 fea201d5...). JS de la auditoria final. No es el APK de Play ni mainnet. | — |
 | 2026-09-16 | Auditoria final de productividad: hidratar credito solo con contrato del mundo activo; hub/linea/personas usan creditOnChain; cache de red de referidos; notify-worker AES-GCM recargado. Hardhat 149/149, tsc 0, salud 14/14, production 14/15 (falta mainnet). Sin deploy ni APK. | — |
 | 2026-09-16 | Escaneos que faltaban (local, sin mainnet): Aderyn, Trivy lockfile+Dockerfile, Semgrep packs locales, Mythril bytecode, ZAP al worker WSL `/health`. GCM del almacén de avisos ahora fija `authTagLength: 16`. Sin redespliegue ni APK. | Auditoría ciber restante |
 | 2026-09-16 | WSL: inventario de la lista Gemini. Ya estaban Ubuntu 24.04.5 y Foundry 1.8.3. Instalados Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8 (setuptools 80.10 por pkg_resources) y OWASP ZAP 2.17.0 + OpenJDK 21. C: ~9.7 GB libres. | Tooling de ciberseguridad |

@@ -36,6 +36,8 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad.
 
 ## Cambios realizados
+- [2026-09-16] PDF MobSF APK 1.0.2 61/100 A: HIGH es huella androidx.biometric; native canary JNA/NDK; sin Twilio ni claves. Release quita esquema exp+ de Metro. Sin regenerar APK ni mainnet.
+- [2026-09-16] APK release 1.0.2 arm-only firmado v3 SHA-256 CN=Quatrivium Finance copiado a Desktop Quatrivium-Finance-MobSF.apk (67.20 MB, SHA256 fea201d5...). Incluye auditoria final. Sin mainnet.
 - [2026-09-16] Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.
 - [2026-09-16] Auditoria en vivo USB: no se reinstalo el APK (dev client 1.0.0). Metro cargo el JS actual. Real=Pronto sin credito falso; Demo pide; Donar solo Real con boton apagado; pool Demo solo lectura 2000.70; gemas Granate no Bronce; Ajustes sin fila de contrasena.
 - [2026-09-16] Escaneos restantes locales: Aderyn, Trivy, Semgrep, Mythril, ZAP. Un arreglo real: AES-GCM del notify-worker con `authTagLength: 16`. Sin mainnet ni APK.
@@ -84,12 +86,10 @@ Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anterio
 - [2026-09-14] KYC: escaneo local de documento con camara. Marcos cuadrados mas ricos por division. Textos recortados a tono financiero.
 - [2026-09-14] Ajustes solo muestra la frase. El alta lista minimo 8, hasta 66, mayuscula, numero y simbolo. Hub y Cuenta muestran la billetera externa.
 - [2026-09-14] Sin fila de contraseña en Ajustes. Fondos (depositar, retirar, donar, pool, 1 USDT) salen de la externa vinculada hacia la interna.
-- [2026-09-14] Si la llave de la billetera no esta en el telefono, se pide la contrasena una vez y se vuelve a guardar. Textos recortados a tono financiero.
-- [2026-09-14] Lectura de billetera en frio: SecureStore 4s en paralelo con el respaldo local para que MIUI no deje Reintentar al abrir.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-16] Cambio: Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.
+[2026-09-16] Cambio: PDF MobSF APK 1.0.2 61/100 A: HIGH es huella androidx.biometric; native canary JNA/NDK; sin Twilio ni claves. Release quita esquema exp+ de Metro. Sin regenerar APK ni mainnet.

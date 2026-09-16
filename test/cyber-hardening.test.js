@@ -276,6 +276,13 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(plugin).to.include('network_security_config');
     expect(plugin).to.include('CropImageActivity');
     expect(plugin).to.include('DevLauncherActivity');
+    expect(plugin).to.include('exp+quatrivium-credit');
+    expect(plugin).to.match(/android:scheme="exp\+quatrivium-credit"\s+tools:node="remove"/);
+    const releaseManifest = fs.readFileSync(
+      path.join(__dirname, '..', 'android', 'app', 'src', 'release', 'AndroidManifest.xml'),
+      'utf8'
+    );
+    expect(releaseManifest).to.match(/android:scheme="exp\+quatrivium-credit"\s+tools:node="remove"/);
     expect(plugin).to.include('FirebaseInstanceIdReceiver');
     expect(plugin).to.include('ProfileInstallReceiver');
     expect(plugin).to.include('android.enableMinifyInReleaseBuilds');

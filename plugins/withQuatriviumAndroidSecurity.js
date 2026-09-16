@@ -78,6 +78,12 @@ const RELEASE_MANIFEST = `<?xml version="1.0" encoding="utf-8"?>
     <activity android:name="expo.modules.devlauncher.launcher.DevLauncherActivity" tools:node="remove" />
     <activity android:name="expo.modules.devlauncher.compose.AuthActivity" tools:node="remove" />
     <activity android:name="androidx.compose.ui.tooling.PreviewActivity" tools:node="remove" />
+    <activity android:name=".MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="exp+quatrivium-credit" tools:node="remove" />
+      </intent-filter>
+    </activity>
     <activity
         android:name="com.canhub.cropper.CropImageActivity"
         android:exported="false"
@@ -142,7 +148,7 @@ function withQuatriviumAndroidSecurity(config) {
     return cfg;
   });
 
-  const versionName = String(config.version || '1.0.1');
+  const versionName = String(config.version || '1.0.2');
 
   config = withDangerousMod(config, [
     'android',
