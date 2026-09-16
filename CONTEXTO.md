@@ -239,6 +239,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-16 | MobSF del APK debug (37/100): endurecido release con plugin withQuatriviumAndroidSecurity, expo-build-properties minSdk 29 y R8. Debug/dev-client no puede sacar A en MobSF. Hace falta eas build production y volver a escanear. | — |
+| 2026-09-15 | Integración MobSF: scripts/scan-mobile.mjs + npm run security:mobsf. Informe en mobsf-report.json (gitignore). Requiere MOBSF_API_KEY y MobSF en localhost:8000. | — |
 | 2026-09-15 | security:slither usa scripts/run-slither.mjs + run-slither-wsl.sh para encontrar pipx en WSL y no el npm de Windows. Slither 0 findings con la config del repo. | — |
 | 2026-09-15 | Slither: fee de liquidacion multiplica antes de dividir; hitos con modulo; ==0 de pool/mora a <1; detector timestamp excluido (plazos de credito). Demo live no cambia hasta redesplegar. | — |
 | 2026-09-14 | Auditoria 2026-09-14: Demo live 0xD2d2 alineado (24457 B, 1000 niveles, pool 2000 USDT). prepare-production ya no pisa el contrato con 0x1E5118. fundInternalFromExternal no vuelve a sacar USDT si la interna ya tiene el monto. OTP trial usa Twilio Verify. Mainnet sigue sin desplegar. | — |

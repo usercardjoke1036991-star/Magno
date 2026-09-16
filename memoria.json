@@ -33,6 +33,8 @@
     "- [2026-09-12] Cuenta Real se muestra completa antes del lanzamiento. Donar y aportar liquidez suman fama. La UI de donar no menciona destino ni USDT real."
   ],
   "cambios": [
+    "- [2026-09-16] Auditoria MobSF del APK debug: nota 37/100 esperada. Release endurecido: minSdk 29, sin HTTP claro, sin microfono ni storage legado, cropper no exportado, R8 en release. El APK escaneado sigue siendo debug con certificado de desarrollo.",
+    "- [2026-09-15] Script scan-mobile para MobSF: sube el APK, lanza el analisis y guarda el informe JSON en la raiz. Comando npm run security:mobsf. La clave vive en el entorno, no en git.",
     "- [2026-09-15] npm run security:slither ya no usa el slither de Windows: entra a WSL/pipx, compila con hardhat.config.cjs y --hardhat-ignore-compile. Analisis: 0 hallazgos.",
     "- [2026-09-15] Avisos Slither revisados: timestamp es ruido de plazos; se corrigio precision de fee en liquidate y suelo de hitos. Contrato Demo desplegado sigue el bytecode anterior hasta un redespliegue.",
     "- [2026-09-14] Auditoria profunda: contrato Demo live al dia; script de produccion ya no escribe 0x1E5118; no se cobra USDT dos veces si donar falla; OTP Twilio trial via Verify. Falta mainnet y flyctl auth login.",
@@ -80,10 +82,8 @@
     "- [2026-09-14] Historial de personas: cada referido abre su grupo al toque y las generaciones bajan bajo demanda, sin cargar el arbol mundial.",
     "- [2026-09-14] Requisito de 1 USDT de acceso antes de pedir prestamo. La UI dice pagar a la app; el envio va a la billetera fundadora.",
     "- [2026-09-14] Flujo de alta: crear/recuperar en telefono nuevo; iniciar sesion en aparato que ya tuvo cuenta; identidad publica de galeria y alias fijos en la red",
-    "- [2026-09-14] Identidad publica: usuario e imagen anonima se eligen una vez y es lo que ve la red; la foto de galeria solo vive en este telefono",
-    "- [2026-09-14] El historial de personas de Red vive en su ventana con foto, fechas y paginas 1 2 3",
-    "- [2026-09-13] La fila de Ajustes que era Como confirma ahora se llama Candado"
+    "- [2026-09-14] Identidad publica: usuario e imagen anonima se eligen una vez y es lo que ve la red; la foto de galeria solo vive en este telefono"
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-15] Cambio: npm run security:slither ya no usa el slither de Windows: entra a WSL/pipx, compila con hardhat.config.cjs y --hardhat-ignore-compile. Analisis: 0 hallazgos."
+  "ultima_sesion": "[2026-09-16] Cambio: Auditoria MobSF del APK debug: nota 37/100 esperada. Release endurecido: minSdk 29, sin HTTP claro, sin microfono ni storage legado, cropper no exportado, R8 en release. El APK escaneado sigue siendo debug con certificado de desarrollo."
 }

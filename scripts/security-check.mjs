@@ -4,6 +4,7 @@
  *
  * Slither (opcional): pipx install slither-analyzer && npm run security:slither
  * Si npm es el de Windows y Slither vive en WSL, el script entra por WSL/pipx.
+ * MobSF: MOBSF_API_KEY y npm run security:mobsf -- ruta.apk
  */
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -20,6 +21,9 @@ if (!gitignore.includes('.env')) {
 }
 if (!gitignore.includes('.env.worker')) {
   failures.push('.gitignore no ignora .env.worker');
+}
+if (!gitignore.includes('mobsf-report.json')) {
+  failures.push('.gitignore no ignora mobsf-report.json');
 }
 
 const envExample = existsSync(resolve(root, '.env.example'))

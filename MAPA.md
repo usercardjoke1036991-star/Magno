@@ -65,6 +65,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: MainActivity, onCreate, onNewIntent, getMainComponentName, createReactActivityDelegate, invokeDefaultOnBackPressed
 - `android/app/src/main/java/com/quatrivium/credit/MainApplication.kt` — módulo Kotlin
   - Funciones/clases: MainApplication, getPackages, getJSMainModuleName, getUseDeveloperSupport, onCreate, onConfigurationChanged
+- `android/app/src/release/AndroidManifest.xml` — manifiesto Android
+  - Funciones/clases: expo.modules.devlauncher.launcher.DevLauncherActivity, expo.modules.devlauncher.compose.AuthActivity, androidx.compose.ui.tooling.PreviewActivity, com.canhub.cropper.CropImageActivity
 - `app/index.tsx` — módulo JS/TS
   - Funciones/clases: HomeScreen
 - `app/_layout.tsx` — módulo JS/TS
@@ -245,6 +247,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: legalCopy, legalDocsFor
 - `i18n/translations.ts` — módulo JS/TS
   - Funciones/clases: translations
+- `plugins/withQuatriviumAndroidSecurity.js` — módulo JS/TS
 - `profile/ProfileContext.tsx` — módulo JS/TS
   - Funciones/clases: ProfileProvider, useUserProfile
 - `scripts/bscNetworks.cjs` — módulo JS/TS
@@ -262,6 +265,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/prepare-logo.py` — módulo Python
   - Funciones/clases: luma, is_backdrop, flood_transparent, crop_mark, color_transparent, punch_fringe, fit_mark, compose, lerp, colorize, circle_mask, write_android_icons, write_rank_icons, main
 - `scripts/prepare-production-local.mjs` — módulo JS/TS
+- `scripts/run-slither.mjs` — módulo JS/TS
+- `scripts/scan-mobile.mjs` — módulo JS/TS
 - `scripts/security-check.mjs` — módulo JS/TS
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/set-sms-keys.mjs` — módulo JS/TS

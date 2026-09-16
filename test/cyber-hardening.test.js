@@ -235,6 +235,47 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(wslSh).to.include('$HOME/.local/bin');
   });
 
+  it('wires MobSF REST upload, scan and report_json without embedding the API key', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const scanner = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'scan-mobile.mjs'), 'utf8');
+    expect(scanner).to.include('MOBSF_API_KEY');
+    expect(scanner).to.include('/api/v1/upload');
+    expect(scanner).to.include('/api/v1/scan');
+    expect(scanner).to.include('/api/v1/report_json');
+    expect(scanner).to.include('mobsf-report.json');
+    expect(scanner).to.include('multipart');
+    expect(scanner).to.match(/form\.append\(\s*'file'/);
+    expect(scanner).not.to.match(/MOBSF_API_KEY\s*=\s*['"][A-Za-z0-9]{8,}/);
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+    expect(pkg.scripts['security:mobsf']).to.equal('node scripts/scan-mobile.mjs');
+    const gitignore = fs.readFileSync(path.join(__dirname, '..', '.gitignore'), 'utf8');
+    expect(gitignore).to.include('mobsf-report.json');
+  });
+
+  it('hardens the Android release profile against the MobSF high findings of a debug APK', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const app = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'app.json'), 'utf8'));
+    expect(app.expo.android.allowBackup).to.equal(false);
+    expect(app.expo.android.blockedPermissions).to.include.members([
+      'android.permission.RECORD_AUDIO',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+      'android.permission.READ_EXTERNAL_STORAGE',
+    ]);
+    expect(app.expo.plugins.flat()).to.include('./plugins/withQuatriviumAndroidSecurity.js');
+    expect(JSON.stringify(app.expo.plugins)).to.include('minSdkVersion');
+    const plugin = fs.readFileSync(
+      path.join(__dirname, '..', 'plugins', 'withQuatriviumAndroidSecurity.js'),
+      'utf8'
+    );
+    expect(plugin).to.include('usesCleartextTraffic');
+    expect(plugin).to.include('network_security_config');
+    expect(plugin).to.include('CropImageActivity');
+    expect(plugin).to.include('DevLauncherActivity');
+    expect(plugin).to.include('android.enableMinifyInReleaseBuilds');
+  });
+
   it('seals an immutable KYC fingerprint and keeps it when local fields change', function () {
     const { keccak256, toUtf8Bytes } = require('ethers');
     const fingerprint = (wallet, snap) =>

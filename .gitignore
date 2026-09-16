@@ -53,6 +53,8 @@ typechain-types/
 
 # APKs
 *.apk
+mobsf-report.json
+mobsf-report-extract.txt
 
 # Debug screenshots
 store-assets/debug-screen*.png
