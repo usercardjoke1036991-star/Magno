@@ -26,7 +26,7 @@ contract QuatriviumLeveling {
 
     function hitoAlcanzado(uint256 nivel) public pure returns (uint256) {
         if (nivel < HITO_PASO) return 0;
-        uint256 h = (nivel / HITO_PASO) * HITO_PASO;
+        uint256 h = nivel - (nivel % HITO_PASO);
         return h > MAX_NIVEL ? MAX_NIVEL : h;
     }
 

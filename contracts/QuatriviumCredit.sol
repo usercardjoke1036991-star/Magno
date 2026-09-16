@@ -1120,12 +1120,12 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function _aplicarPenalizacionDiaria(address usuario) internal {
         uint256 desde = moraDesde[usuario];
-        if (!esMoroso[usuario] || desde == 0 || block.timestamp <= desde + GRACIA_MORA) return;
+        if (!esMoroso[usuario] || desde < 1 || block.timestamp <= desde + GRACIA_MORA) return;
         uint256 dias = (block.timestamp - desde - GRACIA_MORA) / 1 days;
         uint256 ya = moraDiasCobrados[usuario];
         if (dias <= ya) return;
         uint256 nivel = progresoUsuarios[usuario].nivelActual;
-        if (nivel == 0) nivel = 1;
+        if (nivel < 1) nivel = 1;
         uint256 quita = (dias - ya) * FAMA_POR_DIA_MORA * nivel;
         reputacion[usuario] = reputacion[usuario] > quita ? reputacion[usuario] - quita : 0;
         moraDiasCobrados[usuario] = dias;
@@ -1187,7 +1187,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
         stableTokens[tokenAddress].safeTransferFrom(msg.sender, address(this), restante);
 
-        uint256 fee = (interestRestante * feeBasisPoints) / 10000;
+        uint256 fee = (interest * restante * feeBasisPoints) / (totalDue * 10000);
         if (fee > interestRestante) fee = interestRestante;
         if (fee > 0) collectedFees[tokenAddress] += fee;
 
@@ -1234,20 +1234,20 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function calcularTasaUtilizacion(address tokenAddress) public view returns (uint256) {
         uint256 pool = totalLiquidity[tokenAddress];
-        if (pool == 0) return 0;
+        if (pool < 1) return 0;
         return (outstandingLoans[tokenAddress] * 10000) / pool;
     }
 
     function obtenerTasaInteresActual(address tokenAddress) public view returns (uint256) {
         uint256 utilBP = calcularTasaUtilizacion(tokenAddress);
-        if (utilBP == 0) return tasaBaseBP;
+        if (utilBP < 1) return tasaBaseBP;
         if (utilBP <= puntoOptimoUtilBP) {
-            if (puntoOptimoUtilBP == 0) return tasaBaseBP;
+            if (puntoOptimoUtilBP < 1) return tasaBaseBP;
             return tasaBaseBP + (pendiente1BP * utilBP) / puntoOptimoUtilBP;
         }
         uint256 extraBP = utilBP - puntoOptimoUtilBP;
         uint256 denom = 10000 - puntoOptimoUtilBP;
-        if (denom == 0) return tasaBaseBP + pendiente1BP + pendiente2BP;
+        if (denom < 1) return tasaBaseBP + pendiente1BP + pendiente2BP;
         return tasaBaseBP + pendiente1BP + (pendiente2BP * extraBP) / denom;
     }
 
@@ -1341,9 +1341,9 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(tx.origin == msg.sender, "no contracts");
         require(humanosVerificados[msg.sender] && !blacklist[msg.sender] && !_fueraDeGracia(msg.sender));
         uint256 nivel = progresoUsuarios[msg.sender].nivelActual;
-        if (nivel == 0) nivel = 1;
+        if (nivel < 1) nivel = 1;
         uint256 next = hitoCobrado[msg.sender] + 100;
-        require(next <= MAX_NIVEL_TOTAL && next <= (nivel / 100) * 100);
+        require(next <= MAX_NIVEL_TOTAL && next <= nivel - (nivel % 100));
         uint256 bono = next * 20e18;
         uint256 caja = _cajaLibre(token);
         uint256 piso = (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000;

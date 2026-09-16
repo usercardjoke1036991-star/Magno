@@ -210,6 +210,31 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(check).to.include('demo-contract');
   });
 
+  it('keeps Slither money math multiply-first and treats timestamps as accepted lending windows', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const credit = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'QuatriviumCredit.sol'), 'utf8');
+    const leveling = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'QuatriviumLeveling.sol'), 'utf8');
+    const slitherCfg = fs.readFileSync(path.join(__dirname, '..', 'slither.config.json'), 'utf8');
+    expect(credit).to.include('(interest * restante * feeBasisPoints) / (totalDue * 10000)');
+    expect(credit).not.to.include('(interestRestante * feeBasisPoints) / 10000');
+    expect(credit).to.include('next <= nivel - (nivel % 100)');
+    expect(leveling).to.include('nivel - (nivel % HITO_PASO)');
+    expect(slitherCfg).to.include('timestamp');
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+    expect(pkg.scripts['security:slither']).to.include('run-slither.mjs');
+    const runner = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'run-slither.mjs'), 'utf8');
+    expect(runner).to.include('$HOME/.local/bin');
+    expect(runner).to.include('windowsToWsl');
+    expect(runner).to.include('run-slither-wsl.sh');
+    expect(runner).to.include('-lic');
+    const wslSh = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'run-slither-wsl.sh'), 'utf8');
+    expect(wslSh).to.include('hardhat.config.cjs');
+    expect(wslSh).to.include('compile --force');
+    expect(wslSh).to.include('--hardhat-ignore-compile');
+    expect(wslSh).to.include('$HOME/.local/bin');
+  });
+
   it('seals an immutable KYC fingerprint and keeps it when local fields change', function () {
     const { keccak256, toUtf8Bytes } = require('ethers');
     const fingerprint = (wallet, snap) =>

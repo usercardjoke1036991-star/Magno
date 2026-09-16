@@ -2,7 +2,8 @@
  * Chequeos de seguridad que se pueden correr en local.
  * Uso: npm run security:check
  *
- * Slither (opcional, requiere Python): pip install slither-analyzer && npm run security:slither
+ * Slither (opcional): pipx install slither-analyzer && npm run security:slither
+ * Si npm es el de Windows y Slither vive en WSL, el script entra por WSL/pipx.
  */
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';

@@ -30,6 +30,29 @@ describe('QuatriviumCredit - Liquidation', function () {
     expect(await contract.prestamosCerrados(user.address)).to.equal(1n);
   });
 
+  it('takes the liquidation fee from interest without dividing first', async () => {
+    const { token, contract, owner, user, extra: liquidator, tokenAddr, contractAddr } =
+      await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, user);
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+
+    const userInfo = await contract.usuarios(user.address);
+    const debt = await contract.obtenerDeuda(user.address);
+    await ethers.provider.send('evm_setNextBlockTimestamp', [Number(userInfo.vencimiento) + 10]);
+    await ethers.provider.send('evm_mine');
+
+    await token.mint(liquidator.address, ethers.parseUnits('10', 18));
+    await token.connect(liquidator).approve(contractAddr, ethers.MaxUint256);
+    await contract.connect(liquidator).liquidate(user.address, tokenAddr);
+
+    const interest = debt.interes;
+    const totalDue = debt.total;
+    const feeBp = await contract.feeBasisPoints();
+    const expectedFee = (interest * totalDue * feeBp) / (totalDue * 10000n);
+    expect(await contract.collectedFees(tokenAddr)).to.equal(expectedFee);
+  });
+
   it('lets a liquidated user borrow again after cooldown', async () => {
     const { token, contract, owner, user, extra: liquidator, tokenAddr, contractAddr } =
       await deployProtocol();

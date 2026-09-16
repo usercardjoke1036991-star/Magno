@@ -13,7 +13,7 @@
     "typecheck": "node scripts/check-i18n.mjs && tsc --noEmit",
     "compile": "hardhat compile",
     "security:check": "node scripts/security-check.mjs",
-    "security:slither": "slither . --config-file slither.config.json",
+    "security:slither": "node scripts/run-slither.mjs",
     "deploy:bsc": "hardhat run scripts/deploy.cjs --network bscMainnet",
     "deploy:testnet": "hardhat run scripts/deploy.cjs --network bscTestnet",
     "notify": "node scripts/notify-worker.mjs",
