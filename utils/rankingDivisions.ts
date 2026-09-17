@@ -76,7 +76,6 @@ export function attachDivisionPrizes(seats: RankingSeat[], budgetUsd: number): R
 
   const prizeByKey = new Map<string, number>();
   for (const [division, rows] of byDivision) {
-    const pot = (budget * divisionWeight(division, totalDivisions)) / weightSum;
     const eligible = rows.filter((seat) => !seat.player.delinquent);
     let placeSum = 0;
     const weights = eligible.map((seat) => {
@@ -85,8 +84,12 @@ export function attachDivisionPrizes(seats: RankingSeat[], budgetUsd: number): R
       return weight;
     });
     if (placeSum <= 0) continue;
+    const divWeight = divisionWeight(division, totalDivisions);
     eligible.forEach((seat, index) => {
-      prizeByKey.set(seat.player.address.toLowerCase(), (pot * weights[index]) / placeSum);
+      prizeByKey.set(
+        seat.player.address.toLowerCase(),
+        (budget * divWeight * weights[index]) / (weightSum * placeSum)
+      );
     });
   }
 

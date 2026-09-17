@@ -72,6 +72,14 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     expect(large).to.be.gt(small);
     expect(await leveling.pesoDivision(1, 2)).to.equal(2n);
     expect(await leveling.pesoDivision(2, 2)).to.equal(1n);
+    const caja = ethers.parseUnits('20000', 18);
+    const budget = await leveling.presupuestoPremioMensual(caja, caja);
+    const sumaPesos = 5050n;
+    const firstSeat = await leveling.premioAsiento(caja, caja, 1, 2, 1, sumaPesos);
+    expect(firstSeat).to.equal((budget * 2n * 100n) / (3n * sumaPesos));
+    const lastSeat = await leveling.premioAsiento(caja, caja, 2, 2, 100, sumaPesos);
+    expect(lastSeat).to.equal((budget * 1n * 1n) / (3n * sumaPesos));
+    expect(firstSeat).to.be.gt(lastSeat);
   });
 
   it('only pays a milestone bonus when the pool has free cash above the floor', async () => {

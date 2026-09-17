@@ -28,6 +28,8 @@ describe('Render notify worker', function () {
     expect(worker).to.include('mkdirSync(dirname(DATA_FILE)');
     expect(worker).to.include('const isHealth');
     expect(worker).to.include('process.env.PORT || process.env.NOTIFY_PORT || 8787');
+    expect(worker).to.not.include('displayName: username');
+    expect(worker).to.include('sessionUser');
   });
 
   it('listens on PORT, creates data dir and answers /health', async function () {

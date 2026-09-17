@@ -1558,7 +1558,7 @@ const server = createServer(async (req, res) => {
     }
     store.usernameClaims[username] = { wallet: authn.wallet };
     const prev = store.profiles[authn.wallet] || {};
-    store.profiles[authn.wallet] = { ...prev, username, displayName: username };
+    store.profiles[authn.wallet] = { ...prev, username };
     persist();
     json(res, 200, { ok: true, username });
     return;
@@ -1592,12 +1592,20 @@ const server = createServer(async (req, res) => {
     const profiles = {};
     for (const wallet of wallets) {
       const item = store.profiles[wallet];
-      if (!item?.displayName && !item?.publicPhoto && !item?.username) continue;
+      if (!item) continue;
+      let displayName = stripUnsafe(item.displayName || '', 24);
+      const sessionUser = String(item.username || '').trim();
+      // El usuario de sesión no es el nombre público. Si alguien lo copió al displayName, no se publica.
+      if (!item.publicFace && sessionUser && displayName.toLowerCase() === sessionUser.toLowerCase()) {
+        displayName = '';
+      }
+      const publicPhoto = sanitizePublicPhoto(item.publicPhoto);
+      if (!displayName && !publicPhoto && !item.publicFace) continue;
       profiles[wallet] = {
-        displayName: stripUnsafe(item.displayName || '', 24),
+        displayName,
         avatarId: item.avatarId || 0,
-        publicPhoto: sanitizePublicPhoto(item.publicPhoto),
-        publicFace: Boolean(item.publicFace || item.displayName),
+        publicPhoto,
+        publicFace: Boolean(item.publicFace),
       };
     }
     json(res, 200, { profiles });

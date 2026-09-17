@@ -86,8 +86,8 @@ contract QuatriviumLeveling {
         uint256 wDiv = pesoDivision(division, totalDivisiones);
         uint256 sumDiv = (totalDivisiones * (totalDivisiones + 1)) / 2;
         if (budget == 0 || wDiv == 0 || sumDiv == 0) return 0;
-        uint256 pot = (budget * wDiv) / sumDiv;
         uint256 wSeat = DIVISION_SIZE - puestoEnDivision + 1;
-        return (pot * wSeat) / sumaPesosElegibles;
+        // Un solo floor: no dividir el bote antes de aplicar el peso del asiento.
+        return (budget * wDiv * wSeat) / (sumDiv * sumaPesosElegibles);
     }
 }

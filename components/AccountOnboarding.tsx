@@ -64,11 +64,8 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     };
     const watchdog = setTimeout(() => finish(''), 3000);
     loadClaimedUsername()
-      .then(async (value) => {
+      .then((value) => {
         clearTimeout(watchdog);
-        if (value && walletAddress) {
-          await lockSponsorOnce(walletAddress, '');
-        }
         finish(value);
       })
       .catch(() => {
@@ -224,6 +221,8 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
               setInviteError(resolved.reason === 'self' ? t('cannotSelfInvite') : t('invalidSponsor'));
               throw new Error('invite');
             }
+            await lockSponsorOnce(walletAddress, inviteDraft);
+            onInviteLocked?.();
           }}
           onClaimed={async (value) => {
             await lockSponsorOnce(walletAddress, inviteDraft);

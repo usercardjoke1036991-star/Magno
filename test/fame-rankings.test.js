@@ -100,7 +100,6 @@ function attachDivisionPrizes(seats, budgetUsd) {
   }
   const prizeByKey = new Map();
   for (const [division, rows] of byDivision) {
-    const pot = (budget * (totalDivisions - division + 1)) / weightSum;
     const eligible = rows.filter((seat) => !seat.player.delinquent);
     let placeSum = 0;
     const weights = eligible.map((seat) => {
@@ -109,8 +108,12 @@ function attachDivisionPrizes(seats, budgetUsd) {
       return weight;
     });
     if (placeSum <= 0) continue;
+    const divWeight = totalDivisions - division + 1;
     eligible.forEach((seat, index) => {
-      prizeByKey.set(seat.player.address.toLowerCase(), (pot * weights[index]) / placeSum);
+      prizeByKey.set(
+        seat.player.address.toLowerCase(),
+        (budget * divWeight * weights[index]) / (weightSum * placeSum)
+      );
     });
   }
   return list.map((seat) => ({
@@ -247,6 +250,9 @@ describe('fame rankings', () => {
     const divisions = fs.readFileSync(path.join(__dirname, '..', 'utils', 'rankingDivisions.ts'), 'utf8');
     expect(divisions).to.include('RANKING_DIVISION_SIZE = 100');
     expect(divisions).to.include('RANKING_PRIZE_BUDGET_BP = 150');
+    expect(divisions).to.include('(budget * divWeight * weights[index]) / (weightSum * placeSum)');
+    const leveling = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'QuatriviumLeveling.sol'), 'utf8');
+    expect(leveling).to.include('(budget * wDiv * wSeat) / (sumDiv * sumaPesosElegibles)');
     const banner = fs.readFileSync(path.join(__dirname, '..', 'components', 'KycAccessBanner.tsx'), 'utf8');
     expect(banner).to.include('accessPaid');
     const profiles = fs.readFileSync(path.join(__dirname, '..', 'profile', 'ProfileContext.tsx'), 'utf8');

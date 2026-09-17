@@ -78,10 +78,13 @@ describe('sponsor lock at signup', function () {
     const lock = fs.readFileSync(path.join(__dirname, '..', 'utils', 'sponsorLock.ts'), 'utf8');
     expect(onboarding).to.include('signupInviteLead');
     expect(onboarding).to.include('lockSponsorOnce');
+    expect(onboarding).to.match(/beforeClaim=\{async \(\) => \{[\s\S]*lockSponsorOnce\(walletAddress, inviteDraft\)/);
+    expect(onboarding).to.not.include("lockSponsorOnce(walletAddress, '')");
     expect(activate).to.not.include('invitePlaceholder');
     expect(activate).to.not.include('initialInviteCode');
     expect(handlers).to.include('lockSponsorOnce');
     expect(handlers).to.match(/const handleRegistrarHumano = async \(\) =>/);
     expect(lock).to.include('keepFirstLock');
+    expect(lock).to.include('parseInviteInput');
   });
 });

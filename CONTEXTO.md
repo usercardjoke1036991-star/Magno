@@ -252,6 +252,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-17 | Auditoria productiva: el padrino se fija antes de guardar el usuario; /profiles no publica el usuario de sesion; premioAsiento multiplica antes de dividir. Hardhat 168, tsc 0, production 14/15. Sin mainnet ni APK. | — |
 | 2026-09-17 | Auditoria en vivo 2026-09-16: Hardhat 168, Foundry 6/6, Slither 1 divide-before-multiply en premioAsiento (redondeo a la baja), Aderyn H-1 CEI con nonReentrant, Semgrep 0, ZAP CORS * de Demo, Mythril SWC-101 falso en 0.8.24, Trivy lockfile Expo/snarkjs, MobSF APK SHA fea201d5 sin rescan 401. Sin mainnet. | — |
 | 2026-09-16 | Worker 24/7 listo para Render: render.yaml (Dockerfile.notify, disco /data, health /health, NOTIFY_DATA_KEY generado, Twilio sync false). saveStore crea el directorio. Nunca PRIVATE_KEY en Render. | — |
 | 2026-09-16 | Pack de deploy Hetzner para el notify-worker (Docker, Caddy, volumen /data). Fly sigue disponible. | — |
