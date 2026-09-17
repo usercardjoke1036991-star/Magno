@@ -11,6 +11,7 @@ import { getTokenMeta, isOfficialWorldToken } from '../constants/tokens';
 import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { recordMovement } from '../services/movementHistory';
 import { useWeb3Transactions } from './useWeb3Transactions';
+import { lockSponsorOnce } from '../services/sponsorLock';
 import { notifyApiBases } from '../constants/appLinks';
 import { getProviderWithFallback, isAccessPaymentEnabled, isCreditReady, isDemoAccount, isDemoMode, isDonationEnabled, isDonationVisible } from '../constants/rpcConfig';
 import { isHttpsUrl } from '../utils/sanitize';
@@ -301,7 +302,7 @@ export const useHomeHandlers = ({
     }
   };
 
-  const handleRegistrarHumano = async (padre?: string) => {
+  const handleRegistrarHumano = async () => {
     if (!ensureCreditReady()) return;
     if (!walletAddress) {
       showNotice(t('connect'), t('appWalletNotReady'));
@@ -313,6 +314,13 @@ export const useHomeHandlers = ({
     }
 
     if (!(await ensureGasForTx())) return;
+    let padre: string | undefined;
+    try {
+      const locked = await lockSponsorOnce(walletAddress, '');
+      padre = locked.padre || undefined;
+    } catch {
+      padre = undefined;
+    }
     const result = await registrarHumano(walletAddress, padre);
     if (result.success) {
       await clearPendingInvite();

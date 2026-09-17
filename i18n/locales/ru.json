@@ -69,7 +69,7 @@
   "bonusPaid": "Уже выплачен тому, кто вас пригласил",
   "bonusPending": "Подарок $0.50, когда они закроют первый займ 1-го уровня",
   "royaltiesFrozen": "Комиссии приостановлены. Погасите долг, чтобы снова зарабатывать.",
-  "referralHint": "Вас ещё нет в сети. Ниже, в «Активировать кредитную линию», вставьте код того, кто вас пригласил, или оставьте поле пустым.",
+  "referralHint": "Наставник зафиксирован при создании счёта. Изменить нельзя.",
   "shareTitle": "Приглашение в Quatrivium Finance",
   "shareMessage": "{name} ?????????? ??? ? Quatrivium Finance. ???????? ??????, ??????? ??????? ? ?????????????, ????????? ??????.",
   "connect": "Подключить",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "Реферальный код (необязательно)",
+  "signupInviteLead": "Только при создании счёта. Если пусто — вы начинаете свою цепочку под основателем. Потом изменить нельзя.",
+  "referralOwnChain": "Без кода. Вы начинаете новую цепочку под основателем.",
+  "referralUplineLocked": "Наставник зафиксирован: {code}"
 }

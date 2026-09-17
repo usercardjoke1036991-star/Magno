@@ -69,7 +69,7 @@
   "bonusPaid": "Đã trả cho người đã mời bạn",
   "bonusPending": "Quà 0,50 $ khi họ hoàn thành khoản vay cấp 1 đầu tiên",
   "royaltiesFrozen": "Hoa hồng bị tạm dừng. Tất toán nợ để nhận lại.",
-  "referralHint": "Bạn chưa có trong mạng. Bên dưới, trong «Kích hoạt hạn mức tín dụng», dán mã của người đã mời bạn hoặc để trống.",
+  "referralHint": "Tuyến trên đã khóa lúc tạo tài khoản. Không thể đổi.",
   "shareTitle": "Lời mời Quatrivium Finance",
   "shareMessage": "{name} mời bạn đến Quatrivium Finance. Vay tín dụng, trả đúng hạn và kiếm tiền bằng cách mời người khác.",
   "connect": "Kết nối",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "Mã giới thiệu (tùy chọn)",
+  "signupInviteLead": "Chỉ khi tạo tài khoản. Để trống thì bạn bắt đầu chuỗi riêng dưới nhà sáng lập. Sau đó không đổi được.",
+  "referralOwnChain": "Không có mã. Bạn bắt đầu chuỗi mới gắn với nhà sáng lập.",
+  "referralUplineLocked": "Tuyến trên đã khóa: {code}"
 }

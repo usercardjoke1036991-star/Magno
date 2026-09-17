@@ -1,6 +1,9 @@
 {
-  "enfoque": "Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anteriores. Sin mainnet ni Play hasta que el fundador lo pida.",
+  "enfoque": "Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet.",
   "decisiones": [
+    "- [2026-09-16] Render es el host 24/7 del notify-worker: Dockerfile.notify, disco /data, PORT inyectado, clave de cifrado generada, sin llave de owner.",
+    "- [2026-09-16] Worker 24/7 en Hetzner (CX23 Ubuntu, Caddy HTTPS) como alternativa a Fly. Mismo notify-worker y .env.worker.",
+    "- [2026-09-16] El codigo de referido solo se captura al crear la cuenta. Vacio = cadena propia colgada del fundador. Una vez vinculado no se cambia (local + on-chain already registered).",
     "- [2026-09-16] No recortar funciones del nucleo por EIP-170: ranking y premio van en hermanos (QuatriviumLeveling). La sala Rankings permanece y los nombres se ven desde el nivel 50.",
     "- [2026-09-16] Los puestos de ranking no son fijos: suben o bajan con el esfuerzo. El historial de referidos sigue en Red. Los marcos de gema de nivel se ven en cada persona del ranking; 1o/2o/3o llevan ademas medallas distintas.",
     "- [2026-09-16] Analisis MobSF privado en localhost; no usar la instancia publica para que el APK no circule.",
@@ -27,12 +30,13 @@
     "- [2026-09-12] Si se pierde el celular, Recuperar cuenta en uno nuevo con las 12 palabras. Luego usuario y contrasena de ese aparato y volver a vincular el numero. Una sola instalacion opera credito a la vez.",
     "- [2026-09-12] Una billetera Quatrivium solo opera credito en el dispositivo donde se vinculo. WiFi o VPN no son identidad. Recuperar en otro telefono pide volver a vincular numero y dispositivo.",
     "- [2026-09-12] No hay destruir cuenta en la app. Una persona una linea. Formatear o cambiar VPN no crea otra: se recupera con las 12 palabras. Telefono y KYC on-chain bloquean una segunda linea Real.",
-    "- [2026-09-12] Desbloqueo por defecto contraseña (correo ya guardado). El usuario elige solo la principal o varias opciones. Frase de 12 palabras obligatoria antes de pedir credito. No hay cerrar sesion. Recuperar con 12 palabras carga la cuenta anterior on-chain.",
-    "- [2026-09-12] Guardar sesion mantiene la cuenta en el telefono. Al abrir se muestra el bloqueo, no las tres pantallas. Contraseña por defecto; el usuario elige cuantos metodos y cual es el principal. Cerrar sesion solo en Seguridad.",
-    "- [2026-09-12] El progreso va con la billetera on-chain. Otro telefono se recupera con las 12 palabras, no creando otra cuenta. En un telefono con cuenta, Crear cuenta no se muestra.",
-    "- [2026-09-12] En Cuenta Real no se pide credito sin correo, telefono+dispositivo y KYC. Eso corta multicuentas faciles. Demo sigue libre para probar."
+    "- [2026-09-12] Desbloqueo por defecto contraseña (correo ya guardado). El usuario elige solo la principal o varias opciones. Frase de 12 palabras obligatoria antes de pedir credito. No hay cerrar sesion. Recuperar con 12 palabras carga la cuenta anterior on-chain."
   ],
   "cambios": [
+    "- [2026-09-17] Auditoria completa del kit ciber en vivo. Sin bug de perdida de fondos. APK Desktop mismo hash. Render y mainnet siguen aparte.",
+    "- [2026-09-16] Blueprint render.yaml, mkdir del almacén, health sin CORS, dockerignore con !scripts/, test Render.",
+    "- [2026-09-16] Pack Hetzner: docker-compose + Caddy + npm run notify:hetzner. El fundador crea el VPS y apunta notify.quatriviumcredit.app.",
+    "- [2026-09-16] Referido opcional solo en crear cuenta; se bloquea para siempre; activar credito ya no pide codigo.",
     "- [2026-09-16] Auditoria profunda: rankings con nombre/foto por division completa y la cuenta visible aunque el escaneo recorte. Hardhat 160. Premio estimado. Sin mainnet.",
     "- [2026-09-16] Rankings con nombre y foto, 6 tableros, divisiones de 100 y premio mensual del pool. L1000 cicla el bono. Nucleo Credit no se recorto.",
     "- [2026-09-16] 1 USDT primero para identidad. Rankings: 5 tableros (referidos, prestamos, fama, nivel, general), historial de referidos aparte, marcos de gema + medalla de podio, 1o arriba y mas grande.",
@@ -78,12 +82,8 @@
     "- [2026-09-14] Marco mas ancho que la foto, gemas 4/8/12 por I II III, colores de division mas claros y saturados.",
     "- [2026-09-14] Marco = logo 3D de la app pintado con el color de cada division, entrelazando la foto. I denso, II vivo, III luminoso. Sin rombos.",
     "- [2026-09-14] Marcos vuelven al boceto original: detalle y tamano crecen con I II III y con la piedra, metal 3D nitido.",
-    "- [2026-09-14] Marcos estilizados: mismo tamano, metal 3D de color vivo, sin gemas ni filigrana. I denso, II vivo, III luminoso.",
-    "- [2026-09-14] Marcos metalicos con relieve real del PNG 512px, bisel pulido y piedras talladas con garras. I sobrio, II filigrana y engaste, III doble voluta y mas facetas.",
-    "- [2026-09-14] Vitrina Marcos: 12 piedras con I II III a tamano real. Red muestra marco y etiqueta de rango de cada referido.",
-    "- [2026-09-14] Marcos de rango con piedras incrustadas: I 4 gemas, II 8, III 12, mas bisel y destellos al subir.",
-    "- [2026-09-14] Auditoria: contraste KYC/acceso con letras negras sobre verde. Hardhat 131/131, i18n 939, salud 14/14. Demo live alineado. Mainnet y SMS siguen del fundador."
+    "- [2026-09-14] Marcos estilizados: mismo tamano, metal 3D de color vivo, sin gemas ni filigrana. I denso, II vivo, III luminoso."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-16] Cambio: Auditoria profunda: rankings con nombre/foto por division completa y la cuenta visible aunque el escaneo recorte. Hardhat 160. Premio estimado. Sin mainnet."
+  "ultima_sesion": "[2026-09-17] Cambio: Auditoria completa del kit ciber en vivo. Sin bug de perdida de fondos. APK Desktop mismo hash. Render y mainnet siguen aparte."
 }

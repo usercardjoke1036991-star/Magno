@@ -69,7 +69,7 @@
   "bonusPaid": "회원님을 초대한 사람에게 이미 지급됨",
   "bonusPending": "상대가 첫 레벨 1 대출을 완제하면 $0.50 선물",
   "royaltiesFrozen": "수수료가 정지되었습니다. 다시 수익을 받으려면 채무를 정산하세요.",
-  "referralHint": "아직 네트워크에 없습니다. 아래 「내 신용 한도 활성화」에 초대한 사람의 코드를 붙여 넣거나 비워 두세요.",
+  "referralHint": "업라인은 계정 생성 때 고정되며 바꿀 수 없습니다.",
   "shareTitle": "Quatrivium Finance 초대",
   "shareMessage": "{name}?(?) Quatrivium Finance? ?????. ?? ??? ??, ?? ????, ?? ??? ??? ??? ????.",
   "connect": "연결",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "추천 코드 (선택)",
+  "signupInviteLead": "계정 만들 때만. 비우면 창립자 아래 내 체인을 시작합니다. 이후에는 바꿀 수 없습니다.",
+  "referralOwnChain": "코드 없음. 창립자에 연결된 새 체인을 시작합니다.",
+  "referralUplineLocked": "업라인 고정: {code}"
 }

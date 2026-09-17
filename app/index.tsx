@@ -248,7 +248,8 @@ function HomeScreenWithHooks() {
       isLoading={txLoading}
       paused={userInfo.paused}
       inviteCode={pendingInviteCode}
-      onRegister={(padre) => void handleRegistrarHumano(padre)}
+      onRegister={() => void handleRegistrarHumano()}
+      onInviteLocked={() => { void clearPendingInvite(); }}
       onDeclareKyc={handleDeclararKyc}
       onPhoneBound={refetch}
     >
@@ -443,10 +444,9 @@ function HomeScreenWithHooks() {
               isRegistered={creditOnChain}
               checking={false}
               hasActiveLoan={userInfo.hasActiveLoan}
-              onRegister={handleRegistrarHumano}
+              onRegister={() => void handleRegistrarHumano()}
               onGoLoans={() => setRoom('loans')}
               isLoading={txLoading}
-              initialInviteCode={pendingInviteCode}
               paused={creditPaused}
               contractReady={creditReady}
             />
@@ -468,10 +468,9 @@ function HomeScreenWithHooks() {
               isRegistered={false}
               checking={creditChecking}
               hasActiveLoan={userInfo.hasActiveLoan}
-              onRegister={handleRegistrarHumano}
+              onRegister={() => void handleRegistrarHumano()}
               onGoLoans={() => setRoom('loans')}
               isLoading={txLoading}
-              initialInviteCode={pendingInviteCode}
               paused={creditPaused}
               contractReady={creditReady}
             />

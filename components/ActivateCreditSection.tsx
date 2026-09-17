@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { AppText, AppTextInput } from './AppText';
+import { AppText } from './AppText';
 import { AppIcon } from './icons';
 
 interface ActivateCreditSectionProps {
   isRegistered: boolean;
   checking?: boolean;
   hasActiveLoan?: boolean;
-  onRegister: (padre?: string) => void;
+  onRegister: () => void;
   onGoLoans?: () => void;
   isLoading: boolean;
-  initialInviteCode?: string;
   paused?: boolean;
   contractReady?: boolean;
 }
@@ -24,24 +23,16 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
   onRegister,
   onGoLoans,
   isLoading,
-  initialInviteCode = '',
   paused = false,
   contractReady = true,
 }) => {
   const [showInfo, setShowInfo] = useState(false);
-  const [padre, setPadre] = useState(initialInviteCode);
   const [localBusy, setLocalBusy] = useState(false);
   const [note, setNote] = useState('');
   const { t } = useI18n();
   const { colors } = useTheme();
   const busy = isLoading || localBusy;
   const blocked = busy || paused || !contractReady;
-
-  useEffect(() => {
-    if (initialInviteCode) {
-      setPadre(initialInviteCode);
-    }
-  }, [initialInviteCode]);
 
   return (
     <View>
@@ -102,18 +93,6 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
         </View>
       ) : (
         <View>
-          <AppTextInput
-            value={padre}
-            onChangeText={setPadre}
-            placeholder={t('invitePlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            style={[
-              styles.referralInput,
-              { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
-            ]}
-          />
           {!contractReady ? (
             <AppText style={[styles.note, { color: colors.warnText }]}>
               {t('liveCreditNotReady')}
@@ -124,7 +103,7 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
             onPress={() => {
               setNote(t('activatingCredit'));
               setLocalBusy(true);
-              Promise.resolve(onRegister(padre.trim() || undefined)).finally(() => {
+              Promise.resolve(onRegister()).finally(() => {
                 setLocalBusy(false);
                 setNote('');
               });
@@ -251,14 +230,6 @@ const styles = StyleSheet.create({
   activeLead: {
     fontSize: 14,
     lineHeight: 20,
-  },
-  referralInput: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
-    fontSize: 13,
   },
   registerButton: {
     borderRadius: 12,

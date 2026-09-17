@@ -261,6 +261,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/bscNetworks.cjs` — módulo JS/TS
 - `scripts/check-i18n.mjs` — módulo JS/TS
 - `scripts/check-production.mjs` — módulo JS/TS
+- `scripts/deploy-hetzner.mjs` — módulo JS/TS
 - `scripts/deploy-notify.mjs` — módulo JS/TS
 - `scripts/deploy.cjs` — módulo JS/TS
   - Funciones/clases: DEPLOYED_TESTNET
@@ -270,6 +271,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/notify-worker.mjs` — módulo JS/TS
 - `scripts/paint-wallet-icons.py` — módulo Python
   - Funciones/clases: save, coinbase_wallet, rainbow_mark, main
+- `scripts/parse-zap-detail.py` — módulo Python
+- `scripts/parse-zap.py` — módulo Python
 - `scripts/prepare-logo.py` — módulo Python
   - Funciones/clases: luma, is_backdrop, flood_transparent, crop_mark, color_transparent, punch_fringe, fit_mark, compose, lerp, colorize, circle_mask, write_android_icons, write_rank_icons, main
 - `scripts/prepare-production-local.mjs` — módulo JS/TS
@@ -339,6 +342,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: subscribeSessionCleared, isSessionSaved, purgePersistedWrap, markSessionSaved, restoreSavedSessionWrap, clearSavedSession, signOutSavedSession
 - `services/secureStorageService.ts` — módulo JS/TS
   - Funciones/clases: SecureStorageService
+- `services/sponsorLock.ts` — módulo JS/TS
+  - Funciones/clases: loadLockedSponsor, lockSponsorOnce
 - `services/userProfile.ts` — módulo JS/TS
   - Funciones/clases: PUBLIC_PROFILE_BATCH, AVATAR_PRESETS, EMPTY_PROFILE, PUBLIC_PHOTO_MAX, clampAvatarId, hasLockedPublicIdentity, isPublicIdentityLocked, sanitizePublicPhoto, canSubmitPublicIdentity, publicPhotoFromAsset, normalizeDisplayName, isValidDisplayName, persistPickedPhoto, initialsFromName, avatarColorForWallet, labelForProfile, loadOwnProfile, saveOwnProfile, clearOwnProfile, loadProfileDirectory, rememberProfiles, rememberProfile, publishOwnProfile, fetchPublicProfiles
 - `services/walletAuth.ts` — módulo JS/TS
@@ -364,6 +369,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/hardening-security.test.js` — módulo JS/TS
 - `test/hardening.test.js` — módulo JS/TS
 - `test/helpers.cjs` — módulo JS/TS
+- `test/hetzner-notify.test.js` — módulo JS/TS
 - `test/identity.test.js` — módulo JS/TS
 - `test/kyc.test.js` — módulo JS/TS
 - `test/legal-consent.test.js` — módulo JS/TS
@@ -373,7 +379,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/mlm.test.js` — módulo JS/TS
 - `test/morosity.test.js` — módulo JS/TS
 - `test/peg.test.js` — módulo JS/TS
+- `test/render-notify.test.js` — módulo JS/TS
 - `test/security.test.js` — módulo JS/TS
+- `test/sponsor-lock.test.js` — módulo JS/TS
 - `theme/androidText.ts` — módulo JS/TS
   - Funciones/clases: remapAndroidTextStyle, setInterReady
 - `theme/palette.ts` — módulo JS/TS
@@ -448,6 +456,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: stripUnsafeText, isHttpsUrl, isAllowedWei, isHexAddress
 - `utils/secretBox.ts` — módulo JS/TS
   - Funciones/clases: timingSafeEqualBytes, timingSafeEqualHex, hmacSha256, deriveWrapKey, deriveWrapKeyAsync, isSealedBlob, sealSecret, openSecret
+- `utils/sponsorLock.ts` — módulo JS/TS
+  - Funciones/clases: SPONSOR_LOCK_PREFIX, sponsorLockKey, resolveSponsorInput, parseLockedSponsor, buildLockedSponsor, keepFirstLock
 - `utils/totp.ts` — módulo JS/TS
   - Funciones/clases: bytesToBase32, base32ToBytes, totpAt, verifyTotp, otpauthUrl
 - `utils/txErrors.ts` — módulo JS/TS

@@ -38,6 +38,8 @@ Magno/
 │   └── mocks/                     # ERC20Mock, MockV3Aggregator (testnet)
 ├── test/ (21 archivos)            # accounting, circuitBreaker, cuotas, destroy, identity, kyc, mlm, rankings, demo-identity…
 ├── scripts/                       # deploy, security-check, production-check, notify-worker
+├── Dockerfile.notify              # Imagen del worker 24/7 (Render/Fly/Hetzner)
+├── render.yaml                    # Blueprint Render: disco /data, health /health, sin llaves de owner
 ├── salud_proyecto.py              # Reloj suizo: grafo UI→hooks→contrato + i18n/tsc (`npm run salud`)
 ├── i18n/ (17 locales)             # ar, bn, de, en, es, fr, hi, id, it, ja, ko, pt, ru, tr, ur, vi, zh
 ├── constants/                     # contractConfig, rpcConfig, tokens, loanTiers
@@ -57,7 +59,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 997 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 1001 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -76,6 +78,8 @@ Magno/
 - **Liquidación en AdminPanel**: el servicio aprueba USDT automáticamente antes de `liquidate()`
 - **`useHomeHandlers` hook**: handlers extraídos de `app/index.tsx` para reducir complejidad
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
+- **Worker 24/7:** el camino elegido es **Render** (Web Service + `Dockerfile.notify`, `render.yaml`, disco `/data`, health `/health`). Fly y Hetzner quedan como alternativa. El proceso no debe dormirse. Twilio/Resend siguen aparte. El fundador no sube la llave de despliegue a Render.
+- **Referido solo al alta:** el código opcional se pide al crear la cuenta. Vacío = el usuario inicia su cadena colgada del fundador. Tras continuar, el padrino queda bloqueado en el teléfono y on-chain (`already registered`). Activar la línea ya no pide código.
 - **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. En Real también correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain.
 - **Frase secreta BIP-39**: alta y respaldo. No cierra la cuenta. No hay destruir ni generar otra cuenta en la app.
 - **Usuario y contraseña son el candado de este teléfono.** El correo sigue para Real, recuperar contraseña y OTP. Desbloquear, pedir, pagar o transferir pueden usar contraseña, correo, PIN, huella o autenticador si el usuario los elige.
@@ -122,11 +126,11 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- 16 suites Hardhat (160 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento y rankings…
+- 17 suites Hardhat (164 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings y lock de referido…
 - Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24555 B (margen 21). Live Demo sigue 24457 B hasta el redespliegue.
 - Ciber WSL (producto, local): Aderyn High 1 CEI tras `balanceOf`/`transfer` en funciones con `nonReentrant` (se mantiene). Trivy lockfile 3 HIGH + 1 MEDIUM de deps Expo (`image-size`, `underscore`/`jsonpath`, `uuid@7`); Dockerfile DS-0002 USER no se aplica por el volumen Fly `/data`. Semgrep 1 hallazgo GCM sin `authTagLength` (corregido). Mythril 0 issues con cobertura baja (timeout 180s). ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 997 claves
+- i18n: 17 idiomas, 1001 claves
 - Rankings: 6 tableros, divisiones de 100, premio mensual estimado, nombres y fotos públicas por lotes de 100, visibles desde el nivel 50
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
@@ -248,6 +252,10 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-17 | Auditoria en vivo 2026-09-16: Hardhat 168, Foundry 6/6, Slither 1 divide-before-multiply en premioAsiento (redondeo a la baja), Aderyn H-1 CEI con nonReentrant, Semgrep 0, ZAP CORS * de Demo, Mythril SWC-101 falso en 0.8.24, Trivy lockfile Expo/snarkjs, MobSF APK SHA fea201d5 sin rescan 401. Sin mainnet. | — |
+| 2026-09-16 | Worker 24/7 listo para Render: render.yaml (Dockerfile.notify, disco /data, health /health, NOTIFY_DATA_KEY generado, Twilio sync false). saveStore crea el directorio. Nunca PRIVATE_KEY en Render. | — |
+| 2026-09-16 | Pack de deploy Hetzner para el notify-worker (Docker, Caddy, volumen /data). Fly sigue disponible. | — |
+| 2026-09-16 | Referido opcional solo en alta de cuenta. Sin codigo, la cadena nace en ese usuario colgada del fundador. Tras vincular, es definitivo (SecureStore + registrarHumanoConPadre already registered). Activar linea ya no pide padrino. | — |
 | 2026-09-16 | Auditoria: rankings piden nombre y foto por lotes de 100, incluyen la cuenta que mira y L1000 muestra el ciclo de solicitudes. Hardhat 160. Sin mainnet ni APK. | — |
 | 2026-09-16 | Auditoria: rankings piden nombre/foto por lotes de 100 (worker + Metro 8787), incluyen la cuenta que mira aunque el escaneo recorte, y L1000 muestra las solicitudes del ciclo. Hardhat 160. Premio de ranking sigue estimado hasta hermano de pago / redespliegue. Sin mainnet ni APK. | — |
 | 2026-09-16 | Rankings: 6 tableros, divisiones de 100, premio mensual 1.5% caja libre, nombre y foto publicos, visibilidad nivel 50. L1000 reinicia solicitudes para repetir el bono. Formula de premio en QuatriviumLeveling, sin recortar el nucleo. | — |

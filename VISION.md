@@ -24,6 +24,7 @@
 - ✅ apartado especial para ver los 36 marcos de rango y referidos se ven el marco entre ellos — Marcado como completado manualmente
 - ✅ Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III — Marcado como completado manualmente
 - ✅ auditoria profunda visual y de codigo de toda la app — Marcado como completado manualmente
+- ✅ Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -119,6 +120,10 @@
 - Escanear Magno con Aderyn Trivy Semgrep Mythril y OWASP ZAP (Foundry Slither MobSF ya hechos)
 - Rankings de red (referidos, prestamos, fama, nivel y general) con podio 1-2-3 y marcos de gema; 1 USDT desbloquea correo KYC y telefono
 - Rankings con divisiones de 100, premio mensual del pool, tablero de bonos, visibilidad desde nivel 50 y ciclo infinito del bono 1000
+- campo opcional de codigo de referido en la pantalla de crear cuenta, no solo al activar la linea de credito
+- codigo de referido solo al crear cuenta, vacio inicia cadena propia atada al fundador, vinculo permanente
+- worker 24/7 en Hetzner Cloud con Docker y Caddy HTTPS
+- Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y health /health
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -214,3 +219,8 @@
 - [2026-09-16 14:08] Idea añadida al backlog: "Escanear Magno con Aderyn Trivy Semgrep Mythril y OWASP ZAP (Foundry Slither Mob"
 - [2026-09-16 19:03] Idea añadida al backlog: "Rankings de red (referidos, prestamos, fama, nivel y general) con podio 1-2-3 y "
 - [2026-09-16 19:51] Idea añadida al backlog: "Rankings con divisiones de 100, premio mensual del pool, tablero de bonos, visib"
+- [2026-09-16 20:34] Idea añadida al backlog: "campo opcional de codigo de referido en la pantalla de crear cuenta, no solo al "
+- [2026-09-16 21:07] Idea añadida al backlog: "codigo de referido solo al crear cuenta, vacio inicia cadena propia atada al fun"
+- [2026-09-16 22:31] Idea añadida al backlog: "worker 24/7 en Hetzner Cloud con Docker y Caddy HTTPS"
+- [2026-09-16 23:15] Idea añadida al backlog: "Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h"
+- [2026-09-16 23:15] Módulo completado: 'Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h'

@@ -1,0 +1,52 @@
+name: quatrivium-notify
+
+services:
+  notify:
+    build:
+      context: .
+      dockerfile: Dockerfile.notify
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: "8787"
+      NOTIFY_BIND: "0.0.0.0"
+      NOTIFY_TRUST_PROXY: "1"
+      NOTIFY_DATA_FILE: "/data/.notify-data.json"
+    volumes:
+      - notify_data:/data
+    expose:
+      - "8787"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8787/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - notify
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      NOTIFY_DOMAIN: ${NOTIFY_DOMAIN}
+      CADDY_EMAIL: ${CADDY_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  notify_data:
+  caddy_data:
+  caddy_config:

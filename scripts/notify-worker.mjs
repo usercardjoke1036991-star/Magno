@@ -8,9 +8,9 @@
  * 3. El usuario vincula su número o abre el bot desde la app.
  */
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { randomBytes, createCipheriv, createDecipheriv, createHash, timingSafeEqual } from 'node:crypto';
 import { Contract, JsonRpcProvider, Wallet, getAddress, verifyTypedData, keccak256, toUtf8Bytes, AbiCoder, getBytes, Signature, ZeroAddress } from 'ethers';
 import dotenv from 'dotenv';
@@ -304,6 +304,7 @@ const loadStore = () => {
 };
 
 const saveStore = (next) => {
+  mkdirSync(dirname(DATA_FILE), { recursive: true });
   const payload = JSON.stringify(next);
   const key = dataKey();
   if (!key) {
@@ -1129,7 +1130,10 @@ const requestPath = (req) => String(req.url || '/').split('?')[0];
 const server = createServer(async (req, res) => {
   try {
   requestOrigin = String(req.headers.origin || '');
-  if (!originAllowed()) {
+  const path = requestPath(req);
+  const isHealth = req.method === 'GET' && path === '/health';
+  // Render (y Fly) sondan /health sin Origin. No aplicar CORS ahí.
+  if (!isHealth && !originAllowed()) {
     json(res, 403, { error: 'origin' });
     return;
   }
@@ -1145,9 +1149,8 @@ const server = createServer(async (req, res) => {
     res.end();
     return;
   }
-  const path = requestPath(req);
   const ip = clientIp(req);
-  if (req.method === 'GET' && path === '/health') {
+  if (isHealth) {
     json(res, 200, {
       ok: true,
       chainId: CHAIN_ID,

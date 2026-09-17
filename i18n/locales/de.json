@@ -69,7 +69,7 @@
   "bonusPaid": "Bereits an die Person gezahlt, die Sie eingeladen hat",
   "bonusPending": "0,50-$-Geschenk, wenn sie den ersten Kredit der Stufe 1 abschließen",
   "royaltiesFrozen": "Provisionen ausgesetzt. Begleichen Sie Ihre Schuld, um wieder zu verdienen.",
-  "referralHint": "Sie sind noch nicht im Netzwerk. Unten, unter „Meine Kreditlinie aktivieren“, fügen Sie den Code der Person ein, die Sie eingeladen hat, oder lassen Sie das Feld leer.",
+  "referralHint": "Die Upline wurde beim Kontoanlegen festgelegt. Sie lässt sich nicht ändern.",
   "shareTitle": "Quatrivium-Credit-Einladung",
   "shareMessage": "{name} l?dt Sie zu Quatrivium Finance ein. Beantragen Sie Kredit, zahlen Sie p?nktlich zur?ck und verdienen Sie durch das Einladen anderer.",
   "connect": "Verbinden",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "Empfehlungscode (optional)",
+  "signupInviteLead": "Nur beim Kontoanlegen. Leer: Sie starten Ihre eigene Kette unter dem Gründer. Danach nicht änderbar.",
+  "referralOwnChain": "Kein Code. Sie starten eine neue Kette unter dem Gründer.",
+  "referralUplineLocked": "Upline festgelegt: {code}"
 }

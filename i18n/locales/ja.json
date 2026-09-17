@@ -69,7 +69,7 @@
   "bonusPaid": "あなたを招待した人へ支払い済み",
   "bonusPending": "最初のレベル 1 ローンを完済すると $0.50 の贈り物",
   "royaltiesFrozen": "コミッションは停止中です。再び収益を得るには債務を清算してください。",
-  "referralHint": "まだネットワークに入っていません。下の「与信枠を有効にする」に招待者のコードを貼るか、空のままにしてください。",
+  "referralHint": "紹介関係はアカウント作成時に確定し、変更できません。",
   "shareTitle": "Quatrivium Finance の招待",
   "shareMessage": "{name}?????Quatrivium Finance????????????????????????????????????????????",
   "connect": "接続",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "紹介コード（任意）",
+  "signupInviteLead": "アカウント作成時のみ。空欄なら創設者配下で自分の系列を始めます。以後は変更できません。",
+  "referralOwnChain": "コードなし。創設者配下で新しい系列を始めます。",
+  "referralUplineLocked": "紹介者は確定済み: {code}"
 }

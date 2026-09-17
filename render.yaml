@@ -1,37 +1,58 @@
+# Worker 24/7 en Render (OTP, correo, perfiles).
+# Blueprint: New + Blueprint, o deja el formulario Docker con Dockerfile.notify.
+# Secretos (Twilio, Resend) se piden en el dashboard (sync: false).
+# No incluir llaves de owner ni attester de mainnet aquí.
+
 services:
   - type: web
     name: quatrivium-notify
     runtime: docker
-    dockerfilePath: Dockerfile.notify
-    dockerContext: .
     plan: starter
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile.notify
+    dockerContext: .
     healthCheckPath: /health
+    numInstances: 1
+    autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - Dockerfile.notify
+        - Dockerfile.notify.dockerignore
+        - .dockerignore
+        - scripts/notify-worker.mjs
+        - scripts/bscNetworks.cjs
+        - render.yaml
     envVars:
-      - key: PORT
-        value: "8787"
       - key: NOTIFY_BIND
         value: "0.0.0.0"
       - key: NOTIFY_TRUST_PROXY
         value: "1"
-      - key: NOTIFY_CORS_ORIGIN
-        value: "https://quatriviumcredit.app"
+      - key: NOTIFY_DATA_FILE
+        value: "/data/.notify-data.json"
       - key: EXPO_PUBLIC_CHAIN_ID
         value: "97"
       - key: EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET
         value: "0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f"
+      - key: NOTIFY_CORS_ORIGIN
+        value: "*"
       - key: NOTIFY_DATA_KEY
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-      - key: EMAIL_FROM
-        sync: false
+        generateValue: true
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_FROM
         sync: false
-      - key: ATTESTER_PRIVATE_KEY
+      - key: TWILIO_VERIFY_SERVICE_SID
         sync: false
-      - key: PRIVATE_KEY
+      - key: RESEND_API_KEY
         sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+    disk:
+      name: notify-data
+      mountPath: /data
+      sizeGB: 1

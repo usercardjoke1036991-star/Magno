@@ -19,6 +19,7 @@ interface UsernameSectionProps {
   claimedUsername: string;
   legalName?: string;
   includeLegalName?: boolean;
+  beforeClaim?: () => Promise<void>;
   onClaimed: (username: string, legalName?: string) => void;
 }
 
@@ -27,6 +28,7 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
   claimedUsername,
   legalName: initialLegal = '',
   includeLegalName = false,
+  beforeClaim,
   onClaimed,
 }) => {
   const { t } = useI18n();
@@ -45,6 +47,7 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
     setBusy(true);
     setError('');
     try {
+      if (beforeClaim) await beforeClaim();
       const next = normalizeUsername(username);
       const free = await checkUsernameAvailable(walletAddress, next);
       if (!free) {
@@ -52,10 +55,11 @@ export const UsernameSection: React.FC<UsernameSectionProps> = ({
         return;
       }
       const saved = await claimUsername(walletAddress, next);
-      onClaimed(saved, includeLegalName ? normalizeLegalName(legalName) : undefined);
+      await Promise.resolve(onClaimed(saved, includeLegalName ? normalizeLegalName(legalName) : undefined));
       setEditing(false);
     } catch (caught) {
       const reason = String((caught as Error)?.message || '');
+      if (reason === 'invite' || reason === 'invalid' || reason === 'self') return;
       if (reason.includes('taken')) setError(t('usernameTaken'));
       else if (reason.includes('username')) setError(t('usernameInvalid'));
       else setError(t('usernameTaken'));

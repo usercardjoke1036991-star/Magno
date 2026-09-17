@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -28,6 +28,7 @@ import { openSafeUrl } from '../utils/safeOpenUrl';
 import { AppSubsection } from './AppSection';
 import { AppText } from './AppText';
 import { copyText } from '../utils/copyText';
+import { loadLockedSponsor, type LockedSponsor } from '../services/sponsorLock';
 
 export interface ReferralInfo {
   padre: string;
@@ -65,6 +66,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const { profile, lookup } = useUserProfile();
+  const [lockedSponsor, setLockedSponsor] = useState<LockedSponsor | null>(null);
   const padre = referral?.padre || '';
   const isFundador = Boolean(referral?.isFundador);
   const bonoActivacionCobrado = Boolean(referral?.bonoActivacionCobrado);
@@ -82,6 +84,24 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
   const shareName = profile.displayName || t('profileSomeone');
   const shareText = t('shareMessage', { code: myCode, link: inviteLink, name: shareName });
+
+  useEffect(() => {
+    let done = false;
+    if (!walletAddress) {
+      setLockedSponsor(null);
+      return undefined;
+    }
+    loadLockedSponsor(walletAddress)
+      .then((row) => {
+        if (!done) setLockedSponsor(row);
+      })
+      .catch(() => {
+        if (!done) setLockedSponsor(null);
+      });
+    return () => {
+      done = true;
+    };
+  }, [walletAddress]);
 
   const guardShare = () => {
     if (isRestricted) {
@@ -249,7 +269,11 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           )}
         </View>
       ) : (
-        <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('referralHint')}</AppText>
+        <AppText style={[styles.hint, { color: colors.textMuted }]}>
+          {lockedSponsor?.padre
+            ? t('referralUplineLocked', { code: lockedSponsor.code })
+            : t('referralOwnChain')}
+        </AppText>
       )}
       </AppSubsection>
 

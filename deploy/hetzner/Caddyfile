@@ -1,0 +1,13 @@
+{
+	email {$CADDY_EMAIL}
+}
+
+{$NOTIFY_DOMAIN} {
+	encode gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+	}
+	reverse_proxy notify:8787
+}

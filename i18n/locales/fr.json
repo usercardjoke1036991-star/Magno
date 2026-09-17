@@ -69,7 +69,7 @@
   "bonusPaid": "Déjà versé à la personne qui vous a invité",
   "bonusPending": "Cadeau de 0,50 $ lorsqu’ils terminent leur premier prêt de niveau 1",
   "royaltiesFrozen": "Commissions suspendues. Régularisez votre dette pour gagner à nouveau.",
-  "referralHint": "Vous n’êtes pas encore dans le réseau. Ci-dessous, dans « Activer ma ligne de crédit », collez le code de la personne qui vous a invité ou laissez le champ vide.",
+  "referralHint": "Le parrain a été fixé à la création du compte. Il ne peut plus changer.",
   "shareTitle": "Invitation Quatrivium Finance",
   "shareMessage": "{name} vous invite sur Quatrivium Finance. Obtenez du cr?dit, remboursez ? temps et gagnez en invitant d'autres personnes.",
   "connect": "Connecter",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "Code de parrainage (facultatif)",
+  "signupInviteLead": "Uniquement à la création du compte. Vide : vous démarrez votre chaîne sous le fondateur. Ensuite, c'est définitif.",
+  "referralOwnChain": "Sans code. Vous démarrez une nouvelle chaîne rattachée au fondateur.",
+  "referralUplineLocked": "Parrain figé : {code}"
 }

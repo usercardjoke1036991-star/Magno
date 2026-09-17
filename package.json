@@ -23,6 +23,7 @@
     "notify:prod": "node scripts/notify-worker.mjs --prod",
     "notify:sms": "node scripts/set-sms-keys.mjs",
     "notify:deploy": "node scripts/deploy-notify.mjs",
+    "notify:hetzner": "node scripts/deploy-hetzner.mjs",
     "tunnel": "lt --port 8787 --subdomain quatrivium-notify",
     "tunnel:ngrok": "ngrok http --domain=rundown-shelf-mongoose.ngrok-free.dev 8787",
     "production:check": "node scripts/check-production.mjs",

@@ -10,8 +10,10 @@ import { LinkWalletForm } from './LinkWalletForm';
 import { loadClaimedUsername } from '../services/accountUsername';
 import { hasLockedPublicIdentity, loadOwnProfile } from '../services/userProfile';
 import { hasCompletedWalletLink, loadLinkedExternalWallet } from '../services/linkedWallet';
+import { lockSponsorOnce } from '../services/sponsorLock';
+import { resolveSponsorInput } from '../utils/sponsorLock';
 import { useUserProfile } from '../profile/ProfileContext';
-import { AppText } from './AppText';
+import { AppText, AppTextInput } from './AppText';
 
 interface AccountOnboardingProps {
   walletAddress: string;
@@ -25,6 +27,7 @@ interface AccountOnboardingProps {
   paused?: boolean;
   inviteCode?: string;
   onRegister: (padre?: string) => void;
+  onInviteLocked?: () => void;
   onDeclareKyc: () => Promise<boolean>;
   onPhoneBound: () => void;
   children: React.ReactNode;
@@ -35,6 +38,8 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   walletReady,
   walletFailed,
   onRetryWallet,
+  inviteCode = '',
+  onInviteLocked,
   children,
 }) => {
   const { t } = useI18n();
@@ -46,6 +51,8 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   const [faceReady, setFaceReady] = useState(false);
   const [linkedWallet, setLinkedWallet] = useState('');
   const [linkedReady, setLinkedReady] = useState(false);
+  const [inviteDraft, setInviteDraft] = useState(inviteCode);
+  const [inviteError, setInviteError] = useState('');
 
   useEffect(() => {
     let done = false;
@@ -57,8 +64,11 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     };
     const watchdog = setTimeout(() => finish(''), 3000);
     loadClaimedUsername()
-      .then((value) => {
+      .then(async (value) => {
         clearTimeout(watchdog);
+        if (value && walletAddress) {
+          await lockSponsorOnce(walletAddress, '');
+        }
         finish(value);
       })
       .catch(() => {
@@ -70,6 +80,10 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
       clearTimeout(watchdog);
     };
   }, [walletAddress]);
+
+  useEffect(() => {
+    if (inviteCode) setInviteDraft(inviteCode);
+  }, [inviteCode]);
 
   useEffect(() => {
     let done = false;
@@ -183,10 +197,37 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
         <BrandLogo size={64} style={styles.logo} />
         <AppText style={[styles.title, { color: colors.text }]}>{t('createCredentialsTitle')}</AppText>
         <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('createCredentialsLead')}</AppText>
+        <AppText style={[styles.label, { color: colors.text }]}>{t('signupInviteLabel')}</AppText>
+        <AppText style={[styles.inviteLead, { color: colors.textMuted }]}>{t('signupInviteLead')}</AppText>
+        <AppTextInput
+          value={inviteDraft}
+          onChangeText={(value) => {
+            setInviteDraft(value);
+            setInviteError('');
+          }}
+          placeholder={t('invitePlaceholder')}
+          placeholderTextColor={colors.textMuted}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          style={[
+            styles.inviteInput,
+            { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
+          ]}
+        />
+        {inviteError ? <AppText style={[styles.inviteError, { color: colors.danger }]}>{inviteError}</AppText> : null}
         <UsernameSection
           walletAddress={walletAddress}
           claimedUsername={username}
+          beforeClaim={async () => {
+            const resolved = resolveSponsorInput(inviteDraft, walletAddress);
+            if (!resolved.ok) {
+              setInviteError(resolved.reason === 'self' ? t('cannotSelfInvite') : t('invalidSponsor'));
+              throw new Error('invite');
+            }
+          }}
           onClaimed={async (value) => {
+            await lockSponsorOnce(walletAddress, inviteDraft);
+            onInviteLocked?.();
             setUsername(value);
           }}
         />
@@ -218,6 +259,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  inviteLead: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  inviteInput: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 8,
+    fontSize: 13,
+  },
+  inviteError: {
+    fontSize: 13,
+    lineHeight: 18,
     marginBottom: 10,
   },
 });

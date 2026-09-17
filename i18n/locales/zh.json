@@ -69,7 +69,7 @@
   "bonusPaid": "已支付给邀请您的人",
   "bonusPending": "对方还清第一笔 1 级贷款后，赠送 $0.50",
   "royaltiesFrozen": "佣金已暂停。结清债务后才能继续获得收益。",
-  "referralHint": "您还不在网络中。请在下方「开通我的信用额度」中粘贴邀请人的邀请码，没有则可留空。",
+  "referralHint": "推荐关系在创建账户时已锁定，无法更改。",
   "shareTitle": "Quatrivium Finance 邀请",
   "shareMessage": "{name} ????? Quatrivium Finance????????????????????",
   "connect": "连接",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "推荐码（可选）",
+  "signupInviteLead": "仅在创建账户时填写。留空则从您开始一条新链，挂在创始人名下。此后不可更改。",
+  "referralOwnChain": "未填写推荐码。您从自己开始一条新链，挂在创始人名下。",
+  "referralUplineLocked": "已锁定推荐人：{code}"
 }

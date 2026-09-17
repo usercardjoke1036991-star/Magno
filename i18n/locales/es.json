@@ -69,7 +69,7 @@
   "bonusPaid": "Pagado a quien lo invitó",
   "bonusPending": "Bono de .50 al completar su primer préstamo.",
   "royaltiesFrozen": "Gracia vencida. Comisiones y bonos van al pool hasta pagar.",
-  "referralHint": "Código de quien lo invitó, o deje el campo vacío.",
+  "referralHint": "El padrino se fijó al crear la cuenta. No se puede cambiar.",
   "shareTitle": "Invitación Quatrivium Finance",
   "shareMessage": "{name} lo invita a Quatrivium Finance.",
   "connect": "Conectar",
@@ -995,5 +995,9 @@
   "famePrizeMora": "En mora: no recibe premio.",
   "famePrizeLead": "Cada mes se reserva el 1,5 % de la caja libre por encima del suelo del 20 %. El premio es mayor en la división alta y solo lo reciben quienes no están en mora. La parte no asignada permanece en el banco.",
   "famePageOf": "Página {page} de {pages}",
-  "fameYou": "Usted"
+  "fameYou": "Usted",
+  "signupInviteLabel": "Código de referido (opcional)",
+  "signupInviteLead": "Solo al crear la cuenta. Si lo deja vacío, empieza su propia cadena atada al fundador. Luego no se puede cambiar.",
+  "referralOwnChain": "Sin código. Empieza una cadena nueva atada al fundador.",
+  "referralUplineLocked": "Padrino fijado: {code}"
 }

@@ -69,7 +69,7 @@
   "bonusPaid": "Sudah dibayar kepada yang mengundang Anda",
   "bonusPending": "Hadiah $0.50 ketika mereka menyelesaikan pinjaman level 1 pertama",
   "royaltiesFrozen": "Komisi ditangguhkan. Lunasi utang untuk mendapat lagi.",
-  "referralHint": "Anda belum di jaringan. Di bawah, di «Aktifkan jalur kredit saya», tempel kode undangan orang yang mengundang Anda atau biarkan kosong.",
+  "referralHint": "Upline dikunci saat membuat akun. Tidak bisa diubah.",
   "shareTitle": "Undangan Quatrivium Finance",
   "shareMessage": "{name} mengundang Anda ke Quatrivium Finance. Dapatkan kredit, bayar tepat waktu, dan dapatkan penghasilan dengan mengundang orang lain.",
   "connect": "Hubungkan",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "Kode referral (opsional)",
+  "signupInviteLead": "Hanya saat membuat akun. Jika kosong, Anda memulai rantai sendiri di bawah pendiri. Setelah itu tidak bisa diubah.",
+  "referralOwnChain": "Tanpa kode. Anda memulai rantai baru di bawah pendiri.",
+  "referralUplineLocked": "Upline terkunci: {code}"
 }

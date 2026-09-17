@@ -69,7 +69,7 @@
   "bonusPaid": "যিনি আপনাকে আমন্ত্রণ করেছেন তাকে ইতিমধ্যে দেওয়া হয়েছে",
   "bonusPending": "তারা প্রথম স্তর ১ লোন সম্পন্ন করলে $0.50 উপহার",
   "royaltiesFrozen": "কমিশন স্থগিত। আবার আয় করতে ঋণ নিষ্পত্তি করুন।",
-  "referralHint": "আপনি এখনও নেটওয়ার্কে নেই। নিচে, «আমার ক্রেডিট লাইন সক্রিয় করুন»-এ, যিনি আমন্ত্রণ করেছেন তার কোড লাগান বা খালি রাখুন।",
+  "referralHint": "আপলাইন অ্যাকাউন্ট তৈরির সময় স্থির হয়েছে। বদলানো যাবে না।",
   "shareTitle": "Quatrivium Finance আমন্ত্রণ",
   "shareMessage": "{name} ?????? Quatrivium Finance-? ???????? ????????? ??????? ???, ??????? ?????? ???? ??? ??????? ???????? ??????? ??????? ?????",
   "connect": "সংযুক্ত করুন",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "রেফারেল কোড (ঐচ্ছিক)",
+  "signupInviteLead": "শুধু অ্যাকাউন্ট তৈরির সময়। খালি রাখলে আপনি প্রতিষ্ঠাতার নিচে নিজের শৃঙ্খল শুরু করেন। পরে বদলানো যায় না।",
+  "referralOwnChain": "কোনো কোড নেই। প্রতিষ্ঠাতার সাথে যুক্ত নতুন শৃঙ্খল আপনি শুরু করেন।",
+  "referralUplineLocked": "আপলাইন লক: {code}"
 }

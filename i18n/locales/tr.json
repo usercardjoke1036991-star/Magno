@@ -69,7 +69,7 @@
   "bonusPaid": "Sizi davet edene zaten ödendi",
   "bonusPending": "İlk 1. seviye kredisini tamamladıklarında 0,50 $ hediye",
   "royaltiesFrozen": "Komisyonlar askıda. Yeniden kazanmak için borcunuzu kapatın.",
-  "referralHint": "Henüz ağda değilsiniz. Aşağıda, «Kredi hattımı etkinleştir» bölümünde sizi davet edenin kodunu yapıştırın veya boş bırakın.",
+  "referralHint": "Üst hat hesap oluşturulurken kilitlendi. Değiştirilemez.",
   "shareTitle": "Quatrivium Finance daveti",
   "shareMessage": "{name} sizi Quatrivium Finance'a davet ediyor. Kredi alin, zamaninda odeyin ve baskalarini davet ederek kazanin.",
   "connect": "Bağla",
@@ -995,5 +995,9 @@
   "famePrizeMora": "Overdue: no prize.",
   "famePrizeLead": "Each month, 1.5% of free cash above the 20% floor is reserved. Higher divisions receive more. Only accounts not in arrears are paid. Unassigned amounts stay in the bank.",
   "famePageOf": "Page {page} of {pages}",
-  "fameYou": "You"
+  "fameYou": "You",
+  "signupInviteLabel": "Referans kodu (isteğe bağlı)",
+  "signupInviteLead": "Yalnız hesap oluştururken. Boş bırakılırsa kurucuya bağlı kendi zincirinizi başlatırsınız. Sonra değişmez.",
+  "referralOwnChain": "Kod yok. Kurucuya bağlı yeni bir zincir başlatırsınız.",
+  "referralUplineLocked": "Üst hat kilitli: {code}"
 }
