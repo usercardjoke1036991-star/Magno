@@ -36,6 +36,8 @@ Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet
 - [2026-09-12] No hay destruir cuenta en la app. Una persona una linea. Formatear o cambiar VPN no crea otra: se recupera con las 12 palabras. Telefono y KYC on-chain bloquean una segunda linea Real.
 
 ## Cambios realizados
+- [2026-09-17] Mythril 0.24.8, Semgrep 1.177.0 y Trivy 0.74.0 en vivo. SWC-101 es overflow de 0.8.24 en getters/vistas. Semgrep solo INFO de gas. Trivy no toca el credito. Sin cambio de codigo.
+- [2026-09-17] Aderyn 0.6.8 en vivo: High 1 (CEI en marcarMorosoSiVencido ~1163 y destruirCuenta ~1301, ambas nonReentrant) y 13 Low de estilo. No se toco el nucleo. No hay bug de fondos.
 - [2026-09-17] Foundry 1.8.3: 8/8 pass. No se cambio QuatriviumCredit (avisos de lint son diseno). Tests nuevos de premio en forge-test.
 - [2026-09-17] Slither 0.11.3 en vivo (WSL, Hardhat): 19 contratos, 79 detectores, 2 avisos Medium divide-before-multiply en premioAsiento. Son n(n+1)/2 exacto y la formula multiply-first ya aplicada. Sin bug de fondos.
 - [2026-09-17] PDF ssaas.pdf (scan 7am) confirma APK B5BD79B9 sin exp+. HIGH=huella. Sin cambios de codigo. Escanear solo localhost.
