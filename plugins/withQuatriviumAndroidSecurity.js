@@ -81,7 +81,10 @@ const RELEASE_MANIFEST = `<?xml version="1.0" encoding="utf-8"?>
     <activity android:name=".MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
         <data android:scheme="exp+quatrivium-credit" tools:node="remove" />
+        <data android:scheme="exp+magno" tools:node="remove" />
       </intent-filter>
     </activity>
     <activity
@@ -97,6 +100,59 @@ const RELEASE_MANIFEST = `<?xml version="1.0" encoding="utf-8"?>
 function ensureToolsNs(manifest) {
   manifest.manifest.$ = manifest.manifest.$ || {};
   manifest.manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+}
+
+function isExpPlusScheme(scheme) {
+  return String(scheme || '').startsWith('exp+');
+}
+
+function stripExpPlusData(dataNode) {
+  if (!dataNode) return undefined;
+  const items = Array.isArray(dataNode) ? dataNode : [dataNode];
+  const kept = items.filter((item) => !isExpPlusScheme(item?.$?.['android:scheme']));
+  if (kept.length === 0) return undefined;
+  return Array.isArray(dataNode) ? kept : kept[0];
+}
+
+function stripExpPlusFromManifest(manifest) {
+  const apps = manifest.manifest?.application;
+  const app = Array.isArray(apps) ? apps[0] : apps;
+  if (!app?.activity) return;
+  const activities = Array.isArray(app.activity) ? app.activity : [app.activity];
+  for (const activity of activities) {
+    const filters = activity['intent-filter'];
+    if (!filters) continue;
+    const list = Array.isArray(filters) ? filters : [filters];
+    for (const filter of list) {
+      const next = stripExpPlusData(filter.data);
+      if (!next) delete filter.data;
+      else filter.data = next;
+    }
+  }
+}
+
+/** Metro/dev-client schemes must not ship in the release APK. */
+function stripExpPlusFromManifestXml(xml) {
+  return String(xml).replace(/\s*<data\b[^>]*android:scheme="exp\+[^"]*"[^>]*\/>/g, '');
+}
+
+const DEEP_HOSTS = ['quatriviumcredit.app', 'www.quatriviumcredit.app'];
+const DEEP_PATHS = ['/invite', '/history', '/room'];
+
+function ensureHttpsDeepLinks(xml) {
+  let next = String(xml);
+  for (const host of DEEP_HOSTS) {
+    for (const prefix of DEEP_PATHS) {
+      const marker = `android:host="${host}" android:pathPrefix="${prefix}"`;
+      if (next.includes(marker)) continue;
+      const invite = `<data android:scheme="https" android:host="${host}" android:pathPrefix="/invite"/>`;
+      const tag = `<data android:scheme="https" android:host="${host}" android:pathPrefix="${prefix}"/>`;
+      if (next.includes(invite)) {
+        next = next.replace(invite, `${invite}\n        ${tag}`);
+      }
+    }
+  }
+  return next;
 }
 
 function addRemovePermission(manifest, name) {
@@ -144,6 +200,7 @@ function withQuatriviumAndroidSecurity(config) {
       }
       crop.$['android:exported'] = 'false';
       crop.$['tools:replace'] = 'android:exported';
+      stripExpPlusFromManifest(manifest);
     }
     return cfg;
   });
@@ -160,6 +217,14 @@ function withQuatriviumAndroidSecurity(config) {
       const releaseDir = path.join(androidRoot, 'app/src/release');
       fs.mkdirSync(releaseDir, { recursive: true });
       fs.writeFileSync(path.join(releaseDir, 'AndroidManifest.xml'), RELEASE_MANIFEST, 'utf8');
+
+      const mainManifestPath = path.join(androidRoot, 'app/src/main/AndroidManifest.xml');
+      if (fs.existsSync(mainManifestPath)) {
+        let mainXml = fs.readFileSync(mainManifestPath, 'utf8');
+        mainXml = stripExpPlusFromManifestXml(mainXml);
+        mainXml = ensureHttpsDeepLinks(mainXml);
+        fs.writeFileSync(mainManifestPath, mainXml, 'utf8');
+      }
 
       const gradlePath = path.join(androidRoot, 'app/build.gradle');
       if (fs.existsSync(gradlePath)) {
@@ -216,3 +281,5 @@ function withQuatriviumAndroidSecurity(config) {
 }
 
 module.exports = withQuatriviumAndroidSecurity;
+module.exports.stripExpPlusFromManifestXml = stripExpPlusFromManifestXml;
+module.exports.ensureHttpsDeepLinks = ensureHttpsDeepLinks;

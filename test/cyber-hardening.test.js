@@ -277,7 +277,30 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(plugin).to.include('CropImageActivity');
     expect(plugin).to.include('DevLauncherActivity');
     expect(plugin).to.include('exp+quatrivium-credit');
+    expect(plugin).to.include('stripExpPlusFromManifestXml');
     expect(plugin).to.match(/android:scheme="exp\+quatrivium-credit"\s+tools:node="remove"/);
+    const {
+      stripExpPlusFromManifestXml,
+      ensureHttpsDeepLinks,
+    } = require('../plugins/withQuatriviumAndroidSecurity.js');
+    expect(
+      stripExpPlusFromManifestXml(
+        '<data android:scheme="quatrivium"/><data android:scheme="exp+quatrivium-credit"/>'
+      )
+    ).to.equal('<data android:scheme="quatrivium"/>');
+    expect(
+      ensureHttpsDeepLinks(
+        '<data android:scheme="https" android:host="quatriviumcredit.app" android:pathPrefix="/invite"/>'
+      )
+    ).to.include('pathPrefix="/history"');
+    const mainManifest = fs.readFileSync(
+      path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
+      'utf8'
+    );
+    expect(mainManifest).to.not.match(/android:scheme="exp\+/);
+    expect(mainManifest).to.include('pathPrefix="/invite"');
+    expect(mainManifest).to.include('pathPrefix="/history"');
+    expect(mainManifest).to.include('pathPrefix="/room"');
     const releaseManifest = fs.readFileSync(
       path.join(__dirname, '..', 'android', 'app', 'src', 'release', 'AndroidManifest.xml'),
       'utf8'

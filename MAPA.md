@@ -256,6 +256,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `i18n/translations.ts` — módulo JS/TS
   - Funciones/clases: translations
 - `plugins/withQuatriviumAndroidSecurity.js` — módulo JS/TS
+  - Funciones/clases: stripExpPlusFromManifestXml, ensureHttpsDeepLinks
 - `profile/ProfileContext.tsx` — módulo JS/TS
   - Funciones/clases: ProfileProvider, useUserProfile
 - `scripts/bscNetworks.cjs` — módulo JS/TS

@@ -252,6 +252,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-17 | Auditoria PDF MobSF sss.pdf (APK 1E36EC5B, 61/100 A): el HIGH CBC es androidx.biometric CryptoObjectUtils (huella, se mantiene). Native canary JNA/Hermes. El fallo real era el esquema Metro exp+ que el merger no quitaba. Ahora se borra en el manifiesto principal y el APK Desktop es SHA256 B5BD79B9 (1.0.2 vc3, solo quatrivium:// + https invite/history/room). No es Play ni mainnet. | — |
+| 2026-09-17 | APK release 1.0.2 versionCode 3 para MobSF local en Escritorio Quatrivium-Finance-MobSF.apk (67.25 MB, SHA256 1E36EC5B..., v3 CN=Quatrivium Finance, arm-only, minSdk 29). No es Play ni mainnet. | — |
 | 2026-09-17 | Auditoria productiva: el padrino se fija antes de guardar el usuario; /profiles no publica el usuario de sesion; premioAsiento multiplica antes de dividir. Hardhat 168, tsc 0, production 14/15. Sin mainnet ni APK. | — |
 | 2026-09-17 | Auditoria en vivo 2026-09-16: Hardhat 168, Foundry 6/6, Slither 1 divide-before-multiply en premioAsiento (redondeo a la baja), Aderyn H-1 CEI con nonReentrant, Semgrep 0, ZAP CORS * de Demo, Mythril SWC-101 falso en 0.8.24, Trivy lockfile Expo/snarkjs, MobSF APK SHA fea201d5 sin rescan 401. Sin mainnet. | — |
 | 2026-09-16 | Worker 24/7 listo para Render: render.yaml (Dockerfile.notify, disco /data, health /health, NOTIFY_DATA_KEY generado, Twilio sync false). saveStore crea el directorio. Nunca PRIVATE_KEY en Render. | — |

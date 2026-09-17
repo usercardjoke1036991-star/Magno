@@ -36,6 +36,8 @@ Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet
 - [2026-09-12] No hay destruir cuenta en la app. Una persona una linea. Formatear o cambiar VPN no crea otra: se recupera con las 12 palabras. Telefono y KYC on-chain bloquean una segunda linea Real.
 
 ## Cambios realizados
+- [2026-09-17] Auditoria sss.pdf: HIGH=huella, se quito exp+ de release. APK Escritorio SHA256 B5BD79B9 version 1.0.2 vc3. Escanear solo en localhost:8000.
+- [2026-09-17] APK MobSF regenerado 1.0.2 vc3 en Escritorio SHA256 1E36EC5B. Escanear solo en localhost:8000.
 - [2026-09-17] Auditoria profunda: padrino al validar el codigo, rankings sin usuario de sesion, premio de asiento multiply-first. Hardhat 168. Demo 14/15.
 - [2026-09-17] Auditoria completa del kit ciber en vivo. Sin bug de perdida de fondos. APK Desktop mismo hash. Render y mainnet siguen aparte.
 - [2026-09-16] Blueprint render.yaml, mkdir del almacén, health sin CORS, dockerignore con !scripts/, test Render.
@@ -84,12 +86,10 @@ Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet
 - [2026-09-14] Gemas de cristal transparente: vidrio con luz interior, destellos y poco metal. Se ve el marco a traves de la piedra.
 - [2026-09-14] Gemas de marco con talla real: cabujon, perla, esmeralda y brillante. I 4, II 8 con garras, III 12 con mas fuego.
 - [2026-09-14] Marco mas ancho que la foto, gemas 4/8/12 por I II III, colores de division mas claros y saturados.
-- [2026-09-14] Marco = logo 3D de la app pintado con el color de cada division, entrelazando la foto. I denso, II vivo, III luminoso. Sin rombos.
-- [2026-09-14] Marcos vuelven al boceto original: detalle y tamano crecen con I II III y con la piedra, metal 3D nitido.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-17] Decisión: El usuario de sesion no viaja a rankings. El padrino se bloquea al validar el codigo, antes de persistir el usuario.
+[2026-09-17] Cambio: Auditoria sss.pdf: HIGH=huella, se quito exp+ de release. APK Escritorio SHA256 B5BD79B9 version 1.0.2 vc3. Escanear solo en localhost:8000.
