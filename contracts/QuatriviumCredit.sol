@@ -835,12 +835,16 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
             return;
         }
         progresoPago.solicitudesCompletadas++;
-        // L1 → 3; L2–9 → 5; desde $100 (L10) cada nivel pide 5 más que el anterior.
+        // L1 → 3; L2–9 → 5; L10–1000 → 5, 10… 4955. En L1000 el ciclo se reinicia y el hito 1000 se puede volver a cobrar.
         uint256 solicitudesRequeridas = unlocked <= 1 ? 3 : (unlocked < 10 ? 5 : 5 * (unlocked - 9));
-        if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas && unlocked < MAX_NIVEL_TOTAL) {
-            progresoPago.nivelActual++;
+        if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas) {
             progresoPago.solicitudesCompletadas = 0;
-            emit NivelActualizado(deudor, progresoPago.nivelActual);
+            if (unlocked < MAX_NIVEL_TOTAL) {
+                progresoPago.nivelActual++;
+                emit NivelActualizado(deudor, progresoPago.nivelActual);
+            } else if (hitoCobrado[deudor] >= MAX_NIVEL_TOTAL) {
+                hitoCobrado[deudor] = MAX_NIVEL_TOTAL - 100;
+            }
         }
     }
 

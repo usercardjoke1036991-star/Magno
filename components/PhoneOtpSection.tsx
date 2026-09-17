@@ -12,6 +12,7 @@ import { AppIcon } from './icons';
 import { notifyApiConfigured, requestPhoneOtp, verifyPhoneOtp } from '../services/phoneOtp';
 import { isValidPhone, normalizePhone } from '../services/notificationProfile';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
+import { isCreditReady } from '../constants/rpcConfig';
 import { humanizeTxError } from '../utils/txErrors';
 import { AppText, AppTextInput } from './AppText';
 
@@ -45,7 +46,8 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
 
   const done = identityBound && deviceMatches && !editing;
   const needsThisDevice = identityBound && !deviceMatches;
-  const blocked = isLoading || paused || !isRegistered || !walletAddress || busy;
+  const chainReady = isCreditReady();
+  const blocked = isLoading || paused || !chainReady || !isRegistered || !walletAddress || busy;
   const apiReady = notifyApiConfigured();
   const phoneOk = isValidPhone(normalizePhone(phone)) && Boolean(normalizePhone(phone));
 
@@ -116,7 +118,9 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
         </View>
       ) : (
         <View>
-          {!isRegistered ? (
+          {!chainReady ? (
+            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
+          ) : !isRegistered ? (
             <AppText style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</AppText>
           ) : null}
           {!apiReady ? (

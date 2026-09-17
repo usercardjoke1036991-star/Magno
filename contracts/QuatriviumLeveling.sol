@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 /**
  * @title QuatriviumLeveling
  * @notice Misma curva de solicitudes que el núcleo + bonos de hito cada 100 niveles.
- *         L1 → 3; L2–9 → 5; desde $100 (L10) → 5, 10, 15…; L1000 no sube.
+ *         L1 → 3; L2–9 → 5; desde $100 (L10) → 5, 10, 15…; L1000 no sube de nivel y reinicia el ciclo del bono.
  *         Bono = 20 USDT × nivel del hito (100 → 2000, 200 → 4000, 1000 → 20 000).
  */
 contract QuatriviumLeveling {
@@ -13,10 +13,12 @@ contract QuatriviumLeveling {
     uint256 public constant BONO_NIVEL_MAXIMO = 20000e18;
     uint256 public constant BONO_HITOS_TOTAL = 110000e18;
     uint256 public constant MAX_NIVEL = 1000;
+    uint256 public constant DIVISION_SIZE = 100;
+    uint256 public constant RANKING_PREMIO_BP = 150;
     uint256 internal constant PISO_CAJA_BP = 2000;
 
     function requiredCount(uint256 nivel) public pure returns (uint256) {
-        if (nivel < 1 || nivel >= MAX_NIVEL) return 0;
+        if (nivel < 1 || nivel > MAX_NIVEL) return 0;
         if (nivel <= 1) return 3;
         if (nivel < 10) return 5;
         unchecked {
@@ -51,5 +53,41 @@ contract QuatriviumLeveling {
 
     function canPayMaxBonus(uint256 cajaLibre, uint256 liquidezTotal) public pure returns (bool) {
         return canPayHito(cajaLibre, liquidezTotal, MAX_NIVEL);
+    }
+
+    function presupuestoPremioMensual(uint256 cajaLibre, uint256 liquidezTotal) public pure returns (uint256) {
+        uint256 piso = (liquidezTotal * PISO_CAJA_BP) / 10000;
+        if (cajaLibre <= piso) return 0;
+        unchecked {
+            return ((cajaLibre - piso) * RANKING_PREMIO_BP) / 10000;
+        }
+    }
+
+    function pesoDivision(uint256 division, uint256 totalDivisiones) public pure returns (uint256) {
+        if (division < 1 || division > totalDivisiones) return 0;
+        return totalDivisiones - division + 1;
+    }
+
+    function premioAsiento(
+        uint256 cajaLibre,
+        uint256 liquidezTotal,
+        uint256 division,
+        uint256 totalDivisiones,
+        uint256 puestoEnDivision,
+        uint256 sumaPesosElegibles
+    ) public pure returns (uint256) {
+        if (
+            puestoEnDivision < 1
+            || puestoEnDivision > DIVISION_SIZE
+            || sumaPesosElegibles == 0
+            || totalDivisiones == 0
+        ) return 0;
+        uint256 budget = presupuestoPremioMensual(cajaLibre, liquidezTotal);
+        uint256 wDiv = pesoDivision(division, totalDivisiones);
+        uint256 sumDiv = (totalDivisiones * (totalDivisiones + 1)) / 2;
+        if (budget == 0 || wDiv == 0 || sumDiv == 0) return 0;
+        uint256 pot = (budget * wDiv) / sumDiv;
+        uint256 wSeat = DIVISION_SIZE - puestoEnDivision + 1;
+        return (pot * wSeat) / sumaPesosElegibles;
     }
 }

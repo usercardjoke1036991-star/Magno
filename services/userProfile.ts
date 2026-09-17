@@ -1,10 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { File, Paths } from 'expo-file-system';
-import { NOTIFY_API } from '../constants/appLinks';
+import { notifyApiConfigured, notifyJsonFetch } from './notifyClient';
 import { stripUnsafeText } from '../utils/sanitize';
-import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
+import { readJsonLimited } from '../utils/safeFetch';
 import { loadAppWallet } from './appWallet';
 import { signedAuthBody } from './walletAuth';
+
+/** El worker acepta hasta 100 direcciones; una división de ranking llena usa este tope. */
+export const PUBLIC_PROFILE_BATCH = 100;
 
 export const AVATAR_PRESETS = [
   { id: 0, bg: '#C4793C', fg: '#fff4e8' },
@@ -284,13 +287,13 @@ export async function rememberProfile(wallet: string, profile: UserProfile): Pro
 }
 
 export async function publishOwnProfile(walletAddress: string, profile: UserProfile): Promise<void> {
-  if (!NOTIFY_API || !walletAddress) return;
+  if (!notifyApiConfigured() || !walletAddress) return;
   try {
     const signer = await loadAppWallet();
     if (!signer) return;
     const wallet = walletKey(walletAddress);
     const auth = await signedAuthBody(signer, wallet, 'perfil');
-    await safeJsonFetch(`${NOTIFY_API}/profile`, {
+    await notifyJsonFetch('/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -308,22 +311,29 @@ export async function publishOwnProfile(walletAddress: string, profile: UserProf
 
 export async function fetchPublicProfiles(wallets: string[]): Promise<Record<string, UserProfile>> {
   const unique = [...new Set(wallets.map(walletKey).filter((item) => item.startsWith('0x')))];
-  if (!NOTIFY_API || unique.length === 0) return {};
+  if (!notifyApiConfigured() || unique.length === 0) return {};
   try {
     const signer = await loadAppWallet();
     if (!signer) return {};
     const auth = await signedAuthBody(signer, await signer.getAddress(), 'perfil');
-    const response = await safeJsonFetch(`${NOTIFY_API}/profiles`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...auth, wallets: unique.slice(0, 20) }),
-    });
-    if (!response.ok) return {};
-    const body = await readJsonLimited<{ profiles?: Record<string, unknown> }>(response);
     const out: Record<string, UserProfile> = {};
-    for (const [wallet, value] of Object.entries(body.profiles || {})) {
-      const profile = parseProfile(value);
-      if (profile) out[walletKey(wallet)] = profile;
+    for (let i = 0; i < unique.length; i += PUBLIC_PROFILE_BATCH) {
+      const batch = unique.slice(i, i + PUBLIC_PROFILE_BATCH);
+      const response = await notifyJsonFetch('/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...auth, wallets: batch }),
+      });
+      if (response.status === 429) break;
+      if (!response.ok) {
+        if (i === 0) return {};
+        continue;
+      }
+      const body = await readJsonLimited<{ profiles?: Record<string, unknown> }>(response);
+      for (const [wallet, value] of Object.entries(body.profiles || {})) {
+        const profile = parseProfile(value);
+        if (profile) out[walletKey(wallet)] = profile;
+      }
     }
     return out;
   } catch {

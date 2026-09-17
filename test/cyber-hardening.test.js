@@ -293,6 +293,28 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(scanner).to.include('/api/v1/delete_scan');
   });
 
+  it('sends email and phone OTP through the notify worker including Metro localhost', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const client = fs.readFileSync(path.join(__dirname, '..', 'services', 'notifyClient.ts'), 'utf8');
+    expect(client).to.include('notifyApiBases');
+    expect(client).to.include('127.0.0.1');
+    expect(client).to.include('localJsonFetch');
+    const email = fs.readFileSync(path.join(__dirname, '..', 'services', 'emailOtp.ts'), 'utf8');
+    expect(email).to.include('notifyJsonBody');
+    expect(email).to.not.include('NOTIFY_API');
+    const phone = fs.readFileSync(path.join(__dirname, '..', 'services', 'phoneOtp.ts'), 'utf8');
+    expect(phone).to.include('notifyJsonBody');
+    const demo = fs.readFileSync(path.join(__dirname, '..', 'services', 'demoIdentity.ts'), 'utf8');
+    expect(demo).to.include('notifyJsonBody');
+    const settings = fs.readFileSync(path.join(__dirname, '..', 'components', 'SecuritySettings.tsx'), 'utf8');
+    expect(settings).to.not.include("panel === 'kyc' && !demoAccount");
+    expect(settings).to.not.include("panel === 'phone' && !demoAccount");
+    const kycUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'KycSection.tsx'), 'utf8');
+    expect(kycUi).to.include('isCreditReady');
+    expect(kycUi).to.include("t('liveCreditNotReady')");
+  });
+
   it('seals an immutable KYC fingerprint and keeps it when local fields change', function () {
     const { keccak256, toUtf8Bytes } = require('ethers');
     const fingerprint = (wallet, snap) =>
@@ -617,33 +639,45 @@ describe('demo credit gates', function () {
     expect(deviceMatchAfterIdentityReadFailure(true)).to.equal(true);
     expect(identityHashBound('0x0000000000000000000000000000000000000000000000000000000000000000')).to.equal(false);
     expect(identityHashBound('0xabc')).to.equal(true);
-    function loanGateBannerRows({ phraseDone, showIdentity, emailDone, kycDone, phoneDone }) {
+    function loanGateBannerRows({ phraseDone, accessPaid, showIdentity, emailDone, kycDone, phoneDone }) {
       const rows = [];
       if (!phraseDone) rows.push('phrase');
-      if (!showIdentity) return rows;
+      if (!accessPaid || !showIdentity) return rows;
       if (!emailDone) rows.push('email');
       if (!kycDone) rows.push('kyc');
       if (!phoneDone) rows.push('phone');
       return rows;
     }
     expect(loanGateBannerRows({
-      phraseDone: false, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
+      phraseDone: false, accessPaid: true, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
     })).to.deep.equal(['phrase', 'email', 'kyc', 'phone']);
     expect(loanGateBannerRows({
-      phraseDone: true, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
+      phraseDone: true, accessPaid: true, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
     })).to.deep.equal(['email', 'kyc', 'phone']);
     expect(loanGateBannerRows({
-      phraseDone: true, showIdentity: true, emailDone: true, kycDone: true, phoneDone: false,
+      phraseDone: true, accessPaid: true, showIdentity: true, emailDone: true, kycDone: true, phoneDone: false,
     })).to.deep.equal(['phone']);
     expect(loanGateBannerRows({
-      phraseDone: false, showIdentity: false, emailDone: false, kycDone: false, phoneDone: false,
+      phraseDone: false, accessPaid: false, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
     })).to.deep.equal(['phrase']);
     expect(loanGateBannerRows({
-      phraseDone: true, showIdentity: false, emailDone: false, kycDone: false, phoneDone: false,
+      phraseDone: true, accessPaid: false, showIdentity: true, emailDone: false, kycDone: false, phoneDone: false,
     })).to.deep.equal([]);
     expect(loanGateBannerRows({
-      phraseDone: true, showIdentity: true, emailDone: true, kycDone: true, phoneDone: true,
+      phraseDone: false, accessPaid: true, showIdentity: false, emailDone: false, kycDone: false, phoneDone: false,
+    })).to.deep.equal(['phrase']);
+    expect(loanGateBannerRows({
+      phraseDone: true, accessPaid: true, showIdentity: false, emailDone: false, kycDone: false, phoneDone: false,
     })).to.deep.equal([]);
+    expect(loanGateBannerRows({
+      phraseDone: true, accessPaid: true, showIdentity: true, emailDone: true, kycDone: true, phoneDone: true,
+    })).to.deep.equal([]);
+    const gatesSrc = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
+    expect(gatesSrc).to.include('identityUnlocked');
+    expect(gatesSrc).to.include('accessPaid');
+    const securityUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'SecuritySettings.tsx'), 'utf8');
+    expect(securityUi).to.include('identityUnlocked');
+    expect(securityUi).to.include('identityNeedAccess');
   });
 
   it('keeps Demo and Real history apart and runs grace down then mora up', function () {
@@ -1048,6 +1082,8 @@ describe('account entry — password, email and session', () => {
     const phoneUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'PhoneOtpSection.tsx'), 'utf8');
     expect(phoneUi).to.include('identityBound && deviceMatches && !editing');
     expect(phoneUi).to.include("t('seedNeedDevice')");
+    expect(phoneUi).to.include('isCreditReady');
+    expect(phoneUi).to.include("t('liveCreditNotReady')");
     const banner = fs.readFileSync(path.join(__dirname, '..', 'components', 'KycAccessBanner.tsx'), 'utf8');
     expect(banner).to.include('deviceMatches={deviceMatches}');
     function sessionOwnedHere(claimedDeviceHash, localDeviceHash) {

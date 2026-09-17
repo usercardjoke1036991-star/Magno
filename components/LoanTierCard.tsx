@@ -152,9 +152,8 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
       ) : null}
       {isMaxLevel ? (
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('maxLevelNote')}</AppText>
-      ) : (
-        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payOnTimeToLevel', { count: tier.requiredCount })}</AppText>
-      )}
+      ) : null}
+      <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payOnTimeToLevel', { count: tier.requiredCount })}</AppText>
       <AppText style={[styles.earnNote, { color: colors.textMuted }]}>
         {tier.id === 1
           ? t('referralEarnLevel1', {

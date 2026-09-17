@@ -78,7 +78,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     (wallet?: string) => {
       if (!wallet) return undefined;
       const key = wallet.toLowerCase();
-      if (walletAddress && key === walletAddress) return profile;
+      if (walletAddress && key === walletAddress.toLowerCase()) return profile;
       return directory[key];
     },
     [directory, profile, walletAddress]

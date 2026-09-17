@@ -3,7 +3,7 @@ const { ethers } = require('hardhat');
 const { deployProtocol, seedPool, registerAndFund, assertNavInvariant } = require('./helpers.cjs');
 
 function requiredCountPlanned(id) {
-  if (id < 1 || id >= 1000) return 0;
+  if (id < 1 || id > 1000) return 0;
   if (id <= 1) return 3;
   if (id < 10) return 5;
   return 5 * (id - 9);
@@ -40,7 +40,7 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     expect(await leveling.requiredCount(100)).to.equal(455n);
     expect(await leveling.requiredCount(101)).to.equal(460n);
     expect(await leveling.requiredCount(999)).to.equal(4950n);
-    expect(await leveling.requiredCount(1000)).to.equal(0n);
+    expect(await leveling.requiredCount(1000)).to.equal(4955n);
     expect(await leveling.bonoDeHito(100)).to.equal(bonusOf(100));
     expect(await leveling.bonoDeHito(200)).to.equal(bonusOf(200));
     expect(await leveling.bonoDeHito(1000)).to.equal(bonusOf(1000));
@@ -64,6 +64,14 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     expect(await leveling.siguienteHito(100, 200)).to.equal(200n);
     expect(await leveling.siguienteHito(900, 1000)).to.equal(1000n);
     expect(await leveling.siguienteHito(1000, 1000)).to.equal(0n);
+    expect(await leveling.DIVISION_SIZE()).to.equal(100n);
+    expect(await leveling.presupuestoPremioMensual(ethers.parseUnits('400', 18), ethers.parseUnits('2000', 18))).to.equal(0n);
+    const small = await leveling.presupuestoPremioMensual(ethers.parseUnits('2000', 18), ethers.parseUnits('2000', 18));
+    const large = await leveling.presupuestoPremioMensual(ethers.parseUnits('20000', 18), ethers.parseUnits('20000', 18));
+    expect(small).to.be.gt(0n);
+    expect(large).to.be.gt(small);
+    expect(await leveling.pesoDivision(1, 2)).to.equal(2n);
+    expect(await leveling.pesoDivision(2, 2)).to.equal(1n);
   });
 
   it('only pays a milestone bonus when the pool has free cash above the floor', async () => {
@@ -112,6 +120,34 @@ describe('QuatriviumCredit - bono de hito cada 100 niveles', function () {
     await contract.forceNivel(user.address, 100);
     await expect(contract.connect(user).cobrarBonoHito(tokenAddr)).to.be.reverted;
     expect(await contract.hitoCobrado(user.address)).to.equal(0n);
+  });
+
+  it('resets the level-1000 request cycle so the max bonus can be claimed again', async () => {
+    const { token, contract, owner, user, tokenAddr, contractAddr } = await deployHarness();
+    await seedPool(token, contract, owner, '8000');
+    await token.mint(owner.address, ethers.parseUnits('150000', 18));
+    await contract.connect(owner).depositarLiquidez(tokenAddr, ethers.parseUnits('120000', 18));
+    await registerAndFund(token, contract, user);
+    await contract.forceNivel(user.address, 1000);
+    await contract.forceHito(user.address, 900);
+    await expect(contract.connect(user).cobrarBonoHito(tokenAddr))
+      .to.emit(contract, 'BonoHitoPagado')
+      .withArgs(user.address, 1000n, bonusOf(1000), tokenAddr);
+    expect(await contract.hitoCobrado(user.address)).to.equal(1000n);
+
+    const [monto] = await contract.niveles(1000);
+    const now = (await ethers.provider.getBlock('latest')).timestamp;
+    await contract.forceSolicitudes(user.address, 4954);
+    await contract.forceLoanClock(user.address, monto, now + 3600);
+    await contract.forcePagoATiempo(user.address);
+    expect(await contract.hitoCobrado(user.address)).to.equal(900n);
+    const progress = await contract.obtenerProgresoUsuario(user.address);
+    expect(progress[1]).to.equal(0n);
+
+    await expect(contract.connect(user).cobrarBonoHito(tokenAddr))
+      .to.emit(contract, 'BonoHitoPagado')
+      .withArgs(user.address, 1000n, bonusOf(1000), tokenAddr);
+    await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 });
 

@@ -15,9 +15,9 @@ export const LADDER_STEP_USD = 1_100;
 export const LADDER_RATE_DROPS = 394;
 export const ONCHAIN_TIER_SCAN = CORE_LOAN_LEVEL;
 
-/** L1 → 3; L2–9 → 5; L10–999 → 5, 10, 15…; L1000 no sube. */
+/** L1 → 3; L2–9 → 5; L10–1000 → 5, 10, 15…; L1000 no sube de nivel y reinicia el ciclo del bono. */
 export function requiredCountForLevel(id: number): number {
-  if (id < 1 || id >= MAX_LOAN_LEVEL) return 0;
+  if (id < 1 || id > MAX_LOAN_LEVEL) return 0;
   if (id <= 1) return 3;
   if (id < USD100_LEVEL) return 5;
   return 5 * (id - 9);

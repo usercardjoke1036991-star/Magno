@@ -17,4 +17,21 @@ contract QuatriviumCreditHarness is QuatriviumCredit {
     function forceNivel(address usuario, uint256 nivel) external {
         progresoUsuarios[usuario].nivelActual = nivel;
     }
+
+    function forceHito(address usuario, uint256 hito) external {
+        hitoCobrado[usuario] = hito;
+    }
+
+    function forceSolicitudes(address usuario, uint256 n) external {
+        progresoUsuarios[usuario].solicitudesCompletadas = n;
+    }
+
+    function forceLoanClock(address usuario, uint256 monto, uint256 vencimiento) external {
+        usuarios[usuario].montoActivo = monto;
+        usuarios[usuario].vencimiento = vencimiento;
+    }
+
+    function forcePagoATiempo(address deudor) external {
+        _subirNivelSiATiempo(deudor, true);
+    }
 }

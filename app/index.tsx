@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import { parseAppDeepLink } from '../utils/appDeepLink';
+import { rankingVisible } from '../utils/fameRankings';
 import { rememberAppUrl, takePendingAppUrl } from '../utils/pendingDeepLink';
 import { AppKit, useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
 import { parseUnits } from 'ethers';
@@ -15,6 +16,7 @@ import { TokenSelector } from '../components/TokenSelector';
 import { BalanceDisplay } from '../components/BalanceDisplay';
 import { UserMetrics } from '../components/UserMetrics';
 import { RankLadder } from '../components/RankLadder';
+import { FameLeaderboard } from '../components/FameLeaderboard';
 import { LoanTierCard } from '../components/LoanTierCard';
 import { LockedLoanCatalog } from '../components/LockedLoanCatalog';
 import { AdminPanel } from '../components/AdminPanel';
@@ -41,7 +43,7 @@ import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
-import { canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, liveCreditReady, phoneVerifiedOnThisDevice } from '../utils/creditGates';
+import { canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, hasCreditAccess, liveCreditReady, phoneVerifiedOnThisDevice } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhraseBackedUp } from '../services/appWallet';
 import { useI18n } from '../i18n/LanguageContext';
@@ -314,6 +316,7 @@ function HomeScreenWithHooks() {
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}
+          accessPaid={hasCreditAccess(userInfo.donatedUsd || 0)}
           deviceMatches={userInfo.deviceMatches}
           walletAddress={walletAddress || ''}
           isRegistered={userInfo.isRegistered}
@@ -362,6 +365,7 @@ function HomeScreenWithHooks() {
             },
             { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
             { id: 'ranks', title: t('rankGalleryTitle'), lead: t('hubRanksLead'), icon: 'star' },
+            { id: 'fame', title: t('fameBoardTitle'), lead: rankingVisible(userInfo.userProgress.nivelActual) ? t('hubFameLead') : t('hubFameLeadLocked'), icon: 'chart' },
             { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' },
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
             { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
@@ -525,6 +529,7 @@ function HomeScreenWithHooks() {
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}
+          accessPaid={hasCreditAccess(userInfo.donatedUsd || 0)}
           deviceMatches={userInfo.deviceMatches}
           walletAddress={walletAddress || ''}
           isRegistered={userInfo.isRegistered}
@@ -613,6 +618,21 @@ function HomeScreenWithHooks() {
         onClose={() => setRoom(null)}
       >
         <RankLadder userLevel={userInfo.userProgress.nivelActual} />
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'fame'}
+        title={t('fameBoardTitle')}
+        lead={rankingVisible(userInfo.userProgress.nivelActual) ? t('fameBoardLead') : t('fameBoardLocked')}
+        onClose={() => setRoom(null)}
+      >
+        <FameLeaderboard
+          enabled={room === 'fame'}
+          unlocked={rankingVisible(userInfo.userProgress.nivelActual)}
+          walletAddress={walletAddress || ''}
+          poolCashUsd={Number(balances.poolCash) || 0}
+          poolNavUsd={Number(balances.poolBalance) || 0}
+        />
       </AppWindow>
 
       <AppWindow

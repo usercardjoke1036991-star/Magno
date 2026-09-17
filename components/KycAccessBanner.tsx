@@ -28,6 +28,7 @@ interface KycAccessBannerProps {
   emailDone?: boolean;
   phraseDone?: boolean;
   showIdentity?: boolean;
+  accessPaid?: boolean;
   deviceMatches?: boolean;
   walletAddress: string;
   isRegistered: boolean;
@@ -47,6 +48,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   emailDone = true,
   phraseDone = false,
   showIdentity = true,
+  accessPaid = false,
   deviceMatches = false,
   walletAddress,
   isRegistered,
@@ -128,6 +130,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
 
   const rows = loanGateBannerRows({
     phraseDone,
+    accessPaid,
     showIdentity,
     emailDone,
     kycDone,

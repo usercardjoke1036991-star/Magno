@@ -36,7 +36,7 @@ Magno/
 │   ├── Groth16Verifier.sol        # ZK experimental (no en producción)
 │   ├── interfaces/                # AggregatorV3Interface (Chainlink)
 │   └── mocks/                     # ERC20Mock, MockV3Aggregator (testnet)
-├── test/ (15 archivos)            # accounting, circuitBreaker, cuotas, destroy, identity, kyc, mlm, demo-identity…
+├── test/ (21 archivos)            # accounting, circuitBreaker, cuotas, destroy, identity, kyc, mlm, rankings, demo-identity…
 ├── scripts/                       # deploy, security-check, production-check, notify-worker
 ├── salud_proyecto.py              # Reloj suizo: grafo UI→hooks→contrato + i18n/tsc (`npm run salud`)
 ├── i18n/ (17 locales)             # ar, bn, de, en, es, fr, hi, id, it, ja, ko, pt, ru, tr, ur, vi, zh
@@ -57,7 +57,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 962 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 997 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -100,7 +100,7 @@ Reglas:
 - **1–100**: la tasa del anterior > la del siguiente (estricta)
 - **101–1000**: la tasa no sube (baja 1 bps/nivel hasta 4,06 % y luego se sostiene; si bajara más el interés $ se rompería)
 
-`requiredCount` (la velocidad de llegada marca la de pago): L1 → 3; L2–9 → 5; desde **$100 (L10)** cada nivel pide **5 más** (5, 10, 15…; L100 = 455; L999 = 4950). L1000 no sube.
+`requiredCount` (la velocidad de llegada marca la de pago): L1 → 3; L2–9 → 5; desde **$100 (L10)** cada nivel pide **5 más** (5, 10, 15…; L100 = 455; L999 = 4950; L1000 = 4955). L1000 no sube de nivel: al completar las solicitudes el ciclo se reinicia y el bono de 20 000 USDT se puede volver a cobrar.
 Bono de pool cada 100 niveles: **20 USDT × nivel del hito**. Sala **Bonos** en Demo y Real. **Donar** (sala aparte, solo Real) y **aportar liquidez** suman fama **proporcional al monto** (10 y 5 puntos por USDT). El pool es el banco común. Cuenta Real muestra el producto completo (KYC, niveles 1–1000, hitos, donar, pool) antes del lanzamiento; firmar espera mainnet.
 Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina, peridoto, esmeralda, zafiro, rubí, ónix, diamante, amatista). Cada banda se parte en I / II / III. El marco es el logo 3D, más ancho que la foto, con incrustaciones fotográficas de esa piedra.
 
@@ -111,7 +111,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 | 11 | $120 | 50 días | 33,71% | $40.45 | 3 | 10 |
 | 100 | $10 000 | 90 días | 8% | $800 | 3 | 455 |
 | 101 | $11 100 | 90 días | 7,99% | $886.89 | 3 | 460 |
-| 1000 | **$1 000 000** | 180 días | 4,06% | $40 600 | 12 | — |
+| 1000 | **$1 000 000** | 180 días | 4,06% | $40 600 | 12 | 4955 |
 
 > Los bps son tasa plana sobre el principal por el plazo (no APR anual).
 > Cuotas: $50 → 2; $60 → 3; $25 000 → 6; $100 000 → 12.
@@ -122,11 +122,12 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- 15 suites Hardhat (149 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación y endurecimiento…
-- Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime Foundry 23954 B (margen 622). Live Demo sigue 24457 B.
+- 16 suites Hardhat (160 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento y rankings…
+- Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24555 B (margen 21). Live Demo sigue 24457 B hasta el redespliegue.
 - Ciber WSL (producto, local): Aderyn High 1 CEI tras `balanceOf`/`transfer` en funciones con `nonReentrant` (se mantiene). Trivy lockfile 3 HIGH + 1 MEDIUM de deps Expo (`image-size`, `underscore`/`jsonpath`, `uuid@7`); Dockerfile DS-0002 USER no se aplica por el volumen Fly `/data`. Semgrep 1 hallazgo GCM sin `authTagLength` (corregido). Mythril 0 issues con cobertura baja (timeout 180s). ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 962 claves
+- i18n: 17 idiomas, 997 claves
+- Rankings: 6 tableros, divisiones de 100, premio mensual estimado, nombres y fotos públicas por lotes de 100, visibles desde el nivel 50
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
@@ -149,6 +150,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - **ZK real en React Native**: `snarkjs` no es bundleable; el registro es `registrarHumanoConPadre()`. Decisión consciente.
 - **Pool no se retira**: no hay circuit breaker de retiros al 50% — el pool está cerrado a propósito (`revert("pool locked")`). La pausa de emergencia es el freno.
 - **`eas.json` sin dirección mainnet**: correcto hasta el deploy. No rellenar con un placeholder.
+- **Premio mensual de rankings**: la UI muestra la estimación; el núcleo Credit no lo paga. Haría falta un contrato hermano fondeado o un redespliegue.
 - **Java 25 en la máquina local**: puede romper `expo run:android` local. Los builds EAS usan imagen `sdk-54` (JDK correcto). En local: usar JDK 17.
 
 ---
@@ -246,6 +248,11 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-16 | Auditoria: rankings piden nombre y foto por lotes de 100, incluyen la cuenta que mira y L1000 muestra el ciclo de solicitudes. Hardhat 160. Sin mainnet ni APK. | — |
+| 2026-09-16 | Auditoria: rankings piden nombre/foto por lotes de 100 (worker + Metro 8787), incluyen la cuenta que mira aunque el escaneo recorte, y L1000 muestra las solicitudes del ciclo. Hardhat 160. Premio de ranking sigue estimado hasta hermano de pago / redespliegue. Sin mainnet ni APK. | — |
+| 2026-09-16 | Rankings: 6 tableros, divisiones de 100, premio mensual 1.5% caja libre, nombre y foto publicos, visibilidad nivel 50. L1000 reinicia solicitudes para repetir el bono. Formula de premio en QuatriviumLeveling, sin recortar el nucleo. | — |
+| 2026-09-16 | 1 USDT desbloquea verificar correo, numero y KYC. Sala Rankings aparte del historial de referidos: 5 tableros, puestos por esfuerzo, podio con 1o arriba y mas grande, marco de gema en cada persona y medallas distintas para 1-2-3. | — |
+| 2026-09-16 | Identidad: notifyClient prueba HTTPS y luego 127.0.0.1:8787. Ajustes muestra KYC y telefono tambien en Demo. Correo no necesita contrato. Telefono y KYC on-chain siguen exigiendo linea activa en un contrato vivo. | — |
 | 2026-09-16 | Auditoria PDF MobSF 1.0.2 (SHA256 fea201d5): 61/100 Grade A, 0 exportados, sin HTTP claro, OFAC vacio, dominios ok, secretos=nombres C++. HIGH CBC p/q.java = huella (se mantiene). Release overlay quita exp+quatrivium-credit. Regenerar APK no sube la nota. | — |
 | 2026-09-16 | APK MobSF 1.0.2 en Escritorio (arm-only, v3 SHA-256 CN=Quatrivium Finance, SHA256 fea201d5...). JS de la auditoria final. No es el APK de Play ni mainnet. | — |
 | 2026-09-16 | Auditoria final de productividad: hidratar credito solo con contrato del mundo activo; hub/linea/personas usan creditOnChain; cache de red de referidos; notify-worker AES-GCM recargado. Hardhat 149/149, tsc 0, salud 14/14, production 14/15 (falta mainnet). Sin deploy ni APK. | — |

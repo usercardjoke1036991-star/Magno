@@ -1,6 +1,8 @@
 {
   "enfoque": "Subir el APK release del Escritorio a MobSF. No dejar basura de analisis anteriores. Sin mainnet ni Play hasta que el fundador lo pida.",
   "decisiones": [
+    "- [2026-09-16] No recortar funciones del nucleo por EIP-170: ranking y premio van en hermanos (QuatriviumLeveling). La sala Rankings permanece y los nombres se ven desde el nivel 50.",
+    "- [2026-09-16] Los puestos de ranking no son fijos: suben o bajan con el esfuerzo. El historial de referidos sigue en Red. Los marcos de gema de nivel se ven en cada persona del ranking; 1o/2o/3o llevan ademas medallas distintas.",
     "- [2026-09-16] Analisis MobSF privado en localhost; no usar la instancia publica para que el APK no circule.",
     "- [2026-09-14] OTP de telefono usa Twilio SMS. El worker publico corre en Fly (min 1 maquina, sin ngrok). Hasta mainnet el worker Demo acepta firmas de Cuenta Real para correo/OTP.",
     "- [2026-09-14] La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta.",
@@ -28,11 +30,13 @@
     "- [2026-09-12] Desbloqueo por defecto contraseña (correo ya guardado). El usuario elige solo la principal o varias opciones. Frase de 12 palabras obligatoria antes de pedir credito. No hay cerrar sesion. Recuperar con 12 palabras carga la cuenta anterior on-chain.",
     "- [2026-09-12] Guardar sesion mantiene la cuenta en el telefono. Al abrir se muestra el bloqueo, no las tres pantallas. Contraseña por defecto; el usuario elige cuantos metodos y cual es el principal. Cerrar sesion solo en Seguridad.",
     "- [2026-09-12] El progreso va con la billetera on-chain. Otro telefono se recupera con las 12 palabras, no creando otra cuenta. En un telefono con cuenta, Crear cuenta no se muestra.",
-    "- [2026-09-12] En Cuenta Real no se pide credito sin correo, telefono+dispositivo y KYC. Eso corta multicuentas faciles. Demo sigue libre para probar.",
-    "- [2026-09-12] Crear cuenta: correo, contraseña y guardar sesión. Luego una pantalla aparte verifica el código. Iniciar sesión: solo correo, contraseña y guardar sesión. Son funciones distintas.",
-    "- [2026-09-12] Crear cuenta pide contraseña y correo juntos. El código de correo solo la primera vez. Iniciar sesión pide contraseña y correo, sin código. Guardar sesión está en ambas pantallas y persiste de verdad."
+    "- [2026-09-12] En Cuenta Real no se pide credito sin correo, telefono+dispositivo y KYC. Eso corta multicuentas faciles. Demo sigue libre para probar."
   ],
   "cambios": [
+    "- [2026-09-16] Auditoria profunda: rankings con nombre/foto por division completa y la cuenta visible aunque el escaneo recorte. Hardhat 160. Premio estimado. Sin mainnet.",
+    "- [2026-09-16] Rankings con nombre y foto, 6 tableros, divisiones de 100 y premio mensual del pool. L1000 cicla el bono. Nucleo Credit no se recorto.",
+    "- [2026-09-16] 1 USDT primero para identidad. Rankings: 5 tableros (referidos, prestamos, fama, nivel, general), historial de referidos aparte, marcos de gema + medalla de podio, 1o arriba y mas grande.",
+    "- [2026-09-16] Correo y OTP usan el worker (HTTPS o Metro 8787). KYC y telefono se completan en Demo con linea activa; Real on-chain espera mainnet.",
     "- [2026-09-16] PDF MobSF APK 1.0.2 61/100 A: HIGH es huella androidx.biometric; native canary JNA/NDK; sin Twilio ni claves. Release quita esquema exp+ de Metro. Sin regenerar APK ni mainnet.",
     "- [2026-09-16] APK release 1.0.2 arm-only firmado v3 SHA-256 CN=Quatrivium Finance copiado a Desktop Quatrivium-Finance-MobSF.apk (67.20 MB, SHA256 fea201d5...). Incluye auditoria final. Sin mainnet.",
     "- [2026-09-16] Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.",
@@ -78,12 +82,8 @@
     "- [2026-09-14] Marcos metalicos con relieve real del PNG 512px, bisel pulido y piedras talladas con garras. I sobrio, II filigrana y engaste, III doble voluta y mas facetas.",
     "- [2026-09-14] Vitrina Marcos: 12 piedras con I II III a tamano real. Red muestra marco y etiqueta de rango de cada referido.",
     "- [2026-09-14] Marcos de rango con piedras incrustadas: I 4 gemas, II 8, III 12, mas bisel y destellos al subir.",
-    "- [2026-09-14] Auditoria: contraste KYC/acceso con letras negras sobre verde. Hardhat 131/131, i18n 939, salud 14/14. Demo live alineado. Mainnet y SMS siguen del fundador.",
-    "- [2026-09-14] Marcos de rango con emblema 3D metalico del logo, teñido por division. Billetera externa: Billetera y Vincular billetera. Botones verdes con letras negras.",
-    "- [2026-09-14] KYC: escaneo local de documento con camara. Marcos cuadrados mas ricos por division. Textos recortados a tono financiero.",
-    "- [2026-09-14] Ajustes solo muestra la frase. El alta lista minimo 8, hasta 66, mayuscula, numero y simbolo. Hub y Cuenta muestran la billetera externa.",
-    "- [2026-09-14] Sin fila de contraseña en Ajustes. Fondos (depositar, retirar, donar, pool, 1 USDT) salen de la externa vinculada hacia la interna."
+    "- [2026-09-14] Auditoria: contraste KYC/acceso con letras negras sobre verde. Hardhat 131/131, i18n 939, salud 14/14. Demo live alineado. Mainnet y SMS siguen del fundador."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-16] Cambio: PDF MobSF APK 1.0.2 61/100 A: HIGH es huella androidx.biometric; native canary JNA/NDK; sin Twilio ni claves. Release quita esquema exp+ de Metro. Sin regenerar APK ni mainnet."
+  "ultima_sesion": "[2026-09-16] Cambio: Auditoria profunda: rankings con nombre/foto por division completa y la cuenta visible aunque el escaneo recorte. Hardhat 160. Premio estimado. Sin mainnet."
 }

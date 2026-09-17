@@ -61,6 +61,9 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   const bonusAmount = formatUSD(milestoneBonusUsd(claimableMilestone || nextMilestone));
   const supportKey = supportNameKey(supportKind(voluntaryDonateUsd(userInfo.donatedUsd || 0), lpUsd));
   const maxLevel = displayMaxLoanLevel(userInfo.maxLoanLevel);
+  const cycleNeed = requiredCountForLiveLevel(userInfo.userProgress.nivelActual, maxLevel);
+  const atCap = userInfo.userProgress.nivelActual >= maxLevel;
+  const showMaxCycle = atCap && cycleNeed > 0;
 
   return (
     <View>
@@ -97,12 +100,14 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
             </TouchableOpacity>
           ) : null}
 
-          {nextMilestone > 0 ? (
+          {nextMilestone > 0 || showMaxCycle ? (
             <View style={[styles.loanBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <AppText style={[styles.loanMeta, { color: colors.text, marginTop: 0 }]}>
                 {claimableMilestone > 0
                   ? t('milestoneBonusReady', { level: claimableMilestone, amount: bonusAmount })
-                  : t('milestoneBonusHint', { level: nextMilestone, amount: bonusAmount })}
+                  : nextMilestone > 0
+                    ? t('milestoneBonusHint', { level: nextMilestone, amount: bonusAmount })
+                    : t('bonusMaxCycle')}
               </AppText>
               {onOpenBonuses ? (
                 <TouchableOpacity
@@ -163,13 +168,13 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               <View style={styles.metricLabelRow}>
                 <AppIcon name="chart" size={14} color={colors.textMuted} />
                 <AppText style={[styles.metricLabel, { color: colors.textMuted }]}>
-                  {userInfo.userProgress.nivelActual >= (maxLevel) ? t('maxLevelReached') : t('toLevelUp')}
+                  {showMaxCycle ? t('bonusMaxCycleLabel') : atCap ? t('maxLevelReached') : t('toLevelUp')}
                 </AppText>
               </View>
               <AppText style={[styles.metricValue, { color: colors.text }]}>
-                {userInfo.userProgress.nivelActual >= (maxLevel)
-                  ? t('maxLevelReached')
-                  : `${userInfo.userProgress.solicitudesCompletadas}/${requiredCountForLiveLevel(userInfo.userProgress.nivelActual, maxLevel)} ${t('onTimePayments')}`}
+                {showMaxCycle || !atCap
+                  ? `${userInfo.userProgress.solicitudesCompletadas}/${cycleNeed} ${t('onTimePayments')}`
+                  : t('maxLevelReached')}
               </AppText>
             </View>
 

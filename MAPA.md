@@ -105,6 +105,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: DonateFounderSection
 - `components/EmailOtpSection.tsx` — módulo JS/TS
   - Funciones/clases: EmailOtpSection
+- `components/FameLeaderboard.tsx` — módulo JS/TS
+  - Funciones/clases: FameLeaderboard
 - `components/FundsConfirmHost.tsx` — módulo JS/TS
   - Funciones/clases: FundsConfirmHost, useFundsConfirm
 - `components/GraceMoraClock.tsx` — módulo JS/TS
@@ -149,6 +151,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: PasswordRulesHint
 - `components/PhoneOtpSection.tsx` — módulo JS/TS
   - Funciones/clases: PhoneOtpSection
+- `components/PodiumFrame.tsx` — módulo JS/TS
+  - Funciones/clases: PodiumFrame
 - `components/PoolSupportSection.tsx` — módulo JS/TS
   - Funciones/clases: PoolSupportSection
 - `components/ProfileAvatar.tsx` — módulo JS/TS
@@ -213,6 +217,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
   - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
+- `constants/podium.ts` — módulo JS/TS
+  - Funciones/clases: PODIUM_STYLE
 - `constants/ranks.ts` — módulo JS/TS
   - Funciones/clases: FAMILY_BANDS, saturateHex, colorizeTextureFilters, RANK_GEM_ASSET, RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, rankFamilyIndex, romanDivision, rankDivisionTint, formatRankLabel, RANK_LADDER, rankGalleryRow, RANK_GALLERY
 - `constants/reputation.ts` — módulo JS/TS
@@ -223,6 +229,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: SUPPORT_PATRON_USD, SUPPORT_CIRCLE_USD, FAME_PER_USDT_DONATE, FAME_PER_USDT_POOL, fameFromUsd, fameFromDonateUsd, fameFromPoolUsd, supportKind, supportNameKey
 - `constants/tokens.ts` — módulo JS/TS
   - Funciones/clases: getConfigurableStables, getSupportedTokens, getTokenMeta, isOfficialWorldToken
+- `hooks/useFameLeaderboard.ts` — módulo JS/TS
+  - Funciones/clases: useFameLeaderboard
 - `hooks/useHomeHandlers.ts` — módulo JS/TS
   - Funciones/clases: useHomeHandlers
 - `hooks/useLiveCooldown.ts` — módulo JS/TS
@@ -305,6 +313,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: requestEmailOtp, verifyEmailOtp
 - `services/exclusiveSession.ts` — módulo JS/TS
   - Funciones/clases: thisDeviceOwnsSession, claimExclusiveSession
+- `services/fameLeaderboard.ts` — módulo JS/TS
+  - Funciones/clases: peekFameLeaderboard, clearFameLeaderboardCache, loadFameLeaderboard
 - `services/fundsConfirm.ts` — módulo JS/TS
   - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
@@ -315,10 +325,12 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: recordMovement, loadMovementHistory, loadMoraHistory
 - `services/notificationProfile.ts` — módulo JS/TS
   - Funciones/clases: normalizePhone, isValidPhone, loadNotificationProfile, saveNotificationProfile
+- `services/notifyClient.ts` — módulo JS/TS
+  - Funciones/clases: notifyApiConfigured, notifyJsonFetch, notifyJsonBody
 - `services/passwordRecovery.ts` — módulo JS/TS
   - Funciones/clases: storePasswordRecovery, requestPasswordRecovery, resetPasswordWithEmail
 - `services/phoneOtp.ts` — módulo JS/TS
-  - Funciones/clases: notifyApiConfigured, requestPhoneOtp, verifyPhoneOtp
+  - Funciones/clases: requestPhoneOtp, verifyPhoneOtp
 - `services/quatriviumCreditService.ts` — módulo JS/TS
   - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, cachedProtocolCaps, asWeiString, QuatriviumCreditService
 - `services/referralNetwork.ts` — módulo JS/TS
@@ -328,7 +340,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/secureStorageService.ts` — módulo JS/TS
   - Funciones/clases: SecureStorageService
 - `services/userProfile.ts` — módulo JS/TS
-  - Funciones/clases: AVATAR_PRESETS, EMPTY_PROFILE, PUBLIC_PHOTO_MAX, clampAvatarId, hasLockedPublicIdentity, isPublicIdentityLocked, sanitizePublicPhoto, canSubmitPublicIdentity, publicPhotoFromAsset, normalizeDisplayName, isValidDisplayName, persistPickedPhoto, initialsFromName, avatarColorForWallet, labelForProfile, loadOwnProfile, saveOwnProfile, clearOwnProfile, loadProfileDirectory, rememberProfiles, rememberProfile, publishOwnProfile, fetchPublicProfiles
+  - Funciones/clases: PUBLIC_PROFILE_BATCH, AVATAR_PRESETS, EMPTY_PROFILE, PUBLIC_PHOTO_MAX, clampAvatarId, hasLockedPublicIdentity, isPublicIdentityLocked, sanitizePublicPhoto, canSubmitPublicIdentity, publicPhotoFromAsset, normalizeDisplayName, isValidDisplayName, persistPickedPhoto, initialsFromName, avatarColorForWallet, labelForProfile, loadOwnProfile, saveOwnProfile, clearOwnProfile, loadProfileDirectory, rememberProfiles, rememberProfile, publishOwnProfile, fetchPublicProfiles
 - `services/walletAuth.ts` — módulo JS/TS
   - Funciones/clases: AUTH_TYPES, authDomain, signWalletAuth, signedAuthBody, recoverWalletAuth, isFreshTimestamp
 - `services/walletSession.ts` — módulo JS/TS
@@ -348,6 +360,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: loadReferralChildren, ensureAppWallet, wipeAppWallet
 - `test/demo-identity.test.js` — módulo JS/TS
 - `test/destroy.test.js` — módulo JS/TS
+- `test/fame-rankings.test.js` — módulo JS/TS
 - `test/hardening-security.test.js` — módulo JS/TS
 - `test/hardening.test.js` — módulo JS/TS
 - `test/helpers.cjs` — módulo JS/TS
@@ -390,11 +403,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
   - Funciones/clases: normalizeEmail, isAllowedEmailProvider, canonicalEmail, isValidEmail
+- `utils/fameRankings.ts` — módulo JS/TS
+  - Funciones/clases: FAME_PAGE_SIZE, RANKING_UNLOCK_LEVEL, FAME_BOARD_KINDS, rankingVisible, normalizeFameMetric, attachCombinedScores, fameBoardMetric, sortFameBoard, podiumPlayers, podiumPlace, rankedFameRows, fameListAfterPodium
 - `utils/formatters.ts` — módulo JS/TS
   - Funciones/clases: formatCooldown, formatCountdownClock, formatAddress, formatUSD, formatDueDate, parsePositiveDecimal, calculateLoanWithInterest
 - `utils/graceClock.ts` — módulo JS/TS
@@ -415,6 +430,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: rememberAppUrl, takePendingAppUrl
 - `utils/pinPolicy.ts` — módulo JS/TS
   - Funciones/clases: isWeakPin, lockoutMs, remainingLockMs
+- `utils/rankingDivisions.ts` — módulo JS/TS
+  - Funciones/clases: RANKING_DIVISION_SIZE, RANKING_PRIZE_BUDGET_BP, RANKING_PRIZE_FLOOR_BP, monthlyPrizeBudgetUsd, divisionCountFor, divisionWeight, seatPlaceWeight, assignDivisions, attachDivisionPrizes, seatsForDivision
 - `utils/referralEarnings.ts` — módulo JS/TS
   - Funciones/clases: asWei, sumReferralEarnings
 - `utils/referralPages.ts` — módulo JS/TS

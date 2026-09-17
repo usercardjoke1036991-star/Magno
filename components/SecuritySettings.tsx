@@ -35,6 +35,7 @@ import type { TranslationKey } from '../i18n/translations';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { EmailOtpSection } from './EmailOtpSection';
 import { AppText } from './AppText';
+import { identityUnlocked } from '../utils/creditGates';
 
 type RowStatus = 'done' | 'todo' | 'warn';
 type Panel = 'menu' | 'kyc' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'methods' | 'authenticator';
@@ -117,6 +118,15 @@ export const SecuritySettings: React.FC = () => {
 
   const kycOk = userInfo.kycDeclarado;
   const phoneOk = userInfo.identityBound;
+  const accessPaid = identityUnlocked(userInfo.donatedUsd || 0);
+
+  const openIdentity = (next: 'kyc' | 'email' | 'phone', alreadyDone: boolean) => {
+    if (!accessPaid && !alreadyDone) {
+      Alert.alert(t('creditAccessTitle'), t('identityNeedAccess'));
+      return;
+    }
+    setPanel(next);
+  };
 
   const reveal = async () => {
     if (passwordSet) {
@@ -234,7 +244,7 @@ export const SecuritySettings: React.FC = () => {
           <AppText style={[styles.back, { color: colors.primary }]}>{t('settingsBack')}</AppText>
         </TouchableOpacity>
         <AppText style={[styles.section, { color: colors.text }]}>{t(panelTitle[panel])}</AppText>
-        {panel === 'kyc' && !demoAccount ? (
+        {panel === 'kyc' ? (
           <KycSection
             walletAddress={address}
             isRegistered={userInfo.isRegistered}
@@ -256,7 +266,7 @@ export const SecuritySettings: React.FC = () => {
           />
         ) : null}
         {panel === 'pin' ? <LockSettings mode="pin" onChanged={() => void refreshPhrase()} /> : null}
-        {panel === 'phone' && !demoAccount ? (
+        {panel === 'phone' ? (
           <PhoneOtpSection
             walletAddress={address}
             isRegistered={userInfo.isRegistered}
@@ -336,21 +346,19 @@ export const SecuritySettings: React.FC = () => {
       <AppText style={[styles.lead, { color: colors.textMuted }]}>
         {demoAccount ? t('securityLeadDemo') : t('securityLead')}
       </AppText>
-      {demoAccount ? null : (
       <Row
         icon="id"
         label={t('securityKyc')}
-        hint={kycOk ? t('securityKycDone') : t('securityKycTodo')}
-        status={kycOk ? 'done' : 'warn'}
-        onPress={() => setPanel('kyc')}
+        hint={kycOk ? t('securityKycDone') : accessPaid ? t('securityKycTodo') : t('identityNeedAccess')}
+        status={kycOk ? 'done' : accessPaid ? 'warn' : 'todo'}
+        onPress={() => openIdentity('kyc', kycOk)}
       />
-      )}
       <Row
         icon="id"
         label={t('securityEmail')}
-        hint={email || t('securityEmailTodo')}
-        status={email ? 'done' : 'warn'}
-        onPress={() => setPanel('email')}
+        hint={email || (accessPaid ? t('securityEmailTodo') : t('identityNeedAccess'))}
+        status={email ? 'done' : accessPaid ? 'warn' : 'todo'}
+        onPress={() => openIdentity('email', Boolean(email))}
       />
       <Row
         icon="lock"
@@ -373,15 +381,13 @@ export const SecuritySettings: React.FC = () => {
         status={backedUp ? 'done' : 'todo'}
         onPress={() => setPanel('phrase')}
       />
-      {demoAccount ? null : (
       <Row
         icon="phone"
         label={t('securityPhone')}
-        hint={phoneOk ? t('securityPhoneDone') : t('securityPhoneTodo')}
-        status={phoneOk ? 'done' : 'warn'}
-        onPress={() => setPanel('phone')}
+        hint={phoneOk ? t('securityPhoneDone') : accessPaid ? t('securityPhoneTodo') : t('identityNeedAccess')}
+        status={phoneOk ? 'done' : accessPaid ? 'warn' : 'todo'}
+        onPress={() => openIdentity('phone', phoneOk)}
       />
-      )}
       <Row
         icon="lock"
         label={t('authMethodsTitle')}

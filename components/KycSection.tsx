@@ -12,6 +12,7 @@ import {
   saveKycDeclaration,
   type KycDocType,
 } from '../services/kycDeclaration';
+import { isCreditReady } from '../constants/rpcConfig';
 
 interface KycSectionProps {
   walletAddress: string;
@@ -64,7 +65,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
   const done = kycDeclarado && !editing;
   const identityNameFrozen = kycDeclarado || nameLocked;
   const identityDocFrozen = kycDeclarado || docLocked;
-  const blocked = isLoading || paused || !isRegistered || !walletAddress;
+  const chainReady = isCreditReady();
+  const blocked = isLoading || paused || !chainReady || !isRegistered || !walletAddress;
 
   const submit = async () => {
     if (!isValidKyc({ legalName, country, city, docType }) || !accepted) return;
@@ -158,7 +160,9 @@ export const KycSection: React.FC<KycSectionProps> = ({
         </View>
       ) : (
         <View>
-          {!isRegistered ? (
+          {!chainReady ? (
+            <AppText style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
+          ) : !isRegistered ? (
             <AppText style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</AppText>
           ) : null}
           <AppText style={[styles.label, { color: colors.text }]}>{t('kycLegalName')}</AppText>

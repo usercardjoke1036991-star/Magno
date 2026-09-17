@@ -425,7 +425,7 @@ const normalizeUsername = (value) => {
     .toLowerCase()
     .replace(/^@+/, '')
     .replace(/[^a-z0-9_]/g, '')
-    .slice(0, 20);
+      .slice(0, 100);
   if (!/^[a-z][a-z0-9_]{2,19}$/.test(username)) return '';
   const reserved = new Set([
     'admin',
@@ -1585,7 +1585,7 @@ const server = createServer(async (req, res) => {
     const wallets = (Array.isArray(body.wallets) ? body.wallets : [])
       .map((item) => String(item || '').trim().toLowerCase())
       .filter((item) => /^0x[0-9a-f]{40}$/.test(item))
-      .slice(0, 20);
+      .slice(0, 100);
     const profiles = {};
     for (const wallet of wallets) {
       const item = store.profiles[wallet];

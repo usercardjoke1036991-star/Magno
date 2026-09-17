@@ -117,6 +117,8 @@
 - Worker de OTP y correo en HTTPS 24/7 con Twilio SMS, sin tunel de prueba
 - Instalar en WSL las herramientas de ciberseguridad de la lista: Aderyn, Trivy, Semgrep, Mythril y OWASP ZAP (Ubuntu y Foundry ya estan)
 - Escanear Magno con Aderyn Trivy Semgrep Mythril y OWASP ZAP (Foundry Slither MobSF ya hechos)
+- Rankings de red (referidos, prestamos, fama, nivel y general) con podio 1-2-3 y marcos de gema; 1 USDT desbloquea correo KYC y telefono
+- Rankings con divisiones de 100, premio mensual del pool, tablero de bonos, visibilidad desde nivel 50 y ciclo infinito del bono 1000
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -210,3 +212,5 @@
 - [2026-09-14 17:55] Idea añadida al backlog: "Worker de OTP y correo en HTTPS 24/7 con Twilio SMS, sin tunel de prueba"
 - [2026-09-16 13:40] Idea añadida al backlog: "Instalar en WSL las herramientas de ciberseguridad de la lista: Aderyn, Trivy, S"
 - [2026-09-16 14:08] Idea añadida al backlog: "Escanear Magno con Aderyn Trivy Semgrep Mythril y OWASP ZAP (Foundry Slither Mob"
+- [2026-09-16 19:03] Idea añadida al backlog: "Rankings de red (referidos, prestamos, fama, nivel y general) con podio 1-2-3 y "
+- [2026-09-16 19:51] Idea añadida al backlog: "Rankings con divisiones de 100, premio mensual del pool, tablero de bonos, visib"

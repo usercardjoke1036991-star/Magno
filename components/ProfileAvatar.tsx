@@ -65,10 +65,13 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   const publicPhoto = profile?.publicPhoto && /^data:image\//i.test(profile.publicPhoto)
     ? profile.publicPhoto
     : '';
+  const sharedPhoto = publicView && profile?.photoUri && /^data:image\//i.test(profile.photoUri)
+    ? profile.photoUri
+    : '';
   const localPhoto = !publicView && profile?.photoUri && !/^https?:/i.test(profile.photoUri)
     ? profile.photoUri
     : '';
-  const photoUri = publicView ? publicPhoto : publicPhoto || localPhoto;
+  const photoUri = publicView ? publicPhoto || sharedPhoto : publicPhoto || localPhoto;
   const rank = level ? getRankForLevel(level) : null;
   const caption = rank && rankName ? formatRankLabel(rank, rankName) : '';
 

@@ -36,9 +36,12 @@ export function MilestoneBonusCatalog({
       </AppText>
       {milestoneLevels().filter((level) => level <= displayMaxLoanLevel(maxLevel)).map((level) => {
         const amount = formatUSD(milestoneBonusUsd(level));
+        const cap = displayMaxLoanLevel(maxLevel);
+        const cycling = level === cap && userLevel >= level;
         const claimed = lastHito >= level;
         const unlocked = userLevel >= level;
         const ready = canClaim && claimable === level;
+        const waitingCycle = cycling && claimed && !ready;
         return (
           <View
             key={level}
@@ -46,9 +49,9 @@ export function MilestoneBonusCatalog({
           >
             <View style={styles.row}>
               <AppIcon
-                name={claimed ? 'check' : unlocked ? 'star' : 'lock'}
+                name={waitingCycle ? 'star' : claimed ? 'check' : unlocked ? 'star' : 'lock'}
                 size={18}
-                color={claimed ? colors.success : unlocked ? colors.primary : colors.textMuted}
+                color={waitingCycle || unlocked ? colors.primary : claimed ? colors.success : colors.textMuted}
               />
               <View style={styles.body}>
                 <AppText style={[styles.title, { color: colors.text }]}>
@@ -56,15 +59,17 @@ export function MilestoneBonusCatalog({
                 </AppText>
                 <AppText style={[styles.amount, { color: colors.text }]}>{amount}</AppText>
                 <AppText style={[styles.meta, { color: colors.textMuted }]}>
-                  {claimed
-                    ? t('bonusClaimed')
-                    : ready
-                      ? t('bonusReady')
-                      : unlocked && !canClaim
-                        ? t('bonusLegacyContract')
-                        : unlocked
-                          ? t('bonusUnlockedWait')
-                          : t('bonusLocked')}
+                  {waitingCycle
+                    ? t('bonusMaxCycle')
+                    : claimed
+                      ? t('bonusClaimed')
+                      : ready
+                        ? t('bonusReady')
+                        : unlocked && !canClaim
+                          ? t('bonusLegacyContract')
+                          : unlocked
+                            ? t('bonusUnlockedWait')
+                            : t('bonusLocked')}
                 </AppText>
               </View>
             </View>
