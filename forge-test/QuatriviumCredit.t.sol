@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {QuatriviumCredit} from "../contracts/QuatriviumCredit.sol";
+import {QuatriviumLeveling} from "../contracts/QuatriviumLeveling.sol";
 import {ERC20Mock} from "../contracts/mocks/ERC20Mock.sol";
 import {MockV3Aggregator} from "../contracts/mocks/MockV3Aggregator.sol";
 
@@ -125,6 +126,30 @@ contract QuatriviumCreditForgeTest is Test {
         uint256 liquidity = credit.totalLiquidity(address(token));
         uint256 fees = credit.collectedFees(address(token));
         assertEq(cash + outstanding, liquidity + fees, "NAV broken");
+    }
+}
+
+contract QuatriviumLevelingForgeTest is Test {
+    function test_premio_asiento_matches_multiply_first() public {
+        QuatriviumLeveling leveling = new QuatriviumLeveling();
+        uint256 caja = 20_000 ether;
+        uint256 budget = leveling.presupuestoPremioMensual(caja, caja);
+        uint256 sumaPesos = 5050;
+        uint256 firstSeat = leveling.premioAsiento(caja, caja, 1, 2, 1, sumaPesos);
+        assertEq(firstSeat, (budget * 2 * 100) / (3 * sumaPesos));
+        uint256 lastSeat = leveling.premioAsiento(caja, caja, 2, 2, 100, sumaPesos);
+        assertEq(lastSeat, (budget * 1 * 1) / (3 * sumaPesos));
+        assertGt(firstSeat, lastSeat);
+    }
+
+    function testFuzz_division_weight_sum_is_exact(uint8 nRaw) public pure {
+        uint256 n = bound(nRaw, 1, 200);
+        uint256 sumDiv = (n * (n + 1)) / 2;
+        if (n % 2 == 0) {
+            assertEq(sumDiv, (n / 2) * (n + 1));
+        } else {
+            assertEq(sumDiv, n * ((n + 1) / 2));
+        }
     }
 }
 

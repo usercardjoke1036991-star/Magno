@@ -36,6 +36,9 @@ Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet
 - [2026-09-12] No hay destruir cuenta en la app. Una persona una linea. Formatear o cambiar VPN no crea otra: se recupera con las 12 palabras. Telefono y KYC on-chain bloquean una segunda linea Real.
 
 ## Cambios realizados
+- [2026-09-17] Foundry 1.8.3: 8/8 pass. No se cambio QuatriviumCredit (avisos de lint son diseno). Tests nuevos de premio en forge-test.
+- [2026-09-17] Slither 0.11.3 en vivo (WSL, Hardhat): 19 contratos, 79 detectores, 2 avisos Medium divide-before-multiply en premioAsiento. Son n(n+1)/2 exacto y la formula multiply-first ya aplicada. Sin bug de fondos.
+- [2026-09-17] PDF ssaas.pdf (scan 7am) confirma APK B5BD79B9 sin exp+. HIGH=huella. Sin cambios de codigo. Escanear solo localhost.
 - [2026-09-17] Auditoria sss.pdf: HIGH=huella, se quito exp+ de release. APK Escritorio SHA256 B5BD79B9 version 1.0.2 vc3. Escanear solo en localhost:8000.
 - [2026-09-17] APK MobSF regenerado 1.0.2 vc3 en Escritorio SHA256 1E36EC5B. Escanear solo en localhost:8000.
 - [2026-09-17] Auditoria profunda: padrino al validar el codigo, rankings sin usuario de sesion, premio de asiento multiply-first. Hardhat 168. Demo 14/15.
@@ -83,13 +86,10 @@ Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet
 - [2026-09-14] Auditoria completa: tsc 0, Hardhat 131/131, i18n 943, salud 14/14, conectores 210. Telefono: hub, credito, cuenta, red, marcos, pool, donar, bonos, personas, historial y ajustes sin crash.
 - [2026-09-14] Restaurado el catalogo de gemas (granate/citrino/onix). Metro recargado: el telefono muestra Granate, no Bronce.
 - [2026-09-14] Incrustaciones con fotos reales del catalogo: granate, aguamarina, citrino, topacio, turmalina, peridoto, esmeralda, zafiro, rubi, onix, diamante, amatista.
-- [2026-09-14] Gemas de cristal transparente: vidrio con luz interior, destellos y poco metal. Se ve el marco a traves de la piedra.
-- [2026-09-14] Gemas de marco con talla real: cabujon, perla, esmeralda y brillante. I 4, II 8 con garras, III 12 con mas fuego.
-- [2026-09-14] Marco mas ancho que la foto, gemas 4/8/12 por I II III, colores de division mas claros y saturados.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-17] Cambio: Auditoria sss.pdf: HIGH=huella, se quito exp+ de release. APK Escritorio SHA256 B5BD79B9 version 1.0.2 vc3. Escanear solo en localhost:8000.
+[2026-09-17] Cambio: Foundry 1.8.3: 8/8 pass. No se cambio QuatriviumCredit (avisos de lint son diseno). Tests nuevos de premio en forge-test.

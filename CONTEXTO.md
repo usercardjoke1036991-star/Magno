@@ -252,6 +252,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-17 | Foundry 1.8.3 en vivo: 8/8 tests (fuzz 256) incluyendo premioAsiento multiply-first y n(n+1)/2 exacto. Lint: tx.origin, timestamps y this.selector son diseño; no se toco el nucleo por EIP-170. Sin redespliegue. | — |
+| 2026-09-17 | Auditoria PDF MobSF ssaas.pdf del APK B5BD79B9 (1.0.2 vc3): 61/100 Grade A. exp+ Metro ya no aparece. HIGH CBC sigue siendo androidx.biometric (huella). Sin Twilio ni claves en el APK. OFAC vacio, 0 exportados. No se regenera APK: no hay fallo nuevo que no rompa el producto. Demo 14/15, falta mainnet. | — |
 | 2026-09-17 | Auditoria PDF MobSF sss.pdf (APK 1E36EC5B, 61/100 A): el HIGH CBC es androidx.biometric CryptoObjectUtils (huella, se mantiene). Native canary JNA/Hermes. El fallo real era el esquema Metro exp+ que el merger no quitaba. Ahora se borra en el manifiesto principal y el APK Desktop es SHA256 B5BD79B9 (1.0.2 vc3, solo quatrivium:// + https invite/history/room). No es Play ni mainnet. | — |
 | 2026-09-17 | APK release 1.0.2 versionCode 3 para MobSF local en Escritorio Quatrivium-Finance-MobSF.apk (67.25 MB, SHA256 1E36EC5B..., v3 CN=Quatrivium Finance, arm-only, minSdk 29). No es Play ni mainnet. | — |
 | 2026-09-17 | Auditoria productiva: el padrino se fija antes de guardar el usuario; /profiles no publica el usuario de sesion; premioAsiento multiplica antes de dividir. Hardhat 168, tsc 0, production 14/15. Sin mainnet ni APK. | — |
