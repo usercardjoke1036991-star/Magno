@@ -597,6 +597,8 @@ describe('demo credit gates', function () {
     expect(balances).to.not.include('canDonate: isDonationVisible()');
     const service = fs.readFileSync(path.join(__dirname, '..', 'services', 'quatriviumCreditService.ts'), 'utf8');
     expect(service).to.include('isAccessPaymentEnabled()');
+    expect(service).to.include('access-required');
+    expect(service).to.include('donado(userAddress)');
     expect(service).to.not.match(/donar:[\s\S]{0,80}!isDonationEnabled\(\)/);
     const banner = fs.readFileSync(path.join(__dirname, '..', 'components', 'CreditAccessBanner.tsx'), 'utf8');
     expect(banner).to.include("mode === 'demo'");
@@ -772,7 +774,8 @@ describe('demo credit gates', function () {
     expect(phoneUi).to.include('chargeVerificationFee');
     expect(phoneUi).to.include('vincularIdentidad');
     const phoneConfirm = phoneUi.slice(phoneUi.indexOf('const confirmCode'));
-    expect(phoneConfirm.indexOf('chargeVerificationFee')).to.be.below(phoneConfirm.indexOf('vincularIdentidad'));
+    expect(phoneConfirm.indexOf('canVincularIdentidad')).to.be.below(phoneConfirm.indexOf('chargeVerificationFee'));
+    expect(phoneConfirm.indexOf('chargeVerificationFee')).to.be.below(phoneConfirm.lastIndexOf('vincularIdentidad'));
     expect(phoneUi).to.not.include('depositarLiquidez');
     expect(phoneUi).to.not.include('retirarLiquidez');
     expect(phoneUi).to.not.include('verifyFeePhoneLead');
@@ -806,7 +809,8 @@ describe('demo credit gates', function () {
     expect(verifyFn).to.include('confirmEmailOtp');
     expect(verifyFn).to.include('saveVerifiedEmail');
     const lockUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
-    expect(lockUi).to.include('verifyEmailOtp');
+    expect(lockUi).to.not.include('verifyEmailOtp');
+    expect(lockUi).to.not.include('requestEmailOtp');
     expect(lockUi).to.not.include('chargeVerificationFee');
   });
 
@@ -1268,7 +1272,7 @@ describe('account entry — password, email and session', () => {
     expect(canSubmitRestorePhrase('uno dos tres')).to.equal(false);
     expect(canSubmitRestorePhrase('uno dos tres cuatro cinco seis siete ocho nueve diez once doce')).to.equal(true);
     function methodsForPurpose(purpose) {
-      if (purpose === 'signin') return ['email', 'pin', 'biometric', 'authenticator'];
+      if (purpose === 'signin') return ['password', 'pin', 'biometric', 'authenticator'];
       return ['pin', 'authenticator', 'biometric', 'password'];
     }
     expect(methodsForPurpose('unlock')).to.deep.equal(['pin', 'authenticator', 'biometric', 'password']);
@@ -1836,15 +1840,20 @@ describe('account entry — password, email and session', () => {
     const identity = fs.readFileSync(path.join(__dirname, '..', 'services', 'accountIdentity.ts'), 'utf8');
     expect(identity).to.include('restoreIdentityLocal');
     expect(identity).to.include('resumeDeviceIfNeeded');
+    expect(identity).to.include('else await setPhoneActive(true)');
     expect(identity).to.not.include('chargeVerificationFee');
     expect(identity).to.not.include('chargeFounderUsdt');
     const prefs = fs.readFileSync(path.join(__dirname, '..', 'services', 'authPrefs.ts'), 'utf8');
     expect(prefs).to.match(/ACTION_AUTH_METHODS: AuthMethod\[\] = \['pin', 'authenticator', 'biometric', 'password'\];/);
     expect(prefs).to.not.include("'phone'");
+    expect(prefs).to.include("['password', 'pin', 'biometric', 'authenticator']");
     const lock = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
     expect(lock).to.not.include("unlockMode === 'phone'");
+    expect(lock).to.not.include("unlockMode === 'email'");
     expect(lock).to.not.include('submitUnlockPhone');
+    expect(lock).to.not.include('submitUnlockEmail');
     expect(lock).to.not.include('requestPhoneOtp');
+    expect(lock).to.not.include('requestEmailOtp');
     expect(lock).to.include('restoreIdentityLocal');
     const funds = fs.readFileSync(path.join(__dirname, '..', 'components', 'FundsConfirmHost.tsx'), 'utf8');
     expect(funds).to.not.include("method === 'phone'");
@@ -1853,5 +1862,12 @@ describe('account entry — password, email and session', () => {
     expect(funds).to.not.include('requestEmailOtp');
     const walletCtx = fs.readFileSync(path.join(__dirname, '..', 'wallet', 'AppWalletContext.tsx'), 'utf8');
     expect(walletCtx).to.include('hydrateAccountIdentity');
+    const service = fs.readFileSync(path.join(__dirname, '..', 'services', 'quatriviumCreditService.ts'), 'utf8');
+    expect(service).to.include('access-required');
+    expect(service).to.include('canVincularIdentidad');
+    expect(service).to.include('.catch(() => false)');
+    const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
+    expect(home).to.include('livePhoneStepDone');
+    expect(gates).to.include('livePhoneStepDone');
   });
 });

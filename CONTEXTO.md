@@ -23,6 +23,7 @@ Magno/
 ├── metro.config.js                # Metro + stub snarkjs
 ├── hardhat.config.cjs             # Hardhat: tests y deploy Solidity
 ├── foundry.toml                   # Foundry overlay (forge-out/forge-cache, no mezclar con Hardhat)
+├── lib/forge-std/scripts/vm.py    # Vendor Foundry (no es módulo de producto)
 ├── forge-test/                    # Fuzz/invariantes Foundry (WSL)
 ├── zkService.ts                   # Reexport ZK experimental (stub Metro)
 ├── web3Config.tsx                 # AppKit / WalletConnect (BSC Demo y Real)
@@ -59,7 +60,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Textbelt SMS (OTP) / Twilio y WhatsApp Cloud de respaldo / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 1005 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 1013 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -254,6 +255,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-18 | Auditoria: restaurar identidad no apaga el telefono on-chain, Solicitar Real exige 1 USDT on-chain, el vinculo se previsualiza antes del 0.50, y el candado ya no envia OTP de correo. | — |
 | 2026-09-18 | Correo y numero salen del candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. Identidad de crédito no cambia. | — |
 | 2026-09-18 | Correo y numero quedan en la cuenta: viajan a otro celular sin re-OTP, se cambian o quitan en Ajustes, cada cambio cobra 0.50 USDT silencioso, y si se quitan hay que volver a verificar para el credito. | — |
 | 2026-09-18 | La tarifa 0.50 de correo y numero en Real queda silenciosa: sin texto, sin PIN extra, sin historial. El usuario solo confirma el codigo. | — |

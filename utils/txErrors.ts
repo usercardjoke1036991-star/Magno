@@ -27,6 +27,7 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['kyc required', 'errKycRequired'],
   ['identity required', 'errIdentityRequired'],
   ['email-required', 'errEmailRequired'],
+  ['access-required', 'creditAccessNeed'],
   ['phrase-required', 'seedNeedBeforeLoan'],
   ['phone taken', 'errPhoneTaken'],
   ['device taken', 'errDeviceTaken'],

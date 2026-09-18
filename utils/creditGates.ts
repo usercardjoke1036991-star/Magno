@@ -20,6 +20,11 @@ export function liveNeedsPhone(demo: boolean, identityBound: boolean, phoneActiv
   return !demo && !(identityBound && phoneActive);
 }
 
+/** Fila de teléfono del hub: hecha solo si el crédito ya no pide número. */
+export function livePhoneStepDone(demo: boolean, identityBound: boolean, phoneActive = true): boolean {
+  return !liveNeedsPhone(demo, identityBound, phoneActive);
+}
+
 /** Teléfono listo para crédito: atado, no quitado, y este aparato coincide o se reanuda en segundo plano. */
 export function phoneVerifiedOnThisDevice(
   identityBound: boolean,

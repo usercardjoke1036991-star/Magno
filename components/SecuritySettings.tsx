@@ -121,7 +121,7 @@ export const SecuritySettings: React.FC = () => {
   }, [shown]);
 
   const kycOk = userInfo.kycDeclarado;
-  const phoneOk = phoneActive;
+  const phoneOk = Boolean(phoneActive && userInfo.identityBound);
   const accessPaid = identityUnlocked(userInfo.donatedUsd || 0);
 
   const openIdentity = (next: 'kyc' | 'email' | 'phone', alreadyDone: boolean) => {

@@ -314,9 +314,13 @@ export const QuatriviumCreditService = {
     }
     if (!isDemoAccount()) {
       const email = await loadVerifiedEmail();
-      const phoneActive = await isPhoneActive().catch(() => true);
+      const phoneActive = await isPhoneActive().catch(() => false);
       const userAddress = await signer.getAddress();
       const credit = contractWith(signer);
+      const donated = await credit.donado(userAddress).catch(() => 0n);
+      if (BigInt(donated.toString()) < 10n ** 18n) {
+        throw new Error('access-required');
+      }
       let kycDeclarado = false;
       let identityBound = false;
       try {
@@ -511,6 +515,18 @@ export const QuatriviumCreditService = {
     return tx.wait();
   },
 
+  canVincularIdentidad: async (
+    phoneHash: string,
+    deviceHash: string,
+    deadline: number,
+    v: number,
+    r: string,
+    s: string
+  ) => {
+    const { signer } = await requireInternalSigner();
+    await contractWith(signer).vincularIdentidad.staticCall(phoneHash, deviceHash, deadline, v, r, s);
+  },
+
   vincularIdentidad: async (
     phoneHash: string,
     deviceHash: string,
@@ -520,7 +536,9 @@ export const QuatriviumCreditService = {
     s: string
   ) => {
     const { signer } = await requireInternalSigner();
-    const tx = await contractWith(signer).vincularIdentidad(phoneHash, deviceHash, deadline, v, r, s);
+    const credit = contractWith(signer);
+    await credit.vincularIdentidad.staticCall(phoneHash, deviceHash, deadline, v, r, s);
+    const tx = await credit.vincularIdentidad(phoneHash, deviceHash, deadline, v, r, s);
     return tx.wait();
   },
 

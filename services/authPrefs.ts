@@ -19,7 +19,7 @@ export const AUTH_METHODS: AuthMethod[] = ['password', 'email', 'pin', 'biometri
 export const ACTION_AUTH_METHODS: AuthMethod[] = ['pin', 'authenticator', 'biometric', 'password'];
 
 export function methodsForPurpose(purpose: AuthPurpose, _available: AuthMethod[] = []): AuthMethod[] {
-  if (purpose === 'signin') return ['email', 'pin', 'biometric', 'authenticator'];
+  if (purpose === 'signin') return ['password', 'pin', 'biometric', 'authenticator'];
   return [...ACTION_AUTH_METHODS];
 }
 
@@ -205,5 +205,5 @@ export async function fallbackAuthIfNeeded(removed: AuthMethod): Promise<void> {
     prefs[purpose] = slot(prefs[purpose].on, next, prefs[purpose].primaryOnly !== false);
     changed = true;
   }
-  if (changed) await persist(prefs);
+  if (changed) await persist(await sanitize(prefs));
 }

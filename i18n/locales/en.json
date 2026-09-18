@@ -752,7 +752,7 @@
   "securityEmailTodo": "No email",
   "securityEmailReplace": "Replace",
   "saveSession": "Save session",
-  "saveSessionLead": "This phone will not ask for email again to sign in.",
+  "saveSessionLead": "This phone will keep the session. Unlock uses PIN, authenticator, fingerprint or password.",
   "notificationEmail": "Email alerts",
   "notificationEmailHint": "Payments and alerts go to this email. Change it in Security.",
   "notificationEmailLink": "Link email in Security for alerts and password recovery.",

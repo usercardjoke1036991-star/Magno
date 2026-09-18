@@ -349,7 +349,7 @@ export const useHomeHandlers = ({
     const [hasEmail, phraseOk, phoneReady] = await Promise.all([
       loadVerifiedEmail().then((email) => Boolean(email)).catch(() => false),
       isPhraseBackedUp().catch(() => false),
-      isPhoneActive().catch(() => true),
+      isPhoneActive().catch(() => false),
     ]);
     if (creditNeedsPhrase(phraseOk)) {
       Alert.alert(t('seedBannerTitle'), t('seedNeedBeforeLoan'));

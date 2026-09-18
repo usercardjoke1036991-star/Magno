@@ -752,7 +752,7 @@
   "securityEmailTodo": "Sin correo",
   "securityEmailReplace": "Reemplazar",
   "saveSession": "Guardar sesión",
-  "saveSessionLead": "Este teléfono no volverá a pedir el correo para entrar.",
+  "saveSessionLead": "Este teléfono guardará la sesión. El desbloqueo usa PIN, autenticador, huella o contraseña.",
   "notificationEmail": "Avisos al correo",
   "notificationEmailHint": "Pagos y avisos a este correo. Cámbielo en Seguridad.",
   "notificationEmailLink": "Vincule el correo en Seguridad para avisos y recuperar contraseña.",

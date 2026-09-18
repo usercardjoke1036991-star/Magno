@@ -426,7 +426,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, CREDIT_VERIFY_EMAIL_USDT, CREDIT_VERIFY_PHONE_USDT, verificationFeeUsdt, verificationFeeLabel, hasCreditAccess, voluntaryDonateUsd, isHiddenVerificationDonation, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, livePhoneStepDone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, CREDIT_VERIFY_EMAIL_USDT, CREDIT_VERIFY_PHONE_USDT, verificationFeeUsdt, verificationFeeLabel, hasCreditAccess, voluntaryDonateUsd, isHiddenVerificationDonation, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
@@ -495,9 +495,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `README.md` — documentación (sí)
 
 ## Docs vs código
-### Avisos
-- Archivo 'lib/forge-std/scripts/vm.py' no aparece en CONTEXTO/VISION/README AUTO-README
-- Sugerencia: python actualizar_readme.py
+Sin desfases detectados entre docs y código.
 
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
@@ -505,6 +503,6 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - verificar_modulos: 0 crítico(s), 13 aviso(s)
 
 ## Estado
-**DESFASADO**
+**AL DÍA**
 
 _Inventario heurístico + docs + conexión estática. No afirma ejecución 100% en runtime._

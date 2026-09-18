@@ -1,9 +1,10 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Identidad de cuenta lista: correo y numero viajan, se cambian o quitan en Ajustes, y el credito se bloquea si los quitan. El candado no usa correo ni celular. Mainnet sigue pendiente de BNB y CONFIRM_MAINNET.
+Auditoria profunda hecha: candado sin correo/celular, identidad de credito estable, 1 USDT exigido al pedir en Real. Mainnet sigue pendiente de BNB y CONFIRM_MAINNET.
 
 ## Decisiones
+- [2026-09-18] El 1 USDT de Real se exige tambien en el servicio al pedir, no solo en la pantalla. Demo sigue libre.
 - [2026-09-18] Correo y celular no son candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. El OTP de identidad sigue en Inicio y Ajustes.
 - [2026-09-18] Correo y numero son de la cuenta. Otro celular los restaura sin OTP. Cambiar o volver a agregar cobra 0.50. Quitar no cobra, pero bloquea el credito hasta verificar de nuevo en Inicio o Ajustes. No se desata on-chain al quitar el numero.
 - [2026-09-18] Correo y numero se ven gratis. El 0.50 USDT se cobra por detras al confirmar el codigo, sin mostrarlo.
@@ -37,6 +38,7 @@ Identidad de cuenta lista: correo y numero viajan, se cambian o quitan en Ajuste
 - [2026-09-13] Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real.
 
 ## Cambios realizados
+- [2026-09-18] Auditoria: restaurar telefono on-chain sin MSISDN, 1 USDT al pedir, preview de vinculo antes del 0.50, candado sin OTP de correo.
 - [2026-09-18] Correo y celular fuera del candado para no gastar Textbelt ni Resend al desbloquear.
 - [2026-09-18] Identidad de cuenta: restore/resume en worker, quitar en Ajustes, cobro 0.50 solo al confirmar cambio o alta.
 - [2026-09-18] Cobro de verificacion Real invisible en UI: silent donar, sin avisos de 0.50, oculto en historial y en donacion voluntaria.
@@ -94,4 +96,4 @@ Identidad de cuenta lista: correo y numero viajan, se cambian o quitan en Ajuste
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-18] Cambio: Correo y celular fuera del candado. Identidad de credito y cobro 0.50 al confirmar siguen.
+[2026-09-18] Cambio: Auditoria profunda. Candado sin OTP, 1 USDT al pedir, restaurar identidad y preview de vinculo antes del cobro.

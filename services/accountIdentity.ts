@@ -65,9 +65,10 @@ export async function restoreIdentityLocal(walletAddress: string): Promise<Ident
   try {
     const status = await fetchIdentityStatus(walletAddress);
     if (status.emailActive && status.email) await saveVerifiedEmail(status.email);
-    else await clearVerifiedEmail();
-    if (status.phoneActive && status.phone) await saveVerifiedPhone(status.phone);
-    else await setPhoneActive(false);
+    else if (!status.emailActive) await clearVerifiedEmail();
+    if (!status.phoneActive) await setPhoneActive(false);
+    else if (status.phone) await saveVerifiedPhone(status.phone);
+    else await setPhoneActive(true);
     return status;
   } catch {
     return null;

@@ -7,6 +7,7 @@
 [Estructura técnica sugerida]
 
 ## 📦 Módulos
+- ✅ lib/forge-std/scripts/vm.py — Vendor Foundry (no es módulo de producto)
 - ✅ index.js — Punto de entrada principal
 - ✅ app.js — Punto de entrada principal
 - ✅ package.json — Configuración de dependencias y scripts
@@ -26,6 +27,7 @@
 - ✅ auditoria profunda visual y de codigo de toda la app — Marcado como completado manualmente
 - ✅ Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h — Marcado como completado manualmente
 - ✅ identidad de cuenta correo y telefono — Marcado como completado manualmente
+- ✅ auditoria profunda y completa antes de mainnet — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -241,3 +243,4 @@
 - [2026-09-18 01:07] Idea añadida al backlog: "En Cuenta Real cada confirmacion de correo y de numero cobra 0.50 USDT a la fund"
 - [2026-09-18 02:23] Idea añadida al backlog: "Correo y numero viajan con la cuenta; se pueden cambiar o quitar en Ajustes; cad"
 - [2026-09-18 02:27] Módulo completado: 'identidad de cuenta correo y telefono'
+- [2026-09-18 03:18] Módulo completado: 'auditoria profunda y completa antes de mainnet'

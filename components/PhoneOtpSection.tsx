@@ -94,6 +94,14 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
     setError('');
     try {
       const attestation = await verifyPhoneOtp(walletAddress, phone, code);
+      await QuatriviumCreditService.canVincularIdentidad(
+        attestation.phoneHash,
+        attestation.deviceHash,
+        attestation.deadline,
+        attestation.v,
+        attestation.r,
+        attestation.s
+      );
       const charged = await chargeVerificationFee(attestation.phoneHash || normalizePhone(phone));
       if (charged !== 'paid') {
         setError(t('otpVerifyFailed'));
