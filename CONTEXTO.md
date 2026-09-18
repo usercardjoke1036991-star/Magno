@@ -254,6 +254,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-17 | Auditoria de contratos: sin bug de fondos. Nucleo 24555 B. LoanLadder.requiredCount de L1000 alineado con el nucleo (4955). | — |
 | 2026-09-17 | Worker testnet arranca sin dominio ni Resend. Render usa ATTESTER_PRIVATE_KEY, no la del owner. EMAIL_FROM vacio hasta verificar el dominio. | — |
 | 2026-09-17 | Demo opera sin correo, numero, KYC ni 1 USDT. Esos candados quedan solo en Real y persisten al completarlos. | — |
 | 2026-09-17 | Conexion OTP: app -> worker Render -> Textbelt SMS y Resend correo. /health expone textbelt, resend y attester sin claves. ATTESTER_PRIVATE_KEY en Render (sync false). Nunca API de SMS en AdminPanel. | — |

@@ -14,7 +14,7 @@ contract LoanLadder {
     uint256 public constant RATE_DROPS = 394;
 
     function requiredCount(uint256 id) external pure returns (uint256) {
-        if (id < 1 || id >= MAX_NIVEL) return 0;
+        if (id < 1 || id > MAX_NIVEL) return 0;
         if (id <= 1) return 3;
         if (id < 10) return 5;
         unchecked {

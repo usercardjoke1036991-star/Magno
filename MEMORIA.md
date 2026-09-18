@@ -36,6 +36,7 @@ Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet
 - [2026-09-12] Una sola sesion iniciada a la vez por cuenta. El ultimo telefono que entra echa al anterior.
 
 ## Cambios realizados
+- [2026-09-17] Auditoria de contratos: sin perdida de fondos. Nucleo 24555 B. LoanLadder L1000 requiredCount alineado a 4955.
 - [2026-09-17] Auditoria para iniciar Render: worker testnet sin correo; attester explicito; EMAIL_FROM no se fuerza.
 - [2026-09-17] Demo libre de identidad y de 1 USDT; Real sigue pidiendo primero el acceso y luego correo, numero y KYC.
 - [2026-09-17] Auditoria de conexion: health del worker reporta textbelt/resend/attester; Render pide TEXTBELT, Resend y attester; la app de preview/produccion apunta a notify.quatriviumcredit.app
@@ -85,11 +86,10 @@ Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet
 - [2026-09-14] Textos legales y ficha Play reescritos: 1000 niveles, frase 24, KYC local, pool locked, sin destruir cuenta. Grafico e icono de tienda generados.
 - [2026-09-14] Auditoria en vivo Real: el nivel 1 ya no dice Disponible si mainnet no esta listo; muestra Pronto. Hub, credito, red, historial y donar abiertos sin crash.
 - [2026-09-14] Auditoria productiva: historial, referidos, credito, donar y cuenta corregidos para Demo y Real.
-- [2026-09-14] Auditoria del pool: Demo muestra el banco de 2000 USDT en solo lectura, sin aportar. Real no enseña NAV 0 ni formulario falso. El aporte no promete rendimiento retirable. LinkedWalletCard en la sala Pool.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-17] Cambio: Auditoria para iniciar Render: worker testnet sin correo; attester explicito; EMAIL_FROM no se fuerza.
+[2026-09-17] Cambio: Auditoria de contratos: sin perdida de fondos. Nucleo 24555 B. LoanLadder L1000 requiredCount alineado a 4955.

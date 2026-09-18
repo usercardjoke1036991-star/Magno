@@ -64,12 +64,18 @@ describe('QuatriviumCredit - 1000 loan levels', function () {
   it('keeps LoanLadder in lockstep with the core formula', async () => {
     const { contract } = await deployProtocol();
     const ladder = await (await ethers.getContractFactory('LoanLadder')).deploy();
+    const leveling = await (await ethers.getContractFactory('QuatriviumLeveling')).deploy();
     for (const id of [101, 500, 1000]) {
       const [monto, plazo, tasa] = await contract.niveles(id);
       const row = await ladder.params(id);
       expect(row.monto).to.equal(monto);
       expect(row.plazo).to.equal(plazo);
       expect(row.tasa).to.equal(tasa);
+    }
+    for (const id of [1, 9, 10, 100, 1000]) {
+      const need = id <= 1 ? 3n : (id < 10 ? 5n : BigInt(5 * (id - 9)));
+      expect(await ladder.requiredCount(id), `ladder L${id}`).to.equal(need);
+      expect(await leveling.requiredCount(id), `leveling L${id}`).to.equal(need);
     }
   });
 
