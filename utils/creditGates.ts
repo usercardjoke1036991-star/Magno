@@ -38,6 +38,11 @@ export function liveNeedsDeviceMatch(demo: boolean, deviceMatches: boolean): boo
   return !demo && !deviceMatches;
 }
 
+/** Cuenta Real: 1 USDT de acceso una vez. Demo no lo pide. */
+export function liveNeedsAccess(demo: boolean, paidUsd: number): boolean {
+  return !demo && !hasCreditAccess(paidUsd);
+}
+
 export function liveCreditReady(demo: boolean, flags: LiveCreditFlags): boolean {
   return (
     !liveNeedsPhrase(flags.phraseBackedUp) &&
@@ -50,8 +55,9 @@ export function liveCreditReady(demo: boolean, flags: LiveCreditFlags): boolean 
 
 export type LoanGateBannerRow = 'phrase' | 'email' | 'kyc' | 'phone';
 
-/** Correo, número y KYC solo después del 1 USDT de acceso. */
+/** Correo, número y KYC solo en Real, después del 1 USDT. Demo no abre esa verificación. */
 export function identityUnlocked(paidUsd: number): boolean {
+  if (isDemoAccount()) return false;
   return hasCreditAccess(paidUsd);
 }
 
@@ -107,7 +113,7 @@ export function creditNeedsDeviceMatch(deviceMatches: boolean): boolean {
 
 export const CREDIT_ACCESS_USDT = 1;
 
-/** 1 USDT de acceso, una vez. Demo y Real. */
+/** 1 USDT de acceso pagado on-chain. El candado de la app solo aplica en Real. */
 export function hasCreditAccess(paidUsd: number): boolean {
   const paid = Number(paidUsd);
   return Number.isFinite(paid) && paid + 1e-9 >= CREDIT_ACCESS_USDT;
@@ -135,7 +141,7 @@ export function classifyDonationKind(usdAmount: number, isFirstDonation: boolean
 }
 
 export function creditNeedsAccess(paidUsd: number): boolean {
-  return !hasCreditAccess(paidUsd);
+  return liveNeedsAccess(isDemoAccount(), paidUsd);
 }
 
 /** El botón de 1 USDT se enciende si el contrato puede donar y hay destino. No usa la sala Donar. */

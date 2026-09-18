@@ -3,8 +3,8 @@
  * Uso: npm run notify          (demo / testnet, lee .env y .env.worker si existe)
  *      npm run notify:prod     (real / mainnet, exige .env.worker)
  *
- * 1. Cree un bot con @BotFather y ponga TELEGRAM_BOT_TOKEN.
- * 2. (Opcional) WhatsApp Cloud API: WHATSAPP_TOKEN y WHATSAPP_PHONE_NUMBER_ID.
+ * 1. OTP SMS: TEXTBELT_API_KEY (pago). Twilio y WhatsApp Cloud son respaldo.
+ * 2. (Opcional) Telegram: TELEGRAM_BOT_TOKEN. WhatsApp: WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID.
  * 3. El usuario vincula su número o abre el bot desde la app.
  */
 import { createServer } from 'node:http';
@@ -27,6 +27,7 @@ if (existsSync(workerEnv)) {
 }
 
 const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = createRequire(import.meta.url)('./bscNetworks.cjs');
+const { sendTextbeltSms, isTextbeltConfigured } = createRequire(import.meta.url)('./textbeltSms.cjs');
 
 const PORT = Number(process.env.PORT || process.env.NOTIFY_PORT || 8787);
 const DATA_FILE = process.env.NOTIFY_DATA_FILE
@@ -93,6 +94,8 @@ const rpcUnhealthy = (error) =>
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || '';
 const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+const TEXTBELT_KEY = process.env.TEXTBELT_API_KEY || process.env.TEXTBELT_KEY || '';
+const TEXTBELT_SENDER = process.env.TEXTBELT_SENDER || 'Quatrivium';
 const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID || '';
 const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_FROM = process.env.TWILIO_FROM || '';
@@ -113,9 +116,19 @@ if (isMainnet && sameKey(ATTESTER_EXPLICIT, DEPLOY_KEY)) {
   console.error('Mainnet: ATTESTER_PRIVATE_KEY debe ser distinta de PRIVATE_KEY.');
   process.exit(1);
 }
-// Testnet: el contrato deja attester = primer admin (owner). Firmar con esa llave.
-// Mainnet: ATTESTER_PRIVATE_KEY distinta del owner.
-const ATTESTER_KEY = isMainnet ? ATTESTER_EXPLICIT : DEPLOY_KEY || ATTESTER_EXPLICIT;
+// Render y testnet: se firma con ATTESTER_PRIVATE_KEY. Fallback local: PRIVATE_KEY del primer admin.
+// Mainnet: solo ATTESTER_PRIVATE_KEY, distinta del owner. Nunca PRIVATE_KEY en Render.
+const ATTESTER_KEY = ATTESTER_EXPLICIT || (!isMainnet ? DEPLOY_KEY : '');
+let attesterReady = false;
+try {
+  if (ATTESTER_KEY) {
+    new Wallet(ATTESTER_KEY);
+    attesterReady = true;
+  }
+} catch {
+  console.error('ATTESTER_PRIVATE_KEY no es una clave Ethereum. No pulse Generate; pegue la clave de la billetera attester.');
+  if (isMainnet) process.exit(1);
+}
 const START_BLOCK = Number(process.env.EXPO_PUBLIC_CONTRACT_START_BLOCK || 0);
 const ADMIN_CHAT = process.env.TELEGRAM_ADMIN_CHAT_ID || '';
 const CORS_ORIGINS = (process.env.NOTIFY_CORS_ORIGIN || '*')
@@ -127,8 +140,11 @@ const hashPhone = (phone) => keccak256(toUtf8Bytes(`quatrivium.phone.v1:${DATA_K
 const hashEmail = (email) => keccak256(toUtf8Bytes(`quatrivium.email.v1:${DATA_KEY_RAW}:${email}`));
 const BIND = process.env.NOTIFY_BIND || (process.env.PORT ? '0.0.0.0' : '127.0.0.1');
 const TRUST_PROXY = process.env.NOTIFY_TRUST_PROXY === '1' || Boolean(process.env.PORT);
+const hasTextbelt = isTextbeltConfigured(TEXTBELT_KEY);
 const hasSms =
-  Boolean(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM) || Boolean(WHATSAPP_TOKEN && WHATSAPP_PHONE_ID);
+  hasTextbelt ||
+  Boolean(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM) ||
+  Boolean(WHATSAPP_TOKEN && WHATSAPP_PHONE_ID);
 const hasEmail = Boolean(RESEND_KEY && EMAIL_FROM);
 if (DATA_KEY_RAW.length < 16) {
   console.error('NOTIFY_DATA_KEY de al menos 16 caracteres es obligatorio (cifra teléfonos y Telegram en disco).');
@@ -147,7 +163,7 @@ if (isMainnet && !ATTESTER_KEY) {
   process.exit(1);
 }
 if (isMainnet && !hasSms) {
-  console.error('Mainnet: configure Twilio o WhatsApp Cloud API para el OTP.');
+  console.error('Mainnet: configure TEXTBELT_API_KEY, Twilio o WhatsApp Cloud API para el OTP.');
   process.exit(1);
 }
 if (isMainnet && !hasEmail) {
@@ -650,6 +666,21 @@ const twilioForm = (url, params) =>
     body: new URLSearchParams(params),
   });
 
+const sendTextbelt = async (phone, text) => {
+  if (!hasTextbelt || !phone) return false;
+  const e164 = normalizeE164(phone);
+  if (!e164) {
+    console.error('Textbelt', 'phone');
+    return false;
+  }
+  const result = await sendTextbeltSms(e164, text, { key: TEXTBELT_KEY, sender: TEXTBELT_SENDER });
+  if (!result.ok) {
+    console.error('Textbelt', result.error || 'fail');
+    return false;
+  }
+  return true;
+};
+
 const sendSms = async (phone, text) => {
   if (!TWILIO_SID || !TWILIO_TOKEN || !TWILIO_FROM || !phone) return false;
   const result = await twilioForm(
@@ -709,6 +740,7 @@ const checkTwilioVerify = async (phone, code) => {
 
 const deliverOtp = async (phone, code) => {
   const text = `Quatrivium Finance: su código de autenticación es ${code}. Caduca en 10 minutos. No lo comparta.`;
+  if (await sendTextbelt(phone, text)) return { channel: 'sms', via: 'textbelt' };
   if (await sendSms(phone, text)) return { channel: 'sms', via: 'body' };
   const verified = await startTwilioVerify(phone, code);
   if (verified.ok) return { channel: 'sms', via: verified.custom ? 'verify-custom' : 'twilio-verify' };
@@ -1157,6 +1189,9 @@ const server = createServer(async (req, res) => {
       rpc: Boolean(identityProvider),
       email: hasEmail,
       sms: hasSms,
+      textbelt: hasTextbelt,
+      resend: hasEmail,
+      attester: attesterReady,
     });
     return;
   }
@@ -1885,10 +1920,13 @@ server.headersTimeout = 46_000;
 server.maxHeadersCount = 40;
 server.listen(PORT, BIND, () => {
   console.log(`Avisos Quatrivium Finance en http://${BIND}:${PORT}`);
-  console.log(`Correo Resend: ${hasEmail ? 'listo' : 'sin RESEND_API_KEY o EMAIL_FROM'}`);
-  console.log(`SMS Twilio: ${hasSms ? 'listo' : 'no configurado (falta SID, token o FROM)'}`);
+  console.log(`Red: ${isMainnet ? 'mainnet' : 'testnet'} chain ${CHAIN_ID}`);
+  console.log(`Correo Resend: ${hasEmail ? 'listo' : 'omitido (sin dominio/Resend; el SMS no lo necesita)'}`);
+  console.log(`SMS Textbelt: ${hasTextbelt ? 'listo' : 'no configurado'}`);
+  console.log(`SMS Twilio: ${TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM ? 'listo' : 'no configurado'}`);
   try {
-    if (ATTESTER_KEY) console.log(`Attester de firma: ${new Wallet(ATTESTER_KEY).address}`);
+    if (attesterReady) console.log(`Attester de firma: ${new Wallet(ATTESTER_KEY).address}`);
+    else console.warn('Sin attester: el SMS puede salir y el crédito no vincula el número.');
   } catch {
     console.warn('Attester de firma: llave inválida');
   }

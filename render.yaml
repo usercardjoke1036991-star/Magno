@@ -1,7 +1,8 @@
 # Worker 24/7 en Render (OTP, correo, perfiles).
 # Blueprint: New + Blueprint, o deja el formulario Docker con Dockerfile.notify.
-# Secretos (Twilio, Resend) se piden en el dashboard (sync: false).
-# No incluir llaves de owner ni attester de mainnet aquí.
+# Secretos (Textbelt, Resend, attester de firma OTP) se piden en el dashboard (sync: false).
+# EMAIL_FROM puede ir vacío hasta comprar y verificar el dominio en Resend.
+# Nunca PRIVATE_KEY de owner. El attester de Demo/firma OTP sí: sin él el SMS llega y el crédito no vincula.
 
 services:
   - type: web
@@ -22,6 +23,7 @@ services:
         - .dockerignore
         - scripts/notify-worker.mjs
         - scripts/bscNetworks.cjs
+        - scripts/textbeltSms.cjs
         - render.yaml
     envVars:
       - key: NOTIFY_BIND
@@ -38,6 +40,16 @@ services:
         value: "*"
       - key: NOTIFY_DATA_KEY
         generateValue: true
+      - key: TEXTBELT_API_KEY
+        sync: false
+      - key: TEXTBELT_SENDER
+        value: "Quatrivium"
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: ATTESTER_PRIVATE_KEY
+        sync: false
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
@@ -45,10 +57,6 @@ services:
       - key: TWILIO_FROM
         sync: false
       - key: TWILIO_VERIFY_SERVICE_SID
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-      - key: EMAIL_FROM
         sync: false
       - key: TELEGRAM_BOT_TOKEN
         sync: false

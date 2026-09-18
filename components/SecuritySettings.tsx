@@ -121,6 +121,7 @@ export const SecuritySettings: React.FC = () => {
   const accessPaid = identityUnlocked(userInfo.donatedUsd || 0);
 
   const openIdentity = (next: 'kyc' | 'email' | 'phone', alreadyDone: boolean) => {
+    if (demoAccount) return;
     if (!accessPaid && !alreadyDone) {
       Alert.alert(t('creditAccessTitle'), t('identityNeedAccess'));
       return;
@@ -346,20 +347,24 @@ export const SecuritySettings: React.FC = () => {
       <AppText style={[styles.lead, { color: colors.textMuted }]}>
         {demoAccount ? t('securityLeadDemo') : t('securityLead')}
       </AppText>
-      <Row
-        icon="id"
-        label={t('securityKyc')}
-        hint={kycOk ? t('securityKycDone') : accessPaid ? t('securityKycTodo') : t('identityNeedAccess')}
-        status={kycOk ? 'done' : accessPaid ? 'warn' : 'todo'}
-        onPress={() => openIdentity('kyc', kycOk)}
-      />
-      <Row
-        icon="id"
-        label={t('securityEmail')}
-        hint={email || (accessPaid ? t('securityEmailTodo') : t('identityNeedAccess'))}
-        status={email ? 'done' : accessPaid ? 'warn' : 'todo'}
-        onPress={() => openIdentity('email', Boolean(email))}
-      />
+      {demoAccount ? null : (
+        <>
+          <Row
+            icon="id"
+            label={t('securityKyc')}
+            hint={kycOk ? t('securityKycDone') : accessPaid ? t('securityKycTodo') : t('identityNeedAccess')}
+            status={kycOk ? 'done' : accessPaid ? 'warn' : 'todo'}
+            onPress={() => openIdentity('kyc', kycOk)}
+          />
+          <Row
+            icon="id"
+            label={t('securityEmail')}
+            hint={email || (accessPaid ? t('securityEmailTodo') : t('identityNeedAccess'))}
+            status={email ? 'done' : accessPaid ? 'warn' : 'todo'}
+            onPress={() => openIdentity('email', Boolean(email))}
+          />
+        </>
+      )}
       <Row
         icon="lock"
         label={t('securityPin')}
@@ -381,13 +386,15 @@ export const SecuritySettings: React.FC = () => {
         status={backedUp ? 'done' : 'todo'}
         onPress={() => setPanel('phrase')}
       />
-      <Row
-        icon="phone"
-        label={t('securityPhone')}
-        hint={phoneOk ? t('securityPhoneDone') : accessPaid ? t('securityPhoneTodo') : t('identityNeedAccess')}
-        status={phoneOk ? 'done' : accessPaid ? 'warn' : 'todo'}
-        onPress={() => openIdentity('phone', phoneOk)}
-      />
+      {demoAccount ? null : (
+        <Row
+          icon="phone"
+          label={t('securityPhone')}
+          hint={phoneOk ? t('securityPhoneDone') : accessPaid ? t('securityPhoneTodo') : t('identityNeedAccess')}
+          status={phoneOk ? 'done' : accessPaid ? 'warn' : 'todo'}
+          onPress={() => openIdentity('phone', phoneOk)}
+        />
+      )}
       <Row
         icon="lock"
         label={t('authMethodsTitle')}

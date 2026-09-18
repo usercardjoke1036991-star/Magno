@@ -124,6 +124,8 @@
 - codigo de referido solo al crear cuenta, vacio inicia cadena propia atada al fundador, vinculo permanente
 - worker 24/7 en Hetzner Cloud con Docker y Caddy HTTPS
 - Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y health /health
+- OTP de telefono por Textbelt en el worker (SMS de pago, no Twilio)
+- en Demo usar credito sin correo, numero, KYC ni pago de 1 USDT; esos requisitos solo en Real y quedan al completarlos
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -225,3 +227,5 @@
 - [2026-09-16 23:15] Idea añadida al backlog: "Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h"
 - [2026-09-16 23:15] Módulo completado: 'Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h'
 - [2026-09-17 01:16] Módulo completado: 'auditoria profunda del proyecto y correccion de todo lo que falle para dejar Demo 100 por ciento productivo'
+- [2026-09-17 19:02] Idea añadida al backlog: "OTP de telefono por Textbelt en el worker (SMS de pago, no Twilio)"
+- [2026-09-17 19:30] Idea añadida al backlog: "en Demo usar credito sin correo, numero, KYC ni pago de 1 USDT; esos requisitos "

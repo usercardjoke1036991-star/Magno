@@ -283,6 +283,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/set-sms-keys.mjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
+- `scripts/textbeltSms.cjs` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
 - `scripts/_audit-bytecode.cjs` — módulo JS/TS
 - `scripts/_dump-ui-nodes.py` — módulo Python
@@ -383,6 +384,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/render-notify.test.js` — módulo JS/TS
 - `test/security.test.js` — módulo JS/TS
 - `test/sponsor-lock.test.js` — módulo JS/TS
+- `test/textbelt-notify.test.js` — módulo JS/TS
 - `theme/androidText.ts` — módulo JS/TS
   - Funciones/clases: remapAndroidTextStyle, setInterReady
 - `theme/palette.ts` — módulo JS/TS
@@ -412,7 +414,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS

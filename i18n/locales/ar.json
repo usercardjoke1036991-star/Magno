@@ -499,7 +499,7 @@
   "kycBannerDone": "تم إقرار الهوية. يمكنك العمل بمحفظتك.",
   "securityTitle": "الأمان",
   "securityLead": "الهوية والرقم مطلوبان للقروض في الوضع الحقيقي.",
-  "securityLeadDemo": "في التجريب لا يُطلب KYC ولا هاتف.",
+  "securityLeadDemo": "في التجريب لا يُطلب بريد ولا هاتف ولا KYC ولا 1 USDT. ذلك للحساب الحقيقي.",
   "securityKyc": "KYC (مطلوب للائتمان)",
   "securityKycDemo": "KYC (اختياري في العرض)",
   "securityKycDone": "تم توقيع الإقرار. يمكنك العمل بالائتمان.",

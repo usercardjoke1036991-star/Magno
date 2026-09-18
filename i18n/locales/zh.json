@@ -499,7 +499,7 @@
   "kycBannerDone": "身份已声明。您可以使用钱包进行操作。",
   "securityTitle": "安全",
   "securityLead": "实名和电话是真实模式贷款所必需的。",
-  "securityLeadDemo": "演示模式不要求 KYC 或电话。",
+  "securityLeadDemo": "演示模式不要求邮箱、电话、KYC 或 1 USDT。这些只在真实账户中。",
   "securityKyc": "KYC（信贷必填）",
   "securityKycDemo": "KYC（演示可选）",
   "securityKycDone": "声明已签署。可以使用信贷。",

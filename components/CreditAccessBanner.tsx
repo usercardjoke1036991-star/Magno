@@ -24,11 +24,11 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const { mode } = useAppMode();
-  if (hasCreditAccess(paidUsd)) {
+  if (mode === 'demo' || hasCreditAccess(paidUsd)) {
     return null;
   }
 
-  const pendingLead = mode === 'demo' ? t('configWarn') : t('creditAccessPending');
+  const pendingLead = t('creditAccessPending');
 
   return (
     <View style={[styles.box, { borderColor: colors.border, backgroundColor: colors.surface }]}>

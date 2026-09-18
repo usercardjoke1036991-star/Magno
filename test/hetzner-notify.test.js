@@ -16,7 +16,7 @@ describe('Hetzner notify worker pack', function () {
     expect(compose).to.match(/["']443:443["']/);
     expect(caddy).to.include('reverse_proxy notify:8787');
     expect(deploy).to.include('HETZNER_HOST');
-    expect(deploy).to.include('NOTIFY_DATA_KEY');
+    expect(deploy).to.include('textbeltSms.cjs');
     expect(deploy).to.not.include('console.log(env');
   });
 

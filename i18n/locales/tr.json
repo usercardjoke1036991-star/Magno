@@ -499,7 +499,7 @@
   "kycBannerDone": "Kimlik beyan edildi. Cüzdanınızla işlem yapabilirsiniz.",
   "securityTitle": "Güvenlik",
   "securityLead": "Gerçek modda krediler için kimlik ve numara gerekir.",
-  "securityLeadDemo": "Demoda KYC veya telefon istenmez.",
+  "securityLeadDemo": "Demoda e-posta, telefon, KYC veya 1 USDT istenmez. Bunlar Real hesabında kalır.",
   "securityKyc": "KYC (kredi için zorunlu)",
   "securityKycDemo": "KYC (demoda isteğe bağlı)",
   "securityKycDone": "Beyan imzalandı. Krediyle işlem yapabilirsiniz.",

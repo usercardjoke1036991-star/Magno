@@ -170,6 +170,10 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(worker).to.include("process.env.NOTIFY_BIND || (process.env.PORT ? '0.0.0.0'");
     expect(worker).to.include('NOTIFY_DATA_FILE');
     expect(worker).to.include('sms: hasSms');
+    expect(worker).to.include('textbelt: hasTextbelt');
+    expect(worker).to.include('resend: hasEmail');
+    const textbelt = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'textbeltSms.cjs'), 'utf8');
+    expect(textbelt).to.include('https://textbelt.com/text');
     expect(worker).to.include('BSC_MAINNET.chainId');
     expect(worker).to.include('0x0000000000000000000000000000000000000001');
     expect(worker).to.include('verify.twilio.com');
@@ -536,15 +540,21 @@ describe('demo credit gates', function () {
     return Boolean(hash) && !/^0x0+$/i.test(hash);
   }
 
-  it('requires a one-time 1 USDT access fee before any loan', function () {
+  it('requires a one-time 1 USDT access fee in Real before any loan', function () {
     function hasCreditAccess(paidUsd) {
       const paid = Number(paidUsd);
       return Number.isFinite(paid) && paid + 1e-9 >= 1;
+    }
+    function liveNeedsAccess(demo, paidUsd) {
+      return !demo && !hasCreditAccess(paidUsd);
     }
     expect(hasCreditAccess(0)).to.equal(false);
     expect(hasCreditAccess(0.99)).to.equal(false);
     expect(hasCreditAccess(1)).to.equal(true);
     expect(hasCreditAccess(5)).to.equal(true);
+    expect(liveNeedsAccess(false, 0)).to.equal(true);
+    expect(liveNeedsAccess(false, 1)).to.equal(false);
+    expect(liveNeedsAccess(true, 0)).to.equal(false);
     function canPayCreditAccess({ protocolCanDonate, founderAddress, accessEnabled }) {
       return Boolean(protocolCanDonate && String(founderAddress || '').trim() && accessEnabled);
     }
@@ -573,6 +583,7 @@ describe('demo credit gates', function () {
     expect(loans).to.include('isAccessPaymentEnabled');
     const gate = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
     expect(gate).to.include('creditNeedsAccess');
+    expect(gate).to.include('isDemoAccount()');
     expect(gate).to.include('isAccessPaymentEnabled');
     expect(gate).to.include('fundInternalFromExternal');
     expect(gate).to.include('mintDemoUsdtTo');
@@ -585,17 +596,37 @@ describe('demo credit gates', function () {
     expect(service).to.include('isAccessPaymentEnabled()');
     expect(service).to.not.match(/donar:[\s\S]{0,80}!isDonationEnabled\(\)/);
     const banner = fs.readFileSync(path.join(__dirname, '..', 'components', 'CreditAccessBanner.tsx'), 'utf8');
+    expect(banner).to.include("mode === 'demo'");
     expect(banner).to.include('pendingLead');
     expect(banner).to.include("canPay ? t('creditAccessLead') : pendingLead");
     expect(banner).to.include('{canPay ? (');
+    const gatesSrc = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
+    expect(gatesSrc).to.include('liveNeedsAccess');
+    expect(gatesSrc).to.match(/return !demo && !hasCreditAccess\(paidUsd\)/);
+    expect(gatesSrc).to.include('liveNeedsAccess(isDemoAccount(), paidUsd)');
   });
 
-  it('lets a demo account operate without KYC, phone or email but requires the 24-word backup', function () {
+  it('lets a demo account operate without KYC, phone, email or 1 USDT but requires the 24-word backup', function () {
+    function hasCreditAccess(paidUsd) {
+      const paid = Number(paidUsd);
+      return Number.isFinite(paid) && paid + 1e-9 >= 1;
+    }
+    function liveNeedsAccess(demo, paidUsd) {
+      return !demo && !hasCreditAccess(paidUsd);
+    }
     expect(liveNeedsKyc(true, false)).to.equal(false);
     expect(liveNeedsPhone(true, false)).to.equal(false);
     expect(liveNeedsEmail(true, false)).to.equal(false);
+    expect(liveNeedsAccess(true, 0)).to.equal(false);
     expect(liveCreditReady(true, { kycDeclarado: false, identityBound: false, hasEmail: false, phraseBackedUp: false })).to.equal(false);
     expect(liveCreditReady(true, { kycDeclarado: false, identityBound: false, hasEmail: false, phraseBackedUp: true })).to.equal(true);
+    const fs = require('fs');
+    const path = require('path');
+    const securityUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'SecuritySettings.tsx'), 'utf8');
+    expect(securityUi).to.include('demoAccount ? null');
+    expect(securityUi).to.include("openIdentity('kyc'");
+    const handlers = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
+    expect(handlers).to.match(/handlePagarAcceso = async \(\) => \{\s*if \(isDemoAccount\(\)\) return;/);
   });
 
   it('blocks Solicitar in Real until phrase, email, phone and KYC are bound', function () {
@@ -879,14 +910,14 @@ describe('demo credit gates', function () {
     expect(donationAllowedInWorld('demo', 'demo', true)).to.equal(false);
     expect(donationAllowedInWorld('live', 'live', false)).to.equal(false);
     expect(donationAllowedInWorld('live', 'live', true)).to.equal(true);
-    function accessPaymentAllowedInWorld(product, runtime, testnetReady, mainnetReady) {
-      if (product === 'demo' && runtime === 'demo') return testnetReady;
+    function accessPaymentAllowedInWorld(product, runtime, mainnetReady) {
+      if (product === 'demo') return false;
       return donationAllowedInWorld(product, runtime, mainnetReady);
     }
-    expect(accessPaymentAllowedInWorld('demo', 'demo', true, false)).to.equal(true);
-    expect(accessPaymentAllowedInWorld('demo', 'demo', false, false)).to.equal(false);
-    expect(accessPaymentAllowedInWorld('live', 'live', true, false)).to.equal(false);
-    expect(accessPaymentAllowedInWorld('live', 'live', true, true)).to.equal(true);
+    expect(accessPaymentAllowedInWorld('demo', 'demo', false)).to.equal(false);
+    expect(accessPaymentAllowedInWorld('demo', 'demo', true)).to.equal(false);
+    expect(accessPaymentAllowedInWorld('live', 'live', false)).to.equal(false);
+    expect(accessPaymentAllowedInWorld('live', 'live', true)).to.equal(true);
   });
 
   it('blocks pool deposits from Demo', function () {

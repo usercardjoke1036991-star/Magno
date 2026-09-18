@@ -1,5 +1,5 @@
 /**
- * Rellena lo que se puede sin Twilio, sin VPS y sin deploy de mainnet.
+ * Rellena lo que se puede sin VPS y sin deploy de mainnet.
  * No pone CHAIN_ID=56 ni CONFIRM_MAINNET=yes en el .env del teléfono.
  */
 import { randomBytes } from 'node:crypto';
@@ -133,6 +133,8 @@ const workerLines = [
   '# Ponga aquí la URL HTTPS pública cuando tenga el VPS o el túnel.',
   'EXPO_PUBLIC_NOTIFY_API=',
   '',
+  'TEXTBELT_API_KEY=',
+  'TEXTBELT_SENDER=Quatrivium',
   'TWILIO_ACCOUNT_SID=',
   'TWILIO_AUTH_TOKEN=',
   'TWILIO_FROM=',

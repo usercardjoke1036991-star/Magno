@@ -1,6 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY scripts/notify-worker.mjs scripts/bscNetworks.cjs ./scripts/
+COPY scripts/notify-worker.mjs scripts/bscNetworks.cjs scripts/textbeltSms.cjs ./scripts/
 RUN npm init -y && npm install ethers@6.15.0 dotenv@16.3.1 --omit=dev \
   && mkdir -p /data
 ENV NODE_ENV=production

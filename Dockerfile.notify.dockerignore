@@ -2,3 +2,4 @@
 !scripts/
 !scripts/notify-worker.mjs
 !scripts/bscNetworks.cjs
+!scripts/textbeltSms.cjs

@@ -353,6 +353,10 @@ export const useHomeHandlers = ({
       Alert.alert(t('seedBannerTitle'), t('seedNeedBeforeLoan'));
       return;
     }
+    if (creditNeedsAccess(userInfo.donatedUsd || 0)) {
+      Alert.alert(t('creditAccessTitle'), t('creditAccessNeed'));
+      return;
+    }
     if (creditNeedsEmail(hasEmail)) {
       Alert.alert(t('emailTitle'), t('emailNeedBeforeLoan'));
       return;
@@ -367,10 +371,6 @@ export const useHomeHandlers = ({
     }
     if (creditNeedsDeviceMatch(userInfo.deviceMatches)) {
       Alert.alert(t('deviceBannerTitle'), t('seedNeedDevice'));
-      return;
-    }
-    if (creditNeedsAccess(userInfo.donatedUsd || 0)) {
-      Alert.alert(t('creditAccessTitle'), t('creditAccessNeed'));
       return;
     }
     if (userInfo.hasActiveLoan) {
@@ -595,6 +595,7 @@ export const useHomeHandlers = ({
   };
 
   const handlePagarAcceso = async () => {
+    if (isDemoAccount()) return;
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;

@@ -499,7 +499,7 @@
   "kycBannerDone": "Identitas dinyatakan. Anda bisa beroperasi dengan dompet Anda.",
   "securityTitle": "Keamanan",
   "securityLead": "Identitas dan nomor wajib untuk pinjaman di mode nyata.",
-  "securityLeadDemo": "Demo tidak meminta KYC atau telepon.",
+  "securityLeadDemo": "Demo tidak meminta email, telepon, KYC, atau 1 USDT. Itu tetap di Real.",
   "securityKyc": "KYC (wajib untuk kredit)",
   "securityKycDemo": "KYC (opsional di demo)",
   "securityKycDone": "Pernyataan ditandatangani. Anda bisa beroperasi dengan kredit.",

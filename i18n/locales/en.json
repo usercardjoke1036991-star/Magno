@@ -499,7 +499,7 @@
   "kycBannerDone": "Identity verified.",
   "securityTitle": "Security",
   "securityLead": "Identity and phone are required for live loans.",
-  "securityLeadDemo": "Demo does not require KYC or phone.",
+  "securityLeadDemo": "Demo does not require email, phone, KYC or the 1 USDT access fee. Those stay in Real.",
   "securityKyc": "KYC (required for credit)",
   "securityKycDemo": "KYC (optional in demo)",
   "securityKycDone": "Verification complete. You can now apply for credit.",

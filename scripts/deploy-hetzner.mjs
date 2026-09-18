@@ -68,7 +68,7 @@ if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)) {
 
 const workerFile = resolve(root, '.env.worker');
 if (!existsSync(workerFile)) {
-  console.error('Falta .env.worker. Copie .env.worker.example y ponga Twilio, Resend y NOTIFY_DATA_KEY.');
+  console.error('Falta .env.worker. Copie .env.worker.example y ponga TEXTBELT_API_KEY, Resend y NOTIFY_DATA_KEY.');
   process.exit(1);
 }
 
@@ -97,6 +97,7 @@ writeFileSync(join(staging, 'docker-compose.yml'), readFileSync(resolve(root, 'd
 writeFileSync(join(staging, 'Caddyfile'), readFileSync(resolve(root, 'deploy/hetzner/Caddyfile')));
 writeFileSync(join(staging, 'scripts/notify-worker.mjs'), readFileSync(resolve(root, 'scripts/notify-worker.mjs')));
 writeFileSync(join(staging, 'scripts/bscNetworks.cjs'), readFileSync(resolve(root, 'scripts/bscNetworks.cjs')));
+writeFileSync(join(staging, 'scripts/textbeltSms.cjs'), readFileSync(resolve(root, 'scripts/textbeltSms.cjs')));
 writeFileSync(join(staging, '.env'), readFileSync(workerFile));
 writeFileSync(join(staging, '.env.compose'), `NOTIFY_DOMAIN=${domain}\nCADDY_EMAIL=${email}\n`);
 

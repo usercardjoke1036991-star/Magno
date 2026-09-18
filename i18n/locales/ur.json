@@ -499,7 +499,7 @@
   "kycBannerDone": "شناخت کا اعلان۔ آپ اپنے والیٹ سے چلا سکتے ہیں۔",
   "securityTitle": "سیکیورٹی",
   "securityLead": "حقیقی موڈ میں قرض کے لیے شناخت اور فون ضروری ہیں۔",
-  "securityLeadDemo": "ڈیمو میں KYC یا فون نہیں مانگا جاتا۔",
+  "securityLeadDemo": "ڈیمو میں ای میل، فون، KYC یا 1 USDT نہیں مانگا جاتا۔ وہ Real میں رہتا ہے۔",
   "securityKyc": "KYC (کریڈٹ کے لیے ضروری)",
   "securityKycDemo": "KYC (ڈیمو میں اختیاری)",
   "securityKycDone": "اعلان دستخط شدہ۔ آپ کریڈٹ سے چلا سکتے ہیں۔",

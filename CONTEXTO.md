@@ -58,7 +58,7 @@ Magno/
 - **Tooling WSL (Ubuntu-24.04, usuario root):** Aderyn 0.6.8 · Trivy 0.74.0 · Semgrep 1.177.0 · Mythril 0.24.8 · OWASP ZAP 2.17.0 (OpenJDK 21). PATH en `/etc/profile.d/cyber-tools.sh`.
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
-- **Notificaciones:** Twilio SMS+WhatsApp / Telegram Bot / Resend / notify-worker
+- **Notificaciones:** Textbelt SMS (OTP) / Twilio y WhatsApp Cloud de respaldo / Telegram Bot / Resend / notify-worker
 - **i18n:** 17 idiomas, 1001 claves, soporte RTL (árabe, urdu)
 
 ---
@@ -78,14 +78,14 @@ Magno/
 - **Liquidación en AdminPanel**: el servicio aprueba USDT automáticamente antes de `liquidate()`
 - **`useHomeHandlers` hook**: handlers extraídos de `app/index.tsx` para reducir complejidad
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
-- **Worker 24/7:** el camino elegido es **Render** (Web Service + `Dockerfile.notify`, `render.yaml`, disco `/data`, health `/health`). Fly y Hetzner quedan como alternativa. El proceso no debe dormirse. Twilio/Resend siguen aparte. El fundador no sube la llave de despliegue a Render.
+- **Worker 24/7:** el camino elegido es **Render** (Web Service + `Dockerfile.notify`, `render.yaml`, disco `/data`, health `/health`). OTP SMS = Textbelt (`TEXTBELT_API_KEY`). Correo = Resend. Firma OTP = `ATTESTER_PRIVATE_KEY` (nunca la llave de owner). El proceso no debe dormirse. El fundador no sube la llave de despliegue a Render.
 - **Referido solo al alta:** el código opcional se pide al crear la cuenta. Vacío = el usuario inicia su cadena colgada del fundador. Tras continuar, el padrino queda bloqueado en el teléfono y on-chain (`already registered`). Activar la línea ya no pide código.
-- **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. En Real también correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain.
+- **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. **Demo no pide correo, número, KYC ni el 1 USDT.** En Real sí: primero el 1 USDT y luego correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain; al completarlos quedan en esa cuenta Real.
 - **Frase secreta BIP-39**: alta y respaldo. No cierra la cuenta. No hay destruir ni generar otra cuenta en la app.
 - **Usuario y contraseña son el candado de este teléfono.** El correo sigue para Real, recuperar contraseña y OTP. Desbloquear, pedir, pagar o transferir pueden usar contraseña, correo, PIN, huella o autenticador si el usuario los elige.
 - **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: contraseña, correo, PIN, huella o autenticador). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar. El autenticador es TOTP real: al activarlo muestra un QR `otpauth://` escaneable y la clave por si la cámara no enfoca.
 - **Historial**: Demo y Real tienen diarios distintos (modo + chain + contrato + billetera). Dos ventanas (transferencias y préstamos) y mora. En el hub, al vencer empieza un reloj rojo: 30 días de gracia en cuenta atrás; al acabarse, cuenta hacia adelante hasta que pague. El fundador no entra en gracia ni mora.
-- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain).
+- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain). El 1 USDT, el correo, el número y el KYC son de Real; Demo opera sin esos candados (sí pide anotar las 24 palabras).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
 - **Fama y dinero no se mezclan**: al registrar, la reputación recorre toda la línea (misma escala 15/8/6/4/2/0,8/0,4 %) y el fundador suma de cada alta. El USDT solo se mueve al pagar (interés + bono de activación). Los puntos de red y el bono del pool son solo del referidor directo, para no drenar la caja.
@@ -136,7 +136,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
 - App lock: la contraseña se pide al desbloquear y para ver la frase; ya no hay fila de contraseña en Ajustes. PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
-- Fondos: depositar, retirar, donar, aportar al pool y pagar el 1 USDT de acceso salen de una billetera externa vinculada. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero.
+- Fondos: depositar, retirar, donar, aportar al pool y pagar el 1 USDT de acceso (solo Real) salen de una billetera externa vinculada. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero. Demo no cobra el 1 USDT ni pide identidad.
 - Frase secreta BIP-39: ver/anotar. No se sustituye: cambiarla sería otra cuenta. Recuperar en otro teléfono usa las mismas 24 palabras.
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
@@ -146,7 +146,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 ## Lo que está en progreso 🔄 (solo el fundador puede completar)
 - Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)
 - Configurar `EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET` en `eas.json` production **después** del deploy
-- Credenciales Twilio o WhatsApp Cloud API en `.env.worker`
+- Credenciales Textbelt (`TEXTBELT_API_KEY`) en `.env.worker` y en Render; Resend para correo
 - Publicación en Google Play Store (`eas build --platform android --profile production`)
 
 ## Lo que NO es un bug (deuda de diseño, no hay que “arreglarlo”)
@@ -254,6 +254,10 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-17 | Worker testnet arranca sin dominio ni Resend. Render usa ATTESTER_PRIVATE_KEY, no la del owner. EMAIL_FROM vacio hasta verificar el dominio. | — |
+| 2026-09-17 | Demo opera sin correo, numero, KYC ni 1 USDT. Esos candados quedan solo en Real y persisten al completarlos. | — |
+| 2026-09-17 | Conexion OTP: app -> worker Render -> Textbelt SMS y Resend correo. /health expone textbelt, resend y attester sin claves. ATTESTER_PRIVATE_KEY en Render (sync false). Nunca API de SMS en AdminPanel. | — |
+| 2026-09-17 | OTP SMS principal: Textbelt. El worker envia el codigo a textbelt.com; TEXTBELT_API_KEY vive en .env.worker y en el dashboard de Render. Twilio/WhatsApp siguen de respaldo. | — |
 | 2026-09-17 | Mythril 0.24.8 + Semgrep 1.177.0 + Trivy 0.74.0 en vivo. Mythril SWC-101 en getters/vistas 0.8.24 (falso). Semgrep 202 INFO de gas, worker 0. Trivy: Metro/snarkjs/xcode + Docker USER (se mantiene por /data). Sin cambio de codigo. | — |
 | 2026-09-17 | Aderyn 0.6.8 en vivo (WSL, 6 contratos, 88 detectores): High 1 CEI en marcarMorosoSiVencido y destruirCuenta — ambas nonReentrant, se mantiene. 13 Low de estilo/gas/EIP-170. Sin cambio al nucleo ni redespliegue. | — |
 | 2026-09-17 | Foundry 1.8.3 en vivo: 8/8 tests (fuzz 256) incluyendo premioAsiento multiply-first y n(n+1)/2 exacto. Lint: tx.origin, timestamps y this.selector son diseño; no se toco el nucleo por EIP-170. Sin redespliegue. | — |

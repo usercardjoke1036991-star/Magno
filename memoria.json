@@ -1,6 +1,9 @@
 {
   "enfoque": "Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet.",
   "decisiones": [
+    "- [2026-09-17] Demo no pide correo, numero, KYC ni el 1 USDT. Esos requisitos son de la cuenta Real y, al hacerlos ahi, quedan.",
+    "- [2026-09-17] Cambiar Textbelt o Resend se hace en el panel de Render, no en el AdminPanel de la app. El attester de firma OTP si va en Render; la llave de owner no.",
+    "- [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.",
     "- [2026-09-17] El usuario de sesion no viaja a rankings. El padrino se bloquea al validar el codigo, antes de persistir el usuario.",
     "- [2026-09-16] Render es el host 24/7 del notify-worker: Dockerfile.notify, disco /data, PORT inyectado, clave de cifrado generada, sin llave de owner.",
     "- [2026-09-16] Worker 24/7 en Hetzner (CX23 Ubuntu, Caddy HTTPS) como alternativa a Fly. Mismo notify-worker y .env.worker.",
@@ -27,12 +30,15 @@
     "- [2026-09-13] Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real.",
     "- [2026-09-12] Contraseña del celular: minimo 8, maximo 66, con mayuscula, numero y simbolo. Frase nueva siempre 24 palabras BIP-39; recuperar acepta 12 si la cuenta es antigua.",
     "- [2026-09-12] Una sola frase BIP-39. Se revela solo tras el candado. En Ajustes se consulta o se sustituye. Cambiar de aparato exige esa frase.",
-    "- [2026-09-12] Una sola sesion iniciada a la vez por cuenta. El ultimo telefono que entra echa al anterior.",
-    "- [2026-09-12] Si se pierde el celular, Recuperar cuenta en uno nuevo con las 12 palabras. Luego usuario y contrasena de ese aparato y volver a vincular el numero. Una sola instalacion opera credito a la vez.",
-    "- [2026-09-12] Una billetera Quatrivium solo opera credito en el dispositivo donde se vinculo. WiFi o VPN no son identidad. Recuperar en otro telefono pide volver a vincular numero y dispositivo.",
-    "- [2026-09-12] No hay destruir cuenta en la app. Una persona una linea. Formatear o cambiar VPN no crea otra: se recupera con las 12 palabras. Telefono y KYC on-chain bloquean una segunda linea Real."
+    "- [2026-09-12] Una sola sesion iniciada a la vez por cuenta. El ultimo telefono que entra echa al anterior."
   ],
   "cambios": [
+    "- [2026-09-17] Auditoria para iniciar Render: worker testnet sin correo; attester explicito; EMAIL_FROM no se fuerza.",
+    "- [2026-09-17] Demo libre de identidad y de 1 USDT; Real sigue pidiendo primero el acceso y luego correo, numero y KYC.",
+    "- [2026-09-17] Auditoria de conexion: health del worker reporta textbelt/resend/attester; Render pide TEXTBELT, Resend y attester; la app de preview/produccion apunta a notify.quatriviumcredit.app",
+    "- [2026-09-17] Worker, Render y production:check usan Textbelt como SMS principal del OTP",
+    "- [2026-09-17] Mythril 0.24.8, Semgrep 1.177.0 y Trivy 0.74.0 en vivo. SWC-101 es overflow de 0.8.24 en getters/vistas. Semgrep solo INFO de gas. Trivy no toca el credito. Sin cambio de codigo.",
+    "- [2026-09-17] Aderyn 0.6.8 en vivo: High 1 (CEI en marcarMorosoSiVencido ~1163 y destruirCuenta ~1301, ambas nonReentrant) y 13 Low de estilo. No se toco el nucleo. No hay bug de fondos.",
     "- [2026-09-17] Foundry 1.8.3: 8/8 pass. No se cambio QuatriviumCredit (avisos de lint son diseno). Tests nuevos de premio en forge-test.",
     "- [2026-09-17] Slither 0.11.3 en vivo (WSL, Hardhat): 19 contratos, 79 detectores, 2 avisos Medium divide-before-multiply en premioAsiento. Son n(n+1)/2 exacto y la formula multiply-first ya aplicada. Sin bug de fondos.",
     "- [2026-09-17] PDF ssaas.pdf (scan 7am) confirma APK B5BD79B9 sin exp+. HIGH=huella. Sin cambios de codigo. Escanear solo localhost.",
@@ -76,14 +82,8 @@
     "- [2026-09-14] Textos legales y ficha Play reescritos: 1000 niveles, frase 24, KYC local, pool locked, sin destruir cuenta. Grafico e icono de tienda generados.",
     "- [2026-09-14] Auditoria en vivo Real: el nivel 1 ya no dice Disponible si mainnet no esta listo; muestra Pronto. Hub, credito, red, historial y donar abiertos sin crash.",
     "- [2026-09-14] Auditoria productiva: historial, referidos, credito, donar y cuenta corregidos para Demo y Real.",
-    "- [2026-09-14] Auditoria del pool: Demo muestra el banco de 2000 USDT en solo lectura, sin aportar. Real no enseña NAV 0 ni formulario falso. El aporte no promete rendimiento retirable. LinkedWalletCard en la sala Pool.",
-    "- [2026-09-14] Auditoria Ajustes y ciber: wrap de sesion solo en SecureStore, /session/check con EIP-712, frase oculta ante captura y al cerrar. Hash de clave no se duplica en AsyncStorage si SecureStore responde.",
-    "- [2026-09-14] Auditoria Demo/Real en vivo: contrato Demo operativo, worker y tunel levantados, UI Real sin credito fantasma, switch de red en billetera externa.",
-    "- [2026-09-14] Auditoria on-chain: Demo 0xD2d2 alineado 24457 B con FamaLib 0x6b98. ABI cliente cubre todos los selectores del timelock, despausar y cancelar propuesta. Hardhat 133/133.",
-    "- [2026-09-14] Auditoria completa: tsc 0, Hardhat 131/131, i18n 943, salud 14/14, conectores 210. Telefono: hub, credito, cuenta, red, marcos, pool, donar, bonos, personas, historial y ajustes sin crash.",
-    "- [2026-09-14] Restaurado el catalogo de gemas (granate/citrino/onix). Metro recargado: el telefono muestra Granate, no Bronce.",
-    "- [2026-09-14] Incrustaciones con fotos reales del catalogo: granate, aguamarina, citrino, topacio, turmalina, peridoto, esmeralda, zafiro, rubi, onix, diamante, amatista."
+    "- [2026-09-14] Auditoria del pool: Demo muestra el banco de 2000 USDT en solo lectura, sin aportar. Real no enseña NAV 0 ni formulario falso. El aporte no promete rendimiento retirable. LinkedWalletCard en la sala Pool."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-17] Cambio: Foundry 1.8.3: 8/8 pass. No se cambio QuatriviumCredit (avisos de lint son diseno). Tests nuevos de premio en forge-test."
+  "ultima_sesion": "[2026-09-17] Cambio: Auditoria para iniciar Render: worker testnet sin correo; attester explicito; EMAIL_FROM no se fuerza."
 }

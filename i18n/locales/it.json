@@ -499,7 +499,7 @@
   "kycBannerDone": "Identità dichiarata. Puoi operare con il tuo wallet.",
   "securityTitle": "Sicurezza",
   "securityLead": "Identità e numero sono obbligatori per i prestiti in modalità reale.",
-  "securityLeadDemo": "In demo non servono KYC né telefono per operare.",
+  "securityLeadDemo": "In demo non servono e-mail, telefono, KYC né 1 USDT. Quelli restano in Real.",
   "securityKyc": "KYC (obbligatorio per il credito)",
   "securityKycDemo": "KYC (facoltativo in demo)",
   "securityKycDone": "Dichiarazione firmata. Puoi operare con il credito.",

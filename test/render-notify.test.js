@@ -16,20 +16,26 @@ describe('Render notify worker', function () {
     expect(yaml).to.include('plan: starter');
     expect(yaml).to.include('generateValue: true');
     expect(yaml).to.include('autoDeployTrigger: commit');
+    expect(yaml).to.match(/TEXTBELT_API_KEY[\s\S]*sync: false/);
+    expect(yaml).to.match(/RESEND_API_KEY[\s\S]*sync: false/);
+    expect(yaml).to.match(/ATTESTER_PRIVATE_KEY[\s\S]*sync: false/);
+    expect(yaml).to.match(/EMAIL_FROM[\s\S]*sync: false/);
+    expect(yaml).to.not.include('soporte@quatriviumcredit.app');
     expect(yaml).to.match(/TWILIO_ACCOUNT_SID[\s\S]*sync: false/);
-    expect(yaml).to.not.match(/PRIVATE_KEY/);
-    expect(yaml).to.not.include('ATTESTER_PRIVATE_KEY');
+    expect(yaml).to.not.match(/key: PRIVATE_KEY\b/);
     expect(docker).to.include('NOTIFY_BIND=0.0.0.0');
     expect(docker).to.include('NOTIFY_TRUST_PROXY=1');
     expect(docker).to.include('NOTIFY_DATA_FILE=/data/.notify-data.json');
     expect(docker).to.include('mkdir -p /data');
     expect(dockerignore).to.include('!scripts/');
+    expect(dockerignore).to.include('textbeltSms.cjs');
     expect(worker).to.include("path === '/health'");
     expect(worker).to.include('mkdirSync(dirname(DATA_FILE)');
     expect(worker).to.include('const isHealth');
     expect(worker).to.include('process.env.PORT || process.env.NOTIFY_PORT || 8787');
     expect(worker).to.not.include('displayName: username');
     expect(worker).to.include('sessionUser');
+    expect(worker).to.include('ATTESTER_EXPLICIT || (!isMainnet ? DEPLOY_KEY : \'\')');
   });
 
   it('listens on PORT, creates data dir and answers /health', async function () {
@@ -51,6 +57,9 @@ describe('Render notify worker', function () {
         EXPO_PUBLIC_CHAIN_ID: '97',
         EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET: '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f',
         NOTIFY_CORS_ORIGIN: '*',
+        TEXTBELT_API_KEY: 'paid-textbelt-key-16',
+        RESEND_API_KEY: 're_test_render_health_key',
+        EMAIL_FROM: 'soporte@quatriviumcredit.app',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -89,6 +98,82 @@ describe('Render notify worker', function () {
       const parsed = JSON.parse(body.data);
       expect(parsed.ok).to.equal(true);
       expect(parsed.chainId).to.equal(97);
+      expect(parsed.sms).to.equal(true);
+      expect(parsed.email).to.equal(true);
+      expect(parsed.textbelt).to.equal(true);
+      expect(parsed.resend).to.equal(true);
+      expect(parsed).to.not.have.property('TEXTBELT_API_KEY');
+    } finally {
+      child.kill('SIGTERM');
+    }
+  });
+
+  it('boots on testnet without domain, Resend or attester and still answers /health', async function () {
+    this.timeout(20000);
+    const { spawn } = require('child_process');
+    const http = require('http');
+    const os = require('os');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'notify-render-bare-'));
+    const dataFile = path.join(dir, '.notify-data.json');
+    const port = 19787 + Math.floor(Math.random() * 1000);
+    const child = spawn(process.execPath, [path.join(root, 'scripts', 'notify-worker.mjs')], {
+      cwd: root,
+      env: {
+        ...process.env,
+        PORT: String(port),
+        NOTIFY_BIND: '127.0.0.1',
+        NOTIFY_DATA_KEY: 'render-bare-key-32chars-ok!!',
+        NOTIFY_DATA_FILE: dataFile,
+        EXPO_PUBLIC_CHAIN_ID: '97',
+        EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET: '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f',
+        NOTIFY_CORS_ORIGIN: '*',
+        TEXTBELT_API_KEY: 'paid-textbelt-key-16',
+        RESEND_API_KEY: '',
+        EMAIL_FROM: '',
+        ATTESTER_PRIVATE_KEY: '',
+        PRIVATE_KEY: '',
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const waitStart = () =>
+      new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('worker start timeout')), 12000);
+        const onExit = (code) => {
+          clearTimeout(timer);
+          reject(new Error(`worker exited ${code}`));
+        };
+        const onData = (buf) => {
+          if (String(buf).includes('Avisos Quatrivium')) {
+            clearTimeout(timer);
+            child.removeListener('exit', onExit);
+            resolve();
+          }
+        };
+        child.stdout.on('data', onData);
+        child.stderr.on('data', onData);
+        child.once('exit', onExit);
+      });
+    try {
+      await waitStart();
+      const body = await new Promise((resolve, reject) => {
+        http
+          .get({ hostname: '127.0.0.1', port, path: '/health' }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => {
+              data += chunk;
+            });
+            res.on('end', () => resolve({ status: res.statusCode, data }));
+          })
+          .on('error', reject);
+      });
+      expect(body.status).to.equal(200);
+      const parsed = JSON.parse(body.data);
+      expect(parsed.ok).to.equal(true);
+      expect(parsed.chainId).to.equal(97);
+      expect(parsed.sms).to.equal(true);
+      expect(parsed.email).to.equal(false);
+      expect(parsed.resend).to.equal(false);
+      expect(parsed.attester).to.equal(false);
     } finally {
       child.kill('SIGTERM');
     }

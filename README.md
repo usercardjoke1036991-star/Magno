@@ -9,13 +9,13 @@
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
 - **Estado:** Testnet operativo — mainnet pendiente de deploy (acción manual del fundador)
-- **Tests detectados:** 24 archivo(s)
+- **Tests detectados:** 25 archivo(s)
 
 ### Qué funciona
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
 - 17 suites Hardhat (164 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings y lock de referido…
 - Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24555 B (margen 21). Live Demo sigue 24457 B hasta el redespliegue.
-- Ciber WSL (producto, local): Aderyn High 1 CEI tras `balanceOf`/`transfer` en funciones con `nonReentrant` (se mantiene). Trivy lockfile 3 HIGH + 1 MEDIUM de deps Expo (`image-size`, `underscore`/`jsonpath`, `uuid@7`); Dockerfile DS-0002 USER no se aplica por el volumen Fly `/data`. Semgrep 1 hallazgo GCM sin `authTagLength` (corregido). Mythril 0 issues con cobertura baja (timeout 180s). ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
+- Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
 - i18n: 17 idiomas, 1001 claves
 - Rankings: 6 tableros, divisiones de 100, premio mensual estimado, nombres y fotos públicas por lotes de 100, visibles desde el nivel 50
@@ -23,12 +23,12 @@
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
 - App lock: la contraseña se pide al desbloquear y para ver la frase; ya no hay fila de contraseña en Ajustes. PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
-- Fondos: depositar, retirar, donar, aportar al pool y pagar el 1 USDT de acceso salen de una billetera externa vinculada. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero.
+- Fondos: depositar, retirar, donar, aportar al pool y pagar el 1 USDT de acceso (solo Real) salen de una billetera externa vinculada. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero. Demo no cobra el 1 USDT ni pide identidad.
 
 ### En progreso
 - Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)
 - Configurar `EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET` en `eas.json` production **después** del deploy
-- Credenciales Twilio o WhatsApp Cloud API en `.env.worker`
+- Credenciales Textbelt (`TEXTBELT_API_KEY`) en `.env.worker` y en Render; Resend para correo
 - Publicación en Google Play Store (`eas build --platform android --profile production`)
 
 ### Módulos

@@ -499,7 +499,7 @@
   "kycBannerDone": "신원이 신고되었습니다. 지갑으로 운영할 수 있습니다.",
   "securityTitle": "보안",
   "securityLead": "실제 모드 대출에는 신원과 전화번호가 필요합니다.",
-  "securityLeadDemo": "데모에서는 KYC나 전화가 없습니다.",
+  "securityLeadDemo": "데모에서는 이메일, 전화, KYC, 1 USDT가 없습니다. 그건 Real에 남습니다.",
   "securityKyc": "KYC(신용에 필수)",
   "securityKycDemo": "KYC(데모에서 선택)",
   "securityKycDone": "신고에 서명했습니다. 신용을 이용할 수 있습니다.",

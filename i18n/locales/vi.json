@@ -499,7 +499,7 @@
   "kycBannerDone": "Đã tuyên bố danh tính. Bạn có thể vận hành với ví.",
   "securityTitle": "Bảo mật",
   "securityLead": "Danh tính và số điện thoại bắt buộc cho khoản vay ở chế độ thật.",
-  "securityLeadDemo": "Demo không yêu cầu KYC hay điện thoại.",
+  "securityLeadDemo": "Demo không yêu cầu email, điện thoại, KYC hay 1 USDT. Những mục đó thuộc Real.",
   "securityKyc": "KYC (bắt buộc cho tín dụng)",
   "securityKycDemo": "KYC (tùy chọn ở demo)",
   "securityKycDone": "Đã ký tuyên bố. Bạn có thể vận hành tín dụng.",

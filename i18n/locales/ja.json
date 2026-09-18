@@ -499,7 +499,7 @@
   "kycBannerDone": "身元を申告済みです。ウォレットで操作できます。",
   "securityTitle": "セキュリティ",
   "securityLead": "リアルモードのローンには身分と電話が必要です。",
-  "securityLeadDemo": "デモでは KYC も電話も不要です。",
+  "securityLeadDemo": "デモではメール・電話・KYC・1 USDTは不要です。それらはRealに残ります。",
   "securityKyc": "KYC（クレジットに必須）",
   "securityKycDemo": "KYC（デモでは任意）",
   "securityKycDone": "申告に署名済みです。クレジットを利用できます。",

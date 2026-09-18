@@ -499,7 +499,7 @@
   "kycBannerDone": "Identité déclarée. Vous pouvez opérer avec votre portefeuille.",
   "securityTitle": "Sécurité",
   "securityLead": "L’identité et le numéro sont obligatoires pour les prêts en mode réel.",
-  "securityLeadDemo": "En démo, pas de KYC ni de téléphone pour opérer.",
+  "securityLeadDemo": "En démo, pas d’e-mail, de téléphone, de KYC ni de 1 USDT. Cela reste en compte réelle.",
   "securityKyc": "KYC (obligatoire pour le crédit)",
   "securityKycDemo": "KYC (facultatif en démo)",
   "securityKycDone": "Déclaration signée. Vous pouvez opérer avec le crédit.",

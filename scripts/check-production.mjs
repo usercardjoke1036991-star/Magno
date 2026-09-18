@@ -8,6 +8,7 @@ import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 
 const { isHexAddress, isZero } = createRequire(import.meta.url)('./bscNetworks.cjs');
+const { isTextbeltConfigured } = createRequire(import.meta.url)('./textbeltSms.cjs');
 
 const root = resolve(process.cwd());
 const strict = process.argv.includes('--strict');
@@ -37,6 +38,8 @@ const WORKER_KEYS = [
   'EXPO_PUBLIC_NOTIFY_API',
   'NOTIFY_CORS_ORIGIN',
   'NOTIFY_DATA_KEY',
+  'TEXTBELT_API_KEY',
+  'TEXTBELT_KEY',
   'TWILIO_ACCOUNT_SID',
   'TWILIO_AUTH_TOKEN',
   'TWILIO_FROM',
@@ -140,8 +143,11 @@ const checks = [
   {
     id: 'sms',
     who: 'you',
-    ok: (set('TWILIO_ACCOUNT_SID') && set('TWILIO_AUTH_TOKEN') && set('TWILIO_FROM')) || (set('WHATSAPP_TOKEN') && set('WHATSAPP_PHONE_NUMBER_ID')),
-    need: 'Twilio (SID, token, FROM) o WhatsApp Cloud API en .env.worker',
+    ok:
+      isTextbeltConfigured(get('TEXTBELT_API_KEY') || get('TEXTBELT_KEY')) ||
+      (set('TWILIO_ACCOUNT_SID') && set('TWILIO_AUTH_TOKEN') && set('TWILIO_FROM')) ||
+      (set('WHATSAPP_TOKEN') && set('WHATSAPP_PHONE_NUMBER_ID')),
+    need: 'TEXTBELT_API_KEY (pago) en .env.worker, o Twilio, o WhatsApp Cloud API',
   },
   {
     id: 'email',

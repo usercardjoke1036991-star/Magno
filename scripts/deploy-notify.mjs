@@ -1,6 +1,6 @@
 /**
  * Publica el worker en Fly.io (HTTPS 24/7). No imprime secretos.
- * Requiere: flyctl autenticado. Twilio ya en .env.worker si hay SMS.
+ * Requiere: flyctl autenticado. TEXTBELT_API_KEY en .env.worker si hay SMS.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -59,6 +59,8 @@ const env = { ...local, ...worker };
 
 const secrets = {
   NOTIFY_DATA_KEY: env.NOTIFY_DATA_KEY,
+  TEXTBELT_API_KEY: env.TEXTBELT_API_KEY || env.TEXTBELT_KEY,
+  TEXTBELT_SENDER: env.TEXTBELT_SENDER,
   RESEND_API_KEY: env.RESEND_API_KEY,
   EMAIL_FROM: env.EMAIL_FROM,
   TWILIO_ACCOUNT_SID: env.TWILIO_ACCOUNT_SID,

@@ -499,7 +499,7 @@
   "kycBannerDone": "পরিচয় ঘোষিত। আপনার ওয়ালেট দিয়ে চালাতে পারেন।",
   "securityTitle": "নিরাপত্তা",
   "securityLead": "রিয়েল মোডে ঋণের জন্য পরিচয় ও ফোন দরকার।",
-  "securityLeadDemo": "ডেমোতে KYC বা ফোন লাগে না।",
+  "securityLeadDemo": "ডেমোতে ইমেইল, ফোন, KYC বা 1 USDT লাগে না। সেগুলো Real-এ থাকে।",
   "securityKyc": "KYC (ক্রেডিটের জন্য আবশ্যক)",
   "securityKycDemo": "KYC (ডেমোতে ঐচ্ছিক)",
   "securityKycDone": "ঘোষণা স্বাক্ষরিত। ক্রেডিট দিয়ে চালাতে পারেন।",
