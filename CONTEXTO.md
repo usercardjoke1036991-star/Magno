@@ -255,6 +255,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-18 | APK release 1.0.2 versionCode 4 en Escritorio Quatrivium-Finance-MobSF.apk (67.29 MB, SHA256 35CADA22…, v3 CN=Quatrivium Finance, sin esquema exp+). Escanear solo en localhost:8000. No se reinstalo en Xiaomi. | — |
 | 2026-09-18 | Auditoria kit completo: Dockerfile.notify USER node, override compression 1.8.2, ZAP HEALTH_OK=1 sin alertas, Semgrep https-only en fetch-wallet-logos. image-size 1.2.1 queda en Metro. | — |
 | 2026-09-18 | Slither operativo en Windows con Hardhat 2 forzado; 7 avisos revisados sin fallo real; test nuevo de premio de asiento (exactitud + tope de bote). | — |
 | 2026-09-18 | Auditoria en vivo USB: Seguridad Real ya no pide 1 USDT de acceso si mainnet no esta publicado; candado sin correo en metodos disponibles. | — |

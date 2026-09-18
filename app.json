@@ -37,6 +37,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.quatrivium.credit",
+      "versionCode": 4,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
