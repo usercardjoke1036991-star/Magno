@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Invitación BitCredit</title>
-  <meta name="description" content="Lo invitan a BitCredit. Abra la aplicación e ingrese el código para activar su línea de crédito." />
-  <meta property="og:title" content="Invitación BitCredit" />
+  <title>Invitación Quatrivium Finance</title>
+  <meta name="description" content="Lo invitan a Quatrivium Finance. Abra la aplicación e ingrese el código para activar su línea de crédito." />
+  <meta property="og:title" content="Invitación Quatrivium Finance" />
   <meta property="og:description" content="Abra este enlace para unirse con un código de invitación." />
   <meta property="og:type" content="website" />
   <style>
@@ -42,12 +42,12 @@
 </head>
 <body>
   <main>
-    <h1>BitCredit</h1>
+    <h1>Quatrivium Finance</h1>
     <p>Lo invitan a activar su línea de crédito. Si ya tiene la aplicación, ábrala con este enlace. Si no, descárguela e ingrese el código.</p>
     <div class="code" id="code">—</div>
     <p>
-      <a class="btn" id="open">Abrir BitCredit</a>
-      <a class="btn ghost" id="store" href="https://play.google.com/store/apps/details?id=com.magnotechnologies.bitcredit">Google Play</a>
+      <a class="btn" id="open">Abrir Quatrivium Finance</a>
+      <a class="btn ghost" id="store" href="https://play.google.com/store/apps/details?id=com.quatrivium.credit">Google Play</a>
     </p>
     <p class="hint">Si la aplicación no se abre, copie el código y péguelo al activar su línea de crédito.</p>
   </main>
@@ -64,8 +64,8 @@
     if (inviter && lead) {
       lead.textContent = inviter + ' lo invita a activar su línea de crédito. Si ya tiene la aplicación, ábrala con este enlace. Si no, descárguela e ingrese el código.';
     }
-    const appUrl = 'bitcredit://invite?c=' + raw + (inviter ? '&n=' + encodeURIComponent(inviter) : '');
-    const play = 'https://play.google.com/store/apps/details?id=com.magnotechnologies.bitcredit&referrer=' +
+    const appUrl = 'quatrivium://invite?c=' + raw + (inviter ? '&n=' + encodeURIComponent(inviter) : '');
+    const play = 'https://play.google.com/store/apps/details?id=com.quatrivium.credit&referrer=' +
       encodeURIComponent('utm_source=invite&c=' + raw + (inviter ? '&n=' + inviter : ''));
     open.href = appUrl;
     store.href = play;

@@ -255,6 +255,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-18 | Auditoria kit completo: Dockerfile.notify USER node, override compression 1.8.2, ZAP HEALTH_OK=1 sin alertas, Semgrep https-only en fetch-wallet-logos. image-size 1.2.1 queda en Metro. | — |
 | 2026-09-18 | Slither operativo en Windows con Hardhat 2 forzado; 7 avisos revisados sin fallo real; test nuevo de premio de asiento (exactitud + tope de bote). | — |
 | 2026-09-18 | Auditoria en vivo USB: Seguridad Real ya no pide 1 USDT de acceso si mainnet no esta publicado; candado sin correo en metodos disponibles. | — |
 | 2026-09-18 | Auditoria: restaurar identidad no apaga el telefono on-chain, Solicitar Real exige 1 USDT on-chain, el vinculo se previsualiza antes del 0.50, y el candado ya no envia OTP de correo. | — |

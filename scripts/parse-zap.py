@@ -1,6 +1,10 @@
 from pathlib import Path
+import os
 import re
-p = Path("/root/cyber-scans/2026-09-16-validate/zap-health.html")
+import sys
+
+default = Path(os.environ.get("CYBER_OUT", "/root/cyber-scans")) / "zap-health.html"
+p = Path(sys.argv[1]) if len(sys.argv) > 1 else default
 t = p.read_text(encoding="utf-8", errors="replace")
 print("size", p.stat().st_size)
 for m in re.finditer(r"<td[^>]*>(High|Medium|Low|Informational)</td>\s*<td[^>]*>(\d+)</td>", t, re.I):

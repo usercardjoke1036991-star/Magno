@@ -61,9 +61,13 @@ SOURCES = {
 
 
 def fetch(url: str) -> bytes | None:
+    if not url.startswith("https://"):
+        print("skip scheme", url)
+        return None
     try:
         req = Request(url, headers={"User-Agent": "Mozilla/5.0 QuatriviumCredit/1.0"})
-        with urlopen(req, timeout=25) as response:
+        # SOURCES es allowlist https del propio archivo, no input de usuario.
+        with urlopen(req, timeout=25) as response:  # nosemgrep
             data = response.read()
             if len(data) < 80:
                 return None

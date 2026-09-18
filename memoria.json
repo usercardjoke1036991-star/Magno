@@ -1,6 +1,7 @@
 {
   "enfoque": "Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.",
   "decisiones": [
+    "- [2026-09-18] No subir image-size a 2.x (rompe Metro 0.83). No recortar Credit por Aderyn H-1 ni Mythril SWC-101. Worker Docker corre como USER node.",
     "- [2026-09-18] El divide-before-multiply de premioAsiento es falso positivo: n(n+1)/2 es exacto y va en el denominador. No se reescribe la formula; queda blindada con test de exactitud e invariante de bote en Hardhat y fuzz en Foundry.",
     "- [2026-09-18] El 1 USDT de Real se exige tambien en el servicio al pedir, no solo en la pantalla. Demo sigue libre.",
     "- [2026-09-18] Correo y celular no son candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. El OTP de identidad sigue en Inicio y Ajustes.",
@@ -29,10 +30,10 @@
     "- [2026-09-14] Con 3 fundadoras se exigen 2 firmas. Llave perdida o hackeada: las otras 2 la quitan. Pausa inmediata se mantiene.",
     "- [2026-09-14] El 1 USDT de acceso es obligatorio en Demo y Real, una vez. No se muestra el destino. Los niveles desbloqueados se pueden pedir cuando se quiera, con un prestamo a la vez y 48h.",
     "- [2026-09-14] El usuario de sesion queda cifrado en el celular y no se edita. El nombre e imagen anonimos van a la red y no se cambian. No son el mismo texto.",
-    "- [2026-09-14] Hay dos nombres distintos: el de inicio de sesion va cifrado en el celular y no se edita; el anonimo lo ve la red, se elige una vez y no es el mismo.",
-    "- [2026-09-13] Como confirma: las cuatro acciones tienen interruptor y chips PIN, autenticador, huella y contrasena. Sin encender no se aplica ningun metodo. No se muestra Principal; el desbloqueo por defecto se entiende como contrasena."
+    "- [2026-09-14] Hay dos nombres distintos: el de inicio de sesion va cifrado en el celular y no se edita; el anonimo lo ve la red, se elige una vez y no es el mismo."
   ],
   "cambios": [
+    "- [2026-09-18] Kit ciber en vivo: Aderyn/Slither/Forge verdes; Trivy Docker 0; compression 1.8.2; ZAP health OK 0 alertas; Semgrep urllib https; Mythril SWC-101 de 0.8.24 sin recortar nucleo",
     "- [2026-09-18] Slither queda como semaforo real: silenciado el unico hallazgo (divide-before-multiply) en su linea con la razon visible. 0 hallazgos, exit 0. Bytecode intacto 24555/1599, Hardhat 176/176.",
     "- [2026-09-18] Slither en vivo: arreglado el lanzador en Windows (forzaba Foundry y buscaba forge). 18 contratos, 99 detectores, 7 avisos, 0 criticos. Nuevo test: premio de asiento exacto y suma de premios <= bote. Hardhat 176/176, Foundry 8/8, salud 14/14, EIP-170 24555/24576.",
     "- [2026-09-18] Auditoria USB en vivo: Metro + Xiaomi. Corregido Ajustes/Seguridad en Real para mostrar lanzamiento en vez de Pague 1 USDT mientras no hay mainnet. Candado ya no considera correo como metodo disponible.",
@@ -81,9 +82,8 @@
     "- [2026-09-16] Slither 0.11.6 en Windows: 18 contratos, 80 detectores, 0 hallazgos. Magno queda type commonjs y hardhat --config hardhat.config.cjs para no heredar el HH19 del padre ESM. Ubuntu WSL no arranca (error 6).",
     "- [2026-09-16] Limpieza de temporales Cursor/PC y APKs viejos. APK release para MobSF en el Escritorio: Quatrivium-Finance-MobSF.apk (minSdk 29, sin HTTP claro, sin debug, R8). El usuario lo sube a la pagina. Sigue firmado con el keystore de debug hasta EAS/Play.",
     "- [2026-09-16] Auditoria MobSF del APK debug: nota 37/100 esperada. Release endurecido: minSdk 29, sin HTTP claro, sin microfono ni storage legado, cropper no exportado, R8 en release. El APK escaneado sigue siendo debug con certificado de desarrollo.",
-    "- [2026-09-15] Script scan-mobile para MobSF: sube el APK, lanza el analisis y guarda el informe JSON en la raiz. Comando npm run security:mobsf. La clave vive en el entorno, no en git.",
-    "- [2026-09-15] npm run security:slither ya no usa el slither de Windows: entra a WSL/pipx, compila con hardhat.config.cjs y --hardhat-ignore-compile. Analisis: 0 hallazgos."
+    "- [2026-09-15] Script scan-mobile para MobSF: sube el APK, lanza el analisis y guarda el informe JSON en la raiz. Comando npm run security:mobsf. La clave vive en el entorno, no en git."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-18] Cambio: Slither queda como semaforo real: silenciado el unico hallazgo (divide-before-multiply) en su linea con la razon visible. 0 hallazgos, exit 0. Bytecode intacto 24555/1599, Hardhat 176/176."
+  "ultima_sesion": "[2026-09-18] Decisión: No subir image-size a 2.x (rompe Metro 0.83). No recortar Credit por Aderyn H-1 ni Mythril SWC-101. Worker Docker corre como USER node."
 }

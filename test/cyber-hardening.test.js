@@ -232,6 +232,32 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(slitherCfg).to.include('timestamp');
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
     expect(pkg.scripts['security:slither']).to.include('run-slither.mjs');
+    // underscore 1.13.6 llega por snarkjs con CVE-2026-27601; el override lo sube al parche.
+    expect(pkg.overrides.underscore).to.equal('^1.13.8');
+    expect(pkg.overrides.compression).to.equal('^1.8.2');
+    const cyber = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'run-full-cyber-audit.sh'), 'utf8');
+    // Tres verdes falsos que ya costaron una auditoría entera: no volver a ellos.
+    expect(cyber).to.not.include('--config p/solidity');
+    expect(cyber).to.include('SEMGREP_DID_NOT_RUN');
+    expect(cyber).to.include('TRIVY_${label}_DID_NOT_RUN');
+    expect(cyber).to.include('--bin-runtime');
+    expect(cyber).to.include('"$MAGNO/package-lock.json"');
+    expect(cyber).to.include('"$MAGNO/Dockerfile.notify"');
+    expect(cyber).to.include('"$MAGNO/scripts"');
+    expect(cyber).to.not.match(/trivy_step [^\n]*"\$MAGNO"$/m);
+    const zap = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'zap-health-wsl.sh'), 'utf8');
+    // El arnés no debe abrir CORS: se auto-provocaba un Medium que en mainnet no puede existir.
+    expect(zap).to.not.match(/NOTIFY_CORS_ORIGIN=\*/);
+    expect(zap).to.include('env -i');
+    expect(zap).to.include('seq 1 40');
+    const docker = fs.readFileSync(path.join(__dirname, '..', 'Dockerfile.notify'), 'utf8');
+    expect(docker).to.match(/^USER node$/m);
+    expect(docker).to.include('chown -R node:node /app /data');
+    const logos = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'fetch-wallet-logos.py'), 'utf8');
+    expect(logos).to.include('startswith("https://")');
+    expect(logos).to.include('# nosemgrep');
+    const worker = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'notify-worker.mjs'), 'utf8');
+    expect(worker).to.include('NOTIFY_CORS_ORIGIN no puede ser * en mainnet');
     const runner = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'run-slither.mjs'), 'utf8');
     expect(runner).to.include('$HOME/.local/bin');
     expect(runner).to.include('windowsToWsl');
@@ -247,6 +273,29 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(wslSh).to.include('compile --force');
     expect(wslSh).to.include('--hardhat-ignore-compile');
     expect(wslSh).to.include('$HOME/.local/bin');
+  });
+
+  it('points the public invite page at this app, not the retired brand', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const root = path.join(__dirname, '..');
+    const appJson = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
+    const pkgId = appJson.expo.android.package;
+    const scheme = appJson.expo.scheme;
+    const landing = fs.readFileSync(path.join(root, 'web', 'index.html'), 'utf8');
+    const invite = fs.readFileSync(path.join(root, 'web', 'invite', 'index.html'), 'utf8');
+
+    for (const page of [landing, invite]) {
+      // El enlace de invitación vive en esta web: una marca vieja rompe el embudo de referidos.
+      expect(page).to.not.match(/bitcredit/i);
+      expect(page).to.not.include('magnotechnologies');
+      expect(page).to.include(`id=${pkgId}`);
+      expect(page).to.include('Quatrivium Finance');
+    }
+    // El fallback de esquema debe ser el que la app declara, o no abre.
+    expect(invite).to.include(`${scheme}://invite?c=`);
+    const links = fs.readFileSync(path.join(root, 'utils', 'inviteCode.ts'), 'utf8');
+    expect(links).to.include('/invite?c=');
   });
 
   it('wires MobSF REST upload, scan and report_json without embedding the API key', function () {

@@ -2,11 +2,13 @@ FROM node:20-alpine
 WORKDIR /app
 COPY scripts/notify-worker.mjs scripts/bscNetworks.cjs scripts/textbeltSms.cjs ./scripts/
 RUN npm init -y && npm install ethers@6.15.0 dotenv@16.3.1 --omit=dev \
-  && mkdir -p /data
+  && mkdir -p /data \
+  && chown -R node:node /app /data
 ENV NODE_ENV=production
 ENV NOTIFY_BIND=0.0.0.0
 ENV NOTIFY_TRUST_PROXY=1
 ENV NOTIFY_DATA_FILE=/data/.notify-data.json
 # Render inyecta PORT (suele ser 10000). En local/Fly queda 8787 si no hay PORT.
 EXPOSE 8787 10000
+USER node
 CMD ["node", "scripts/notify-worker.mjs"]
