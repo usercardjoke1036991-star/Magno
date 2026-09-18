@@ -257,8 +257,6 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: legalCopy, legalDocsFor
 - `i18n/translations.ts` — módulo JS/TS
   - Funciones/clases: translations
-- `lib/forge-std/scripts/vm.py` — módulo Python
-  - Funciones/clases: main, update_interface_ids, CmpCheatcode, cmp_cheatcode, prefix_with_group_headers, group, Visibility, Mutability, Function, Cheatcode, Error, Event, EnumVariant, Enum, StructField, Struct, Cheatcodes, Item, ItemOrder, CheatcodesPrinter
 - `plugins/withQuatriviumAndroidSecurity.js` — módulo JS/TS
   - Funciones/clases: stripExpPlusFromManifestXml, ensureHttpsDeepLinks
 - `profile/ProfileContext.tsx` — módulo JS/TS

@@ -84,6 +84,8 @@ contract QuatriviumLeveling {
         ) return 0;
         uint256 budget = presupuestoPremioMensual(cajaLibre, liquidezTotal);
         uint256 wDiv = pesoDivision(division, totalDivisiones);
+        // n(n+1) siempre es par: el /2 es exacto y sumDiv va en el denominador, no multiplica el bote.
+        // slither-disable-next-line divide-before-multiply
         uint256 sumDiv = (totalDivisiones * (totalDivisiones + 1)) / 2;
         if (budget == 0 || wDiv == 0 || sumDiv == 0) return 0;
         uint256 wSeat = DIVISION_SIZE - puestoEnDivision + 1;

@@ -226,6 +226,9 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(credit).not.to.include('(interestRestante * feeBasisPoints) / 10000');
     expect(credit).to.include('next <= nivel - (nivel % 100)');
     expect(leveling).to.include('nivel - (nivel % HITO_PASO)');
+    // El único hallazgo de Slither queda silenciado con su razón a la vista, no borrado a ciegas.
+    expect(leveling).to.include('slither-disable-next-line divide-before-multiply');
+    expect(leveling).to.match(/n\(n\+1\) siempre es par/);
     expect(slitherCfg).to.include('timestamp');
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
     expect(pkg.scripts['security:slither']).to.include('run-slither.mjs');
@@ -234,6 +237,11 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(runner).to.include('windowsToWsl');
     expect(runner).to.include('run-slither-wsl.sh');
     expect(runner).to.include('-lic');
+    // Con foundry.toml presente, crytic-compile elegiría Foundry y buscaría `forge` (no existe en Windows).
+    expect(runner).to.include('--compile-force-framework');
+    expect(runner).to.include('--hardhat-ignore-compile');
+    expect(runner).to.include('compileWithHardhat');
+    expect(runner).to.include('hardhat.config.cjs');
     const wslSh = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'run-slither-wsl.sh'), 'utf8');
     expect(wslSh).to.include('hardhat.config.cjs');
     expect(wslSh).to.include('compile --force');
@@ -1847,6 +1855,12 @@ describe('account entry — password, email and session', () => {
     expect(prefs).to.match(/ACTION_AUTH_METHODS: AuthMethod\[\] = \['pin', 'authenticator', 'biometric', 'password'\];/);
     expect(prefs).to.not.include("'phone'");
     expect(prefs).to.include("['password', 'pin', 'biometric', 'authenticator']");
+    expect(prefs).to.not.include("methods.push('email')");
+    expect(prefs).to.not.include('|| method === \'email\'');
+    const securityUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'SecuritySettings.tsx'), 'utf8');
+    expect(securityUi).to.include('isAccessPaymentEnabled');
+    expect(securityUi).to.include('liveCreditNotReady');
+    expect(securityUi).to.include('identityNeedAccess');
     const lock = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
     expect(lock).to.not.include("unlockMode === 'phone'");
     expect(lock).to.not.include("unlockMode === 'email'");

@@ -41,7 +41,7 @@ function uniqueMethods(values: unknown): AuthMethod[] {
 }
 
 function slot(on: boolean, methods: AuthMethod[], primaryOnly = true): AuthSlot {
-  const next = uniqueMethods(methods).filter((method) => ACTION_AUTH_METHODS.includes(method) || method === 'email');
+  const next = uniqueMethods(methods).filter((method) => ACTION_AUTH_METHODS.includes(method));
   if (!on) {
     return { on: false, methods: next, method: next[0] || 'password', primaryOnly };
   }
@@ -105,7 +105,6 @@ async function readRaw(): Promise<AuthPrefs> {
 
 export async function getAvailableMethods(): Promise<AuthMethod[]> {
   const methods: AuthMethod[] = ['password'];
-  if (await isEmailVerified()) methods.push('email');
   if (await isPinSet()) methods.push('pin');
   if (await isMethodReady('biometric')) methods.push('biometric');
   if (await isAuthenticatorEnabled()) methods.push('authenticator');

@@ -255,6 +255,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-18 | Slither operativo en Windows con Hardhat 2 forzado; 7 avisos revisados sin fallo real; test nuevo de premio de asiento (exactitud + tope de bote). | — |
+| 2026-09-18 | Auditoria en vivo USB: Seguridad Real ya no pide 1 USDT de acceso si mainnet no esta publicado; candado sin correo en metodos disponibles. | — |
 | 2026-09-18 | Auditoria: restaurar identidad no apaga el telefono on-chain, Solicitar Real exige 1 USDT on-chain, el vinculo se previsualiza antes del 0.50, y el candado ya no envia OTP de correo. | — |
 | 2026-09-18 | Correo y numero salen del candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. Identidad de crédito no cambia. | — |
 | 2026-09-18 | Correo y numero quedan en la cuenta: viajan a otro celular sin re-OTP, se cambian o quitan en Ajustes, cada cambio cobra 0.50 USDT silencioso, y si se quitan hay que volver a verificar para el credito. | — |

@@ -82,6 +82,41 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     expect(firstSeat).to.be.gt(lastSeat);
   });
 
+  it('keeps the seat prize exact and never pays more than the monthly budget', async () => {
+    const Factory = await ethers.getContractFactory('QuatriviumLeveling');
+    const leveling = await Factory.deploy();
+    const caja = ethers.parseUnits('20000', 18);
+    const budget = await leveling.presupuestoPremioMensual(caja, caja);
+    const seats = await leveling.DIVISION_SIZE();
+    const sumaPesos = (seats * (seats + 1n)) / 2n;
+
+    // El /2 de n(n+1)/2 es exacto: divide-before-multiply no pierde wei.
+    for (const divisiones of [1n, 2n, 3n, 7n, 10n]) {
+      for (const division of [1n, divisiones]) {
+        for (const puesto of [1n, 50n, seats]) {
+          const peso = await leveling.pesoDivision(division, divisiones);
+          const asiento = seats - puesto + 1n;
+          const sinDividirAntes =
+            (budget * peso * asiento * 2n) / (divisiones * (divisiones + 1n) * sumaPesos);
+          expect(await leveling.premioAsiento(caja, caja, division, divisiones, puesto, sumaPesos)).to.equal(
+            sinDividirAntes
+          );
+        }
+      }
+    }
+
+    // Todos los asientos elegibles juntos caben en el bote: el pool no se sobregira.
+    for (const divisiones of [1n, 2n, 3n]) {
+      let total = 0n;
+      for (let division = 1n; division <= divisiones; division += 1n) {
+        for (let puesto = 1n; puesto <= seats; puesto += 1n) {
+          total += await leveling.premioAsiento(caja, caja, division, divisiones, puesto, sumaPesos);
+        }
+      }
+      expect(total).to.be.lte(budget);
+    }
+  });
+
   it('only pays a milestone bonus when the pool has free cash above the floor', async () => {
     const Factory = await ethers.getContractFactory('QuatriviumLeveling');
     const leveling = await Factory.deploy();

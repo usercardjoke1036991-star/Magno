@@ -4,14 +4,25 @@
  * Uso: npm run security:slither
  */
 import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const extra = process.argv.slice(2);
-const slitherArgs = ['.', '--config-file', 'slither.config.json', ...extra];
+// Hardhat 2 explícito: con foundry.toml presente crytic-compile elegiría Foundry y buscaría `forge`.
+const slitherArgs = [
+  '.',
+  '--config-file',
+  'slither.config.json',
+  '--compile-force-framework',
+  'hardhat',
+  '--hardhat-ignore-compile',
+  ...extra,
+];
 const wslScript = resolve(root, 'scripts', 'run-slither-wsl.sh');
+const hardhatCli = resolve(root, 'node_modules', 'hardhat', 'internal', 'cli', 'cli.js');
 
 function envWithPipx() {
   const env = { ...process.env };
@@ -61,6 +72,22 @@ function bashQuote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`;
 }
 
+/** Artefactos frescos con el Hardhat 2 de Magno, no el del directorio padre. */
+function compileWithHardhat() {
+  if (!existsSync(hardhatCli)) {
+    console.error('Falta Magno/node_modules/hardhat. Ejecuta npm install en Magno.');
+    return false;
+  }
+  const status = run(process.execPath, [
+    hardhatCli,
+    '--config',
+    'hardhat.config.cjs',
+    'compile',
+    '--force',
+  ]);
+  return status === 0;
+}
+
 const localTries = [
   ['slither', ['--version']],
   ['python3', ['-m', 'slither', '--version']],
@@ -69,6 +96,7 @@ const localTries = [
 
 for (const [command, versionArgs] of localTries) {
   if (!probe(command, versionArgs)) continue;
+  if (!compileWithHardhat()) process.exit(1);
   const args = command === 'slither' ? slitherArgs : ['-m', 'slither', ...slitherArgs];
   const status = run(command, args);
   if (status === null) continue;

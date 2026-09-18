@@ -1,9 +1,10 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Auditoria profunda hecha: candado sin correo/celular, identidad de credito estable, 1 USDT exigido al pedir en Real. Mainnet sigue pendiente de BNB y CONFIRM_MAINNET.
+Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
 
 ## Decisiones
+- [2026-09-18] El divide-before-multiply de premioAsiento es falso positivo: n(n+1)/2 es exacto y va en el denominador. No se reescribe la formula; queda blindada con test de exactitud e invariante de bote en Hardhat y fuzz en Foundry.
 - [2026-09-18] El 1 USDT de Real se exige tambien en el servicio al pedir, no solo en la pantalla. Demo sigue libre.
 - [2026-09-18] Correo y celular no son candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. El OTP de identidad sigue en Inicio y Ajustes.
 - [2026-09-18] Correo y numero son de la cuenta. Otro celular los restaura sin OTP. Cambiar o volver a agregar cobra 0.50. Quitar no cobra, pero bloquea el credito hasta verificar de nuevo en Inicio o Ajustes. No se desata on-chain al quitar el numero.
@@ -33,11 +34,11 @@ Auditoria profunda hecha: candado sin correo/celular, identidad de credito estab
 - [2026-09-14] El usuario de sesion queda cifrado en el celular y no se edita. El nombre e imagen anonimos van a la red y no se cambian. No son el mismo texto.
 - [2026-09-14] Hay dos nombres distintos: el de inicio de sesion va cifrado en el celular y no se edita; el anonimo lo ve la red, se elige una vez y no es el mismo.
 - [2026-09-13] Como confirma: las cuatro acciones tienen interruptor y chips PIN, autenticador, huella y contrasena. Sin encender no se aplica ningun metodo. No se muestra Principal; el desbloqueo por defecto se entiende como contrasena.
-- [2026-09-13] La contraseña es la unica principal del desbloqueo. En Confirmar el usuario suma PIN, huella o autenticador. Pedir, pagar y transferir (billeteras y plataformas) usan los mismos sistemas, sin correo.
-- [2026-09-13] Con cuenta en este telefono no se vuelve a Iniciar sesion; Iniciar sesion solo si el almacen no responde.
-- [2026-09-13] Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real.
 
 ## Cambios realizados
+- [2026-09-18] Slither queda como semaforo real: silenciado el unico hallazgo (divide-before-multiply) en su linea con la razon visible. 0 hallazgos, exit 0. Bytecode intacto 24555/1599, Hardhat 176/176.
+- [2026-09-18] Slither en vivo: arreglado el lanzador en Windows (forzaba Foundry y buscaba forge). 18 contratos, 99 detectores, 7 avisos, 0 criticos. Nuevo test: premio de asiento exacto y suma de premios <= bote. Hardhat 176/176, Foundry 8/8, salud 14/14, EIP-170 24555/24576.
+- [2026-09-18] Auditoria USB en vivo: Metro + Xiaomi. Corregido Ajustes/Seguridad en Real para mostrar lanzamiento en vez de Pague 1 USDT mientras no hay mainnet. Candado ya no considera correo como metodo disponible.
 - [2026-09-18] Auditoria: restaurar telefono on-chain sin MSISDN, 1 USDT al pedir, preview de vinculo antes del 0.50, candado sin OTP de correo.
 - [2026-09-18] Correo y celular fuera del candado para no gastar Textbelt ni Resend al desbloquear.
 - [2026-09-18] Identidad de cuenta: restore/resume en worker, quitar en Ajustes, cobro 0.50 solo al confirmar cambio o alta.
@@ -85,15 +86,10 @@ Auditoria profunda hecha: candado sin correo/celular, identidad de credito estab
 - [2026-09-16] Auditoria MobSF del APK debug: nota 37/100 esperada. Release endurecido: minSdk 29, sin HTTP claro, sin microfono ni storage legado, cropper no exportado, R8 en release. El APK escaneado sigue siendo debug con certificado de desarrollo.
 - [2026-09-15] Script scan-mobile para MobSF: sube el APK, lanza el analisis y guarda el informe JSON en la raiz. Comando npm run security:mobsf. La clave vive en el entorno, no en git.
 - [2026-09-15] npm run security:slither ya no usa el slither de Windows: entra a WSL/pipx, compila con hardhat.config.cjs y --hardhat-ignore-compile. Analisis: 0 hallazgos.
-- [2026-09-15] Avisos Slither revisados: timestamp es ruido de plazos; se corrigio precision de fee en liquidate y suelo de hitos. Contrato Demo desplegado sigue el bytecode anterior hasta un redespliegue.
-- [2026-09-14] Auditoria profunda: contrato Demo live al dia; script de produccion ya no escribe 0x1E5118; no se cobra USDT dos veces si donar falla; OTP Twilio trial via Verify. Falta mainnet y flyctl auth login.
-- [2026-09-14] Twilio SMS guardado en .env.worker (gitignored): FROM trial listo. production:check 13/14, solo falta contrato mainnet.
-- [2026-09-14] Worker de avisos listo para Fly 24/7 (Dockerfile.notify, fly.toml) y Twilio SMS. Falta login de Fly y las 3 claves Twilio del fundador.
-- [2026-09-14] Auditoria alta-hub: ensureAppWallet ya no crea otra frase si falta el blob; persistencia de billetera falla cerrado; OTP de telefono se reabre si el dispositivo no coincide; misma direccion BIP-39 12/24 en cualquier aparato. Hardhat 143/143. Demo live 24457 B alineado.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-18] Cambio: Auditoria profunda. Candado sin OTP, 1 USDT al pedir, restaurar identidad y preview de vinculo antes del cobro.
+[2026-09-18] Cambio: Slither queda como semaforo real: silenciado el unico hallazgo (divide-before-multiply) en su linea con la razon visible. 0 hallazgos, exit 0. Bytecode intacto 24555/1599, Hardhat 176/176.

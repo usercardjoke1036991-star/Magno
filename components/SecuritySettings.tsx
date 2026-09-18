@@ -37,6 +37,7 @@ import { isPhoneActive } from '../services/accountPhone';
 import { EmailOtpSection } from './EmailOtpSection';
 import { AppText } from './AppText';
 import { identityUnlocked } from '../utils/creditGates';
+import { isAccessPaymentEnabled } from '../constants/rpcConfig';
 
 type RowStatus = 'done' | 'todo' | 'warn';
 type Panel = 'menu' | 'kyc' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'methods' | 'authenticator';
@@ -123,9 +124,21 @@ export const SecuritySettings: React.FC = () => {
   const kycOk = userInfo.kycDeclarado;
   const phoneOk = Boolean(phoneActive && userInfo.identityBound);
   const accessPaid = identityUnlocked(userInfo.donatedUsd || 0);
+  const accessOpen = isAccessPaymentEnabled();
+
+  const identityHint = (done: boolean, doneText: string, todoKey: TranslationKey) => {
+    if (done) return doneText;
+    if (!accessOpen) return t('liveCreditNotReady');
+    if (!accessPaid) return t('identityNeedAccess');
+    return t(todoKey);
+  };
 
   const openIdentity = (next: 'kyc' | 'email' | 'phone', alreadyDone: boolean) => {
     if (demoAccount) return;
+    if (!alreadyDone && !accessOpen) {
+      Alert.alert(t('creditAccessTitle'), t('liveCreditNotReady'));
+      return;
+    }
     if (!accessPaid && !alreadyDone) {
       Alert.alert(t('creditAccessTitle'), t('identityNeedAccess'));
       return;
@@ -359,14 +372,14 @@ export const SecuritySettings: React.FC = () => {
           <Row
             icon="id"
             label={t('securityKyc')}
-            hint={kycOk ? t('securityKycDone') : accessPaid ? t('securityKycTodo') : t('identityNeedAccess')}
+            hint={identityHint(kycOk, t('securityKycDone'), 'securityKycTodo')}
             status={kycOk ? 'done' : accessPaid ? 'warn' : 'todo'}
             onPress={() => openIdentity('kyc', kycOk)}
           />
           <Row
             icon="id"
             label={t('securityEmail')}
-            hint={email || (accessPaid ? t('securityEmailTodo') : t('identityNeedAccess'))}
+            hint={identityHint(Boolean(email), email, 'securityEmailTodo')}
             status={email ? 'done' : accessPaid ? 'warn' : 'todo'}
             onPress={() => openIdentity('email', Boolean(email))}
           />
@@ -397,7 +410,7 @@ export const SecuritySettings: React.FC = () => {
         <Row
           icon="phone"
           label={t('securityPhone')}
-          hint={phoneOk ? t('securityPhoneDone') : accessPaid ? t('securityPhoneTodo') : t('identityNeedAccess')}
+          hint={identityHint(phoneOk, t('securityPhoneDone'), 'securityPhoneTodo')}
           status={phoneOk ? 'done' : accessPaid ? 'warn' : 'todo'}
           onPress={() => openIdentity('phone', phoneOk)}
         />
