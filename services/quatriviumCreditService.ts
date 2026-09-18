@@ -21,6 +21,7 @@ import { CORE_LOAN_LEVEL, MAX_LOAN_LEVEL, nextClaimableMilestone, nextUpcomingMi
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 import { walletRunsOnThisDevice } from '../utils/accountEntry';
 import { identityHashBound, liveCreditReady } from '../utils/creditGates';
+import { isPhoneActive } from './accountPhone';
 import { getDeviceHash } from './deviceBinding';
 import { cobrarComisionIntermediario, isPhraseBackedUp, loadAppWallet } from './appWallet';
 import { loadVerifiedEmail } from './accountEmail';
@@ -313,6 +314,7 @@ export const QuatriviumCreditService = {
     }
     if (!isDemoAccount()) {
       const email = await loadVerifiedEmail();
+      const phoneActive = await isPhoneActive().catch(() => true);
       const userAddress = await signer.getAddress();
       const credit = contractWith(signer);
       let kycDeclarado = false;
@@ -339,10 +341,11 @@ export const QuatriviumCreditService = {
         hasEmail: Boolean(email),
         phraseBackedUp: true,
         deviceMatches,
+        phoneActive,
       })) {
         if (!email) throw new Error('email-required');
-        if (!identityBound) throw new Error('identity required');
-        if (!deviceMatches) throw new Error('device-mismatch');
+        if (!identityBound || !phoneActive) throw new Error('identity required');
+        if (!deviceMatches && !phoneActive) throw new Error('device-mismatch');
         throw new Error('kyc required');
       }
     }

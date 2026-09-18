@@ -10,7 +10,8 @@ export type AuthPurpose =
   | 'email'
   | 'username'
   | 'demo-identity'
-  | 'session';
+  | 'session'
+  | 'identity';
 
 const ZERO_PLACEHOLDER = '0x0000000000000000000000000000000000000001';
 const ZERO_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';

@@ -1,11 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { HDNodeWallet, Wallet } from 'ethers';
-import { subscribeRuntimeMode } from '../constants/rpcConfig';
+import { isDemoAccount, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { setWalletSigner, clearWalletSigner } from '../services/quatriviumCreditService';
 import { loadAppWallet, ensureAppWallet, importFromPhrase, recreateAppWallet, addressFromPhrase, withCurrentRpc } from '../services/appWallet';
 import { wipeLocalAccount } from '../services/accountReset';
 import { restoreSavedSessionWrap } from '../services/savedSession';
 import { getWalletWrapKey } from '../services/walletSession';
+import { hydrateAccountIdentity } from '../services/accountIdentity';
 
 interface AppWalletValue {
   address: string;
@@ -36,6 +37,9 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const wallet = await ensureAppWallet();
     setSigner(wallet);
     setWalletSigner(wallet);
+    if (!isDemoAccount()) {
+      await hydrateAccountIdentity(wallet.address).catch(() => null);
+    }
     setFailed(false);
     setReady(true);
   }, []);
@@ -122,6 +126,9 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const wallet = await importFromPhrase(phrase);
     setSigner(wallet);
     setWalletSigner(wallet);
+    if (!isDemoAccount()) {
+      await hydrateAccountIdentity(wallet.address).catch(() => null);
+    }
     return wallet.address.toLowerCase();
   }, [signer]);
 

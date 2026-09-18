@@ -11,9 +11,6 @@ import { useTheme } from '../theme/ThemeContext';
 import { authenticateBiometric, matchPassword, matchPin } from '../services/appLock';
 import { verifyAuthenticator } from '../services/authenticator';
 import { getAuthMethods, isAuthEnabled, isMethodReady, type AuthMethod, type AuthPurpose } from '../services/authPrefs';
-import { loadVerifiedEmail } from '../services/accountEmail';
-import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
-import { ensureAppWallet } from '../services/appWallet';
 import type { FundsConfirmPurpose } from '../services/fundsConfirm';
 import { SecretInput } from './SecretInput';
 import { AppText } from './AppText';
@@ -50,25 +47,11 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
     setError('');
   }, []);
 
-  const sendEmailCode = async () => {
-    try {
-      const [wallet, email] = await Promise.all([ensureAppWallet(), loadVerifiedEmail()]);
-      if (!email) throw new Error('email');
-      await requestEmailOtp(wallet.address, email);
-    } catch (caught) {
-      const reason = String((caught as Error)?.message || '');
-      if (reason.includes('rate')) setError(t('otpRate'));
-      else if (reason.includes('notify')) setError(t('emailNeedApi'));
-      else setError(t('otpRequestFailed'));
-    }
-  };
-
   const askSecret = (next: AuthMethod) =>
     new Promise<boolean>((resolve) => {
       resolver.current = resolve;
       setMethod(next);
       setOpen(true);
-      if (next === 'email') void sendEmailCode();
     });
 
   const confirmFunds = useCallback(async (nextPurpose: FundsConfirmPurpose = 'transfer') => {
@@ -130,21 +113,6 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       finish(true);
       return;
     }
-    if (method === 'email') {
-      if (code.length !== 6) return;
-      setBusy(true);
-      try {
-        const [wallet, email] = await Promise.all([ensureAppWallet(), loadVerifiedEmail()]);
-        if (!email) throw new Error('email');
-        await verifyEmailOtp(wallet.address, email, code);
-        finish(true);
-      } catch {
-        setError(t('emailCodeWrong'));
-        setCode('');
-        setBusy(false);
-      }
-      return;
-    }
     if (!password) return;
     setBusy(true);
     const ok = await matchPassword(password);
@@ -169,13 +137,11 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       ? t('fundsConfirmPrompt')
       : method === 'authenticator'
         ? t('fundsConfirmPromptAuth')
-        : method === 'email'
-          ? t('fundsConfirmPromptEmail')
-          : t('fundsConfirmPromptPassword');
+        : t('fundsConfirmPromptPassword');
   const canSubmit =
     method === 'pin'
       ? pin.length === 6
-      : method === 'authenticator' || method === 'email'
+      : method === 'authenticator'
         ? code.length === 6
         : Boolean(password);
 
@@ -195,13 +161,13 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
                 maxLength={6}
                 placeholder="••••••"
               />
-            ) : method === 'authenticator' || method === 'email' ? (
+            ) : method === 'authenticator' ? (
               <SecretInput
                 value={code}
                 onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
                 keyboardType="number-pad"
                 maxLength={6}
-                placeholder={method === 'email' ? t('emailCode') : t('authenticatorCode')}
+                placeholder={t('authenticatorCode')}
               />
             ) : (
               <SecretInput

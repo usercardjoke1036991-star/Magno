@@ -19,6 +19,7 @@ function methodKey(method: AuthMethod): TranslationKey {
   if (method === 'pin') return 'authMethodPin';
   if (method === 'authenticator') return 'authMethodAuthenticator';
   if (method === 'biometric') return 'authMethodBiometric';
+  if (method === 'email') return 'authMethodEmail';
   return 'authMethodPassword';
 }
 

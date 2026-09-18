@@ -518,8 +518,8 @@ describe('demo credit gates', function () {
   function liveNeedsKyc(demo, kycDeclarado) {
     return !demo && !kycDeclarado;
   }
-  function liveNeedsPhone(demo, identityBound) {
-    return !demo && !identityBound;
+  function liveNeedsPhone(demo, identityBound, phoneActive = true) {
+    return !demo && !(identityBound && phoneActive);
   }
   function liveNeedsEmail(demo, hasEmail) {
     return !demo && !hasEmail;
@@ -527,15 +527,16 @@ describe('demo credit gates', function () {
   function liveNeedsPhrase(phraseBackedUp) {
     return !phraseBackedUp;
   }
-  function liveNeedsDeviceMatch(demo, deviceMatches) {
-    return !demo && !deviceMatches;
+  function liveNeedsDeviceMatch(demo, deviceMatches, phoneActive = false) {
+    if (demo || phoneActive) return false;
+    return !deviceMatches;
   }
   function liveCreditReady(demo, flags) {
     return !liveNeedsPhrase(flags.phraseBackedUp)
       && !liveNeedsEmail(demo, flags.hasEmail)
-      && !liveNeedsPhone(demo, flags.identityBound)
+      && !liveNeedsPhone(demo, flags.identityBound, flags.phoneActive !== false)
       && !liveNeedsKyc(demo, flags.kycDeclarado)
-      && !liveNeedsDeviceMatch(demo, flags.deviceMatches);
+      && !liveNeedsDeviceMatch(demo, flags.deviceMatches, Boolean(flags.phoneActive));
   }
   function identityHashBound(value) {
     const hash = String(value || '');
@@ -642,6 +643,10 @@ describe('demo credit gates', function () {
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true })).to.equal(false);
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true, deviceMatches: true })).to.equal(true);
     expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true, deviceMatches: false })).to.equal(false);
+    expect(liveNeedsPhone(false, true, false)).to.equal(true);
+    expect(liveNeedsPhone(false, true, true)).to.equal(false);
+    expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true, deviceMatches: false, phoneActive: true })).to.equal(true);
+    expect(liveCreditReady(false, { kycDeclarado: true, identityBound: true, hasEmail: true, phraseBackedUp: true, deviceMatches: true, phoneActive: false })).to.equal(false);
     function creditLineLooksActive(creditReady, isRegistered, hasActiveLoan) {
       return Boolean(creditReady && (isRegistered || hasActiveLoan));
     }
@@ -736,6 +741,75 @@ describe('demo credit gates', function () {
     expect(securityUi).to.include('identityNeedAccess');
   });
 
+  it('charges Real email and phone verification to the founder, not the pool', function () {
+    const fs = require('fs');
+    const path = require('path');
+    function verificationFeeUsdt(kind, demo) {
+      if (demo) return 0;
+      return kind === 'email' ? 0.5 : 0.5;
+    }
+    expect(verificationFeeUsdt('email', true)).to.equal(0);
+    expect(verificationFeeUsdt('phone', true)).to.equal(0);
+    expect(verificationFeeUsdt('email', false)).to.equal(0.5);
+    expect(verificationFeeUsdt('phone', false)).to.equal(0.5);
+    const gatesSrc = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
+    expect(gatesSrc).to.include('CREDIT_VERIFY_EMAIL_USDT = 0.5');
+    expect(gatesSrc).to.include('CREDIT_VERIFY_PHONE_USDT = 0.5');
+    expect(gatesSrc).to.include('if (demo) return 0');
+    const emailUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'EmailOtpSection.tsx'), 'utf8');
+    expect(emailUi).to.include('chargeVerificationFee');
+    expect(emailUi).to.include('confirmEmailOtp');
+    expect(emailUi).to.include('saveVerifiedEmail');
+    const emailConfirm = emailUi.slice(emailUi.indexOf('const confirmCode'));
+    expect(emailConfirm.indexOf('confirmEmailOtp')).to.be.below(emailConfirm.indexOf('chargeVerificationFee'));
+    expect(emailConfirm.indexOf('chargeVerificationFee')).to.be.below(emailConfirm.indexOf('saveVerifiedEmail'));
+    expect(emailUi).to.not.include('depositarLiquidez');
+    expect(emailUi).to.not.include('retirarLiquidez');
+    expect(emailUi).to.not.include('verifyFeeEmailLead');
+    expect(emailUi).to.not.include('verifyFeeFailed');
+    expect(emailUi).to.not.match(/TEXTBELT|textbelt/i);
+    const phoneUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'PhoneOtpSection.tsx'), 'utf8');
+    expect(phoneUi).to.include('chargeVerificationFee');
+    expect(phoneUi).to.include('vincularIdentidad');
+    const phoneConfirm = phoneUi.slice(phoneUi.indexOf('const confirmCode'));
+    expect(phoneConfirm.indexOf('chargeVerificationFee')).to.be.below(phoneConfirm.indexOf('vincularIdentidad'));
+    expect(phoneUi).to.not.include('depositarLiquidez');
+    expect(phoneUi).to.not.include('retirarLiquidez');
+    expect(phoneUi).to.not.include('verifyFeePhoneLead');
+    expect(phoneUi).to.not.include('verifyFeeFailed');
+    const charge = fs.readFileSync(path.join(__dirname, '..', 'services', 'founderUsdtCharge.ts'), 'utf8');
+    expect(charge).to.include('QuatriviumCreditService.donar');
+    expect(charge).to.include('ensureExternalWalletOnAppChain');
+    expect(charge).to.include('silent');
+    expect(charge).to.not.include('depositarLiquidez');
+    expect(charge).to.not.include('retirarLiquidez');
+    expect(charge).to.not.match(/TEXTBELT|RESEND_API|ATTESTER_PRIVATE/i);
+    const hook = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useVerificationFee.ts'), 'utf8');
+    expect(hook).to.include('silent: true');
+    expect(hook).to.not.include('useFundsConfirm');
+    const historySvc = fs.readFileSync(path.join(__dirname, '..', 'services', 'movementHistory.ts'), 'utf8');
+    expect(historySvc).to.include('isHiddenVerificationDonation');
+    const gates = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
+    expect(gates).to.include('isHiddenVerificationDonation');
+    function isHiddenVerificationDonation(usdAmount, isFirstDonation) {
+      if (isFirstDonation) return false;
+      return Math.abs(Number(usdAmount) - 0.5) < 1e-6;
+    }
+    expect(isHiddenVerificationDonation(0.5, false)).to.equal(true);
+    expect(isHiddenVerificationDonation(0.5, true)).to.equal(false);
+    expect(isHiddenVerificationDonation(1, false)).to.equal(false);
+    const emailOtp = fs.readFileSync(path.join(__dirname, '..', 'services', 'emailOtp.ts'), 'utf8');
+    const confirmFn = emailOtp.slice(emailOtp.indexOf('export async function confirmEmailOtp'), emailOtp.indexOf('export async function verifyEmailOtp'));
+    expect(confirmFn).to.include('/email/verify');
+    expect(confirmFn).to.not.include('saveVerifiedEmail');
+    const verifyFn = emailOtp.slice(emailOtp.indexOf('export async function verifyEmailOtp'));
+    expect(verifyFn).to.include('confirmEmailOtp');
+    expect(verifyFn).to.include('saveVerifiedEmail');
+    const lockUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(lockUi).to.include('verifyEmailOtp');
+    expect(lockUi).to.not.include('chargeVerificationFee');
+  });
+
   it('keeps Demo and Real history apart and runs grace down then mora up', function () {
     function historyJournalSuffix({ mode, chainId, contract, address }) {
       return `${mode === 'live' ? 'live' : 'demo'}_${Number(chainId) || 0}_${String(contract || '').toLowerCase()}_${String(address || '').toLowerCase()}`;
@@ -797,7 +871,10 @@ describe('demo credit gates', function () {
     function voluntaryDonateUsd(paidUsd) {
       const paid = Number(paidUsd);
       if (!Number.isFinite(paid) || paid <= 0) return 0;
-      return Math.max(0, paid - (paid + 1e-9 >= 1 ? 1 : 0));
+      if (!(paid + 1e-9 >= 1)) return 0;
+      const extra = paid - 1;
+      const hidden = Math.min(extra, 1);
+      return Math.max(0, extra - hidden);
     }
     function classifyDonationKind(usdAmount, isFirstDonation) {
       const usd = Number(usdAmount);
@@ -853,7 +930,9 @@ describe('demo credit gates', function () {
     expect(movementBelongsToWorld({ world: 'demo' }, 'live')).to.equal(false);
     expect(movementBelongsToWorld({}, 'demo')).to.equal(false);
     expect(voluntaryDonateUsd(1)).to.equal(0);
-    expect(voluntaryDonateUsd(6)).to.equal(5);
+    expect(voluntaryDonateUsd(1.5)).to.equal(0);
+    expect(voluntaryDonateUsd(2)).to.equal(0);
+    expect(voluntaryDonateUsd(6)).to.equal(4);
     expect(voluntaryDonateUsd(0)).to.equal(0);
     expect(classifyDonationKind(1, true)).to.equal('access');
     expect(classifyDonationKind(5, true)).to.equal('donation');
@@ -1125,21 +1204,26 @@ describe('account entry — password, email and session', () => {
     function restoreAllowedOnThisDevice({ claimedWallet, phraseWallet }) {
       return restoreMatchesDevice(claimedWallet, phraseWallet);
     }
-    function phoneVerifiedOnThisDevice(identityBound, deviceMatches) {
-      return Boolean(identityBound) && Boolean(deviceMatches);
+    function phoneVerifiedOnThisDevice(identityBound, deviceMatches, phoneActive = true) {
+      return Boolean(identityBound) && Boolean(phoneActive) && Boolean(deviceMatches);
     }
     expect(restoreAllowedOnThisDevice({ claimedWallet: '', phraseWallet: '0xdef', onChainDeviceHash: '0x11', localDeviceHash: '0x22' })).to.equal(true);
     expect(restoreAllowedOnThisDevice({ claimedWallet: '0xabc', phraseWallet: '0xdef' })).to.equal(false);
     expect(phoneVerifiedOnThisDevice(true, false)).to.equal(false);
     expect(phoneVerifiedOnThisDevice(true, true)).to.equal(true);
     expect(phoneVerifiedOnThisDevice(false, true)).to.equal(false);
+    expect(phoneVerifiedOnThisDevice(true, true, false)).to.equal(false);
     const fs = require('fs');
     const path = require('path');
     const phoneUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'PhoneOtpSection.tsx'), 'utf8');
-    expect(phoneUi).to.include('identityBound && deviceMatches && !editing');
-    expect(phoneUi).to.include("t('seedNeedDevice')");
+    expect(phoneUi).to.include('phoneActive && !editing');
+    expect(phoneUi).to.include("t('otpRemove')");
+    expect(phoneUi).to.include('releaseAccountContact');
     expect(phoneUi).to.include('isCreditReady');
     expect(phoneUi).to.include("t('liveCreditNotReady')");
+    const emailUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'EmailOtpSection.tsx'), 'utf8');
+    expect(emailUi).to.include("t('emailRemove')");
+    expect(emailUi).to.include('releaseAccountContact');
     const banner = fs.readFileSync(path.join(__dirname, '..', 'components', 'KycAccessBanner.tsx'), 'utf8');
     expect(banner).to.include('deviceMatches={deviceMatches}');
     function sessionOwnedHere(claimedDeviceHash, localDeviceHash) {
@@ -1733,5 +1817,41 @@ describe('account entry — password, email and session', () => {
     const lock = fs.readFileSync(path.join(__dirname, '..', 'services', 'appLock.ts'), 'utf8');
     expect(lock).to.include('AsyncStorage.removeItem(PASSWORD_FALLBACK)');
     expect(lock).to.match(/if \(stored\) \{[\s\S]*removeItem\(PASSWORD_FALLBACK\)/);
+  });
+
+  it('keeps email and phone on the account until deleted, then blocks credit', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const gates = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
+    expect(gates).to.include('phoneActive');
+    expect(gates).to.match(/if \(demo \|\| phoneActive\) return false/);
+    const worker = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'notify-worker.mjs'), 'utf8');
+    expect(worker).to.include("/identity/status");
+    expect(worker).to.include("/identity/resume");
+    expect(worker).to.include("/identity/release");
+    expect(worker).to.include('phoneReleased');
+    expect(worker).to.include('emailReleased');
+    expect(worker).to.include('verifiedPhone');
+    expect(worker).to.include("purpose !== 'identity'");
+    const identity = fs.readFileSync(path.join(__dirname, '..', 'services', 'accountIdentity.ts'), 'utf8');
+    expect(identity).to.include('restoreIdentityLocal');
+    expect(identity).to.include('resumeDeviceIfNeeded');
+    expect(identity).to.not.include('chargeVerificationFee');
+    expect(identity).to.not.include('chargeFounderUsdt');
+    const prefs = fs.readFileSync(path.join(__dirname, '..', 'services', 'authPrefs.ts'), 'utf8');
+    expect(prefs).to.match(/ACTION_AUTH_METHODS: AuthMethod\[\] = \['pin', 'authenticator', 'biometric', 'password'\];/);
+    expect(prefs).to.not.include("'phone'");
+    const lock = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(lock).to.not.include("unlockMode === 'phone'");
+    expect(lock).to.not.include('submitUnlockPhone');
+    expect(lock).to.not.include('requestPhoneOtp');
+    expect(lock).to.include('restoreIdentityLocal');
+    const funds = fs.readFileSync(path.join(__dirname, '..', 'components', 'FundsConfirmHost.tsx'), 'utf8');
+    expect(funds).to.not.include("method === 'phone'");
+    expect(funds).to.not.include("method === 'email'");
+    expect(funds).to.not.include('requestPhoneOtp');
+    expect(funds).to.not.include('requestEmailOtp');
+    const walletCtx = fs.readFileSync(path.join(__dirname, '..', 'wallet', 'AppWalletContext.tsx'), 'utf8');
+    expect(walletCtx).to.include('hydrateAccountIdentity');
   });
 });

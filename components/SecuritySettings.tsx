@@ -33,6 +33,7 @@ import {
 import { useAppMode } from '../wallet/AppModeContext';
 import type { TranslationKey } from '../i18n/translations';
 import { loadVerifiedEmail } from '../services/accountEmail';
+import { isPhoneActive } from '../services/accountPhone';
 import { EmailOtpSection } from './EmailOtpSection';
 import { AppText } from './AppText';
 import { identityUnlocked } from '../utils/creditGates';
@@ -69,9 +70,10 @@ export const SecuritySettings: React.FC = () => {
     loanPay: { on: false, methods: ['password'], method: 'password', primaryOnly: true },
   });
   const [email, setEmail] = useState('');
+  const [phoneActive, setPhoneActive] = useState(false);
 
   const refreshPhrase = async () => {
-    const [exists, ack, pin, password, bioStatus, bioEnabled, authenticator, prefs, verifiedEmail] = await Promise.all([
+    const [exists, ack, pin, password, bioStatus, bioEnabled, authenticator, prefs, verifiedEmail, phoneReady] = await Promise.all([
       hasSecretPhrase(),
       isPhraseBackedUp(),
       isPinSet(),
@@ -81,6 +83,7 @@ export const SecuritySettings: React.FC = () => {
       isAuthenticatorEnabled(),
       loadAuthPrefs(),
       loadVerifiedEmail(),
+      isPhoneActive(),
     ]);
     setHasPhrase(exists);
     setBackedUp(ack);
@@ -90,6 +93,7 @@ export const SecuritySettings: React.FC = () => {
     setAuthOn(authenticator);
     setAuthPrefs(prefs);
     setEmail(verifiedEmail);
+    setPhoneActive(phoneReady);
     setPhrase(null);
     setShown(false);
   };
@@ -117,7 +121,7 @@ export const SecuritySettings: React.FC = () => {
   }, [shown]);
 
   const kycOk = userInfo.kycDeclarado;
-  const phoneOk = userInfo.identityBound;
+  const phoneOk = phoneActive;
   const accessPaid = identityUnlocked(userInfo.donatedUsd || 0);
 
   const openIdentity = (next: 'kyc' | 'email' | 'phone', alreadyDone: boolean) => {
@@ -275,7 +279,10 @@ export const SecuritySettings: React.FC = () => {
             deviceMatches={userInfo.deviceMatches}
             isLoading={kycBusy}
             paused={userInfo.paused}
-            onBound={refetch}
+            onBound={() => {
+              refetch();
+              void refreshPhrase();
+            }}
           />
         ) : null}
         {panel === 'fingerprint' ? <BiometricLockSection compact onChanged={setBioOn} /> : null}

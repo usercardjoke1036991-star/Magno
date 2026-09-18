@@ -1,6 +1,9 @@
 {
-  "enfoque": "Dejar el worker 24/7 listo en Render (Web Service Docker) y no desplegar mainnet.",
+  "enfoque": "Identidad de cuenta lista: correo y numero viajan, se cambian o quitan en Ajustes, y el credito se bloquea si los quitan. Mainnet sigue pendiente de BNB y CONFIRM_MAINNET.",
   "decisiones": [
+    "- [2026-09-18] Correo y numero son de la cuenta. Otro celular los restaura sin OTP. Cambiar o volver a agregar cobra 0.50. Quitar no cobra, pero bloquea el credito hasta verificar de nuevo en Inicio o Ajustes. No se desata on-chain al quitar el numero.",
+    "- [2026-09-18] Correo y numero se ven gratis. El 0.50 USDT se cobra por detras al confirmar el codigo, sin mostrarlo.",
+    "- [2026-09-18] La tarifa de verificacion Real sale de la billetera del usuario hacia la fundadora con donar, nunca del pool. Cada confirmacion cobra; si donar pasa y el vinculo falla, un recibo de 2h evita doble cobro.",
     "- [2026-09-17] Demo no pide correo, numero, KYC ni el 1 USDT. Esos requisitos son de la cuenta Real y, al hacerlos ahi, quedan.",
     "- [2026-09-17] Cambiar Textbelt o Resend se hace en el panel de Render, no en el AdminPanel de la app. El attester de firma OTP si va en Render; la llave de owner no.",
     "- [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.",
@@ -27,12 +30,12 @@
     "- [2026-09-13] Como confirma: las cuatro acciones tienen interruptor y chips PIN, autenticador, huella y contrasena. Sin encender no se aplica ningun metodo. No se muestra Principal; el desbloqueo por defecto se entiende como contrasena.",
     "- [2026-09-13] La contraseña es la unica principal del desbloqueo. En Confirmar el usuario suma PIN, huella o autenticador. Pedir, pagar y transferir (billeteras y plataformas) usan los mismos sistemas, sin correo.",
     "- [2026-09-13] Con cuenta en este telefono no se vuelve a Iniciar sesion; Iniciar sesion solo si el almacen no responde.",
-    "- [2026-09-13] Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real.",
-    "- [2026-09-12] Contraseña del celular: minimo 8, maximo 66, con mayuscula, numero y simbolo. Frase nueva siempre 24 palabras BIP-39; recuperar acepta 12 si la cuenta es antigua.",
-    "- [2026-09-12] Una sola frase BIP-39. Se revela solo tras el candado. En Ajustes se consulta o se sustituye. Cambiar de aparato exige esa frase.",
-    "- [2026-09-12] Una sola sesion iniciada a la vez por cuenta. El ultimo telefono que entra echa al anterior."
+    "- [2026-09-13] Por defecto entra en Real. Si el usuario abre Demo, al reabrir vuelve a Demo. Si no hay modo guardado, Real."
   ],
   "cambios": [
+    "- [2026-09-18] Identidad de cuenta: restore/resume en worker, quitar en Ajustes, candado con correo y telefono, cobro 0.50 solo al confirmar cambio o alta.",
+    "- [2026-09-18] Cobro de verificacion Real invisible en UI: silent donar, sin avisos de 0.50, oculto en historial y en donacion voluntaria.",
+    "- [2026-09-18] Cobro redondo Real: 0.50 USDT correo y 0.50 USDT numero a la fundadora via donar. Demo gratis. Pool intacto. Textbelt de Render no se toca.",
     "- [2026-09-17] Auditoria profunda: 173/173 tests. Corregido deploy-notify (no owner a Fly) y prepare-production (no fundadora vieja). Donacion Real 0x5023. Falta BNB y CONFIRM_MAINNET para desplegar.",
     "- [2026-09-17] Fundadora nueva en .env: 0x5023bf46dB7458B9bb9152a7ffE64f195CD1a047. ADMINS y FEE_COLLECTOR alineados. Attester local en .env.worker 0x55D3... distinto del owner. Render no lleva la clave de owner.",
     "- [2026-09-17] Auditoria USB en vivo Xiaomi M2102J20SG: app abierta con Metro 8081, APK 1.0.0 sin reinstalar. Real=Acceso pendiente y Pronto sin credito falso; Demo=linea activa y Solicitar; pool Demo 2000.70 solo lectura 0xD2d2; gemas Granate; Ajustes Demo sin KYC/correo/telefono/contrasena; rankings L50. Sin bug de fondos. Telefono dejado en Cuenta Real.",
@@ -79,11 +82,8 @@
     "- [2026-09-14] Auditoria profunda: contrato Demo live al dia; script de produccion ya no escribe 0x1E5118; no se cobra USDT dos veces si donar falla; OTP Twilio trial via Verify. Falta mainnet y flyctl auth login.",
     "- [2026-09-14] Twilio SMS guardado en .env.worker (gitignored): FROM trial listo. production:check 13/14, solo falta contrato mainnet.",
     "- [2026-09-14] Worker de avisos listo para Fly 24/7 (Dockerfile.notify, fly.toml) y Twilio SMS. Falta login de Fly y las 3 claves Twilio del fundador.",
-    "- [2026-09-14] Auditoria alta-hub: ensureAppWallet ya no crea otra frase si falta el blob; persistencia de billetera falla cerrado; OTP de telefono se reabre si el dispositivo no coincide; misma direccion BIP-39 12/24 en cualquier aparato. Hardhat 143/143. Demo live 24457 B alineado.",
-    "- [2026-09-14] Auditoria en vivo: politicas, hub, credito, red, historial, donar, pool y ajustes sin crash. Codigo de invitacion por grupos. Watchdog legal ya no pisa el consentimiento. Demo se consulta y Real queda restaurado.",
-    "- [2026-09-14] Textos legales de usuario: tono prestigioso, secciones cortas. Play sigue cubierto (datos, 18+, red irreversible, camara local).",
-    "- [2026-09-14] Alta: idioma, luego politicas con aceptar al leer el final, luego cuenta. Ajustes muestra privacidad y terminos."
+    "- [2026-09-14] Auditoria alta-hub: ensureAppWallet ya no crea otra frase si falta el blob; persistencia de billetera falla cerrado; OTP de telefono se reabre si el dispositivo no coincide; misma direccion BIP-39 12/24 en cualquier aparato. Hardhat 143/143. Demo live 24457 B alineado."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-17] Cambio: Auditoria profunda: 173/173 tests. Corregido deploy-notify (no owner a Fly) y prepare-production (no fundadora vieja). Donacion Real 0x5023. Falta BNB y CONFIRM_MAINNET para desplegar."
+  "ultima_sesion": "[2026-09-18] Cambio: Identidad de cuenta: restore/resume en worker, quitar en Ajustes, candado con correo y telefono, cobro 0.50 solo al confirmar cambio o alta."
 }

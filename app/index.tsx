@@ -43,8 +43,9 @@ import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
-import { canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, hasCreditAccess, liveCreditReady, phoneVerifiedOnThisDevice } from '../utils/creditGates';
+import { canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, hasCreditAccess, liveCreditReady } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
+import { isPhoneActive } from '../services/accountPhone';
 import { isPhraseBackedUp } from '../services/appWallet';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -77,6 +78,7 @@ function HomeScreenWithHooks() {
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
   const [room, setRoom] = useState<HomeRoom | null>(null);
   const [hasVerifiedEmail, setHasVerifiedEmail] = useState(false);
+  const [phoneActive, setPhoneActive] = useState(false);
   const [phraseBackedUp, setPhraseBackedUp] = useState(false);
 
   useEffect(() => {
@@ -105,12 +107,17 @@ function HomeScreenWithHooks() {
 
   useEffect(() => {
     let live = true;
-    loadVerifiedEmail()
-      .then((email) => {
-        if (live) setHasVerifiedEmail(Boolean(email));
+    Promise.all([loadVerifiedEmail(), isPhoneActive()])
+      .then(([email, phoneReady]) => {
+        if (!live) return;
+        setHasVerifiedEmail(Boolean(email));
+        setPhoneActive(phoneReady);
       })
       .catch(() => {
-        if (live) setHasVerifiedEmail(false);
+        if (live) {
+          setHasVerifiedEmail(false);
+          setPhoneActive(false);
+        }
       });
     return () => {
       live = false;
@@ -157,6 +164,7 @@ function HomeScreenWithHooks() {
     hasEmail: hasVerifiedEmail,
     phraseBackedUp,
     deviceMatches: userInfo.deviceMatches,
+    phoneActive,
   });
   const identityBlocked = !liveIdentityReady;
   const labelTier = (tier: (typeof loanTiers)[number]) => ({
@@ -313,7 +321,7 @@ function HomeScreenWithHooks() {
 
         <KycAccessBanner
           kycDone={userInfo.kycDeclarado}
-          phoneDone={phoneVerifiedOnThisDevice(userInfo.identityBound, userInfo.deviceMatches)}
+          phoneDone={phoneActive}
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}
@@ -326,9 +334,12 @@ function HomeScreenWithHooks() {
           isLoading={txLoading}
           paused={userInfo.paused}
           onDeclare={handleDeclararKyc}
-          onPhoneBound={refetch}
+          onPhoneBound={() => {
+            void isPhoneActive().then(setPhoneActive);
+            refetch();
+          }}
           onPhraseSaved={() => setPhraseBackedUp(true)}
-          onEmailVerified={() => setHasVerifiedEmail(true)}
+          onEmailVerified={(email) => setHasVerifiedEmail(Boolean(email))}
         />
 
         <GraceMoraClock
@@ -524,7 +535,7 @@ function HomeScreenWithHooks() {
         />
         <KycAccessBanner
           kycDone={userInfo.kycDeclarado}
-          phoneDone={phoneVerifiedOnThisDevice(userInfo.identityBound, userInfo.deviceMatches)}
+          phoneDone={phoneActive}
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}
@@ -537,9 +548,12 @@ function HomeScreenWithHooks() {
           isLoading={txLoading}
           paused={userInfo.paused}
           onDeclare={handleDeclararKyc}
-          onPhoneBound={refetch}
+          onPhoneBound={() => {
+            void isPhoneActive().then(setPhoneActive);
+            refetch();
+          }}
           onPhraseSaved={() => setPhraseBackedUp(true)}
-          onEmailVerified={() => setHasVerifiedEmail(true)}
+          onEmailVerified={(email) => setHasVerifiedEmail(Boolean(email))}
         />
         {tokens.length > 1 ? (
           <TokenSelector

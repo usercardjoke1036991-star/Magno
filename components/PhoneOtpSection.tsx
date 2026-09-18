@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -14,7 +14,10 @@ import { isValidPhone, normalizePhone } from '../services/notificationProfile';
 import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { isCreditReady } from '../constants/rpcConfig';
 import { humanizeTxError } from '../utils/txErrors';
+import { useVerificationFee } from '../hooks/useVerificationFee';
 import { AppText, AppTextInput } from './AppText';
+import { isPhoneActive, loadVerifiedPhone, maskPhone, saveVerifiedPhone, setPhoneActive } from '../services/accountPhone';
+import { releaseAccountContact } from '../services/accountIdentity';
 
 interface PhoneOtpSectionProps {
   walletAddress: string;
@@ -30,22 +33,38 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   walletAddress,
   isRegistered,
   identityBound,
-  deviceMatches = false,
   isLoading,
   paused = false,
   onBound,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { chargeVerificationFee } = useVerificationFee('phone');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
+  const [phoneActive, setPhoneActiveState] = useState(false);
+  const [savedPhone, setSavedPhone] = useState('');
 
-  const done = identityBound && deviceMatches && !editing;
-  const needsThisDevice = identityBound && !deviceMatches;
+  useEffect(() => {
+    let live = true;
+    Promise.all([isPhoneActive(), loadVerifiedPhone()])
+      .then(([active, stored]) => {
+        if (!live) return;
+        setPhoneActiveState(active);
+        setSavedPhone(stored);
+        if (stored && !phone) setPhone(stored);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [identityBound, walletAddress]);
+
+  const done = phoneActive && !editing;
   const chainReady = isCreditReady();
   const blocked = isLoading || paused || !chainReady || !isRegistered || !walletAddress || busy;
   const apiReady = notifyApiConfigured();
@@ -75,6 +94,11 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
     setError('');
     try {
       const attestation = await verifyPhoneOtp(walletAddress, phone, code);
+      const charged = await chargeVerificationFee(attestation.phoneHash || normalizePhone(phone));
+      if (charged !== 'paid') {
+        setError(t('otpVerifyFailed'));
+        return;
+      }
       await QuatriviumCreditService.vincularIdentidad(
         attestation.phoneHash,
         attestation.deviceHash,
@@ -83,6 +107,9 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
         attestation.r,
         attestation.s
       );
+      const stored = await saveVerifiedPhone(normalizePhone(phone));
+      setSavedPhone(stored);
+      setPhoneActiveState(true);
       Alert.alert(t('ready'), t('otpDone'));
       setEditing(false);
       setSent(false);
@@ -100,20 +127,51 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
     }
   };
 
+  const removePhone = () => {
+    Alert.alert(t('otpRemove'), t('otpRemoveConfirm'), [
+      { text: t('fundsConfirmCancel'), style: 'cancel' },
+      {
+        text: t('otpRemove'),
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            setBusy(true);
+            setError('');
+            try {
+              await releaseAccountContact(walletAddress, 'phone');
+              await setPhoneActive(false);
+              setPhoneActiveState(false);
+              setSavedPhone('');
+              setPhone('');
+              setEditing(true);
+              setSent(false);
+              setCode('');
+              onBound();
+            } catch (caught) {
+              setError(humanizeTxError(caught));
+            } finally {
+              setBusy(false);
+            }
+          })();
+        },
+      },
+    ]);
+  };
+
   return (
     <View>
       <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('otpLead')}</AppText>
-      {needsThisDevice ? (
-        <AppText style={[styles.warn, { color: colors.warnText }]}>{t('seedNeedDevice')}</AppText>
-      ) : null}
       {done ? (
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
           <AppText style={[styles.doneText, { color: colors.text }]}>
-            {t('otpDone')}
+            {maskPhone(savedPhone) || t('otpDone')}
           </AppText>
           <TouchableOpacity onPress={() => setEditing(true)}>
             <AppText style={[styles.change, { color: colors.primary }]}>{t('otpChange')}</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={removePhone} disabled={busy}>
+            <AppText style={[styles.change, { color: colors.danger }]}>{t('otpRemove')}</AppText>
           </TouchableOpacity>
         </View>
       ) : (
@@ -182,6 +240,19 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
             </>
           ) : null}
           {error ? <AppText style={[styles.warn, { color: colors.danger }]}>{error}</AppText> : null}
+          {editing && phoneActive ? (
+            <TouchableOpacity
+              onPress={() => {
+                setEditing(false);
+                setSent(false);
+                setCode('');
+                setError('');
+                if (savedPhone) setPhone(savedPhone);
+              }}
+            >
+              <AppText style={[styles.change, { color: colors.textMuted }]}>{t('fundsConfirmCancel')}</AppText>
+            </TouchableOpacity>
+          ) : null}
         </View>
       )}
     </View>

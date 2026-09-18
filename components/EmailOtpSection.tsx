@@ -10,9 +10,13 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { notifyApiConfigured } from '../services/phoneOtp';
-import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
+import { confirmEmailOtp, requestEmailOtp } from '../services/emailOtp';
+import { clearVerifiedEmail, saveVerifiedEmail } from '../services/accountEmail';
+import { releaseAccountContact } from '../services/accountIdentity';
+import { fallbackAuthIfNeeded } from '../services/authPrefs';
 import { storePasswordRecovery } from '../services/passwordRecovery';
 import { isAllowedEmailProvider, isValidEmail, normalizeEmail } from '../utils/emailPolicy';
+import { useVerificationFee } from '../hooks/useVerificationFee';
 import { AppText, AppTextInput } from './AppText';
 
 interface EmailOtpSectionProps {
@@ -30,6 +34,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { chargeVerificationFee } = useVerificationFee('email');
   const [email, setEmail] = useState(verifiedEmail);
   const [code, setCode] = useState('');
   const [sent, setSent] = useState(false);
@@ -66,7 +71,13 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
     setBusy(true);
     setError('');
     try {
-      const saved = await verifyEmailOtp(walletAddress, email, code);
+      const confirmed = await confirmEmailOtp(walletAddress, email, code);
+      const charged = await chargeVerificationFee(confirmed);
+      if (charged !== 'paid') {
+        setError(t('otpVerifyFailed'));
+        return;
+      }
+      const saved = await saveVerifiedEmail(confirmed);
       await storePasswordRecovery(walletAddress);
       onVerified(saved);
       setEditing(false);
@@ -84,6 +95,36 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
     }
   };
 
+  const removeEmail = () => {
+    Alert.alert(t('emailRemove'), t('emailRemoveConfirm'), [
+      { text: t('fundsConfirmCancel'), style: 'cancel' },
+      {
+        text: t('emailRemove'),
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            setBusy(true);
+            setError('');
+            try {
+              await releaseAccountContact(walletAddress, 'email');
+              await clearVerifiedEmail();
+              await fallbackAuthIfNeeded('email');
+              onVerified('');
+              setEmail('');
+              setEditing(true);
+              setSent(false);
+              setCode('');
+            } catch {
+              setError(t('otpVerifyFailed'));
+            } finally {
+              setBusy(false);
+            }
+          })();
+        },
+      },
+    ]);
+  };
+
   return (
     <View>
       {done ? (
@@ -92,6 +133,9 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
           <AppText style={[styles.doneText, { color: colors.text }]}>{verifiedEmail}</AppText>
           <TouchableOpacity onPress={() => setEditing(true)}>
             <AppText style={[styles.change, { color: colors.primary }]}>{changeLabel || t('emailChange')}</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={removeEmail} disabled={busy}>
+            <AppText style={[styles.change, { color: colors.danger }]}>{t('emailRemove')}</AppText>
           </TouchableOpacity>
         </View>
       ) : (
@@ -141,6 +185,19 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
           ) : null}
           {email.length > 0 && !allowed ? (
             <AppText style={[styles.warn, { color: colors.danger }]}>{t('emailNotAllowed')}</AppText>
+          ) : null}
+          {editing && verifiedEmail ? (
+            <TouchableOpacity
+              onPress={() => {
+                setEditing(false);
+                setEmail(verifiedEmail);
+                setSent(false);
+                setCode('');
+                setError('');
+              }}
+            >
+              <AppText style={[styles.change, { color: colors.textMuted }]}>{t('fundsConfirmCancel')}</AppText>
+            </TouchableOpacity>
           ) : null}
           {error ? <AppText style={[styles.warn, { color: colors.danger }]}>{error}</AppText> : null}
         </View>

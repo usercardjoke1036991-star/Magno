@@ -25,6 +25,7 @@
 - ✅ Marco de rango = logo de la app entrelazando la foto, metal pintado con color nitido de cada piedra, jerarquia seria I II III — Marcado como completado manualmente
 - ✅ auditoria profunda visual y de codigo de toda la app — Marcado como completado manualmente
 - ✅ Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h — Marcado como completado manualmente
+- ✅ identidad de cuenta correo y telefono — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -128,6 +129,9 @@
 - en Demo usar credito sin correo, numero, KYC ni pago de 1 USDT; esos requisitos solo en Real y quedan al completarlos
 - cambiar la billetera fundadora antes de mainnet; Real aun no desplegado
 - auditoria profunda y completa antes de mainnet; corregir fallos reales de productividad
+- cobro USDT al usuario por cada verificacion de correo y telefono en Real, destino fundadora; no sacar del pool
+- En Cuenta Real cada confirmacion de correo y de numero cobra 0.50 USDT a la fundadora con donar, no del pool. Demo sigue gratis. La clave de Textbelt ya esta en Render y no se toca.
+- Correo y numero viajan con la cuenta; se pueden cambiar o quitar en Ajustes; cada cambio cobra 0.50 USDT; si se quitan hay que volver a verificar para el credito; el candado no usa correo ni telefono
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -233,3 +237,7 @@
 - [2026-09-17 19:30] Idea añadida al backlog: "en Demo usar credito sin correo, numero, KYC ni pago de 1 USDT; esos requisitos "
 - [2026-09-17 23:17] Idea añadida al backlog: "cambiar la billetera fundadora antes de mainnet; Real aun no desplegado"
 - [2026-09-17 23:34] Idea añadida al backlog: "auditoria profunda y completa antes de mainnet; corregir fallos reales de produc"
+- [2026-09-18 00:42] Idea añadida al backlog: "cobro USDT al usuario por cada verificacion de correo y telefono en Real, destin"
+- [2026-09-18 01:07] Idea añadida al backlog: "En Cuenta Real cada confirmacion de correo y de numero cobra 0.50 USDT a la fund"
+- [2026-09-18 02:23] Idea añadida al backlog: "Correo y numero viajan con la cuenta; se pueden cambiar o quitar en Ajustes; cad"
+- [2026-09-18 02:27] Módulo completado: 'identidad de cuenta correo y telefono'

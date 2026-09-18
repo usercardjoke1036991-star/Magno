@@ -18,6 +18,7 @@ import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
 import { CREDIT_ACCESS_USDT, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
+import { isPhoneActive } from '../services/accountPhone';
 import { enviarToken, isPhraseBackedUp } from '../services/appWallet';
 import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from '../services/linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
@@ -345,9 +346,10 @@ export const useHomeHandlers = ({
       Alert.alert(t('register'), t('activateBeforeLoan'));
       return;
     }
-    const [hasEmail, phraseOk] = await Promise.all([
+    const [hasEmail, phraseOk, phoneReady] = await Promise.all([
       loadVerifiedEmail().then((email) => Boolean(email)).catch(() => false),
       isPhraseBackedUp().catch(() => false),
+      isPhoneActive().catch(() => true),
     ]);
     if (creditNeedsPhrase(phraseOk)) {
       Alert.alert(t('seedBannerTitle'), t('seedNeedBeforeLoan'));
@@ -365,11 +367,11 @@ export const useHomeHandlers = ({
       Alert.alert(t('kycTitle'), t('kycNeedBeforeLoan'));
       return;
     }
-    if (creditNeedsPhone(userInfo)) {
+    if (creditNeedsPhone(userInfo, phoneReady)) {
       Alert.alert(t('otpTitle'), t('otpNeedBeforeLoan'));
       return;
     }
-    if (creditNeedsDeviceMatch(userInfo.deviceMatches)) {
+    if (creditNeedsDeviceMatch(userInfo.deviceMatches, phoneReady)) {
       Alert.alert(t('deviceBannerTitle'), t('seedNeedDevice'));
       return;
     }

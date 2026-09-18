@@ -50,6 +50,7 @@ import {
 import { claimUsername, loadClaimedUsername, saveClaimedUsername } from '../services/accountUsername';
 import { lookupBoundWalletOnThisDevice } from '../services/deviceClaim';
 import { loadVerifiedEmail } from '../services/accountEmail';
+import { restoreIdentityLocal } from '../services/accountIdentity';
 import { requestEmailOtp, verifyEmailOtp } from '../services/emailOtp';
 import { isAuthenticatorEnabled, unlockWithAuthenticator } from '../services/authenticator';
 import { ensureUnlockEnabled, getAuthMethods, isAuthEnabled, isMethodReady, loadAuthPrefs, type AuthMethod } from '../services/authPrefs';
@@ -76,6 +77,14 @@ import { isValidUsername, normalizeUsername } from '../utils/usernamePolicy';
 import type { BiometricKind } from '../utils/biometricStatus';
 
 type UnlockMode = 'pin' | 'password' | 'authenticator' | 'email' | 'biometric';
+
+type UnlockFlags = {
+  passwordSet: boolean;
+  pinSet: boolean;
+  authOn: boolean;
+  hasEmail: boolean;
+  bioEnabled: boolean;
+};
 
 function modeFromMethod(
   method: AuthMethod,
@@ -165,11 +174,14 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const backgroundAt = useRef<number | null>(null);
   const passwordCommittedRef = useRef(false);
 
-  const applyQueuedMethod = async (
-    method: AuthMethod,
-    flags: { passwordSet: boolean; pinSet: boolean; authOn: boolean; hasEmail: boolean; bioEnabled: boolean }
-  ) => {
-    const nextMode = modeFromMethod(method, flags.passwordSet, flags.pinSet, flags.authOn, flags.hasEmail);
+  const applyQueuedMethod = async (method: AuthMethod, flags: UnlockFlags) => {
+    const nextMode = modeFromMethod(
+      method,
+      flags.passwordSet,
+      flags.pinSet,
+      flags.authOn,
+      flags.hasEmail
+    );
     setUnlockMode(nextMode);
     setBioOn(flags.bioEnabled && method === 'biometric');
     setPasswordInput('');
@@ -189,13 +201,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     }
   };
 
-  const startMethodQueue = async (purpose: 'unlock' | 'signin', flags: {
-    passwordSet: boolean;
-    pinSet: boolean;
-    authOn: boolean;
-    hasEmail: boolean;
-    bioEnabled: boolean;
-  }) => {
+  const startMethodQueue = async (purpose: 'unlock' | 'signin', flags: UnlockFlags) => {
     const prefs = await loadAuthPrefs().catch(() => null);
     const preferred = orderUnlockMethods(
       await getAuthMethods(purpose),
@@ -326,6 +332,16 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       return;
     }
     const authOn = await isAuthenticatorEnabled();
+    await restoreSavedSessionWrap();
+    const wrapReadyEarly = Boolean(getWalletWrapKey());
+    if (wrapReadyEarly) {
+      try {
+        const wallet = await raceMs(ensureAppWallet(), 8000, null);
+        if (wallet?.address) await raceMs(restoreIdentityLocal(wallet.address), 8000, null);
+      } catch {
+        // El desbloqueo sigue con lo que haya en este teléfono.
+      }
+    }
     const verifiedEmail = await loadVerifiedEmail();
     if (__DEV__) {
       console.log('[boot] AppLockGate creds', {

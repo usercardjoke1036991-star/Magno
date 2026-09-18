@@ -30,6 +30,9 @@ describe('Render notify worker', function () {
     expect(dockerignore).to.include('!scripts/');
     expect(dockerignore).to.include('textbeltSms.cjs');
     expect(worker).to.include("path === '/health'");
+    expect(worker).to.include("/identity/status");
+    expect(worker).to.include("/identity/resume");
+    expect(worker).to.include("/identity/release");
     expect(worker).to.include('mkdirSync(dirname(DATA_FILE)');
     expect(worker).to.include('const isHealth');
     expect(worker).to.include('process.env.PORT || process.env.NOTIFY_PORT || 8787');

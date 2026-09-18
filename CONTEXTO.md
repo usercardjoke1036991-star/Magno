@@ -59,7 +59,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Textbelt SMS (OTP) / Twilio y WhatsApp Cloud de respaldo / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 1001 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 1005 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -82,8 +82,8 @@ Magno/
 - **Referido solo al alta:** el código opcional se pide al crear la cuenta. Vacío = el usuario inicia su cadena colgada del fundador. Tras continuar, el padrino queda bloqueado en el teléfono y on-chain (`already registered`). Activar la línea ya no pide código.
 - **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. **Demo no pide correo, número, KYC ni el 1 USDT.** En Real sí: primero el 1 USDT y luego correo, teléfono, KYC y que este dispositivo coincida con el hash on-chain; al completarlos quedan en esa cuenta Real.
 - **Frase secreta BIP-39**: alta y respaldo. No cierra la cuenta. No hay destruir ni generar otra cuenta en la app.
-- **Usuario y contraseña son el candado de este teléfono.** El correo sigue para Real, recuperar contraseña y OTP. Desbloquear, pedir, pagar o transferir pueden usar contraseña, correo, PIN, huella o autenticador si el usuario los elige.
-- **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: contraseña, correo, PIN, huella o autenticador). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar. El autenticador es TOTP real: al activarlo muestra un QR `otpauth://` escaneable y la clave por si la cámara no enfoca.
+- **Usuario y contraseña son el candado de este teléfono.** El correo y el número siguen para crédito Real, avisos y recuperar contraseña. No se usan para desbloquear, pedir, pagar ni transferir.
+- **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: PIN, autenticador, huella o contraseña). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar. El autenticador es TOTP real: al activarlo muestra un QR `otpauth://` escaneable y la clave por si la cámara no enfoca.
 - **Historial**: Demo y Real tienen diarios distintos (modo + chain + contrato + billetera). Dos ventanas (transferencias y préstamos) y mora. En el hub, al vencer empieza un reloj rojo: 30 días de gracia en cuenta atrás; al acabarse, cuenta hacia adelante hasta que pague. El fundador no entra en gracia ni mora.
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain). El 1 USDT, el correo, el número y el KYC son de Real; Demo opera sin esos candados (sí pide anotar las 24 palabras).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
@@ -130,7 +130,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24555 B (margen 21). Live Demo sigue 24457 B hasta el redespliegue.
 - Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 1001 claves
+- i18n: 17 idiomas, 1005 claves
 - Rankings: 6 tableros, divisiones de 100, premio mensual estimado, nombres y fotos públicas por lotes de 100, visibles desde el nivel 50
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
@@ -254,6 +254,10 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-18 | Correo y numero salen del candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. Identidad de crédito no cambia. | — |
+| 2026-09-18 | Correo y numero quedan en la cuenta: viajan a otro celular sin re-OTP, se cambian o quitan en Ajustes, cada cambio cobra 0.50 USDT silencioso, y si se quitan hay que volver a verificar para el credito. | — |
+| 2026-09-18 | La tarifa 0.50 de correo y numero en Real queda silenciosa: sin texto, sin PIN extra, sin historial. El usuario solo confirma el codigo. | — |
+| 2026-09-18 | Real: confirmar correo o numero cobra 0.50 USDT a la fundadora via donar (misma via que el acceso). Demo 0. El pool no se toca. Textbelt sigue solo en Render. | — |
 | 2026-09-17 | Auditoria profunda pre-mainnet: Hardhat 173/173, typecheck OK, worker health OK. Fly ya no sube PRIVATE_KEY. production:prepare deriva la fundadora de PRIVATE_KEY. Donacion Real apunta a 0x5023. Sin deploy mainnet. | — |
 | 2026-09-17 | Auditoria de contratos: sin bug de fondos. Nucleo 24555 B. LoanLadder.requiredCount de L1000 alineado con el nucleo (4955). | — |
 | 2026-09-17 | Worker testnet arranca sin dominio ni Resend. Render usa ATTESTER_PRIVATE_KEY, no la del owner. EMAIL_FROM vacio hasta verificar el dominio. | — |

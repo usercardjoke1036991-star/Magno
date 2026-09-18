@@ -476,7 +476,8 @@ const requireAuth = (body) => {
     purpose !== 'email' &&
     purpose !== 'username' &&
     purpose !== 'demo-identity' &&
-    purpose !== 'session'
+    purpose !== 'session' &&
+    purpose !== 'identity'
   ) {
     throw new Error('purpose');
   }
@@ -488,7 +489,7 @@ const requireAuth = (body) => {
   if (purpose === 'otp') {
     if (!normalizeE164(phone)) throw new Error('phone');
   } else if (purpose === 'email') {
-    if (!parseAllowedEmail(phone).email) throw new Error('email');
+    if (phone && !parseAllowedEmail(phone).email) throw new Error('email');
   } else if (purpose === 'username') {
     if (!normalizeUsername(phone)) throw new Error('username');
   } else if (phone) {
@@ -812,6 +813,30 @@ const setIdentityProvider = (url) => {
 const takenByOther = (owner, wallet) => {
   if (!owner || owner === ZeroAddress) return false;
   return String(owner).toLowerCase() !== String(wallet).toLowerCase();
+};
+
+const hashBound = (value) => {
+  const hash = String(value || '');
+  return Boolean(hash) && !/^0x0+$/i.test(hash);
+};
+
+const IDENTITY_CLAIM_MS = 10 * 365 * 24 * 60 * 60 * 1000;
+
+const readBoundIdentity = async (wallet) => {
+  if (!CONTRACT || !identityProvider) return { phoneHash: '', deviceHash: '' };
+  const contract = new Contract(
+    CONTRACT,
+    [
+      'function phoneHashOf(address) view returns (bytes32)',
+      'function deviceHashOf(address) view returns (bytes32)',
+    ],
+    identityProvider
+  );
+  const [phoneHash, deviceHash] = await Promise.all([
+    contract.phoneHashOf(wallet),
+    contract.deviceHashOf(wallet),
+  ]);
+  return { phoneHash: String(phoneHash || ''), deviceHash: String(deviceHash || '') };
 };
 
 const assertIdentityAvailable = async (phoneHash, deviceHash, wallet) => {
@@ -1391,7 +1416,16 @@ const server = createServer(async (req, res) => {
     }
     try {
       const attestation = await attestIdentity(wallet, phoneHash, deviceHash);
-      store.phoneClaims[phoneHash] = { wallet, exp: now + 24 * 60 * 60 * 1000 };
+      const prevPhone = store.profiles[wallet]?.verifiedPhone;
+      if (prevPhone) {
+        const oldHash = hashPhone(prevPhone);
+        if (oldHash !== phoneHash && store.phoneClaims[oldHash]?.wallet === wallet) {
+          delete store.phoneClaims[oldHash];
+        }
+      }
+      store.phoneClaims[phoneHash] = { wallet, exp: now + IDENTITY_CLAIM_MS };
+      const prev = store.profiles[wallet] || {};
+      store.profiles[wallet] = { ...prev, verifiedPhone: phone, phoneReleased: false };
       delete store.otps[wallet];
       persist();
       json(res, 200, attestation);
@@ -1501,9 +1535,9 @@ const server = createServer(async (req, res) => {
         delete store.emailClaims[oldHash];
       }
     }
-    store.emailClaims[emailHash] = { wallet, exp: now + 365 * 24 * 60 * 60 * 1000 };
+    store.emailClaims[emailHash] = { wallet, exp: now + IDENTITY_CLAIM_MS };
     const prev = store.profiles[wallet] || {};
-    store.profiles[wallet] = { ...prev, email };
+    store.profiles[wallet] = { ...prev, email, emailReleased: false };
     store.recoveryWraps = store.recoveryWraps || {};
     if (prevEmail) {
       const oldHash = hashEmail(parseAllowedEmail(prevEmail).canonical || prevEmail);
@@ -1515,6 +1549,105 @@ const server = createServer(async (req, res) => {
     delete store.emailOtps[wallet];
     persist();
     json(res, 200, { ok: true });
+    return;
+  }
+  if (path === '/identity/status' || path === '/identity/resume' || path === '/identity/release') {
+    if (!rateLimit(`identity:${ip}`, 30, 15 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      json(res, 413, { error: 'payload' });
+      return;
+    }
+    let authn;
+    try {
+      authn = requireAuth(body);
+    } catch (error) {
+      json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    if (String(body.purpose) !== 'identity') {
+      json(res, 401, { error: 'purpose' });
+      return;
+    }
+    const wallet = authn.wallet;
+    store.profiles = store.profiles || {};
+    store.emailClaims = store.emailClaims || {};
+    store.phoneClaims = store.phoneClaims || {};
+    store.recoveryWraps = store.recoveryWraps || {};
+    const profile = store.profiles[wallet] || {};
+    if (path === '/identity/status') {
+      let onChainBound = false;
+      try {
+        const bound = await readBoundIdentity(wallet);
+        onChainBound = hashBound(bound.phoneHash);
+      } catch {
+        onChainBound = false;
+      }
+      const emailReleased = Boolean(profile.emailReleased);
+      const phoneReleased = Boolean(profile.phoneReleased);
+      const email = !emailReleased && profile.email ? String(profile.email) : '';
+      const phone = !phoneReleased && profile.verifiedPhone ? String(profile.verifiedPhone) : '';
+      json(res, 200, {
+        ok: true,
+        email,
+        phone,
+        emailActive: Boolean(email),
+        phoneActive: !phoneReleased && (Boolean(phone) || onChainBound),
+      });
+      return;
+    }
+    if (path === '/identity/release') {
+      const target = String(body.target || '');
+      if (target !== 'email' && target !== 'phone') {
+        json(res, 400, { error: 'target' });
+        return;
+      }
+      if (target === 'email') {
+        if (profile.email) {
+          const parsed = parseAllowedEmail(profile.email);
+          const oldHash = hashEmail(parsed.canonical || profile.email);
+          if (store.emailClaims[oldHash]?.wallet === wallet) delete store.emailClaims[oldHash];
+          if (store.recoveryWraps[oldHash]?.wallet === wallet) delete store.recoveryWraps[oldHash];
+        }
+        store.profiles[wallet] = { ...profile, email: '', emailReleased: true };
+      } else {
+        store.profiles[wallet] = { ...profile, verifiedPhone: '', phoneReleased: true };
+      }
+      persist();
+      json(res, 200, { ok: true });
+      return;
+    }
+    if (Boolean(profile.phoneReleased)) {
+      json(res, 409, { error: 'released' });
+      return;
+    }
+    let bound;
+    try {
+      bound = await readBoundIdentity(wallet);
+    } catch {
+      json(res, 503, { error: 'identity' });
+      return;
+    }
+    if (!hashBound(bound.phoneHash)) {
+      json(res, 404, { error: 'identity' });
+      return;
+    }
+    if (String(bound.deviceHash || '').toLowerCase() === String(authn.deviceHash || '').toLowerCase()) {
+      json(res, 200, { ok: true, already: true, phoneHash: bound.phoneHash, deviceHash: bound.deviceHash });
+      return;
+    }
+    try {
+      await assertIdentityAvailable(bound.phoneHash, authn.deviceHash, wallet);
+      const attestation = await attestIdentity(wallet, bound.phoneHash, authn.deviceHash);
+      json(res, 200, { ok: true, already: false, ...attestation });
+    } catch (error) {
+      json(res, Number(error.status) || 503, { error: error.message || 'attester' });
+    }
     return;
   }
   if (path === '/session/check' || path === '/session/claim') {

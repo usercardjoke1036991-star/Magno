@@ -39,7 +39,7 @@ interface KycAccessBannerProps {
   onDeclare: () => Promise<boolean>;
   onPhoneBound: () => void;
   onPhraseSaved?: () => void;
-  onEmailVerified?: () => void;
+  onEmailVerified?: (email: string) => void;
 }
 
 export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
@@ -260,8 +260,8 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                 verifiedEmail={verifiedEmail}
                 onVerified={(email) => {
                   setVerifiedEmail(email);
-                  onEmailVerified?.();
-                  setOpen(null);
+                  onEmailVerified?.(email);
+                  if (email) setOpen(null);
                 }}
               />
             ) : null}

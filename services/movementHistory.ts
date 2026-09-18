@@ -12,7 +12,7 @@ import {
 import { historyJournalSuffix, movementBelongsToWorld } from '../utils/historyWorld';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { getTokenMeta } from '../constants/tokens';
-import { classifyDonationKind } from '../utils/creditGates';
+import { classifyDonationKind, isHiddenVerificationDonation } from '../utils/creditGates';
 import { addPoolToSpells, buildMoraSpells, type MoraSpell } from '../utils/moraHistory';
 
 const CHUNK = 4000;
@@ -366,6 +366,7 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
       const amount = formatToken(amountWei, tokenAddr);
       const usd = Number.parseFloat(amount.label) || 0;
       const hash = event.transactionHash;
+      if (isHiddenVerificationDonation(usd, index === 0)) return;
       chain.push({
         id: hash,
         kind: classifyDonationKind(usd, index === 0),

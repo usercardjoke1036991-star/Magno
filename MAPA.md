@@ -241,6 +241,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: usePendingInvite
 - `hooks/useReferralNetwork.ts` — módulo JS/TS
   - Funciones/clases: useReferralNetwork
+- `hooks/useVerificationFee.ts` — módulo JS/TS
+  - Funciones/clases: useVerificationFee
 - `hooks/useWalletLevel.ts` — módulo JS/TS
   - Funciones/clases: getWalletLevel, rememberWalletLevel, useWalletLevel
 - `hooks/useWeb3Balances.ts` — módulo JS/TS
@@ -255,6 +257,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: legalCopy, legalDocsFor
 - `i18n/translations.ts` — módulo JS/TS
   - Funciones/clases: translations
+- `lib/forge-std/scripts/vm.py` — módulo Python
+  - Funciones/clases: main, update_interface_ids, CmpCheatcode, cmp_cheatcode, prefix_with_group_headers, group, Visibility, Mutability, Function, Cheatcode, Error, Event, EnumVariant, Enum, StructField, Struct, Cheatcodes, Item, ItemOrder, CheatcodesPrinter
 - `plugins/withQuatriviumAndroidSecurity.js` — módulo JS/TS
   - Funciones/clases: stripExpPlusFromManifestXml, ensureHttpsDeepLinks
 - `profile/ProfileContext.tsx` — módulo JS/TS
@@ -296,6 +300,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/_set-demo-mode.py` — módulo Python
 - `services/accountEmail.ts` — módulo JS/TS
   - Funciones/clases: loadVerifiedEmail, isEmailVerified, saveVerifiedEmail, clearVerifiedEmail
+- `services/accountIdentity.ts` — módulo JS/TS
+  - Funciones/clases: fetchIdentityStatus, releaseAccountContact, restoreIdentityLocal, resumeDeviceIfNeeded, hydrateAccountIdentity
+- `services/accountPhone.ts` — módulo JS/TS
+  - Funciones/clases: maskPhone, loadVerifiedPhone, saveVerifiedPhone, clearVerifiedPhone, setPhoneActive, isPhoneActive, isPhoneVerified
 - `services/accountReset.ts` — módulo JS/TS
   - Funciones/clases: wipeLocalAccount
 - `services/accountUsername.ts` — módulo JS/TS
@@ -315,11 +323,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/deviceClaim.ts` — módulo JS/TS
   - Funciones/clases: lookupBoundWalletOnThisDevice, lookupDeviceHashOf, assertRestoreFitsThisDevice
 - `services/emailOtp.ts` — módulo JS/TS
-  - Funciones/clases: requestEmailOtp, verifyEmailOtp
+  - Funciones/clases: requestEmailOtp, confirmEmailOtp, verifyEmailOtp
 - `services/exclusiveSession.ts` — módulo JS/TS
   - Funciones/clases: thisDeviceOwnsSession, claimExclusiveSession
 - `services/fameLeaderboard.ts` — módulo JS/TS
   - Funciones/clases: peekFameLeaderboard, clearFameLeaderboardCache, loadFameLeaderboard
+- `services/founderUsdtCharge.ts` — módulo JS/TS
+  - Funciones/clases: chargeFounderUsdt
 - `services/fundsConfirm.ts` — módulo JS/TS
   - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
@@ -348,6 +358,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: loadLockedSponsor, lockSponsorOnce
 - `services/userProfile.ts` — módulo JS/TS
   - Funciones/clases: PUBLIC_PROFILE_BATCH, AVATAR_PRESETS, EMPTY_PROFILE, PUBLIC_PHOTO_MAX, clampAvatarId, hasLockedPublicIdentity, isPublicIdentityLocked, sanitizePublicPhoto, canSubmitPublicIdentity, publicPhotoFromAsset, normalizeDisplayName, isValidDisplayName, persistPickedPhoto, initialsFromName, avatarColorForWallet, labelForProfile, loadOwnProfile, saveOwnProfile, clearOwnProfile, loadProfileDirectory, rememberProfiles, rememberProfile, publishOwnProfile, fetchPublicProfiles
+- `services/verificationFeeReceipt.ts` — módulo JS/TS
+  - Funciones/clases: hasVerificationFeeReceipt, markVerificationFeeReceipt
 - `services/walletAuth.ts` — módulo JS/TS
   - Funciones/clases: AUTH_TYPES, authDomain, signWalletAuth, signedAuthBody, recoverWalletAuth, isFreshTimestamp
 - `services/walletSession.ts` — módulo JS/TS
@@ -364,7 +376,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/contract-abi.test.js` — módulo JS/TS
 - `test/cuotas.test.js` — módulo JS/TS
 - `test/cyber-hardening.test.js` — módulo JS/TS
-  - Funciones/clases: loadReferralChildren, ensureAppWallet, wipeAppWallet
+  - Funciones/clases: confirmEmailOtp, verifyEmailOtp, loadReferralChildren, ensureAppWallet, wipeAppWallet
 - `test/demo-identity.test.js` — módulo JS/TS
 - `test/destroy.test.js` — módulo JS/TS
 - `test/fame-rankings.test.js` — módulo JS/TS
@@ -414,7 +426,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, CREDIT_VERIFY_EMAIL_USDT, CREDIT_VERIFY_PHONE_USDT, verificationFeeUsdt, verificationFeeLabel, hasCreditAccess, voluntaryDonateUsd, isHiddenVerificationDonation, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
@@ -483,7 +495,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `README.md` — documentación (sí)
 
 ## Docs vs código
-Sin desfases detectados entre docs y código.
+### Avisos
+- Archivo 'lib/forge-std/scripts/vm.py' no aparece en CONTEXTO/VISION/README AUTO-README
+- Sugerencia: python actualizar_readme.py
 
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
@@ -491,6 +505,6 @@ Sin desfases detectados entre docs y código.
 - verificar_modulos: 0 crítico(s), 13 aviso(s)
 
 ## Estado
-**AL DÍA**
+**DESFASADO**
 
 _Inventario heurístico + docs + conexión estática. No afirma ejecución 100% en runtime._

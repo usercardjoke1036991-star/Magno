@@ -19,7 +19,8 @@ export async function requestEmailOtp(walletAddress: string, email: string): Pro
   }
 }
 
-export async function verifyEmailOtp(walletAddress: string, email: string, code: string): Promise<string> {
+/** Comprueba el código con el worker. No guarda el correo hasta cobrar la tarifa Real. */
+export async function confirmEmailOtp(walletAddress: string, email: string, code: string): Promise<string> {
   const normalized = normalizeEmail(email);
   const trimmed = code.replace(/\D/g, '');
   if (!/^\d{6}$/.test(trimmed)) throw new Error('code');
@@ -36,5 +37,10 @@ export async function verifyEmailOtp(walletAddress: string, email: string, code:
   if (!response.ok || !body.ok) {
     throw new Error(body.error || 'email-verify');
   }
+  return normalized;
+}
+
+export async function verifyEmailOtp(walletAddress: string, email: string, code: string): Promise<string> {
+  const normalized = await confirmEmailOtp(walletAddress, email, code);
   return saveVerifiedEmail(normalized);
 }

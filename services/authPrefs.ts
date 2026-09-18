@@ -15,7 +15,7 @@ export type AuthPrefs = Record<AuthPurpose, AuthSlot>;
 
 export const AUTH_PURPOSES: AuthPurpose[] = ['signin', 'unlock', 'funds', 'loanRequest', 'loanPay'];
 export const AUTH_METHODS: AuthMethod[] = ['password', 'email', 'pin', 'biometric', 'authenticator'];
-/** Pedir, pagar, transferir y desbloqueo: el usuario marca cuáles. */
+/** Pedir, pagar, transferir y desbloqueo: PIN, autenticador, huella y contraseña. Correo y teléfono no son candado. */
 export const ACTION_AUTH_METHODS: AuthMethod[] = ['pin', 'authenticator', 'biometric', 'password'];
 
 export function methodsForPurpose(purpose: AuthPurpose, _available: AuthMethod[] = []): AuthMethod[] {
@@ -41,9 +41,7 @@ function uniqueMethods(values: unknown): AuthMethod[] {
 }
 
 function slot(on: boolean, methods: AuthMethod[], primaryOnly = true): AuthSlot {
-  const next = uniqueMethods(methods).filter((method) =>
-    method === 'email' ? true : ACTION_AUTH_METHODS.includes(method)
-  );
+  const next = uniqueMethods(methods).filter((method) => ACTION_AUTH_METHODS.includes(method) || method === 'email');
   if (!on) {
     return { on: false, methods: next, method: next[0] || 'password', primaryOnly };
   }

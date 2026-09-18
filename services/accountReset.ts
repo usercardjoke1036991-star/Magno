@@ -1,4 +1,5 @@
 import { clearVerifiedEmail } from './accountEmail';
+import { setPhoneActive } from './accountPhone';
 import { clearClaimedUsername } from './accountUsername';
 import { clearKycDeclaration } from './kycDeclaration';
 import { clearOwnProfile } from './userProfile';
@@ -10,6 +11,7 @@ export async function wipeLocalAccount(wallet: string): Promise<void> {
     clearKycDeclaration(wallet),
     clearClaimedUsername(),
     clearVerifiedEmail(),
+    setPhoneActive(false),
     clearOwnProfile(wallet),
     clearSavedSession(),
   ]);
