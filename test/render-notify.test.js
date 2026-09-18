@@ -36,6 +36,10 @@ describe('Render notify worker', function () {
     expect(worker).to.not.include('displayName: username');
     expect(worker).to.include('sessionUser');
     expect(worker).to.include('ATTESTER_EXPLICIT || (!isMainnet ? DEPLOY_KEY : \'\')');
+    const fly = fs.readFileSync(path.join(root, 'scripts', 'deploy-notify.mjs'), 'utf8');
+    expect(fly).to.not.include('ATTESTER_PRIVATE_KEY: env.ATTESTER_PRIVATE_KEY || env.PRIVATE_KEY');
+    expect(fly).to.not.match(/^\s*PRIVATE_KEY: env\.PRIVATE_KEY,/m);
+    expect(fly).to.include('ATTESTER_PRIVATE_KEY debe ser distinta de PRIVATE_KEY');
   });
 
   it('listens on PORT, creates data dir and answers /health', async function () {

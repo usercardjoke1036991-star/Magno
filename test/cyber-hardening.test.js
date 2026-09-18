@@ -209,6 +209,8 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(prepare).to.include("TESTNET_CONTRACT = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f'");
     expect(prepare).to.include("STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3'");
     expect(prepare).to.not.match(/TESTNET_CONTRACT = '0x1E5118/);
+    expect(prepare).to.include('addressFromPrivateKey');
+    expect(prepare).to.not.include("DEPLOYER = '0xdb135e9cd9be9bE262b3222eaD737c84d72Ef870'");
     const check = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'check-production.mjs'), 'utf8');
     expect(check).to.include("LIVE_TESTNET = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f'");
     expect(check).to.include('demo-contract');

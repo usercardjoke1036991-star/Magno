@@ -57,6 +57,28 @@ const local = loadEnv(resolve(root, '.env'));
 const worker = loadEnv(resolve(root, '.env.worker'));
 const env = { ...local, ...worker };
 
+function sameHexKey(a, b) {
+  const left = String(a || '')
+    .trim()
+    .replace(/^0x/i, '')
+    .toLowerCase();
+  const right = String(b || '')
+    .trim()
+    .replace(/^0x/i, '')
+    .toLowerCase();
+  return Boolean(left) && left === right;
+}
+
+const attesterKey = String(env.ATTESTER_PRIVATE_KEY || '').trim();
+if (!attesterKey) {
+  console.error('Falta ATTESTER_PRIVATE_KEY en .env.worker. No se usa la clave de owner.');
+  process.exit(1);
+}
+if (sameHexKey(attesterKey, env.PRIVATE_KEY)) {
+  console.error('ATTESTER_PRIVATE_KEY debe ser distinta de PRIVATE_KEY.');
+  process.exit(1);
+}
+
 const secrets = {
   NOTIFY_DATA_KEY: env.NOTIFY_DATA_KEY,
   TEXTBELT_API_KEY: env.TEXTBELT_API_KEY || env.TEXTBELT_KEY,
@@ -67,8 +89,7 @@ const secrets = {
   TWILIO_AUTH_TOKEN: env.TWILIO_AUTH_TOKEN,
   TWILIO_FROM: env.TWILIO_FROM,
   TWILIO_VERIFY_SERVICE_SID: env.TWILIO_VERIFY_SERVICE_SID,
-  ATTESTER_PRIVATE_KEY: env.ATTESTER_PRIVATE_KEY || env.PRIVATE_KEY,
-  PRIVATE_KEY: env.PRIVATE_KEY,
+  ATTESTER_PRIVATE_KEY: attesterKey,
   EXPO_PUBLIC_BSC_RPC_URL_PRIMARY: env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY,
   BSC_TESTNET_RPC_URL: env.BSC_TESTNET_RPC_URL,
 };

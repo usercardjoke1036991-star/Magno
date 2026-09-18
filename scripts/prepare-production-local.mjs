@@ -5,6 +5,7 @@
 import { randomBytes } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { Wallet } from 'ethers';
 
 const root = resolve(process.cwd());
 const envPath = resolve(root, '.env');
@@ -12,10 +13,21 @@ const workerPath = resolve(root, '.env.worker');
 const STALE_MAINNET = '0xa6aac9ce4923789a4095fbc0504db9a697f8a46d';
 const STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3';
 const ZERO = '0x0000000000000000000000000000000000000000';
-const DEPLOYER = '0xdb135e9cd9be9bE262b3222eaD737c84d72Ef870';
 const TESTNET_CONTRACT = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f';
 const INVITE = 'https://quatriviumcredit.app';
 const PLAY = 'https://play.google.com/store/apps/details?id=com.quatrivium.credit';
+
+function addressFromPrivateKey(raw) {
+  const hex = String(raw || '')
+    .trim()
+    .replace(/^0x/i, '');
+  if (!/^[0-9a-fA-F]{64}$/.test(hex)) return '';
+  try {
+    return new Wallet(`0x${hex}`).address;
+  } catch {
+    return '';
+  }
+}
 
 function loadMap(filePath) {
   const map = {};
@@ -85,9 +97,14 @@ if (testnetNow === STALE_TESTNET.toLowerCase() || testnetNow !== TESTNET_CONTRAC
   );
 }
 
+const fromKey = addressFromPrivateKey(env.PRIVATE_KEY);
 if (!env.ADMINS) {
-  upsert(envPath, 'ADMINS', DEPLOYER);
-  done.push('ADMINS = deployer (fundadora 1). Cámbielo si la fundadora es otra wallet');
+  if (!fromKey) {
+    console.error('Falta ADMINS o una PRIVATE_KEY válida para la fundadora. No se usa una dirección vieja.');
+    process.exit(1);
+  }
+  upsert(envPath, 'ADMINS', fromKey);
+  done.push('ADMINS = dirección de PRIVATE_KEY (fundadora 1). Cámbielo si la fundadora es otra wallet');
 }
 
 if (!env.REQUIRED_CONFIRMATIONS) {

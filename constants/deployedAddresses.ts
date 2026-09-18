@@ -10,8 +10,8 @@ export const DEPLOYED_MAINNET = {
   chainId: 56,
   contract: '',
   usdt: '0x55d398326f99059ff775485246999027b3197955',
-  /** Billetera personal Real (donaciones). Vacía hasta que el fundador la agregue. */
-  founder: '',
+  /** Billetera personal Real (donaciones). El contrato mainnet sigue vacío hasta el deploy. */
+  founder: '0x5023bf46dB7458B9bb9152a7ffE64f195CD1a047',
   startBlock: 0,
 } as const;
 
