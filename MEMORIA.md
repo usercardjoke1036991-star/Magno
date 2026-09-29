@@ -4,6 +4,10 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
 
 ## Decisiones
+- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
+- [2026-09-29] El multiplicador de comisiones del que bloquea se paga del bote de Reserva, no del pool. El fundador cobra corteFundadorBp de ese extra. Credit no se recorta (EIP-170).
+- [2026-09-29] Owner de Reserva sigue EOA; la pausa de emergencia se alinea con Credit via syncPauseFromCredit (attester, sin llave de owner). Unlock no se congela.
+- [2026-09-29] Reserva no es producto de inversion ni banco. Rendimiento hasta 12% estimado desde un bote aparte; principal no se toca. Demo sin KYC; Real misma identidad que el credito.
 - [2026-09-18] No subir image-size a 2.x (rompe Metro 0.83). No recortar Credit por Aderyn H-1 ni Mythril SWC-101. Worker Docker corre como USER node.
 - [2026-09-18] El divide-before-multiply de premioAsiento es falso positivo: n(n+1)/2 es exacto y va en el denominador. No se reescribe la formula; queda blindada con test de exactitud e invariante de bote en Hardhat y fuzz en Foundry.
 - [2026-09-18] El 1 USDT de Real se exige tambien en el servicio al pedir, no solo en la pantalla. Demo sigue libre.
@@ -30,12 +34,13 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] El escaneo KYC es foto local del documento. No hay OCR. La declaracion on-chain sigue siendo declararKyc().
 - [2026-09-14] La frase no se sustituye: cambiarla seria otra cuenta. Recuperar en otro telefono usa las mismas 24 palabras.
 - [2026-09-14] La interna guarda el credito. La externa paga donar, pool, 1 USDT, depositar y retirar. Saltarse el vinculo no mueve fondos.
-- [2026-09-14] Con 3 fundadoras se exigen 2 firmas. Llave perdida o hackeada: las otras 2 la quitan. Pausa inmediata se mantiene.
-- [2026-09-14] El 1 USDT de acceso es obligatorio en Demo y Real, una vez. No se muestra el destino. Los niveles desbloqueados se pueden pedir cuando se quiera, con un prestamo a la vez y 48h.
-- [2026-09-14] El usuario de sesion queda cifrado en el celular y no se edita. El nombre e imagen anonimos van a la red y no se cambian. No son el mismo texto.
-- [2026-09-14] Hay dos nombres distintos: el de inicio de sesion va cifrado en el celular y no se edita; el anonimo lo ve la red, se elige una vez y no es el mismo.
 
 ## Cambios realizados
+- [2026-09-29] Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10
+- [2026-09-29] Extra de comisiones Reserva del bote; fundador cobra su tramo; Credit intacto
+- [2026-09-29] Endurecimiento Reserva pre-testnet: unlock con pausa, allowlist, approve monto, guardian worker, invariante caja. Hardhat 9/9 Foundry 2/2.
+- [2026-09-29] Analisis E2E Reserva: UI ya no bloquea desbloquear por mora/pausa del credito. Deploy testnet pendiente de tBNB en la fundadora.
+- [2026-09-29] Implementada sala Reserva (contrato hermano, UI, i18n, tests Hardhat 5/5). Demo practica local; Real espera contrato oficial.
 - [2026-09-29] Cierra los 10 issues restantes de SonarCloud Magno (bigint tests, I/O kit, spawn pytest, regex).
 - [2026-09-29] Corrige hallazgos SonarCloud Magno (paths, spawn, regex, tests MLM, Telegram) y sube a GitHub.
 - [2026-09-18] Auditoria PDF MobSF descsdsadarga.pdf: APK 35CADA22 1.0.2 vc4, 61/100 A. HIGH=huella CBC (se mantiene). Sin exp+/Twilio/claves. Corregido networkNotMainnet en 15 idiomas (ya no filtra CONFIRM_MAINNET). Hardhat verde. Real sigue sin contrato mainnet.
@@ -81,15 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Escaneos restantes locales: Aderyn, Trivy, Semgrep, Mythril, ZAP. Un arreglo real: AES-GCM del notify-worker con `authTagLength: 16`. Sin mainnet ni APK.
 - [2026-09-16] WSL ciber: Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8, ZAP 2.17.0. Ubuntu y Foundry ya estaban. Sin escaneo de producto ni mainnet.
 - [2026-09-16] Foundry 1.8.3 WSL: forge test NAV/EIP-170/anti-contrato + fuzz 256. Lint clasificado, sin cambio al nucleo ni mainnet.
-- [2026-09-16] Foundry 1.8.3 en WSL: overlay foundry.toml + forge-test. 6 tests (fuzz 256) + lint clasificado. Sin cambios al nucleo. No mainnet.
-- [2026-09-16] Auditoria PDF MobSF local del APK 1.0.1: nota 61 Grade A. El HIGH es la huella de Android. El JS del APK no lleva Twilio ni clave de deployer. No se regenera el APK.
-- [2026-09-16] Docker Desktop 4.91 reinstalado; MobSF local en 127.0.0.1:8000 (contenedor mobsf). El APK no se sube a mobsf.live.
-- [2026-09-16] APK release 1.0.1 arm-only firmado v3 SHA-256 CN=Quatrivium Finance copiado a Desktop Quatrivium-Finance-MobSF.apk (67.20 MB, SHA256 2e1e987a...)
-- [2026-09-16] Auditoria MobSF PDF 61/100 A: el HIGH CBC es androidx.biometric CryptoObjectUtils (huella), no el credito. Version 1.0.1, R8 sin logs, APK release sin x86. No se regenero APK: C: tiene 2.4 GB libres.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-29] Cambio: Cierra los 10 issues restantes de SonarCloud Magno (bigint tests, I/O kit, spawn pytest, regex).
+[2026-09-29] Cambio: Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10

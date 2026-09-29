@@ -28,6 +28,7 @@
 - ✅ Worker 24/7 de avisos OTP listo para Render con Blueprint, disco persistente y h — Marcado como completado manualmente
 - ✅ identidad de cuenta correo y telefono — Marcado como completado manualmente
 - ✅ auditoria profunda y completa antes de mainnet — Marcado como completado manualmente
+- ✅ Sala Reserva — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -134,6 +135,10 @@
 - cobro USDT al usuario por cada verificacion de correo y telefono en Real, destino fundadora; no sacar del pool
 - En Cuenta Real cada confirmacion de correo y de numero cobra 0.50 USDT a la fundadora con donar, no del pool. Demo sigue gratis. La clave de Textbelt ya esta en Render y no se toca.
 - Correo y numero viajan con la cuenta; se pueden cambiar o quitar en Ajustes; cada cambio cobra 0.50 USDT; si se quitan hay que volver a verificar para el credito; el candado no usa correo ni telefono
+- Sala Staking USDT: lock 30 dias, objetivo 12 por ciento anual, boost de comisiones de referidos segun monto bloqueado y tramo, recorte del fundador sobre el mismo bote, Demo sin KYC solo simulacion, Real exige identidad. Contrato hermano, no recortar Credit ni mezclar con el pool no redimible.
+- quien bloquea en Reserva cobra multiplicador en comisiones de red pagado del bote; el fundador cobra su tramo de ese extra; Credit no se recorta
+- Reserva con cupo: 12% anual solo sobre asientos ya fondeados por el bote e interes del fundador, sin garantizar TVL ilimitado ni tocar el pool
+- Reserva visible desde el inicio, usable en nivel 10; el bote solo lo llenan admins (no Donar ni pool)
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -244,3 +249,8 @@
 - [2026-09-18 02:23] Idea añadida al backlog: "Correo y numero viajan con la cuenta; se pueden cambiar o quitar en Ajustes; cad"
 - [2026-09-18 02:27] Módulo completado: 'identidad de cuenta correo y telefono'
 - [2026-09-18 03:18] Módulo completado: 'auditoria profunda y completa antes de mainnet'
+- [2026-09-29 07:03] Idea añadida al backlog: "Sala Staking USDT: lock 30 dias, objetivo 12 por ciento anual, boost de comision"
+- [2026-09-29 07:49] Módulo completado: 'Sala Reserva'
+- [2026-09-29 09:58] Idea añadida al backlog: "quien bloquea en Reserva cobra multiplicador en comisiones de red pagado del bot"
+- [2026-09-29 10:13] Idea añadida al backlog: "Reserva con cupo: 12% anual solo sobre asientos ya fondeados por el bote e inter"
+- [2026-09-29 10:45] Idea añadida al backlog: "Reserva visible desde el inicio, usable en nivel 10; el bote solo lo llenan admi"

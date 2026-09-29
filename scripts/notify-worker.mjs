@@ -41,6 +41,12 @@ const CONTRACT = (() => {
     : process.env.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET;
   return isHexAddress(chosen) && !isZero(chosen) ? chosen : '';
 })();
+const RESERVA = (() => {
+  const chosen = isMainnet
+    ? process.env.EXPO_PUBLIC_RESERVA_ADDRESS_MAINNET
+    : process.env.EXPO_PUBLIC_RESERVA_ADDRESS_TESTNET;
+  return isHexAddress(chosen) && !isZero(chosen) ? chosen : '';
+})();
 const RPC = isMainnet
   ? process.env.BSC_MAINNET_RPC_URL || process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY || BSC_MAINNET.rpc[0]
   : process.env.EXPO_PUBLIC_BSC_RPC_URL_PRIMARY || process.env.BSC_TESTNET_RPC_URL || BSC_TESTNET.rpc[0];
@@ -203,6 +209,22 @@ const ABI = [
   'event BonoActivacionPagado(address indexed padre, address indexed referido, uint256 monto, address indexed token)',
   'event ComisionGeneracional(address indexed beneficiario, address indexed deudor, uint8 generacion, uint256 monto, address indexed token)',
   'event AdminActionExecuted(uint256 indexed id, bytes4 selector)',
+  'event Paused(address account)',
+  'event Unpaused(address account)',
+  'function paused() view returns (bool)',
+];
+
+const RESERVA_ABI = [
+  'function paused() view returns (bool)',
+  'function syncPauseFromCredit()',
+  'function posiciones(address) view returns (uint256 principal, uint256 desde, bool activa, bool enRed)',
+  'function extraComisionDe(address beneficiario, uint256 montoBase) view returns (uint256 extra, uint256 founderCut)',
+  'function boostUsado(bytes32) view returns (bool)',
+  'function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 id)',
+  'event Bloqueado(address indexed usuario, uint256 monto, uint256 desbloqueo)',
+  'event Desbloqueado(address indexed usuario, uint256 principal, uint256 rendimiento, uint256 corteFundador)',
+  'event BoostComision(address indexed beneficiario, uint256 montoBase, uint256 extra, uint256 corteFundador)',
+  'event BoteAportado(address indexed de, uint256 monto)',
   'event Paused(address account)',
   'event Unpaused(address account)',
 ];
@@ -1042,6 +1064,60 @@ const scanDebtReminders = async (contract) => {
   if (changed) saveStore(store);
 };
 
+const pagarBoostReserva = async (event) => {
+  if (!RESERVA || !ATTESTER_KEY || !identityProvider) return;
+  const beneficiario = String(event.args?.beneficiario || '');
+  const monto = event.args?.monto ?? 0n;
+  if (!/^0x[0-9a-fA-F]{40}$/.test(beneficiario) || !monto) return;
+  try {
+    const reservaContract = new Contract(RESERVA, RESERVA_ABI, identityProvider);
+    const [extra] = await reservaContract.extraComisionDe(beneficiario, monto);
+    if (!extra) return;
+    const id = keccak256(
+      AbiCoder.defaultAbiCoder().encode(['bytes32', 'uint256'], [event.transactionHash, event.index])
+    );
+    if (await reservaContract.boostUsado(id)) return;
+    const signer = new Wallet(ATTESTER_KEY, identityProvider);
+    const tx = await reservaContract.connect(signer).pagarBoostComision(beneficiario, monto, id);
+    await tx.wait(1);
+    await notifyWallet(
+      beneficiario,
+      'commission',
+      'Quatrivium Finance: extra de Reserva sobre su comisión. Sale del bote, no del préstamo.'
+    );
+  } catch (error) {
+    console.warn('reserva boost comisión:', error.message || error);
+  }
+};
+
+const guardReservaPause = async (creditContract, reservaContract) => {
+  if (!reservaContract || !creditContract) return;
+  try {
+    const [creditPaused, reservaPaused] = await Promise.all([
+      creditContract.paused(),
+      reservaContract.paused(),
+    ]);
+    store.reservaGuard = {
+      creditPaused: Boolean(creditPaused),
+      reservaPaused: Boolean(reservaPaused),
+      at: Date.now(),
+    };
+    if (!creditPaused || reservaPaused) return;
+    await alertAdmin(
+      'Quatrivium Finance ALERTA: el crédito está pausado y Reserva aún aceptaba locks. Se llama syncPauseFromCredit (el principal se puede desbloquear).'
+    );
+    if (!ATTESTER_KEY || !identityProvider) return;
+    const signer = new Wallet(ATTESTER_KEY, identityProvider);
+    const tx = await reservaContract.connect(signer).syncPauseFromCredit();
+    await tx.wait(1);
+    store.reservaGuard.reservaPaused = true;
+    store.reservaGuard.synced = true;
+    await alertAdmin('Quatrivium Finance: Reserva pausada en nuevos locks. El desbloqueo de principal sigue abierto.');
+  } catch (error) {
+    console.warn('reserva guardian:', error.message || error);
+  }
+};
+
 const watchChain = async () => {
   if (!CONTRACT || !RPC) {
     console.log('Avisos: falta contrato o RPC. El servidor de perfiles sigue activo.');
@@ -1057,6 +1133,7 @@ const watchChain = async () => {
   let provider = makeProvider(rpcUrl);
   setIdentityProvider(rpcUrl);
   let contract = new Contract(CONTRACT, ABI, provider);
+  let reserva = RESERVA ? new Contract(RESERVA, RESERVA_ABI, provider) : null;
   try {
     if (!store.lastBlock) {
       const latest = await provider.getBlockNumber();
@@ -1121,6 +1198,7 @@ const watchChain = async () => {
         for (const event of commissions) {
           const beneficiario = String(event.args?.beneficiario || '');
           await notifyWallet(beneficiario, 'commission', 'Quatrivium Finance: recibió una comisión de su red.');
+          await pagarBoostReserva(event);
         }
         if (pausedEv.length) {
           await alertAdmin('Quatrivium Finance ALERTA: el contrato fue PAUSADO. Préstamos y registros están detenidos.');
@@ -1131,6 +1209,30 @@ const watchChain = async () => {
         for (const event of adminExec) {
           await alertAdmin(`Quatrivium Finance: acción de admin ejecutada ${event.args?.selector || ''}`);
         }
+        if (reserva) {
+          const pullReserva = async (filter) => {
+            try {
+              return await reserva.queryFilter(filter, from, to);
+            } catch (error) {
+              if (rpcRateLimited(error) || rpcUnhealthy(error)) throw error;
+              return [];
+            }
+          };
+          const locks = await pullReserva(reserva.filters.Bloqueado());
+          const unlocks = await pullReserva(reserva.filters.Desbloqueado());
+          const pots = await pullReserva(reserva.filters.BoteAportado());
+          const boosts = await pullReserva(reserva.filters.BoostComision());
+          const rPaused = await pullReserva(reserva.filters.Paused());
+          const rUnpaused = await pullReserva(reserva.filters.Unpaused());
+          if (locks.length) await alertAdmin(`Quatrivium Finance Reserva: ${locks.length} bloqueo(s).`);
+          if (unlocks.length) await alertAdmin(`Quatrivium Finance Reserva: ${unlocks.length} desbloqueo(s).`);
+          if (pots.length) await alertAdmin(`Quatrivium Finance Reserva: aporte al bote (${pots.length}).`);
+          if (boosts.length) await alertAdmin(`Quatrivium Finance Reserva: extra de comisión (${boosts.length}).`);
+          if (rPaused.length) {
+            await alertAdmin('Quatrivium Finance ALERTA: Reserva PAUSADA. Nuevos locks detenidos; el principal se puede desbloquear.');
+          }
+          if (rUnpaused.length) await alertAdmin('Quatrivium Finance: Reserva despausada.');
+        }
         store.lastBlock = to;
         saveStore(store);
         rateLimitStreak = 0;
@@ -1139,6 +1241,7 @@ const watchChain = async () => {
       if (Date.now() - lastDebtCheck > 60_000) {
         lastDebtCheck = Date.now();
         await scanDebtReminders(contract);
+        await guardReservaPause(contract, reserva);
       }
     } catch (error) {
       if (rpcRateLimited(error)) {
@@ -1155,6 +1258,7 @@ const watchChain = async () => {
           if (Date.now() - lastDebtCheck > 60_000) {
             lastDebtCheck = Date.now();
             await scanDebtReminders(contract);
+            await guardReservaPause(contract, reserva);
           }
         } catch {
           // los avisos de deuda se reintentan en el siguiente ciclo
@@ -1171,6 +1275,7 @@ const watchChain = async () => {
         provider = makeProvider(rpcUrl);
         setIdentityProvider(rpcUrl);
         contract = new Contract(CONTRACT, ABI, provider);
+        reserva = RESERVA ? new Contract(RESERVA, RESERVA_ABI, provider) : null;
         console.error('Avisos chain: RPC caída, se cambia de nodo');
         await new Promise((r) => setTimeout(r, 15000));
         continue;
@@ -1235,6 +1340,9 @@ const server = createServer(async (req, res) => {
       textbelt: hasTextbelt,
       resend: hasEmail,
       attester: attesterReady,
+      reserva: Boolean(RESERVA),
+      creditPaused: store.reservaGuard?.creditPaused ?? null,
+      reservaPaused: store.reservaGuard?.reservaPaused ?? null,
     });
     return;
   }
@@ -2081,6 +2189,7 @@ server.listen(PORT, BIND, () => {
   } catch {
     console.warn('Attester de firma: llave inválida');
   }
+  console.log(`Reserva guardian: ${RESERVA || 'sin dirección (Demo práctica local)'}`);
 });
 
 pollTelegram().catch((error) => console.error(error));

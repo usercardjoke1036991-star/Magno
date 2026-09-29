@@ -33,6 +33,7 @@ Magno/
 ├── contracts/
 │   ├── QuatriviumCredit.sol       # Núcleo (EIP-170 ≤ 24576)
 │   ├── QuatriviumLeveling.sol     # Hermano: solicitudes/hitos
+│   ├── QuatriviumReserva.sol      # Hermano: bloqueo 30d, techo 12% anual del bote
 │   ├── libraries/QuatriviumFamaLib.sol # Fama de línea (delegatecall)
 │   ├── Groth16Verifier.sol        # ZK experimental (no en producción)
 │   ├── interfaces/                # AggregatorV3Interface (Chainlink)
@@ -61,7 +62,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Textbelt SMS (OTP) / Twilio y WhatsApp Cloud de respaldo / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 1013 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 1040 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -89,7 +90,8 @@ Magno/
 - **Historial**: Demo y Real tienen diarios distintos (modo + chain + contrato + billetera). Dos ventanas (transferencias y préstamos) y mora. En el hub, al vencer empieza un reloj rojo: 30 días de gracia en cuenta atrás; al acabarse, cuenta hacia adelante hasta que pague. El fundador no entra en gracia ni mora.
 - **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain). El 1 USDT, el correo, el número y el KYC son de Real; Demo opera sin esos candados (sí pide anotar las 24 palabras).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
-- **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
+- **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red, Reserva) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
+- **Reserva no es el pool**: el pool de préstamos no se retira. Reserva es un hermano: se ve desde el inicio y se usa desde el **nivel 10**. Bloqueo 30 días, principal de vuelta, techo de hasta 12% anual estimado pagado de un bote que **solo llenan las cuentas admin** (no es Donar ni depositar al pool). Extra de comisiones de red del mismo bote (tramo 2/3) con corte del fundador; Credit no se recorta. Demo practica en local; Real exige identidad como el crédito. No se llama “producto de inversión” ni banco.
 - **Fama y dinero no se mezclan**: al registrar, la reputación recorre toda la línea (misma escala 15/8/6/4/2/0,8/0,4 %) y el fundador suma de cada alta. El USDT solo se mueve al pagar (interés + bono de activación). Los puntos de red y el bono del pool son solo del referidor directo, para no drenar la caja.
 - **Mora con mes de gracia**: al vencer se cobra de la billetera. Si no hay saldo, 30 días sigue cobrando para poder pagar. Luego la reputación baja 10 × nivel por día y sus comisiones/bonos van al pool hasta que pague. El **fundador no entra en mora ni gracia**: si al vencer no hay saldo, el pool cubre el principal restante (se perdona el interés). Sigue sujeto a la espera de 48 h entre préstamos y no se le puede liquidar. La fama de línea vive en `QuatriviumFamaLib` (delegatecall) para no romper EIP-170.
 
@@ -128,11 +130,12 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
+- Sala **Reserva**: hermano `QuatriviumReserva.sol` (Hardhat 12/12). Visible desde el inicio, usable en nivel 10. Bote solo admin (no Donar ni pool). Extra de comisiones con corte del fundador. Demo práctica local; Real exige identidad. Sin contrato mainnet.
 - 17 suites Hardhat (164 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings y lock de referido…
 - Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24555 B (margen 21). Live Demo sigue 24457 B hasta el redespliegue.
 - Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
-- App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos)
-- i18n: 17 idiomas, 1005 claves
+- App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
+- i18n: 17 idiomas, 1040 claves
 - Rankings: 6 tableros, divisiones de 100, premio mensual estimado, nombres y fotos públicas por lotes de 100, visibles desde el nivel 50
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
@@ -256,6 +259,11 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-29 | Reserva visible desde el inicio, usable en nivel 10; aportarBote solo admin (no Donar ni pool) | — |
+| 2026-09-29 | Reserva: extra de comisiones de red del bote (tramo 2/3) con corte del fundador; Credit no se recorta; worker paga al ver ComisionGeneracional | — |
+| 2026-09-29 | Reserva endurecida: desbloquear vive bajo pausa, pin de direccion Demo, approve acotado, setCredit(0) prohibido, syncPauseFromCredit, invariante Foundry y guardian en el worker. Credit no se toco. | — |
+| 2026-09-29 | Reserva E2E: Credit.paused/mora no atrapan el principal; desbloquear sigue permitido; deploy testnet listo (sin humo de lock en el deployer). Falta tBNB en 0x5023. | — |
+| 2026-09-29 | Sala Reserva: contrato hermano QuatriviumReserva (lock 30 dias, techo hasta 12% anual del bote, principal vuelve, recorte fundador y boost de red). UI en el hub, Demo practica local, Real exige identidad. Sin recortar Credit ni mezclar con el pool. Sin deploy mainnet. | — |
 | 2026-09-29 | Quality Gate Magno: corrige S5845, S2083, S8705 y S8786 que quedaron tras el analisis 02:43. | — |
 | 2026-09-29 | Correccion SonarCloud de los 26 issues del analisis 29-sep y Quality Gate de codigo nuevo. | — |
 | 2026-09-18 | Auditoria PDF MobSF descsdsadarga.pdf del APK 35CADA22 (1.0.2 vc4): 61/100 Grade A. HIGH=AES/CBC de huella androidx.biometric (se mantiene). 0 exportados, sin exp+, sin HTTP claro, OFAC vacio, sin Twilio/claves. I18n: 15 idiomas ya no muestran CONFIRM_MAINNET. Hardhat 178. Falta mainnet. | — |

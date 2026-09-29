@@ -179,6 +179,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: ReferralHistory
 - `components/ReferralSection.tsx` — módulo JS/TS
   - Funciones/clases: ReferralSection
+- `components/ReservaSection.tsx` — módulo JS/TS
+  - Funciones/clases: ReservaSection
 - `components/ScreenGuard.tsx` — módulo JS/TS
   - Funciones/clases: subscribeScreenshot, ScreenGuard
 - `components/SecretInput.tsx` — módulo JS/TS
@@ -225,6 +227,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: FAMILY_BANDS, saturateHex, colorizeTextureFilters, RANK_GEM_ASSET, RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, rankFamilyIndex, romanDivision, rankDivisionTint, formatRankLabel, RANK_LADDER, rankGalleryRow, RANK_GALLERY
 - `constants/reputation.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, generationBps, fameForGeneration, founderFamePoints, referralsForNextBonus, formatPoolBonus
+- `constants/reserva.ts` — módulo JS/TS
+  - Funciones/clases: RESERVA_LOCK_SECONDS, RESERVA_MAX_APY_BP, RESERVA_YEAR_SECONDS, RESERVA_TRAMO_MEDIO, RESERVA_TRAMO_ALTO, RESERVA_MIN_LEVEL, reservaTramoUsd, reservaBoostRedBp, reservaCorteFundadorBp, reservaExtraComisionWei, reservaTechoWei
+- `constants/reservaConfig.ts` — módulo JS/TS
+  - Funciones/clases: RESERVA_ABI, getReservaAddress, isReservaConfigured, reservaUsesPracticeLedger
 - `constants/rpcConfig.ts` — módulo JS/TS
   - Funciones/clases: isStoreProduction, getRuntimeMode, isDemoMode, isDemoAccount, isCreditReady, donationVisibleInWorld, donationAllowedInWorld, isDonationVisible, isDonationEnabled, accessPaymentAllowedInWorld, isAccessPaymentEnabled, getProductMode, setProductMode, subscribeRuntimeMode, resetRpcCache, setRuntimeMode, APP_ENV, NETWORK_CONFIG, RPC_URLS, CONTRACT_ADDRESSES, getActiveContractNetwork, getProviderWithFallback, assertTrustedRpc, getContractAddress, isContractConfigured
 - `constants/support.ts` — módulo JS/TS
@@ -268,6 +274,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/check-production.mjs` — módulo JS/TS
 - `scripts/deploy-hetzner.mjs` — módulo JS/TS
 - `scripts/deploy-notify.mjs` — módulo JS/TS
+- `scripts/deploy-reserva.cjs` — módulo JS/TS
+  - Funciones/clases: DEPLOYED_TESTNET
 - `scripts/deploy.cjs` — módulo JS/TS
   - Funciones/clases: DEPLOYED_TESTNET
 - `scripts/fetch-wallet-logos.py` — módulo Python
@@ -357,6 +365,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: setWalletSigner, clearWalletSigner, getWalletSigner, cachedProtocolCaps, asWeiString, QuatriviumCreditService
 - `services/referralNetwork.ts` — módulo JS/TS
   - Funciones/clases: peekReferralNetwork, clearReferralNetworkCache, clearReferralBranchCache, loadReferralChildren, fillReferralTimestamps, loadReferralNetwork
+- `services/reservaDemoStore.ts` — módulo JS/TS
+  - Funciones/clases: loadDemoPosicion, loadDemoBote, demoAportarBote, demoBloquear, demoDesbloquear, demoRenovar
+- `services/reservaService.ts` — módulo JS/TS
+  - Funciones/clases: loadReservaPreview, bloquearReserva, desbloquearReserva, renovarReserva, aportarReservaBote, reservaErrorKey
 - `services/savedSession.ts` — módulo JS/TS
   - Funciones/clases: subscribeSessionCleared, isSessionSaved, purgePersistedWrap, markSessionSaved, restoreSavedSessionWrap, clearSavedSession, signOutSavedSession
 - `services/secureStorageService.ts` — módulo JS/TS
@@ -401,6 +413,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/morosity.test.js` — módulo JS/TS
 - `test/peg.test.js` — módulo JS/TS
 - `test/render-notify.test.js` — módulo JS/TS
+- `test/reserva.test.js` — módulo JS/TS
 - `test/security.test.js` — módulo JS/TS
 - `test/sponsor-lock.test.js` — módulo JS/TS
 - `test/textbelt-notify.test.js` — módulo JS/TS

@@ -9,6 +9,7 @@ import { getEthersSignerFromProvider } from '../web3Config';
 import { ERC20_ABI } from '../constants/contractConfig';
 import { getTokenMeta, isOfficialWorldToken } from '../constants/tokens';
 import { setWalletSigner, QuatriviumCreditService } from '../services/quatriviumCreditService';
+import { aportarReservaBote, reservaErrorKey } from '../services/reservaService';
 import { recordMovement } from '../services/movementHistory';
 import { useWeb3Transactions } from './useWeb3Transactions';
 import { lockSponsorOnce } from '../services/sponsorLock';
@@ -643,6 +644,28 @@ export const useHomeHandlers = ({
     }
   };
 
+  const handleAportarReserva = async (amountHuman: string) => {
+    if (!adminConnected || !adminProvider) {
+      Alert.alert(t('admin'), t('appWalletAdminConnect'));
+      return;
+    }
+    const parsed = parsePositiveDecimal(amountHuman);
+    if (!parsed) {
+      Alert.alert(t('amount'), t('amountGreaterZero'));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    try {
+      const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
+      if (!signer) throw new Error('admin');
+      await aportarReservaBote(signer, parsed);
+      showNotice(t('ready'), t('reservaAdminPotOk'));
+      refetch();
+    } catch (error) {
+      Alert.alert(t('error'), t(reservaErrorKey(error)));
+    }
+  };
+
   const handleDonar = async (amountHuman: string) => {
     if (!isDonationVisible()) {
       Alert.alert(t('donateTitle'), t('donateRealOnly'));
@@ -841,6 +864,7 @@ export const useHomeHandlers = ({
     handleDepositarPool,
     handlePagarAcceso,
     handleDonar,
+    handleAportarReserva,
     handleRetirarComisiones,
     handleRetirarComisionesToken,
     handleDeclararKyc,

@@ -22,6 +22,7 @@
     "security:sonar": "node scripts/run-sonar.mjs",
     "deploy:bsc": "hardhat run scripts/deploy.cjs --network bscMainnet",
     "deploy:testnet": "hardhat run scripts/deploy.cjs --network bscTestnet",
+    "deploy:reserva": "hardhat run scripts/deploy-reserva.cjs --network bscTestnet",
     "notify": "node scripts/notify-worker.mjs",
     "notify:prod": "node scripts/notify-worker.mjs --prod",
     "notify:sms": "node scripts/set-sms-keys.mjs",

@@ -33,12 +33,15 @@ function writeTestnetKnownAddress(address, usdt, startBlock) {
   const knownPath = path.join(__dirname, '..', 'constants', 'deployedAddresses.ts');
   if (fs.existsSync(knownPath) && /^0x[0-9a-fA-F]{40}$/.test(address)) {
     let source = fs.readFileSync(knownPath, 'utf8');
+    const reservaMatch = source.match(/export const DEPLOYED_TESTNET = \{[\s\S]*?reserva:\s*'([^']*)'/);
+    const reserva = reservaMatch ? reservaMatch[1] : '';
     source = source.replace(
       /export const DEPLOYED_TESTNET = \{[\s\S]*?\} as const;/,
       `export const DEPLOYED_TESTNET = {
   chainId: 97,
   contract: '${address}',
   usdt: '${usdt}',
+  reserva: '${reserva}',
   startBlock: ${block || 0},
 } as const;`
     );

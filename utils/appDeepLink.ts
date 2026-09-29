@@ -1,11 +1,11 @@
 import * as Linking from 'expo-linking';
 
 export type AppDeepLink =
-  | { kind: 'room'; room: 'wallet' | 'credit' | 'loans' | 'bonuses' | 'donate' | 'network' | 'people' | 'pool' | 'admin' | 'history' | 'ranks' | 'fame' }
+  | { kind: 'room'; room: 'wallet' | 'credit' | 'loans' | 'bonuses' | 'donate' | 'network' | 'people' | 'pool' | 'reserva' | 'admin' | 'history' | 'ranks' | 'fame' }
   | { kind: 'settings'; panel: 'home' | 'security' | 'privacy' | 'terms' }
   | { kind: 'mode'; mode: 'demo' | 'live' };
 
-const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'people', 'pool', 'admin', 'history', 'ranks', 'fame']);
+const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'people', 'pool', 'reserva', 'admin', 'history', 'ranks', 'fame']);
 
 function trimPathSlashes(path: string): string {
   let s = path;

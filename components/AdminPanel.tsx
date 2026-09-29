@@ -42,6 +42,7 @@ interface AdminPanelProps {
   onProposeSetTokenConfig?: (token: string, feed: string, enabled: boolean) => void;
   onLiquidar?: (debtorAddress: string, tokenAddress: string) => void;
   onMarcarMoroso?: (debtorAddress: string) => void;
+  onAportarReserva?: (amount: string) => void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -76,11 +77,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onProposeSetTokenConfig,
   onLiquidar,
   onMarcarMoroso,
+  onAportarReserva,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const [draft, setDraft] = useState('');
   const [debtorDraft, setDebtorDraft] = useState('');
+  const [reservaPot, setReservaPot] = useState('100');
   if (!isOwner && !isAdmin) return null;
 
   const confirmToggle = (next: boolean, apply: (value: boolean) => void) => {
@@ -341,6 +344,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </View>
           )}
         </TouchableOpacity>
+      ) : null}
+      {onAportarReserva ? (
+        <>
+          <AppText style={[styles.note, { color: colors.textMuted, marginTop: 16 }]}>{t('reservaAdminPotTitle')}</AppText>
+          <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaAdminPotHint')}</AppText>
+          <AppTextInput
+            value={reservaPot}
+            onChangeText={setReservaPot}
+            keyboardType="decimal-pad"
+            placeholder="100"
+            placeholderTextColor={colors.textMuted}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.surface }]}
+          />
+          <TouchableOpacity
+            disabled={isLoading}
+            onPress={() => onAportarReserva(reservaPot)}
+            style={[styles.button, { backgroundColor: colors.primary }]}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={colors.onPrimary} size="small" />
+            ) : (
+              <AppText style={[styles.buttonText, { color: colors.onPrimary }]}>{t('reservaAdminPot')}</AppText>
+            )}
+          </TouchableOpacity>
+        </>
       ) : null}
       {isAdmin && paused && onUnpause ? (
         <TouchableOpacity disabled={isLoading} onPress={confirmUnpause} style={[styles.button, { backgroundColor: colors.primary }]}>

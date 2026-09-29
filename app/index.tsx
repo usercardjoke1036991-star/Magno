@@ -36,11 +36,13 @@ import { AppText } from '../components/AppText';
 import { PoolSupportSection } from '../components/PoolSupportSection';
 import { MilestoneBonusCatalog } from '../components/MilestoneBonusCatalog';
 import { DonateFounderSection } from '../components/DonateFounderSection';
+import { ReservaSection } from '../components/ReservaSection';
 import { NotificationChannels } from '../components/NotificationChannels';
 import { ReferralHistory } from '../components/ReferralHistory';
 import { MovementHistory } from '../components/MovementHistory';
 import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
+import { RESERVA_MIN_LEVEL } from '../constants/reserva';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
 import { canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, hasCreditAccess, liveCreditReady, livePhoneStepDone } from '../utils/creditGates';
@@ -195,6 +197,7 @@ function HomeScreenWithHooks() {
     handleDepositarPool,
     handlePagarAcceso,
     handleDonar,
+    handleAportarReserva,
     handleRetirarComisiones,
     handleRetirarComisionesToken,
     handleDeclararKyc,
@@ -382,6 +385,7 @@ function HomeScreenWithHooks() {
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
             { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
             { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' },
+            { id: 'reserva', title: t('reservaTitle'), lead: userInfo.userProgress.nivelActual >= RESERVA_MIN_LEVEL ? t('hubReservaLead') : t('hubReservaLeadLocked'), icon: 'lock' },
             ...(mode === 'demo'
               ? []
               : [
@@ -749,6 +753,27 @@ function HomeScreenWithHooks() {
       </AppWindow>
 
       <AppWindow
+        visible={room === 'reserva'}
+        title={t('reservaTitle')}
+        lead={t('hubReservaLead')}
+        onClose={() => setRoom(null)}
+      >
+        {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
+        <ReservaSection
+          walletAddress={walletAddress || ''}
+          signer={appSigner}
+          tokenSymbol={selectedToken.symbol}
+          tokenBalance={balances.tokenBalance}
+          identityBlocked={mode !== 'demo' && identityBlocked}
+          delinquent={userInfo.isDelinquent}
+          paused={creditPaused}
+          hasPadre={Boolean(userInfo.referral?.padre && !/^0x0+$/i.test(userInfo.referral.padre))}
+          userLevel={userInfo.userProgress.nivelActual}
+          isLoading={txLoading}
+        />
+      </AppWindow>
+
+      <AppWindow
         visible={room === 'pool'}
         title={t('sectionPool')}
         lead={t('sectionPoolLead')}
@@ -816,6 +841,7 @@ function HomeScreenWithHooks() {
           onProposeSetTokenConfig={handleProposeSetTokenConfig}
           onLiquidar={handleLiquidarDeudor}
           onMarcarMoroso={handleMarcarMorosoSiVencido}
+          onAportarReserva={handleAportarReserva}
           adminRoster={adminInfo.adminRoster.length ? adminInfo.adminRoster : userInfo.adminRoster}
           requiredConfirmations={adminInfo.requiredConfirmations || userInfo.requiredConfirmations}
           proposalCount={adminInfo.proposalCount || userInfo.proposalCount}
