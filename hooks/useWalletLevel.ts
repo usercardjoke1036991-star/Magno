@@ -40,9 +40,11 @@ export function useWalletLevel(wallet?: string, knownLevel?: number) {
       return;
     }
     let cancelled = false;
-    getWalletLevel(wallet).then((next) => {
-      if (!cancelled) setLevel(next);
-    });
+    void getWalletLevel(wallet)
+      .then((next) => {
+        if (!cancelled) setLevel(next);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };

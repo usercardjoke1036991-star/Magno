@@ -103,7 +103,7 @@ export const ActivateCreditSection: React.FC<ActivateCreditSectionProps> = ({
             onPress={() => {
               setNote(t('activatingCredit'));
               setLocalBusy(true);
-              Promise.resolve(onRegister()).finally(() => {
+              void Promise.resolve(onRegister()).finally(() => {
                 setLocalBusy(false);
                 setNote('');
               });

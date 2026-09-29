@@ -1396,7 +1396,7 @@ const server = createServer(async (req, res) => {
       publicPhoto: locked ? sanitizePublicPhoto(prev.publicPhoto) : sanitizePublicPhoto(body.publicPhoto || prev.publicPhoto),
       publicFace: locked || Boolean(body.publicFace) || Boolean(body.displayName),
     };
-    persist();
+    await persist();
     json(res, 200, { ok: true });
     return;
   }
@@ -1435,7 +1435,7 @@ const server = createServer(async (req, res) => {
     }
     const code = randomBytes(5).toString('hex');
     store.pendingBinds[code] = { wallet, exp: now + 10 * 60 * 1000 };
-    persist();
+    await persist();
     json(res, 200, { code });
     return;
   }
@@ -1507,7 +1507,7 @@ const server = createServer(async (req, res) => {
         exp: now + 10 * 60 * 1000,
         attempts: 0,
       };
-      persist();
+      await persist();
       json(res, 200, { ok: true, channel: delivery.channel });
       return;
     }
@@ -1520,14 +1520,14 @@ const server = createServer(async (req, res) => {
     }
     if (Number(pending.exp) < now) {
       delete store.otps[wallet];
-      persist();
+      await persist();
       json(res, 400, { error: 'expired' });
       return;
     }
     pending.attempts = Number(pending.attempts || 0) + 1;
     if (pending.attempts > 5) {
       delete store.otps[wallet];
-      persist();
+      await persist();
       json(res, 429, { error: 'rate' });
       return;
     }
@@ -1536,7 +1536,7 @@ const server = createServer(async (req, res) => {
       ? await checkTwilioVerify(phone, code)
       : sameHash(pending.codeHash, hashOtp(code, phoneHash, wallet));
     if (!codeOk) {
-      persist();
+      await persist();
       json(res, 401, { error: 'code' });
       return;
     }
@@ -1553,7 +1553,7 @@ const server = createServer(async (req, res) => {
       const prev = store.profiles[wallet] || {};
       store.profiles[wallet] = { ...prev, verifiedPhone: phone, phoneReleased: false };
       delete store.otps[wallet];
-      persist();
+      await persist();
       json(res, 200, attestation);
     } catch {
       json(res, 503, { error: 'attester' });
@@ -1615,13 +1615,13 @@ const server = createServer(async (req, res) => {
         exp: now + 10 * 60 * 1000,
         attempts: 0,
       };
-      persist();
+      await persist();
       const channel = await deliverEmailOtp(email, code);
       if (!channel) {
         delete store.emailOtps[wallet];
         refundRate(`email:${ip}`);
         refundRate(`email-addr:${emailHash}`);
-        persist();
+        await persist();
         console.error('OTP correo: entrega fallida (falta Resend o EMAIL_FROM, o Resend rechazó el envío)');
         json(res, 503, { error: 'delivery' });
         return;
@@ -1638,19 +1638,19 @@ const server = createServer(async (req, res) => {
     }
     if (Number(pending.exp) < now) {
       delete store.emailOtps[wallet];
-      persist();
+      await persist();
       json(res, 400, { error: 'expired' });
       return;
     }
     pending.attempts = Number(pending.attempts || 0) + 1;
     if (pending.attempts > 5) {
       delete store.emailOtps[wallet];
-      persist();
+      await persist();
       json(res, 429, { error: 'rate' });
       return;
     }
     if (!sameHash(pending.codeHash, hashOtp(code, emailHash, wallet))) {
-      persist();
+      await persist();
       json(res, 401, { error: 'code' });
       return;
     }
@@ -1673,7 +1673,7 @@ const server = createServer(async (req, res) => {
       }
     }
     delete store.emailOtps[wallet];
-    persist();
+    await persist();
     json(res, 200, { ok: true });
     return;
   }
@@ -1744,7 +1744,7 @@ const server = createServer(async (req, res) => {
       } else {
         store.profiles[wallet] = { ...profile, verifiedPhone: '', phoneReleased: true };
       }
-      persist();
+      await persist();
       json(res, 200, { ok: true });
       return;
     }
@@ -1807,7 +1807,7 @@ const server = createServer(async (req, res) => {
       return;
     }
     store.exclusiveSessions[authn.wallet] = { deviceHash: authn.deviceHash, at: Date.now() };
-    persist();
+    await persist();
     json(res, 200, { ok: true, owner: true });
     return;
   }
@@ -1853,7 +1853,7 @@ const server = createServer(async (req, res) => {
     store.usernameClaims[username] = { wallet: authn.wallet };
     const prev = store.profiles[authn.wallet] || {};
     store.profiles[authn.wallet] = { ...prev, username };
-    persist();
+    await persist();
     json(res, 200, { ok: true, username });
     return;
   }
@@ -2007,7 +2007,7 @@ const server = createServer(async (req, res) => {
       );
       if (!channel) {
         delete store.recoverOtps[emailHash];
-        persist();
+        await persist();
         json(res, 200, { ok: true });
         return;
       }
@@ -2041,19 +2041,19 @@ const server = createServer(async (req, res) => {
     const now = Date.now();
     if (!pending || Number(pending.exp) < now) {
       if (pending) delete store.recoverOtps[emailHash];
-      persist();
+      await persist();
       json(res, 401, { error: 'code' });
       return;
     }
     pending.attempts = Number(pending.attempts || 0) + 1;
     if (pending.attempts > 5) {
       delete store.recoverOtps[emailHash];
-      persist();
+      await persist();
       json(res, 429, { error: 'rate' });
       return;
     }
     if (!sameHash(pending.codeHash, hashRecoverOtp(code, emailHash)) || !wrapOk(wrapRow?.wrap)) {
-      persist();
+      await persist();
       json(res, 401, { error: 'code' });
       return;
     }
