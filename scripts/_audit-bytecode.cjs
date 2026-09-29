@@ -46,7 +46,7 @@ function sha256hex(hex) {
   const libLive = libCode.replace(/^0x/, '').toLowerCase();
   function stripCbor(hex) {
     if (hex.length < 4) return hex;
-    const metaLen = parseInt(hex.slice(-4), 16);
+    const metaLen = Number.parseInt(hex.slice(-4), 16);
     const cut = hex.length - 4 - metaLen * 2;
     if (cut > 0 && cut < hex.length) return hex.slice(0, cut);
     return hex;

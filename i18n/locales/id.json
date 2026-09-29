@@ -327,7 +327,7 @@
   "networkMainnet": "BNB Smart Chain (mainnet)",
   "networkTestnet": "BNB Smart Chain Testnet (Chapel)",
   "networkContract": "Kontrak live: {address}",
-  "networkNotMainnet": "Ini testnet nyata: transaksi dari dompet Anda. Mainnet membutuhkan CONFIRM_MAINNET=yes.",
+  "networkNotMainnet": "Mode uji aktif. Dana di jaringan ini tidak bernilai nyata.",
   "lockSettings": "Kunci aplikasi",
   "lockSettingsLead": "The password encrypts the wallet. An optional 6-digit PIN opens the app day to day. After 5 failed tries there is a wait. If you forget the password, restore it with the account email.",
   "lockCreatePin": "Buat PIN 6 digit",

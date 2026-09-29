@@ -634,9 +634,19 @@ const sendWhatsApp = async (phone, text) => {
 
 const twilioBasic = () => Buffer.from(`${TWILIO_SID}:${TWILIO_TOKEN}`).toString('base64');
 
+const oneLine = (value) => String(value || '').replace(/[\r\n\u2028\u2029]/g, ' ').slice(0, 180);
+
+const assertTwilioUrl = (url) => {
+  const parsed = new URL(String(url));
+  const host = parsed.hostname.toLowerCase();
+  if (parsed.protocol !== 'https:') throw new Error('twilio');
+  if (host !== 'api.twilio.com' && host !== 'verify.twilio.com') throw new Error('twilio');
+  return parsed.toString();
+};
+
 const twilioJson = async (url, init = {}) => {
   try {
-    const response = await fetch(url, {
+    const response = await fetch(assertTwilioUrl(url), {
       ...init,
       headers: {
         Authorization: `Basic ${twilioBasic()}`,
@@ -650,7 +660,7 @@ const twilioJson = async (url, init = {}) => {
       body = {};
     }
     if (!response.ok) {
-      const detail = String(body.message || body.code || response.status).slice(0, 180);
+      const detail = oneLine(body.message || body.code || response.status);
       console.error('Twilio HTTP', response.status, detail);
     }
     return { ok: response.ok, status: response.status, body };
@@ -768,7 +778,7 @@ const sendEmail = async (to, subject, text) => {
       } catch {
         detail = '';
       }
-      console.error('Resend HTTP', response.status, detail);
+      console.error('Resend HTTP', response.status, oneLine(detail));
     }
     return response.ok;
   } catch (error) {
@@ -915,7 +925,13 @@ const consumeBindCode = (payload) => {
 const pollTelegram = async () => {
   if (!TELEGRAM_TOKEN) return;
   let offset = 0;
-  for (;;) {
+  let telegramAlive = true;
+  const stopTelegram = () => {
+    telegramAlive = false;
+  };
+  process.once('SIGTERM', stopTelegram);
+  process.once('SIGINT', stopTelegram);
+  while (telegramAlive) {
     try {
       const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/getUpdates?timeout=25&offset=${offset}`;
       const data = await (await fetch(url)).json();

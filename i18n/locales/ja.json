@@ -327,7 +327,7 @@
   "networkMainnet": "BNB Smart Chain（メインネット）",
   "networkTestnet": "BNB Smart Chain テストネット（Chapel）",
   "networkContract": "稼働中のコントラクト: {address}",
-  "networkNotMainnet": "これは実際のテストネットです。取引はウォレットから行われます。メインネットには CONFIRM_MAINNET=yes が必要です。",
+  "networkNotMainnet": "テストモードです。このネットワーク上の資金に実価値はありません。",
   "lockSettings": "アプリロック",
   "lockSettingsLead": "The password encrypts the wallet. An optional 6-digit PIN opens the app day to day. After 5 failed tries there is a wait. If you forget the password, restore it with the account email.",
   "lockCreatePin": "6桁の PIN を作成",

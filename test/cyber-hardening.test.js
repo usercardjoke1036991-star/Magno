@@ -298,6 +298,54 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(links).to.include('/invite?c=');
   });
 
+  it('wires SonarQube and Snyk without embedding tokens', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const root = path.join(__dirname, '..');
+    const sonar = fs.readFileSync(path.join(root, 'sonar-project.properties'), 'utf8');
+    expect(sonar).to.include('sonar.projectKey=usercardjoke1036991-star_Magno');
+    expect(sonar).to.include('sonar.organization=usercardjoke1036991-star');
+    expect(sonar).to.include('sonarcloud.io');
+    expect(sonar).to.not.match(/sonar\.login=/);
+    expect(sonar).to.not.match(/sonar\.token=/);
+    const compose = fs.readFileSync(path.join(root, 'docker-compose.sonar.yml'), 'utf8');
+    expect(compose).to.include('127.0.0.1:9000:9000');
+    const runner = fs.readFileSync(path.join(root, 'scripts', 'run-sonar.mjs'), 'utf8');
+    expect(runner).to.include('SONAR_TOKEN');
+    expect(runner).to.include('sonarsource/sonar-scanner-cli');
+    expect(runner).to.include('host.docker.internal');
+    expect(runner).to.include('Automatic Analysis');
+    const snykRunner = fs.readFileSync(path.join(root, 'scripts', 'run-snyk.mjs'), 'utf8');
+    expect(snykRunner).to.include('SNYK_TOKEN');
+    expect(snykRunner).not.to.match(/snyk_uat\./);
+    const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+    expect(pkg.scripts['security:sonar']).to.equal('node scripts/run-sonar.mjs');
+    expect(pkg.scripts['security:snyk']).to.include('run-snyk.mjs');
+    const policy = fs.readFileSync(path.join(root, '.snyk'), 'utf8');
+    expect(policy).to.include('image-size');
+    expect(policy).to.include('Metro 0.83');
+    const slot = fs.readFileSync(path.join(root, 'utils', 'storeSlot.ts'), 'utf8');
+    expect(slot).to.include('parts.filter(Boolean).join(glue)');
+    const email = fs.readFileSync(path.join(root, 'services', 'accountEmail.ts'), 'utf8');
+    expect(email).to.include("storeSlot(['quatrivium', 'account', 'email'])");
+  });
+
+  it('keeps deploy flags and vendor names out of user-facing locale copy', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const dir = path.join(__dirname, '..', 'i18n', 'locales');
+    const files = fs.readdirSync(dir).filter((name) => name.endsWith('.json'));
+    expect(files.length).to.be.at.least(17);
+    for (const name of files) {
+      const data = JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8'));
+      const blob = Object.values(data).join('\n');
+      expect(blob, name).to.not.include('CONFIRM_MAINNET');
+      expect(blob, name).to.not.include('PRIVATE_KEY');
+      expect(blob, name).to.not.include('TEXTBELT');
+      expect(String(data.networkNotMainnet || ''), name).to.match(/\S/);
+    }
+  });
+
   it('wires MobSF REST upload, scan and report_json without embedding the API key', function () {
     const fs = require('fs');
     const path = require('path');

@@ -11,6 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnEnv } from './spawnEnv.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 loadDotEnv(resolve(root, '.env'));
@@ -18,7 +19,7 @@ loadDotEnv(resolve(root, '.env'));
 const extra = process.argv.slice(2);
 const wantPurge = extra.includes('--purge');
 const apiKey = String(process.env.MOBSF_API_KEY || '').trim();
-const baseUrl = String(process.env.MOBSF_URL || 'http://localhost:8000').replace(/\/+$/, '');
+const baseUrl = String(process.env.MOBSF_URL || 'http://localhost:8000').replace(/\/+$/u, '');
 const reportPath = resolve(root, 'mobsf-report.json');
 const apkPath = wantPurge ? '' : resolveApkPath(extra);
 const auth = { Authorization: apiKey };
@@ -59,7 +60,7 @@ try {
   if (!hash) {
     throw new Error(`MobSF no devolvió hash al subir. Respuesta: ${brief(uploaded)}`);
   }
-  console.log(`Hash   ${hash}`);
+  console.log(`Hash   ${hash.replace(/[\r\n]/g, '')}`);
 
   const scanned = await postForm(`${baseUrl}/api/v1/scan`, {
     hash,
@@ -79,7 +80,7 @@ try {
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
   console.log(`Informe ${reportPath}`);
 } catch (err) {
-  const message = err instanceof Error ? err.message : String(err);
+  const message = (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, ' ');
   console.error(`MobSF falló: ${message}
 ¿Está corriendo http://localhost:8000? ¿La API Key es la de esa instancia?`);
   process.exit(1);
@@ -147,7 +148,7 @@ async function purgeScans() {
   const dockerPs = spawnSync(
     'docker',
     ['ps', '--filter', 'ancestor=opensecurity/mobile-security-framework-mobsf', '--format', '{{.Names}}'],
-    { encoding: 'utf8', windowsHide: true }
+    { encoding: 'utf8', windowsHide: true, env: spawnEnv() }
   );
   for (const name of String(dockerPs.stdout || '').split(/\r?\n/).map((item) => item.trim()).filter(Boolean)) {
     if (!names.includes(name)) names.push(name);
@@ -156,7 +157,7 @@ async function purgeScans() {
     spawnSync(
       'docker',
       ['exec', name, 'sh', '-c', 'rm -rf /home/mobsf/.MobSF/uploads/* /home/mobsf/.MobSF/downloads/*'],
-      { encoding: 'utf8', windowsHide: true }
+      { encoding: 'utf8', windowsHide: true, env: spawnEnv() }
     );
   }
   return removed;

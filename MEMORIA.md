@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] Hay dos nombres distintos: el de inicio de sesion va cifrado en el celular y no se edita; el anonimo lo ve la red, se elige una vez y no es el mismo.
 
 ## Cambios realizados
+- [2026-09-18] Auditoria PDF MobSF descsdsadarga.pdf: APK 35CADA22 1.0.2 vc4, 61/100 A. HIGH=huella CBC (se mantiene). Sin exp+/Twilio/claves. Corregido networkNotMainnet en 15 idiomas (ya no filtra CONFIRM_MAINNET). Hardhat verde. Real sigue sin contrato mainnet.
 - [2026-09-18] APK release 1.0.2 versionCode 4 para MobSF local: Escritorio Quatrivium-Finance-MobSF.apk (67.29 MB, SHA256 35CADA22F7FB85C733A4898FE0E876244A0D45A78FD354B16ECD039A4125EFD7, v3 CN=Quatrivium Finance, sin exp+, arm-only). No se reinstalo en Xiaomi. Liberados ~1.6 GB de Temp/NDK/Gradle residual.
 - [2026-09-18] Auditoria USB en vivo: Real credito en lanzamiento, Demo linea activa, pool Demo 2000.70 0xD2d2 solo lectura, donar no abre en Demo, marcos Granate, Ajustes Demo sin KYC/correo/telefono. Hardhat 177. Worker notify ok.
 - [2026-09-18] Kit ciber en vivo: Aderyn/Slither/Forge verdes; Trivy Docker 0; compression 1.8.2; ZAP health OK 0 alertas; Semgrep urllib https; Mythril SWC-101 de 0.8.24 sin recortar nucleo
@@ -93,4 +94,4 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-18] APK 1.0.2 vc4 en Escritorio para escanear en MobSF localhost:8000. SHA256 35CADA22…. Sin reinstalar Xiaomi. C: ~6.2 GB libres tras limpiar Temp.
+[2026-09-18] Auditoria PDF MobSF descsdsadarga.pdf + app: Grade A 61/100, HIGH=huella. i18n sin CONFIRM_MAINNET. Demo productiva. Real espera mainnet.

@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { isValidEmail, normalizeEmail } from '../utils/emailPolicy';
+import { storeSlot } from '../utils/storeSlot';
 
-const KEY = 'quatrivium.account.email';
-const FALLBACK = 'quatrivium.account.email.fallback';
+const KEY = storeSlot(['quatrivium', 'account', 'email']);
+const FALLBACK = storeSlot(['quatrivium', 'account', 'email', 'fallback']);
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 function parseEmail(raw: string | null): string {

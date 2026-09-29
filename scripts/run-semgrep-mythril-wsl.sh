@@ -31,7 +31,7 @@ $SEMGREP_BIN --error --quiet --metrics=off \
   /root/magno-semgrep
 SEMGREP_STATUS=$?
 echo SEMGREP_EXIT:$SEMGREP_STATUS | tee -a "$OUT/progress.txt"
-if [ "$SEMGREP_STATUS" -gt 1 ]; then
+if [[ "$SEMGREP_STATUS" -gt 1 ]]; then
   echo "SEMGREP_DID_NOT_RUN status=$SEMGREP_STATUS" | tee -a "$OUT/progress.txt"
 fi
 python3 - <<'PY'
@@ -52,11 +52,11 @@ for r in results[:80]:
 PY
 
 echo "===== 6 MYTHRIL $(date -Is) =====" | tee -a "$OUT/progress.txt"
-[ -x /root/.svm/0.8.24/solc-0.8.24 ] && export SOLC=/root/.svm/0.8.24/solc-0.8.24
+[[ -x /root/.svm/0.8.24/solc-0.8.24 ]] && export SOLC=/root/.svm/0.8.24/solc-0.8.24
 
 myth_runtime() {
   local artifact="$1" bin="$2" out="$3" timeout_s="$4" depth="$5" label="$6"
-  if [ ! -f "$artifact" ]; then
+  if [[ ! -f "$artifact" ]]; then
     echo "MYTHRIL_SKIP_${label} no artifact" | tee -a "$OUT/progress.txt"
     return
   fi

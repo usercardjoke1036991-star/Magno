@@ -1,12 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storeSlot } from './storeSlot';
 
 const PAIRS: [string, string][] = [
-  ['bitcredit.lang', 'quatrivium.lang'],
-  ['bitcredit.theme', 'quatrivium.theme'],
-  ['bitcredit.invite', 'quatrivium.invite'],
-  ['bitcredit.notify.profile', 'quatrivium.notify.profile'],
-  ['bitcredit.profile.own', 'quatrivium.profile.own'],
-  ['bitcredit.profile.directory', 'quatrivium.profile.directory'],
+  ['bitcredit.lang', storeSlot(['quatrivium', 'lang'])],
+  ['bitcredit.theme', storeSlot(['quatrivium', 'theme'])],
+  ['bitcredit.invite', storeSlot(['quatrivium', 'invite'])],
+  ['bitcredit.notify.profile', storeSlot(['quatrivium', 'notify', 'profile'])],
+  ['bitcredit.profile.own', storeSlot(['quatrivium', 'profile', 'own'])],
+  ['bitcredit.profile.directory', storeSlot(['quatrivium', 'profile', 'directory'])],
 ];
 
 export async function migrateLegacyStorage(): Promise<void> {

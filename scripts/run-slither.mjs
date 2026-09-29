@@ -8,6 +8,7 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnEnv, spawnPath } from './spawnEnv.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const extra = process.argv.slice(2);
@@ -25,10 +26,10 @@ const wslScript = resolve(root, 'scripts', 'run-slither-wsl.sh');
 const hardhatCli = resolve(root, 'node_modules', 'hardhat', 'internal', 'cli', 'cli.js');
 
 function envWithPipx() {
-  const env = { ...process.env };
+  const env = spawnEnv();
   const pipxBin = resolve(homedir(), '.local', 'bin');
   const localBin = resolve(root, 'node_modules', '.bin');
-  env.PATH = `${pipxBin}${delimiter}${localBin}${delimiter}${env.PATH || env.Path || ''}`;
+  env.PATH = `${pipxBin}${delimiter}${localBin}${delimiter}${spawnPath()}`;
   env.HARDHAT_CONFIG = resolve(root, 'hardhat.config.cjs');
   return env;
 }
@@ -112,6 +113,7 @@ if (process.platform === 'win32') {
       cwd: root,
       stdio: 'inherit',
       windowsHide: true,
+      env: spawnEnv(),
     });
     if (!status.error || status.error.code !== 'ENOENT') {
       process.exit(status.status ?? 1);

@@ -3,6 +3,7 @@ import { File, Paths } from 'expo-file-system';
 import { notifyApiConfigured, notifyJsonFetch } from './notifyClient';
 import { stripUnsafeText } from '../utils/sanitize';
 import { readJsonLimited } from '../utils/safeFetch';
+import { storeSlot } from '../utils/storeSlot';
 import { loadAppWallet } from './appWallet';
 import { signedAuthBody } from './walletAuth';
 
@@ -178,8 +179,8 @@ export function labelForProfile(profile?: UserProfile | null, fallback = ''): st
   return name || fallback;
 }
 
-const OWN_KEY = 'quatrivium.profile.own';
-const DIR_KEY = 'quatrivium.profile.directory';
+const OWN_KEY = storeSlot(['quatrivium', 'profile', 'own']);
+const DIR_KEY = storeSlot(['quatrivium', 'profile', 'directory']);
 
 function walletKey(wallet: string): string {
   return wallet.trim().toLowerCase();

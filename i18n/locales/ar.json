@@ -327,7 +327,7 @@
   "networkMainnet": "BNB Smart Chain (الشبكة الرئيسية)",
   "networkTestnet": "BNB Smart Chain Testnet (Chapel)",
   "networkContract": "العقد الحي: {address}",
-  "networkNotMainnet": "هذه شبكة اختبار حقيقية: المعاملات تأتي من محفظتك. الشبكة الرئيسية تتطلب CONFIRM_MAINNET=yes.",
+  "networkNotMainnet": "وضع التجربة نشط. الأموال في هذه الشبكة ليس لها قيمة حقيقية.",
   "lockSettings": "قفل التطبيق",
   "lockSettingsLead": "The password encrypts the wallet. An optional 6-digit PIN opens the app day to day. After 5 failed tries there is a wait. If you forget the password, restore it with the account email.",
   "lockCreatePin": "إنشاء PIN من 6 أرقام",

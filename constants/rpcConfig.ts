@@ -6,7 +6,7 @@ import { DEPLOYED_MAINNET, DEPLOYED_TESTNET } from './deployedAddresses';
 export type AppMode = 'demo' | 'live';
 
 const envRaw = (process.env.EXPO_PUBLIC_APP_ENV || '').trim().toLowerCase();
-const chainRaw = parseInt(process.env.EXPO_PUBLIC_CHAIN_ID || '', 10);
+const chainRaw = Number.parseInt(process.env.EXPO_PUBLIC_CHAIN_ID || '', 10);
 
 export function isStoreProduction(): boolean {
   return envRaw === 'production';

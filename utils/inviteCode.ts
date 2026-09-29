@@ -2,9 +2,10 @@ import { getAddress, isAddress } from 'ethers';
 import * as Linking from 'expo-linking';
 import { INVITE_WEB_BASE, PLAY_STORE_URL } from '../constants/appLinks';
 import { stripUnsafeText } from './sanitize';
+import { storeSlot } from './storeSlot';
 
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-const STORAGE_KEY = 'quatrivium.invite';
+const STORAGE_KEY = storeSlot(['quatrivium', 'invite']);
 const GROUPED_RE =
   /\b[0-9A-HJKMNP-TV-ZILOilo]{4}(?:-[0-9A-HJKMNP-TV-ZILOilo]{4}){7}\b/;
 
@@ -14,7 +15,7 @@ function hexToBytes(address: string): Uint8Array {
   const hex = address.slice(2).toLowerCase();
   const out = new Uint8Array(20);
   for (let i = 0; i < 20; i += 1) {
-    out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    out[i] = Number.parseInt(hex.slice(i * 2, i * 2 + 2), 16);
   }
   return out;
 }
@@ -39,7 +40,7 @@ function encodeBase32(bytes: Uint8Array): string {
   }
   let out = '';
   for (let i = 0; i < bits.length; i += 5) {
-    out += ALPHABET[parseInt(bits.slice(i, i + 5), 2)];
+    out += ALPHABET[Number.parseInt(bits.slice(i, i + 5), 2)];
   }
   return out;
 }
@@ -64,7 +65,7 @@ function decodeBase32(normalized: string): Uint8Array | null {
   }
   const bytes = new Uint8Array(20);
   for (let i = 0; i < 20; i += 1) {
-    bytes[i] = parseInt(bits.slice(i * 8, i * 8 + 8), 2);
+    bytes[i] = Number.parseInt(bits.slice(i * 8, i * 8 + 8), 2);
   }
   return bytes;
 }

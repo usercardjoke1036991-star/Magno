@@ -49,10 +49,21 @@ export const formatAddress = (address: string): string => {
  * @param amount - Amount to format
  * @returns Formatted USD string
  */
+function groupThousands(whole: string): string {
+  let out = '';
+  let n = 0;
+  for (let i = whole.length - 1; i >= 0; i -= 1) {
+    if (n > 0 && n % 3 === 0) out = `.${out}`;
+    out = `${whole[i]}${out}`;
+    n += 1;
+  }
+  return out;
+}
+
 export const formatUSD = (amount: number): string => {
   const safe = Number.isFinite(amount) ? amount : 0;
   const [whole, cents] = Math.abs(safe).toFixed(2).split('.');
-  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const grouped = groupThousands(whole);
   return `$${safe < 0 ? '-' : ''}${grouped}.${cents}`;
 };
 

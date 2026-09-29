@@ -22,6 +22,7 @@ import sys
 import os
 import argparse
 from pathlib import Path
+from qa_safe_io import confine
 from datetime import date
 
 # Forzar UTF-8 en Windows (seguro bajo pytest con reconfigure)
@@ -87,7 +88,7 @@ def cmd_mostrar(ruta: Path | None):
     print(f"  📄 CONTEXTO.MD — {ruta.parent.name}")
     print(f"  Ruta: {ruta}")
     print(f"{'═' * 60}\n")
-    print(ruta.read_text(encoding="utf-8"))
+    print(confine(ruta).read_text(encoding="utf-8"))
     print(f"{'═' * 60}\n")
 
 
@@ -121,7 +122,7 @@ def cmd_actualizar_estado(ruta: Path | None, nuevo_estado: str):
         print(f"   Añade manualmente: {nueva_linea.strip()}")
         return
 
-    ruta.write_text("".join(lineas), encoding="utf-8")
+    confine(ruta).write_text("".join(lineas), encoding="utf-8")
     print(f"✅ Estado actualizado → {nuevo_estado}")
     print(f"   Archivo: {ruta}")
 
@@ -136,6 +137,7 @@ def cmd_agregar_cambio(ruta: Path | None, descripcion: str):
         print("   Crea uno con: python actualizar_contexto.py --init")
         return
 
+    ruta = confine(ruta)
     fecha_hoy = date.today().strftime("%Y-%m-%d")
     contenido = ruta.read_text(encoding="utf-8")
 

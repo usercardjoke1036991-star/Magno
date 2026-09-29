@@ -21,6 +21,7 @@ import os
 import sys
 import json
 from pathlib import Path
+from qa_safe_io import confine
 from dataclasses import dataclass, field
 
 # Forzar UTF-8 en Windows para que los símbolos Unicode se impriman correctamente
@@ -646,7 +647,7 @@ def detectar_volumen_cero(contenido: str) -> list[dict]:
     )
     # input double = 0 o 0.0, no 0.01
     pat_input_zero = re.compile(
-        r'input\s+double\s+\w*[Ll]ot\w*\s*=\s*0(?:\.0+)?\s*;',
+        r'input\s+double\s+\w*[Ll]ot\w*\s*=\s*0;',
         re.IGNORECASE,
     )
 
@@ -1041,7 +1042,7 @@ def _analizar_logica_node(archivo: Path) -> list[ProblemaLogica]:
 
 def _detectar_tipo_proyecto(directorio: Path) -> str:
     """Detecta el tipo de proyecto para elegir los analizadores correctos."""
-    d = directorio
+    d = confine(directorio)
 
     if (d / "build.gradle").exists() or (d / "AndroidManifest.xml").exists():
         return "android"

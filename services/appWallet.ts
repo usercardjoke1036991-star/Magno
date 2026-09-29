@@ -9,10 +9,11 @@ import { isSealedBlob, openSecret, sealSecret } from '../utils/secretBox';
 import { assertRestoreFitsThisDevice, lookupBoundWalletOnThisDevice } from './deviceClaim';
 import { bindAppWallet, claimDeviceWallet, clearBoundWallet } from './deviceBinding';
 import { getWalletWrapKey } from './walletSession';
+import { storeSlot } from '../utils/storeSlot';
 
-const WALLET_KEY = 'quatrivium.appWallet.v1';
-const WALLET_FALLBACK = 'quatrivium.appWallet.v1.fallback';
-const PHRASE_ACK_KEY = 'quatrivium.appWallet.phraseAck';
+const WALLET_KEY = storeSlot(['quatrivium', 'appWallet', 'v1']);
+const WALLET_FALLBACK = storeSlot(['quatrivium', 'appWallet', 'v1', 'fallback']);
+const PHRASE_ACK_KEY = storeSlot(['quatrivium', 'appWallet', 'phraseAck']);
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 async function withLimit<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {

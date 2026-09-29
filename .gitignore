@@ -63,6 +63,9 @@ lib/
 keystore.properties
 mobsf-report.json
 mobsf-report-extract.txt
+.scannerwork/
+.sonar/
+.snyk-report.json
 
 # Debug screenshots
 store-assets/debug-screen*.png

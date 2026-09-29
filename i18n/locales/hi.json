@@ -327,7 +327,7 @@
   "networkMainnet": "BNB Smart Chain (मेननेट)",
   "networkTestnet": "BNB Smart Chain टेस्टनेट (Chapel)",
   "networkContract": "लाइव कॉन्ट्रैक्ट: {address}",
-  "networkNotMainnet": "यह वास्तविक टेस्टनेट है: लेन-देन आपके वॉलेट से आते हैं। मेननेट के लिए CONFIRM_MAINNET=yes चाहिए।",
+  "networkNotMainnet": "परीक्षण मोड चालू है। इस नेटवर्क के धन का कोई वास्तविक मूल्य नहीं है।",
   "lockSettings": "ऐप लॉक",
   "lockSettingsLead": "The password encrypts the wallet. An optional 6-digit PIN opens the app day to day. After 5 failed tries there is a wait. If you forget the password, restore it with the account email.",
   "lockCreatePin": "6 अंकों का PIN बनाएँ",

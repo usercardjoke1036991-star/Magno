@@ -106,7 +106,12 @@ async function assertNavInvariant(token, contract, tokenAddr, contractAddr) {
   const outstanding = await contract.outstandingLoans(tokenAddr);
   const liquidity = await contract.totalLiquidity(tokenAddr);
   const fees = await contract.collectedFees(tokenAddr);
-  expect(cash + outstanding).to.equal(liquidity + fees);
+  expectAmt(cash + outstanding, liquidity + fees);
+}
+
+function expectAmt(actual, expected) {
+  const { expect } = require('chai');
+  expect(BigInt(actual)).to.equal(BigInt(expected));
 }
 
 module.exports = {
@@ -117,4 +122,5 @@ module.exports = {
   proposeAndExecute,
   drainToken,
   assertNavInvariant,
+  expectAmt,
 };

@@ -327,7 +327,7 @@
   "networkMainnet": "BNB Smart Chain (основная сеть)",
   "networkTestnet": "BNB Smart Chain Testnet (Chapel)",
   "networkContract": "Рабочий контракт: {address}",
-  "networkNotMainnet": "Это настоящий тестнет: транзакции идут с вашего кошелька. Основная сеть требует CONFIRM_MAINNET=yes.",
+  "networkNotMainnet": "Включён тестовый режим. Средства в этой сети не имеют реальной стоимости.",
   "lockSettings": "Блокировка приложения",
   "lockSettingsLead": "The password encrypts the wallet. An optional 6-digit PIN opens the app day to day. After 5 failed tries there is a wait. If you forget the password, restore it with the account email.",
   "lockCreatePin": "Создать 6-значный PIN",

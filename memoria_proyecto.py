@@ -20,6 +20,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
+from qa_safe_io import confine
 from typing import List, Optional
 
 # ERR-003: reconfigure + hasattr — nunca TextIOWrapper sobre stdout
@@ -197,6 +198,7 @@ def renderizar_memoria(mem: MemoriaProyecto) -> str:
 def escribir_memoria(mem: MemoriaProyecto, directorio: Path) -> bool:
     """Escribe MEMORIA.md y memoria.json. False si falla el I/O."""
     try:
+        directorio = confine(directorio)
         directorio.mkdir(parents=True, exist_ok=True)
         ruta_memoria_md(directorio).write_text(
             renderizar_memoria(mem), encoding="utf-8",

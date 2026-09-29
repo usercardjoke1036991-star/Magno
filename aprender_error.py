@@ -25,6 +25,7 @@ import re
 import argparse
 from datetime import date
 from pathlib import Path
+from qa_safe_io import confine_write
 
 # Forzar UTF-8 en Windows
 if sys.platform == "win32":
@@ -69,9 +70,9 @@ def cargar_errores() -> dict:
 
 def guardar_errores(datos: dict):
     """Guarda el JSON de errores aprendidos con formato legible."""
-    ERRORES_JSON.write_text(
+    confine_write(
+        ERRORES_JSON,
         json.dumps(datos, ensure_ascii=False, indent=2),
-        encoding="utf-8"
     )
 
 

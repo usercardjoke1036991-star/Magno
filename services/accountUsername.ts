@@ -4,8 +4,9 @@ import { isValidUsername, normalizeUsername } from '../utils/usernamePolicy';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { loadAppWallet } from './appWallet';
 import { signedAuthBody } from './walletAuth';
+import { storeSlot } from '../utils/storeSlot';
 
-const KEY = 'quatrivium.account.username';
+const KEY = storeSlot(['quatrivium', 'account', 'username']);
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 export async function loadClaimedUsername(): Promise<string> {

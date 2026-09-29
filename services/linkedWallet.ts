@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAddress, isAddress } from 'ethers';
+import { storeSlot } from '../utils/storeSlot';
 
-const PREFIX = 'quatrivium.linkedExternal.v1:';
+const PREFIX = `${storeSlot(['quatrivium', 'linkedExternal', 'v1'])}:`;
 export const WALLET_LINK_SKIPPED = 'skipped';
 
 export function linkedWalletStorageKey(internalWallet: string): string {

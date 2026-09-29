@@ -11,7 +11,8 @@ function tokenFromUrl(url?: string | null): string {
   if (!url) return '';
   const parsed = Linking.parse(url);
   const parts = String(parsed.path || '')
-    .replace(/^\/+|\/+$/g, '')
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '')
     .split('/')
     .filter((part) => part && part !== '--');
   const fromQuery = String(parsed.queryParams?.room || parsed.queryParams?.panel || '').toLowerCase();
@@ -30,7 +31,7 @@ function tokenFromUrl(url?: string | null): string {
       const inner = new URL(nested);
       const nestedRoom = (inner.searchParams.get('room') || inner.searchParams.get('panel') || '').toLowerCase();
       if (nestedRoom) return nestedRoom;
-      const nestedParts = inner.pathname.replace(/^\/+|\/+$/g, '').split('/').filter((part) => part && part !== '--');
+      const nestedParts = inner.pathname.replace(/^\/+/, '').replace(/\/+$/, '').split('/').filter((part) => part && part !== '--');
       const nestedPath = nestedParts[0] === 'room' ? nestedParts[1] || '' : nestedParts[0] || '';
       if (nestedPath) return nestedPath.toLowerCase();
     }

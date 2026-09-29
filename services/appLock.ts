@@ -16,15 +16,16 @@ import { deriveWrapKeyAsync, isSealedBlob, openSecret, sealSecret, timingSafeEqu
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { clearWalletSession, getWalletWrapKey, setWalletWrapKey } from './walletSession';
 import { sha256, toUtf8Bytes } from 'ethers';
+import { storeSlot } from '../utils/storeSlot';
 
-const PIN_KEY = 'quatrivium.lock.pin';
-const PASSWORD_KEY = 'quatrivium.lock.password';
-const PASSWORD_FALLBACK = 'quatrivium.lock.password.fallback';
-const PIN_WRAP_KEY = 'quatrivium.lock.pinWrap';
-const BIO_KEY = 'quatrivium.lock.bio';
-const LOCK_OPEN_KEY = 'quatrivium.lock.onOpen';
-const GATE_KEY = 'quatrivium.lock.gate';
-const WRAP_STORE = 'quatrivium.wallet.wrap.v1';
+const PIN_KEY = storeSlot(['quatrivium', 'lock', 'pin']);
+const PASSWORD_KEY = storeSlot(['quatrivium', 'lock', 'password']);
+const PASSWORD_FALLBACK = storeSlot(['quatrivium', 'lock', 'password', 'fallback']);
+const PIN_WRAP_KEY = storeSlot(['quatrivium', 'lock', 'pinWrap']);
+const BIO_KEY = storeSlot(['quatrivium', 'lock', 'bio']);
+const LOCK_OPEN_KEY = storeSlot(['quatrivium', 'lock', 'onOpen']);
+const GATE_KEY = storeSlot(['quatrivium', 'lock', 'gate']);
+const WRAP_STORE = storeSlot(['quatrivium', 'wallet', 'wrap', 'v1']);
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 const BIO_WRAP_OPTIONS = {
   ...OPTIONS,
@@ -423,7 +424,7 @@ export async function changePin(current: string, next: string): Promise<boolean>
     return true;
   }
   const pinBackup = await SecureStore.getItemAsync(PIN_KEY);
-  const walletBackup = await SecureStore.getItemAsync('quatrivium.appWallet.v1');
+  const walletBackup = await SecureStore.getItemAsync(storeSlot(['quatrivium', 'appWallet', 'v1']));
   const oldWrap = getWalletWrapKey();
   try {
     const { rewrapWalletWithNewKey } = await import('./appWallet');
@@ -434,7 +435,7 @@ export async function changePin(current: string, next: string): Promise<boolean>
       await SecureStore.setItemAsync(PIN_KEY, pinBackup, OPTIONS);
     }
     if (walletBackup) {
-      await SecureStore.setItemAsync('quatrivium.appWallet.v1', walletBackup, OPTIONS);
+      await SecureStore.setItemAsync(storeSlot(['quatrivium', 'appWallet', 'v1']), walletBackup, OPTIONS);
     }
     setWalletWrapKey(oldWrap);
     return false;

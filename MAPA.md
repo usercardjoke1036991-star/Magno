@@ -270,6 +270,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: DEPLOYED_TESTNET
 - `scripts/fetch-wallet-logos.py` — módulo Python
   - Funciones/clases: fetch, to_png, is_github_identicon, save_square, main
+- `scripts/free-disk-for-apk.py` — módulo Python
+  - Funciones/clases: on_rm_error, size_of, remove_path, main
 - `scripts/linkCredit.cjs` — módulo JS/TS
 - `scripts/notify-worker.mjs` — módulo JS/TS
 - `scripts/paint-wallet-icons.py` — módulo Python

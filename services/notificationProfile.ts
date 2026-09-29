@@ -4,8 +4,9 @@ import { signedAuthBody } from './walletAuth';
 import { NOTIFY_API } from '../constants/appLinks';
 import { stripUnsafeText } from '../utils/sanitize';
 import { safeJsonFetch } from '../utils/safeFetch';
+import { storeSlot } from '../utils/storeSlot';
 
-const STORAGE_KEY = 'quatrivium.notify.profile';
+const STORAGE_KEY = storeSlot(['quatrivium', 'notify', 'profile']);
 
 export interface NotificationPrefs {
   debt: boolean;

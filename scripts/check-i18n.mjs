@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'i18n', 'locales');
 const langs = ['es', 'en', 'zh', 'hi', 'ar', 'bn', 'pt', 'ru', 'ur', 'id', 'fr', 'ja', 'de', 'ko', 'tr', 'vi', 'it'];
 const en = JSON.parse(fs.readFileSync(path.join(dir, 'en.json'), 'utf8'));
-const keys = Object.keys(en).sort();
+const keys = Object.keys(en).sort((a, b) => a.localeCompare(b));
 const placeholders = /\{[a-zA-Z]+\}/g;
 let failed = false;
 
@@ -17,7 +17,7 @@ for (const lang of langs) {
     continue;
   }
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const got = Object.keys(data).sort();
+  const got = Object.keys(data).sort((a, b) => a.localeCompare(b));
   if (got.join() !== keys.join()) {
     const missing = keys.filter((k) => !got.includes(k));
     const extra = got.filter((k) => !keys.includes(k));

@@ -4,11 +4,12 @@ import { Platform } from 'react-native';
 import * as Application from 'expo-application';
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
+import { storeSlot } from '../utils/storeSlot';
 
-const INSTALL_KEY = 'quatrivium.device.installId';
-const INSTALL_FALLBACK = 'quatrivium.device.installId.fallback';
-const BOUND_WALLET_KEY = 'quatrivium.device.boundWallet';
-const BOUND_FALLBACK = 'quatrivium.device.boundWallet.fallback';
+const INSTALL_KEY = storeSlot(['quatrivium', 'device', 'installId']);
+const INSTALL_FALLBACK = storeSlot(['quatrivium', 'device', 'installId', 'fallback']);
+const BOUND_WALLET_KEY = storeSlot(['quatrivium', 'device', 'boundWallet']);
+const BOUND_FALLBACK = storeSlot(['quatrivium', 'device', 'boundWallet', 'fallback']);
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 async function withLimit<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {

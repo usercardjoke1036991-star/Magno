@@ -327,7 +327,7 @@
   "networkMainnet": "BNB Smart Chain (mạng chính)",
   "networkTestnet": "BNB Smart Chain Testnet (Chapel)",
   "networkContract": "Hợp đồng đang chạy: {address}",
-  "networkNotMainnet": "Đây là testnet thật: giao dịch đến từ ví của bạn. Mạng chính cần CONFIRM_MAINNET=yes.",
+  "networkNotMainnet": "Chế độ thử nghiệm đang bật. Tiền trên mạng này không có giá trị thật.",
   "lockSettings": "Khóa ứng dụng",
   "lockSettingsLead": "The password encrypts the wallet. An optional 6-digit PIN opens the app day to day. After 5 failed tries there is a wait. If you forget the password, restore it with the account email.",
   "lockCreatePin": "Tạo PIN 6 chữ số",

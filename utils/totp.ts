@@ -101,7 +101,9 @@ export function bytesToBase32(bytes: Uint8Array): string {
 }
 
 export function base32ToBytes(secret: string): Uint8Array {
-  const clean = secret.toUpperCase().replace(/=+$/g, '').replace(/[^A-Z2-7]/g, '');
+  let clean = secret.toUpperCase();
+  while (clean.endsWith('=')) clean = clean.slice(0, -1);
+  clean = clean.replace(/[^A-Z2-7]/g, '');
   let bits = 0;
   let value = 0;
   const out: number[] = [];

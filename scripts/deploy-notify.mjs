@@ -4,7 +4,7 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawnEnv } from './spawnEnv.mjs';
 
 const root = resolve(process.cwd());
 
@@ -32,7 +32,8 @@ function fly(args, opts = {}) {
     cwd: root,
     stdio: opts.silent ? 'pipe' : 'inherit',
     encoding: 'utf8',
-    shell: true,
+    env: spawnEnv(),
+    shell: false,
   });
   if (result.status !== 0 && !opts.allowFail) {
     process.exit(result.status || 1);
@@ -40,14 +41,14 @@ function fly(args, opts = {}) {
   return result;
 }
 
-const flyctl = spawnSync('flyctl', ['version'], { encoding: 'utf8', shell: true });
+const flyctl = spawnSync('flyctl', ['version'], { encoding: 'utf8', env: spawnEnv() });
 if (flyctl.status !== 0) {
   console.error('Instale Fly: iwr https://fly.io/install.ps1 -useb | iex');
   console.error('Luego: flyctl auth login');
   process.exit(1);
 }
 
-const who = spawnSync('flyctl', ['auth', 'whoami'], { encoding: 'utf8', shell: true });
+const who = spawnSync('flyctl', ['auth', 'whoami'], { encoding: 'utf8', env: spawnEnv() });
 if (who.status !== 0) {
   console.error('Inicie sesión: flyctl auth login');
   process.exit(1);
@@ -100,14 +101,14 @@ if (!secrets.NOTIFY_DATA_KEY || String(secrets.NOTIFY_DATA_KEY).length < 16) {
   process.exit(1);
 }
 
-const apps = spawnSync('flyctl', ['apps', 'list'], { encoding: 'utf8', shell: true });
+const apps = spawnSync('flyctl', ['apps', 'list'], { encoding: 'utf8', env: spawnEnv() });
 if (!String(apps.stdout || '').includes('quatrivium-notify')) {
   fly(['apps', 'create', 'quatrivium-notify'], { allowFail: true });
 }
 
 const volumes = spawnSync('flyctl', ['volumes', 'list', '-a', 'quatrivium-notify'], {
   encoding: 'utf8',
-  shell: true,
+  env: spawnEnv(),
 });
 if (!String(volumes.stdout || '').includes('notify_data')) {
   fly(['volumes', 'create', 'notify_data', '--region', 'iad', '--size', '1', '-a', 'quatrivium-notify'], {

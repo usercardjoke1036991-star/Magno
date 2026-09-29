@@ -4,7 +4,7 @@
 set -uo pipefail
 . /etc/profile.d/cyber-tools.sh 2>/dev/null || true
 export PATH="/root/.foundry/bin:/root/.cyfrin/bin:/root/.cargo/bin:/root/.local/bin:/usr/local/bin:/opt/zaproxy:${PATH}"
-[ -f /root/.cargo/env ] && . /root/.cargo/env
+[[ -f /root/.cargo/env ]] && . /root/.cargo/env
 export SEMGREP_SEND_METRICS=off
 MAGNO=/mnt/c/CURSORPLANTILLA-BASE/Magno
 OUT=/root/cyber-scans/2026-09-16-live
@@ -32,7 +32,7 @@ aderyn "$MAGNO" \
   -o "$OUT/aderyn-report.md" \
   && echo ADERYN_OK | tee -a "$OUT/progress.txt" \
   || echo ADERYN_FAIL | tee -a "$OUT/progress.txt"
-if [ -f "$OUT/aderyn-report.md" ]; then
+if [[ -f "$OUT/aderyn-report.md" ]]; then
   wc -l "$OUT/aderyn-report.md" | tee -a "$OUT/progress.txt"
   sed -n '1,120p' "$OUT/aderyn-report.md" | tee "$OUT/aderyn-head.txt"
 fi
@@ -92,7 +92,7 @@ PY
 echo
 echo "===== 5 MYTHRIL $(date -Is) =====" | tee -a "$OUT/progress.txt"
 ART="$MAGNO/artifacts/contracts/QuatriviumCredit.sol/QuatriviumCredit.json"
-if [ -f "$ART" ]; then
+if [[ -f "$ART" ]]; then
   myth analyze "$ART" --execution-timeout 180 --max-depth 22 \
     2>&1 | tee "$OUT/mythril-credit.txt"
   echo MYTHRIL_CREDIT_EXIT:${PIPESTATUS[0]} | tee -a "$OUT/progress.txt"
@@ -100,7 +100,7 @@ else
   echo "MYTHRIL_SKIP no artifact $ART" | tee -a "$OUT/progress.txt"
 fi
 ART2="$MAGNO/artifacts/contracts/QuatriviumLeveling.sol/QuatriviumLeveling.json"
-if [ -f "$ART2" ]; then
+if [[ -f "$ART2" ]]; then
   myth analyze "$ART2" --execution-timeout 120 --max-depth 18 \
     2>&1 | tee "$OUT/mythril-leveling.txt"
   echo MYTHRIL_LEVELING_EXIT:${PIPESTATUS[0]} | tee -a "$OUT/progress.txt"

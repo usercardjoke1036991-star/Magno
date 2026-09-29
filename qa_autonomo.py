@@ -17,6 +17,7 @@ import subprocess
 import ast
 import re
 from pathlib import Path
+from qa_safe_io import confine
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -85,7 +86,7 @@ def detectar_tipo_proyecto(directorio: str) -> str:
     Detecta el tipo de proyecto analizando archivos indicadores.
     Retorna una cadena que identifica el tipo (ej: 'python', 'android', 'mql5').
     """
-    d = Path(directorio)
+    d = confine(directorio)
 
     # Android
     if (d / "build.gradle").exists() or (d / "build.gradle.kts").exists():
@@ -546,7 +547,7 @@ def _verificar_secretos(directorio: str, reporte: ReporteQA, extensiones: list[s
 
 def _verificar_gitignore(directorio: str, reporte: ReporteQA):
     """Verifica que .gitignore excluya archivos sensibles."""
-    d = Path(directorio)
+    d = confine(directorio)
     gitignore = d / ".gitignore"
 
     if not gitignore.exists():
@@ -627,6 +628,7 @@ def verificar_errores_aprendidos(directorio: str, reporte: "ReporteQA"):
       3. Reporta coincidencias respetando la severidad del patrón.
       4. Incrementa veces_detectado en el JSON cuando detecta un match.
     """
+    directorio = str(confine(directorio))
     ruta_json = _encontrar_errores_json(directorio)
     if ruta_json is None:
         # No bloquear: el JSON es opcional (subproyectos recién creados pueden no tenerlo)
@@ -706,6 +708,7 @@ def verificar_errores_aprendidos(directorio: str, reporte: "ReporteQA"):
     if patrones_actualizados:
         try:
             datos["patrones"] = patrones
+            ruta_json = confine(ruta_json)
             ruta_json.write_text(
                 json.dumps(datos, ensure_ascii=False, indent=2),
                 encoding="utf-8"

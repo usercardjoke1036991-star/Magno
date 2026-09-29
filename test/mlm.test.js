@@ -8,6 +8,7 @@ const {
   assertNavInvariant,
   attestIdentity,
   drainToken,
+  expectAmt,
 } = require('./helpers.cjs');
 
 const FUNDADOR_BP = 1500n;
@@ -87,11 +88,11 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     const gen3 = (debt.interes * GEN_BP[2]) / 10000n;
     const poolShare = debt.interes - founderCut - bono - gen2 - gen3;
 
-    expect((await token.balanceOf(padre.address)) - padreBefore).to.equal(bono);
-    expect((await token.balanceOf(abuelo.address)) - abueloBefore).to.equal(gen2);
-    expect((await token.balanceOf(owner.address)) - founderBefore).to.equal(founderCut + gen3);
-    expect((await contract.totalLiquidity(tokenAddr)) - liqBefore).to.equal(poolShare);
-    expect(founderCut + bono + gen2 + gen3 + poolShare).to.equal(debt.interes);
+    expectAmt((await token.balanceOf(padre.address)) - padreBefore, bono);
+    expectAmt((await token.balanceOf(abuelo.address)) - abueloBefore, gen2);
+    expectAmt((await token.balanceOf(owner.address)) - founderBefore, founderCut + gen3);
+    expectAmt((await contract.totalLiquidity(tokenAddr)) - liqBefore, poolShare);
+    expectAmt(founderCut + bono + gen2 + gen3 + poolShare, debt.interes);
     expect((await contract.redGenealogica(user.address)).bonoActivacionCobrado).to.equal(true);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
@@ -107,8 +108,9 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     const bono = await contract.BONO_ACTIVACION();
     const founderCut = corteFundador(debt.interes);
 
-    expect((await token.balanceOf(owner.address)) - founderBefore).to.equal(founderCut + bono);
-    expect((await contract.totalLiquidity(tokenAddr)) - liqBefore).to.equal(
+    expectAmt((await token.balanceOf(owner.address)) - founderBefore, founderCut + bono);
+    expectAmt(
+      (await contract.totalLiquidity(tokenAddr)) - liqBefore,
       debt.interes - founderCut - bono
     );
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
@@ -146,14 +148,14 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     const gen6ToRoot = (interes * 80n) / 10000n;
     const poolShare = interes - founderCut - expected.reduce((a, b) => a + b, 0n) - gen6ToRoot;
 
-    expect((await token.balanceOf(g1.address)) - before[0]).to.equal(expected[0]);
-    expect((await token.balanceOf(g2.address)) - before[1]).to.equal(expected[1]);
-    expect((await token.balanceOf(g3.address)) - before[2]).to.equal(expected[2]);
-    expect((await token.balanceOf(g4.address)) - before[3]).to.equal(expected[3]);
-    expect((await token.balanceOf(g5.address)) - before[4]).to.equal(expected[4]);
-    expect((await token.balanceOf(owner.address)) - before[5]).to.equal(founderCut + gen6ToRoot);
-    expect((await contract.totalLiquidity(tokenAddr)) - before[6]).to.equal(poolShare);
-    expect(founderCut + expected.reduce((a, b) => a + b, 0n) + gen6ToRoot + poolShare).to.equal(interes);
+    expectAmt((await token.balanceOf(g1.address)) - before[0], expected[0]);
+    expectAmt((await token.balanceOf(g2.address)) - before[1], expected[1]);
+    expectAmt((await token.balanceOf(g3.address)) - before[2], expected[2]);
+    expectAmt((await token.balanceOf(g4.address)) - before[3], expected[3]);
+    expectAmt((await token.balanceOf(g5.address)) - before[4], expected[4]);
+    expectAmt((await token.balanceOf(owner.address)) - before[5], founderCut + gen6ToRoot);
+    expectAmt((await contract.totalLiquidity(tokenAddr)) - before[6], poolShare);
+    expectAmt(founderCut + expected.reduce((a, b) => a + b, 0n) + gen6ToRoot + poolShare, interes);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 
@@ -182,8 +184,9 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     const gen7ToRoot = (interes * 80n) / 10000n;
     const poolShare = (await contract.totalLiquidity(tokenAddr)) - liqBefore;
 
-    expect((await token.balanceOf(g6.address)) - g6Before).to.equal(gen6Share);
-    expect((await token.balanceOf(owner.address)) - ownerBefore).to.equal(
+    expectAmt((await token.balanceOf(g6.address)) - g6Before, gen6Share);
+    expectAmt(
+      (await token.balanceOf(owner.address)) - ownerBefore,
       corteFundador(interes) + gen7ToRoot
     );
     expect(poolShare).to.be.gte((interes * 4000n) / 10000n);
@@ -208,8 +211,8 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     const founderCut = corteFundador(debt.interes);
     const bono = await contract.BONO_ACTIVACION();
 
-    expect((await token.balanceOf(extraAddr)) - extraBefore).to.equal(founderCut);
-    expect((await token.balanceOf(owner.address)) - ownerBefore).to.equal(bono);
+    expectAmt((await token.balanceOf(extraAddr)) - extraBefore, founderCut);
+    expectAmt((await token.balanceOf(owner.address)) - ownerBefore, bono);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 
@@ -242,7 +245,7 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     await contract.connect(user).pagarPrestamo(tokenAddr, lateDebt.total);
 
     const bono = await contract.BONO_ACTIVACION();
-    expect((await token.balanceOf(padre.address)) - padreBefore).to.equal(bono);
+    expectAmt((await token.balanceOf(padre.address)) - padreBefore, bono);
     expect((await contract.redGenealogica(user.address)).bonoActivacionCobrado).to.equal(true);
     expect(await contract.dispersionCongelada(user.address)).to.equal(false);
 
@@ -250,7 +253,8 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     await token.mint(user.address, ethers.parseUnits('2', 18));
     const padreMid = await token.balanceOf(padre.address);
     const next = await borrowAndPay(contract, token, user, tokenAddr);
-    expect((await token.balanceOf(padre.address)) - padreMid).to.equal(
+    expectAmt(
+      (await token.balanceOf(padre.address)) - padreMid,
       (next.interes * GEN_BP[0]) / 10000n
     );
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);

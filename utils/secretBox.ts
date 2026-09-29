@@ -1,4 +1,5 @@
 import { concat, getBytes, hexlify, randomBytes, sha256, toUtf8Bytes, toUtf8String, type BytesLike } from 'ethers';
+import { storeSlot } from './storeSlot';
 
 export function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
   if (a.length !== b.length) return false;
@@ -94,7 +95,7 @@ export function isSealedBlob(raw: string): boolean {
 
 export function sealSecret(plaintext: string, wrapKeyHex: string): string {
   const key = getBytes(wrapKeyHex);
-  const macKey = hmacSha256(key, toUtf8Bytes('quatrivium.mac.v1'));
+  const macKey = hmacSha256(key, toUtf8Bytes(storeSlot(['quatrivium', 'mac', 'v1'])));
   const iv = randomBytes(16);
   const plain = toUtf8Bytes(plaintext);
   const ks = keystream(key, iv, plain.length);
@@ -113,7 +114,7 @@ export function openSecret(blob: string, wrapKeyHex: string): string {
     throw new Error('seal');
   }
   const key = getBytes(wrapKeyHex);
-  const macKey = hmacSha256(key, toUtf8Bytes('quatrivium.mac.v1'));
+  const macKey = hmacSha256(key, toUtf8Bytes(storeSlot(['quatrivium', 'mac', 'v1'])));
   const iv = getBytes(parsed.iv);
   const ct = getBytes(parsed.ct);
   const mac = getBytes(parsed.mac);

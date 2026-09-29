@@ -1,4 +1,5 @@
 import { addressToInviteCode, parseInviteInput } from './inviteCode';
+import { storeSlot } from './storeSlot';
 
 export type LockedSponsor = {
   v: 1;
@@ -11,7 +12,7 @@ export type SponsorResolve =
   | { ok: true; code: string; padre: string }
   | { ok: false; reason: 'invalid' | 'self' };
 
-export const SPONSOR_LOCK_PREFIX = 'quatrivium.sponsor.lock.';
+export const SPONSOR_LOCK_PREFIX = `${storeSlot(['quatrivium', 'sponsor', 'lock'])}.`;
 
 export function sponsorLockKey(wallet: string): string {
   return `${SPONSOR_LOCK_PREFIX}${String(wallet || '').trim().toLowerCase()}`;

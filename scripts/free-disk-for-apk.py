@@ -70,16 +70,10 @@ def remove_path(path: Path, reason: str) -> None:
 
 
 def main() -> None:
-    temp = Path(os.environ.get("TEMP") or os.environ.get("TMP") or r"C:\Users\Vexor\AppData\Local\Temp")
-    local_temp = Path(os.environ.get("LOCALAPPDATA", "")) / "Temp"
-    magno = Path(r"C:\CURSORPLANTILLA-BASE\Magno")
-    now = time.time()
-    day = 24 * 3600
+    magno = Path(__file__).resolve().parents[1]
 
     android_app_build = magno / "android" / "app" / "build"
     targets = [
-        temp / "cursor-sandbox-cache",
-        temp / "hsperfdata_Vexor",
         magno / "artifacts",
         magno / "cache",
         magno / "forge-out",
@@ -95,45 +89,9 @@ def main() -> None:
         android_app_build / "generated",
         android_app_build / "kotlin",
         magno / "node_modules" / ".cache",
-        Path(r"C:\Users\Vexor\.cursor\projects\c-CURSORPLANTILLA-BASE-Magno\agent-tools"),
-        Path(os.environ.get("LOCALAPPDATA", "")) / "npm-cache",
     ]
     for item in targets:
         remove_path(item, "cache")
-
-    # Gradle sandbox leftover under Temp (the failed 260-char path). Do NOT wipe %USERPROFILE%\.gradle.
-    for child in temp.iterdir() if temp.exists() else []:
-        name = child.name.lower()
-        if name.startswith("cursor-sandbox") or name.startswith("gradle-") or name == "kotlin-compiler":
-            remove_path(child, "temp-gradle")
-            continue
-        if name.startswith("npm-") or name.startswith("yarn-") or name.startswith("metro-"):
-            remove_path(child, "temp-tool")
-            continue
-        if name.startswith("vscode-") or name.startswith("is-") or name.startswith("jna-"):
-            remove_path(child, "temp-installer")
-            continue
-        if name in {"diagoutputdir", "node-compile-cache", "v8-compile-cache"}:
-            remove_path(child, "temp-cache")
-            continue
-        if name.endswith((".apk", ".log", ".dump", ".js")):
-            remove_path(child, "temp-file")
-            continue
-        # Windows GUID extract leftovers (installer/update staging)
-        if len(name) == 36 and name.count("-") == 4:
-            remove_path(child, "temp-guid")
-            continue
-        # Old unlocked files > 1 day
-        try:
-            age = now - child.stat().st_mtime
-        except OSError:
-            continue
-        if child.is_file() and age > day and child.suffix.lower() in {".tmp", ".log", ".etl", ".dmp", ".zip"}:
-            remove_path(child, "stale-temp")
-
-    if local_temp.exists() and local_temp.resolve() != temp.resolve():
-        sand = local_temp / "cursor-sandbox-cache"
-        remove_path(sand, "localapp-sandbox")
 
     print(f"FREED_MB {FREED / (1024 * 1024):.1f}")
     print(f"SKIPPED {SKIPPED}")

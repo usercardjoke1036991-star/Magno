@@ -3,8 +3,9 @@ import * as SecureStore from 'expo-secure-store';
 import { isAuthenticatorEnabled } from './authenticator';
 import { getBiometricStatus, isBiometricEnabled, isPinSet } from './appLock';
 import { isEmailVerified } from './accountEmail';
+import { storeSlot } from '../utils/storeSlot';
 
-const KEY = 'qc_auth_prefs_v2';
+const KEY = storeSlot(['qc', 'auth', 'prefs', 'v2'], '_');
 const LEGACY = 'qc_auth_prefs_v1';
 const KEY_FALLBACK = 'qc_auth_prefs_v2.fallback';
 

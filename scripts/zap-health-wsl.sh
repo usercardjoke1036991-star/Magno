@@ -35,7 +35,7 @@ done
 echo HEALTH_OK=$ok
 cat /tmp/notify-zap/health.json 2>/dev/null || true
 echo
-if [ "$ok" != 1 ]; then
+if [[ "$ok" != 1 ]]; then
   echo WORKER_LOG
   tail -n 80 /tmp/notify-zap/out.log || true
 fi

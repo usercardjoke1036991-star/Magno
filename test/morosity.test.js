@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { deployProtocol, seedPool, registerAndFund, drainToken, attestIdentity } = require('./helpers.cjs');
+const { deployProtocol, seedPool, registerAndFund, drainToken, attestIdentity, expectAmt } = require('./helpers.cjs');
 
 async function advanceCooldown() {
   await ethers.provider.send('evm_increaseTime', [48 * 60 * 60]);
@@ -99,7 +99,7 @@ describe('QuatriviumCredit - Morosity', function () {
     const debt = await contract.obtenerDeuda(user.address);
     await contract.connect(user).pagarPrestamo(tokenAddr, debt.total);
 
-    expect((await token.balanceOf(padre.address)) - padreBefore).to.equal(0n);
+    expectAmt((await token.balanceOf(padre.address)) - padreBefore, 0n);
     expect((await contract.totalLiquidity(tokenAddr)) - liqBefore).to.be.gt(0n);
   });
 

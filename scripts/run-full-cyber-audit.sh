@@ -3,7 +3,7 @@
 set +e
 . /etc/profile.d/cyber-tools.sh 2>/dev/null || true
 export PATH="/root/.foundry/bin:/root/.cyfrin/bin:/root/.cargo/bin:/root/.local/bin:/usr/local/bin:/opt/zaproxy:/usr/bin:${PATH}"
-[ -f /root/.cargo/env ] && . /root/.cargo/env
+[[ -f /root/.cargo/env ]] && . /root/.cargo/env
 export SEMGREP_SEND_METRICS=off
 MAGNO=/mnt/c/CURSORPLANTILLA-BASE/Magno
 # Una carpeta por día: dos auditorías distintas no se pisan los resultados.
@@ -108,7 +108,7 @@ SEMGREP_STATUS=$?
 echo SEMGREP_EXIT:$SEMGREP_STATUS | tee -a "$OUT/progress.txt"
 # 0 = sin hallazgos, 1 = con hallazgos. Cualquier otro código significa que no analizó:
 # "0 hallazgos" ahí sería un verde falso.
-if [ "$SEMGREP_STATUS" -gt 1 ]; then
+if [[ "$SEMGREP_STATUS" -gt 1 ]]; then
   echo "SEMGREP_DID_NOT_RUN status=$SEMGREP_STATUS" | tee -a "$OUT/progress.txt"
 fi
 python3 - <<'PY' || true
@@ -132,11 +132,11 @@ if want mythril; then
 echo "===== 6 MYTHRIL $(date -Is) =====" | tee -a "$OUT/progress.txt"
 # Sobre bytecode de ejecución, no sobre fuente: `myth analyze artifact.json` exige solc en PATH
 # y aquí solc solo existe dentro de .svm de Foundry.
-[ -x /root/.svm/0.8.24/solc-0.8.24 ] && export SOLC=/root/.svm/0.8.24/solc-0.8.24
+[[ -x /root/.svm/0.8.24/solc-0.8.24 ]] && export SOLC=/root/.svm/0.8.24/solc-0.8.24
 
 myth_runtime() {
   local artifact="$1" bin="$2" out="$3" timeout_s="$4" depth="$5" label="$6"
-  if [ ! -f "$artifact" ]; then
+  if [[ ! -f "$artifact" ]]; then
     echo "MYTHRIL_SKIP_${label} no artifact" | tee -a "$OUT/progress.txt"
     return
   fi

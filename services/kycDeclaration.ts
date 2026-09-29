@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { File, Paths } from 'expo-file-system';
 import { keccak256, toUtf8Bytes } from 'ethers';
 import { stripUnsafeText } from '../utils/sanitize';
+import { storeSlot } from '../utils/storeSlot';
 
 export type KycDocType = 'nationalId' | 'passport' | 'other';
 
@@ -22,8 +23,8 @@ export interface KycDeclaration {
 
 export type KycIdentitySnapshot = Pick<KycDeclaration, 'legalName' | 'country' | 'city' | 'docType'>;
 
-const PREFIX = 'quatrivium.kyc.';
-const PHOTO_KEY = 'quatrivium.kyc.photo.v1:';
+const PREFIX = `${storeSlot(['quatrivium', 'kyc'])}.`;
+const PHOTO_KEY = `${storeSlot(['quatrivium', 'kyc', 'photo', 'v1'])}:`;
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 function walletKey(wallet: string): string {
@@ -59,7 +60,7 @@ function safeDocType(value: unknown): KycDocType {
 
 export function kycIdentitySource(wallet: string, snapshot: KycIdentitySnapshot): string {
   return [
-    'quatrivium.kyc.fp.v1',
+    storeSlot(['quatrivium', 'kyc', 'fp', 'v1']),
     walletKey(wallet),
     normalizeLegalName(snapshot.legalName),
     normalizeCountry(snapshot.country),

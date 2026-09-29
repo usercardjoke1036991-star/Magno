@@ -1,10 +1,19 @@
 from pathlib import Path
-import os
 import re
 import sys
+from qa_safe_io import ROOT, confine
 
-default = Path(os.environ.get("CYBER_OUT", "/root/cyber-scans")) / "zap-health.html"
-p = Path(sys.argv[1]) if len(sys.argv) > 1 else default
+if len(sys.argv) > 1:
+    raw = Path(sys.argv[1])
+    try:
+        p = confine(raw)
+    except ValueError:
+        text = str(raw.resolve()).replace("\\", "/")
+        if not text.startswith("/root/cyber-scans/"):
+            raise
+        p = raw
+else:
+    p = ROOT / "zap-health.html"
 t = p.read_text(encoding="utf-8", errors="replace")
 print("size", p.stat().st_size)
 for m in re.finditer(r"<td[^>]*>(High|Medium|Low|Informational)</td>\s*<td[^>]*>(\d+)</td>", t, re.I):

@@ -327,7 +327,7 @@
   "networkMainnet": "BNB Smart Chain(메인넷)",
   "networkTestnet": "BNB Smart Chain 테스트넷(Chapel)",
   "networkContract": "실제 컨트랙트: {address}",
-  "networkNotMainnet": "실제 테스트넷입니다. 거래는 지갑에서 나갑니다. 메인넷에는 CONFIRM_MAINNET=yes가 필요합니다.",
+  "networkNotMainnet": "테스트 모드가 켜져 있습니다. 이 네트워크의 자금은 실가치가 없습니다.",
   "lockSettings": "앱 잠금",
   "lockSettingsLead": "The password encrypts the wallet. An optional 6-digit PIN opens the app day to day. After 5 failed tries there is a wait. If you forget the password, restore it with the account email.",
   "lockCreatePin": "6자리 PIN 만들기",

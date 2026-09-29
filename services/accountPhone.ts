@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { storeSlot } from '../utils/storeSlot';
 import { isValidPhone, normalizePhone } from './notificationProfile';
 
-const PHONE_KEY = 'quatrivium.account.phone';
-const PHONE_FALLBACK = 'quatrivium.account.phone.fallback';
-const ACTIVE_KEY = 'quatrivium.account.phone.active';
-const ACTIVE_FALLBACK = 'quatrivium.account.phone.active.fallback';
+const PHONE_KEY = storeSlot(['quatrivium', 'account', 'phone']);
+const PHONE_FALLBACK = storeSlot(['quatrivium', 'account', 'phone', 'fallback']);
+const ACTIVE_KEY = storeSlot(['quatrivium', 'account', 'phone', 'active']);
+const ACTIVE_FALLBACK = storeSlot(['quatrivium', 'account', 'phone', 'active', 'fallback']);
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 async function withLimit<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {

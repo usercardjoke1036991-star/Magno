@@ -22,7 +22,7 @@ function parseAdmins(deployerAddress) {
   }
   const admins = unique.length > 0 ? unique : [deployerAddress];
   const confirms = Math.min(
-    Math.max(parseInt(process.env.REQUIRED_CONFIRMATIONS || (admins.length > 1 ? '2' : '1'), 10), 1),
+    Math.max(Number.parseInt(process.env.REQUIRED_CONFIRMATIONS || (admins.length > 1 ? '2' : '1'), 10), 1),
     admins.length
   );
   return { admins, confirms };

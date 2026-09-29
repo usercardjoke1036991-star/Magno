@@ -6,6 +6,7 @@ const {
   registerAndFund,
   proposeAndExecute,
   assertNavInvariant,
+  expectAmt,
 } = require('./helpers.cjs');
 
 function montoCuota(total, pagado, totales, pagadas) {
@@ -117,7 +118,7 @@ describe('QuatriviumCredit - cuotas desde $50', function () {
       montoCuota(midDebt.total, mid.pagado, mid.totales, mid.pagadas)
     );
     const afterAll = await token.balanceOf(padre.address);
-    expect(afterAll - padreBefore).to.equal(fullShare);
+    expectAmt(afterAll - padreBefore, fullShare);
   });
 
   it('lets an unlocked user keep requesting any lower level and rejects locked levels', async () => {
