@@ -155,6 +155,7 @@
   - `confine_read()`
   - `confine_write()`
   - `write_under()`
+  - `resto_bullet_estado()`
 - `reestructurar_peticion.py`
   - `resolver_directorio()`
   - `normalizar()`

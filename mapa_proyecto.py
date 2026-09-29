@@ -30,6 +30,8 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
+from qa_safe_io import resto_bullet_estado
+
 # Forzar UTF-8 en Windows (ERR-003: reconfigure + hasattr, no TextIOWrapper)
 if sys.platform == "win32":
     try:
@@ -91,7 +93,6 @@ _RE_ARCHIVO = re.compile(
 _RE_ARBOL = re.compile(
     rf"[├└]──\s+([A-Za-z0-9][A-Za-z0-9_.-]{{0,80}}\.(?:{_EXTS_DOC}))(?![\w])"
 )
-_RE_ESTADO = re.compile(r"^[\s]*[-*]\s+[✅🔄]\s+(.+)$")
 _PLACEHOLDERS = ("[descripción", "[describe", "[añadir", "[agregar")
 
 _SCRIPTS_SUBCHECK = (
@@ -445,9 +446,9 @@ def _extraer_mencionados(texto: str) -> list[tuple[str, int]]:
         if strip.startswith("##"):
             en_tabla = ("Módulos" in strip) or ("Modulos" in strip)
         candidatos: list[str] = []
-        m_est = _RE_ESTADO.match(linea)
-        if m_est:
-            resto = m_est.group(1).strip().strip("`")
+        resto_est = resto_bullet_estado(linea)
+        if resto_est:
+            resto = resto_est.strip().strip("`")
             primer = re.split(r"[\s—–]+", resto, maxsplit=1)[0].strip("`")
             if primer and (Path(primer).suffix or "/" in primer):
                 candidatos.append(primer)

@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] Hay dos nombres distintos: el de inicio de sesion va cifrado en el celular y no se edita; el anonimo lo ve la red, se elige una vez y no es el mismo.
 
 ## Cambios realizados
+- [2026-09-29] Cierra los 10 issues restantes de SonarCloud Magno (bigint tests, I/O kit, spawn pytest, regex).
 - [2026-09-29] Corrige hallazgos SonarCloud Magno (paths, spawn, regex, tests MLM, Telegram) y sube a GitHub.
 - [2026-09-18] Auditoria PDF MobSF descsdsadarga.pdf: APK 35CADA22 1.0.2 vc4, 61/100 A. HIGH=huella CBC (se mantiene). Sin exp+/Twilio/claves. Corregido networkNotMainnet en 15 idiomas (ya no filtra CONFIRM_MAINNET). Hardhat verde. Real sigue sin contrato mainnet.
 - [2026-09-18] APK release 1.0.2 versionCode 4 para MobSF local: Escritorio Quatrivium-Finance-MobSF.apk (67.29 MB, SHA256 35CADA22F7FB85C733A4898FE0E876244A0D45A78FD354B16ECD039A4125EFD7, v3 CN=Quatrivium Finance, sin exp+, arm-only). No se reinstalo en Xiaomi. Liberados ~1.6 GB de Temp/NDK/Gradle residual.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Docker Desktop 4.91 reinstalado; MobSF local en 127.0.0.1:8000 (contenedor mobsf). El APK no se sube a mobsf.live.
 - [2026-09-16] APK release 1.0.1 arm-only firmado v3 SHA-256 CN=Quatrivium Finance copiado a Desktop Quatrivium-Finance-MobSF.apk (67.20 MB, SHA256 2e1e987a...)
 - [2026-09-16] Auditoria MobSF PDF 61/100 A: el HIGH CBC es androidx.biometric CryptoObjectUtils (huella), no el credito. Version 1.0.1, R8 sin logs, APK release sin x86. No se regenero APK: C: tiene 2.4 GB libres.
-- [2026-09-16] MobSF 53/100 del APK release: se quito certificado debug/SHA1 (keystore SHA256 Quatrivium), receivers exportados de Firebase IID y ProfileInstaller, permisos badge/wifi/huella legado. Nuevo APK en el Escritorio. El HIGH CBC PKCS7 es de una libreria ofuscada, no del credito.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-29] Cambio: Corrige hallazgos SonarCloud Magno (paths, spawn, regex, tests MLM, Telegram) y sube a GitHub.
+[2026-09-29] Cambio: Cierra los 10 issues restantes de SonarCloud Magno (bigint tests, I/O kit, spawn pytest, regex).

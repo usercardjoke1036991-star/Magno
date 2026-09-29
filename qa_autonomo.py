@@ -17,7 +17,7 @@ import subprocess
 import ast
 import re
 from pathlib import Path
-from qa_safe_io import confine
+from qa_safe_io import confine, confine_write
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -708,12 +708,11 @@ def verificar_errores_aprendidos(directorio: str, reporte: "ReporteQA"):
     if patrones_actualizados:
         try:
             datos["patrones"] = patrones
-            ruta_json = confine(ruta_json)
-            ruta_json.write_text(
+            confine_write(
+                ruta_json,
                 json.dumps(datos, ensure_ascii=False, indent=2),
-                encoding="utf-8"
             )
-        except OSError:
+        except (OSError, ValueError):
             pass  # No crítico: fallo silencioso al actualizar contadores
 
     if not hubo_deteccion and patrones:

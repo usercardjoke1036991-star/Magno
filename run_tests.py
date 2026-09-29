@@ -29,6 +29,7 @@ import subprocess
 import time
 from pathlib import Path
 from dataclasses import dataclass, field
+from qa_safe_io import confine
 
 # ─── Forzar UTF-8 en Windows ───────────────────────────────────────────────
 if sys.platform == "win32":
@@ -112,6 +113,14 @@ _TIMEOUT_TESTS_ALL = 60       # segundos máximo por proyecto en modo --all
 _TIMEOUT_TESTS_FAST = 30      # segundos máximo en modo --fast (falla rápido)
 
 
+_ALLOWED_EXE = frozenset({
+    "python", "python.exe", "python3", "python3.exe",
+    "npm", "npm.cmd", "npx", "npx.cmd",
+    "node", "node.exe",
+    "gradlew", "gradlew.bat",
+})
+
+
 def _ejecutar_comando(
     cmd: list[str],
     cwd: str,
@@ -123,20 +132,41 @@ def _ejecutar_comando(
     Maneja timeout y FileNotFoundError de forma segura.
     `env_extra` permite añadir/sobreescribir variables de entorno (ej: CI=true).
     """
+    try:
+        workdir = os.fspath(confine(cwd))
+    except ValueError:
+        return 1, "directorio fuera del proyecto"
+
+    if not cmd:
+        return 1, "comando vacio"
+
+    argv = list(cmd)
+    head = argv[0]
+    exe_name = os.path.basename(head).lower()
+    if os.path.normcase(os.path.abspath(head)) != os.path.normcase(sys.executable):
+        if exe_name not in _ALLOWED_EXE:
+            return 1, "comando no permitido"
+        if exe_name.startswith("gradlew"):
+            try:
+                argv[0] = os.fspath(confine(head))
+            except ValueError:
+                return 1, "comando no permitido"
+
     env = os.environ.copy()
     if env_extra:
         env.update(env_extra)
 
     try:
         result = subprocess.run(
-            cmd,
+            argv,
             capture_output=True,
             text=True,
-            cwd=cwd,
+            cwd=workdir,
             timeout=timeout,
             encoding="utf-8",
             errors="replace",
             env=env,
+            shell=False,
         )
         output = (result.stdout + result.stderr).strip()
         return result.returncode, output
@@ -154,9 +184,9 @@ def _parsear_resumen_pytest(output: str) -> tuple[int, int]:
     """
     import re
     passed = total = 0
-    m_passed = re.search(r"(\d+) passed", output)
-    m_failed = re.search(r"(\d+) failed", output)
-    m_error = re.search(r"(\d+) error", output)
+    m_passed = re.search(r"([0-9]{1,8}) passed", output)
+    m_failed = re.search(r"([0-9]{1,8}) failed", output)
+    m_error = re.search(r"([0-9]{1,8}) error", output)
 
     if m_passed:
         passed = int(m_passed.group(1))

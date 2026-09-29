@@ -43,7 +43,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `qa_autonomo.py` — módulo Python
   - Funciones/clases: ResultadoQA, ReporteQA, detectar_tipo_proyecto, verificar_python, verificar_mql5, verificar_nodejs, verificar_android, verificar_rust, verificar_go, _iterar_archivos_auditables, _obtener_raices_subproyectos, _es_subproyecto, _verificar_secretos, _verificar_gitignore, verificar_ci, verificar_readme, _encontrar_errores_json, verificar_errores_aprendidos, verificar_logica, verificar_conectores_sueltos, verificar_modulos_proyecto, verificar_mapa_proyecto, ejecutar_qa, imprimir_reporte, main
 - `qa_safe_io.py` — módulo Python
-  - Funciones/clases: confine, confine_read, confine_write, write_under
+  - Funciones/clases: confine, confine_read, confine_write, write_under, resto_bullet_estado
 - `reestructurar_peticion.py` — módulo Python
   - Funciones/clases: resolver_directorio, normalizar, _contiene_patron, detectar_intencion, detectar_tipo_proyecto, habla_espanol, _primera_linea_util, leer_contexto_una_linea, inferir_alcance, sugerir_herramientas, inferir_entregable, reformular_objetivo, construir_restricciones, construir_prompt_agente, PromptProfesional, reestructurar, formatear_texto, formatear_json, _parse_args, _resolver_texto, main
 - `run_tests.py` — módulo Python

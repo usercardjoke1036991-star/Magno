@@ -60,3 +60,15 @@ def write_under(directory: Path | str, filename: str, text: str, encoding: str =
     with open(dest, "w", encoding=encoding, newline="\n") as fh:
         fh.write(text)
     return Path(dest)
+
+
+def resto_bullet_estado(linea: str) -> str | None:
+    """Texto tras '- ✅' o '- 🔄' sin regex (evita S8786)."""
+    s = linea.lstrip(" \t")
+    if not s or s[0] not in "-*":
+        return None
+    s = s[1:].lstrip(" \t")
+    if not s or s[0] not in "✅🔄":
+        return None
+    return s[1:].lstrip(" \t")
+

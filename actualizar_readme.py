@@ -20,7 +20,7 @@ import importlib.util
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from qa_safe_io import confine
+from qa_safe_io import confine, confine_read, confine_write
 from typing import Any, Optional
 
 # ERR-003: no reemplazar sys.stdout; usar reconfigure si existe
@@ -157,17 +157,17 @@ def _leer_texto(ruta: Path) -> Optional[str]:
         ruta = confine(ruta)
         if not ruta.exists() or not ruta.is_file():
             return None
-        return ruta.read_text(encoding="utf-8", errors="replace")
-    except OSError:
+        return confine_read(ruta)
+    except (OSError, ValueError):
         return None
 
 
 def _escribir_texto(ruta: Path, contenido: str) -> bool:
     """Escribe UTF-8. Retorna False si falla."""
     try:
-        confine(ruta).write_text(contenido, encoding="utf-8")
+        confine_write(ruta, contenido)
         return True
-    except OSError as e:
+    except (OSError, ValueError) as e:
         print(f"❌ Error escribiendo {ruta}: {e}", file=sys.stderr)
         return False
 

@@ -256,6 +256,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-29 | Quality Gate Magno: corrige S5845, S2083, S8705 y S8786 que quedaron tras el analisis 02:43. | — |
 | 2026-09-29 | Correccion SonarCloud de los 26 issues del analisis 29-sep y Quality Gate de codigo nuevo. | — |
 | 2026-09-18 | Auditoria PDF MobSF descsdsadarga.pdf del APK 35CADA22 (1.0.2 vc4): 61/100 Grade A. HIGH=AES/CBC de huella androidx.biometric (se mantiene). 0 exportados, sin exp+, sin HTTP claro, OFAC vacio, sin Twilio/claves. I18n: 15 idiomas ya no muestran CONFIRM_MAINNET. Hardhat 178. Falta mainnet. | — |
 | 2026-09-18 | APK release 1.0.2 versionCode 4 en Escritorio Quatrivium-Finance-MobSF.apk (67.29 MB, SHA256 35CADA22…, v3 CN=Quatrivium Finance, sin esquema exp+). Escanear solo en localhost:8000. No se reinstalo en Xiaomi. | — |

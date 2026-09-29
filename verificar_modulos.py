@@ -27,6 +27,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from qa_safe_io import resto_bullet_estado
+
 # Forzar UTF-8 en Windows (ERR-003: reconfigure + hasattr, no TextIOWrapper)
 if sys.platform == "win32":
     try:
@@ -70,7 +72,6 @@ _JS_RESOLVE = (
     "/index.js", "/index.jsx", "/index.ts", "/index.tsx",
 )
 
-_RE_DOC_ESTADO = re.compile(r"^[ \t]*[-*][ \t]+[✅🔄][ \t]+(.+)$")
 # Extensiones largas primero para no cortar .json como .js
 _RE_ARCHIVO_DOC = re.compile(
     r"(?<![\w./])("
@@ -288,9 +289,9 @@ def _extraer_modulos_documentados(texto: str) -> list[tuple[str, int]]:
             en_tabla_modulos = ("Módulos" in strip) or ("Modulos" in strip)
 
         candidatos: list[str] = []
-        m_estado = _RE_DOC_ESTADO.match(linea)
-        if m_estado:
-            resto = m_estado.group(1).strip().strip("`")
+        resto_est = resto_bullet_estado(linea)
+        if resto_est:
+            resto = resto_est.strip().strip("`")
             primer = re.split(r"[\s—–]+", resto, maxsplit=1)[0].strip("`")
             if primer and (Path(primer).suffix or primer.endswith("/") or "/" in primer):
                 candidatos.append(primer)
