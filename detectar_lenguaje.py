@@ -108,7 +108,7 @@ _RE_EXPORT_JS_CONST = re.compile(r"export\s+(?:const|let|var)\s+(\w+)")
 _RE_EXPORT_JS_COMMON = re.compile(r"exports\.(\w+)\s*=")
 _RE_EXPORT_JS_DEFAULT = re.compile(r"export\s+default\s+(\w+)")
 _RE_ACTIVITY = re.compile(
-    r"""android:name\s*=\s*['"]([^'"]*Activity[^'"]*)['"]""",
+    r"""android:name\s*=\s*['"]([^'"]{0,180}Activity[^'"]{0,80})['"]""",
     re.IGNORECASE,
 )
 _RE_RUST_FN = re.compile(

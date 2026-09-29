@@ -7,11 +7,12 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stripTrailSlash } from './spawnEnv.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 loadDotEnv(resolve(root, '.env'));
 
-const host = String(process.env.SONAR_HOST_URL || 'https://sonarcloud.io').replace(/\/+$/, '');
+const host = stripTrailSlash(process.env.SONAR_HOST_URL || 'https://sonarcloud.io');
 const token = String(process.env.SONAR_TOKEN || '').trim();
 const compose = resolve(root, 'docker-compose.sonar.yml');
 const MAGNO_KEY = 'usercardjoke1036991-star_Magno';

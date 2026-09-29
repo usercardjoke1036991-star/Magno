@@ -22,7 +22,7 @@ import sys
 import os
 import argparse
 from pathlib import Path
-from qa_safe_io import confine
+from qa_safe_io import confine, confine_read, confine_write
 from datetime import date
 
 # Forzar UTF-8 en Windows (seguro bajo pytest con reconfigure)
@@ -56,8 +56,12 @@ def _encontrar_contexto_md() -> Path | None:
         SCRIPT_DIR / "CONTEXTO.md",         # workspace raíz
     ]
     for ruta in candidatos:
-        if ruta.exists():
-            return ruta
+        try:
+            safe = confine(ruta)
+        except ValueError:
+            continue
+        if safe.exists():
+            return safe
     return None
 
 
@@ -88,7 +92,7 @@ def cmd_mostrar(ruta: Path | None):
     print(f"  📄 CONTEXTO.MD — {ruta.parent.name}")
     print(f"  Ruta: {ruta}")
     print(f"{'═' * 60}\n")
-    print(confine(ruta).read_text(encoding="utf-8"))
+    print(confine_read(ruta))
     print(f"{'═' * 60}\n")
 
 
@@ -106,7 +110,7 @@ def cmd_actualizar_estado(ruta: Path | None, nuevo_estado: str):
         print("   Crea uno con: python actualizar_contexto.py --init")
         return
 
-    contenido = ruta.read_text(encoding="utf-8")
+    contenido = confine_read(ruta)
     lineas = contenido.splitlines(keepends=True)
     nueva_linea = f"- **Estado actual:** {nuevo_estado}\n"
     modificado = False
@@ -122,7 +126,7 @@ def cmd_actualizar_estado(ruta: Path | None, nuevo_estado: str):
         print(f"   Añade manualmente: {nueva_linea.strip()}")
         return
 
-    confine(ruta).write_text("".join(lineas), encoding="utf-8")
+    confine_write(ruta, "".join(lineas))
     print(f"✅ Estado actualizado → {nuevo_estado}")
     print(f"   Archivo: {ruta}")
 
@@ -139,7 +143,7 @@ def cmd_agregar_cambio(ruta: Path | None, descripcion: str):
 
     ruta = confine(ruta)
     fecha_hoy = date.today().strftime("%Y-%m-%d")
-    contenido = ruta.read_text(encoding="utf-8")
+    contenido = confine_read(ruta)
 
     # Buscar la línea de encabezado de la tabla del historial
     MARCADOR_TABLA = "| Fecha | Cambio | Razón |"
@@ -167,7 +171,7 @@ def cmd_agregar_cambio(ruta: Path | None, descripcion: str):
             1
         )
 
-    ruta.write_text(contenido_nuevo, encoding="utf-8")
+    confine_write(ruta, contenido_nuevo)
     print(f"✅ Cambio registrado en CONTEXTO.md:")
     print(f"   {nueva_fila}")
 
@@ -181,7 +185,7 @@ def cmd_init():
     Crea un CONTEXTO.md vacío desde la plantilla si no existe.
     No sobreescribe si ya existe.
     """
-    proyecto_dir = _inferir_directorio_proyecto()
+    proyecto_dir = confine(_inferir_directorio_proyecto())
     destino = proyecto_dir / "CONTEXTO.md"
 
     if destino.exists():
@@ -224,7 +228,7 @@ def cmd_init():
 | {date.today().strftime("%Y-%m-%d")} | Archivo de contexto inicializado | Creado manualmente |
 """
 
-    destino.write_text(contenido, encoding="utf-8")
+    confine_write(destino, contenido)
     print(f"✅ CONTEXTO.md creado en: {destino}")
     print("   Rellena las secciones para que el agente entienda tu proyecto.")
 

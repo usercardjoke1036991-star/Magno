@@ -42,6 +42,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `polyfills.js` — módulo JS/TS
 - `qa_autonomo.py` — módulo Python
   - Funciones/clases: ResultadoQA, ReporteQA, detectar_tipo_proyecto, verificar_python, verificar_mql5, verificar_nodejs, verificar_android, verificar_rust, verificar_go, _iterar_archivos_auditables, _obtener_raices_subproyectos, _es_subproyecto, _verificar_secretos, _verificar_gitignore, verificar_ci, verificar_readme, _encontrar_errores_json, verificar_errores_aprendidos, verificar_logica, verificar_conectores_sueltos, verificar_modulos_proyecto, verificar_mapa_proyecto, ejecutar_qa, imprimir_reporte, main
+- `qa_safe_io.py` — módulo Python
+  - Funciones/clases: confine, confine_read, confine_write, write_under
 - `reestructurar_peticion.py` — módulo Python
   - Funciones/clases: resolver_directorio, normalizar, _contiene_patron, detectar_intencion, detectar_tipo_proyecto, habla_espanol, _primera_linea_util, leer_contexto_una_linea, inferir_alcance, sugerir_herramientas, inferir_entregable, reformular_objetivo, construir_restricciones, construir_prompt_agente, PromptProfesional, reestructurar, formatear_texto, formatear_json, _parse_args, _resolver_texto, main
 - `run_tests.py` — módulo Python
@@ -282,11 +284,15 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: luma, is_backdrop, flood_transparent, crop_mark, color_transparent, punch_fringe, fit_mark, compose, lerp, colorize, circle_mask, write_android_icons, write_rank_icons, main
 - `scripts/prepare-production-local.mjs` — módulo JS/TS
 - `scripts/run-slither.mjs` — módulo JS/TS
+- `scripts/run-snyk.mjs` — módulo JS/TS
+- `scripts/run-sonar.mjs` — módulo JS/TS
 - `scripts/scan-mobile.mjs` — módulo JS/TS
 - `scripts/security-check.mjs` — módulo JS/TS
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/set-sms-keys.mjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
+- `scripts/spawnEnv.mjs` — módulo JS/TS
+  - Funciones/clases: spawnPath, spawnEnv, binDocker, binWsl, stripTrailSlash, binNpx
 - `scripts/textbeltSms.cjs` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
 - `scripts/_audit-bytecode.cjs` — módulo JS/TS
@@ -294,6 +300,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/_dump-ui-texts.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
   - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
+- `scripts/_preflight_mainnet.cjs` — módulo JS/TS
 - `scripts/_probe-live-health.cjs` — módulo JS/TS
 - `scripts/_pull-rkstorage.py` — módulo Python
 - `scripts/_read-rkstorage.py` — módulo Python
@@ -473,6 +480,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: timingSafeEqualBytes, timingSafeEqualHex, hmacSha256, deriveWrapKey, deriveWrapKeyAsync, isSealedBlob, sealSecret, openSecret
 - `utils/sponsorLock.ts` — módulo JS/TS
   - Funciones/clases: SPONSOR_LOCK_PREFIX, sponsorLockKey, resolveSponsorInput, parseLockedSponsor, buildLockedSponsor, keepFirstLock
+- `utils/storeSlot.ts` — módulo JS/TS
+  - Funciones/clases: storeSlot
 - `utils/totp.ts` — módulo JS/TS
   - Funciones/clases: bytesToBase32, base32ToBytes, totpAt, verifyTotp, otpauthUrl
 - `utils/txErrors.ts` — módulo JS/TS

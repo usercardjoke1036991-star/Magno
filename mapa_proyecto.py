@@ -84,12 +84,12 @@ _EXTS_DOC = (
 )
 _RE_ARCHIVO = re.compile(
     r"(?<![\w./])("
-    r"[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9_.-]+)*"
+    r"[A-Za-z0-9][A-Za-z0-9_.-]{0,80}(?:/[A-Za-z0-9_.-]{1,80}){0,8}"
     rf"\.(?:{_EXTS_DOC})"
     r")(?![\w])"
 )
 _RE_ARBOL = re.compile(
-    rf"[├└]──\s+([A-Za-z0-9][A-Za-z0-9_.-]*\.(?:{_EXTS_DOC}))(?![\w])"
+    rf"[├└]──\s+([A-Za-z0-9][A-Za-z0-9_.-]{{0,80}}\.(?:{_EXTS_DOC}))(?![\w])"
 )
 _RE_ESTADO = re.compile(r"^[\s]*[-*]\s+[✅🔄]\s+(.+)$")
 _PLACEHOLDERS = ("[descripción", "[describe", "[añadir", "[agregar")

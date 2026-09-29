@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnEnv } from './spawnEnv.mjs';
+import { spawnEnv, binDocker, stripTrailSlash } from './spawnEnv.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 loadDotEnv(resolve(root, '.env'));
@@ -19,7 +19,7 @@ loadDotEnv(resolve(root, '.env'));
 const extra = process.argv.slice(2);
 const wantPurge = extra.includes('--purge');
 const apiKey = String(process.env.MOBSF_API_KEY || '').trim();
-const baseUrl = String(process.env.MOBSF_URL || 'http://localhost:8000').replace(/\/+$/u, '');
+const baseUrl = stripTrailSlash(process.env.MOBSF_URL || 'http://localhost:8000');
 const reportPath = resolve(root, 'mobsf-report.json');
 const apkPath = wantPurge ? '' : resolveApkPath(extra);
 const auth = { Authorization: apiKey };
@@ -146,7 +146,7 @@ async function purgeScans() {
   }
   const names = ['agitated_mcnulty'];
   const dockerPs = spawnSync(
-    'docker',
+    binDocker(),
     ['ps', '--filter', 'ancestor=opensecurity/mobile-security-framework-mobsf', '--format', '{{.Names}}'],
     { encoding: 'utf8', windowsHide: true, env: spawnEnv() }
   );
@@ -155,7 +155,7 @@ async function purgeScans() {
   }
   for (const name of names) {
     spawnSync(
-      'docker',
+      binDocker(),
       ['exec', name, 'sh', '-c', 'rm -rf /home/mobsf/.MobSF/uploads/* /home/mobsf/.MobSF/downloads/*'],
       { encoding: 'utf8', windowsHide: true, env: spawnEnv() }
     );

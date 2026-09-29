@@ -496,15 +496,19 @@ def detectar_imports_js_rotos(archivo: Path, raiz: Path) -> list[dict]:
     rel = _ruta_relativa(archivo, raiz)
 
     # Detectar: import X from './ruta'  |  import './ruta'  |  import type X from './ruta'
+    patron_import_side = re.compile(
+        r"""import\s+['"](\.[^'"]{1,240})['"]""",
+        re.MULTILINE,
+    )
     patron_import = re.compile(
-        r"""import\s+(?:type\s+)?(?:[\w\s{},*]+\s+from\s+)?['"](\.[^'"]+)['"]""",
-        re.MULTILINE
+        r"""import\s+(?:type\s+)?[\w{},*\s]{1,120}\s+from\s+['"](\.[^'"]{1,240})['"]""",
+        re.MULTILINE,
     )
     # Detectar: require('./ruta')
     patron_require = re.compile(r"""require\s*\(\s*['"](\.[^'"]+)['"]\s*\)""")
 
     for linea_num, linea in enumerate(codigo.splitlines(), 1):
-        for patron in (patron_import, patron_require):
+        for patron in (patron_import_side, patron_import, patron_require):
             for m in patron.finditer(linea):
                 ruta_import = m.group(1)
                 if _resolver_import_js(ruta_import, archivo) is None:
@@ -570,7 +574,7 @@ def _nombres_js_definidos(codigo: str) -> set[str]:
             if name.isidentifier():
                 nombres.add(name)
     patron_import_nombre = re.compile(
-        r"""import\s+(?:type\s+)?(?:[\w*]+\s*,\s*)?{?\s*([\w\s,]+?)\s*}?\s+from"""
+        r"""import\s+(?:type\s+)?\{([\w\s,]{1,200})\}\s+from"""
     )
     for m in patron_import_nombre.finditer(codigo):
         for nombre in re.split(r"[,\s]+", m.group(1)):

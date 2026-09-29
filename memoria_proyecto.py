@@ -20,7 +20,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from qa_safe_io import confine
+from qa_safe_io import confine, write_under
 from typing import List, Optional
 
 # ERR-003: reconfigure + hasattr — nunca TextIOWrapper sobre stdout
@@ -84,10 +84,9 @@ class MemoriaProyecto:
 # ─────────────────────────────────────────────
 
 def resolver_directorio(ruta: Optional[str]) -> Path:
-    """Resuelve el directorio del proyecto (ruta dada o cwd)."""
-    if ruta:
-        return Path(ruta).expanduser().resolve()
-    return Path.cwd().resolve()
+    """Resuelve el directorio del proyecto (ruta dada o cwd) dentro de Magno."""
+    raw = Path(ruta).expanduser() if ruta else Path.cwd()
+    return confine(raw)
 
 
 def ruta_memoria_md(directorio: Path) -> Path:
@@ -198,17 +197,16 @@ def renderizar_memoria(mem: MemoriaProyecto) -> str:
 def escribir_memoria(mem: MemoriaProyecto, directorio: Path) -> bool:
     """Escribe MEMORIA.md y memoria.json. False si falla el I/O."""
     try:
-        directorio = confine(directorio)
-        directorio.mkdir(parents=True, exist_ok=True)
-        ruta_memoria_md(directorio).write_text(
-            renderizar_memoria(mem), encoding="utf-8",
-        )
-        ruta_memoria_json(directorio).write_text(
+        base = confine(directorio)
+        base.mkdir(parents=True, exist_ok=True)
+        write_under(base, MEMORIA_MD, renderizar_memoria(mem))
+        write_under(
+            base,
+            MEMORIA_JSON,
             json.dumps(mem.to_dict(), ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
         )
         return True
-    except OSError as e:
+    except (OSError, ValueError) as e:
         print(f"❌ No se pudo escribir MEMORIA.md: {e}", file=sys.stderr)
         return False
 

@@ -42,6 +42,7 @@ Magno/
 ├── Dockerfile.notify              # Imagen del worker 24/7 (Render/Fly/Hetzner)
 ├── render.yaml                    # Blueprint Render: disco /data, health /health, sin llaves de owner
 ├── salud_proyecto.py              # Reloj suizo: grafo UI→hooks→contrato + i18n/tsc (`npm run salud`)
+├── qa_safe_io.py                  # I/O del kit QA acotado a Magno (Sonar path traversal)
 ├── i18n/ (17 locales)             # ar, bn, de, en, es, fr, hi, id, it, ja, ko, pt, ru, tr, ur, vi, zh
 ├── constants/                     # contractConfig, rpcConfig, tokens, loanTiers
 ├── stubs/zk-node-stub.js          # Metro stub: snarkjs no es bundleable en RN
@@ -255,6 +256,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-29 | Correccion SonarCloud de los 26 issues del analisis 29-sep y Quality Gate de codigo nuevo. | — |
 | 2026-09-18 | Auditoria PDF MobSF descsdsadarga.pdf del APK 35CADA22 (1.0.2 vc4): 61/100 Grade A. HIGH=AES/CBC de huella androidx.biometric (se mantiene). 0 exportados, sin exp+, sin HTTP claro, OFAC vacio, sin Twilio/claves. I18n: 15 idiomas ya no muestran CONFIRM_MAINNET. Hardhat 178. Falta mainnet. | — |
 | 2026-09-18 | APK release 1.0.2 versionCode 4 en Escritorio Quatrivium-Finance-MobSF.apk (67.29 MB, SHA256 35CADA22…, v3 CN=Quatrivium Finance, sin esquema exp+). Escanear solo en localhost:8000. No se reinstalo en Xiaomi. | — |
 | 2026-09-18 | Auditoria kit completo: Dockerfile.notify USER node, override compression 1.8.2, ZAP HEALTH_OK=1 sin alertas, Semgrep https-only en fetch-wallet-logos. image-size 1.2.1 queda en Metro. | — |

@@ -70,11 +70,11 @@ _JS_RESOLVE = (
     "/index.js", "/index.jsx", "/index.ts", "/index.tsx",
 )
 
-_RE_DOC_ESTADO = re.compile(r"^[\s]*[-*]\s+[✅🔄]\s+(.+)$")
+_RE_DOC_ESTADO = re.compile(r"^[ \t]*[-*][ \t]+[✅🔄][ \t]+(.+)$")
 # Extensiones largas primero para no cortar .json como .js
 _RE_ARCHIVO_DOC = re.compile(
     r"(?<![\w./])("
-    r"[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9_.-]+)*"
+    r"[A-Za-z0-9][A-Za-z0-9_.-]{0,80}(?:/[A-Za-z0-9_.-]{1,80}){0,8}"
     r"\.(?:json|jsx|tsx|mjs|cjs|mq5|mq4|mqh|java|kts|mdc|yaml|yml|py|js|ts|kt)"
     r")(?![\w])"
 )
@@ -82,11 +82,14 @@ _RE_DIR_DOC = re.compile(
     r"(?<![\w./])(src/|tests/|test/|app/|lib/|include/|Include/)(?![\w])"
 )
 _RE_ARBOL = re.compile(
-    r"[├└]──\s+([A-Za-z0-9][A-Za-z0-9_.-]*\.(?:json|jsx|tsx|mq5|mq4|mqh|py|js|ts))"
+    r"[├└]──\s+([A-Za-z0-9][A-Za-z0-9_.-]{0,80}\.(?:json|jsx|tsx|mq5|mq4|mqh|py|js|ts))"
 )
 _RE_INCLUDE_MQL = re.compile(r'#include\s+"([^"]+\.mqh)"')
 _RE_EXPORT_FROM = re.compile(
-    r"""export\s+(?:type\s+)?(?:default\s+|[\w*\s{},]+?\s+)?from\s+['"](\.[^'"]+)['"]"""
+    r"""export\s+(?:type\s+)?(?:default\s+)?from\s+['"](\.[^'"]{1,240})['"]"""
+)
+_RE_EXPORT_FROM_NAMED = re.compile(
+    r"""export\s+[\w*\s{},]{1,120}\s+from\s+['"](\.[^'"]{1,240})['"]"""
 )
 _RE_EXPORT_NAMED = re.compile(r"""export\s+\{([^}]+)\}(?!\s*from)""")
 _RE_NOMBRE_MODAL = re.compile(r"(Modal|Dialog|Drawer|Popup)", re.IGNORECASE)
@@ -701,18 +704,19 @@ def detectar_exports_index_rotos(archivo: Path, raiz: Path) -> list[dict]:
     rel = _ruta_relativa(archivo, raiz)
     hallazgos: list[dict] = []
     for num, linea in enumerate(codigo.splitlines(), 1):
-        for m in _RE_EXPORT_FROM.finditer(linea):
-            ruta = m.group(1)
-            if _resolver_export_js(ruta, archivo):
-                continue
-            hallazgos.append(_hallazgo(
-                categoria="modulos",
-                tipo="export_index_ausente",
-                archivo=rel,
-                linea=num,
-                mensaje=f"export desde '{ruta}' en index — archivo no encontrado",
-                severidad="advertencia",
-            ))
+        for rex in (_RE_EXPORT_FROM, _RE_EXPORT_FROM_NAMED):
+            for m in rex.finditer(linea):
+                ruta = m.group(1)
+                if _resolver_export_js(ruta, archivo):
+                    continue
+                hallazgos.append(_hallazgo(
+                    categoria="modulos",
+                    tipo="export_index_ausente",
+                    archivo=rel,
+                    linea=num,
+                    mensaje=f"export desde '{ruta}' en index — archivo no encontrado",
+                    severidad="advertencia",
+                ))
         for m in _RE_EXPORT_NAMED.finditer(linea):
             nombres = [
                 p.split(" as ")[0].strip()

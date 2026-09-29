@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnEnv, spawnPath } from './spawnEnv.mjs';
+import { spawnEnv, spawnPath, binWsl } from './spawnEnv.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const extra = process.argv.slice(2);
@@ -109,7 +109,7 @@ if (process.platform === 'win32') {
   if (script && probe('wsl', ['-e', 'bash', '-lc', 'true'], process.env)) {
     const extraArgs = extra.map(bashQuote).join(' ');
     const inner = `bash ${bashQuote(script)} ${extraArgs}`.trim();
-    const status = spawnSync('wsl', ['-e', 'bash', '-lic', inner], {
+    const status = spawnSync(binWsl(), ['-e', 'bash', '-lic', inner], {
       cwd: root,
       stdio: 'inherit',
       windowsHide: true,

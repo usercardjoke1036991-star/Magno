@@ -931,7 +931,8 @@ const pollTelegram = async () => {
   };
   process.once('SIGTERM', stopTelegram);
   process.once('SIGINT', stopTelegram);
-  while (telegramAlive) {
+  while (true) {
+    if (!telegramAlive) break;
     try {
       const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/getUpdates?timeout=25&offset=${offset}`;
       const data = await (await fetch(url)).json();
@@ -953,6 +954,7 @@ const pollTelegram = async () => {
     } catch {
       await new Promise((r) => setTimeout(r, 4000));
     }
+    telegramAlive = Boolean(TELEGRAM_TOKEN) && telegramAlive;
   }
 };
 

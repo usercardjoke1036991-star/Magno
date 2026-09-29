@@ -642,17 +642,17 @@ def detectar_volumen_cero(contenido: str) -> list[dict]:
 
     # Asignación explícita a 0 (no 0.01: \b entre 0 y . daba FP)
     pat_zero = re.compile(
-        r"\b(InpLotSize|InpLots|LotSize|lot_size|lotSize|volume)\s*=\s*0(?![.\d])",
+        r"\b(InpLotSize|InpLots|LotSize|lot_size|volume)\s*=\s*0(?![.\d])",
         re.IGNORECASE,
     )
-    # input double = 0 o 0.0, no 0.01
     pat_input_zero = re.compile(
-        r'input\s+double\s+\w*[Ll]ot\w*\s*=\s*0;',
+        r"input\s+double\s+(\w+)\s*=\s*0;",
         re.IGNORECASE,
     )
 
     for i, linea in enumerate(lineas, 1):
-        if pat_zero.search(linea) or pat_input_zero.search(linea):
+        m_in = pat_input_zero.search(linea)
+        if pat_zero.search(linea) or (m_in and "lot" in m_in.group(1).lower()):
             resultados.append({
                 "linea": i,
                 "tipo": "volumen_cero",

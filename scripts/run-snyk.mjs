@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { binNpx, spawnEnv } from './spawnEnv.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 loadDotEnv(resolve(root, '.env'));
@@ -21,13 +22,13 @@ const args = extra.length
   ? extra
   : ['test', '--severity-threshold=high', '--policy-path=.snyk'];
 
-const ran = spawnSync('npx', ['--yes', 'snyk', ...args], {
+const ran = spawnSync(binNpx(), ['--yes', 'snyk', ...args], {
   cwd: root,
   encoding: 'utf8',
   windowsHide: true,
   stdio: 'inherit',
-  env: process.env,
-  shell: process.platform === 'win32',
+  env: spawnEnv({ SNYK_TOKEN: token }),
+  shell: false,
 });
 process.exit(ran.status || 0);
 

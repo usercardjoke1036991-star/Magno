@@ -150,6 +150,11 @@
   - `verificar_ci()`
   - `verificar_readme()`
   - `verificar_errores_aprendidos()`
+- `qa_safe_io.py`
+  - `confine()`
+  - `confine_read()`
+  - `confine_write()`
+  - `write_under()`
 - `reestructurar_peticion.py`
   - `resolver_directorio()`
   - `normalizar()`
@@ -227,8 +232,6 @@
   - `toEthersWeb3Provider()`
   - `getEthersSignerFromProvider()`
   - `web3ConfigDebug()`
-- `app/index.tsx`
-  - `HomeScreen()`
 
 ### Cómo usarlo
 
@@ -247,6 +250,9 @@ npm run security:check
 npm run security:slither
 npm run security:mobsf
 npm run security:mobsf:purge
+npm run security:snyk
+npm run security:snyk:code
+npm run security:sonar
 npm run deploy:bsc
 npm run deploy:testnet
 npm run notify
@@ -285,7 +291,7 @@ python actualizar_readme.py
 | `memoria_proyecto.py` | `python memoria_proyecto.py --mostrar` | Memoria de sesión (MEMORIA.md) |
 | `reestructurar_peticion.py` | `python reestructurar_peticion.py "texto"` | Reestructura una petición informal en prompt profesional |
 
-_Actualizado automáticamente el 2026-09-18 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
+_Actualizado automáticamente el 2026-09-29 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
 
 <!-- AUTO-README:END -->
 Quatrivium Finance es crédito on-chain **sin colateral**: pides un préstamo, lo pagas dentro del plazo y subes de nivel para pedir más.

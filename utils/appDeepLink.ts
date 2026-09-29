@@ -7,12 +7,17 @@ export type AppDeepLink =
 
 const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'people', 'pool', 'admin', 'history', 'ranks', 'fame']);
 
+function trimPathSlashes(path: string): string {
+  let s = path;
+  while (s.startsWith('/')) s = s.slice(1);
+  while (s.endsWith('/')) s = s.slice(0, -1);
+  return s;
+}
+
 function tokenFromUrl(url?: string | null): string {
   if (!url) return '';
   const parsed = Linking.parse(url);
-  const parts = String(parsed.path || '')
-    .replace(/^\/+/, '')
-    .replace(/\/+$/, '')
+  const parts = trimPathSlashes(String(parsed.path || ''))
     .split('/')
     .filter((part) => part && part !== '--');
   const fromQuery = String(parsed.queryParams?.room || parsed.queryParams?.panel || '').toLowerCase();
@@ -31,7 +36,7 @@ function tokenFromUrl(url?: string | null): string {
       const inner = new URL(nested);
       const nestedRoom = (inner.searchParams.get('room') || inner.searchParams.get('panel') || '').toLowerCase();
       if (nestedRoom) return nestedRoom;
-      const nestedParts = inner.pathname.replace(/^\/+/, '').replace(/\/+$/, '').split('/').filter((part) => part && part !== '--');
+      const nestedParts = trimPathSlashes(inner.pathname).split('/').filter((part) => part && part !== '--');
       const nestedPath = nestedParts[0] === 'room' ? nestedParts[1] || '' : nestedParts[0] || '';
       if (nestedPath) return nestedPath.toLowerCase();
     }
