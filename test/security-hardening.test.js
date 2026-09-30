@@ -45,4 +45,15 @@ describe('defensive security hardening', function () {
     expect(reserva).to.include('function acceptOwner()');
     expect(reserva).to.include('function applyCredit()');
   });
+
+  it('leaves Sumsub ready behind Render env and does not put secrets in the admin panel', function () {
+    const worker = fs.readFileSync(path.join(root, 'scripts', 'notify-worker.mjs'), 'utf8');
+    const panel = fs.readFileSync(path.join(root, 'components', 'AdminPanel.tsx'), 'utf8');
+    const kyc = fs.readFileSync(path.join(root, 'components', 'KycSection.tsx'), 'utf8');
+    expect(worker).to.include('kycProvider: hasKycProvider');
+    expect(worker).to.include("path === '/kyc/provider-token'");
+    expect(worker).to.include('attesterKms: false');
+    expect(panel).to.not.include('SUMSUB_');
+    expect(kyc).to.include('openKycProvider');
+  });
 });

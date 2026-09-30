@@ -13,6 +13,7 @@ import {
   type KycDocType,
 } from '../services/kycDeclaration';
 import { isCreditReady } from '../constants/rpcConfig';
+import { notifyKycProviderReady, openKycProvider } from '../services/kycProvider';
 
 interface KycSectionProps {
   walletAddress: string;
@@ -45,6 +46,16 @@ export const KycSection: React.FC<KycSectionProps> = ({
   const [editing, setEditing] = useState(false);
   const [nameLocked, setNameLocked] = useState(false);
   const [docLocked, setDocLocked] = useState(false);
+  const [providerReady, setProviderReady] = useState(false);
+  const [providerBusy, setProviderBusy] = useState(false);
+
+  useEffect(() => {
+    if (!isCreditReady()) {
+      setProviderReady(false);
+      return;
+    }
+    notifyKycProviderReady().then(setProviderReady).catch(() => setProviderReady(false));
+  }, []);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -84,6 +95,18 @@ export const KycSection: React.FC<KycSectionProps> = ({
       if (!ok) return;
     }
     setEditing(false);
+  };
+
+  const startProvider = async () => {
+    if (!walletAddress || providerBusy) return;
+    setProviderBusy(true);
+    try {
+      await openKycProvider(walletAddress);
+    } catch {
+      Alert.alert(t('kycScreenTitle'), t('kycProviderFail'));
+    } finally {
+      setProviderBusy(false);
+    }
   };
 
   const scanDoc = async () => {
@@ -164,6 +187,23 @@ export const KycSection: React.FC<KycSectionProps> = ({
             <AppText style={[styles.warn, { color: colors.warnText }]}>{t('liveCreditNotReady')}</AppText>
           ) : !isRegistered ? (
             <AppText style={[styles.warn, { color: colors.warnText }]}>{t('activateBeforeLoan')}</AppText>
+          ) : null}
+          {providerReady ? (
+            <View>
+              <AppText style={[styles.warn, { color: colors.textMuted }]}>{t('kycProviderLead')}</AppText>
+              <TouchableOpacity
+                onPress={() => void startProvider()}
+                disabled={blocked || providerBusy}
+                style={[styles.scanBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
+              >
+                {providerBusy ? (
+                  <ActivityIndicator color={colors.primary} />
+                ) : (
+                  <AppIcon name="id" size={16} color={colors.primary} />
+                )}
+                <AppText style={[styles.scanBtnText, { color: colors.text }]}>{t('kycProviderCta')}</AppText>
+              </TouchableOpacity>
+            </View>
           ) : null}
           <AppText style={[styles.label, { color: colors.text }]}>{t('kycLegalName')}</AppText>
           {identityNameFrozen ? (

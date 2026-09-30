@@ -11,7 +11,7 @@ import { createServer } from 'node:http';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-import { randomBytes, createCipheriv, createDecipheriv, createHash, timingSafeEqual } from 'node:crypto';
+import { randomBytes, createCipheriv, createDecipheriv, createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { Contract, JsonRpcProvider, Wallet, getAddress, verifyTypedData, keccak256, toUtf8Bytes, AbiCoder, getBytes, Signature, ZeroAddress } from 'ethers';
 import dotenv from 'dotenv';
 
@@ -154,6 +154,10 @@ const hasSms =
   Boolean(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM) ||
   Boolean(WHATSAPP_TOKEN && WHATSAPP_PHONE_ID);
 const hasEmail = Boolean(RESEND_KEY && EMAIL_FROM);
+const SUMSUB_TOKEN = process.env.SUMSUB_APP_TOKEN || '';
+const SUMSUB_SECRET = process.env.SUMSUB_SECRET || '';
+const SUMSUB_LEVEL = process.env.SUMSUB_LEVEL_NAME || '';
+const hasKycProvider = Boolean(SUMSUB_TOKEN && SUMSUB_SECRET && SUMSUB_LEVEL);
 if (DATA_KEY_RAW.length < 16) {
   console.error('NOTIFY_DATA_KEY de al menos 16 caracteres es obligatorio (cifra teléfonos y Telegram en disco).');
   process.exit(1);
@@ -904,6 +908,42 @@ const assertIdentityAvailable = async (phoneHash, deviceHash, wallet) => {
   }
 };
 
+const sumsubHeaders = (method, pathWithQuery, body = '') => {
+  const ts = String(Math.floor(Date.now() / 1000));
+  const sig = createHmac('sha256', SUMSUB_SECRET)
+    .update(ts + method.toUpperCase() + pathWithQuery + body)
+    .digest('hex');
+  return {
+    Accept: 'application/json',
+    'X-App-Token': SUMSUB_TOKEN,
+    'X-App-Access-Ts': ts,
+    'X-App-Access-Sig': sig,
+  };
+};
+
+const sumsubProviderLink = async (wallet) => {
+  if (!hasKycProvider) {
+    const error = new Error('not configured');
+    error.status = 503;
+    throw error;
+  }
+  const userId = encodeURIComponent(getAddress(wallet));
+  const level = encodeURIComponent(SUMSUB_LEVEL);
+  const pathWithQuery = `/resources/sdkIntegrations/levels/${level}/websdkLink?externalUserId=${userId}&ttlInSecs=1800`;
+  const response = await fetch(`https://api.sumsub.com${pathWithQuery}`, {
+    method: 'GET',
+    headers: sumsubHeaders('GET', pathWithQuery),
+  });
+  const payload = await response.json().catch(() => ({}));
+  const url = String(payload.url || payload.websdkLink || '');
+  if (!response.ok || !/^https:\/\//i.test(url)) {
+    const error = new Error('provider');
+    error.status = 503;
+    throw error;
+  }
+  return url;
+};
+
 const attestIdentity = async (wallet, phoneHash, deviceHash) => {
   if (!ATTESTER_KEY || !CONTRACT || !/^0x[0-9a-fA-F]{40}$/.test(CONTRACT)) {
     throw new Error('attester');
@@ -1350,6 +1390,8 @@ const server = createServer(async (req, res) => {
       textbelt: hasTextbelt,
       resend: hasEmail,
       attester: attesterReady,
+      kycProvider: hasKycProvider,
+      attesterKms: false,
       reserva: Boolean(RESERVA),
       creditPaused: store.reservaGuard?.creditPaused ?? null,
       reservaPaused: store.reservaGuard?.reservaPaused ?? null,
@@ -2162,6 +2204,37 @@ const server = createServer(async (req, res) => {
     }
     return;
   }
+  if (path === '/kyc/provider-token') {
+    if (!rateLimit(`kycprov:${ip}`, 8, 15 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      json(res, 413, { error: 'payload' });
+      return;
+    }
+    let authn;
+    try {
+      authn = requireAuth(body);
+    } catch (error) {
+      json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    if (String(body.purpose) !== 'identity') {
+      json(res, 401, { error: 'purpose' });
+      return;
+    }
+    try {
+      const url = await sumsubProviderLink(authn.wallet);
+      json(res, 200, { ok: true, url });
+    } catch (error) {
+      json(res, Number(error.status) || 503, { error: error.message || 'provider' });
+    }
+    return;
+  }
   json(res, 404, { error: 'not found' });
   } catch (error) {
     console.error('notify http:', error?.message || error);
@@ -2185,6 +2258,7 @@ server.listen(PORT, BIND, () => {
     console.warn('Attester de firma: llave inválida');
   }
   console.log(`Reserva guardian: ${RESERVA || 'sin dirección (Demo práctica local)'}`);
+  console.log(`KYC proveedor: ${hasKycProvider ? 'listo (Sumsub en Render)' : 'declaración de la app'}`);
 });
 
 pollTelegram().catch((error) => console.error(error));

@@ -349,6 +349,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
   - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration, loadKycDocPhoto, persistKycDocPhoto
+- `services/kycProvider.ts` — módulo JS/TS
+  - Funciones/clases: notifyKycProviderReady, openKycProvider
 - `services/linkedWallet.ts` — módulo JS/TS
   - Funciones/clases: WALLET_LINK_SKIPPED, linkedWalletStorageKey, hasLinkedExternalWallet, hasCompletedWalletLink, loadLinkedExternalWallet, saveLinkedExternalWallet, skipLinkedExternalWallet, loadRequiredExternalWallet
 - `services/movementHistory.ts` — módulo JS/TS

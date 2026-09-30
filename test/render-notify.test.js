@@ -22,6 +22,9 @@ describe('Render notify worker', function () {
     expect(yaml).to.match(/EMAIL_FROM[\s\S]*sync: false/);
     expect(yaml).to.not.include('soporte@quatriviumcredit.app');
     expect(yaml).to.match(/TWILIO_ACCOUNT_SID[\s\S]*sync: false/);
+    expect(yaml).to.match(/SUMSUB_APP_TOKEN[\s\S]*sync: false/);
+    expect(yaml).to.match(/SUMSUB_SECRET[\s\S]*sync: false/);
+    expect(yaml).to.match(/SUMSUB_LEVEL_NAME[\s\S]*sync: false/);
     expect(yaml).to.not.match(/key: PRIVATE_KEY\b/);
     expect(docker).to.include('NOTIFY_BIND=0.0.0.0');
     expect(docker).to.include('NOTIFY_TRUST_PROXY=1');

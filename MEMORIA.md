@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] La frase no se sustituye: cambiarla seria otra cuenta. Recuperar en otro telefono usa las mismas 24 palabras.
 
 ## Cambios realizados
+- [2026-09-29] KYC Sumsub queda detras de variables de Render. Sin claves, la app sigue con la declaracion. HSM no es un interruptor universal.
 - [2026-09-29] Hardening defensivo: recovery sin wrap en el worker, autofund con firma EIP-712, approve de deuda restante, attester sin llave de owner en host publico, Reserva solo attester y timelock 72h
 - [2026-09-29] Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10
 - [2026-09-29] Extra de comisiones Reserva del bote; fundador cobra su tramo; Credit intacto
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.
 - [2026-09-16] Auditoria en vivo USB: no se reinstalo el APK (dev client 1.0.0). Metro cargo el JS actual. Real=Pronto sin credito falso; Demo pide; Donar solo Real con boton apagado; pool Demo solo lectura 2000.70; gemas Granate no Bronce; Ajustes sin fila de contrasena.
 - [2026-09-16] Escaneos restantes locales: Aderyn, Trivy, Semgrep, Mythril, ZAP. Un arreglo real: AES-GCM del notify-worker con `authTagLength: 16`. Sin mainnet ni APK.
-- [2026-09-16] WSL ciber: Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8, ZAP 2.17.0. Ubuntu y Foundry ya estaban. Sin escaneo de producto ni mainnet.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-29] Cambio: Hardening defensivo: recovery sin wrap en el worker, autofund con firma EIP-712, approve de deuda restante, attester sin llave de owner en host publico, Reserva solo attester y timelock 72h
+[2026-09-29] Cambio: KYC Sumsub queda detras de variables de Render. Sin claves, la app sigue con la declaracion. HSM no es un interruptor universal.

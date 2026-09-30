@@ -61,6 +61,12 @@ services:
         sync: false
       - key: TELEGRAM_BOT_TOKEN
         sync: false
+      - key: SUMSUB_APP_TOKEN
+        sync: false
+      - key: SUMSUB_SECRET
+        sync: false
+      - key: SUMSUB_LEVEL_NAME
+        sync: false
     disk:
       name: notify-data
       mountPath: /data
