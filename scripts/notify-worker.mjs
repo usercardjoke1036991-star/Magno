@@ -1362,8 +1362,9 @@ const server = createServer(async (req, res) => {
   requestOrigin = String(req.headers.origin || '');
   const path = requestPath(req);
   const isHealth = req.method === 'GET' && path === '/health';
-  // Render (y Fly) sondan /health sin Origin. No aplicar CORS ahí.
-  if (!isHealth && !originAllowed()) {
+  const isRoot = req.method === 'GET' && path === '/';
+  // Render (y Fly) sondan /health sin Origin. La raíz GET solo apunta al health.
+  if (!isHealth && !isRoot && !originAllowed()) {
     json(res, 403, { error: 'origin' });
     return;
   }
@@ -1380,6 +1381,10 @@ const server = createServer(async (req, res) => {
     return;
   }
   const ip = clientIp(req);
+  if (isRoot) {
+    json(res, 200, { ok: true, service: 'quatrivium-notify', health: '/health' });
+    return;
+  }
   if (isHealth) {
     json(res, 200, {
       ok: true,

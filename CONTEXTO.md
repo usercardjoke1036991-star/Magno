@@ -259,6 +259,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-29 | GET / del worker responde ok y apunta a /health. Sonar ignora USER root del Dockerfile.notify porque el entrypoint baja a node. Snyk: override brace-expansion; inflight y uuid 7 se ignoran por Expo 54. | — |
 | 2026-09-29 | Worker y KYC listos para Sumsub por env en Render. El panel de admins no guarda esas claves. Attester HSM sigue pendiente del proveedor. | — |
 | 2026-09-29 | Hardening: el worker no guarda ni devuelve el wrap; autofund exige EIP-712; approve exacto tras prestar; attester no usa la llave de owner en host publico; Reserva boost solo attester y cambios de owner/credit a 72h | — |
 | 2026-09-29 | Reserva visible desde el inicio, usable en nivel 10; aportarBote solo admin (no Donar ni pool) | — |

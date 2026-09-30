@@ -38,6 +38,8 @@ describe('Render notify worker', function () {
     expect(dockerignore).to.include('!scripts/');
     expect(dockerignore).to.include('textbeltSms.cjs');
     expect(worker).to.include("path === '/health'");
+    expect(worker).to.include("path === '/'");
+    expect(worker).to.include("service: 'quatrivium-notify'");
     expect(worker).to.include("/identity/status");
     expect(worker).to.include("/identity/resume");
     expect(worker).to.include("/identity/release");
@@ -121,6 +123,19 @@ describe('Render notify worker', function () {
       expect(parsed.textbelt).to.equal(true);
       expect(parsed.resend).to.equal(true);
       expect(parsed).to.not.have.property('TEXTBELT_API_KEY');
+      const rootBody = await new Promise((resolve, reject) => {
+        http
+          .get({ hostname: '127.0.0.1', port, path: '/' }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => {
+              data += chunk;
+            });
+            res.on('end', () => resolve({ status: res.statusCode, data }));
+          })
+          .on('error', reject);
+      });
+      expect(rootBody.status).to.equal(200);
+      expect(JSON.parse(rootBody.data).health).to.equal('/health');
     } finally {
       child.kill('SIGTERM');
     }

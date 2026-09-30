@@ -30,3 +30,11 @@ ignore:
     - '*':
         reason: node-forge via expo-updates 29 / Expo 54; sin parche compatible
         expires: 2027-09-28T00:00:00.000Z
+  SNYK-JS-INFLIGHT-6095116:
+    - '*':
+        reason: inflight via React Native 0.81 / Expo 54; el fix pide RN 0.84
+        expires: 2027-09-29T00:00:00.000Z
+  SNYK-JS-UUID-16133035:
+    - '*':
+        reason: uuid 7 via expo-constants 18 / Expo 54; el fix pide Expo 55
+        expires: 2027-09-29T00:00:00.000Z
