@@ -1,9 +1,9 @@
 export const FAME_PAGE_SIZE = 10;
 export const RANKING_UNLOCK_LEVEL = 50;
 
-export type FameBoardKind = 'referrals' | 'loans' | 'fame' | 'level' | 'bonuses' | 'combined';
+export type FameBoardKind = 'referrals' | 'loans' | 'fame' | 'streak' | 'level' | 'bonuses' | 'combined';
 
-export const FAME_BOARD_KINDS: FameBoardKind[] = ['referrals', 'loans', 'fame', 'level', 'bonuses', 'combined'];
+export const FAME_BOARD_KINDS: FameBoardKind[] = ['referrals', 'loans', 'fame', 'streak', 'level', 'bonuses', 'combined'];
 
 export interface FamePlayer {
   address: string;
@@ -13,6 +13,7 @@ export interface FamePlayer {
   loansPaid: number;
   paidUsd: number;
   fame: number;
+  streakDays: number;
   level: number;
   bonuses: number;
   bonusUsd: number;
@@ -36,6 +37,7 @@ export function attachCombinedScores(players: FamePlayer[]): FamePlayer[] {
   const maxPaid = Math.max(0, ...list.map((row) => row.loansPaid || 0));
   const maxUsd = Math.max(0, ...list.map((row) => row.paidUsd || 0));
   const maxFame = Math.max(0, ...list.map((row) => row.fame || 0));
+  const maxStreak = Math.max(0, ...list.map((row) => row.streakDays || 0));
   const maxLevel = Math.max(0, ...list.map((row) => row.level || 0));
   const maxBonusUsd = Math.max(0, ...list.map((row) => row.bonusUsd || 0));
   return list.map((row) => ({
@@ -45,6 +47,7 @@ export function attachCombinedScores(players: FamePlayer[]): FamePlayer[] {
       normalizeFameMetric(row.loansPaid, maxPaid) +
       normalizeFameMetric(row.paidUsd, maxUsd) +
       normalizeFameMetric(row.fame, maxFame) +
+      normalizeFameMetric(row.streakDays, maxStreak) +
       normalizeFameMetric(row.level, maxLevel) +
       normalizeFameMetric(row.bonusUsd, maxBonusUsd),
   }));
@@ -53,6 +56,7 @@ export function attachCombinedScores(players: FamePlayer[]): FamePlayer[] {
 export function fameBoardMetric(player: FamePlayer, kind: FameBoardKind): number {
   if (kind === 'referrals') return Number(player.referrals) || 0;
   if (kind === 'fame') return Number(player.fame) || 0;
+  if (kind === 'streak') return Number(player.streakDays) || 0;
   if (kind === 'level') return Number(player.level) || 0;
   if (kind === 'bonuses') {
     const usd = Number(player.bonusUsd) || 0;

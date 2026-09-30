@@ -100,10 +100,20 @@ export interface UserInfo {
   famaCaja: number;
   famaCanjeada: number;
   famaDisponible: number;
+  racha: {
+    dias: number;
+    diasMax: number;
+    famaDias: number;
+    hitoCobrado: number;
+    siguienteHito: number;
+    bonoPendienteUsd: number;
+    graciaVigente: boolean;
+  };
   maxLoanLevel: number;
   canClaimHitos: boolean;
   canDonate: boolean;
   canCanjearFama: boolean;
+  canRacha: boolean;
   isOwner: boolean;
   isAdmin: boolean;
   paused: boolean;
@@ -156,10 +166,12 @@ const EMPTY_USER_INFO: UserInfo = {
   famaCaja: 0,
   famaCanjeada: 0,
   famaDisponible: 0,
+  racha: { dias: 0, diasMax: 0, famaDias: 0, hitoCobrado: 0, siguienteHito: 0, bonoPendienteUsd: 0, graciaVigente: false },
   maxLoanLevel: MAX_LOAN_LEVEL,
   canClaimHitos: false,
   canDonate: false,
   canCanjearFama: false,
+  canRacha: false,
   isOwner: false,
   isAdmin: false,
   paused: false,
@@ -277,6 +289,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           identidadExigida: !isDemoAccount(),
           canDonate: false,
           canCanjearFama: false,
+          canRacha: false,
           founderAddress: getRealDonationWallet(),
         });
         setBalances({ ...EMPTY_BALANCES, poolBalance, poolOutstanding, poolCash });
@@ -334,6 +347,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             curveRateBps,
             canDonate: false,
             canCanjearFama: false,
+            canRacha: false,
             founderAddress: getRealDonationWallet(),
             maxLoanLevel: MAX_LOAN_LEVEL,
             canClaimHitos: false,
@@ -368,11 +382,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       try {
         const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
         if (!live()) return;
-        let caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false, canCanjearFama: false };
+        let caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false, canCanjearFama: false, canRacha: false };
         try {
           caps = await QuatriviumCreditService.detectarCapacidadProtocolo();
         } catch {
-          caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false, canCanjearFama: false };
+          caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false, canCanjearFama: false, canRacha: false };
         }
         if (live()) {
           setUserInfo((prev) => ({
@@ -381,6 +395,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             canClaimHitos: caps.canClaimHitos,
             canDonate: caps.canDonate,
             canCanjearFama: caps.canCanjearFama,
+            canRacha: caps.canRacha,
           }));
         }
 
@@ -509,12 +524,14 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
         try {
           const fama = await QuatriviumCreditService.obtenerFama(walletAddress);
+          const racha = await QuatriviumCreditService.obtenerRacha(walletAddress);
           if (live()) {
             setUserInfo((prev) => ({
               ...prev,
               famaCaja: fama.caja,
               famaCanjeada: fama.canjeada,
               famaDisponible: fama.disponible,
+              racha,
             }));
           }
         } catch (e) {

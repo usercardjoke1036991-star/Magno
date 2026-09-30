@@ -91,7 +91,9 @@ describe('legal consent gate', () => {
     const reservaUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReservaSection.tsx'), 'utf8');
     expect(reservaUi).to.include('reservaUnlockWait');
     expect(reservaUi).to.include('formatCountdownClock');
+    expect(reservaUi).to.include('reservaCommissionLead');
+    expect(reservaUi).to.include('reservaBoostComision');
+    expect(reservaUi).to.include('reservaLockOnce');
     expect(reservaUi).to.not.include('reservaFounderNote');
-    expect(reservaUi).to.not.include('reservaBoostComision');
   });
 });

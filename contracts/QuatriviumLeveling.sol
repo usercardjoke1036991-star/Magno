@@ -4,7 +4,8 @@ pragma solidity ^0.8.24;
 /**
  * @title QuatriviumLeveling
  * @notice Misma curva de solicitudes que el núcleo + bonos de hito cada 100 niveles.
- *         L1 → 3; L2–9 → 5; desde $100 (L10) → 5, 10, 15…; L1000 no sube de nivel y reinicia el ciclo del bono.
+ *         L1 → 3; L2–9 → 5; desde $100 (L10) → 5, 10, 15…; L1000 no sube.
+ *         En L1000 las solicitudes se acumulan; cada 100 pagos a tiempo se puede volver a cobrar el hito 1000.
  *         Bono = 20 USDT × nivel del hito (100 → 2000, 200 → 4000, 1000 → 20 000).
  */
 contract QuatriviumLeveling {
@@ -14,6 +15,7 @@ contract QuatriviumLeveling {
     uint256 public constant BONO_HITOS_TOTAL = 110000e18;
     uint256 public constant MAX_NIVEL = 1000;
     uint256 public constant DIVISION_SIZE = 100;
+    uint256 public constant L1000_BONO_CADA = 100;
     uint256 public constant RANKING_PREMIO_BP = 150;
     uint256 internal constant PISO_CAJA_BP = 2000;
 

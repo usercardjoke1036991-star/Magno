@@ -1,10 +1,25 @@
 import { formatUSD } from '../utils/formatters';
 
+/** GEN1_BP del núcleo. El 15% del interés va al padrino directo, salvo el primer L1. */
 export const DIRECT_COMMISSION_BPS = 1500;
+/** BONO_ACTIVACION: 1 USDT del pool al padrino directo en el primer L1 pagado. */
 export const ACTIVATION_BONUS_USD = 1;
+export const MAX_COMMISSION_LINE = 40;
+export const POOL_FLOOR_BP = 4000;
 
 export function interestFromLoan(usdAmount: number, interestBps: number): number {
   return (usdAmount * interestBps) / 10000;
+}
+
+export function generationCommissionBps(gen: number): number {
+  if (gen <= 0 || gen > MAX_COMMISSION_LINE) return 0;
+  if (gen === 1) return 1500;
+  if (gen === 2) return 800;
+  if (gen === 3) return 600;
+  if (gen === 4) return 400;
+  if (gen === 5) return 200;
+  if (gen <= 12) return 80;
+  return 40;
 }
 
 export function directCommissionFromLoan(usdAmount: number, interestBps: number): number {
@@ -15,4 +30,28 @@ export function formatCommissionUSD(amount: number): string {
   if (amount >= 1) return formatUSD(amount);
   if (amount >= 0.01) return `$${amount.toFixed(3)}`;
   return `$${amount.toFixed(4)}`;
+}
+
+export function commissionForGeneration(usdAmount: number, interestBps: number, gen: number): number {
+  return (interestFromLoan(usdAmount, interestBps) * generationCommissionBps(gen)) / 10000;
+}
+
+export const COMMISSION_BANDS: ReadonlyArray<{ range: string; gen: number }> = [
+  { range: '1', gen: 1 },
+  { range: '2', gen: 2 },
+  { range: '3', gen: 3 },
+  { range: '4', gen: 4 },
+  { range: '5', gen: 5 },
+  { range: '6–12', gen: 6 },
+  { range: '13–40', gen: 13 },
+];
+
+export function commissionBandsForLoan(
+  usdAmount: number,
+  interestBps: number
+): Array<{ range: string; amount: number }> {
+  return COMMISSION_BANDS.map((band) => ({
+    range: band.range,
+    amount: commissionForGeneration(usdAmount, interestBps, band.gen),
+  }));
 }

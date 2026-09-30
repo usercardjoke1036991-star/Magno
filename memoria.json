@@ -1,6 +1,8 @@
 {
   "enfoque": "Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.",
   "decisiones": [
+    "- [2026-09-30] No recortar el nucleo por EIP-170. Si no cabe, hermano. No se borran cobrarBonoHito, _assertPeg ni _pagarBonosRed. L1000 cada 100 y cuotas opcionales viven en Credit porque el pago y la liquidacion no pueden delegarse.",
+    "- [2026-09-30] Cambiar PIN, huella, metodos de confirmacion o autenticador exige un metodo ya listo. El QR TOTP no se vuelve a mostrar salvo Reemplazar.",
     "- [2026-09-30] Huella en Xiaomi: si requireAuthentication falla, no desbloquear. Pedir PIN o contraseña.",
     "- [2026-09-30] El canje lee planPago del nucleo. No se anade estaVencido() a Credit: solo quedan 40 bytes de EIP-170.",
     "- [2026-09-30] En Cuenta Real, si SecureStore no guarda el sobre de la billetera, la app para. No se usa AsyncStorage. Demo sigue con respaldo. Cuentas nuevas AES-256-GCM; v1 se abre y se reescribe cuando el cofre responde.",
@@ -28,11 +30,14 @@
     "- [2026-09-16] El codigo de referido solo se captura al crear la cuenta. Vacio = cadena propia colgada del fundador. Una vez vinculado no se cambia (local + on-chain already registered).",
     "- [2026-09-16] No recortar funciones del nucleo por EIP-170: ranking y premio van en hermanos (QuatriviumLeveling). La sala Rankings permanece y los nombres se ven desde el nivel 50.",
     "- [2026-09-16] Los puestos de ranking no son fijos: suben o bajan con el esfuerzo. El historial de referidos sigue en Red. Los marcos de gema de nivel se ven en cada persona del ranking; 1o/2o/3o llevan ademas medallas distintas.",
-    "- [2026-09-16] Analisis MobSF privado en localhost; no usar la instancia publica para que el APK no circule.",
-    "- [2026-09-14] OTP de telefono usa Twilio SMS. El worker publico corre en Fly (min 1 maquina, sin ngrok). Hasta mainnet el worker Demo acepta firmas de Cuenta Real para correo/OTP.",
-    "- [2026-09-14] La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta."
+    "- [2026-09-16] Analisis MobSF privado en localhost; no usar la instancia publica para que el APK no circule."
   ],
   "cambios": [
+    "- [2026-09-30] Racha diaria en FamaCaja. Credit no crecio. Tras pagar, notificarRacha. Ranking de dias. Fama de racha no se pierde.",
+    "- [2026-09-30] Cerrado el paquete de comisiones, L1000 y cuotas: lista por generacion, bono cada 100, mora solo al vencimiento. Tests del modulo 99/99. Snyk Code 0 en components y constants.",
+    "- [2026-09-30] Textos de comisiones vs contrato; QR autenticador oculto tras validar; revalidacion al cambiar seguridad",
+    "- [2026-09-30] Fama UI 100/USDT. Reserva hub sin visible desde ahora. Autenticador genera QR al abrir. USDT/USDC/FDUSD con gobernanza.",
+    "- [2026-09-30] Canje chips hasta 1000. Reserva: extra de comisiones por tramo, min 1 USDT, una posicion 30d. Copy institucional es/en.",
     "- [2026-09-30] Fail-closed contraseña Real y huella solo Keystore; si falla, PIN o clave.",
     "- [2026-09-30] Canje alineado a _estaVencido via planPago; Foundry constructor 7 args con FamaCaja. Credit no crece.",
     "- [2026-09-30] Fail-closed SecureStore en Cuenta Real y sobre AES-GCM v2 con lectura dual v1.",
@@ -77,13 +82,8 @@
     "- [2026-09-17] Slither 0.11.3 en vivo (WSL, Hardhat): 19 contratos, 79 detectores, 2 avisos Medium divide-before-multiply en premioAsiento. Son n(n+1)/2 exacto y la formula multiply-first ya aplicada. Sin bug de fondos.",
     "- [2026-09-17] PDF ssaas.pdf (scan 7am) confirma APK B5BD79B9 sin exp+. HIGH=huella. Sin cambios de codigo. Escanear solo localhost.",
     "- [2026-09-17] Auditoria sss.pdf: HIGH=huella, se quito exp+ de release. APK Escritorio SHA256 B5BD79B9 version 1.0.2 vc3. Escanear solo en localhost:8000.",
-    "- [2026-09-17] APK MobSF regenerado 1.0.2 vc3 en Escritorio SHA256 1E36EC5B. Escanear solo en localhost:8000.",
-    "- [2026-09-17] Auditoria profunda: padrino al validar el codigo, rankings sin usuario de sesion, premio de asiento multiply-first. Hardhat 168. Demo 14/15.",
-    "- [2026-09-17] Auditoria completa del kit ciber en vivo. Sin bug de perdida de fondos. APK Desktop mismo hash. Render y mainnet siguen aparte.",
-    "- [2026-09-16] Blueprint render.yaml, mkdir del almacén, health sin CORS, dockerignore con !scripts/, test Render.",
-    "- [2026-09-16] Pack Hetzner: docker-compose + Caddy + npm run notify:hetzner. El fundador crea el VPS y apunta notify.quatriviumcredit.app.",
-    "- [2026-09-16] Referido opcional solo en crear cuenta; se bloquea para siempre; activar credito ya no pide codigo."
+    "- [2026-09-17] APK MobSF regenerado 1.0.2 vc3 en Escritorio SHA256 1E36EC5B. Escanear solo en localhost:8000."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-30] Decisión: Huella en Xiaomi: si requireAuthentication falla, no desbloquear. Pedir PIN o contraseña."
+  "ultima_sesion": "[2026-09-30] Cambio: Racha diaria en FamaCaja. Credit no crecio. Tras pagar, notificarRacha. Ranking de dias. Fama de racha no se pierde."
 }

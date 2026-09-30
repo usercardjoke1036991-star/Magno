@@ -18,6 +18,7 @@ function attachCombinedScores(players) {
   const maxPaid = Math.max(0, ...list.map((row) => row.loansPaid || 0));
   const maxUsd = Math.max(0, ...list.map((row) => row.paidUsd || 0));
   const maxFame = Math.max(0, ...list.map((row) => row.fame || 0));
+  const maxStreak = Math.max(0, ...list.map((row) => row.streakDays || 0));
   const maxLevel = Math.max(0, ...list.map((row) => row.level || 0));
   const maxBonusUsd = Math.max(0, ...list.map((row) => row.bonusUsd || 0));
   return list.map((row) => ({
@@ -27,6 +28,7 @@ function attachCombinedScores(players) {
       normalizeFameMetric(row.loansPaid, maxPaid) +
       normalizeFameMetric(row.paidUsd, maxUsd) +
       normalizeFameMetric(row.fame, maxFame) +
+      normalizeFameMetric(row.streakDays, maxStreak) +
       normalizeFameMetric(row.level, maxLevel) +
       normalizeFameMetric(row.bonusUsd, maxBonusUsd),
   }));
@@ -35,6 +37,7 @@ function attachCombinedScores(players) {
 function fameBoardMetric(player, kind) {
   if (kind === 'referrals') return Number(player.referrals) || 0;
   if (kind === 'fame') return Number(player.fame) || 0;
+  if (kind === 'streak') return Number(player.streakDays) || 0;
   if (kind === 'level') return Number(player.level) || 0;
   if (kind === 'bonuses') return (Number(player.bonusUsd) || 0) * 1e6 + (Number(player.bonuses) || 0);
   if (kind === 'combined') return Number(player.combined) || 0;
@@ -131,6 +134,7 @@ function player(id, extra = {}) {
     loansPaid: 0,
     paidUsd: 0,
     fame: 0,
+    streakDays: 0,
     level: 1,
     bonuses: 0,
     bonusUsd: 0,
@@ -153,6 +157,10 @@ describe('fame rankings', () => {
     expect(sortFameBoard(sample, 'loans')[0].address).to.equal('0x3');
     expect(sortFameBoard(sample, 'fame')[0].address).to.equal('0x2');
     expect(sortFameBoard(sample, 'level')[0].address).to.equal('0x2');
+    const withStreak = attachCombinedScores(sample.map((row) => (
+      row.address === '0x1' ? { ...row, streakDays: 40 } : row
+    )));
+    expect(sortFameBoard(withStreak, 'streak')[0].address).to.equal('0x1');
     expect(sortFameBoard(sample, 'combined')[0].address).to.equal('0x2');
     const withBonus = attachCombinedScores(sample.map((row) => (
       row.address === '0x4' ? { ...row, bonuses: 3, bonusUsd: 40000 } : row
@@ -300,6 +308,15 @@ describe('fame rankings', () => {
     const loans = fs.readFileSync(path.join(__dirname, '..', 'components', 'LoanTierCard.tsx'), 'utf8');
     expect(loans).to.include('payOnTimeToLevel');
     expect(loans).to.include('maxLevelNote');
-    expect(loans).to.match(/isMaxLevel[\s\S]*payOnTimeToLevel/);
+    expect(loans).to.include('referralEarnBand');
+    expect(loans).to.include('commissionBandsForLoan');
+    expect(loans).to.include('MAX_LEVEL_BONUS_EVERY');
+    expect(loans).to.match(/isMaxLevel \? \(/);
+    const hub = fs.readFileSync(path.join(__dirname, '..', 'app/index.tsx'), 'utf8');
+    expect(hub).to.include("id: 'racha'");
+    expect(hub.indexOf("id: 'racha'")).to.be.greaterThan(hub.indexOf("id: 'reserva'"));
+    const rachaUi = fs.readFileSync(path.join(__dirname, '..', 'components/RachaSection.tsx'), 'utf8');
+    expect(rachaUi).to.include('RACHA_HITOS');
+    expect(rachaUi).to.include('FAMA_POR_DIA_RACHA');
   });
 });

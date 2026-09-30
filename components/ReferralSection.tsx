@@ -19,7 +19,6 @@ import {
   REFERRAL_BONUS_THRESHOLD,
   REFERRAL_NETWORK_POINTS,
   REFERRAL_REPUTATION_POINTS,
-  fameForGeneration,
   formatPoolBonus,
   referralsForNextBonus,
 } from '../constants/reputation';
@@ -281,14 +280,11 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         <AppText style={[styles.earnHint, { color: colors.textMuted }]}>
           {t('referralRepLead', {
             points: String(REFERRAL_REPUTATION_POINTS),
-            network: String(REFERRAL_NETWORK_POINTS),
             threshold: String(networkBonusThreshold),
             bonus: formatPoolBonus(),
           })}
         </AppText>
-        <AppText style={[styles.hint, { color: colors.textMuted }]}>
-          {`1 · ${fameForGeneration(1)}   2 · ${fameForGeneration(2)}   3 · ${fameForGeneration(3)}   4 · ${fameForGeneration(4)}   5 · ${fameForGeneration(5)}   6–12 · ${fameForGeneration(6)}   13–40 · ${fameForGeneration(13)}`}
-        </AppText>
+        <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('referralRepDirectOnly')}</AppText>
         <AppText style={[styles.metaLine, { color: colors.text }]}>
           {t('referralRepScore', { score: String(reputation), network: String(networkPoints) })}
         </AppText>
@@ -302,6 +298,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
       <AppSubsection title={t('referralEarnTitle')} defaultOpen={false} icon="pay">
         <AppText style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralLead')}</AppText>
+        <AppText style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralCommissionSchedule')}</AppText>
         <View style={styles.earnHead}>
           <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.2 }]}>{t('referralEarnColRank')}</AppText>
           <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1 }]}>{t('referralEarnColLoan')}</AppText>

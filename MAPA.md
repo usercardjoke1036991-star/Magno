@@ -168,6 +168,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: PublicFacePicker
 - `components/PublicIdentityForm.tsx` — módulo JS/TS
   - Funciones/clases: PublicIdentityForm
+- `components/RachaSection.tsx` — módulo JS/TS
+  - Funciones/clases: RachaSection
 - `components/RankFrame.tsx` — módulo JS/TS
   - Funciones/clases: RankFrame
 - `components/RankGem.tsx` — módulo JS/TS
@@ -202,6 +204,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: UserMetrics
 - `components/UsernameSection.tsx` — módulo JS/TS
   - Funciones/clases: UsernameSection
+- `components/WalletFailedEscape.tsx` — módulo JS/TS
+  - Funciones/clases: WalletFailedEscape
 - `components/WalletMark.tsx` — módulo JS/TS
   - Funciones/clases: WalletMark
 - `components/WalletSection.tsx` — módulo JS/TS
@@ -213,7 +217,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/bsc.ts` — módulo JS/TS
   - Funciones/clases: ZERO_ADDRESS, BSC_MAINNET, BSC_TESTNET, isZeroAddress, isTestnetOnlyToken
 - `constants/commissions.ts` — módulo JS/TS
-  - Funciones/clases: DIRECT_COMMISSION_BPS, ACTIVATION_BONUS_USD, interestFromLoan, directCommissionFromLoan, formatCommissionUSD
+  - Funciones/clases: DIRECT_COMMISSION_BPS, ACTIVATION_BONUS_USD, MAX_COMMISSION_LINE, POOL_FLOOR_BP, interestFromLoan, generationCommissionBps, directCommissionFromLoan, formatCommissionUSD, commissionForGeneration, COMMISSION_BANDS, commissionBandsForLoan
 - `constants/compatibleWallets.ts` — módulo JS/TS
   - Funciones/clases: COMPATIBLE_WALLETS
 - `constants/contractConfig.ts` — módulo JS/TS
@@ -227,15 +231,17 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
-  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
+  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, MAX_LEVEL_BONUS_EVERY, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/podium.ts` — módulo JS/TS
   - Funciones/clases: PODIUM_STYLE
+- `constants/racha.ts` — módulo JS/TS
+  - Funciones/clases: FAMA_POR_DIA_RACHA, RACHA_GRACIA_DIAS, RACHA_HITOS, RACHA_BONO_USDT, rachaBonusUsd, nextRachaHito
 - `constants/ranks.ts` — módulo JS/TS
   - Funciones/clases: FAMILY_BANDS, saturateHex, colorizeTextureFilters, RANK_GEM_ASSET, RANK_MEDAL_ASSET, clampLoanLevel, getRankForLevel, rankFamilyIndex, romanDivision, rankDivisionTint, formatRankLabel, RANK_LADDER, rankGalleryRow, RANK_GALLERY
 - `constants/reputation.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_REPUTATION_POINTS, REFERRAL_NETWORK_POINTS, REFERRAL_BONUS_THRESHOLD, REFERRAL_POOL_BONUS_USD, generationBps, fameForGeneration, founderFamePoints, referralsForNextBonus, formatPoolBonus
 - `constants/reserva.ts` — módulo JS/TS
-  - Funciones/clases: RESERVA_LOCK_SECONDS, RESERVA_MAX_APY_BP, RESERVA_YEAR_SECONDS, RESERVA_TRAMO_MEDIO, RESERVA_TRAMO_ALTO, RESERVA_MIN_LEVEL, reservaTramoUsd, reservaBoostRedBp, reservaCorteFundadorBp, reservaExtraComisionWei, reservaTechoWei
+  - Funciones/clases: RESERVA_LOCK_SECONDS, RESERVA_MAX_APY_BP, RESERVA_YEAR_SECONDS, RESERVA_TRAMO_MEDIO, RESERVA_TRAMO_ALTO, RESERVA_MIN_LEVEL, RESERVA_MIN_LOCK_USDT, RESERVA_MIN_LOCK_WEI, RESERVA_LOCK_BUTTONS, reservaTramoUsd, reservaBoostRedBp, reservaCorteFundadorBp, reservaExtraComisionWei, reservaTechoWei
 - `constants/reservaConfig.ts` — módulo JS/TS
   - Funciones/clases: RESERVA_ABI, getReservaAddress, isReservaConfigured, reservaUsesPracticeLedger
 - `constants/rpcConfig.ts` — módulo JS/TS
@@ -355,7 +361,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/founderUsdtCharge.ts` — módulo JS/TS
   - Funciones/clases: chargeFounderUsdt
 - `services/fundsConfirm.ts` — módulo JS/TS
-  - Funciones/clases: isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
+  - Funciones/clases: listSecurityConfirmMethods, hasSecurityConfirmMethod, isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
   - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration, loadKycDocPhoto, persistKycDocPhoto
 - `services/kycProvider.ts` — módulo JS/TS
@@ -392,6 +398,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: hasVerificationFeeReceipt, markVerificationFeeReceipt
 - `services/walletAuth.ts` — módulo JS/TS
   - Funciones/clases: AUTH_TYPES, authDomain, signWalletAuth, signedAuthBody, recoverWalletAuth, isFreshTimestamp
+- `services/walletOpenEscape.ts` — módulo JS/TS
+  - Funciones/clases: subscribeWalletOpenEscape, requestWalletOpenEscape
 - `services/walletSession.ts` — módulo JS/TS
   - Funciones/clases: setWalletWrapKey, getWalletWrapKey, hasWalletSession, clearWalletSession
 - `services/zkService.ts` — módulo JS/TS
@@ -424,6 +432,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/mlm.test.js` — módulo JS/TS
 - `test/morosity.test.js` — módulo JS/TS
 - `test/peg.test.js` — módulo JS/TS
+- `test/racha.test.js` — módulo JS/TS
 - `test/render-notify.test.js` — módulo JS/TS
 - `test/reserva.test.js` — módulo JS/TS
 - `test/secret-box.test.js` — módulo JS/TS
@@ -442,7 +451,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `types/zkTypes.ts` — módulo JS/TS
   - Funciones/clases: asFieldElement, ZKTypeValidator, ZK_SECURITY_CONSTANTS
 - `utils/accountEntry.ts` — módulo JS/TS
-  - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, accountOnPhoneFromProbes, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, nextUnlockAfterBiometricFail, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase
+  - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, accountOnPhoneFromProbes, wrapReadyForApp, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, nextUnlockAfterBiometricFail, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase, walletFailEscapes, afterUnlockNext
 - `utils/adminAttester.ts` — módulo JS/TS
   - Funciones/clases: looksLikePrivateKey, attesterProposalError
 - `utils/adminProposal.ts` — módulo JS/TS

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import type { Signer } from 'ethers';
 import { formatUnits } from 'ethers';
@@ -6,7 +6,13 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatCountdownClock, formatDueDate, formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { showNotice } from '../utils/appNotice';
-import { RESERVA_MIN_LEVEL } from '../constants/reserva';
+import {
+  RESERVA_LOCK_BUTTONS,
+  RESERVA_MIN_LEVEL,
+  RESERVA_MIN_LOCK_USDT,
+  reservaBoostRedBp,
+  reservaTramoUsd,
+} from '../constants/reserva';
 import {
   bloquearReserva,
   desbloquearReserva,
@@ -46,7 +52,7 @@ export function ReservaSection({
 }: ReservaSectionProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const [amount, setAmount] = useState('50');
+  const [amount, setAmount] = useState(String(RESERVA_MIN_LOCK_USDT));
   const [acked, setAcked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<ReservaPreview | null>(null);
@@ -84,6 +90,9 @@ export function ReservaSection({
   const reservaPaused = Boolean(preview?.pausedOnChain);
   const creditPaused = paused;
   const levelOk = userLevel >= RESERVA_MIN_LEVEL;
+  const parsed = parsePositiveDecimal(amount);
+  const lockUsd = parsed ? Number(parsed) : 0;
+  const amountOk = Number.isFinite(lockUsd) && lockUsd >= RESERVA_MIN_LOCK_USDT;
   const canLock =
     Boolean(walletAddress) &&
     !busy &&
@@ -95,6 +104,7 @@ export function ReservaSection({
     levelOk &&
     acked &&
     !preview?.activa &&
+    amountOk &&
     Boolean(preview?.practice || preview?.configured);
   const canUnlock =
     Boolean(walletAddress) &&
@@ -102,8 +112,30 @@ export function ReservaSection({
     !isLoading &&
     Boolean(preview?.activa && preview.ready);
   const canRenew = canUnlock && levelOk && !delinquent && !creditPaused && !identityBlocked && !reservaPaused;
-  const amountEditable = canLock;
-  const parsed = parsePositiveDecimal(amount);
+  const amountEditable = Boolean(
+    walletAddress &&
+      !busy &&
+      !isLoading &&
+      !identityBlocked &&
+      !delinquent &&
+      !creditPaused &&
+      !reservaPaused &&
+      levelOk &&
+      !preview?.activa &&
+      (preview?.practice || preview?.configured)
+  );
+
+  const boostPreview = useMemo(() => {
+    const usd = preview?.activa
+      ? Number(formatUnits(preview.principalWei, 18))
+      : amountOk
+        ? lockUsd
+        : 0;
+    if (!Number.isFinite(usd) || usd <= 0) return null;
+    const tramo = reservaTramoUsd(usd);
+    const pct = reservaBoostRedBp(tramo) / 100;
+    return { usd, tramo, pct };
+  }, [amountOk, lockUsd, preview?.activa, preview?.principalWei]);
 
   async function run(action: () => Promise<void>, okKey: 'reservaBlockedOk' | 'reservaUnlockedOk' | 'reservaRenewedOk') {
     if (!signer) {
@@ -126,9 +158,21 @@ export function ReservaSection({
     <View style={styles.stack}>
       <AppSubsection title={t('reservaTitle')} defaultOpen icon="lock">
         <AppText style={[styles.lead, { color: colors.text }]}>{t('reservaLead')}</AppText>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaLockOnce')}</AppText>
+        <AppText style={[styles.lead, { color: colors.text }]}>{t('reservaCommissionLead')}</AppText>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaBoostComision')}</AppText>
         {preview ? (
           <AppText style={[styles.meta, { color: colors.textMuted }]}>
             {t('reservaBoteLabel')}: {formatUSD(Number(formatUnits(preview.boteWei, 18)))} {tokenSymbol}
+          </AppText>
+        ) : null}
+        {boostPreview ? (
+          <AppText style={[styles.meta, { color: colors.primary }]}>
+            {t('reservaYourBoost', {
+              amount: formatUSD(boostPreview.usd),
+              tier: String(boostPreview.tramo),
+              pct: String(boostPreview.pct),
+            })}
           </AppText>
         ) : null}
         {preview?.practice ? (
@@ -164,6 +208,26 @@ export function ReservaSection({
         ) : null}
         {!preview?.activa ? (
           <>
+            <View style={styles.row}>
+              {RESERVA_LOCK_BUTTONS.map((usd) => (
+                <TouchableOpacity
+                  key={usd}
+                  disabled={!amountEditable}
+                  onPress={() => setAmount(String(usd))}
+                  style={[
+                    styles.chip,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: lockUsd === usd ? colors.primary : colors.surface,
+                    },
+                  ]}
+                >
+                  <AppText style={{ color: lockUsd === usd ? colors.onPrimary : amountEditable ? colors.text : colors.textMuted }}>
+                    {formatUSD(usd)}
+                  </AppText>
+                </TouchableOpacity>
+              ))}
+            </View>
             <AppText style={[styles.label, { color: colors.primary }]}>
               {t('reservaAmount')} ({tokenSymbol}
               {tokenBalance ? ` · ${tokenBalance}` : ''})
@@ -172,7 +236,7 @@ export function ReservaSection({
               value={amount}
               onChangeText={setAmount}
               keyboardType="decimal-pad"
-              placeholder="50"
+              placeholder={String(RESERVA_MIN_LOCK_USDT)}
               editable={amountEditable}
               placeholderTextColor={colors.textMuted}
               style={[
@@ -180,6 +244,9 @@ export function ReservaSection({
                 { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
               ]}
             />
+            {parsed && !amountOk ? (
+              <AppText style={[styles.warn, { color: colors.warnText }]}>{t('reservaMonto')}</AppText>
+            ) : null}
           </>
         ) : null}
         {!preview?.activa ? (
@@ -195,16 +262,16 @@ export function ReservaSection({
         ) : null}
         {!preview?.activa ? (
           <TouchableOpacity
-            disabled={!canLock || !parsed}
+            disabled={!canLock}
             onPress={() => void run(() => bloquearReserva(signer as Signer, parsed || '0', hasPadre), 'reservaBlockedOk')}
-            style={[styles.button, { backgroundColor: canLock && parsed ? colors.primary : colors.chip }]}
+            style={[styles.button, { backgroundColor: canLock ? colors.primary : colors.chip }]}
           >
             {busy ? (
               <ActivityIndicator color={colors.onPrimary} size="small" />
             ) : (
               <View style={styles.buttonRow}>
-                <AppIcon name="lock" size={18} color={canLock && parsed ? colors.onPrimary : colors.textMuted} />
-                <AppText style={[styles.buttonText, { color: canLock && parsed ? colors.onPrimary : colors.textMuted }]}>
+                <AppIcon name="lock" size={18} color={canLock ? colors.onPrimary : colors.textMuted} />
+                <AppText style={[styles.buttonText, { color: canLock ? colors.onPrimary : colors.textMuted }]}>
                   {t('reservaBlock')}
                 </AppText>
               </View>
@@ -246,6 +313,8 @@ const styles = StyleSheet.create({
   warn: { fontSize: 13, lineHeight: 18, marginBottom: 8 },
   label: { fontSize: 13, fontWeight: '600', marginTop: 8, marginBottom: 6 },
   input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  chip: { borderWidth: 1, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12 },
   ackRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginVertical: 10 },
   box: { width: 18, height: 18, borderWidth: 1, borderRadius: 4, marginTop: 2 },
   ack: { flex: 1, fontSize: 12, lineHeight: 18 },

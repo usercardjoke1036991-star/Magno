@@ -5,6 +5,7 @@ import { getReservaAddress, isReservaConfigured, reservaUsesPracticeLedger, RESE
 import {
   RESERVA_LOCK_SECONDS,
   RESERVA_MIN_LEVEL,
+  RESERVA_MIN_LOCK_WEI,
   reservaBoostRedBp,
   reservaCorteFundadorBp,
   reservaTechoWei,
@@ -162,6 +163,7 @@ async function withToken(signer: Signer, amount: bigint) {
 
 export async function bloquearReserva(signer: Signer, amountUsd: string, enRed: boolean): Promise<void> {
   const amount = parseUnits(amountUsd, 18);
+  if (amount < RESERVA_MIN_LOCK_WEI) throw new Error('reservaMonto');
   await assertNivelReserva(await signer.getAddress());
   if (reservaUsesPracticeLedger()) {
     await demoBloquear(await signer.getAddress(), amount, enRed);

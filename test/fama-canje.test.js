@@ -138,7 +138,7 @@ describe('QuatriviumFamaCaja - fama de caja y canje', function () {
     await expect(fama.connect(user).canjearFama(250n)).to.be.reverted;
   });
 
-  it('blocks redeem when an installment is overdue before the final due date', async () => {
+  it('still allows fame redeem if an installment date passed but the loan is not due', async () => {
     const { token, contract, fama, owner, user, tokenAddr, contractAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await registerAndFund(token, contract, user, '200');
@@ -167,7 +167,7 @@ describe('QuatriviumFamaCaja - fama de caja y canje', function () {
     await ethers.provider.send('evm_mine');
     const now = (await ethers.provider.getBlock('latest')).timestamp;
     expect(now).to.be.lt(Number(info.vencimiento));
-    await expect(fama.connect(user).canjearFama(250n)).to.be.reverted;
+    await expect(fama.connect(user).canjearFama(250n)).to.emit(fama, 'FamaCanjeada');
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 });

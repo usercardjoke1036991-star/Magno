@@ -27,7 +27,7 @@ describe('QuatriviumCredit - security hardening', function () {
     await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
   });
 
-  it('liquidates after a missed installment, not only at final maturity', async () => {
+  it('does not liquidate for a skipped installment before the final due date', async () => {
     const { token, contract, owner, user, extra: liquidator, tokenAddr, contractAddr } =
       await deployProtocol();
     await seedPool(token, contract, owner, '5000');
@@ -50,6 +50,10 @@ describe('QuatriviumCredit - security hardening', function () {
 
     await token.mint(liquidator.address, ethers.parseUnits('100', 18));
     await token.connect(liquidator).approve(contractAddr, ethers.MaxUint256);
+    await expect(contract.connect(liquidator).liquidate(user.address, tokenAddr)).to.be.reverted;
+
+    await ethers.provider.send('evm_setNextBlockTimestamp', [Number(userInfo.vencimiento) + 10]);
+    await ethers.provider.send('evm_mine');
     await expect(contract.connect(liquidator).liquidate(user.address, tokenAddr)).to.not.be.reverted;
     expect((await contract.usuarios(user.address)).montoActivo).to.equal(0);
   });

@@ -805,16 +805,17 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
             return;
         }
         progresoPago.solicitudesCompletadas++;
-        // L1 â†’ 3; L2â€“9 â†’ 5; L10â€“1000 â†’ 5, 10â€¦ 4955. En L1000 el ciclo se reinicia y el hito 1000 se puede volver a cobrar.
+        if (unlocked >= MAX_NIVEL_TOTAL) {
+            if (progresoPago.solicitudesCompletadas % 100 == 0 && hitoCobrado[deudor] >= MAX_NIVEL_TOTAL) {
+                hitoCobrado[deudor] = MAX_NIVEL_TOTAL - 100;
+            }
+            return;
+        }
         uint256 solicitudesRequeridas = unlocked <= 1 ? 3 : (unlocked < 10 ? 5 : 5 * (unlocked - 9));
         if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas) {
             progresoPago.solicitudesCompletadas = 0;
-            if (unlocked < MAX_NIVEL_TOTAL) {
-                progresoPago.nivelActual++;
-                emit NivelActualizado(deudor, progresoPago.nivelActual);
-            } else if (hitoCobrado[deudor] >= MAX_NIVEL_TOTAL) {
-                hitoCobrado[deudor] = MAX_NIVEL_TOTAL - 100;
-            }
+            progresoPago.nivelActual++;
+            emit NivelActualizado(deudor, progresoPago.nivelActual);
         }
     }
 
@@ -863,9 +864,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint256 pagadoAntes = plan.pagado;
         uint256 restante = totalDue - pagadoAntes;
         uint256 pago = monto < restante ? monto : restante;
-        if (plan.venceCuota != 0 && block.timestamp > plan.venceCuota) {
-            plan.enPlazo = false;
-        }
         if (_estaVencido(deudor)) {
             plan.enPlazo = false;
             _aplicarMoraSiVencido(deudor);
@@ -1095,8 +1093,8 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function _estaVencido(address usuario) internal view returns (bool) {
         if (usuarios[usuario].montoActivo == 0) return false;
-        if (usuarios[usuario].vencimiento > 0 && block.timestamp > usuarios[usuario].vencimiento) return true;
-        return planPago[usuario].venceCuota > 0 && block.timestamp > planPago[usuario].venceCuota;
+        uint256 vence = usuarios[usuario].vencimiento;
+        return vence > 0 && block.timestamp > vence;
     }
 
     function _aplicarPenalizacionDiaria(address usuario) internal {

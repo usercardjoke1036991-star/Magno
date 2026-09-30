@@ -42,6 +42,9 @@ import {
   addressFromPhrase,
   ensureAppWallet,
   generateSecretPhrase,
+  getSecretPhrase,
+  isPhraseBackedUp,
+  loadAppWallet,
   wipeAppWallet,
   importFromPhrase,
   isValidSecretPhrase,
@@ -53,9 +56,16 @@ import { loadVerifiedEmail } from '../services/accountEmail';
 import { restoreIdentityLocal } from '../services/accountIdentity';
 import { isAuthenticatorEnabled, unlockWithAuthenticator } from '../services/authenticator';
 import { ensureUnlockEnabled, getAuthMethods, isAuthEnabled, isMethodReady, loadAuthPrefs, type AuthMethod } from '../services/authPrefs';
-import { getWalletWrapKey } from '../services/walletSession';
-import { isSessionSaved, markSessionSaved, restoreSavedSessionWrap, signOutSavedSession } from '../services/savedSession';
+import { clearWalletSession, getWalletWrapKey } from '../services/walletSession';
+import {
+  isSessionSaved,
+  markSessionSaved,
+  purgePersistedWrap,
+  restoreSavedSessionWrap,
+  signOutSavedSession,
+} from '../services/savedSession';
 import { claimExclusiveSession, thisDeviceOwnsSession } from '../services/exclusiveSession';
+import { subscribeWalletOpenEscape } from '../services/walletOpenEscape';
 import {
   canSubmitDeviceCredentials,
   canSubmitReinstall,
@@ -70,6 +80,7 @@ import {
   restoreMatchesDevice,
   welcomeActions,
   welcomeShowsCreate,
+  wrapReadyForApp,
 } from '../utils/accountEntry';
 import { fetchPublicProfiles, hasLockedPublicIdentity, saveOwnProfile, type UserProfile } from '../services/userProfile';
 import { PublicIdentityForm } from './PublicIdentityForm';
@@ -116,6 +127,20 @@ function raceMs<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
       }
     );
   });
+}
+
+async function resolveSessionWrap(): Promise<{ wrapReady: boolean; address: string }> {
+  await restoreSavedSessionWrap();
+  if (!getWalletWrapKey()) return { wrapReady: false, address: '' };
+  const wallet = await raceMs(ensureAppWallet(), 8000, null);
+  const address = wallet?.address || '';
+  if (address) {
+    await raceMs(restoreIdentityLocal(address), 8000, null);
+    return { wrapReady: wrapReadyForApp(true, true), address };
+  }
+  clearWalletSession();
+  await purgePersistedWrap();
+  return { wrapReady: false, address: '' };
 }
 
 type SetupStage = 'welcome' | 'phraseReveal' | 'credentials' | 'restore' | 'signIn' | 'publicIdentity';
@@ -229,6 +254,22 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   };
   kickIfSessionMovedRef.current = kickIfSessionMoved;
 
+  const resumePhraseRevealIfNeeded = async (): Promise<boolean> => {
+    if (await raceMs(isPhraseBackedUp(), 4000, false)) return false;
+    const phrase = await raceMs(getSecretPhrase(), 8000, null);
+    if (!phrase) return false;
+    const wallet = await raceMs(loadAppWallet(), 8000, null);
+    setPendingPhrase(phrase);
+    setPhraseAcked(false);
+    if (wallet?.address) setSetupWallet(wallet.address.toLowerCase());
+    setSetupStage('phraseReveal');
+    setNeedsSetup(true);
+    setLocked(false);
+    setAskingSignIn(false);
+    setSessionReady(false);
+    return true;
+  };
+
   const finishAuthenticated = async (persist = true) => {
     if (persist) await raceMs(markSessionSaved(), 2500, undefined);
     setHasPassword(true);
@@ -260,7 +301,25 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       }
       if (fromSignIn) {
         await finishAuthenticated(keepOnPhone);
+      } else if (await resumePhraseRevealIfNeeded()) {
+        setRecovering(false);
+        setSessionTaken(false);
       } else {
+        const wallet = await raceMs(ensureAppWallet(), 8000, null);
+        if (!wallet?.address) {
+          clearWalletSession();
+          await purgePersistedWrap();
+          setError(t('appWalletFailed'));
+          setNeedsSetup(true);
+          setSetupStage('restore');
+          setLocked(false);
+          setRestorePhrase('');
+          setPasswordInput('');
+          setAccountUsername('');
+          setPinDigits('');
+          setAuthCode('');
+          return;
+        }
         await raceMs(markSessionSaved(), 2500, undefined);
         setLocked(false);
         setNeedsSetup(!(await isPasswordSet()));
@@ -308,21 +367,14 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       return;
     }
     const authOn = await isAuthenticatorEnabled();
-    await restoreSavedSessionWrap();
-    const wrapReadyEarly = Boolean(getWalletWrapKey());
-    if (wrapReadyEarly) {
-      try {
-        const wallet = await raceMs(ensureAppWallet(), 8000, null);
-        if (wallet?.address) await raceMs(restoreIdentityLocal(wallet.address), 8000, null);
-      } catch {
-        // El desbloqueo sigue con lo que haya en este teléfono.
-      }
-    }
+    const opened = await resolveSessionWrap();
+    const wrapReady = opened.wrapReady;
     if (__DEV__) {
       console.log('[boot] AppLockGate creds', {
         pinSet,
         passwordSet,
         authOn,
+        wrapReady,
       });
     }
     const enabled = passwordSet || pinSet ? await isBiometricEnabled() : false;
@@ -351,13 +403,12 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       setReady(true);
       return;
     }
-    await restoreSavedSessionWrap();
-    const wrapReady = Boolean(getWalletWrapKey());
-    let sessionSaved = await isSessionSaved();
-    if (!sessionSaved) {
-      await raceMs(markSessionSaved(), 2000, undefined);
-      sessionSaved = true;
+    if (wrapReady && (await resumePhraseRevealIfNeeded())) {
+      setReady(true);
+      setLockMs(await getPinLockRemaining());
+      return;
     }
+    const sessionSaved = await isSessionSaved();
     if (sessionSaved) await raceMs(ensureUnlockEnabled().catch(() => undefined), 2000, undefined);
     const unlockOn = await raceMs(isAuthEnabled('unlock').catch(() => false), 4000, false);
     const entry = nextEntryScreen({
@@ -431,10 +482,15 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       const sessionSaved = await raceMs(isSessionSaved(), 4000, false);
       const unlockOn = await raceMs(isAuthEnabled('unlock').catch(() => false), 4000, false);
       setHasPassword(passwordSet);
+      let wrapReady = false;
       if (!unlockOn) {
-        await restoreSavedSessionWrap();
+        const opened = await resolveSessionWrap();
+        wrapReady = opened.wrapReady;
+        if (wrapReady && (await resumePhraseRevealIfNeeded())) {
+          setReady(true);
+          return;
+        }
       }
-      const wrapReady = Boolean(getWalletWrapKey());
       const entry = nextEntryScreen({
         accountOnPhone,
         sessionSaved,
@@ -475,6 +531,32 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       clearTimeout(watchdog);
     };
   }, [boot]);
+
+  useEffect(() => {
+    return subscribeWalletOpenEscape((kind) => {
+      void (async () => {
+        clearWalletSession();
+        await purgePersistedWrap();
+        setError('');
+        setAskingSignIn(false);
+        setSessionReady(false);
+        setBusy(false);
+        if (kind === 'restore') {
+          setNeedsSetup(true);
+          setSetupStage('restore');
+          setLocked(false);
+          setRestorePhrase('');
+          setPasswordInput('');
+          setAccountUsername('');
+          return;
+        }
+        setNeedsSetup(false);
+        setUnlockMode('password');
+        lockNow();
+        setLocked(true);
+      })();
+    });
+  }, []);
 
   // En Xiaomi/MIUI el diálogo de huella al abrir falla. Solo se pide si el usuario pulsa el botón.
 
@@ -995,9 +1077,6 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                                   ? t('lockBiometric')
                                   : t('lockUnlockLead')}
             </AppText>
-            {credentialsStage ? (
-              <AppText style={[styles.emailNote, { color: colors.textMuted }]}>{t('createCredentialsLead')}</AppText>
-            ) : null}
             {!phraseRevealStage && !credentialsStage && !welcomeStage && !restoreStage && !publicIdentityStage && !recovering && setup ? (
               <View style={styles.dots}>
                 {Array.from({ length: PIN_LENGTH }).map((_, index) => (
@@ -1180,6 +1259,10 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 onChangeText={setRestorePhrase}
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoComplete="off"
+                importantForAutofill="no"
+                textContentType="none"
+                spellCheck={false}
                 multiline
                 placeholder={t('seedRestorePlaceholder')}
                 placeholderTextColor={colors.textMuted}
@@ -1194,6 +1277,9 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 onChangeText={(value) => setAccountUsername(normalizeUsername(value))}
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoComplete="off"
+                importantForAutofill="no"
+                textContentType="none"
                 placeholder={t('usernameField')}
                 placeholderTextColor={colors.textMuted}
                 style={[
@@ -1219,12 +1305,17 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 </AppText>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={busy || !canSubmitReinstall(restorePhrase, passwordInput, accountUsername)}
+                disabled={
+                  busy ||
+                  !isValidSecretPhrase(restorePhrase) ||
+                  !canSubmitReinstall(restorePhrase, passwordInput, accountUsername)
+                }
                 onPress={() => void submitRestoreAccount()}
                 style={[
                   styles.primary,
                   { backgroundColor: colors.connect },
-                  !canSubmitReinstall(restorePhrase, passwordInput, accountUsername) && {
+                  (!isValidSecretPhrase(restorePhrase) ||
+                    !canSubmitReinstall(restorePhrase, passwordInput, accountUsername)) && {
                     backgroundColor: colors.chip,
                   },
                 ]}
@@ -1296,6 +1387,9 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 onChangeText={(value) => setAccountUsername(normalizeUsername(value))}
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoComplete="off"
+                importantForAutofill="no"
+                textContentType="none"
                 placeholder={t('usernameField')}
                 placeholderTextColor={colors.textMuted}
                 style={[

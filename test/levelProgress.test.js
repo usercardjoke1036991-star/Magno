@@ -74,6 +74,7 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     expect(await leveling.siguienteHito(900, 1000)).to.equal(1000n);
     expect(await leveling.siguienteHito(1000, 1000)).to.equal(0n);
     expect(await leveling.DIVISION_SIZE()).to.equal(100n);
+    expect(await leveling.L1000_BONO_CADA()).to.equal(100n);
     expect(await leveling.presupuestoPremioMensual(ethers.parseUnits('400', 18), ethers.parseUnits('2000', 18))).to.equal(0n);
     const small = await leveling.presupuestoPremioMensual(ethers.parseUnits('2000', 18), ethers.parseUnits('2000', 18));
     const large = await leveling.presupuestoPremioMensual(ethers.parseUnits('20000', 18), ethers.parseUnits('20000', 18));
@@ -174,7 +175,7 @@ describe('QuatriviumCredit - bono de hito cada 100 niveles', function () {
     expect(await contract.hitoCobrado(user.address)).to.equal(0n);
   });
 
-  it('resets the level-1000 request cycle so the max bonus can be claimed again', async () => {
+  it('lets the max-level bonus be claimed again every 100 on-time loans without resetting the count', async () => {
     const { token, contract, owner, user, tokenAddr, contractAddr } = await deployHarness();
     await seedPool(token, contract, owner, '8000');
     await token.mint(owner.address, ethers.parseUnits('150000', 18));
@@ -189,12 +190,12 @@ describe('QuatriviumCredit - bono de hito cada 100 niveles', function () {
 
     const [monto] = await contract.niveles(1000);
     const now = (await ethers.provider.getBlock('latest')).timestamp;
-    await contract.forceSolicitudes(user.address, 4954);
+    await contract.forceSolicitudes(user.address, 99);
     await contract.forceLoanClock(user.address, monto, now + 3600);
     await contract.forcePagoATiempo(user.address);
     expect(await contract.hitoCobrado(user.address)).to.equal(900n);
     const progress = await contract.obtenerProgresoUsuario(user.address);
-    expect(progress[1]).to.equal(0n);
+    expect(progress[1]).to.equal(100n);
 
     await expect(contract.connect(user).cobrarBonoHito(tokenAddr))
       .to.emit(contract, 'BonoHitoPagado')

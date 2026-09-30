@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -14,6 +14,7 @@ import { lockSponsorOnce } from '../services/sponsorLock';
 import { resolveSponsorInput } from '../utils/sponsorLock';
 import { useUserProfile } from '../profile/ProfileContext';
 import { AppText, AppTextInput } from './AppText';
+import { WalletFailedEscape } from './WalletFailedEscape';
 
 interface AccountOnboardingProps {
   walletAddress: string;
@@ -62,7 +63,11 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
       setUsername(value);
       setUsernameReady(true);
     };
-    const watchdog = setTimeout(() => finish(''), 3000);
+    const watchdog = setTimeout(() => {
+      void loadClaimedUsername()
+        .then((value) => finish(value))
+        .catch(() => finish(''));
+    }, 8000);
     loadClaimedUsername()
       .then((value) => {
         clearTimeout(watchdog);
@@ -139,11 +144,7 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     return (
       <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center', paddingHorizontal: 24 }]}>
         <AppText style={[styles.title, { color: colors.text }]}>{t('appWalletFailed')}</AppText>
-        {walletFailed && onRetryWallet ? (
-          <TouchableOpacity onPress={() => onRetryWallet()} style={{ marginTop: 16, alignItems: 'center' }}>
-            <AppText style={{ color: colors.primary, fontSize: 16, fontWeight: '700' }}>{t('appWalletRetry')}</AppText>
-          </TouchableOpacity>
-        ) : null}
+        <WalletFailedEscape onRetry={onRetryWallet} />
       </SafeAreaView>
     );
   }

@@ -23,6 +23,7 @@ import { AdminPanel } from '../components/AdminPanel';
 import { ActivateCreditSection } from '../components/ActivateCreditSection';
 import { AccountWorldCard } from '../components/AccountWorldCard';
 import { AccountOnboarding } from '../components/AccountOnboarding';
+import { WalletFailedEscape } from '../components/WalletFailedEscape';
 import { KycAccessBanner } from '../components/KycAccessBanner';
 import { CreditAccessBanner } from '../components/CreditAccessBanner';
 import { BrandLogo } from '../components/BrandLogo';
@@ -36,6 +37,7 @@ import { AppText } from '../components/AppText';
 import { PoolSupportSection } from '../components/PoolSupportSection';
 import { MilestoneBonusCatalog } from '../components/MilestoneBonusCatalog';
 import { FameCanjeSection } from '../components/FameCanjeSection';
+import { RachaSection } from '../components/RachaSection';
 import { DonateFounderSection } from '../components/DonateFounderSection';
 import { ReservaSection } from '../components/ReservaSection';
 import { NotificationChannels } from '../components/NotificationChannels';
@@ -195,6 +197,7 @@ function HomeScreenWithHooks() {
     handleSolicitarCredito,
     handleCobrarBonoHito,
     handleCanjearFama,
+    handleCobrarBonoRacha,
     handlePagar,
     handleDepositarPool,
     handlePagarAcceso,
@@ -306,9 +309,7 @@ function HomeScreenWithHooks() {
         {walletReady && (walletFailed || !walletAddress) ? (
           <View style={[styles.configWarn, { backgroundColor: colors.warnBg }]}>
             <AppText style={{ color: colors.warnText }}>{t('appWalletFailed')}</AppText>
-            <AppText style={{ color: colors.primary, marginTop: 8 }} onPress={() => retryWallet()}>
-              {t('appWalletRetry')}
-            </AppText>
+            <WalletFailedEscape onRetry={retryWallet} />
           </View>
         ) : null}
 
@@ -394,6 +395,7 @@ function HomeScreenWithHooks() {
               : [
                   { id: 'donate' as const, title: t('donateTitle'), lead: t('hubDonateLead'), icon: 'deposit' as const },
                 ]),
+            { id: 'racha', title: t('rachaTitle'), lead: t('hubRachaLead'), icon: 'star' },
             ...(adminInfo.isOwner || adminInfo.isAdmin
               ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const }]
               : []),
@@ -827,6 +829,21 @@ function HomeScreenWithHooks() {
           walletConnected={Boolean(walletAddress)}
           paused={creditPaused}
           onDepositPool={handleDepositarPool}
+        />
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'racha'}
+        title={t('sectionRacha')}
+        lead={t('sectionRachaLead')}
+        onClose={() => setRoom(null)}
+      >
+        {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
+        <RachaSection
+          racha={userInfo.racha || { dias: 0, diasMax: 0, famaDias: 0, hitoCobrado: 0, siguienteHito: 0, bonoPendienteUsd: 0, graciaVigente: false }}
+          canUse={Boolean(creditReady && userInfo.canRacha && userInfo.isRegistered && !creditPaused && !userInfo.isDelinquent)}
+          isPaying={txLoading}
+          onClaim={() => void handleCobrarBonoRacha()}
         />
       </AppWindow>
 

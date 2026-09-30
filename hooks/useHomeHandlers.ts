@@ -148,6 +148,7 @@ export const useHomeHandlers = ({
     cobrarBonoHito,
     donarProyecto,
     canjearFama,
+    cobrarBonoRacha,
     pagarPrestamo,
     pagarCuotas,
     depositarLiquidez,
@@ -525,6 +526,49 @@ export const useHomeHandlers = ({
         from: '',
         to: walletAddress,
         amountLabel: formatUSD(usdtFromFama(fama)),
+        tokenSymbol: selectedToken.symbol,
+        platform: 'Quatrivium',
+        timestamp: Date.now(),
+      });
+      refetch();
+    }
+  };
+
+  const handleCobrarBonoRacha = async () => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!ensureCreditReady()) return;
+    if (userInfo.paused) {
+      Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    if (userInfo.isDelinquent) {
+      Alert.alert(t('delinquent'), t('moraBlocked'));
+      return;
+    }
+    if (!userInfo.isRegistered) {
+      Alert.alert(t('sectionCreditLine'), t('creditAccessNeed'));
+      return;
+    }
+    if (!userInfo.canRacha) {
+      Alert.alert(t('rachaTitle'), t('rachaLegacy'));
+      return;
+    }
+    if (!(userInfo.racha?.bonoPendienteUsd > 0)) {
+      Alert.alert(t('rachaTitle'), t('rachaNothing'));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    if (!(await ensureGasForTx())) return;
+    const result = await cobrarBonoRacha();
+    if (result.success) {
+      void recordMovement(walletAddress, {
+        kind: 'bonus',
+        from: '',
+        to: walletAddress,
+        amountLabel: formatUSD(userInfo.racha.bonoPendienteUsd),
         tokenSymbol: selectedToken.symbol,
         platform: 'Quatrivium',
         timestamp: Date.now(),
@@ -917,6 +961,7 @@ export const useHomeHandlers = ({
     handleSolicitarCredito,
     handleCobrarBonoHito,
     handleCanjearFama,
+    handleCobrarBonoRacha,
     handlePagar,
     handleDepositarPool,
     handlePagarAcceso,

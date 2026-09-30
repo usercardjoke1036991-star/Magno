@@ -6,6 +6,9 @@ export const RESERVA_YEAR_SECONDS = 365 * 24 * 60 * 60;
 export const RESERVA_TRAMO_MEDIO = 50;
 export const RESERVA_TRAMO_ALTO = 500;
 export const RESERVA_MIN_LEVEL = 10;
+export const RESERVA_MIN_LOCK_USDT = 1;
+export const RESERVA_MIN_LOCK_WEI = 10n ** 18n;
+export const RESERVA_LOCK_BUTTONS = [1, 10, 25, 50, 100, 250, 500, 1000] as const;
 
 export function reservaTramoUsd(principalUsd: number): 1 | 2 | 3 {
   if (principalUsd >= RESERVA_TRAMO_ALTO) return 3;

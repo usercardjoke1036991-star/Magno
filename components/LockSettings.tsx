@@ -21,8 +21,10 @@ import {
 } from '../services/appLock';
 import { isWeakPin } from '../utils/pinPolicy';
 import { fallbackAuthIfNeeded } from '../services/authPrefs';
+import { hasSecurityConfirmMethod } from '../services/fundsConfirm';
 import { loadAppWallet } from '../services/appWallet';
 import { storePasswordRecovery } from '../services/passwordRecovery';
+import { useFundsConfirm } from './FundsConfirmHost';
 import { SecretInput } from './SecretInput';
 import { AppText } from './AppText';
 
@@ -34,6 +36,7 @@ export const LockSettings: React.FC<{
 }> = ({ mode = 'pin', onChanged }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { confirmFunds } = useFundsConfirm();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -67,6 +70,9 @@ export const LockSettings: React.FC<{
     }
     setBusy(true);
     try {
+      if (hasPin || (await hasSecurityConfirmMethod())) {
+        if (!(await confirmFunds('security'))) return;
+      }
       if (!hasPin) {
         await setPin(next);
         setHasPin(true);
@@ -109,6 +115,7 @@ export const LockSettings: React.FC<{
         onPress: async () => {
           setBusy(true);
           try {
+            if (!(await confirmFunds('security'))) return;
             const ok = await clearPin(current);
             if (!ok) {
               setMessage(t('lockPinWrong'));
@@ -148,6 +155,9 @@ export const LockSettings: React.FC<{
     }
     setPasswordBusy(true);
     try {
+      if (hasPassword || (await hasSecurityConfirmMethod())) {
+        if (!(await confirmFunds('security'))) return;
+      }
       if (!hasPassword) {
         await setPassword(nextPassword, current || undefined);
         setHasPassword(true);

@@ -8,9 +8,9 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { RankMedal } from './RankMedal';
 import { AppIcon } from './icons';
-import { directCommissionFromLoan, formatCommissionUSD, ACTIVATION_BONUS_USD } from '../constants/commissions';
+import { commissionBandsForLoan, formatCommissionUSD, ACTIVATION_BONUS_USD } from '../constants/commissions';
 import { AppText } from './AppText';
-import { isMilestoneLevel, MAX_LOAN_LEVEL, milestoneBonusUsd } from '../constants/loanTiers';
+import { isMilestoneLevel, MAX_LEVEL_BONUS_EVERY, MAX_LOAN_LEVEL, milestoneBonusUsd } from '../constants/loanTiers';
 
 interface LoanTierCardProps {
   tier: LoanTier;
@@ -81,7 +81,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const isMaxLevel = tier.id >= MAX_LOAN_LEVEL;
   const rank = getRankForLevel(tier.id);
   const rankLabel = formatRankLabel(rank, t(rank.nameKey));
-  const referralEarn = formatCommissionUSD(directCommissionFromLoan(tier.usdAmount, appliedBps));
+  const earnBands = commissionBandsForLoan(tier.usdAmount, appliedBps);
   const curveRaisesRate = appliedBps > tier.interestBps;
   const remainingInstallments = Math.max(0, cuotasTotales - cuotasPagadas);
   const cooldownLeft = useLiveCooldown(ultimoPrestamoTimestamp, cooldownRestante);
@@ -144,6 +144,9 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
       ) : (
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('repayOnce')}</AppText>
       )}
+      {installments > 1 ? (
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payChoiceLead')}</AppText>
+      ) : null}
       <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('term')}: {tier.term}</AppText>
       {showMilestoneBonus && isMilestoneLevel(tier.id) ? (
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>
@@ -151,17 +154,26 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
         </AppText>
       ) : null}
       {isMaxLevel ? (
-        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('maxLevelNote')}</AppText>
+        <AppText style={[styles.tierMeta, { color: colors.success }]}>
+          {t('maxLevelNote', {
+            count: String(MAX_LEVEL_BONUS_EVERY),
+            amount: formatUSD(milestoneBonusUsd(MAX_LOAN_LEVEL)),
+          })}
+        </AppText>
+      ) : (
+        <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payOnTimeToLevel', { count: tier.requiredCount })}</AppText>
+      )}
+      <AppText style={[styles.earnNote, { color: colors.success }]}>{t('referralEarnLeadLevel')}</AppText>
+      {tier.id === 1 ? (
+        <AppText style={[styles.earnNote, { color: colors.success }]}>
+          {t('referralEarnLevel1First', { bonus: formatCommissionUSD(ACTIVATION_BONUS_USD) })}
+        </AppText>
       ) : null}
-      <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payOnTimeToLevel', { count: tier.requiredCount })}</AppText>
-      <AppText style={[styles.earnNote, { color: colors.textMuted }]}>
-        {tier.id === 1
-          ? t('referralEarnLevel1', {
-              bonus: formatCommissionUSD(ACTIVATION_BONUS_USD),
-              amount: referralEarn,
-            })
-          : t('referralEarnLevel', { amount: referralEarn })}
-      </AppText>
+      {earnBands.map((band) => (
+        <AppText key={band.range} style={[styles.earnBand, { color: colors.success }]}>
+          {t('referralEarnBand', { range: band.range, amount: formatCommissionUSD(band.amount) })}
+        </AppText>
+      ))}
 
       <View style={styles.tierActions}>
         {locked ? (
@@ -169,7 +181,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
         ) : isActiveTier && hasActiveLoan ? (
           <>
             {remainingLabel && remainingInstallments > 1 && (
-              <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payChoiceLead')}</AppText>
+              <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payChoiceNow')}</AppText>
             )}
             {remainingLabel && remainingInstallments > 1 && (
               <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('remainingDebt', { amount: remainingLabel })}</AppText>
@@ -412,9 +424,14 @@ const styles = StyleSheet.create({
   },
   earnNote: {
     fontSize: 12,
-    fontWeight: '400',
+    fontWeight: '600',
     marginTop: 8,
     lineHeight: 17,
+  },
+  earnBand: {
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 18,
   },
   tierActions: {
     marginTop: 12,

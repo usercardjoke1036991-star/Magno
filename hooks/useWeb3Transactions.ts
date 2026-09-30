@@ -100,6 +100,14 @@ export const useWeb3Transactions = () => {
     );
   };
 
+  const cobrarBonoRacha = async () => {
+    return executeTransaction(
+      'cobrarBonoRacha',
+      () => QuatriviumCreditService.cobrarBonoRacha(),
+      t('rachaClaimedOk')
+    );
+  };
+
   const pagarPrestamo = async (amountWei: string, tokenAddress: string) => {
     return executeTransaction(
       'pagarPrestamo',
@@ -298,6 +306,7 @@ export const useWeb3Transactions = () => {
     cobrarBonoHito,
     donarProyecto,
     canjearFama,
+    cobrarBonoRacha,
     pagarPrestamo,
     pagarCuotas,
     depositarLiquidez,

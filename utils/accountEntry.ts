@@ -52,6 +52,11 @@ export function accountOnPhoneFromProbes(
   return false;
 }
 
+/** Una llave en memoria no abre la app si no descifra el sobre de este teléfono. */
+export function wrapReadyForApp(wrapPresent: boolean, walletOpened: boolean): boolean {
+  return Boolean(wrapPresent && walletOpened);
+}
+
 /** Hay cuenta en este teléfono: desbloqueo. Iniciar sesión solo si el almacén no responde. */
 export function nextEntryScreen(input: {
   accountOnPhone: boolean | null;
@@ -174,4 +179,22 @@ export function canSubmitRestorePhrase(phrase: string): boolean {
     .split(/\s+/)
     .filter(Boolean);
   return words.length === 12 || words.length === 24;
+}
+
+export type WalletFailEscape = 'unlock' | 'restore';
+
+/** Reintentar solo no basta: si el sobre no abre hay que pedir clave o las 24 palabras. */
+export function walletFailEscapes(passwordSet: boolean): WalletFailEscape[] {
+  return passwordSet ? ['unlock', 'restore'] : ['restore'];
+}
+
+/** Tras desbloquear, no entrar a la app si el cofre sigue cerrado o faltan las 24 palabras. */
+export function afterUnlockNext(input: {
+  walletOpened: boolean;
+  phraseAcked: boolean;
+  hasPhrase: boolean;
+}): 'restore' | 'phraseReveal' | 'app' {
+  if (!input.walletOpened) return 'restore';
+  if (!input.phraseAcked && input.hasPhrase) return 'phraseReveal';
+  return 'app';
 }

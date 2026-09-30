@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {QuatriviumCredit} from "../QuatriviumCredit.sol";
+import {QuatriviumFamaLib} from "../libraries/QuatriviumFamaLib.sol";
 
 /// @dev Solo tests: fuerza el nivel de progreso para probar bonos de hito.
 contract QuatriviumCreditHarness is QuatriviumCredit {
@@ -34,5 +35,9 @@ contract QuatriviumCreditHarness is QuatriviumCredit {
 
     function forcePagoATiempo(address deudor) external {
         _subirNivelSiATiempo(deudor, true);
+    }
+
+    function forceTickRacha(address deudor) external {
+        QuatriviumFamaLib.onCierre(famaHermano, deudor, redGenealogica[deudor].padre);
     }
 }

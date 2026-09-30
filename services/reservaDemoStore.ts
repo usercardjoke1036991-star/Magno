@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { storeSlot } from '../utils/storeSlot';
 import {
   RESERVA_LOCK_SECONDS,
+  RESERVA_MIN_LOCK_WEI,
   reservaBoostRedBp,
   reservaCorteFundadorBp,
   reservaTechoWei,
@@ -84,7 +85,7 @@ function settle(pos: DemoPosicion, now: number, bote: bigint): { userPay: bigint
 export async function demoBloquear(wallet: string, principalWei: bigint, enRed: boolean): Promise<void> {
   const pos = await loadDemoPosicion(wallet);
   if (pos.activa) throw new Error('reservaPeriodoActivo');
-  if (principalWei <= 0n) throw new Error('reservaMonto');
+  if (principalWei < RESERVA_MIN_LOCK_WEI) throw new Error('reservaMonto');
   await saveDemoPosicion(wallet, {
     principal: principalWei.toString(),
     desde: Math.floor(Date.now() / 1000),

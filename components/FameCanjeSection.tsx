@@ -1,11 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { CANJE_USDT_BUTTONS, FAMA_CANJE_POR_USDT, FAMA_PER_REFERRAL_L1, FAMA_PER_USDT, famaNeededForUsdt, maxCanjeUsdt } from '../constants/fama';
-import { RESERVA_MAX_APY_BP, RESERVA_MIN_LEVEL } from '../constants/reserva';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatUSD, parsePositiveDecimal } from '../utils/formatters';
-import { AppSubsection } from './AppSection';
 import { AppText, AppTextInput } from './AppText';
 import { AppIcon } from './icons';
 
@@ -36,8 +34,6 @@ export function FameCanjeSection({
   const famaNeed = famaNeededForUsdt(usdtWanted);
   const maxUsdt = maxCanjeUsdt(famaDisponible);
   const ready = Boolean(canRedeem && usdtWanted >= 1 && famaNeed > 0 && famaNeed <= famaDisponible);
-
-  const apy = useMemo(() => (RESERVA_MAX_APY_BP / 100).toFixed(0), []);
 
   return (
     <View style={styles.stack}>
@@ -118,10 +114,6 @@ export function FameCanjeSection({
           </View>
         )}
       </TouchableOpacity>
-
-      <AppSubsection title={t('canjeReservaExists')} defaultOpen icon="lock">
-        <AppText style={[styles.lead, { color: colors.text }]}>{t('canjeReservaLead', { apy, level: String(RESERVA_MIN_LEVEL) })}</AppText>
-      </AppSubsection>
     </View>
   );
 }

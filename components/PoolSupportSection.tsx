@@ -8,6 +8,7 @@ import {
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { getContractAddress } from '../constants/contractConfig';
+import { FAMA_PER_USDT } from '../constants/fama';
 import { fameFromPoolUsd } from '../constants/support';
 import { isContractConfigured } from '../constants/rpcConfig';
 import { useAppMode } from '../wallet/AppModeContext';
@@ -57,7 +58,9 @@ export const PoolSupportSection: React.FC<PoolSupportSectionProps> = ({
     <View style={styles.stack}>
       <AppSubsection title={t('subsectionPoolInfo')} defaultOpen={!allowDeposit || !contractReady} icon="info">
         <AppText style={[styles.lead, { color: colors.text }]}>{t('poolPublicLead')}</AppText>
-        <AppText style={[styles.locked, { color: colors.textMuted }]}>{t('supportPoolBenefit')}</AppText>
+        <AppText style={[styles.locked, { color: colors.textMuted }]}>
+          {t('supportPoolBenefit', { points: String(FAMA_PER_USDT), symbol: tokenSymbol })}
+        </AppText>
         <AppText style={[styles.locked, { color: colors.textMuted }]}>{t('poolLockedNote')}</AppText>
         {!allowDeposit ? (
           <AppText style={[styles.warn, { color: colors.warnText }]}>{t('poolRealOnly')}</AppText>

@@ -4,7 +4,7 @@ export const FAMA_PER_USDT = 100;
 export const FAMA_PER_REFERRAL_L1 = 100;
 /** 250 fama disponible = 1 USDT de canje. Siempre menor que lo metido. */
 export const FAMA_CANJE_POR_USDT = 250;
-export const CANJE_USDT_BUTTONS = [1, 2, 5, 10] as const;
+export const CANJE_USDT_BUTTONS = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000] as const;
 
 export function famaFromUsd(usd: number): number {
   if (!Number.isFinite(usd) || usd <= 0) return 0;

@@ -4,6 +4,7 @@ import { Token } from '../hooks/useWeb3Balances';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { TokenLogo } from './icons';
+import { useAppMode } from '../wallet/AppModeContext';
 import { AppText } from './AppText';
 
 interface TokenSelectorProps {
@@ -19,12 +20,16 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { mode } = useAppMode();
   return (
     <View style={styles.tokenSelector}>
       <View style={styles.titleRow}>
         <TokenLogo symbol={selectedToken.symbol} size={18} />
         <AppText style={[styles.sectionTitle, { color: colors.text }]}>{t('selectToken')}</AppText>
       </View>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>
+        {mode === 'demo' ? t('tokenUniverseDemo') : t('tokenUniverseLive')}
+      </AppText>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {tokens.map((token) => (
           <TouchableOpacity
@@ -68,6 +73,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 8,
+  },
+  lead: {
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: 10,
   },
   tokenButton: {
     flexDirection: 'row',

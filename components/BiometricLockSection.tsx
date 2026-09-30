@@ -20,6 +20,8 @@ import {
   type BiometricToggleReason,
 } from '../services/appLock';
 import { fallbackAuthIfNeeded } from '../services/authPrefs';
+import { hasSecurityConfirmMethod } from '../services/fundsConfirm';
+import { useFundsConfirm } from './FundsConfirmHost';
 import { AppText } from './AppText';
 
 function unlockLabel(kinds: BiometricKind[]): TranslationKey {
@@ -72,6 +74,7 @@ export const BiometricLockSection: React.FC<{
 }> = ({ onChanged, compact = false }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { confirmFunds } = useFundsConfirm();
   const [bioOn, setBioOn] = useState(false);
   const [draft, setDraft] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -104,6 +107,15 @@ export const BiometricLockSection: React.FC<{
     }
     setBusy(true);
     try {
+      if (!(await hasSecurityConfirmMethod())) {
+        Alert.alert(t('error'), t('securityConfirmMissing'));
+        await refresh();
+        return;
+      }
+      if (!(await confirmFunds('security'))) {
+        await refresh();
+        return;
+      }
       const result = await toggleBiometric(draft);
       if (!result.ok) {
         Alert.alert(t('securityFingerprint'), t(toggleErrorKey(result.reason)));

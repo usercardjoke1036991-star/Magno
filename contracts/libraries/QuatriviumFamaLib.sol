@@ -33,6 +33,11 @@ library QuatriviumFamaLib {
         IQuatriviumFamaCaja(hermano).acreditar(who, pts);
     }
 
+    function onCierre(address hermano, address deudor, address padre) external {
+        if (hermano == address(0) || deudor == address(0) || padre == address(0) || padre == deudor) return;
+        IQuatriviumFamaCaja(hermano).onCierrePrestamo(deudor, padre);
+    }
+
     function sacarCaja(
         mapping(address => uint256) storage totalLiquidity,
         IERC20 token,

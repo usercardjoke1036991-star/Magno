@@ -223,4 +223,23 @@ describe('QuatriviumReserva', function () {
     await expect(reserva.connect(extra).applyFundador()).to.be.revertedWithCustomError(reserva, 'EsperaTimelock');
     expect(await reserva.fundador()).to.equal(founder.address);
   });
+
+  it('accepts a 1 USDT lock and applies 20 percent extra from 500 USDT', async () => {
+    const { reserva, user, founder } = await deployReserva();
+    await reserva.connect(founder).aportarBote(ethers.parseUnits('20', 18));
+    await reserva.connect(user).bloquear(ethers.parseUnits('1', 18));
+    const pos = await reserva.posiciones(user.address);
+    expect(pos.activa).to.equal(true);
+    expect(pos.principal).to.equal(ethers.parseUnits('1', 18));
+    await expect(reserva.connect(user).bloquear(ethers.parseUnits('1', 18))).to.be.revertedWithCustomError(
+      reserva,
+      'PeriodoActivo'
+    );
+    await ethers.provider.send('evm_increaseTime', [LOCK]);
+    await ethers.provider.send('evm_mine');
+    await reserva.connect(user).desbloquear();
+    await reserva.connect(user).bloquear(ethers.parseUnits('500', 18));
+    const [extra] = await reserva.extraComisionDe(user.address, ethers.parseUnits('5', 18));
+    expect(extra).to.equal(ethers.parseUnits('1', 18));
+  });
 });

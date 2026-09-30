@@ -150,6 +150,11 @@
 - Sala Canje sin niveles bloqueados: fama cuando quieran. Bono de referido del primer L1 pagado pasa de 0.50 a 1 USDT
 - Sala de canje de fama contra el pool (250=1 USDT) y texto de que el multiplicador de bloqueo USDT vive en Reserva
 - Blindar el sobre de la billetera: AES-GCM para cuentas nuevas y no usar respaldo AsyncStorage en Cuenta Real si el cofre del telefono falla.
+- Botones de canje hasta 1000 USDT, tabla de extra de comisiones de red en Reserva segun capital inmovilizado, minimo 1 USDT y una sola posicion por 30 dias, textos institucionales
+- Auditar textos vs contrato, QR autenticador visible al abrir, tokens USDT USDC FDUSD y sucesor si un estable desaparece
+- Textos de comisiones alineados al contrato; QR TOTP solo en alta o reemplazo autenticado; revalidacion obligatoria al cambiar seguridad
+- En cada nivel, lista de comisiones por generacion en dolares. L1000 sin subir; solicitudes se acumulan; bono de hito cada 100 pagos a tiempo. Comisiones mas jugosas por nivel. Cuotas opcionales: una, varias o todo antes del vencimiento.
+- Sala racha diaria: un referido que se registra pide y paga suma un dia, fama por dia, gracia de 1 dia, bono del pool en hitos 7/30/100/365 acumulable, ranking de racha; fama no se pierde al fallar
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -276,3 +281,8 @@
 - [2026-09-30 07:03] Idea añadida al backlog: "Sala de canje de fama contra el pool (250=1 USDT) y texto de que el multiplicado"
 - [2026-09-30 07:04] Módulo completado: 'Canje de fama'
 - [2026-09-30 09:53] Idea añadida al backlog: "Blindar el sobre de la billetera: AES-GCM para cuentas nuevas y no usar respaldo"
+- [2026-09-30 15:45] Idea añadida al backlog: "Botones de canje hasta 1000 USDT, tabla de extra de comisiones de red en Reserva"
+- [2026-09-30 16:08] Idea añadida al backlog: "Auditar textos vs contrato, QR autenticador visible al abrir, tokens USDT USDC F"
+- [2026-09-30 16:42] Idea añadida al backlog: "Textos de comisiones alineados al contrato; QR TOTP solo en alta o reemplazo aut"
+- [2026-09-30 16:58] Idea añadida al backlog: "En cada nivel, lista de comisiones por generacion en dolares. L1000 sin subir; s"
+- [2026-09-30 17:45] Idea añadida al backlog: "Sala racha diaria: un referido que se registra pide y paga suma un dia, fama por"

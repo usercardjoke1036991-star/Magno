@@ -140,4 +140,41 @@ describe('QuatriviumCredit - cuotas desde $50', function () {
     debt = await contract.obtenerDeuda(user.address);
     await contract.connect(user).pagarPrestamo(tokenAddr, debt.total);
   });
+
+  it('keeps on-time ranking if installments are skipped and the loan is paid before the final due date', async () => {
+    const { token, contract, owner, user, tokenAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, user, '200');
+
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    let debt = await contract.obtenerDeuda(user.address);
+    await contract.connect(user).pagarPrestamo(tokenAddr, debt.total);
+    await borrowAndPay(contract, user, tokenAddr);
+    await borrowAndPay(contract, user, tokenAddr);
+
+    await proposeAndExecute(contract, owner, 'setNivel', [
+      2,
+      ethers.parseUnits('50', 18),
+      35 * 24 * 60 * 60,
+      1400,
+    ]);
+
+    await advanceCooldown();
+    const before = await contract.obtenerProgresoUsuario(user.address);
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const plan = await contract.planPago(user.address);
+    const info = await contract.usuarios(user.address);
+    expect(plan.totales).to.equal(2);
+    expect(plan.venceCuota).to.be.lt(info.vencimiento);
+
+    await ethers.provider.send('evm_setNextBlockTimestamp', [Number(plan.venceCuota) + 10]);
+    await ethers.provider.send('evm_mine');
+    await expect(contract.marcarMorosoSiVencido(user.address)).to.be.reverted;
+
+    debt = await contract.obtenerDeuda(user.address);
+    await contract.connect(user).pagarPrestamo(tokenAddr, debt.total);
+    expect((await contract.usuarios(user.address)).montoActivo).to.equal(0n);
+    const after = await contract.obtenerProgresoUsuario(user.address);
+    expect(after[1]).to.equal(before[1] + 1n);
+  });
 });

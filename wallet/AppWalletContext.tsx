@@ -4,8 +4,8 @@ import { isDemoAccount, subscribeRuntimeMode } from '../constants/rpcConfig';
 import { setWalletSigner, clearWalletSigner } from '../services/quatriviumCreditService';
 import { loadAppWallet, ensureAppWallet, importFromPhrase, recreateAppWallet, addressFromPhrase, withCurrentRpc } from '../services/appWallet';
 import { wipeLocalAccount } from '../services/accountReset';
-import { restoreSavedSessionWrap } from '../services/savedSession';
-import { getWalletWrapKey } from '../services/walletSession';
+import { purgePersistedWrap, restoreSavedSessionWrap } from '../services/savedSession';
+import { clearWalletSession, getWalletWrapKey } from '../services/walletSession';
 import { hydrateAccountIdentity } from '../services/accountIdentity';
 
 interface AppWalletValue {
@@ -61,9 +61,12 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           clearTimeout(watchdog);
           return;
         } catch {
-          if (!getWalletWrapKey()) {
-            await restoreSavedSessionWrap();
+          if (getWalletWrapKey()) {
+            clearWalletSession();
+            await purgePersistedWrap();
+            break;
           }
+          await restoreSavedSessionWrap();
           await new Promise((resolve) => setTimeout(resolve, 1200));
         }
       }

@@ -1167,7 +1167,7 @@ describe('demo credit gates', function () {
     const es = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'i18n', 'locales', 'es.json'), 'utf8'));
     expect(es.poolPublicLead).to.match(/No se retira/);
     expect(es.poolPublicLead).to.not.match(/rendimiento/);
-    expect(es.poolLockedNote).to.match(/préstamo/i);
+    expect(es.poolLockedNote).to.match(/no se retira/i);
   });
 
   it('does not let a live account reuse demo testnet credit', function () {
@@ -1416,6 +1416,71 @@ describe('account entry — password, email and session', () => {
     expect(actionApplies(false, ['pin', 'authenticator', 'biometric', 'password'])).to.equal(false);
     expect(actionApplies(true, [])).to.equal(false);
     expect(actionApplies(true, ['pin', 'password'])).to.equal(true);
+  });
+
+  it('keeps restore Entrar off for a fake 24-word line and turns off Android autofill on the seed field', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(gate).to.include('importantForAutofill="no"');
+    expect(gate).to.include('!isValidSecretPhrase(restorePhrase)');
+    const secret = fs.readFileSync(path.join(__dirname, '..', 'components', 'SecretInput.tsx'), 'utf8');
+    expect(secret).to.include('importantForAutofill="no"');
+    expect(secret).to.include('autoComplete="off"');
+  });
+
+  it('does not treat a leftover wrap as an open wallet after a reload mid-setup', () => {
+    function wrapReadyForApp(wrapPresent, walletOpened) {
+      return Boolean(wrapPresent && walletOpened);
+    }
+    expect(wrapReadyForApp(true, false)).to.equal(false);
+    expect(wrapReadyForApp(true, true)).to.equal(true);
+    expect(wrapReadyForApp(false, false)).to.equal(false);
+    function nextAfterReload({ passwordSet, wrapPresent, walletOpened, phraseAcked }) {
+      if (wrapPresent && walletOpened && !phraseAcked) return 'phraseReveal';
+      if (passwordSet && !wrapReadyForApp(wrapPresent, walletOpened)) return 'unlock';
+      return 'app';
+    }
+    expect(nextAfterReload({ passwordSet: true, wrapPresent: true, walletOpened: false, phraseAcked: false })).to.equal(
+      'unlock'
+    );
+    expect(nextAfterReload({ passwordSet: true, wrapPresent: true, walletOpened: true, phraseAcked: false })).to.equal(
+      'phraseReveal'
+    );
+    const fs = require('fs');
+    const path = require('path');
+    const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(gate).to.include('purgePersistedWrap');
+    expect(gate).to.include('resumePhraseRevealIfNeeded');
+    expect(gate).to.include('getSecretPhrase');
+  });
+
+  it('never leaves a closed vault on Retry-only and does not enter the app after a failed unlock', () => {
+    function walletFailEscapes(passwordSet) {
+      return passwordSet ? ['unlock', 'restore'] : ['restore'];
+    }
+    function afterUnlockNext({ walletOpened, phraseAcked, hasPhrase }) {
+      if (!walletOpened) return 'restore';
+      if (!phraseAcked && hasPhrase) return 'phraseReveal';
+      return 'app';
+    }
+    expect(walletFailEscapes(true)).to.deep.equal(['unlock', 'restore']);
+    expect(walletFailEscapes(false)).to.deep.equal(['restore']);
+    expect(afterUnlockNext({ walletOpened: false, phraseAcked: false, hasPhrase: false })).to.equal('restore');
+    expect(afterUnlockNext({ walletOpened: true, phraseAcked: false, hasPhrase: true })).to.equal('phraseReveal');
+    expect(afterUnlockNext({ walletOpened: true, phraseAcked: true, hasPhrase: true })).to.equal('app');
+    const fs = require('fs');
+    const path = require('path');
+    const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(gate).to.include('subscribeWalletOpenEscape');
+    expect(gate).to.include("setSetupStage('restore')");
+    const onboarding = fs.readFileSync(path.join(__dirname, '..', 'components', 'AccountOnboarding.tsx'), 'utf8');
+    expect(onboarding).to.include('WalletFailedEscape');
+    const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
+    expect(home).to.include('WalletFailedEscape');
+    const walletCtx = fs.readFileSync(path.join(__dirname, '..', 'wallet', 'AppWalletContext.tsx'), 'utf8');
+    expect(walletCtx).to.include('purgePersistedWrap');
+    expect(walletCtx).to.include('break');
   });
 
   it('builds a standard otpauth URL so authenticator apps can scan the QR', () => {
@@ -1826,12 +1891,12 @@ describe('account entry — password, email and session', () => {
     expect(es.adminTwoOfThree).to.match(/pierde|hackean/);
     expect(es.emailNeedApi).to.not.match(/RESEND|EMAIL_FROM|worker/i);
     expect(es.otpDeliveryFailed).to.not.match(/Twilio|WhatsApp Cloud/i);
-    expect(es.creditAccessLead.length).to.be.below(80);
+    expect(es.creditAccessLead.length).to.be.below(120);
     expect(es.linkWalletNeedFunds).to.match(/externa/);
     expect(es.externalPaysLead).to.match(/vinculada/);
     expect(es.appWalletFailed.length).to.be.below(50);
     expect(es.appWalletInTitle).to.equal('Depositar');
-    expect(es.yourLpPosition).to.match(/Su posici/);
+    expect(es.yourLpPosition).to.match(/aporte|posici/i);
     const walletCtx = fs.readFileSync(path.join(__dirname, '..', 'wallet', 'AppWalletContext.tsx'), 'utf8');
     expect(walletCtx).to.include('restoreSavedSessionWrap');
     const walletSvc = fs.readFileSync(path.join(__dirname, '..', 'services', 'appWallet.ts'), 'utf8');
@@ -2012,5 +2077,87 @@ describe('account entry — password, email and session', () => {
     const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
     expect(home).to.include('livePhoneStepDone');
     expect(gates).to.include('livePhoneStepDone');
+  });
+
+  it('offers canje amounts through 1000 USDT and keeps Reserva commission copy in Reserva', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const fama = fs.readFileSync(path.join(__dirname, '..', 'constants', 'fama.ts'), 'utf8');
+    expect(fama).to.include('CANJE_USDT_BUTTONS = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000]');
+    const canje = fs.readFileSync(path.join(__dirname, '..', 'components', 'FameCanjeSection.tsx'), 'utf8');
+    expect(canje).to.not.include('canjeReservaExists');
+    expect(canje).to.not.include('canjeReservaLead');
+    expect(canje).to.include('CANJE_USDT_BUTTONS');
+    const reservaUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReservaSection.tsx'), 'utf8');
+    expect(reservaUi).to.include('reservaCommissionLead');
+    expect(reservaUi).to.include('reservaBoostComision');
+    expect(reservaUi).to.include('reservaLockOnce');
+    expect(reservaUi).to.include('RESERVA_LOCK_BUTTONS');
+    expect(reservaUi).to.include('RESERVA_MIN_LOCK_USDT');
+    expect(reservaUi).to.not.include('reservaFounderNote');
+    const constants = fs.readFileSync(path.join(__dirname, '..', 'constants', 'reserva.ts'), 'utf8');
+    expect(constants).to.include('RESERVA_MIN_LOCK_USDT = 1');
+    const service = fs.readFileSync(path.join(__dirname, '..', 'services', 'reservaService.ts'), 'utf8');
+    expect(service).to.include('RESERVA_MIN_LOCK_WEI');
+    const store = fs.readFileSync(path.join(__dirname, '..', 'services', 'reservaDemoStore.ts'), 'utf8');
+    expect(store).to.include('RESERVA_MIN_LOCK_WEI');
+    const es = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'i18n', 'locales', 'es.json'), 'utf8'));
+    expect(es.reservaCommissionLead).to.match(/generacional/);
+    expect(es.reservaBoostComision).to.include('10%');
+    expect(es.reservaBoostComision).to.include('20%');
+    expect(es.reservaMonto).to.include('1 USDT');
+    expect(es.hubReservaLeadLocked).to.equal('Operativa a partir del nivel 10.');
+    expect(es.hubReservaLeadLocked.toLowerCase()).to.not.include('visible');
+    expect(es.supportDonateBenefit).to.include('{points}');
+    expect(es.supportDonateBenefit).to.include('{symbol}');
+    expect(es.supportPoolBenefit).to.include('{points}');
+    const donate = fs.readFileSync(path.join(__dirname, '..', 'components', 'DonateFounderSection.tsx'), 'utf8');
+    expect(donate).to.include('FAMA_PER_USDT');
+    const pool = fs.readFileSync(path.join(__dirname, '..', 'components', 'PoolSupportSection.tsx'), 'utf8');
+    expect(pool).to.include('FAMA_PER_USDT');
+    const auth = fs.readFileSync(path.join(__dirname, '..', 'components', 'AuthenticatorSetup.tsx'), 'utf8');
+    expect(auth).to.include('createAuthenticatorSecret');
+    expect(auth).to.include('collapsable={false}');
+    expect(auth).to.include('renderToHardwareTextureAndroid={false}');
+    expect(auth).to.include('authenticatorActivate');
+    expect(auth).to.include('authenticatorReplace');
+    expect(auth).to.include("confirmFunds('security')");
+    expect(auth).to.not.match(/if \(on\) return;[\s\S]{0,80}createAuthenticatorSecret/);
+    expect(es.referralEarnLevel.toLowerCase()).to.not.include('pide y paga');
+    expect(es.referralEarnBand).to.include('{amount}');
+    expect(es.maxLevelNote).to.include('{count}');
+    expect(es.maxLevelNote).to.include('{amount}');
+    expect(es.maxLevelNote.toLowerCase()).to.not.include('subir');
+    const card = fs.readFileSync(path.join(__dirname, '..', 'components', 'LoanTierCard.tsx'), 'utf8');
+    expect(card).to.include('referralEarnBand');
+    expect(card).to.include('MAX_LEVEL_BONUS_EVERY');
+    expect(card).to.include("t('payChoiceLead')");
+    expect(es.referralCommissionSchedule).to.include('0,8%');
+    expect(es.referralRepDirectOnly).to.include('2 a 40');
+    expect(es.jobCycle5.toLowerCase()).to.include('cancela');
+    expect(es.jobCycle5.toLowerCase()).to.not.include('solicita y cancela');
+    const referrals = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReferralSection.tsx'), 'utf8');
+    expect(referrals).to.include('referralCommissionSchedule');
+    expect(referrals).to.not.include('fameForGeneration');
+    const commissions = fs.readFileSync(path.join(__dirname, '..', 'constants', 'commissions.ts'), 'utf8');
+    expect(commissions).to.include('generationCommissionBps');
+    expect(commissions).to.include('MAX_COMMISSION_LINE = 40');
+    expect(commissions).to.include('if (gen === 1) return 1500');
+    expect(commissions).to.include('if (gen === 2) return 800');
+    expect(commissions).to.include('if (gen <= 12) return 80');
+    const credit = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'QuatriviumCredit.sol'), 'utf8');
+    expect(credit).to.include('GEN1_BP = 1500');
+    expect(credit).to.include('GEN2_BP = 800');
+    expect(credit).to.include('MAX_LINEA = 40');
+    expect(credit).to.include('PUNTOS_POR_REFERIDO = 50');
+    const confirmHost = fs.readFileSync(path.join(__dirname, '..', 'components', 'FundsConfirmHost.tsx'), 'utf8');
+    expect(confirmHost).to.include("nextPurpose === 'security'");
+    expect(confirmHost).to.include('listSecurityConfirmMethods');
+    const lockUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'LockSettings.tsx'), 'utf8');
+    expect(lockUi).to.include("confirmFunds('security')");
+    const bioUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'BiometricLockSection.tsx'), 'utf8');
+    expect(bioUi).to.include("confirmFunds('security')");
+    const methodsUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'AuthMethodPicker.tsx'), 'utf8');
+    expect(methodsUi).to.include("confirmFunds('security')");
   });
 });

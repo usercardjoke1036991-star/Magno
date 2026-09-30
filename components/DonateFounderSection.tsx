@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FAMA_PER_USDT } from '../constants/fama';
 import { fameFromDonateUsd, supportKind, supportNameKey } from '../constants/support';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -55,7 +56,9 @@ export function DonateFounderSection({
         ) : !tokenSupported && walletConnected ? (
           <AppText style={[styles.warn, { color: colors.warnText }]}>{t('tokenNotEnabled')}</AppText>
         ) : null}
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('supportDonateBenefit')}</AppText>
+        <AppText style={[styles.meta, { color: colors.textMuted }]}>
+          {t('supportDonateBenefit', { points: String(FAMA_PER_USDT), symbol: tokenSymbol })}
+        </AppText>
         {titleKey ? (
           <AppText style={[styles.title, { color: colors.primary }]}>
             {t('supportYourTitle', { title: t(titleKey) })}

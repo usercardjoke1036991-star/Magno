@@ -55,6 +55,7 @@ export const SecretInput: React.FC<SecretInputProps> = ({
         autoCapitalize={autoCapitalize}
         autoCorrect={false}
         autoComplete="off"
+        importantForAutofill="no"
         textContentType="password"
         secureTextEntry={!visible}
         editable={editable}

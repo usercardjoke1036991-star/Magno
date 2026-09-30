@@ -7,6 +7,7 @@ import {
   Interface,
   ZeroAddress,
   ZeroHash,
+  formatUnits,
   isAddress,
   type AbstractProvider,
   type Signer,
@@ -114,6 +115,7 @@ export type ProtocolCaps = {
   canClaimHitos: boolean;
   canDonate: boolean;
   canCanjearFama: boolean;
+  canRacha: boolean;
 };
 
 const DEFAULT_CAPS: ProtocolCaps = {
@@ -121,6 +123,7 @@ const DEFAULT_CAPS: ProtocolCaps = {
   canClaimHitos: false,
   canDonate: false,
   canCanjearFama: false,
+  canRacha: false,
 };
 
 export function cachedProtocolCaps(): ProtocolCaps {
@@ -277,6 +280,7 @@ export const QuatriviumCreditService = {
     let canClaimHitos = false;
     let canDonate = false;
     let canCanjearFama = false;
+    let canRacha = false;
     try {
       const row = await credit.niveles(CORE_LOAN_LEVEL + 1);
       if (BigInt(row[0] ?? 0) > 0n) maxLevel = MAX_LOAN_LEVEL;
@@ -296,7 +300,20 @@ export const QuatriviumCreditService = {
       canDonate = false;
     }
     canCanjearFama = Boolean(await readFamaHermano(credit));
-    const caps = { maxLevel, canClaimHitos, canDonate, canCanjearFama };
+    if (canCanjearFama) {
+      try {
+        const { provider } = await getProviderAndSigner();
+        const hermano = await readFamaHermano(credit);
+        if (hermano) {
+          const fama = new Contract(hermano, FAMA_ABI, provider);
+          await fama.FAMA_POR_DIA_RACHA();
+          canRacha = true;
+        }
+      } catch {
+        canRacha = false;
+      }
+    }
+    const caps = { maxLevel, canClaimHitos, canDonate, canCanjearFama, canRacha };
     capsCache = { addr, caps };
     return caps;
   },
@@ -438,6 +455,65 @@ export const QuatriviumCreditService = {
     }
   },
 
+  obtenerRacha: async (userAddress: string) => {
+    const empty = {
+      dias: 0,
+      diasMax: 0,
+      famaDias: 0,
+      hitoCobrado: 0,
+      siguienteHito: 0,
+      bonoPendienteUsd: 0,
+      graciaVigente: false,
+    };
+    if (!isAddress(userAddress) || !isContractConfigured()) return empty;
+    const { provider } = await getProviderAndSigner();
+    const hermano = await readFamaHermano(contractWith(provider));
+    if (!hermano) return empty;
+    try {
+      const fama = new Contract(hermano, FAMA_ABI, provider);
+      const row = await fama.obtenerRacha(userAddress);
+      const pendingWei = BigInt(row.bonoPendiente ?? row[6] ?? 0);
+      return {
+        dias: Number(row.dias ?? row[0] ?? 0) || 0,
+        diasMax: Number(row.diasMax ?? row[1] ?? 0) || 0,
+        famaDias: Number(row.famaDias ?? row[3] ?? 0) || 0,
+        hitoCobrado: Number(row.hitoCobrado ?? row[4] ?? 0) || 0,
+        siguienteHito: Number(row.siguienteHito ?? row[5] ?? 0) || 0,
+        bonoPendienteUsd: Number(formatUnits(pendingWei, 18)) || 0,
+        graciaVigente: Boolean(row.graciaVigente ?? row[7]),
+      };
+    } catch {
+      return empty;
+    }
+  },
+
+  notificarRacha: async (hijo: string) => {
+    if (!isAddress(hijo)) return;
+    const { signer } = await requireInternalSigner();
+    const credit = contractWith(signer);
+    const hermano = await readFamaHermano(credit);
+    if (!hermano) return;
+    const caja = new Contract(hermano, FAMA_ABI, signer);
+    try {
+      await caja.notificarRacha.staticCall(hijo);
+      const tx = await caja.notificarRacha(hijo);
+      await tx.wait();
+    } catch {
+      /* sin cierre nuevo, sin padrino o hermano legado */
+    }
+  },
+
+  cobrarBonoRacha: async () => {
+    const { signer } = await requireInternalSigner();
+    const credit = contractWith(signer);
+    const hermano = await readFamaHermano(credit);
+    if (!hermano) throw new Error('racha-legacy');
+    const caja = new Contract(hermano, FAMA_ABI, signer);
+    await caja.cobrarBonoRacha.staticCall();
+    const tx = await caja.cobrarBonoRacha();
+    return tx.wait();
+  },
+
   canjearFama: async (fama: number) => {
     if (!Number.isInteger(fama) || fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT !== 0) {
       throw new Error('invalid-amount');
@@ -462,7 +538,9 @@ export const QuatriviumCreditService = {
     await credit.pagarPrestamo.staticCall(tokenAddress, amountInWei);
     await cobrarComisionIntermediario(signer, true);
     const tx = await credit.pagarPrestamo(tokenAddress, amountInWei);
-    return tx.wait();
+    const receipt = await tx.wait();
+    await QuatriviumCreditService.notificarRacha(userAddress);
+    return receipt;
   },
 
   pagarCuotas: async (tokenAddress: string, count: number) => {
@@ -494,6 +572,7 @@ export const QuatriviumCreditService = {
       last = await tx.wait();
       if (leftover >= left || left <= 1) break;
     }
+    await QuatriviumCreditService.notificarRacha(userAddress);
     return last;
   },
 

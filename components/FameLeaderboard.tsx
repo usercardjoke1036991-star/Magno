@@ -43,6 +43,7 @@ const BOARD_TITLE: Record<FameBoardKind, TranslationKey> = {
   referrals: 'fameBoardReferrals',
   loans: 'fameBoardLoans',
   fame: 'fameBoardFame',
+  streak: 'fameBoardStreak',
   level: 'fameBoardLevel',
   bonuses: 'fameBoardBonuses',
   combined: 'fameBoardCombined',
@@ -64,6 +65,7 @@ function metricLine(player: FamePlayer, kind: FameBoardKind, t: (key: Translatio
     });
   }
   if (kind === 'fame') return t('fameMetricFame', { points: player.fame });
+  if (kind === 'streak') return t('fameMetricStreak', { count: player.streakDays || 0 });
   if (kind === 'level') return t('fameMetricLevel', { level: player.level || 1 });
   if (kind === 'bonuses') {
     return t('fameMetricBonuses', {

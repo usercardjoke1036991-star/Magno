@@ -7,12 +7,17 @@ export const FAMA_ABI = [
   'function FAMA_POR_USDT() view returns (uint256)',
   'function FAMA_POR_REFERIDO_L1() view returns (uint256)',
   'function FAMA_CANJE_POR_USDT() view returns (uint256)',
+  'function FAMA_POR_DIA_RACHA() view returns (uint256)',
   'function credit() view returns (address)',
   'function token() view returns (address)',
   'function famaCaja(address) view returns (uint256)',
   'function famaCanjeada(address) view returns (uint256)',
   'function famaDisponible(address) view returns (uint256)',
   'function canjearFama(uint256 fama)',
+  'function notificarRacha(address hijo)',
+  'function cobrarBonoRacha()',
+  'function diasRacha(address) view returns (uint32)',
+  'function obtenerRacha(address) view returns (uint32 dias, uint32 diasMax, uint32 ultimoDia, uint32 famaDias, uint32 hitoCobrado, uint256 siguienteHito, uint256 bonoPendiente, bool graciaVigente)',
 ];
 
 function envAddr(name: string): string {

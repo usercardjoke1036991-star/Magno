@@ -261,6 +261,11 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-30 | Sala Racha en el hermano de fama: 100 fama/dia, gracia 1 dia, bonos 5/25/100/500 USDT a 7/30/100/365, ranking de racha. Credit intacto EIP-170. | — |
+| 2026-09-30 | Niveles: lista de comisiones por generacion; L1000 acumula y bono cada 100; cuotas opcionales contra vencimiento final. Nucleo sin funciones borradas. | — |
+| 2026-09-30 | Copy de niveles/comisiones igual al nucleo (gen 15/8/6/4/2/0.8/0.4, primer L1 1 USDT del pool, 50 puntos solo al directo). Autenticador sin QR si ya esta validado. confirmSecurity antes de mutar PIN, huella, metodos y autenticador. | — |
+| 2026-09-30 | Copy alineada al contrato: fama 100 por estable, Reserva solo operativa nivel 10, QR TOTP al abrir Seguridad, texto de universos de token Demo/Real | — |
+| 2026-09-30 | Canje hasta 1000 USDT; Reserva muestra tramos 0/10/20 porciento y una posicion de 30 dias; minimo 1 USDT en bloquear; textos institucionales en es/en | — |
 | 2026-09-30 | En Cuenta Real la contraseña no cae a AsyncStorage. Si el cofre de huella no abre, se pide PIN o contraseña; no se abre con wrap suelto. | — |
 | 2026-09-30 | Canje de fama usa el mismo vencido que Credit (cuota o plazo final). Foundry despliega FamaCaja y el constructor de 7 argumentos. Nucleo Credit intacto (EIP-170). Hardhat 210/210. Foundry 11/11. | — |
 | 2026-09-30 | Cuenta Real ya no guarda el sobre de la billetera en AsyncStorage si falla SecureStore. Cuentas nuevas se cifran con AES-256-GCM; las v1 se siguen abriendo. | — |

@@ -13,6 +13,8 @@ import {
   type AuthPrefs,
   type AuthPurpose,
 } from '../services/authPrefs';
+import { hasSecurityConfirmMethod } from '../services/fundsConfirm';
+import { useFundsConfirm } from './FundsConfirmHost';
 import { AppText } from './AppText';
 
 function methodKey(method: AuthMethod): TranslationKey {
@@ -43,6 +45,7 @@ function emptyPrefs(): AuthPrefs {
 export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChanged }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { confirmFunds } = useFundsConfirm();
   const empty = useMemo(() => emptyPrefs(), []);
   const [draft, setDraft] = useState<AuthPrefs>(empty);
   const [available, setAvailable] = useState<AuthMethod[]>(['password']);
@@ -93,6 +96,11 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
     }
     setBusy(true);
     try {
+      if (!(await hasSecurityConfirmMethod())) {
+        Alert.alert(t('error'), t('securityConfirmMissing'));
+        return;
+      }
+      if (!(await confirmFunds('security'))) return;
       const next = await saveAuthPrefs(draft);
       setDraft(next);
       onChanged?.();

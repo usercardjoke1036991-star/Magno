@@ -13,9 +13,11 @@ export const MAX_LEVEL_BONUS_USD = MAX_LOAN_LEVEL * MILESTONE_BONUS_PER_LEVEL_US
 export const MILESTONE_BONUS_TOTAL_USD = 110_000;
 export const LADDER_STEP_USD = 1_100;
 export const LADDER_RATE_DROPS = 394;
+/** Bono de hito 1000: cada 100 pagos a tiempo en el último nivel, sin reiniciar el contador. */
+export const MAX_LEVEL_BONUS_EVERY = 100;
 export const ONCHAIN_TIER_SCAN = CORE_LOAN_LEVEL;
 
-/** L1 → 3; L2–9 → 5; L10–1000 → 5, 10, 15…; L1000 no sube de nivel y reinicia el ciclo del bono. */
+/** L1 → 3; L2–9 → 5; L10–999 → 5, 10, 15…; L1000 no sube y acumula; bono extra cada 100. */
 export function requiredCountForLevel(id: number): number {
   if (id < 1 || id > MAX_LOAN_LEVEL) return 0;
   if (id <= 1) return 3;

@@ -1,5 +1,6 @@
 import { Contract, formatUnits, getAddress, type AbstractProvider } from 'ethers';
 import { CONTRACT_ABI, getContractAddress } from '../constants/contractConfig';
+import { FAMA_ABI } from '../constants/famaConfig';
 import { getKnownStartBlock } from '../constants/deployedAddresses';
 import { assertTrustedRpc, getProviderWithFallback, isContractConfigured } from '../constants/rpcConfig';
 import { attachCombinedScores, type FamePlayer } from '../utils/fameRankings';
@@ -217,19 +218,32 @@ export async function loadFameLeaderboard(viewerAddress = ''): Promise<FameLeade
   if (viewer) remember(viewer);
   const { roster, truncated: rosterTruncated } = takeRoster(order, viewer);
   const fame = new Map<string, number>();
+  const streak = new Map<string, number>();
   const closed = new Map<string, number>();
   const levels = new Map<string, number>();
   const mora = new Map<string, boolean>();
+  let rachaCaja: Contract | null = null;
+  try {
+    const hermano = String(await contract.famaHermano());
+    if (hermano && hermano !== ZERO) {
+      const caja = new Contract(hermano, FAMA_ABI, provider);
+      await caja.FAMA_POR_DIA_RACHA();
+      rachaCaja = caja;
+    }
+  } catch {
+    rachaCaja = null;
+  }
   for (let i = 0; i < roster.length; i += VIEW_BATCH) {
     const batch = roster.slice(i, i + VIEW_BATCH);
     const rows = await Promise.all(
       batch.map(async (address) => {
         try {
-          const [history, closedLoans, progress, delinquent] = await Promise.all([
+          const [history, closedLoans, progress, delinquent, streakDays] = await Promise.all([
             contract.obtenerHistorialUsuario(address),
             contract.prestamosCerrados(address),
             contract.obtenerProgresoUsuario(address),
             contract.esMoroso(address).catch(() => false),
+            rachaCaja ? rachaCaja.diasRacha(address).catch(() => 0) : Promise.resolve(0),
           ]);
           return {
             address,
@@ -237,14 +251,16 @@ export async function loadFameLeaderboard(viewerAddress = ''): Promise<FameLeade
             closed: Number(closedLoans || 0) || 0,
             level: Math.max(1, Number(progress.nivelActual ?? progress[0] ?? 1) || 1),
             delinquent: Boolean(delinquent),
+            streakDays: Number(streakDays || 0) || 0,
           };
         } catch {
-          return { address, fame: 0, closed: 0, level: 1, delinquent: false };
+          return { address, fame: 0, closed: 0, level: 1, delinquent: false, streakDays: 0 };
         }
       })
     );
     for (const row of rows) {
       fame.set(row.address.toLowerCase(), row.fame);
+      streak.set(row.address.toLowerCase(), row.streakDays);
       closed.set(row.address.toLowerCase(), row.closed);
       levels.set(row.address.toLowerCase(), row.level);
       mora.set(row.address.toLowerCase(), row.delinquent);
@@ -263,6 +279,7 @@ export async function loadFameLeaderboard(viewerAddress = ''): Promise<FameLeade
         loansPaid,
         paidUsd: Number(formatUnits(paidWei.get(keyAddr) || 0n, 18)) || 0,
         fame: fame.get(keyAddr) || 0,
+        streakDays: streak.get(keyAddr) || 0,
         level: levels.get(keyAddr) || 1,
         bonuses: bonusCount.get(keyAddr) || 0,
         bonusUsd: Number(formatUnits(bonusWei.get(keyAddr) || 0n, 18)) || 0,

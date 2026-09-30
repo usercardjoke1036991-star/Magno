@@ -11,7 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { authenticateBiometric, checkPassword, checkPin } from '../services/appLock';
 import { verifyAuthenticator } from '../services/authenticator';
 import { getAuthMethods, isAuthEnabled, isMethodReady, type AuthMethod, type AuthPurpose } from '../services/authPrefs';
-import type { FundsConfirmPurpose } from '../services/fundsConfirm';
+import { listSecurityConfirmMethods, type FundsConfirmPurpose } from '../services/fundsConfirm';
 import { SecretInput } from './SecretInput';
 import { AppText } from './AppText';
 import type { TranslationKey } from '../i18n/translations';
@@ -57,6 +57,19 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
   const confirmFunds = useCallback(async (nextPurpose: FundsConfirmPurpose = 'transfer') => {
     if (inflight.current) return inflight.current;
     const run = (async () => {
+      if (nextPurpose === 'security') {
+        setPurpose('security');
+        const queue = await listSecurityConfirmMethods();
+        if (!queue.length) return false;
+        for (const chosen of queue) {
+          if (chosen === 'biometric') {
+            if (await authenticateBiometric()) return true;
+            continue;
+          }
+          return askSecret(chosen);
+        }
+        return false;
+      }
       const slot: AuthPurpose = nextPurpose === 'transfer' ? 'funds' : nextPurpose;
       if (!(await isAuthEnabled(slot))) return true;
       setPurpose(nextPurpose);
@@ -139,7 +152,9 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       ? 'loanConfirmRequestTitle'
       : purpose === 'loanPay'
         ? 'loanConfirmPayTitle'
-        : 'fundsConfirmTitle';
+        : purpose === 'security'
+          ? 'securityConfirmTitle'
+          : 'fundsConfirmTitle';
   const prompt =
     method === 'pin'
       ? t('fundsConfirmPrompt')
