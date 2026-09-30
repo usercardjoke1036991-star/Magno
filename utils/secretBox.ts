@@ -1,4 +1,5 @@
-import { concat, getBytes, hexlify, randomBytes, sha256, toUtf8Bytes, toUtf8String, type BytesLike } from 'ethers';
+import { concat, getBytes, sha256, toUtf8Bytes, toUtf8String, type BytesLike } from 'ethers';
+import { openAesGcmV2, sealAesGcmV2 } from './secretBoxAes';
 import { storeSlot } from './storeSlot';
 
 export function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
@@ -77,42 +78,45 @@ function keystream(key: Uint8Array, iv: Uint8Array, length: number): Uint8Array 
   return out;
 }
 
-export type SealedSecret = {
+export type SealedSecretV1 = {
   v: 1;
   iv: string;
   ct: string;
   mac: string;
 };
 
+export type SealedSecretV2 = {
+  v: 2;
+  iv: string;
+  ct: string;
+  tag: string;
+};
+
+export type SealedSecret = SealedSecretV1 | SealedSecretV2;
+
 export function isSealedBlob(raw: string): boolean {
   try {
     const parsed = JSON.parse(raw) as Partial<SealedSecret>;
+    if (parsed.v === 2) {
+      return Boolean(parsed.iv && parsed.ct && parsed.tag);
+    }
     return parsed.v === 1 && Boolean(parsed.iv && parsed.ct && parsed.mac);
   } catch {
     return false;
   }
 }
 
-export function sealSecret(plaintext: string, wrapKeyHex: string): string {
-  const key = getBytes(wrapKeyHex);
-  const macKey = hmacSha256(key, toUtf8Bytes(storeSlot(['quatrivium', 'mac', 'v1'])));
-  const iv = randomBytes(16);
-  const plain = toUtf8Bytes(plaintext);
-  const ks = keystream(key, iv, plain.length);
-  const ct = new Uint8Array(plain.length);
-  for (let i = 0; i < plain.length; i += 1) {
-    ct[i] = plain[i] ^ ks[i];
+export function sealedBlobVersion(raw: string): 1 | 2 | 0 {
+  try {
+    const parsed = JSON.parse(raw) as { v?: number };
+    if (parsed.v === 2 || parsed.v === 1) return parsed.v;
+  } catch {
+    // ignore
   }
-  const mac = hmacSha256(macKey, getBytes(concat([iv, ct])));
-  const payload: SealedSecret = { v: 1, iv: hexlify(iv), ct: hexlify(ct), mac: hexlify(mac) };
-  return JSON.stringify(payload);
+  return 0;
 }
 
-export function openSecret(blob: string, wrapKeyHex: string): string {
-  const parsed = JSON.parse(blob) as Partial<SealedSecret>;
-  if (parsed.v !== 1 || !parsed.iv || !parsed.ct || !parsed.mac) {
-    throw new Error('seal');
-  }
+function openSecretV1(parsed: SealedSecretV1, wrapKeyHex: string): string {
   const key = getBytes(wrapKeyHex);
   const macKey = hmacSha256(key, toUtf8Bytes(storeSlot(['quatrivium', 'mac', 'v1'])));
   const iv = getBytes(parsed.iv);
@@ -128,4 +132,24 @@ export function openSecret(blob: string, wrapKeyHex: string): string {
     plain[i] = ct[i] ^ ks[i];
   }
   return toUtf8String(plain);
+}
+
+function openSecretV2(parsed: SealedSecretV2, wrapKeyHex: string): string {
+  return openAesGcmV2(parsed, wrapKeyHex);
+}
+
+/** Cierra el sobre con AES-256-GCM. Las cuentas viejas (v1) se siguen abriendo. */
+export function sealSecret(plaintext: string, wrapKeyHex: string): string {
+  return sealAesGcmV2(plaintext, wrapKeyHex);
+}
+
+export function openSecret(blob: string, wrapKeyHex: string): string {
+  const parsed = JSON.parse(blob) as Partial<SealedSecret>;
+  if (parsed.v === 2 && parsed.iv && parsed.ct && parsed.tag) {
+    return openSecretV2({ v: 2, iv: parsed.iv, ct: parsed.ct, tag: parsed.tag }, wrapKeyHex);
+  }
+  if (parsed.v === 1 && parsed.iv && parsed.ct && parsed.mac) {
+    return openSecretV1({ v: 1, iv: parsed.iv, ct: parsed.ct, mac: parsed.mac }, wrapKeyHex);
+  }
+  throw new Error('seal');
 }

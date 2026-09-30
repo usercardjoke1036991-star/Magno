@@ -212,6 +212,7 @@
   "hubAdminLead": "Protocol administration.",
   "txBusy": "An operation is already in progress. Wait until it finishes.",
   "appWalletFailed": "Could not open the wallet.",
+  "errWalletPersist": "Could not save the account in this phone vault. Real accounts do not use the weak backup.",
   "appWalletRetry": "Retry",
   "amountExceedsBalance": "That amount is greater than your account balance.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

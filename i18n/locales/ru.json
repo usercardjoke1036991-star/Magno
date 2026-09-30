@@ -212,6 +212,7 @@
   "hubAdminLead": "Только 3 кошелька основателей, не кредитные счета.",
   "txBusy": "Операция уже выполняется. Дождитесь завершения.",
   "appWalletFailed": "Эта установка не смогла открыть свой кошелёк. Попробуйте снова.",
+  "errWalletPersist": "Не удалось сохранить счет в сейфе телефона. Реальный счет не использует слабую резервную копию.",
   "appWalletRetry": "Повторить",
   "amountExceedsBalance": "Сумма больше баланса вашего счёта.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

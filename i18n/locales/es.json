@@ -212,6 +212,7 @@
   "hubAdminLead": "Administración del protocolo.",
   "txBusy": "Ya hay una operación en curso. Espere a que termine.",
   "appWalletFailed": "No se pudo abrir la billetera.",
+  "errWalletPersist": "No se pudo guardar la cuenta en el cofre de este teléfono. En Cuenta Real no se usa el respaldo débil.",
   "appWalletRetry": "Reintentar",
   "amountExceedsBalance": "Ese monto supera el saldo de su cuenta.",
   "poolNeedInternalFunds": "Pague con su billetera vinculada. El saldo llega a su cuenta.",

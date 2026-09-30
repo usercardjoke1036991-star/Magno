@@ -138,6 +138,12 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(() => openSecret(sealed, other)).to.throw();
   });
 
+  it('keeps AsyncStorage wallet fallback only on Demo', function () {
+    const allowWalletAsyncFallback = (productMode) => productMode !== 'live';
+    expect(allowWalletAsyncFallback('live')).to.equal(false);
+    expect(allowWalletAsyncFallback('demo')).to.equal(true);
+  });
+
   it('accepts a user-chosen master password and rejects a private key', function () {
     const generated = masterPasswordFromRandomBytes(randomBytes(64));
     expect(generated).to.have.length(16);

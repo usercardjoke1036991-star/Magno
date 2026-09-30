@@ -212,6 +212,7 @@
   "hubAdminLead": "केवल 3 संस्थापक वॉलेट, क्रेडिट खाते नहीं।",
   "txBusy": "एक ऑपरेशन पहले से चल रहा है। खत्म होने तक प्रतीक्षा करें।",
   "appWalletFailed": "यह इंस्टॉल अपना वॉलेट नहीं खोल सका। फिर कोशिश करें।",
+  "errWalletPersist": "इस फोन के तिजोरी में खाता सहेजा नहीं जा सका। असली खाता कमजोर बैकअप का उपयोग नहीं करता।",
   "appWalletRetry": "फिर कोशिश करें",
   "amountExceedsBalance": "वह राशि आपके खाता शेष से ज़्यादा है।",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

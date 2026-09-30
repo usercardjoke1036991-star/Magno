@@ -149,6 +149,7 @@
 - Canje de fama se paga del pool (caja libre con piso), no de un bote aparte. Acceso Real sigue yendo al fundador; el pool es quien paga los botones de canje
 - Sala Canje sin niveles bloqueados: fama cuando quieran. Bono de referido del primer L1 pagado pasa de 0.50 a 1 USDT
 - Sala de canje de fama contra el pool (250=1 USDT) y texto de que el multiplicador de bloqueo USDT vive en Reserva
+- Blindar el sobre de la billetera: AES-GCM para cuentas nuevas y no usar respaldo AsyncStorage en Cuenta Real si el cofre del telefono falla.
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -274,3 +275,4 @@
 - [2026-09-30 04:00] Idea añadida al backlog: "Sala Canje sin niveles bloqueados: fama cuando quieran. Bono de referido del pri"
 - [2026-09-30 07:03] Idea añadida al backlog: "Sala de canje de fama contra el pool (250=1 USDT) y texto de que el multiplicado"
 - [2026-09-30 07:04] Módulo completado: 'Canje de fama'
+- [2026-09-30 09:53] Idea añadida al backlog: "Blindar el sobre de la billetera: AES-GCM para cuentas nuevas y no usar respaldo"

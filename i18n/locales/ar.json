@@ -212,6 +212,7 @@
   "hubAdminLead": "محافظ المؤسسين الثلاث فقط، وليست حسابات الائتمان.",
   "txBusy": "عملية جارية بالفعل. انتظر حتى تنتهي.",
   "appWalletFailed": "تعذر على هذا التثبيت فتح محفظته. حاول مرة أخرى.",
+  "errWalletPersist": "تعذر حفظ الحساب في خزنة هذا الهاتف. الحساب الحقيقي لا يستخدم النسخة الاحتياطية الضعيفة.",
   "appWalletRetry": "إعادة المحاولة",
   "amountExceedsBalance": "هذا المبلغ أكبر من رصيد حسابك.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

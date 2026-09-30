@@ -212,6 +212,7 @@
   "hubAdminLead": "Solo i 3 wallet fondatori, non i conti di credito.",
   "txBusy": "Un’operazione è già in corso. Aspetta che finisca.",
   "appWalletFailed": "Questa installazione non è riuscita ad aprire il wallet. Riprova.",
+  "errWalletPersist": "Impossibile salvare il conto nella cassaforte di questo telefono. Il Conto Reale non usa il backup debole.",
   "appWalletRetry": "Riprova",
   "amountExceedsBalance": "Questo importo è maggiore del saldo del conto.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

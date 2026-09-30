@@ -212,6 +212,7 @@
   "hubAdminLead": "শুধু ৩টি প্রতিষ্ঠাতা ওয়ালেট, ক্রেডিট অ্যাকাউন্ট নয়।",
   "txBusy": "একটি অপারেশন ইতিমধ্যে চলছে। শেষ হওয়া পর্যন্ত অপেক্ষা করুন।",
   "appWalletFailed": "এই ইনস্টল তার ওয়ালেট খুলতে পারেনি। আবার চেষ্টা করুন।",
+  "errWalletPersist": "এই ফোনের ভল্টে অ্যাকাউন্ট সংরক্ষণ করা যায়নি। আসল অ্যাকাউন্ট দুর্বল ব্যাকআপ ব্যবহার করে না।",
   "appWalletRetry": "আবার চেষ্টা",
   "amountExceedsBalance": "সেই পরিমাণ আপনার অ্যাকাউন্ট ব্যালেন্সের চেয়ে বেশি।",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

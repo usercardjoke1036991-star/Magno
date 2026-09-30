@@ -212,6 +212,7 @@
   "hubAdminLead": "Hanya 3 dompet pendiri, bukan akun kredit.",
   "txBusy": "Operasi sudah berjalan. Tunggu sampai selesai.",
   "appWalletFailed": "Pemasangan ini tidak bisa membuka dompetnya. Coba lagi.",
+  "errWalletPersist": "Tidak bisa menyimpan akun di brankas ponsel ini. Akun Real tidak memakai cadangan lemah.",
   "appWalletRetry": "Coba lagi",
   "amountExceedsBalance": "Jumlah itu lebih besar dari saldo akun Anda.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

@@ -212,6 +212,7 @@
   "hubAdminLead": "Yalnızca 3 kurucu cüzdanı, kredi hesapları değil.",
   "txBusy": "Bir işlem zaten sürüyor. Bitmesini bekleyin.",
   "appWalletFailed": "Bu kurulum cüzdanını açamadı. Tekrar deneyin.",
+  "errWalletPersist": "Hesap bu telefonun kasasına kaydedilemedi. Gerçek hesap zayıf yedeği kullanmaz.",
   "appWalletRetry": "Yeniden dene",
   "amountExceedsBalance": "Bu tutar hesap bakiyenizden büyük.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

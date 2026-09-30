@@ -212,6 +212,7 @@
   "hubAdminLead": "仅限 3 个创始钱包，不是信贷账户。",
   "txBusy": "已有操作正在进行。请等待其完成。",
   "appWalletFailed": "此安装无法打开钱包。请再试一次。",
+  "errWalletPersist": "无法将账户存入本机保险箱。真实账户不会使用较弱的备用存储。",
   "appWalletRetry": "重试",
   "amountExceedsBalance": "该金额大于您的账户余额。",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

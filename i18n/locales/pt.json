@@ -212,6 +212,7 @@
   "hubAdminLead": "Só as 3 carteiras fundadoras, não as contas de crédito.",
   "txBusy": "Já há uma operação em andamento. Espere ela terminar.",
   "appWalletFailed": "Esta instalação não conseguiu abrir a carteira. Tente de novo.",
+  "errWalletPersist": "Não foi possível guardar a conta no cofre deste telemóvel. A Conta Real não usa o backup fraco.",
   "appWalletRetry": "Tentar de novo",
   "amountExceedsBalance": "Esse valor é maior que o saldo da sua conta.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

@@ -665,11 +665,13 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
           ? t('lockPasswordPrivateKey')
           : code === 'device-bound'
             ? t('errDeviceBound')
-            : code === 'wallet-other-app' || code.includes('wallet-other-app')
-              ? t('errWalletOtherApp')
-              : code === 'username'
-                ? t('usernameInvalid')
-                : t('appWalletFailed')
+            : code === 'wallet-persist'
+              ? t('errWalletPersist')
+              : code === 'wallet-other-app' || code.includes('wallet-other-app')
+                ? t('errWalletOtherApp')
+                : code === 'username'
+                  ? t('usernameInvalid')
+                  : t('appWalletFailed')
       );
     } finally {
       setBusy(false);
@@ -785,9 +787,11 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
           ? t('seedInvalid')
           : code === 'device-bound'
             ? t('errDeviceBound')
-            : code === 'wallet-other-app' || code.includes('wallet-other-app')
-              ? t('errWalletOtherApp')
-              : t('appWalletFailed')
+            : code === 'wallet-persist'
+              ? t('errWalletPersist')
+              : code === 'wallet-other-app' || code.includes('wallet-other-app')
+                ? t('errWalletOtherApp')
+                : t('appWalletFailed')
       );
     } finally {
       setBusy(false);

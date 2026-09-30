@@ -90,11 +90,13 @@ export const AppWalletProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return;
     }
     clearWalletSigner();
-    void loadAppWallet().then((wallet) => {
-      if (!wallet) return;
-      setSigner(wallet);
-      setWalletSigner(wallet);
-    });
+    void loadAppWallet()
+      .then((wallet) => {
+        if (!wallet) return;
+        setSigner(wallet);
+        setWalletSigner(wallet);
+      })
+      .catch(() => {});
   }), []);
 
   const retry = useCallback(async () => {

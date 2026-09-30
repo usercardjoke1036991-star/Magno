@@ -212,6 +212,7 @@
   "hubAdminLead": "Nur die 3 Gründer-Wallets, keine Kreditkonten.",
   "txBusy": "Ein Vorgang läuft bereits. Warten Sie, bis er fertig ist.",
   "appWalletFailed": "Diese Installation konnte ihr Wallet nicht öffnen. Erneut versuchen.",
+  "errWalletPersist": "Das Konto konnte nicht im Tresor dieses Telefons gespeichert werden. Das Echtkonto nutzt kein schwaches Backup.",
   "appWalletRetry": "Erneut versuchen",
   "amountExceedsBalance": "Dieser Betrag ist größer als Ihr Kontostand.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

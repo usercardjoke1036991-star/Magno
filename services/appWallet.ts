@@ -2,10 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Contract, HDNodeWallet, JsonRpcProvider, Mnemonic, Wallet, randomBytes, type Signer } from 'ethers';
 import * as SecureStore from 'expo-secure-store';
 import { ERC20_ABI } from '../constants/contractConfig';
-import { NETWORK_CONFIG, RPC_URLS } from '../constants/rpcConfig';
 import { estimateNetworkGasWei, resolveFeeCollector } from '../constants/feeConfig';
+import { getProductMode, NETWORK_CONFIG, RPC_URLS } from '../constants/rpcConfig';
 import { isAllowedWei, isHexAddress } from '../utils/sanitize';
-import { isSealedBlob, openSecret, sealSecret } from '../utils/secretBox';
+import { isSealedBlob, openSecret, sealSecret, sealedBlobVersion } from '../utils/secretBox';
+import { allowWalletAsyncFallback } from '../utils/walletVaultPolicy';
 import { assertRestoreFitsThisDevice, lookupBoundWalletOnThisDevice } from './deviceClaim';
 import { bindAppWallet, claimDeviceWallet, clearBoundWallet } from './deviceBinding';
 import { getWalletWrapKey } from './walletSession';
@@ -55,12 +56,20 @@ async function readRawWallet(): Promise<string | null> {
     return secure;
   }
   const fallback = await AsyncStorage.getItem(WALLET_FALLBACK).catch(() => null);
-  if (fallback) {
-    void SecureStore.setItemAsync(WALLET_KEY, fallback, OPTIONS).catch(() => {});
-    void AsyncStorage.removeItem(WALLET_FALLBACK).catch(() => {});
+  if (!fallback) return null;
+  const migrated = await withLimit(
+    SecureStore.setItemAsync(WALLET_KEY, fallback, OPTIONS).then(() => true as const),
+    2500,
+    false as const
+  );
+  if (migrated) {
+    await AsyncStorage.removeItem(WALLET_FALLBACK).catch(() => {});
     return fallback;
   }
-  return null;
+  if (!allowWalletAsyncFallback(getProductMode())) {
+    throw new Error('wallet-persist');
+  }
+  return fallback;
 }
 
 async function readStored(): Promise<StoredWallet | null> {
@@ -69,7 +78,15 @@ async function readStored(): Promise<StoredWallet | null> {
   if (isSealedBlob(raw)) {
     const wrap = getWalletWrapKey();
     if (!wrap) return null;
-    return parseStored(openSecret(raw, wrap));
+    const opened = parseStored(openSecret(raw, wrap));
+    if (opened && sealedBlobVersion(raw) === 1) {
+      try {
+        await persistRecord(opened);
+      } catch {
+        // El sobre v1 sigue sirviendo si el cofre no acepta reescribir AES-GCM.
+      }
+    }
+    return opened;
   }
   const parsed = parseStored(raw);
   if (!parsed) return null;
@@ -93,6 +110,9 @@ async function persistRecord(record: StoredWallet): Promise<void> {
   if (secureOk) {
     await AsyncStorage.removeItem(WALLET_FALLBACK).catch(() => {});
     return;
+  }
+  if (!allowWalletAsyncFallback(getProductMode())) {
+    throw new Error('wallet-persist');
   }
   try {
     await AsyncStorage.setItem(WALLET_FALLBACK, sealed);

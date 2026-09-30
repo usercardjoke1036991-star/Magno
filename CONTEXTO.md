@@ -260,6 +260,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-30 | Cuenta Real ya no guarda el sobre de la billetera en AsyncStorage si falla SecureStore. Cuentas nuevas se cifran con AES-256-GCM; las v1 se siguen abriendo. | — |
 | 2026-09-30 | Auditoria canje: el fundador ya no puede donarse fama; mora y vencido no canjean; sacarCaja exige saldo real. Credit 24536/24576. | — |
 | 2026-09-30 | Sala Canje cableada a QuatriviumFamaCaja (hermano). Credit no se recorta: 250 fama=1 USDT del pool; Reserva lock documentado en la misma sala. | — |
 | 2026-09-30 | Dockerfile.notify declara USER node; el entrypoint solo hace chown/su-exec si arranca como root. Worker prueba /data y cae a /app/data. Contratos y app sin hallazgo nuevo. ReDoS Expo 54 se ignora, no se sube a 55. | — |

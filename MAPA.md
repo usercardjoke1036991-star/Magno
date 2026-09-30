@@ -426,6 +426,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/peg.test.js` — módulo JS/TS
 - `test/render-notify.test.js` — módulo JS/TS
 - `test/reserva.test.js` — módulo JS/TS
+- `test/secret-box.test.js` — módulo JS/TS
 - `test/security-hardening.test.js` — módulo JS/TS
 - `test/security.test.js` — módulo JS/TS
 - `test/sponsor-lock.test.js` — módulo JS/TS
@@ -503,7 +504,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/sanitize.ts` — módulo JS/TS
   - Funciones/clases: stripUnsafeText, isHttpsUrl, isAllowedWei, isHexAddress
 - `utils/secretBox.ts` — módulo JS/TS
-  - Funciones/clases: timingSafeEqualBytes, timingSafeEqualHex, hmacSha256, deriveWrapKey, deriveWrapKeyAsync, isSealedBlob, sealSecret, openSecret
+  - Funciones/clases: timingSafeEqualBytes, timingSafeEqualHex, hmacSha256, deriveWrapKey, deriveWrapKeyAsync, isSealedBlob, sealedBlobVersion, sealSecret, openSecret
+- `utils/secretBoxAes.d.ts` — módulo JS/TS
+  - Funciones/clases: sealAesGcmV2, openAesGcmV2
+- `utils/secretBoxAes.js` — módulo JS/TS
 - `utils/sponsorLock.ts` — módulo JS/TS
   - Funciones/clases: SPONSOR_LOCK_PREFIX, sponsorLockKey, resolveSponsorInput, parseLockedSponsor, buildLockedSponsor, keepFirstLock
 - `utils/storeSlot.ts` — módulo JS/TS
@@ -516,6 +520,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: normalizeUsername, isValidUsername
 - `utils/walletChain.ts` — módulo JS/TS
   - Funciones/clases: parseEvmChainId, needsWalletAddChain, ensureExternalWalletOnAppChain
+- `utils/walletVaultPolicy.ts` — módulo JS/TS
+  - Funciones/clases: allowWalletAsyncFallback
 - `wallet/AppModeContext.tsx` — módulo JS/TS
   - Funciones/clases: AppModeProvider, useAppMode
 - `wallet/appModePersist.ts` — módulo JS/TS

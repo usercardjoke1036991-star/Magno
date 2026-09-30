@@ -212,6 +212,7 @@
   "hubAdminLead": "Uniquement les 3 portefeuilles fondateurs, pas les comptes de crédit.",
   "txBusy": "Une opération est déjà en cours. Attendez qu’elle se termine.",
   "appWalletFailed": "Cette installation n’a pas pu ouvrir son portefeuille. Réessayez.",
+  "errWalletPersist": "Impossible d’enregistrer le compte dans le coffre de ce téléphone. Le compte Réel n’utilise pas la sauvegarde faible.",
   "appWalletRetry": "Réessayer",
   "amountExceedsBalance": "Ce montant dépasse le solde de votre compte.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

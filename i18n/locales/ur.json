@@ -212,6 +212,7 @@
   "hubAdminLead": "صرف 3 بانی والیٹ، کریڈٹ اکاؤنٹس نہیں۔",
   "txBusy": "ایک آپریشن پہلے سے جاری ہے۔ ختم ہونے تک انتظار کریں۔",
   "appWalletFailed": "یہ انسٹال اپنا والیٹ نہیں کھول سکا۔ دوبارہ کوشش کریں۔",
+  "errWalletPersist": "اس فون کے خزانے میں اکاؤنٹ محفوظ نہیں ہو سکا۔ اصلی اکاؤنٹ کمزور بیک اپ استعمال نہیں کرتا.",
   "appWalletRetry": "دوبارہ کوشش",
   "amountExceedsBalance": "وہ رقم آپ کے اکاؤنٹ بیلنس سے زیادہ ہے۔",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",

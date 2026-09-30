@@ -212,6 +212,7 @@
   "hubAdminLead": "Chỉ 3 ví sáng lập, không phải tài khoản tín dụng.",
   "txBusy": "Một thao tác đang chạy. Đợi cho đến khi xong.",
   "appWalletFailed": "Bản cài này không mở được ví. Thử lại.",
+  "errWalletPersist": "Không lưu được tài khoản vào két của điện thoại này. Tài khoản Thật không dùng bản sao yếu.",
   "appWalletRetry": "Thử lại",
   "amountExceedsBalance": "Số tiền đó lớn hơn số dư tài khoản.",
   "poolNeedInternalFunds": "Pay from your linked wallet. Funds arrive in this account.",
