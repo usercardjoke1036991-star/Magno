@@ -84,6 +84,9 @@ describe('defensive security hardening', function () {
     expect(worker).to.include('javascript:S5332');
     expect(aprender).to.include('len(patron) > 120');
     expect(safeIo).to.include('def under_root');
+    const plugin = fs.readFileSync(path.join(root, 'plugins', 'withQuatriviumAndroidSecurity.js'), 'utf8');
+    expect(plugin).to.include("indexOf('<data'");
+    expect(plugin).to.not.include('android:scheme="exp+[^"]*"');
   });
 
   it('leaves Sumsub ready behind Render env and does not put secrets in the admin panel', function () {
