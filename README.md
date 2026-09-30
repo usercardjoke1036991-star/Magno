@@ -9,11 +9,11 @@
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
 - **Estado:** Testnet operativo — mainnet pendiente de deploy (acción manual del fundador)
-- **Tests detectados:** 26 archivo(s)
+- **Tests detectados:** 27 archivo(s)
 
 ### Qué funciona
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- Sala **Reserva**: hermano `QuatriviumReserva.sol` (Hardhat 11/11). Botón Bloquear USDT, 30 días, techo hasta 12% anual estimado del bote. Extra de comisiones de red del mismo bote (tramo 2/3) con corte del fundador; Credit intacto. Demo práctica local; Real exige identidad. Sin contrato mainnet.
+- Sala **Reserva**: hermano `QuatriviumReserva.sol` (Hardhat 12/12). Visible desde el inicio, usable en nivel 10. Bote solo admin (no Donar ni pool). Extra de comisiones con corte del fundador. Demo práctica local; Real exige identidad. Sin contrato mainnet.
 - 17 suites Hardhat (164 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings y lock de referido…
 - Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24555 B (margen 21). Live Demo sigue 24457 B hasta el redespliegue.
 - Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).

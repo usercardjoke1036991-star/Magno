@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Guardar senha nova",
   "lockRecoverBack": "Voltar",
   "lockRecoverFail": "Não foi possível restaurar a senha. Confira o e-mail e o código.",
+  "lockRecoverNeedDevice": "O e-mail só redefine a senha neste telefone. Num novo use a frase de 24 palavras.",
   "kycFingerprint": "Impressao de identidade: {fingerprint}",
   "referralRepTitle": "Pontos de reputação",
   "referralRepLead": "Ganha reputação com a sua rede. Comissão no pagamento; bónus de {bonus} a cada {threshold} pontos.",

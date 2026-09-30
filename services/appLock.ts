@@ -26,6 +26,7 @@ const BIO_KEY = storeSlot(['quatrivium', 'lock', 'bio']);
 const LOCK_OPEN_KEY = storeSlot(['quatrivium', 'lock', 'onOpen']);
 const GATE_KEY = storeSlot(['quatrivium', 'lock', 'gate']);
 const WRAP_STORE = storeSlot(['quatrivium', 'wallet', 'wrap', 'v1']);
+const RECOVERY_WRAP = storeSlot(['quatrivium', 'lock', 'recoveryWrap']);
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 const BIO_WRAP_OPTIONS = {
   ...OPTIONS,
@@ -288,8 +289,27 @@ export async function clearBiometricWrap(): Promise<void> {
   }
 }
 
+export async function persistLocalRecoveryWrap(wrap = getWalletWrapKey()): Promise<void> {
+  if (!wrap) return;
+  try {
+    await SecureStore.setItemAsync(RECOVERY_WRAP, wrap, OPTIONS);
+  } catch {
+    // El correo no debe depender de un wrap en el worker.
+  }
+}
+
+export async function loadLocalRecoveryWrap(): Promise<string | null> {
+  try {
+    const raw = String((await SecureStore.getItemAsync(RECOVERY_WRAP)) || '').toLowerCase();
+    return /^0x[0-9a-f]{64}$/.test(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
 async function persistCompanionWraps(wrap = getWalletWrapKey()): Promise<void> {
   if (!wrap) return;
+  await persistLocalRecoveryWrap(wrap);
   await withTimeout(
     (async () => {
       try {

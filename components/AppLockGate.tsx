@@ -729,6 +729,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       const reason = String((caught as Error)?.message || '');
       if (reason.includes('code')) setError(t('emailCodeWrong'));
       else if (reason.includes('expired')) setError(t('emailExpired'));
+      else if (reason.includes('device') || reason.includes('wrap')) setError(t('lockRecoverNeedDevice'));
       else setError(t('lockRecoverFail'));
     } finally {
       setBusy(false);

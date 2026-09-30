@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "Geri",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "E-posta parolayı yalnızca bu telefonda sıfırlar. Yeni telefonda 24 kelimelik ifadeyi kullanın.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "İtibar puanları",
   "referralRepLead": "Ağınızdan itibar kazanırsınız. Ödemede komisyon; her {threshold} puanda {bonus} bonus.",

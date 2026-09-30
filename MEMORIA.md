@@ -4,6 +4,7 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
 
 ## Decisiones
+- [2026-09-29] La recuperacion por correo solo cambia la contraseña en el mismo telefono. En uno nuevo se usa la frase. El wrap no sale del dispositivo.
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 - [2026-09-29] El multiplicador de comisiones del que bloquea se paga del bote de Reserva, no del pool. El fundador cobra corteFundadorBp de ese extra. Credit no se recorta (EIP-170).
 - [2026-09-29] Owner de Reserva sigue EOA; la pausa de emergencia se alinea con Credit via syncPauseFromCredit (attester, sin llave de owner). Unlock no se congela.
@@ -33,9 +34,9 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] Los 12 rangos se muestran con nombres de gema. No volver a Bronce, Oro ni Platino.
 - [2026-09-14] El escaneo KYC es foto local del documento. No hay OCR. La declaracion on-chain sigue siendo declararKyc().
 - [2026-09-14] La frase no se sustituye: cambiarla seria otra cuenta. Recuperar en otro telefono usa las mismas 24 palabras.
-- [2026-09-14] La interna guarda el credito. La externa paga donar, pool, 1 USDT, depositar y retirar. Saltarse el vinculo no mueve fondos.
 
 ## Cambios realizados
+- [2026-09-29] Hardening defensivo: recovery sin wrap en el worker, autofund con firma EIP-712, approve de deuda restante, attester sin llave de owner en host publico, Reserva solo attester y timelock 72h
 - [2026-09-29] Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10
 - [2026-09-29] Extra de comisiones Reserva del bote; fundador cobra su tramo; Credit intacto
 - [2026-09-29] Endurecimiento Reserva pre-testnet: unlock con pausa, allowlist, approve monto, guardian worker, invariante caja. Hardhat 9/9 Foundry 2/2.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Auditoria en vivo USB: no se reinstalo el APK (dev client 1.0.0). Metro cargo el JS actual. Real=Pronto sin credito falso; Demo pide; Donar solo Real con boton apagado; pool Demo solo lectura 2000.70; gemas Granate no Bronce; Ajustes sin fila de contrasena.
 - [2026-09-16] Escaneos restantes locales: Aderyn, Trivy, Semgrep, Mythril, ZAP. Un arreglo real: AES-GCM del notify-worker con `authTagLength: 16`. Sin mainnet ni APK.
 - [2026-09-16] WSL ciber: Aderyn 0.6.8, Trivy 0.74.0, Semgrep 1.177.0, Mythril 0.24.8, ZAP 2.17.0. Ubuntu y Foundry ya estaban. Sin escaneo de producto ni mainnet.
-- [2026-09-16] Foundry 1.8.3 WSL: forge test NAV/EIP-170/anti-contrato + fuzz 256. Lint clasificado, sin cambio al nucleo ni mainnet.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-29] Cambio: Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10
+[2026-09-29] Cambio: Hardening defensivo: recovery sin wrap en el worker, autofund con firma EIP-712, approve de deuda restante, attester sin llave de owner en host publico, Reserva solo attester y timelock 72h

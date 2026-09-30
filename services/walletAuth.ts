@@ -11,7 +11,8 @@ export type AuthPurpose =
   | 'username'
   | 'demo-identity'
   | 'session'
-  | 'identity';
+  | 'identity'
+  | 'autofund';
 
 const ZERO_PLACEHOLDER = '0x0000000000000000000000000000000000000001';
 const ZERO_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';

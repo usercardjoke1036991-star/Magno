@@ -139,6 +139,7 @@
 - quien bloquea en Reserva cobra multiplicador en comisiones de red pagado del bote; el fundador cobra su tramo de ese extra; Credit no se recorta
 - Reserva con cupo: 12% anual solo sobre asientos ya fondeados por el bote e interes del fundador, sin garantizar TVL ilimitado ni tocar el pool
 - Reserva visible desde el inicio, usable en nivel 10; el bote solo lo llenan admins (no Donar ni pool)
+- Blindar recovery, autofund e attester para que un atacante no robe el wrap ni drene gas ni use la llave del owner
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -254,3 +255,4 @@
 - [2026-09-29 09:58] Idea añadida al backlog: "quien bloquea en Reserva cobra multiplicador en comisiones de red pagado del bot"
 - [2026-09-29 10:13] Idea añadida al backlog: "Reserva con cupo: 12% anual solo sobre asientos ya fondeados por el bote e inter"
 - [2026-09-29 10:45] Idea añadida al backlog: "Reserva visible desde el inicio, usable en nivel 10; el bote solo lo llenan admi"
+- [2026-09-29 21:08] Idea añadida al backlog: "Blindar recovery, autofund e attester para que un atacante no robe el wrap ni dr"

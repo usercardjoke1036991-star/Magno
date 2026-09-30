@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "Zurück",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "E-Mail setzt das Passwort nur auf diesem Telefon zurück. Auf einem neuen Gerät die 24-Wort-Phrase nutzen.",
   "kycFingerprint": "Identitaetsfingerabdruck: {fingerprint}",
   "referralRepTitle": "Reputationspunkte",
   "referralRepLead": "Reputation aus Ihrem Netzwerk. Provision bei Rückzahlung; {bonus} Bonus alle {threshold} Punkte.",

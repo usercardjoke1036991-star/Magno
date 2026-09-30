@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "वापस",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "ईमेल केवल इसी फ़ोन पर पासवर्ड बदलता है। नए फ़ोन पर 24 शब्दों का वाक्यांश उपयोग करें।",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "प्रतिष्ठा अंक",
   "referralRepLead": "आपके नेटवर्क से प्रतिष्ठा मिलती है। भुगतान पर कमिशन; हर {threshold} अंक पर {bonus} बोनस।",

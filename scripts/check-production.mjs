@@ -105,6 +105,12 @@ const checks = [
     need: 'ADMINS=0xFundador (la primera es la fundadora). Las otras dos se listan ahora o se agregan después desde la app',
   },
   {
+    id: 'admins-2of3',
+    who: 'you',
+    ok: admins.length >= 3,
+    need: '3 admins distintos antes de mainnet: el contrato solo hace 2-de-3 si hay tres llaves',
+  },
+  {
     id: 'confirms',
     who: 'code',
     ok: Number(get('REQUIRED_CONFIRMATIONS') || '0') >= 1 && (admins.length < 2 || Number(get('REQUIRED_CONFIRMATIONS') || '0') >= 2),

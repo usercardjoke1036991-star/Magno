@@ -684,6 +684,7 @@
   "lockRecoverSubmit": "Guardar contraseña nueva",
   "lockRecoverBack": "Volver",
   "lockRecoverFail": "No se pudo restablecer la contraseña. Revise el correo y el código.",
+  "lockRecoverNeedDevice": "El correo solo cambia la contraseña en este teléfono. En uno nuevo use la frase de 24 palabras.",
   "kycFingerprint": "Huella de identidad: {fingerprint}",
   "referralRepTitle": "Puntos de reputación",
   "referralRepLead": "Reputación por su red. Comisión al pagar; bono de {bonus} cada {threshold} puntos.",

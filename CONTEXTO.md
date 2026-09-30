@@ -259,6 +259,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-29 | Hardening: el worker no guarda ni devuelve el wrap; autofund exige EIP-712; approve exacto tras prestar; attester no usa la llave de owner en host publico; Reserva boost solo attester y cambios de owner/credit a 72h | — |
 | 2026-09-29 | Reserva visible desde el inicio, usable en nivel 10; aportarBote solo admin (no Donar ni pool) | — |
 | 2026-09-29 | Reserva: extra de comisiones de red del bote (tramo 2/3) con corte del fundador; Credit no se recorta; worker paga al ver ComisionGeneracional | — |
 | 2026-09-29 | Reserva endurecida: desbloquear vive bajo pausa, pin de direccion Demo, approve acotado, setCredit(0) prohibido, syncPauseFromCredit, invariante Foundry y guardian en el worker. Credit no se toco. | — |

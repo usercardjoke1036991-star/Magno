@@ -324,7 +324,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/accountUsername.ts` — módulo JS/TS
   - Funciones/clases: loadClaimedUsername, saveClaimedUsername, checkUsernameAvailable, claimUsername, clearClaimedUsername
 - `services/appLock.ts` — módulo JS/TS
-  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, probePasswordSet, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, probePinSet, isPinSet, getPinLockRemaining, setPin, checkPin, matchPin, verifyPin, changePin, clearPin, setPassword, abortPasswordSetup, checkPassword, matchPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
+  - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, probePasswordSet, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, persistLocalRecoveryWrap, loadLocalRecoveryWrap, probePinSet, isPinSet, getPinLockRemaining, setPin, checkPin, matchPin, verifyPin, changePin, clearPin, setPassword, abortPasswordSetup, checkPassword, matchPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
 - `services/appWallet.ts` — módulo JS/TS
   - Funciones/clases: rewrapWalletWithNewKey, withCurrentRpc, isValidSecretPhrase, loadAppWallet, createAppWallet, ensureAppWallet, wipeAppWallet, recreateAppWallet, generateSecretPhrase, addressFromPhrase, importFromPhrase, getSecretPhrase, hasSecretPhrase, isPhraseBackedUp, markPhraseBackedUp, cobrarComisionIntermediario, enviarToken, enviarBnb
 - `services/authenticator.ts` — módulo JS/TS
@@ -414,6 +414,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/peg.test.js` — módulo JS/TS
 - `test/render-notify.test.js` — módulo JS/TS
 - `test/reserva.test.js` — módulo JS/TS
+- `test/security-hardening.test.js` — módulo JS/TS
 - `test/security.test.js` — módulo JS/TS
 - `test/sponsor-lock.test.js` — módulo JS/TS
 - `test/textbelt-notify.test.js` — módulo JS/TS

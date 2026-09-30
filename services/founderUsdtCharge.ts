@@ -12,7 +12,8 @@ import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
 import { humanizeTxError } from '../utils/txErrors';
 import { getEthersSignerFromProvider } from '../web3Config';
-import { enviarToken } from './appWallet';
+import { enviarToken, loadAppWallet } from './appWallet';
+import { signedAuthBody } from './walletAuth';
 import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from './linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { QuatriviumCreditService } from './quatriviumCreditService';
@@ -78,17 +79,23 @@ async function postAutoFund(base: string, address: string): Promise<AutoFundResu
   const root = base.replace(/\/$/, '');
   const local = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(root);
   if (!local && !isHttpsUrl(root)) return 'fail';
+  const signer = await loadAppWallet();
+  if (!signer) return 'fail';
+  const body = JSON.stringify({
+    address,
+    ...(await signedAuthBody(signer, address, 'autofund')),
+  });
   try {
     const res = local
       ? await fetch(`${root}/auto-fund`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ address }),
+          body,
         })
       : await safeJsonFetch(`${root}/auto-fund`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address }),
+          body,
           timeoutMs: 20_000,
         });
     if (!res.ok) return 'fail';

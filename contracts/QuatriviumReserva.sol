@@ -34,10 +34,16 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     uint256 public constant TRAMO_ALTO = 500e18;
     uint256 public constant NIVEL_MINIMO = 10;
 
+    uint256 public constant CAMBIO_ESPERA = 72 hours;
+
     IERC20 public immutable token;
     address public owner;
     address public fundador;
     address public credit;
+    address public pendienteOwner;
+    uint256 public pendienteOwnerDesde;
+    address public pendienteCredit;
+    uint256 public pendienteCreditDesde;
     uint256 public bote;
 
     struct Posicion {
@@ -65,6 +71,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     error YaPagado();
     error NivelInsuficiente();
     error SoloAdmin();
+    error EsperaTimelock();
 
     event Bloqueado(address indexed usuario, uint256 monto, uint256 desbloqueo);
     event Desbloqueado(address indexed usuario, uint256 principal, uint256 rendimiento, uint256 corteFundador);
@@ -166,7 +173,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         whenNotPaused
         nonReentrant
     {
-        if (msg.sender != owner && !_esAttesterCredit()) revert NoAutorizado();
+        if (!_esAttesterCredit()) revert NoAutorizado();
         if (id == bytes32(0) || boostUsado[id]) revert YaPagado();
         if (beneficiario == address(0) || montoBase == 0) revert MontoCero();
 
@@ -205,13 +212,33 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
 
     function setCredit(address next) external onlyOwner {
         if (next == address(0)) revert DestinoCero();
-        credit = next;
-        emit CreditCambiado(next);
+        pendienteCredit = next;
+        pendienteCreditDesde = block.timestamp;
+    }
+
+    function applyCredit() external onlyOwner {
+        if (pendienteCredit == address(0) || pendienteCreditDesde == 0) revert NadaQueMover();
+        if (block.timestamp < pendienteCreditDesde + CAMBIO_ESPERA) revert EsperaTimelock();
+        credit = pendienteCredit;
+        pendienteCredit = address(0);
+        pendienteCreditDesde = 0;
+        emit CreditCambiado(credit);
     }
 
     function setOwner(address next) external onlyOwner {
         if (next == address(0)) revert DestinoCero();
-        owner = next;
+        pendienteOwner = next;
+        pendienteOwnerDesde = block.timestamp;
+    }
+
+    function acceptOwner() external {
+        if (msg.sender != pendienteOwner) revert SoloOwner();
+        if (pendienteOwnerDesde == 0 || block.timestamp < pendienteOwnerDesde + CAMBIO_ESPERA) {
+            revert EsperaTimelock();
+        }
+        owner = pendienteOwner;
+        pendienteOwner = address(0);
+        pendienteOwnerDesde = 0;
     }
 
     function pausar() external {

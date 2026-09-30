@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "رجوع",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "البريد يعيد كلمة المرور على هذا الهاتف فقط. على هاتف جديد استخدم عبارة الـ 24 كلمة.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "نقاط السمعة",
   "referralRepLead": "تكسب سمعة من شبكتك. عمولة عند السداد؛ مكافأة {bonus} كل {threshold} نقطة.",

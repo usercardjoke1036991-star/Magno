@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "Quay lại",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "Email chỉ đặt lại mật khẩu trên điện thoại này. Máy mới hãy dùng cụm 24 từ.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "Điểm uy tín",
   "referralRepLead": "Uy tín tăng theo mạng lưới. Hoa hồng khi họ trả; thưởng {bonus} mỗi {threshold} điểm.",

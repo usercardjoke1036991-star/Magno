@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "뒤로",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "이메일은 이 휴대폰에서만 비밀번호를 바꿉니다. 새 휴대폰에서는 24단어 문구를 사용하세요.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "평판 포인트",
   "referralRepLead": "네트워크에서 신뢰를 얻습니다. 상환 시 수수료; {threshold}점마다 {bonus} 보너스.",

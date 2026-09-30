@@ -43,7 +43,10 @@ describe('Render notify worker', function () {
     expect(worker).to.include('process.env.PORT || process.env.NOTIFY_PORT || 8787');
     expect(worker).to.not.include('displayName: username');
     expect(worker).to.include('sessionUser');
-    expect(worker).to.include('ATTESTER_EXPLICIT || (!isMainnet ? DEPLOY_KEY : \'\')');
+    expect(worker).to.include('ATTESTER_EXPLICIT || (!isMainnet && !publicAttesterHost ? DEPLOY_KEY : \'\')');
+    expect(worker).to.include('sanitizeLoadedStore');
+    expect(worker).to.include("purpose !== 'autofund'");
+    expect(worker).to.not.include('json(res, 200, { wrap })');
     const fly = fs.readFileSync(path.join(root, 'scripts', 'deploy-notify.mjs'), 'utf8');
     expect(fly).to.not.include('ATTESTER_PRIVATE_KEY: env.ATTESTER_PRIVATE_KEY || env.PRIVATE_KEY');
     expect(fly).to.not.match(/^\s*PRIVATE_KEY: env\.PRIVATE_KEY,/m);

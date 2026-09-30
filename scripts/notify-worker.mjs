@@ -122,9 +122,11 @@ if (isMainnet && sameKey(ATTESTER_EXPLICIT, DEPLOY_KEY)) {
   console.error('Mainnet: ATTESTER_PRIVATE_KEY debe ser distinta de PRIVATE_KEY.');
   process.exit(1);
 }
-// Render y testnet: se firma con ATTESTER_PRIVATE_KEY. Fallback local: PRIVATE_KEY del primer admin.
-// Mainnet: solo ATTESTER_PRIVATE_KEY, distinta del owner. Nunca PRIVATE_KEY en Render.
-const ATTESTER_KEY = ATTESTER_EXPLICIT || (!isMainnet ? DEPLOY_KEY : '');
+// Solo localhost puede firmar con PRIVATE_KEY. En Render/0.0.0.0 nunca: el owner no es attester.
+const bindEarly = process.env.NOTIFY_BIND || (process.env.PORT ? '0.0.0.0' : '127.0.0.1');
+const publicAttesterHost =
+  Boolean(process.env.RENDER) || (bindEarly !== '127.0.0.1' && bindEarly !== '::1');
+const ATTESTER_KEY = ATTESTER_EXPLICIT || (!isMainnet && !publicAttesterHost ? DEPLOY_KEY : '');
 let attesterReady = false;
 try {
   if (ATTESTER_KEY) {
@@ -302,6 +304,13 @@ const emptyStore = () => ({
   recoverOtps: {},
 });
 
+/** El wrap de la billetera no se guarda en el worker. Se borra si un disco viejo aún lo tenía. */
+const sanitizeLoadedStore = (parsed) => {
+  const next = { ...emptyStore(), ...parsed };
+  next.recoveryWraps = {};
+  return next;
+};
+
 const loadStore = () => {
   if (!existsSync(DATA_FILE)) return emptyStore();
   const raw = readFileSync(DATA_FILE);
@@ -319,14 +328,14 @@ const loadStore = () => {
       const decipher = createDecipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
       decipher.setAuthTag(tag);
       const plain = Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
-      return { ...emptyStore(), ...JSON.parse(plain) };
+      return sanitizeLoadedStore({ ...emptyStore(), ...JSON.parse(plain) });
     } catch {
       console.error('No se pudo descifrar .notify-data.json. Revise NOTIFY_DATA_KEY; no se sobrescribe el archivo.');
       process.exit(1);
     }
   }
   try {
-    const parsed = { ...emptyStore(), ...JSON.parse(raw.toString('utf8')) };
+    const parsed = sanitizeLoadedStore({ ...emptyStore(), ...JSON.parse(raw.toString('utf8')) });
     if (key) {
       try {
         saveStore(parsed);
@@ -499,7 +508,8 @@ const requireAuth = (body) => {
     purpose !== 'username' &&
     purpose !== 'demo-identity' &&
     purpose !== 'session' &&
-    purpose !== 'identity'
+    purpose !== 'identity' &&
+    purpose !== 'autofund'
   ) {
     throw new Error('purpose');
   }
@@ -1664,14 +1674,6 @@ const server = createServer(async (req, res) => {
     store.emailClaims[emailHash] = { wallet, exp: now + IDENTITY_CLAIM_MS };
     const prev = store.profiles[wallet] || {};
     store.profiles[wallet] = { ...prev, email, emailReleased: false };
-    store.recoveryWraps = store.recoveryWraps || {};
-    if (prevEmail) {
-      const oldHash = hashEmail(parseAllowedEmail(prevEmail).canonical || prevEmail);
-      if (oldHash !== emailHash && store.recoveryWraps[oldHash]?.wallet === wallet) {
-        store.recoveryWraps[emailHash] = store.recoveryWraps[oldHash];
-        delete store.recoveryWraps[oldHash];
-      }
-    }
     delete store.emailOtps[wallet];
     await persist();
     json(res, 200, { ok: true });
@@ -1701,10 +1703,13 @@ const server = createServer(async (req, res) => {
       return;
     }
     const wallet = authn.wallet;
+    if (!rateLimit(`identity-w:${wallet}`, 12, 15 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
     store.profiles = store.profiles || {};
     store.emailClaims = store.emailClaims || {};
     store.phoneClaims = store.phoneClaims || {};
-    store.recoveryWraps = store.recoveryWraps || {};
     const profile = store.profiles[wallet] || {};
     if (path === '/identity/status') {
       let onChainBound = false;
@@ -1742,6 +1747,10 @@ const server = createServer(async (req, res) => {
         }
         store.profiles[wallet] = { ...profile, email: '', emailReleased: true };
       } else {
+        if (profile.verifiedPhone) {
+          const oldPhoneHash = hashPhone(String(profile.verifiedPhone));
+          if (store.phoneClaims[oldPhoneHash]?.wallet === wallet) delete store.phoneClaims[oldPhoneHash];
+        }
         store.profiles[wallet] = { ...profile, verifiedPhone: '', phoneReleased: true };
       }
       await persist();
@@ -1928,27 +1937,10 @@ const server = createServer(async (req, res) => {
       json(res, 401, { error: 'purpose' });
       return;
     }
-    const wrap = String(body.wrap || '').toLowerCase();
-    if (!wrapOk(wrap)) {
-      json(res, 400, { error: 'wrap' });
-      return;
-    }
     const email = store.profiles[authn.wallet]?.email;
     const parsed = parseAllowedEmail(email);
     if (!parsed.canonical) {
       json(res, 400, { error: 'email' });
-      return;
-    }
-    const emailHash = hashEmail(parsed.canonical);
-    store.recoveryWraps = store.recoveryWraps || {};
-    for (const [key, item] of Object.entries(store.recoveryWraps)) {
-      if (item?.wallet === authn.wallet && key !== emailHash) delete store.recoveryWraps[key];
-    }
-    store.recoveryWraps[emailHash] = { wallet: authn.wallet, wrap };
-    try {
-      await persist();
-    } catch {
-      json(res, 500, { error: 'store' });
       return;
     }
     json(res, 200, { ok: true });
@@ -1977,15 +1969,13 @@ const server = createServer(async (req, res) => {
       return;
     }
     store.emailClaims = store.emailClaims || {};
-    store.recoveryWraps = store.recoveryWraps || {};
     store.recoverOtps = store.recoverOtps || {};
     const claimed = store.emailClaims[emailHash];
-    const wrapRow = store.recoveryWraps[emailHash];
     const now = Date.now();
     for (const [key, item] of Object.entries(store.recoverOtps)) {
       if (Number(item?.exp) < now) delete store.recoverOtps[key];
     }
-    if (claimed?.wallet && wrapRow?.wrap && wrapOk(wrapRow.wrap) && claimed.wallet === wrapRow.wallet) {
+    if (claimed?.wallet) {
       const code = sixDigitCode();
       store.recoverOtps[emailHash] = {
         wallet: claimed.wallet,
@@ -2035,9 +2025,7 @@ const server = createServer(async (req, res) => {
     }
     const emailHash = hashEmail(parsed.canonical);
     store.recoverOtps = store.recoverOtps || {};
-    store.recoveryWraps = store.recoveryWraps || {};
     const pending = store.recoverOtps[emailHash];
-    const wrapRow = store.recoveryWraps[emailHash];
     const now = Date.now();
     if (!pending || Number(pending.exp) < now) {
       if (pending) delete store.recoverOtps[emailHash];
@@ -2052,28 +2040,24 @@ const server = createServer(async (req, res) => {
       json(res, 429, { error: 'rate' });
       return;
     }
-    if (!sameHash(pending.codeHash, hashRecoverOtp(code, emailHash)) || !wrapOk(wrapRow?.wrap)) {
+    if (!sameHash(pending.codeHash, hashRecoverOtp(code, emailHash))) {
       await persist();
       json(res, 401, { error: 'code' });
       return;
     }
-    const wrap = wrapRow.wrap;
     delete store.recoverOtps[emailHash];
-    delete store.recoveryWraps[emailHash];
     try {
       await persist();
     } catch {
       store.recoverOtps[emailHash] = pending;
-      store.recoveryWraps[emailHash] = wrapRow;
       json(res, 500, { error: 'store' });
       return;
     }
-    json(res, 200, { wrap });
+    json(res, 200, { ok: true });
     return;
   }
   if (path === '/auto-fund') {
-    // Solo en testnet: fondea automáticamente wallets sin BNB para gas.
-    // En mainnet se rechaza (ATTESTER no debe gastar BNB real en fondeos anónimos).
+    // Solo en testnet: fondea la wallet que firma EIP-712. Nunca anónimo.
     if (isMainnet) {
       json(res, 403, { error: 'mainnet: use faucet' });
       return;
@@ -2089,11 +2073,18 @@ const server = createServer(async (req, res) => {
       json(res, 413, { error: 'payload' });
       return;
     }
-    const address = String(body.address || '').trim();
-    if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
-      json(res, 400, { error: 'address' });
+    let authn;
+    try {
+      authn = requireAuth(body);
+    } catch (error) {
+      json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
       return;
     }
+    if (String(body.purpose) !== 'autofund') {
+      json(res, 401, { error: 'purpose' });
+      return;
+    }
+    const address = getAddress(authn.wallet);
     const MIN_FUND_WEI = 1_000_000_000_000_000n;  // 0.001 BNB
     const SEND_WEI     = 5_000_000_000_000_000n;  // 0.005 BNB
     try {
@@ -2104,6 +2095,10 @@ const server = createServer(async (req, res) => {
       const balance = await identityProvider.getBalance(address);
       if (balance >= MIN_FUND_WEI) {
         json(res, 200, { funded: false });
+        return;
+      }
+      if (!rateLimit(`autofund-w:${address.toLowerCase()}`, 2, 15 * 60 * 1000)) {
+        json(res, 429, { error: 'rate' });
         return;
       }
       const funder = new Wallet(ATTESTER_KEY, identityProvider);

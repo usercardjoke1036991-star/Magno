@@ -199,4 +199,25 @@ describe('QuatriviumReserva', function () {
     await reserva.connect(founder).aportarBote(ethers.parseUnits('1', 18));
     expect(await reserva.bote()).to.equal(ethers.parseUnits('1', 18));
   });
+
+  it('rejects a commission boost from the owner and delays owner or credit changes 72h', async () => {
+    const { reserva, credit, user, owner, extra, founder } = await deployReserva();
+    await reserva.connect(founder).aportarBote(ethers.parseUnits('20', 18));
+    await reserva.connect(user).bloquear(ethers.parseUnits('100', 18));
+    const id = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [9n]));
+    await expect(
+      reserva.connect(owner).pagarBoostComision(user.address, ethers.parseUnits('5', 18), id)
+    ).to.be.revertedWithCustomError(reserva, 'NoAutorizado');
+    await reserva.connect(owner).setOwner(extra.address);
+    await expect(reserva.connect(extra).acceptOwner()).to.be.revertedWithCustomError(reserva, 'EsperaTimelock');
+    await ethers.provider.send('evm_increaseTime', [72 * 60 * 60]);
+    await ethers.provider.send('evm_mine');
+    await reserva.connect(extra).acceptOwner();
+    expect(await reserva.owner()).to.equal(extra.address);
+    const Mock = await ethers.getContractFactory('CreditViewMock');
+    const nextCredit = await Mock.deploy();
+    await reserva.connect(extra).setCredit(await nextCredit.getAddress());
+    await expect(reserva.connect(extra).applyCredit()).to.be.revertedWithCustomError(reserva, 'EsperaTimelock');
+    expect(await reserva.credit()).to.equal(await credit.getAddress());
+  });
 });

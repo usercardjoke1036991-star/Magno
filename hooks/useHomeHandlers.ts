@@ -20,7 +20,8 @@ import { showNotice } from '../utils/appNotice';
 import { CREDIT_ACCESS_USDT, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhoneActive } from '../services/accountPhone';
-import { enviarToken, isPhraseBackedUp } from '../services/appWallet';
+import { enviarToken, isPhraseBackedUp, loadAppWallet } from '../services/appWallet';
+import { signedAuthBody } from '../services/walletAuth';
 import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from '../services/linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
@@ -70,17 +71,23 @@ async function postAutoFund(base: string, address: string): Promise<AutoFundResu
   const root = base.replace(/\/$/, '');
   const local = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(root);
   if (!local && !isHttpsUrl(root)) return 'fail';
+  const signer = await loadAppWallet();
+  if (!signer) return 'fail';
+  const body = JSON.stringify({
+    address,
+    ...(await signedAuthBody(signer, address, 'autofund')),
+  });
   try {
     const res = local
       ? await fetch(`${root}/auto-fund`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ address }),
+          body,
         })
       : await safeJsonFetch(`${root}/auto-fund`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address }),
+          body,
           timeoutMs: 20_000,
         });
     if (!res.ok) return 'fail';

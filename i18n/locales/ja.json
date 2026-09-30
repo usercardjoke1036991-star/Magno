@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "戻る",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "メールではこの端末のパスワードだけをリセットできます。新しい端末では24語のフレーズを使ってください。",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "評判ポイント",
   "referralRepLead": "ネットワークから信頼が増えます。返済時にコミッション。{threshold} ポインごとに {bonus} のボーナス。",

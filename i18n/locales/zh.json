@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "返回",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "邮件只能在本机重置密码。换手机请使用24个单词的助记词。",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "声誉积分",
   "referralRepLead": "从您的网络获得声誉。还款时产生佣金；每 {threshold} 点奖励 {bonus}。",

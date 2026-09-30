@@ -5,7 +5,6 @@
 import {
   Contract,
   Interface,
-  MaxUint256,
   ZeroAddress,
   ZeroHash,
   isAddress,
@@ -359,7 +358,11 @@ export const QuatriviumCreditService = {
     const tx = await credit.solicitarPrestamo(tokenAddress, nivel);
     const receipt = await tx.wait();
     const userAddress = await signer.getAddress();
-    await asegurarAprobacionToken(signer, userAddress, tokenAddress, MaxUint256.toString());
+    const deuda = await credit.obtenerDeuda(userAddress);
+    const remaining = deuda[2] as bigint;
+    if (remaining > 0n) {
+      await asegurarAprobacionToken(signer, userAddress, tokenAddress, remaining.toString());
+    }
     return receipt;
   },
 

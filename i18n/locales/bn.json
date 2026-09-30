@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "ফিরুন",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "ইমেইল শুধু এই ফোনে পাসওয়ার্ড বদলায়। নতুন ফোনে ২৪ শব্দের বাক্যাংশ ব্যবহার করুন।",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "খ্যাতির পয়েন্ট",
   "referralRepLead": "আপনার নেটওয়ার্ক থেকে সুনাম পান। পরিশোধে কমিশন; প্রতি {threshold} পয়েন্টে {bonus} বোনাস।",

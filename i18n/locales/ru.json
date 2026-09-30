@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "Назад",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "Почта сбрасывает пароль только на этом телефоне. На новом используйте фразу из 24 слов.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "Очки репутации",
   "referralRepLead": "Репутация растёт с сетью. Комиссия при оплате; бонус {bonus} каждые {threshold} баллов.",

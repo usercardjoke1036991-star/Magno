@@ -682,6 +682,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "Kembali",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverNeedDevice": "Email hanya mereset sandi di ponsel ini. Di ponsel baru gunakan frasa 24 kata.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "Poin reputasi",
   "referralRepLead": "Reputasi bertambah dari jaringan Anda. Komisi saat mereka membayar; bonus {bonus} setiap {threshold} poin.",
