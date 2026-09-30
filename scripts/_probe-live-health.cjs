@@ -132,7 +132,6 @@ async function probeWorld({ label, chainId, rpcs, address, usdtList }) {
     'cobrarBonoHito',
     'hitoCobrado',
     'retirarLiquidez',
-    'obtenerCooldownRestante',
     'niveles',
   ];
   out.capabilities = {};

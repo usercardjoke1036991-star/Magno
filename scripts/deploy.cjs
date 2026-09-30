@@ -28,13 +28,15 @@ function parseAdmins(deployerAddress) {
   return { admins, confirms };
 }
 
-function writeTestnetKnownAddress(address, usdt, startBlock) {
+function writeTestnetKnownAddress(address, usdt, startBlock, famaAddr) {
   const block = Number(startBlock || 0);
   const knownPath = path.join(__dirname, '..', 'constants', 'deployedAddresses.ts');
   if (fs.existsSync(knownPath) && /^0x[0-9a-fA-F]{40}$/.test(address)) {
     let source = fs.readFileSync(knownPath, 'utf8');
     const reservaMatch = source.match(/export const DEPLOYED_TESTNET = \{[\s\S]*?reserva:\s*'([^']*)'/);
+    const famaMatch = source.match(/export const DEPLOYED_TESTNET = \{[\s\S]*?fama:\s*'([^']*)'/);
     const reserva = reservaMatch ? reservaMatch[1] : '';
+    const fama = /^0x[0-9a-fA-F]{40}$/.test(famaAddr || '') ? famaAddr : (famaMatch ? famaMatch[1] : '');
     source = source.replace(
       /export const DEPLOYED_TESTNET = \{[\s\S]*?\} as const;/,
       `export const DEPLOYED_TESTNET = {
@@ -42,6 +44,7 @@ function writeTestnetKnownAddress(address, usdt, startBlock) {
   contract: '${address}',
   usdt: '${usdt}',
   reserva: '${reserva}',
+  fama: '${fama}',
   startBlock: ${block || 0},
 } as const;`
     );
@@ -163,11 +166,21 @@ async function main() {
     );
   }
 
-  const contract = await QuatriviumCredit.deploy(usdt, usdtFeed, resolvedCollector, feeBp, admins, confirms);
+  const nonce = await ethers.provider.getTransactionCount(deployer.address);
+  const creditAddr = ethers.getCreateAddress({ from: deployer.address, nonce: nonce + 1 });
+  const FamaCaja = await ethers.getContractFactory('QuatriviumFamaCaja');
+  const fama = await FamaCaja.deploy(usdt, creditAddr);
+  await fama.waitForDeployment();
+  const famaAddr = await fama.getAddress();
+  const contract = await QuatriviumCredit.deploy(usdt, usdtFeed, resolvedCollector, feeBp, admins, confirms, famaAddr);
   await contract.waitForDeployment();
 
   const address = await contract.getAddress();
+  if (address.toLowerCase() !== creditAddr.toLowerCase()) {
+    throw new Error(`Credit previsto ${creditAddr} vs desplegado ${address}`);
+  }
   console.log('Quatrivium Finance (QuatriviumCredit) deployed:', address);
+  console.log('QuatriviumFamaCaja deployed:', famaAddr);
 
   if (isTestnet && process.env.SEED_POOL !== 'no') {
     const seedAmount = ethers.parseUnits(process.env.SEED_POOL || '500', 18);
@@ -195,19 +208,23 @@ async function main() {
       upsertEnvKey(envPath, 'EXPO_PUBLIC_CONTRACT_START_BLOCK', startBlock);
     }
     upsertEnvKey(envPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET', address);
+    upsertEnvKey(envPath, 'EXPO_PUBLIC_FAMA_ADDRESS_TESTNET', famaAddr);
     const workerPath = path.join(__dirname, '..', '.env.worker');
     if (fs.existsSync(workerPath)) {
       upsertEnvKey(workerPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET', address);
+      upsertEnvKey(workerPath, 'EXPO_PUBLIC_FAMA_ADDRESS_TESTNET', famaAddr);
       if (startBlock) upsertEnvKey(workerPath, 'EXPO_PUBLIC_CONTRACT_START_BLOCK', startBlock);
     }
-    writeTestnetKnownAddress(address, usdt, startBlock);
+    writeTestnetKnownAddress(address, usdt, startBlock, famaAddr);
     console.log('Inyectado en .env: EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET=' + address);
   } else {
     upsertEnvKey(envPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET', address);
+    upsertEnvKey(envPath, 'EXPO_PUBLIC_FAMA_ADDRESS_MAINNET', famaAddr);
     console.log('Inyectado en .env: EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET=' + address);
     const workerPath = path.join(__dirname, '..', '.env.worker');
     if (fs.existsSync(workerPath)) {
       upsertEnvKey(workerPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET', address);
+      upsertEnvKey(workerPath, 'EXPO_PUBLIC_FAMA_ADDRESS_MAINNET', famaAddr);
       console.log('Inyectado en .env.worker: EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET=' + address);
     }
     console.log('No se cambió EXPO_PUBLIC_CHAIN_ID ni USDT: el teléfono de desarrollo sigue en testnet.');

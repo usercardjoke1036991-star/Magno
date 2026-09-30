@@ -2,10 +2,11 @@ export type SupportKind = 'none' | 'ally' | 'patron' | 'circle';
 
 export const SUPPORT_PATRON_USD = 50;
 export const SUPPORT_CIRCLE_USD = 200;
-/** Contrato: donar += amount / 1e17 → 10 puntos por USDT. */
-export const FAME_PER_USDT_DONATE = 10;
-/** Contrato: depositar += amount / 2e17 → 5 puntos por USDT. */
-export const FAME_PER_USDT_POOL = 5;
+import { FAMA_PER_USDT } from './fama';
+
+/** Contrato: 100 fama de caja por cada USDT donado o aportado al pool. */
+export const FAME_PER_USDT_DONATE = FAMA_PER_USDT;
+export const FAME_PER_USDT_POOL = FAMA_PER_USDT;
 
 export function fameFromUsd(usd: number, pointsPerUsdt: number): number {
   if (!Number.isFinite(usd) || usd <= 0 || !Number.isFinite(pointsPerUsdt) || pointsPerUsdt <= 0) {

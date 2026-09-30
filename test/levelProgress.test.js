@@ -20,13 +20,22 @@ async function deployHarness() {
   const Token = await ethers.getContractFactory('ERC20Mock');
   const Aggregator = await ethers.getContractFactory('MockV3Aggregator');
   const { getLinkedCreditFactory } = require('../scripts/linkCredit.cjs');
+  const { deployFamaAndCredit } = require('./helpers.cjs');
   const Harness = await getLinkedCreditFactory(ethers, 'QuatriviumCreditHarness');
   const token = await Token.deploy();
   const feed = await Aggregator.deploy(8, 100000000);
   const tokenAddr = await token.getAddress();
-  const contract = await Harness.deploy(tokenAddr, await feed.getAddress(), owner.address, 500, [owner.address], 1);
+  const { contract, fama } = await deployFamaAndCredit(
+    Harness,
+    tokenAddr,
+    await feed.getAddress(),
+    owner,
+    500,
+    [owner.address],
+    1
+  );
   const contractAddr = await contract.getAddress();
-  return { token, contract, owner, user, tokenAddr, contractAddr };
+  return { token, contract, fama, owner, user, tokenAddr, contractAddr };
 }
 
 describe('QuatriviumLeveling - hermano de solicitudes', function () {
@@ -206,7 +215,7 @@ describe('QuatriviumCredit - donacion al fundador', function () {
       .withArgs(user.address, gift, tokenAddr);
     expect(await contract.donado(user.address)).to.equal(gift);
     expect(await token.balanceOf(owner.address)).to.equal(beforeFounder + gift);
-    expect(await contract.reputacion(user.address)).to.equal(beforeRep + 100n);
+    expect(await contract.reputacion(user.address)).to.equal(beforeRep + 1000n);
   });
 
   it('raises reputation when someone injects the common pool', async () => {
@@ -214,7 +223,7 @@ describe('QuatriviumCredit - donacion al fundador', function () {
     await registerAndFund(token, contract, user, '40');
     const beforeRep = await contract.reputacion(user.address);
     await contract.connect(user).depositarLiquidez(tokenAddr, ethers.parseUnits('20', 18));
-    expect(await contract.reputacion(user.address)).to.equal(beforeRep + 100n);
+    expect(await contract.reputacion(user.address)).to.equal(beforeRep + 2000n);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 
@@ -223,8 +232,8 @@ describe('QuatriviumCredit - donacion al fundador', function () {
     await registerAndFund(token, contract, user, '80');
     const before = await contract.reputacion(user.address);
     await contract.connect(user).donar(tokenAddr, ethers.parseUnits('25', 18));
-    expect(await contract.reputacion(user.address)).to.equal(before + 250n);
+    expect(await contract.reputacion(user.address)).to.equal(before + 2500n);
     await contract.connect(user).depositarLiquidez(tokenAddr, ethers.parseUnits('4', 18));
-    expect(await contract.reputacion(user.address)).to.equal(before + 250n + 20n);
+    expect(await contract.reputacion(user.address)).to.equal(before + 2500n + 400n);
   });
 });

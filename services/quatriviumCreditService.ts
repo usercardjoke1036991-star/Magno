@@ -12,6 +12,8 @@ import {
   type Signer,
 } from 'ethers';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
+import { FAMA_ABI, isFamaAddress } from '../constants/famaConfig';
+import { FAMA_CANJE_POR_USDT } from '../constants/fama';
 import { isTestnetOnlyToken } from '../constants/bsc';
 import { assertTrustedRpc, getProviderWithFallback, isAccessPaymentEnabled, isContractConfigured, isDemoAccount, isDemoMode } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
@@ -111,12 +113,14 @@ export type ProtocolCaps = {
   maxLevel: number;
   canClaimHitos: boolean;
   canDonate: boolean;
+  canCanjearFama: boolean;
 };
 
 const DEFAULT_CAPS: ProtocolCaps = {
   maxLevel: CORE_LOAN_LEVEL,
   canClaimHitos: false,
   canDonate: false,
+  canCanjearFama: false,
 };
 
 export function cachedProtocolCaps(): ProtocolCaps {
@@ -132,6 +136,25 @@ export function asWeiString(value: unknown): string {
     return /^\d+$/.test(text) ? text : '0';
   } catch {
     return '0';
+  }
+}
+
+function asFamePoints(value: unknown): number {
+  try {
+    const n = Number(typeof value === 'bigint' ? value : String(value ?? '0'));
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return Math.floor(n);
+  } catch {
+    return 0;
+  }
+}
+
+async function readFamaHermano(credit: Contract): Promise<string> {
+  try {
+    const hermano = await credit.famaHermano();
+    return isFamaAddress(String(hermano || '')) ? String(hermano) : '';
+  } catch {
+    return '';
   }
 }
 
@@ -253,6 +276,7 @@ export const QuatriviumCreditService = {
     let maxLevel = CORE_LOAN_LEVEL;
     let canClaimHitos = false;
     let canDonate = false;
+    let canCanjearFama = false;
     try {
       const row = await credit.niveles(CORE_LOAN_LEVEL + 1);
       if (BigInt(row[0] ?? 0) > 0n) maxLevel = MAX_LOAN_LEVEL;
@@ -271,7 +295,8 @@ export const QuatriviumCreditService = {
     } catch {
       canDonate = false;
     }
-    const caps = { maxLevel, canClaimHitos, canDonate };
+    canCanjearFama = Boolean(await readFamaHermano(credit));
+    const caps = { maxLevel, canClaimHitos, canDonate, canCanjearFama };
     capsCache = { addr, caps };
     return caps;
   },
@@ -387,6 +412,43 @@ export const QuatriviumCreditService = {
     const credit = contractWith(signer);
     await credit.donar.staticCall(tokenAddress, amountInWei);
     const tx = await credit.donar(tokenAddress, amountInWei);
+    return tx.wait();
+  },
+
+  obtenerFama: async (userAddress: string) => {
+    const empty = { caja: 0, canjeada: 0, disponible: 0 };
+    if (!isAddress(userAddress) || !isContractConfigured()) return empty;
+    const { provider } = await getProviderAndSigner();
+    const hermano = await readFamaHermano(contractWith(provider));
+    if (!hermano) return empty;
+    try {
+      const fama = new Contract(hermano, FAMA_ABI, provider);
+      const [caja, canjeada, disponible] = await Promise.all([
+        fama.famaCaja(userAddress),
+        fama.famaCanjeada(userAddress),
+        fama.famaDisponible(userAddress),
+      ]);
+      return {
+        caja: asFamePoints(caja),
+        canjeada: asFamePoints(canjeada),
+        disponible: asFamePoints(disponible),
+      };
+    } catch {
+      return empty;
+    }
+  },
+
+  canjearFama: async (fama: number) => {
+    if (!Number.isInteger(fama) || fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT !== 0) {
+      throw new Error('invalid-amount');
+    }
+    const { signer } = await requireInternalSigner();
+    const credit = contractWith(signer);
+    const hermano = await readFamaHermano(credit);
+    if (!hermano) throw new Error('canje-legacy');
+    const caja = new Contract(hermano, FAMA_ABI, signer);
+    await caja.canjearFama.staticCall(fama);
+    const tx = await caja.canjearFama(fama);
     return tx.wait();
   },
 

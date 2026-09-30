@@ -29,6 +29,7 @@
 - ✅ identidad de cuenta correo y telefono — Marcado como completado manualmente
 - ✅ auditoria profunda y completa antes de mainnet — Marcado como completado manualmente
 - ✅ Sala Reserva — Marcado como completado manualmente
+- ✅ Canje de fama — Marcado como completado manualmente
 
 ## 🗺️ Roadmap
 
@@ -142,6 +143,12 @@
 - Blindar recovery, autofund e attester para que un atacante no robe el wrap ni drene gas ni use la llave del owner
 - auditoria bunker: endurecer worker purpose/replay/store, wallet SecureStore-first, lockout en fondos, timelock fundador Reserva
 - Texto profesional de Reserva con cuenta atras y politicas ampliadas para Play Store, sin afirmar legalidad universal
+- Bonos de hito 250 USDT por nivel, fama 50 por cada USDT donado o al pool, comision 1 USDT desde L1 proporcional al credito para referidos que piden y pagan
+- Sala Canje de fama aparte de Bonos de hito: 5 USDT donados o al pool dan 500 fama canjeable, botones proporcionales por nivel, L1 sigue de regalo y las comisiones de red no se tocan
+- Fama desde 1 USDT en pool o Donar (100 fama por USDT). Referir da 100 fama solo cuando el referido pide y paga el primer L1. Canje a voluntad en muchos niveles; fama canjeada no se vuelve a cobrar y sigue contando en el perfil
+- Canje de fama se paga del pool (caja libre con piso), no de un bote aparte. Acceso Real sigue yendo al fundador; el pool es quien paga los botones de canje
+- Sala Canje sin niveles bloqueados: fama cuando quieran. Bono de referido del primer L1 pagado pasa de 0.50 a 1 USDT
+- Sala de canje de fama contra el pool (250=1 USDT) y texto de que el multiplicador de bloqueo USDT vive en Reserva
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -260,3 +267,10 @@
 - [2026-09-29 21:08] Idea añadida al backlog: "Blindar recovery, autofund e attester para que un atacante no robe el wrap ni dr"
 - [2026-09-29 23:00] Idea añadida al backlog: "auditoria bunker: endurecer worker purpose/replay/store, wallet SecureStore-firs"
 - [2026-09-30 01:55] Idea añadida al backlog: "Texto profesional de Reserva con cuenta atras y politicas ampliadas para Play St"
+- [2026-09-30 03:10] Idea añadida al backlog: "Bonos de hito 250 USDT por nivel, fama 50 por cada USDT donado o al pool, comisi"
+- [2026-09-30 03:24] Idea añadida al backlog: "Sala Canje de fama aparte de Bonos de hito: 5 USDT donados o al pool dan 500 fam"
+- [2026-09-30 03:39] Idea añadida al backlog: "Fama desde 1 USDT en pool o Donar (100 fama por USDT). Referir da 100 fama solo "
+- [2026-09-30 03:44] Idea añadida al backlog: "Canje de fama se paga del pool (caja libre con piso), no de un bote aparte. Acce"
+- [2026-09-30 04:00] Idea añadida al backlog: "Sala Canje sin niveles bloqueados: fama cuando quieran. Bono de referido del pri"
+- [2026-09-30 07:03] Idea añadida al backlog: "Sala de canje de fama contra el pool (250=1 USDT) y texto de que el multiplicado"
+- [2026-09-30 07:04] Módulo completado: 'Canje de fama'

@@ -92,6 +92,14 @@ export const useWeb3Transactions = () => {
     );
   };
 
+  const canjearFama = async (fama: number) => {
+    return executeTransaction(
+      'canjearFama',
+      () => QuatriviumCreditService.canjearFama(fama),
+      t('canjeSuccess')
+    );
+  };
+
   const pagarPrestamo = async (amountWei: string, tokenAddress: string) => {
     return executeTransaction(
       'pagarPrestamo',
@@ -289,6 +297,7 @@ export const useWeb3Transactions = () => {
     solicitarPrestamo,
     cobrarBonoHito,
     donarProyecto,
+    canjearFama,
     pagarPrestamo,
     pagarCuotas,
     depositarLiquidez,

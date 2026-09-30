@@ -23,7 +23,7 @@ module.exports = {
     settings: {
       optimizer: { enabled: true, runs: 1 },
       viaIR: true,
-      metadata: { bytecodeHash: 'none' },
+      metadata: { bytecodeHash: 'none', appendCBOR: false },
       // Quita los strings de require() del bytecode para caber en EIP-170.
       // Los tests no pueden usar revertedWith('mensaje'); sí custom errors de OZ.
       debug: { revertStrings: 'strip' },

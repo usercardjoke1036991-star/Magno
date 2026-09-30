@@ -155,7 +155,8 @@ describe('QuatriviumCredit - Morosity', function () {
     await contract.connect(owner).solicitarPrestamo(tokenAddr, 0);
     const debt = await contract.obtenerDeuda(owner.address);
     await contract.connect(owner).pagarPrestamo(tokenAddr, debt.total);
-    expect(await contract.obtenerCooldownRestante(owner.address)).to.be.gt(0n);
+    const progreso = await contract.obtenerProgresoUsuario(owner.address);
+    expect(progreso[2]).to.be.gt(0n);
     await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
     await advanceCooldown();
     await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;

@@ -1,6 +1,5 @@
 /**
- * QuatriviumFamaLib se despliega aparte y se enlaza por delegatecall.
- * El bytecode de la lib no cuenta para el tope EIP-170 del núcleo.
+ * Enlaza QuatriviumFamaLib. El bytecode de la librería no cuenta para EIP-170.
  */
 async function getLinkedCreditFactory(ethers, name = 'QuatriviumCredit') {
   const FamaLib = await ethers.getContractFactory('QuatriviumFamaLib');
@@ -8,9 +7,7 @@ async function getLinkedCreditFactory(ethers, name = 'QuatriviumCredit') {
   await famaLib.waitForDeployment();
   const famaLibAddress = await famaLib.getAddress();
   const factory = await ethers.getContractFactory(name, {
-    libraries: {
-      QuatriviumFamaLib: famaLibAddress,
-    },
+    libraries: { QuatriviumFamaLib: famaLibAddress },
   });
   factory.famaLibAddress = famaLibAddress;
   return factory;

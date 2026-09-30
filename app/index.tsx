@@ -35,6 +35,7 @@ import { LinkedWalletCard } from '../components/LinkedWalletCard';
 import { AppText } from '../components/AppText';
 import { PoolSupportSection } from '../components/PoolSupportSection';
 import { MilestoneBonusCatalog } from '../components/MilestoneBonusCatalog';
+import { FameCanjeSection } from '../components/FameCanjeSection';
 import { DonateFounderSection } from '../components/DonateFounderSection';
 import { ReservaSection } from '../components/ReservaSection';
 import { NotificationChannels } from '../components/NotificationChannels';
@@ -193,6 +194,7 @@ function HomeScreenWithHooks() {
     handleRegistrarHumano,
     handleSolicitarCredito,
     handleCobrarBonoHito,
+    handleCanjearFama,
     handlePagar,
     handleDepositarPool,
     handlePagarAcceso,
@@ -382,6 +384,7 @@ function HomeScreenWithHooks() {
             { id: 'ranks', title: t('rankGalleryTitle'), lead: t('hubRanksLead'), icon: 'star' },
             { id: 'fame', title: t('fameBoardTitle'), lead: rankingVisible(userInfo.userProgress.nivelActual) ? t('hubFameLead') : t('hubFameLeadLocked'), icon: 'chart' },
             { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' },
+            { id: 'canje', title: t('hubCanje'), lead: t('hubCanjeLead'), icon: 'pay' },
             { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
             { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
             { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' },
@@ -669,6 +672,30 @@ function HomeScreenWithHooks() {
             onClaim={handleCobrarBonoHito}
           />
         </AppSubsection>
+      </AppWindow>
+
+      <AppWindow
+        visible={room === 'canje'}
+        title={t('sectionCanje')}
+        lead={t('sectionCanjeLead')}
+        onClose={() => setRoom(null)}
+      >
+        {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
+        <FameCanjeSection
+          famaCaja={userInfo.famaCaja || 0}
+          famaCanjeada={userInfo.famaCanjeada || 0}
+          famaDisponible={userInfo.famaDisponible || 0}
+          canRedeem={Boolean(
+            creditReady &&
+              userInfo.canCanjearFama &&
+              userInfo.isRegistered &&
+              !creditPaused &&
+              !userInfo.isDelinquent
+          )}
+          tokenSymbol={selectedToken.symbol}
+          isPaying={txLoading}
+          onRedeem={(fama) => void handleCanjearFama(fama)}
+        />
       </AppWindow>
 
       <AppWindow

@@ -108,6 +108,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: DonateFounderSection
 - `components/EmailOtpSection.tsx` — módulo JS/TS
   - Funciones/clases: EmailOtpSection
+- `components/FameCanjeSection.tsx` — módulo JS/TS
+  - Funciones/clases: FameCanjeSection
 - `components/FameLeaderboard.tsx` — módulo JS/TS
   - Funciones/clases: FameLeaderboard
 - `components/FundsConfirmHost.tsx` — módulo JS/TS
@@ -218,6 +220,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: getUsdtAddress, ERC20_ABI, CONTRACT_ABI
 - `constants/deployedAddresses.ts` — módulo JS/TS
   - Funciones/clases: DEPLOYED_TESTNET, DEPLOYED_MAINNET, getRealDonationWallet, getKnownStartBlock
+- `constants/fama.ts` — módulo JS/TS
+  - Funciones/clases: FAMA_PER_USDT, FAMA_PER_REFERRAL_L1, FAMA_CANJE_POR_USDT, CANJE_USDT_BUTTONS, famaFromUsd, famaNeededForUsdt, usdtFromFama, maxCanjeUsdt
+- `constants/famaConfig.ts` — módulo JS/TS
+  - Funciones/clases: FAMA_ABI, getKnownFamaAddress, isFamaAddress
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
@@ -403,6 +409,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: confirmEmailOtp, verifyEmailOtp, loadReferralChildren, ensureAppWallet, wipeAppWallet
 - `test/demo-identity.test.js` — módulo JS/TS
 - `test/destroy.test.js` — módulo JS/TS
+- `test/fama-canje.test.js` — módulo JS/TS
 - `test/fame-rankings.test.js` — módulo JS/TS
 - `test/hardening-security.test.js` — módulo JS/TS
 - `test/hardening.test.js` — módulo JS/TS

@@ -11,8 +11,9 @@ contract QuatriviumCreditHarness is QuatriviumCredit {
         address payable feeCollector_,
         uint256 feeBp,
         address[] memory admins_,
-        uint256 confirms
-    ) QuatriviumCredit(usdt, feed, feeCollector_, feeBp, admins_, confirms) {}
+        uint256 confirms,
+        address famaHermano_
+    ) QuatriviumCredit(usdt, feed, feeCollector_, feeBp, admins_, confirms, famaHermano_) {}
 
     function forceNivel(address usuario, uint256 nivel) external {
         progresoUsuarios[usuario].nivelActual = nivel;

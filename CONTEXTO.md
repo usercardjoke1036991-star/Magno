@@ -34,7 +34,8 @@ Magno/
 │   ├── QuatriviumCredit.sol       # Núcleo (EIP-170 ≤ 24576)
 │   ├── QuatriviumLeveling.sol     # Hermano: solicitudes/hitos
 │   ├── QuatriviumReserva.sol      # Hermano: bloqueo 30d, techo 12% anual del bote
-│   ├── libraries/QuatriviumFamaLib.sol # Fama de línea (delegatecall)
+│   ├── QuatriviumFamaCaja.sol     # Hermano: fama de caja y canje contra el pool
+│   ├── libraries/QuatriviumFamaLib.sol # Peg, L1 bono pool, tocar fama (delegatecall)
 │   ├── Groth16Verifier.sol        # ZK experimental (no en producción)
 │   ├── interfaces/                # AggregatorV3Interface (Chainlink)
 │   └── mocks/                     # ERC20Mock, MockV3Aggregator (testnet)
@@ -259,6 +260,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-30 | Sala Canje cableada a QuatriviumFamaCaja (hermano). Credit no se recorta: 250 fama=1 USDT del pool; Reserva lock documentado en la misma sala. | — |
 | 2026-09-30 | Dockerfile.notify declara USER node; el entrypoint solo hace chown/su-exec si arranca como root. Worker prueba /data y cae a /app/data. Contratos y app sin hallazgo nuevo. ReDoS Expo 54 se ignora, no se sube a 55. | — |
 | 2026-09-30 | Reserva: texto solo de funcionamiento, sin fundador, cuenta atras en Desbloquear. Politicas 2026-09-30.1 con Reserva, riesgos y ley local. No se afirma legalidad universal ni Play 100. | — |
 | 2026-09-29 | Snyk: alfabeto no es password, invite sin redirect abierto, regex acotado, rutas del kit con under_root; HTTP del worker sigue detras de TLS de Render | — |

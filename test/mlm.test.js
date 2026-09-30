@@ -59,12 +59,11 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
 
     expect(debt.principal).to.equal(ethers.parseUnits('1', 18));
     expect(debt.interes).to.equal(ethers.parseUnits('1', 18));
-    expect(debt.interes).to.be.gt(bono);
-    expect(bono).to.equal(ethers.parseUnits('0.50', 18));
+    expect(bono).to.equal(ethers.parseUnits('1', 18));
   });
 
   it('pays the one-time bonus only to the direct referrer on the first Level 1 repayment', async () => {
-    const { token, contract, owner, user, extra: padre, tokenAddr, contractAddr, signers } =
+    const { token, contract, fama, owner, user, extra: padre, tokenAddr, contractAddr, signers } =
       await deployProtocol();
     const abuelo = signers[3];
 
@@ -86,14 +85,17 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     const founderCut = corteFundador(debt.interes);
     const gen2 = (debt.interes * GEN_BP[1]) / 10000n;
     const gen3 = (debt.interes * GEN_BP[2]) / 10000n;
-    const poolShare = debt.interes - founderCut - bono - gen2 - gen3;
+    const poolInterest = debt.interes - founderCut - gen2 - gen3;
 
     expectAmt((await token.balanceOf(padre.address)) - padreBefore, bono);
     expectAmt((await token.balanceOf(abuelo.address)) - abueloBefore, gen2);
     expectAmt((await token.balanceOf(owner.address)) - founderBefore, founderCut + gen3);
-    expectAmt((await contract.totalLiquidity(tokenAddr)) - liqBefore, poolShare);
-    expectAmt(founderCut + bono + gen2 + gen3 + poolShare, debt.interes);
+    expectAmt((await contract.totalLiquidity(tokenAddr)) - liqBefore, poolInterest - bono);
+    expectAmt(founderCut + gen2 + gen3 + poolInterest, debt.interes);
     expect((await contract.redGenealogica(user.address)).bonoActivacionCobrado).to.equal(true);
+    expect(await contract.reputacion(padre.address)).to.equal(100n + 100n);
+    expect(await fama.famaCaja(padre.address)).to.equal(100n);
+    expect(await fama.famaDisponible(padre.address)).to.equal(100n);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 
@@ -116,7 +118,7 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     expect((BigInt(liqAfter) - BigInt(liqBefore)).toString()).to.equal(
       (BigInt(debt.interes) - BigInt(founderCut) - BigInt(bono)).toString()
     );
-    expectAmt(founderCut + bono + (liqAfter - liqBefore), debt.interes);
+    expectAmt(founderCut + (liqAfter - liqBefore) + bono, debt.interes);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 
@@ -266,7 +268,7 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 
-  it('gives reputation on signup and a pool bonus every 250 network points', async () => {
+  it('gives network points on paid L1 and a pool bonus every 250 network points', async () => {
     const { token, contract, owner, extra: padre, tokenAddr, contractAddr, signers } =
       await deployProtocol();
     await seedPool(token, contract, owner, '2000');
@@ -275,12 +277,12 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     const kid = signers[3];
     const padreRep0 = await contract.reputacion(padre.address);
     await registerAndFund(token, contract, kid, '20', padre.address);
-    expect(await contract.reputacion(padre.address)).to.equal(padreRep0 + 50n);
+    expect(await contract.reputacion(padre.address)).to.equal(padreRep0);
 
     await borrowAndPay(contract, token, kid, tokenAddr);
     expect(await contract.puntosRed(padre.address)).to.equal(50n);
     expect(await contract.bonosRedCobrados(padre.address)).to.equal(0n);
-    expect(await contract.reputacion(padre.address)).to.equal(padreRep0 + 50n);
+    expect(await contract.reputacion(padre.address)).to.equal(padreRep0 + 100n);
 
     const padreBefore = await token.balanceOf(padre.address);
     const bonoActivacion = await contract.BONO_ACTIVACION();
@@ -305,64 +307,39 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 
-  it('walks decreasing fame up the line and always credits the founder', async () => {
-    const { token, contract, owner, extra: a, tokenAddr, contractAddr, signers } =
+  it('does not walk caja fame up the line on signup', async () => {
+    const { token, contract, fama, owner, extra: a, tokenAddr, contractAddr, signers } =
       await deployProtocol();
     const b = signers[3];
     const c = signers[4];
 
-    const fama = (gen) => {
-      const bp =
-        gen === 1 ? 1500n
-        : gen === 2 ? 800n
-        : gen === 3 ? 600n
-        : gen === 4 ? 400n
-        : gen === 5 ? 200n
-        : gen <= 12 ? 80n
-        : 40n;
-      return (50n * bp) / 1500n;
-    };
-    const famaFundador = (50n * 1500n) / 1500n;
-
     await contract.connect(a).registrarHumanoConPadre(ethers.ZeroAddress);
     expect(await contract.reputacion(a.address)).to.equal(100n);
-    expect(await contract.reputacion(owner.address)).to.equal(100n + famaFundador + fama(1));
+    expect(await contract.reputacion(owner.address)).to.equal(100n);
+    expect(await fama.famaCaja(a.address)).to.equal(0n);
 
-    const founderAfterA = await contract.reputacion(owner.address);
-    const aAfterSelf = await contract.reputacion(a.address);
     await contract.connect(b).registrarHumanoConPadre(a.address);
     expect(await contract.reputacion(b.address)).to.equal(100n);
-    expect(await contract.reputacion(a.address)).to.equal(aAfterSelf + fama(1));
-    expect(await contract.reputacion(owner.address)).to.equal(
-      founderAfterA + famaFundador + fama(2)
-    );
+    expect(await contract.reputacion(a.address)).to.equal(100n);
+    expect(await fama.famaCaja(a.address)).to.equal(0n);
 
-    const founderAfterB = await contract.reputacion(owner.address);
-    const aAfterB = await contract.reputacion(a.address);
-    const bAfterSelf = await contract.reputacion(b.address);
     await contract.connect(c).registrarHumanoConPadre(b.address);
     expect(await contract.reputacion(c.address)).to.equal(100n);
-    expect(await contract.reputacion(b.address)).to.equal(bAfterSelf + fama(1));
-    expect(await contract.reputacion(a.address)).to.equal(aAfterB + fama(2));
-    expect(await contract.reputacion(owner.address)).to.equal(
-      founderAfterB + famaFundador + fama(3)
-    );
+    expect(await contract.reputacion(b.address)).to.equal(100n);
 
     await seedPool(token, contract, owner, '2000');
     await contract.connect(c).declararKyc();
     await attestIdentity(contract, c);
     await token.mint(c.address, ethers.parseUnits('20', 18));
     await token.connect(c).approve(await contract.getAddress(), ethers.MaxUint256);
-    const aBeforePay = await contract.reputacion(a.address);
-    const bBeforePay = await contract.reputacion(b.address);
-    const founderBeforePay = await contract.reputacion(owner.address);
     await borrowAndPay(contract, token, c, tokenAddr);
     expect(await contract.puntosRed(b.address)).to.equal(50n);
     expect(await contract.puntosRed(a.address)).to.equal(0n);
     expect(await contract.puntosRed(owner.address)).to.equal(0n);
-    expect(await contract.reputacion(a.address)).to.equal(aBeforePay);
-    expect(await contract.reputacion(b.address)).to.equal(bBeforePay);
-    expect(await contract.reputacion(owner.address)).to.equal(founderBeforePay);
+    expect(await fama.famaCaja(b.address)).to.equal(100n);
+    expect(await fama.famaCaja(a.address)).to.equal(0n);
+    expect(await contract.reputacion(b.address)).to.equal(200n);
+    expect(await contract.reputacion(a.address)).to.equal(100n);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 });

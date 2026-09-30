@@ -1,7 +1,7 @@
 import { formatUSD } from '../utils/formatters';
 
 export const DIRECT_COMMISSION_BPS = 1500;
-export const ACTIVATION_BONUS_USD = 0.5;
+export const ACTIVATION_BONUS_USD = 1;
 
 export function interestFromLoan(usdAmount: number, interestBps: number): number {
   return (usdAmount * interestBps) / 10000;

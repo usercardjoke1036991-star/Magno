@@ -1,6 +1,29 @@
 const { ethers } = require('hardhat');
 const { getLinkedCreditFactory } = require('../scripts/linkCredit.cjs');
 
+async function deployFamaAndCredit(factory, tokenAddr, feedAddr, owner, feeBp, admins, confirms) {
+  const nonce = await ethers.provider.getTransactionCount(owner.address);
+  const famaAddr = ethers.getCreateAddress({ from: owner.address, nonce });
+  const creditAddr = ethers.getCreateAddress({ from: owner.address, nonce: nonce + 1 });
+  const Fama = await ethers.getContractFactory('QuatriviumFamaCaja');
+  const fama = await Fama.deploy(tokenAddr, creditAddr);
+  await fama.waitForDeployment();
+  const contract = await factory.deploy(
+    tokenAddr,
+    feedAddr,
+    owner.address,
+    feeBp,
+    admins,
+    confirms,
+    await fama.getAddress()
+  );
+  await contract.waitForDeployment();
+  if ((await contract.getAddress()).toLowerCase() !== creditAddr.toLowerCase()) {
+    throw new Error('predicted Credit address mismatch');
+  }
+  return { contract, fama };
+}
+
 async function deployProtocol(opts = {}) {
   const pegAnswer = opts.pegAnswer ?? 100000000;
   const feeBp = opts.feeBp ?? 500;
@@ -20,17 +43,18 @@ async function deployProtocol(opts = {}) {
   const admins = opts.admins || [owner.address];
   const confirms = opts.confirms ?? 1;
 
-  const contract = await QuatriviumCredit.deploy(
+  const { contract, fama } = await deployFamaAndCredit(
+    QuatriviumCredit,
     tokenAddr,
     feedAddr,
-    owner.address,
+    owner,
     feeBp,
     admins,
     confirms
   );
 
   const contractAddr = await contract.getAddress();
-  return { token, feed, contract, owner, user, extra, tokenAddr, feedAddr, contractAddr, signers };
+  return { token, feed, contract, fama, owner, user, extra, tokenAddr, feedAddr, contractAddr, signers };
 }
 
 async function seedPool(token, contract, owner, amount = '500') {
@@ -115,6 +139,7 @@ function expectAmt(actual, expected) {
 }
 
 module.exports = {
+  deployFamaAndCredit,
   deployProtocol,
   seedPool,
   attestIdentity,

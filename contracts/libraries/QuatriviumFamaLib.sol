@@ -1,69 +1,117 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @dev Nodo Unilevel. Vive aquí para que la fama de línea pueda
-///      ejecutarse por delegatecall sin duplicar el layout.
-struct Usuario {
-    address padre;
-    bool bonoActivacionCobrado;
-}
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {AggregatorV3Interface} from "../interfaces/AggregatorV3Interface.sol";
+import {IQuatriviumFamaCaja} from "../interfaces/IQuatriviumFamaCaja.sol";
 
 /**
  * @title QuatriviumFamaLib
- * @notice Fama decreciente al registrar. Contrato hermano del núcleo:
- *         el bytecode no cuenta para el tope EIP-170 de QuatriviumCredit.
+ * @notice Ganchos y peg. El bytecode de la librería no cuenta para EIP-170 del núcleo.
  */
 library QuatriviumFamaLib {
-    uint256 internal constant PUNTOS_POR_REFERIDO = 50;
-    uint256 internal constant GEN1_BP = 1500;
-    uint256 internal constant FUNDADOR_BP = 1500;
-    uint256 internal constant GEN2_BP = 800;
-    uint256 internal constant GEN3_BP = 600;
-    uint256 internal constant GEN4_BP = 400;
-    uint256 internal constant GEN5_BP = 200;
-    uint8 internal constant MAX_LINEA = 40;
+    using SafeERC20 for IERC20;
+
+    uint256 internal constant BONO_ACTIVACION = 1e18;
 
     event ReputationUpdated(address indexed usuario, uint256 nuevaReputacion);
+    event ComisionGeneracional(
+        address indexed beneficiario,
+        address indexed deudor,
+        uint8 generacion,
+        uint256 monto,
+        address indexed token
+    );
 
-    function acreditarFama(
-        mapping(address => uint256) storage reputacion,
-        mapping(address => bool) storage cuentaDestruida,
-        mapping(address => Usuario) storage red,
-        address nuevo,
-        address padre,
-        address founder
+    function tocar(address hermano, address who, uint256 pts) external {
+        if (hermano == address(0) || who == address(0)) return;
+        if (pts == 0) {
+            IQuatriviumFamaCaja(hermano).wipe(who);
+            return;
+        }
+        IQuatriviumFamaCaja(hermano).acreditar(who, pts);
+    }
+
+    function sacarCaja(
+        mapping(address => uint256) storage totalLiquidity,
+        IERC20 token,
+        address tokenAddr,
+        address to,
+        uint256 amount,
+        uint256 caja,
+        uint256 piso
     ) external {
-        if (founder != address(0) && founder != nuevo && !cuentaDestruida[founder]) {
-            reputacion[founder] += _famaPts(FUNDADOR_BP);
-            emit ReputationUpdated(founder, reputacion[founder]);
+        require(to != address(0) && amount > 0);
+        require(caja > piso && caja - piso >= amount);
+        totalLiquidity[tokenAddr] -= amount;
+        token.safeTransfer(to, amount);
+    }
+
+    function pagarBonoPool(
+        mapping(address => uint256) storage totalLiquidity,
+        mapping(address => bool) storage cuentaDestruida,
+        mapping(address => uint256) storage reputacion,
+        IERC20 token,
+        address tokenAddr,
+        address padre,
+        address deudor,
+        bool padreOk,
+        uint256 caja,
+        uint256 piso,
+        address hermano
+    ) external returns (uint256 bono) {
+        if (!padreOk || padre == address(0) || padre == deudor || cuentaDestruida[padre]) {
+            return 0;
         }
-        address cursor = padre;
-        for (uint8 gen = 1; gen <= MAX_LINEA; ) {
-            if (cursor == address(0) || cursor == nuevo) {
-                break;
-            }
-            if (!cuentaDestruida[cursor]) {
-                reputacion[cursor] += _famaPts(_bpGeneracion(gen));
-                emit ReputationUpdated(cursor, reputacion[cursor]);
-            }
-            cursor = red[cursor].padre;
-            unchecked {
-                gen++;
-            }
+        bono = BONO_ACTIVACION;
+        if (caja <= piso || caja - piso < bono) return 0;
+        totalLiquidity[tokenAddr] -= bono;
+        token.safeTransfer(padre, bono);
+        emit ComisionGeneracional(padre, deudor, 1, bono, tokenAddr);
+        reputacion[padre] += 100;
+        emit ReputationUpdated(padre, reputacion[padre]);
+        if (hermano != address(0)) {
+            IQuatriviumFamaCaja(hermano).acreditar(padre, 100);
         }
     }
 
-    function _famaPts(uint256 bp) private pure returns (uint256) {
-        return (PUNTOS_POR_REFERIDO * bp) / GEN1_BP;
+    function recoverAttest(
+        address user,
+        bytes32 phoneHash,
+        bytes32 deviceHash,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external view returns (address recovered) {
+        bytes32 packed = keccak256(
+            abi.encode(user, phoneHash, deviceHash, deadline, block.chainid, address(this))
+        );
+        recovered = ecrecover(
+            keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", packed)),
+            v,
+            r,
+            s
+        );
     }
 
-    function _bpGeneracion(uint8 generacion) private pure returns (uint256) {
-        if (generacion == 1) return GEN1_BP;
-        if (generacion == 2) return GEN2_BP;
-        if (generacion == 3) return GEN3_BP;
-        if (generacion == 4) return GEN4_BP;
-        if (generacion == 5) return GEN5_BP;
-        if (generacion <= 12) return 80;
-        return 40;
+    function assertPeg(AggregatorV3Interface feed) external view {
+        require(address(feed) != address(0));
+        (
+            uint80 roundId,
+            int256 price,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        ) = feed.latestRoundData();
+        require(price > 0);
+        uint8 dec = feed.decimals();
+        require(dec >= 2 && dec <= 18);
+        int256 threshold = int256(uint256(98) * (10 ** uint256(dec - 2)));
+        require(price >= threshold);
+        require(updatedAt > 0 && block.timestamp - updatedAt <= 1 hours);
+        require(roundId > 0 && answeredInRound == roundId);
+        require(startedAt > 0 && startedAt <= updatedAt);
     }
 }

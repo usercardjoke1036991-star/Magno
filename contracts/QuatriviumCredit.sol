@@ -7,26 +7,25 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AggregatorV3Interface} from "./interfaces/AggregatorV3Interface.sol";
 import {LoanTierSeed} from "./libraries/LoanTierSeed.sol";
-import {QuatriviumFamaLib, Usuario} from "./libraries/QuatriviumFamaLib.sol";
+import {Usuario} from "./libraries/Usuario.sol";
+import {QuatriviumFamaLib} from "./libraries/QuatriviumFamaLib.sol";
 
 /**
  * @title Quatrivium Finance
- * @notice Microcrédito sin colateral + red Unilevel de flujo estrictamente ascendente.
- *         El principal vuelve íntegro al pool. El interés se reparte (red + pool) con suma cero.
- *         Oráculo, pausa de emergencia y admin con timelock + confirmaciones.
+ * @notice Microcredito sin colateral + red Unilevel de flujo estrictamente ascendente.
+ *         El principal vuelve integro al pool. El interes se reparte (red + pool) con suma cero.
+ *         Oraculo, pausa de emergencia y admin con timelock + confirmaciones.
  *
- * Escala: 1000 niveles, $1 → $1 000 000. 1–100 en LoanTierSeed; 101–1000 por fórmula en _tier.
- * Nivel 1 = 1e18 (1 USDT). El bono de reclutamiento es menor que el interés del
- * Nivel 1, así un bot que fabrica referidos pierde dinero en cada ciclo.
- * El fundador cobra un recorte fijo de cada interés. Si una llave se compromete,
+ * Escala: 1000 niveles, $1 a $1 000 000. 1-100 en LoanTierSeed; 101-1000 por formula en _tier.
+ * Nivel 1 = 1e18 (1 USDT). El bono de 1 USDT al padrino sale del pool
+ * (caja libre con piso) cuando el referido pide y paga su primer L1.
+ * El fundador cobra un recorte fijo de cada interes. Si una llave se compromete,
  * las otras fundadoras pueden reasignar fundador y owner (timelock + confirmaciones).
- * Las comisiones de red recorren toda la línea hacia arriba (no se cortan a 5).
- * La reputación usa la misma escala decreciente al registrar; el fundador
- * suma fama de cada alta. Los puntos de red (bono USDT del pool) son solo
- * del referidor directo, para no drenar la caja.
+ * Las comisiones de red recorren toda la linea hacia arriba (no se cortan a 5).
+ * Fama de caja (hermano QuatriviumFamaCaja): referir el primer L1 pagado, donar o aportar al pool.
  *
- * EIP-170: ESTE archivo no puede pasar de 24576 bytes (límite de Ethereum, no nuestro).
- * El protocolo no se recorta: cada pieza nueva vive en un hermano o librería
+ * EIP-170: ESTE archivo no puede pasar de 24576 bytes (limite de Ethereum, no nuestro).
+ * El protocolo no se recorta: cada pieza nueva vive en un hermano o libreria
  * (QuatriviumLeveling, QuatriviumFamaLib, etc.), cada uno con su propio tope.
  */
 contract QuatriviumCredit is ReentrancyGuard, Pausable {
@@ -40,16 +39,15 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     uint256 public constant MAX_ADMINS = 3;
     uint256 internal constant MAX_NIVEL_TOTAL = 1000;
 
-    /// @notice Bono único al referidor directo cuando el referido paga su primer Nivel 1 (0.50 USDT).
-    uint256 public constant BONO_ACTIVACION = 5e17;
+    /// @notice Bono Ãºnico al referidor directo cuando el referido paga su primer Nivel 1 (1 USDT del pool).
+    uint256 public constant BONO_ACTIVACION = 1e18;
     uint8 internal constant MAX_LINEA = 40;
     uint256 internal constant REPUTACION_INICIAL = 100;
-    uint256 internal constant REPUTACION_SANA = 100;
     uint256 public constant PUNTOS_POR_REFERIDO = 50;
     uint256 public constant UMBRAL_BONO_RED = 250;
     uint256 public constant BONO_RED_USDT = 5e17;
     uint256 internal constant BONO_RED_PISO_CAJA_BP = 2000;
-    /// @notice Bono de hito = 20 USDT × nivel (100 → 2000, 1000 → 20 000).
+    /// @notice Bono de hito = 20 USDT Ã— nivel (100 â†’ 2000, 1000 â†’ 20 000).
     /// @dev 15% fundador + 15/8/6/4/2% las primeras 5 generaciones. El resto va al pool;
     ///      generaciones 6+ toman de ese resto (0,8% y luego 0,4%) sin bajar del piso del pool.
     uint256 internal constant POOL_RECURRENTE_BP = 5000;
@@ -110,7 +108,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
     mapping(address => PosicionCredito) public usuarios;
 
-    /// @notice Nodo Unilevel. Registro orgánico cuelga del `fundador`.
+    /// @notice Nodo Unilevel. Registro orgÃ¡nico cuelga del `fundador`.
     mapping(address => Usuario) public redGenealogica;
     mapping(address => uint256) public prestamosCerrados;
 
@@ -141,7 +139,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint256 ultimoPrestamoTimestamp;
     }
     mapping(address => ProgresoNivel) public progresoUsuarios;
-    /// @notice Último hito de 100 cobrado (0, 100, 200… 1000).
+    /// @notice Ãšltimo hito de 100 cobrado (0, 100, 200â€¦ 1000).
     mapping(address => uint256) public hitoCobrado;
     /// @notice USDT donado al fundador (no entra al pool).
     mapping(address => uint256) public donado;
@@ -156,7 +154,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     mapping(address => bool) public kycDeclarado;
     bool public kycExigido = true;
 
-    /// @notice Firmante del worker OTP. Un teléfono y un dispositivo → una sola wallet.
+    /// @notice Firmante del worker OTP. Un telÃ©fono y un dispositivo â†’ una sola wallet.
     address public attester;
     bool public identidadExigida = true;
     mapping(address => bytes32) public phoneHashOf;
@@ -164,6 +162,8 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     mapping(bytes32 => address) public walletOfPhone;
     mapping(bytes32 => address) public walletOfDevice;
     mapping(address => bool) public cuentaDestruida;
+    /// @notice Hermano de fama/canje. Se crea en el constructor (no cabe en este bytecode).
+    address public immutable famaHermano;
 
     event HumanoVerificado(address indexed usuario);
     event AfiliadoRegistrado(address indexed usuario, address indexed padre);
@@ -233,12 +233,14 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         address payable _feeCollector,
         uint256 _feeBP,
         address[] memory _initialAdmins,
-        uint256 _requiredConfirmations
+        uint256 _requiredConfirmations,
+        address _famaHermano
     ) {
         require(_usdtAddress != address(0), "zero token");
         require(_usdtFeed != address(0), "feed required");
         require(_feeCollector != address(0), "zero fee collector");
         require(_feeBP <= 1000, "fee too high");
+        require(_famaHermano != address(0) && _famaHermano != address(this), "fama");
         require(_initialAdmins.length >= 1 && _initialAdmins.length <= MAX_ADMINS, "bad admins");
         require(
             _requiredConfirmations >= 1 && _requiredConfirmations <= _initialAdmins.length,
@@ -313,6 +315,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         allowedAdminSelector[this.setIdentidadExigida.selector] = true;
         allowedAdminSelector[this.retirarComisiones.selector] = true;
         allowedAdminSelector[this.retirarComisionesToken.selector] = true;
+        famaHermano = _famaHermano;
     }
 
     function _syncQuorum() internal {
@@ -403,7 +406,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function _assertAntiSybilNivel1(uint256 montoPrestamo, uint256 tasaInteresBP) internal pure {
         uint256 interes = (montoPrestamo * tasaInteresBP) / 10000;
-        uint256 extracto = BONO_ACTIVACION + (BONO_RED_USDT * PUNTOS_POR_REFERIDO) / UMBRAL_BONO_RED;
+        uint256 extracto = (BONO_RED_USDT * PUNTOS_POR_REFERIDO) / UMBRAL_BONO_RED;
         require(interes > extracto, "L1 interest must exceed referral extract");
     }
 
@@ -572,14 +575,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
         redGenealogica[msg.sender] = Usuario({ padre: padre, bonoActivacionCobrado: false });
         humanosVerificados[msg.sender] = true;
-        QuatriviumFamaLib.acreditarFama(
-            reputacion,
-            cuentaDestruida,
-            redGenealogica,
-            msg.sender,
-            padre,
-            fundador
-        );
         emit HumanoVerificado(msg.sender);
         emit AfiliadoRegistrado(msg.sender, padre);
     }
@@ -619,11 +614,11 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(block.timestamp <= deadline, "expired");
         require(phoneHash != bytes32(0) && deviceHash != bytes32(0), "empty");
 
-        bytes32 packed = keccak256(
-            abi.encode(msg.sender, phoneHash, deviceHash, deadline, block.chainid, address(this))
-        );
-        address recovered = ecrecover(
-            keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", packed)),
+        address recovered = QuatriviumFamaLib.recoverAttest(
+            msg.sender,
+            phoneHash,
+            deviceHash,
+            deadline,
             v,
             r,
             s
@@ -668,38 +663,15 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         lpShares[msg.sender][token] += shares;
         totalShares[token] += shares;
         totalLiquidity[token] += _monto;
-        reputacion[msg.sender] += _monto / 2e17;
+        uint256 pts = (_monto * 100) / 1e18;
+        reputacion[msg.sender] += pts;
+        _tocarFama(msg.sender, pts);
         emit LiquidezAportada(msg.sender, _monto, token);
         emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
     }
 
     function _assertPeg(address token) internal view {
-        AggregatorV3Interface feed = priceFeeds[token];
-        require(address(feed) != address(0), "no price feed");
-        (
-            uint80 roundId,
-            int256 price,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        ) = feed.latestRoundData();
-        require(price > 0, "invalid price");
-        uint8 dec = feed.decimals();
-        require(dec >= 2 && dec <= 18, "bad feed decimals");
-        int256 threshold = int256(uint256(98) * (10 ** uint256(dec - 2)));
-        require(price >= threshold, "peg lost");
-        require(updatedAt > 0 && block.timestamp - updatedAt <= 1 hours, "price data too stale");
-        require(roundId > 0 && answeredInRound == roundId, "round not complete");
-        require(startedAt > 0 && startedAt <= updatedAt, "invalid time range");
-    }
-
-    function _bumpOriginationWindow() internal {
-        if (block.timestamp > originationWindowStart + ORIGINATION_WINDOW) {
-            originationWindowStart = block.timestamp;
-            originationsInWindow = 0;
-        }
-        originationsInWindow += 1;
-        require(originationsInWindow <= maxOriginationsPerWindow, "daily origination cap");
+        QuatriviumFamaLib.assertPeg(priceFeeds[token]);
     }
 
     function solicitarPrestamo(address token, uint256 nivel) external whenNotPaused nonReentrant onlySupportedToken(token) {
@@ -731,7 +703,12 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         );
 
         _assertPeg(token);
-        _bumpOriginationWindow();
+        if (block.timestamp > originationWindowStart + ORIGINATION_WINDOW) {
+            originationWindowStart = block.timestamp;
+            originationsInWindow = 0;
+        }
+        originationsInWindow += 1;
+        require(originationsInWindow <= maxOriginationsPerWindow, "daily origination cap");
 
         Level memory L = _tier(pedido);
         require(L.montoPrestamo > 0, "tier not set");
@@ -750,7 +727,8 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         usuarios[msg.sender].tasaAplicadaBP = tasaCurva > tasaPiso ? tasaCurva : tasaPiso;
 
         outstandingLoans[token] += L.montoPrestamo;
-        uint8 n = _cuotasDeMonto(L.montoPrestamo);
+        uint256 m = L.montoPrestamo;
+        uint8 n = m >= 100000e18 ? 12 : m >= 25000e18 ? 6 : m >= 60e18 ? 3 : m >= 50e18 ? 2 : 1;
         planPago[msg.sender] = PlanPago({
             pagado: 0,
             venceCuota: uint64(n <= 1 ? block.timestamp + L.plazo : block.timestamp + (L.plazo / n)),
@@ -760,14 +738,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         });
         stableTokens[token].safeTransfer(msg.sender, L.montoPrestamo);
         emit PrestamoEmitido(msg.sender, L.montoPrestamo, usuarios[msg.sender].vencimiento, token);
-    }
-
-    function _cuotasDeMonto(uint256 monto) internal pure returns (uint8) {
-        if (monto >= 100000e18) return 12;
-        if (monto >= 25000e18) return 6;
-        if (monto >= 60e18) return 3;
-        if (monto >= 50e18) return 2;
-        return 1;
     }
 
     function _tier(uint256 id) internal view returns (Level memory L) {
@@ -835,7 +805,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
             return;
         }
         progresoPago.solicitudesCompletadas++;
-        // L1 → 3; L2–9 → 5; L10–1000 → 5, 10… 4955. En L1000 el ciclo se reinicia y el hito 1000 se puede volver a cobrar.
+        // L1 â†’ 3; L2â€“9 â†’ 5; L10â€“1000 â†’ 5, 10â€¦ 4955. En L1000 el ciclo se reinicia y el hito 1000 se puede volver a cobrar.
         uint256 solicitudesRequeridas = unlocked <= 1 ? 3 : (unlocked < 10 ? 5 : 5 * (unlocked - 9));
         if (progresoPago.solicitudesCompletadas >= solicitudesRequeridas) {
             progresoPago.solicitudesCompletadas = 0;
@@ -930,21 +900,14 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function _inhabilitado(address usuario) internal view returns (bool) {
-        if (esMoroso[usuario]) return true;
-        if (usuarios[usuario].montoActivo == 0) return false;
-        if (usuarios[usuario].vencimiento != 0 && block.timestamp > usuarios[usuario].vencimiento) return true;
-        return planPago[usuario].venceCuota != 0 && block.timestamp > planPago[usuario].venceCuota;
+        return esMoroso[usuario] || _estaVencido(usuario);
     }
 
     /// @notice Tras el mes de gracia las comisiones y bonos del usuario van al pool.
-    function _fueraDeGracia(address usuario) internal view returns (bool) {
+    function dispersionCongelada(address usuario) public view returns (bool) {
         if (usuario == fundador || !esMoroso[usuario]) return false;
         uint256 desde = moraDesde[usuario];
         return desde != 0 && block.timestamp > desde + GRACIA_MORA;
-    }
-
-    function dispersionCongelada(address usuario) public view returns (bool) {
-        return _fueraDeGracia(usuario);
     }
 
     function _bpGeneracion(uint8 generacion) internal pure returns (uint256) {
@@ -978,9 +941,19 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
         address padre = redGenealogica[deudor].padre;
         if (habriaBonoA) {
-            uint256 bono = remaining < BONO_ACTIVACION ? remaining : BONO_ACTIVACION;
-            uint256 pagadoBono = _pagarCapped(token, padre, bono, remaining, deudor, 1);
-            remaining -= pagadoBono;
+            uint256 pagadoBono = QuatriviumFamaLib.pagarBonoPool(
+                totalLiquidity,
+                cuentaDestruida,
+                reputacion,
+                stableTokens[token],
+                token,
+                padre,
+                deudor,
+                padre != address(0) && !dispersionCongelada(padre),
+                _cajaLibre(token),
+                (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000,
+                famaHermano
+            );
             if (pagadoBono > 0) {
                 redGenealogica[deudor].bonoActivacionCobrado = true;
                 usoBonoA = true;
@@ -1039,7 +1012,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (amount == 0 || to == address(0) || to == deudor || cuentaDestruida[to]) {
             return 0;
         }
-        if (generacion != 0 && _fueraDeGracia(to)) {
+        if (generacion != 0 && dispersionCongelada(to)) {
             return 0;
         }
         stableTokens[token].safeTransfer(to, amount);
@@ -1053,6 +1026,10 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return liq > out ? liq - out : 0;
     }
 
+    function _tocarFama(address who, uint256 pts) internal {
+        QuatriviumFamaLib.tocar(famaHermano, who, pts);
+    }
+
     function _acreditarRed(address padre, address token) internal {
         if (padre == address(0) || cuentaDestruida[padre]) {
             return;
@@ -1063,7 +1040,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function _pagarBonosRed(address usuario, address token) internal {
-        if (_fueraDeGracia(usuario) || blacklist[usuario]) return;
+        if (dispersionCongelada(usuario) || blacklist[usuario]) return;
         uint256 earned = puntosRed[usuario] / UMBRAL_BONO_RED;
         uint256 already = bonosRedCobrados[usuario];
         if (earned <= already) return;
@@ -1111,7 +1088,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         }
     }
 
-    /// @notice El pool es de préstamo, no un LP redimible. La UI y el contrato coinciden.
+    /// @notice El pool es de prÃ©stamo, no un LP redimible. La UI y el contrato coinciden.
     function retirarLiquidez(address, uint256) external pure {
         revert("pool locked");
     }
@@ -1281,14 +1258,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return (level, progreso.solicitudesCompletadas, progreso.ultimoPrestamoTimestamp);
     }
 
-    function obtenerCooldownRestante(address usuario) external view returns (uint256 segundosRestantes) {
-        ProgresoNivel storage progreso = progresoUsuarios[usuario];
-        if (progreso.ultimoPrestamoTimestamp == 0) return 0;
-        uint256 finalBloqueo = progreso.ultimoPrestamoTimestamp + COOLDOWN_PRESTAMO;
-        if (block.timestamp >= finalBloqueo) return 0;
-        return finalBloqueo - block.timestamp;
-    }
-
     function destruirCuenta(address token) external nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
         require(msg.sender != fundador, "founder");
@@ -1338,12 +1307,13 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         hitoCobrado[msg.sender] = 0;
         donado[msg.sender] = 0;
         cuentaDestruida[msg.sender] = true;
+        _tocarFama(msg.sender, 0);
         emit CuentaDestruida(msg.sender, token, pulled);
     }
 
     function cobrarBonoHito(address token) external whenNotPaused nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
-        require(humanosVerificados[msg.sender] && !blacklist[msg.sender] && !_fueraDeGracia(msg.sender));
+        require(humanosVerificados[msg.sender] && !blacklist[msg.sender] && !dispersionCongelada(msg.sender));
         uint256 nivel = progresoUsuarios[msg.sender].nivelActual;
         if (nivel < 1) nivel = 1;
         uint256 next = hitoCobrado[msg.sender] + 100;
@@ -1363,9 +1333,24 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(amount > 0 && fundador != address(0));
         stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
         donado[msg.sender] += amount;
-        reputacion[msg.sender] += amount / 1e17;
+        uint256 pts = (amount * 100) / 1e18;
+        reputacion[msg.sender] += pts;
+        _tocarFama(msg.sender, pts);
         emit Donacion(msg.sender, amount, token);
         emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
+    }
+
+    function pagarCanje(address token, address to, uint256 amount) external nonReentrant onlySupportedToken(token) {
+        require(msg.sender == famaHermano);
+        QuatriviumFamaLib.sacarCaja(
+            totalLiquidity,
+            stableTokens[token],
+            token,
+            to,
+            amount,
+            _cajaLibre(token),
+            (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000
+        );
     }
 
     function niveles(uint256 id) external view returns (uint256, uint256, uint256) {

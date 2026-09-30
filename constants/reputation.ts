@@ -1,6 +1,6 @@
 import { formatCommissionUSD } from './commissions';
 
-/** Puntos al referidor directo cuando alguien entra con su código. */
+/** Puntos de red al referidor directo cuando el referido paga su primer L1. */
 export const REFERRAL_REPUTATION_POINTS = 50;
 /** Puntos de red al activar (el referido paga su primer nivel). Solo el directo. */
 export const REFERRAL_NETWORK_POINTS = 50;

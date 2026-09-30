@@ -97,9 +97,13 @@ export interface UserInfo {
     lastHito: number;
   };
   donatedUsd: number;
+  famaCaja: number;
+  famaCanjeada: number;
+  famaDisponible: number;
   maxLoanLevel: number;
   canClaimHitos: boolean;
   canDonate: boolean;
+  canCanjearFama: boolean;
   isOwner: boolean;
   isAdmin: boolean;
   paused: boolean;
@@ -149,9 +153,13 @@ const EMPTY_USER_INFO: UserInfo = {
   creditHistory: { paidOnTime: 0, missedLoans: 0, penalties: 0 },
   userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0, bonusPending: 0, nextMilestone: 100, lastHito: 0 },
   donatedUsd: 0,
+  famaCaja: 0,
+  famaCanjeada: 0,
+  famaDisponible: 0,
   maxLoanLevel: MAX_LOAN_LEVEL,
   canClaimHitos: false,
   canDonate: false,
+  canCanjearFama: false,
   isOwner: false,
   isAdmin: false,
   paused: false,
@@ -268,6 +276,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           kycExigido: !isDemoAccount() || kycExigido,
           identidadExigida: !isDemoAccount(),
           canDonate: false,
+          canCanjearFama: false,
           founderAddress: getRealDonationWallet(),
         });
         setBalances({ ...EMPTY_BALANCES, poolBalance, poolOutstanding, poolCash });
@@ -324,6 +333,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             ...base,
             curveRateBps,
             canDonate: false,
+            canCanjearFama: false,
             founderAddress: getRealDonationWallet(),
             maxLoanLevel: MAX_LOAN_LEVEL,
             canClaimHitos: false,
@@ -358,11 +368,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       try {
         const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
         if (!live()) return;
-        let caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
+        let caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false, canCanjearFama: false };
         try {
           caps = await QuatriviumCreditService.detectarCapacidadProtocolo();
         } catch {
-          caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false };
+          caps = { maxLevel: CORE_LOAN_LEVEL, canClaimHitos: false, canDonate: false, canCanjearFama: false };
         }
         if (live()) {
           setUserInfo((prev) => ({
@@ -370,6 +380,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             maxLoanLevel: caps.maxLevel,
             canClaimHitos: caps.canClaimHitos,
             canDonate: caps.canDonate,
+            canCanjearFama: caps.canCanjearFama,
           }));
         }
 
@@ -475,13 +486,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         try {
           const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
           const lastTs = Number(progress.ultimoPrestamoTimestamp);
-          let cooldown = cooldownRestanteDesdeTimestamp(lastTs);
-          try {
-            const chainCd = Number(await creditContract.obtenerCooldownRestante(walletAddress));
-            if (Number.isFinite(chainCd) && chainCd > cooldown) cooldown = chainCd;
-          } catch {
-            // se usa el cálculo local
-          }
+          const cooldown = cooldownRestanteDesdeTimestamp(lastTs);
           const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
           if (live()) {
             setUserInfo((prev) => ({
@@ -500,6 +505,20 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }
         } catch (e) {
           logErr('Error fetching user progress:', e);
+        }
+
+        try {
+          const fama = await QuatriviumCreditService.obtenerFama(walletAddress);
+          if (live()) {
+            setUserInfo((prev) => ({
+              ...prev,
+              famaCaja: fama.caja,
+              famaCanjeada: fama.canjeada,
+              famaDisponible: fama.disponible,
+            }));
+          }
+        } catch (e) {
+          logErr('Error fetching fame:', e);
         }
 
         try {

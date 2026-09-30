@@ -38,6 +38,7 @@ async function main() {
   const Token = await ethers.getContractFactory('ERC20Mock');
   const Aggregator = await ethers.getContractFactory('MockV3Aggregator');
   const { getLinkedCreditFactory } = require('./linkCredit.cjs');
+  const { deployFamaAndCredit } = require('../test/helpers.cjs');
   const QuatriviumCredit = await getLinkedCreditFactory(ethers);
 
   const token = await Token.deploy();
@@ -48,15 +49,15 @@ async function main() {
   const tokenAddr = await token.getAddress();
   const feedAddr = await feed.getAddress();
 
-  const protocol = await QuatriviumCredit.deploy(
+  const { contract: protocol } = await deployFamaAndCredit(
+    QuatriviumCredit,
     tokenAddr,
     feedAddr,
-    deployer.address,
+    deployer,
     500,
     [deployer.address],
     1
   );
-  await protocol.waitForDeployment();
   const protocolAddr = await protocol.getAddress();
 
   const mintAmount = ethers.parseUnits('10000', 18);

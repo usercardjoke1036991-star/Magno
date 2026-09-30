@@ -27,6 +27,7 @@ import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 import { formatCooldown, formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { milestoneBonusUsd } from '../constants/loanTiers';
+import { FAMA_CANJE_POR_USDT, usdtFromFama } from '../constants/fama';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { useI18n } from '../i18n/LanguageContext';
 import { humanizeTxError } from '../utils/txErrors';
@@ -146,6 +147,7 @@ export const useHomeHandlers = ({
     solicitarPrestamo,
     cobrarBonoHito,
     donarProyecto,
+    canjearFama,
     pagarPrestamo,
     pagarCuotas,
     depositarLiquidez,
@@ -476,6 +478,53 @@ export const useHomeHandlers = ({
         from: selectedToken.address,
         to: walletAddress,
         amountLabel: formatUSD(milestoneBonusUsd(level)),
+        tokenSymbol: selectedToken.symbol,
+        platform: 'Quatrivium',
+        timestamp: Date.now(),
+      });
+      refetch();
+    }
+  };
+
+  const handleCanjearFama = async (fama: number) => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!ensureCreditReady()) return;
+    if (userInfo.paused) {
+      Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    if (userInfo.isDelinquent) {
+      Alert.alert(t('delinquent'), t('moraBlocked'));
+      return;
+    }
+    if (!userInfo.isRegistered) {
+      Alert.alert(t('sectionCreditLine'), t('creditAccessNeed'));
+      return;
+    }
+    if (!userInfo.canCanjearFama) {
+      Alert.alert(t('hubCanje'), t('canjeLegacy'));
+      return;
+    }
+    if (!Number.isInteger(fama) || fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT !== 0) {
+      Alert.alert(t('amount'), t('invalidAmount'));
+      return;
+    }
+    if (fama > userInfo.famaDisponible) {
+      Alert.alert(t('hubCanje'), t('canjeNeed', { points: String(fama - userInfo.famaDisponible) }));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    if (!(await ensureGasForTx())) return;
+    const result = await canjearFama(fama);
+    if (result.success) {
+      void recordMovement(walletAddress, {
+        kind: 'bonus',
+        from: '',
+        to: walletAddress,
+        amountLabel: formatUSD(usdtFromFama(fama)),
         tokenSymbol: selectedToken.symbol,
         platform: 'Quatrivium',
         timestamp: Date.now(),
@@ -867,6 +916,7 @@ export const useHomeHandlers = ({
     handleRegistrarHumano,
     handleSolicitarCredito,
     handleCobrarBonoHito,
+    handleCanjearFama,
     handlePagar,
     handleDepositarPool,
     handlePagarAcceso,
