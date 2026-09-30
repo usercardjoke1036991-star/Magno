@@ -234,7 +234,7 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(pkg.scripts['security:slither']).to.include('run-slither.mjs');
     // underscore 1.13.6 llega por snarkjs con CVE-2026-27601; el override lo sube al parche.
     expect(pkg.overrides.underscore).to.equal('^1.13.8');
-    expect(pkg.overrides.compression).to.equal('^1.8.2');
+    expect(pkg.overrides.compression).to.equal('1.8.2');
     const cyber = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'run-full-cyber-audit.sh'), 'utf8');
     // Tres verdes falsos que ya costaron una auditoría entera: no volver a ellos.
     expect(cyber).to.not.include('--config p/solidity');
@@ -1903,7 +1903,7 @@ describe('account entry — password, email and session', () => {
       worker.indexOf("path === '/session/check'"),
       worker.indexOf("path === '/username/check'")
     );
-    expect(sessionBlock).to.include('requireAuth(body)');
+    expect(sessionBlock).to.include("requireAuth(body, ['session'])");
     expect(sessionBlock).to.include("body.purpose) !== 'session'");
     expect(sessionBlock).to.not.match(/body\.wallet \|\| ''/);
     const guard = fs.readFileSync(path.join(__dirname, '..', 'components', 'ScreenGuard.tsx'), 'utf8');

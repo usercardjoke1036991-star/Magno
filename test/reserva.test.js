@@ -219,5 +219,8 @@ describe('QuatriviumReserva', function () {
     await reserva.connect(extra).setCredit(await nextCredit.getAddress());
     await expect(reserva.connect(extra).applyCredit()).to.be.revertedWithCustomError(reserva, 'EsperaTimelock');
     expect(await reserva.credit()).to.equal(await credit.getAddress());
+    await reserva.connect(extra).setFundador(user.address);
+    await expect(reserva.connect(extra).applyFundador()).to.be.revertedWithCustomError(reserva, 'EsperaTimelock');
+    expect(await reserva.fundador()).to.equal(founder.address);
   });
 });

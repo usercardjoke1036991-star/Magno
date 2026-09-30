@@ -8,7 +8,7 @@
  * 3. El usuario vincula su número o abre el bot desde la app.
  */
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, chmodSync, unlinkSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { randomBytes, createCipheriv, createDecipheriv, createHash, createHmac, timingSafeEqual } from 'node:crypto';
@@ -147,7 +147,8 @@ const DATA_KEY_RAW = process.env.NOTIFY_DATA_KEY || '';
 const hashPhone = (phone) => keccak256(toUtf8Bytes(`quatrivium.phone.v1:${DATA_KEY_RAW}:${phone}`));
 const hashEmail = (email) => keccak256(toUtf8Bytes(`quatrivium.email.v1:${DATA_KEY_RAW}:${email}`));
 const BIND = process.env.NOTIFY_BIND || (process.env.PORT ? '0.0.0.0' : '127.0.0.1');
-const TRUST_PROXY = process.env.NOTIFY_TRUST_PROXY === '1' || Boolean(process.env.PORT);
+const TRUST_PROXY = process.env.NOTIFY_TRUST_PROXY === '1' || Boolean(process.env.RENDER);
+const allowDemoIdentity = !isMainnet && (process.env.NOTIFY_DEMO_IDENTITY === '1' || !publicAttesterHost);
 const hasTextbelt = isTextbeltConfigured(TEXTBELT_KEY);
 const hasSms =
   hasTextbelt ||
@@ -271,6 +272,8 @@ const SECURITY_HEADERS = {
   'Cache-Control': 'no-store',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'X-DNS-Prefetch-Control': 'off',
+  'Cross-Origin-Resource-Policy': 'same-site',
+  'X-Permitted-Cross-Domain-Policies': 'none',
 };
 
 const json = (res, status, body) => {
@@ -280,7 +283,7 @@ const json = (res, status, body) => {
     Vary: 'Origin',
     ...SECURITY_HEADERS,
   };
-  if (isMainnet) {
+  if (isMainnet || process.env.RENDER) {
     headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
   }
   res.writeHead(status, headers);
@@ -306,13 +309,44 @@ const emptyStore = () => ({
   rateHits: {},
   recoveryWraps: {},
   recoverOtps: {},
+  reservaGuard: { creditPaused: null, reservaPaused: null },
 });
+
+const STORE_KEYS = Object.keys(emptyStore());
 
 /** El wrap de la billetera no se guarda en el worker. Se borra si un disco viejo aún lo tenía. */
 const sanitizeLoadedStore = (parsed) => {
-  const next = { ...emptyStore(), ...parsed };
+  const next = emptyStore();
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return next;
+  for (const key of STORE_KEYS) {
+    if (key === 'recoveryWraps') continue;
+    if (Object.prototype.hasOwnProperty.call(parsed, key) && parsed[key] != null) {
+      next[key] = parsed[key];
+    }
+  }
   next.recoveryWraps = {};
   return next;
+};
+
+const writeAtomic = (file, buffer) => {
+  mkdirSync(dirname(file), { recursive: true });
+  const tmp = `${file}.tmp`;
+  writeFileSync(tmp, buffer);
+  try {
+    chmodSync(tmp, 0o600);
+  } catch {
+    // Windows / volúmenes sin chmod.
+  }
+  try {
+    renameSync(tmp, file);
+  } catch {
+    writeFileSync(file, buffer);
+    try {
+      unlinkSync(tmp);
+    } catch {
+      // ignore
+    }
+  }
 };
 
 const loadStore = () => {
@@ -355,17 +389,17 @@ const loadStore = () => {
 };
 
 const saveStore = (next) => {
-  mkdirSync(dirname(DATA_FILE), { recursive: true });
-  const payload = JSON.stringify(next);
+  const clean = sanitizeLoadedStore(next);
+  const payload = JSON.stringify(clean);
   const key = dataKey();
   if (!key) {
-    writeFileSync(DATA_FILE, payload);
+    writeAtomic(DATA_FILE, Buffer.from(payload, 'utf8'));
     return;
   }
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
   const enc = Buffer.concat([cipher.update(payload, 'utf8'), cipher.final()]);
-  writeFileSync(DATA_FILE, Buffer.concat([Buffer.from('ENC'), iv, cipher.getAuthTag(), enc]));
+  writeAtomic(DATA_FILE, Buffer.concat([Buffer.from('ENC'), iv, cipher.getAuthTag(), enc]));
 };
 
 let persistChain = Promise.resolve();
@@ -496,7 +530,19 @@ const normalizeUsername = (value) => {
   return reserved.has(username) ? '' : username;
 };
 
-const requireAuth = (body) => {
+const AUTH_PURPOSES = [
+  'vincular-avisos',
+  'perfil',
+  'otp',
+  'email',
+  'username',
+  'demo-identity',
+  'session',
+  'identity',
+  'autofund',
+];
+
+const requireAuth = (body, allowed) => {
   const wallet = String(body.wallet || '').toLowerCase();
   const purpose = String(body.purpose || '');
   const timestamp = Number(body.timestamp);
@@ -517,7 +563,11 @@ const requireAuth = (body) => {
   ) {
     throw new Error('purpose');
   }
-  if (!Number.isFinite(timestamp) || Math.abs(Date.now() - timestamp) > 5 * 60 * 1000) {
+  if (!AUTH_PURPOSES.includes(purpose)) throw new Error('purpose');
+  if (Array.isArray(allowed) && allowed.length && !allowed.includes(purpose)) {
+    throw new Error('purpose');
+  }
+  if (!Number.isFinite(timestamp) || timestamp > Date.now() + 60_000 || Date.now() - timestamp > 5 * 60 * 1000) {
     throw new Error('timestamp');
   }
   if (!signature.startsWith('0x') || signature.length < 130) throw new Error('signature');
@@ -572,6 +622,7 @@ const requireAuth = (body) => {
   }
   if (recovered !== wallet) throw new Error('signature');
   store.usedAuth[replayKey] = timestamp;
+  void persist();
   const cutoff = Date.now() - 15 * 60 * 1000;
   const usedKeys = Object.keys(store.usedAuth);
   for (const key of usedKeys) {
@@ -623,12 +674,12 @@ const readBody = (req, limit = 32_768) =>
       try {
         resolveBody(JSON.parse(raw || '{}'));
       } catch {
-        resolveBody({});
+        rejectBody(new Error('json'));
       }
     });
     req.on('error', () => {
       clearTimeout(timeout);
-      resolveBody({});
+      rejectBody(new Error('json'));
     });
   });
 
@@ -1357,6 +1408,12 @@ const isJsonRequest = (req) => {
 
 const requestPath = (req) => String(req.url || '/').split('?')[0];
 
+const bodyError = (res, error) => {
+  if (error?.message === 'json') json(res, 400, { error: 'json' });
+  else if (error?.message === 'timeout') json(res, 408, { error: 'timeout' });
+  else json(res, 413, { error: 'payload' });
+};
+
 const server = createServer(async (req, res) => {
   try {
   requestOrigin = String(req.headers.origin || '');
@@ -1419,15 +1476,19 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req, 90_000);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let wallet;
     try {
-      wallet = requireAuth(body).wallet;
+      wallet = requireAuth(body, ['perfil']).wallet;
     } catch (error) {
       json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    if (String(body.purpose) !== 'perfil') {
+      json(res, 401, { error: 'purpose' });
       return;
     }
     const prev = store.profiles[wallet] || {};
@@ -1465,13 +1526,13 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let wallet;
     try {
-      wallet = requireAuth(body).wallet;
+      wallet = requireAuth(body, ['vincular-avisos']).wallet;
     } catch (error) {
       json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -1490,7 +1551,7 @@ const server = createServer(async (req, res) => {
       json(res, 429, { error: 'rate' });
       return;
     }
-    const code = randomBytes(5).toString('hex');
+    const code = randomBytes(8).toString('hex');
     store.pendingBinds[code] = { wallet, exp: now + 10 * 60 * 1000 };
     await persist();
     json(res, 200, { code });
@@ -1504,13 +1565,13 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['otp']);
     } catch (error) {
       json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -1625,13 +1686,13 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['email']);
     } catch (error) {
       json(res, error.message === 'wallet' || error.message === 'email' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -1734,13 +1795,13 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['identity']);
     } catch (error) {
       json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -1840,14 +1901,14 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     store.exclusiveSessions = store.exclusiveSessions || {};
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['session']);
     } catch (error) {
       json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -1862,6 +1923,14 @@ const server = createServer(async (req, res) => {
       json(res, 200, { owner, vacant: !current?.deviceHash });
       return;
     }
+    const claimed = store.exclusiveSessions[authn.wallet];
+    if (claimed?.deviceHash && claimed.deviceHash !== authn.deviceHash) {
+      const age = Date.now() - Number(claimed.at || 0);
+      if (age < 60 * 60 * 1000) {
+        json(res, 429, { error: 'cooldown' });
+        return;
+      }
+    }
     store.exclusiveSessions[authn.wallet] = { deviceHash: authn.deviceHash, at: Date.now() };
     await persist();
     json(res, 200, { ok: true, owner: true });
@@ -1875,13 +1944,13 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['username']);
     } catch (error) {
       json(res, error.message === 'wallet' || error.message === 'username' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -1921,12 +1990,12 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     try {
-      requireAuth(body);
+      requireAuth(body, ['perfil']);
     } catch (error) {
       json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -1938,7 +2007,7 @@ const server = createServer(async (req, res) => {
     const wallets = (Array.isArray(body.wallets) ? body.wallets : [])
       .map((item) => String(item || '').trim().toLowerCase())
       .filter((item) => /^0x[0-9a-f]{40}$/.test(item))
-      .slice(0, 100);
+      .slice(0, 20);
     const profiles = {};
     for (const wallet of wallets) {
       const item = store.profiles[wallet];
@@ -1969,13 +2038,13 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['perfil']);
     } catch (error) {
       json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -2001,8 +2070,8 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     const parsed = parseAllowedEmail(body.email || body.canonical);
@@ -2060,8 +2129,8 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     const parsed = parseAllowedEmail(body.email || body.canonical);
@@ -2116,13 +2185,13 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['autofund']);
     } catch (error) {
       json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -2145,6 +2214,10 @@ const server = createServer(async (req, res) => {
         return;
       }
       if (!rateLimit(`autofund-w:${address.toLowerCase()}`, 2, 15 * 60 * 1000)) {
+        json(res, 429, { error: 'rate' });
+        return;
+      }
+      if (!rateLimit('autofund-day', 80, 24 * 60 * 60 * 1000)) {
         json(res, 429, { error: 'rate' });
         return;
       }
@@ -2171,16 +2244,20 @@ const server = createServer(async (req, res) => {
       json(res, 403, { error: 'mainnet' });
       return;
     }
+    if (!allowDemoIdentity) {
+      json(res, 403, { error: 'demo-identity' });
+      return;
+    }
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['demo-identity']);
     } catch (error) {
       json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
       return;
@@ -2217,19 +2294,23 @@ const server = createServer(async (req, res) => {
     let body;
     try {
       body = await readBody(req);
-    } catch {
-      json(res, 413, { error: 'payload' });
+    } catch (error) {
+      bodyError(res, error);
       return;
     }
     let authn;
     try {
-      authn = requireAuth(body);
+      authn = requireAuth(body, ['identity']);
     } catch (error) {
       json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
       return;
     }
     if (String(body.purpose) !== 'identity') {
       json(res, 401, { error: 'purpose' });
+      return;
+    }
+    if (!rateLimit(`kycprov-w:${authn.wallet}`, 3, 24 * 60 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
       return;
     }
     try {

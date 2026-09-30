@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { authenticateBiometric, matchPassword, matchPin } from '../services/appLock';
+import { authenticateBiometric, checkPassword, checkPin } from '../services/appLock';
 import { verifyAuthenticator } from '../services/authenticator';
 import { getAuthMethods, isAuthEnabled, isMethodReady, type AuthMethod, type AuthPurpose } from '../services/authPrefs';
 import type { FundsConfirmPurpose } from '../services/fundsConfirm';
@@ -90,9 +90,13 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
     if (method === 'pin') {
       if (pin.length !== 6) return;
       setBusy(true);
-      const ok = await matchPin(pin);
-      if (!ok) {
-        setError(t('lockPinWrong'));
+      const checked = await checkPin(pin);
+      if (!checked.ok) {
+        setError(
+          checked.locked
+            ? t('lockCooldown', { seconds: Math.ceil(checked.remainingMs / 1000) })
+            : t('lockPinWrong')
+        );
         setPin('');
         setBusy(false);
         return;
@@ -115,9 +119,13 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     if (!password) return;
     setBusy(true);
-    const ok = await matchPassword(password);
-    if (!ok) {
-      setError(t('lockPasswordWrong'));
+    const checked = await checkPassword(password);
+    if (!checked.ok) {
+      setError(
+        checked.locked
+          ? t('lockCooldown', { seconds: Math.ceil(checked.remainingMs / 1000) })
+          : t('lockPasswordWrong')
+      );
       setPassword('');
       setBusy(false);
       return;

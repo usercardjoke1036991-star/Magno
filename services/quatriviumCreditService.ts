@@ -661,8 +661,11 @@ export const QuatriviumCreditService = {
     const deuda = await credit.obtenerDeuda(debtorAddress);
     const totalDue = deuda[2] as bigint;
     if (totalDue <= 0n) throw new Error('no-active-debt');
-    // Aprobar el monto total de la deuda del deudor al contrato
-    await asegurarAprobacionToken(signer, userAddress, tokenAddress, totalDue.toString());
+    const plan = await credit.planPago(debtorAddress);
+    const pagado = plan[0] as bigint;
+    const remaining = totalDue > pagado ? totalDue - pagado : 0n;
+    if (remaining <= 0n) throw new Error('no-active-debt');
+    await asegurarAprobacionToken(signer, userAddress, tokenAddress, remaining.toString());
     const tx = await credit.liquidate(debtorAddress, tokenAddress);
     return tx.wait();
   },

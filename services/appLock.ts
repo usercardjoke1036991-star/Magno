@@ -250,12 +250,7 @@ export async function persistWrapForBiometric(wrapKey = getWalletWrapKey()): Pro
     await SecureStore.setItemAsync(WRAP_STORE, wrapKey, BIO_WRAP_OPTIONS);
     return true;
   } catch {
-    try {
-      await SecureStore.setItemAsync(WRAP_STORE, wrapKey, OPTIONS);
-      return true;
-    } catch {
-      return false;
-    }
+    return false;
   }
 }
 

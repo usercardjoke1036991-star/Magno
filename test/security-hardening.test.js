@@ -46,6 +46,31 @@ describe('defensive security hardening', function () {
     expect(reserva).to.include('function applyCredit()');
   });
 
+  it('binds EIP-712 purpose to each notify route before consuming replay', function () {
+    const worker = fs.readFileSync(path.join(root, 'scripts', 'notify-worker.mjs'), 'utf8');
+    const wallet = fs.readFileSync(path.join(root, 'services', 'appWallet.ts'), 'utf8');
+    const funds = fs.readFileSync(path.join(root, 'components', 'FundsConfirmHost.tsx'), 'utf8');
+    const reserva = fs.readFileSync(path.join(root, 'contracts', 'QuatriviumReserva.sol'), 'utf8');
+    expect(worker).to.include("requireAuth(body, ['perfil'])");
+    expect(worker).to.include("requireAuth(body, ['otp'])");
+    expect(worker).to.include("requireAuth(body, ['autofund'])");
+    expect(worker).to.include('void persist()');
+    expect(worker).to.include('writeAtomic');
+    expect(worker).to.include('allowDemoIdentity');
+    expect(worker).to.include("process.env.NOTIFY_TRUST_PROXY === '1' || Boolean(process.env.RENDER)");
+    expect(worker).to.include('autofund-day');
+    expect(worker).to.include("error: 'cooldown'");
+    expect(worker).to.include('rejectBody(new Error(\'json\'))');
+    expect(wallet).to.include('SecureStore.getItemAsync(WALLET_KEY)');
+    expect(wallet).to.include('AsyncStorage.removeItem(WALLET_FALLBACK)');
+    expect(funds).to.include('checkPin');
+    expect(funds).to.include('checkPassword');
+    expect(funds).to.not.include('matchPin');
+    expect(funds).to.not.include('matchPassword');
+    expect(reserva).to.include('function applyFundador()');
+    expect(reserva).to.include('pendienteFundador');
+  });
+
   it('leaves Sumsub ready behind Render env and does not put secrets in the admin panel', function () {
     const worker = fs.readFileSync(path.join(root, 'scripts', 'notify-worker.mjs'), 'utf8');
     const panel = fs.readFileSync(path.join(root, 'components', 'AdminPanel.tsx'), 'utf8');

@@ -49,9 +49,18 @@ function parseStored(raw: string): StoredWallet | null {
 }
 
 async function readRawWallet(): Promise<string | null> {
+  const secure = await withLimit(SecureStore.getItemAsync(WALLET_KEY).catch(() => null), 12000, null);
+  if (secure) {
+    void AsyncStorage.removeItem(WALLET_FALLBACK).catch(() => {});
+    return secure;
+  }
   const fallback = await AsyncStorage.getItem(WALLET_FALLBACK).catch(() => null);
-  if (fallback) return fallback;
-  return withLimit(SecureStore.getItemAsync(WALLET_KEY).catch(() => null), 12000, null);
+  if (fallback) {
+    void SecureStore.setItemAsync(WALLET_KEY, fallback, OPTIONS).catch(() => {});
+    void AsyncStorage.removeItem(WALLET_FALLBACK).catch(() => {});
+    return fallback;
+  }
+  return null;
 }
 
 async function readStored(): Promise<StoredWallet | null> {
@@ -76,19 +85,18 @@ async function persistRecord(record: StoredWallet): Promise<void> {
     throw new Error('locked');
   }
   const sealed = sealSecret(JSON.stringify(record), wrap);
-  let fallbackOk = false;
-  try {
-    await AsyncStorage.setItem(WALLET_FALLBACK, sealed);
-    fallbackOk = true;
-  } catch {
-    fallbackOk = false;
-  }
   const secureOk = await withLimit(
     SecureStore.setItemAsync(WALLET_KEY, sealed, OPTIONS).then(() => true as const),
     2500,
     false as const
   );
-  if (!fallbackOk && !secureOk) {
+  if (secureOk) {
+    await AsyncStorage.removeItem(WALLET_FALLBACK).catch(() => {});
+    return;
+  }
+  try {
+    await AsyncStorage.setItem(WALLET_FALLBACK, sealed);
+  } catch {
     throw new Error('wallet-persist');
   }
 }

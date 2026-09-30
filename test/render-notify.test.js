@@ -25,6 +25,7 @@ describe('Render notify worker', function () {
     expect(yaml).to.match(/SUMSUB_APP_TOKEN[\s\S]*sync: false/);
     expect(yaml).to.match(/SUMSUB_SECRET[\s\S]*sync: false/);
     expect(yaml).to.match(/SUMSUB_LEVEL_NAME[\s\S]*sync: false/);
+    expect(yaml).to.include('NOTIFY_DEMO_IDENTITY');
     expect(yaml).to.not.match(/key: PRIVATE_KEY\b/);
     expect(docker).to.include('NOTIFY_BIND=0.0.0.0');
     expect(docker).to.include('NOTIFY_TRUST_PROXY=1');
@@ -43,7 +44,8 @@ describe('Render notify worker', function () {
     expect(worker).to.include("/identity/status");
     expect(worker).to.include("/identity/resume");
     expect(worker).to.include("/identity/release");
-    expect(worker).to.include('mkdirSync(dirname(DATA_FILE)');
+    expect(worker).to.include('mkdirSync(dirname(file)');
+    expect(worker).to.include('writeAtomic');
     expect(worker).to.include('const isHealth');
     expect(worker).to.include('process.env.PORT || process.env.NOTIFY_PORT || 8787');
     expect(worker).to.not.include('displayName: username');

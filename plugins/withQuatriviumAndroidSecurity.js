@@ -133,7 +133,7 @@ function stripExpPlusFromManifest(manifest) {
 
 /** Metro/dev-client schemes must not ship in the release APK. */
 function stripExpPlusFromManifestXml(xml) {
-  return String(xml).split('\n').filter((line) => !line.includes('android:scheme="exp+')).join('\n');
+  return String(xml).replace(/<data\b[^>]*android:scheme="exp\+[^"]*"[^>]*\/?\s*>/g, '');
 }
 
 const DEEP_HOSTS = ['quatriviumcredit.app', 'www.quatriviumcredit.app'];

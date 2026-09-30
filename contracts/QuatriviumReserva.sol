@@ -44,6 +44,8 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     uint256 public pendienteOwnerDesde;
     address public pendienteCredit;
     uint256 public pendienteCreditDesde;
+    address public pendienteFundador;
+    uint256 public pendienteFundadorDesde;
     uint256 public bote;
 
     struct Posicion {
@@ -206,8 +208,17 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
 
     function setFundador(address next) external onlyOwner {
         if (next == address(0)) revert DestinoCero();
-        fundador = next;
-        emit FundadorCambiado(next);
+        pendienteFundador = next;
+        pendienteFundadorDesde = block.timestamp;
+    }
+
+    function applyFundador() external onlyOwner {
+        if (pendienteFundador == address(0) || pendienteFundadorDesde == 0) revert NadaQueMover();
+        if (block.timestamp < pendienteFundadorDesde + CAMBIO_ESPERA) revert EsperaTimelock();
+        fundador = pendienteFundador;
+        pendienteFundador = address(0);
+        pendienteFundadorDesde = 0;
+        emit FundadorCambiado(fundador);
     }
 
     function setCredit(address next) external onlyOwner {
