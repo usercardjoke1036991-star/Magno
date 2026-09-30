@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-from qa_safe_io import resto_bullet_estado
+from qa_safe_io import resto_bullet_estado, under_root
 
 # Forzar UTF-8 en Windows (ERR-003: reconfigure + hasattr, no TextIOWrapper)
 if sys.platform == "win32":
@@ -410,7 +410,7 @@ def inventariar_partes(directorio: str) -> dict[str, Any]:
 
 def _que_es(raiz: Path, nombre: str) -> str:
     """Una línea: CONTEXTO, VISION o nombre de carpeta."""
-    ctx = _leer(raiz / "CONTEXTO.md") or ""
+    ctx = _leer(under_root(raiz, "CONTEXTO.md")) or ""
     if ctx:
         bloque = _seccion(ctx, r"##\s*(?:¿)?Qué es este proyecto\??")
         frase = _primera_frase(bloque)
@@ -421,7 +421,7 @@ def _que_es(raiz: Path, nombre: str) -> str:
         )
         if tit:
             return f"Proyecto {tit.group(1).strip()}"
-    vis = _leer(raiz / "VISION.md") or ""
+    vis = _leer(under_root(raiz, "VISION.md")) or ""
     if vis:
         idea = _seccion(vis, r"##\s*💡\s*Idea Central")
         frase = _primera_frase(idea)
@@ -543,7 +543,7 @@ def comprobar_al_dia(directorio: str, inventario: dict) -> dict[str, Any]:
     mencionados: set[str] = set()
 
     for doc_name in ("CONTEXTO.md", "VISION.md"):
-        ruta = raiz / doc_name
+        ruta = under_root(raiz, doc_name)
         if not ruta.is_file():
             continue
         texto = _leer(ruta)
@@ -564,7 +564,7 @@ def comprobar_al_dia(directorio: str, inventario: dict) -> dict[str, Any]:
                 "severidad": "critico",
             })
 
-    readme = raiz / "README.md"
+    readme = under_root(raiz, "README.md")
     if readme.is_file():
         texto_r = _leer(readme) or ""
         bloque = _bloque_auto_readme(texto_r)

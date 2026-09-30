@@ -122,7 +122,10 @@ def validar_severidad(severidad: str) -> str:
 
 
 def validar_patron_regex(patron: str) -> bool:
-    """Verifica que el patrón de detección sea regex válido."""
+    """Verifica que el patrón de detección sea regex válido y acotado."""
+    if len(patron) > 120 or re.search(r'(\+|\*|\{).{0,8}(\+|\*|\{)', patron):
+        print("⚠️  El patrón es demasiado amplio. Se usará como texto fijo.")
+        return False
     try:
         re.compile(patron)
         return True

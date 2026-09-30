@@ -28,8 +28,10 @@
   </main>
   <script>
     const params = new URLSearchParams(location.search);
-    const code = params.get('c') || params.get('code');
-    if (code) location.replace('./invite/index.html' + location.search);
+    const code = params.get('c') || params.get('code') || '';
+    if (/^[A-Za-z0-9_-]{1,32}$/.test(code)) {
+      location.replace('./invite/index.html?c=' + encodeURIComponent(code));
+    }
   </script>
 </body>
 </html>

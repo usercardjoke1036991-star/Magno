@@ -62,6 +62,19 @@ def write_under(directory: Path | str, filename: str, text: str, encoding: str =
     return Path(dest)
 
 
+def under_root(root: Path | str, rel: str) -> Path:
+    """Une un relativo fijo al proyecto. Rechaza '..', nulos y rutas absolutas."""
+    if not rel or "\x00" in rel:
+        raise ValueError("ruta invalida")
+    cleaned = rel.replace("\\", "/").strip("/")
+    parts = cleaned.split("/")
+    if not parts or any(p in ("", ".", "..") for p in parts):
+        raise ValueError("ruta invalida")
+    if os.path.isabs(rel) or cleaned.startswith("/"):
+        raise ValueError("ruta invalida")
+    return confine(Path(*parts), root=confine(root))
+
+
 def resto_bullet_estado(linea: str) -> str | None:
     """Texto tras '- ✅' o '- 🔄' sin regex (evita S8786)."""
     s = linea.lstrip(" \t")

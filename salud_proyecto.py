@@ -29,6 +29,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from qa_safe_io import under_root
+
 if sys.platform == "win32":
     try:
         if hasattr(sys.stdout, "reconfigure"):
@@ -239,7 +241,7 @@ def _run(
 
 
 def _es_quatrivium(raiz: Path) -> bool:
-    pkg = raiz / "package.json"
+    pkg = under_root(raiz, "package.json")
     if not pkg.is_file():
         return False
     try:
@@ -247,7 +249,7 @@ def _es_quatrivium(raiz: Path) -> bool:
     except json.JSONDecodeError:
         return False
     nombre = str(data.get("name", "")).lower()
-    return "quatrivium" in nombre or (raiz / "contracts" / "QuatriviumCredit.sol").is_file()
+    return "quatrivium" in nombre or under_root(raiz, "contracts/QuatriviumCredit.sol").is_file()
 
 
 def verificar_identidad(raiz: Path, reporte: ReporteSalud) -> None:
@@ -260,7 +262,7 @@ def verificar_identidad(raiz: Path, reporte: ReporteSalud) -> None:
             "advertencia",
         )
 
-    contexto = raiz / "CONTEXTO.md"
+    contexto = under_root(raiz, "CONTEXTO.md")
     if contexto.is_file():
         texto = _leer(contexto)
         if "Quatrivium Finance" in texto and "Demo" in texto:
@@ -272,7 +274,7 @@ def verificar_identidad(raiz: Path, reporte: ReporteSalud) -> None:
 
 
 def verificar_archivos(raiz: Path, reporte: ReporteSalud) -> None:
-    faltan = [rel for rel in ARCHIVOS_CRITICOS if not (raiz / rel).is_file()]
+    faltan = [rel for rel in ARCHIVOS_CRITICOS if not under_root(raiz, rel).is_file()]
     if faltan:
         for rel in faltan:
             reporte.add("grafo", f"Archivo crítico ausente: {rel}", "critico", rel)
@@ -283,7 +285,7 @@ def verificar_archivos(raiz: Path, reporte: ReporteSalud) -> None:
 def verificar_simbolos(raiz: Path, reporte: ReporteSalud) -> None:
     rotos = 0
     for rel, simbolos in SIMBOLOS_CRITICOS.items():
-        ruta = raiz / rel
+        ruta = under_root(raiz, rel)
         if not ruta.is_file():
             continue
         texto = _leer(ruta)
@@ -302,7 +304,7 @@ def verificar_simbolos(raiz: Path, reporte: ReporteSalud) -> None:
 
 def verificar_decisiones(raiz: Path, reporte: ReporteSalud) -> None:
     """Guards de producto: no romper lo que CONTEXTO/MEMORIA prohíben."""
-    servicio = _leer(raiz / "services" / "quatriviumCreditService.ts")
+    servicio = _leer(under_root(raiz, "services/quatriviumCreditService.ts"))
     if "pool locked" in servicio:
         reporte.add("decision", "Pool no redimible sigue bloqueado en el servicio", "ok")
     else:
@@ -313,7 +315,7 @@ def verificar_decisiones(raiz: Path, reporte: ReporteSalud) -> None:
             "services/quatriviumCreditService.ts",
         )
 
-    contrato = _leer(raiz / "contracts" / "QuatriviumCredit.sol")
+    contrato = _leer(under_root(raiz, "contracts/QuatriviumCredit.sol"))
     if "COOLDOWN_PRESTAMO" in contrato and "48 hours" in contrato:
         reporte.add("decision", "Contrato mantiene cooldown de 48h desde solicitarPrestamo", "ok")
     elif "COOLDOWN_PRESTAMO" in contrato:
@@ -321,7 +323,7 @@ def verificar_decisiones(raiz: Path, reporte: ReporteSalud) -> None:
     else:
         reporte.add("decision", "Falta COOLDOWN_PRESTAMO en el contrato", "critico", "contracts/QuatriviumCredit.sol")
 
-    tarjeta = _leer(raiz / "components" / "LoanTierCard.tsx")
+    tarjeta = _leer(under_root(raiz, "components/LoanTierCard.tsx"))
     if "waitingNextLoan" in tarjeta and "!hasActiveLoan" in tarjeta:
         reporte.add("decision", "Cuenta atrás de Solicitar solo tras pagar (sin deuda activa)", "ok")
     else:
@@ -332,7 +334,7 @@ def verificar_decisiones(raiz: Path, reporte: ReporteSalud) -> None:
             "components/LoanTierCard.tsx",
         )
 
-    env = _leer_env(raiz / ".env")
+    env = _leer_env(under_root(raiz, ".env"))
     chain = env.get("EXPO_PUBLIC_CHAIN_ID", "")
     if chain == "56":
         reporte.add(
@@ -410,7 +412,10 @@ def verificar_herramientas(raiz: Path, reporte: ReporteSalud, con_tests: bool) -
 def _importar_hermano(nombre: str, raiz: Path):
     import importlib.util
 
-    script = raiz / f"{nombre}.py"
+    try:
+        script = under_root(raiz, f"{nombre}.py")
+    except ValueError:
+        return None
     if not script.is_file():
         return None
     spec = importlib.util.spec_from_file_location(nombre, script)
@@ -476,7 +481,7 @@ def _verificar_logica(raiz: Path, reporte: ReporteSalud) -> None:
                 "components/LoanTierCard.tsx",
                 "web3Config.tsx",
             ):
-                ruta = raiz / rel
+                ruta = under_root(raiz, rel)
                 if ruta.is_file():
                     problemas.extend(mod._analizar_logica_node(ruta))
     except Exception as exc:

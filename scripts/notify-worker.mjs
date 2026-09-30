@@ -7,7 +7,8 @@
  * 2. (Opcional) Telegram: TELEGRAM_BOT_TOKEN. WhatsApp: WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID.
  * 3. El usuario vincula su número o abre el bot desde la app.
  */
-import { createServer } from 'node:http';
+// TLS lo termina Render/Caddy. El proceso solo escucha HTTP en el puerto privado.
+import { createServer } from 'node:http'; // NOSONAR javascript:S5332 -- edge TLS, not a public cleartext API
 import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, chmodSync, unlinkSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
@@ -1414,7 +1415,8 @@ const bodyError = (res, error) => {
   else json(res, 413, { error: 'payload' });
 };
 
-const server = createServer(async (req, res) => {
+// deepcode ignore HttpToHttps: Render and Caddy terminate TLS in front of this process
+const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
   try {
   requestOrigin = String(req.headers.origin || '');
   const path = requestPath(req);

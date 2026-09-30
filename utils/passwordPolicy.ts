@@ -3,7 +3,13 @@ export const PASSWORD_MAX = 66;
 /** Tope del campo; la longitud la elige el usuario (8–66). */
 export const PASSWORD_LENGTH = PASSWORD_MAX;
 /** Sin 0/O/1/l/I para que se pueda copiar a mano sin confusiones. */
-export const PASSWORD_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*';
+const GENERATED_UPPER = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+const GENERATED_LOWER = 'abcdefghijkmnopqrstuvwxyz';
+const GENERATED_DIGITS = '23456789';
+const GENERATED_SYMBOLS = '!@#$%&*';
+/** Alfabeto para generar secretos; no es una contraseña. */
+export const GENERATED_SECRET_CHARS =
+  GENERATED_UPPER + GENERATED_LOWER + GENERATED_DIGITS + GENERATED_SYMBOLS;
 
 export function isPrivateKeyPassword(value: string): boolean {
   return /^0x[0-9a-fA-F]{64}$/.test(value.trim());
@@ -37,12 +43,12 @@ export function passwordRuleFlags(value: string) {
 }
 
 export function masterPasswordFromRandomBytes(bytes: Uint8Array): string {
-  const max = 256 - (256 % PASSWORD_ALPHABET.length);
+  const max = 256 - (256 % GENERATED_SECRET_CHARS.length);
   let pool = '';
   for (let i = 0; i < bytes.length; i += 1) {
     const unit = bytes[i];
     if (unit >= max) continue;
-    pool += PASSWORD_ALPHABET[unit % PASSWORD_ALPHABET.length];
+    pool += GENERATED_SECRET_CHARS[unit % GENERATED_SECRET_CHARS.length];
   }
   if (pool.length < 12) throw new Error('entropy');
   const classes = ['A', '7', '#', 'b'];

@@ -259,6 +259,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-29 | Snyk: alfabeto no es password, invite sin redirect abierto, regex acotado, rutas del kit con under_root; HTTP del worker sigue detras de TLS de Render | — |
 | 2026-09-29 | Bunker: purpose EIP-712 por ruta, replay persistido, store atomico, wallet SecureStore-first, lockout en fondos, timelock fundador Reserva | — |
 | 2026-09-29 | GET / del worker responde ok y apunta a /health. Sonar ignora USER root del Dockerfile.notify porque el entrypoint baja a node. Snyk: override brace-expansion; inflight y uuid 7 se ignoran por Expo 54. | — |
 | 2026-09-29 | Worker y KYC listos para Sumsub por env en Render. El panel de admins no guarda esas claves. Attester HSM sigue pendiente del proveedor. | — |

@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] La frase no se sustituye: cambiarla seria otra cuenta. Recuperar en otro telefono usa las mismas 24 palabras.
 
 ## Cambios realizados
+- [2026-09-29] Limpieza Snyk Code: invite acotado, regex acotado, rutas del kit con under_root. Render en vivo.
 - [2026-09-29] Endurecimiento bunker: worker purpose/replay/store, wallet SecureStore-first, lockout fondos, applyFundador 72h
 - [2026-09-29] KYC Sumsub queda detras de variables de Render. Sin claves, la app sigue con la declaracion. HSM no es un interruptor universal.
 - [2026-09-29] Hardening defensivo: recovery sin wrap en el worker, autofund con firma EIP-712, approve de deuda restante, attester sin llave de owner en host publico, Reserva solo attester y timelock 72h
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] PDF MobSF APK 1.0.2 61/100 A: HIGH es huella androidx.biometric; native canary JNA/NDK; sin Twilio ni claves. Release quita esquema exp+ de Metro. Sin regenerar APK ni mainnet.
 - [2026-09-16] APK release 1.0.2 arm-only firmado v3 SHA-256 CN=Quatrivium Finance copiado a Desktop Quatrivium-Finance-MobSF.apk (67.20 MB, SHA256 fea201d5...). Incluye auditoria final. Sin mainnet.
 - [2026-09-16] Auditoria final: Real no hereda credito de Demo, Personas no se queda en spinner, worker GCM recargado. Hardhat 149. Sin mainnet ni APK.
-- [2026-09-16] Auditoria en vivo USB: no se reinstalo el APK (dev client 1.0.0). Metro cargo el JS actual. Real=Pronto sin credito falso; Demo pide; Donar solo Real con boton apagado; pool Demo solo lectura 2000.70; gemas Granate no Bronce; Ajustes sin fila de contrasena.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-29] Cambio: Endurecimiento bunker: worker purpose/replay/store, wallet SecureStore-first, lockout fondos, applyFundador 72h
+[2026-09-29] Cambio: Limpieza Snyk Code: invite acotado, regex acotado, rutas del kit con under_root. Render en vivo.

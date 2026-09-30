@@ -26,6 +26,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from qa_safe_io import under_root
+
 # Forzar UTF-8 en Windows
 if sys.platform == "win32":
     try:
@@ -284,8 +286,11 @@ def _resolver_modulo_local(modulo: str, desde_archivo: Path, raiz: Path) -> Opti
     # Convertir puntos a separadores de ruta
     ruta_rel = modulo.replace(".", os.sep) + ".py"
     # Buscar desde la raíz del proyecto
-    candidato_raiz = raiz / ruta_rel
-    if candidato_raiz.exists():
+    try:
+        candidato_raiz = under_root(raiz, ruta_rel.replace("\\", "/"))
+    except ValueError:
+        candidato_raiz = None
+    if candidato_raiz and candidato_raiz.exists():
         return candidato_raiz
     # Buscar desde el directorio del archivo origen
     candidato_local = desde_archivo.parent / ruta_rel

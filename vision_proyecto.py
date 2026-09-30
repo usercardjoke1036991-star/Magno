@@ -23,6 +23,8 @@ from datetime import datetime
 from dataclasses import dataclass, field
 from typing import Optional
 
+from qa_safe_io import under_root
+
 # Forzar UTF-8 en Windows para evitar UnicodeEncodeError en terminales cp1252
 # Usa reconfigure() — no reemplaza sys.stdout (seguro bajo pytest/CI)
 if sys.platform == "win32":
@@ -154,7 +156,7 @@ def detectar_tipo_proyecto(directorio: str) -> str:
         return "mql5"
 
     # Node / React / Next
-    pkg = d / "package.json"
+    pkg = under_root(d, "package.json")
     if pkg.exists():
         try:
             data = json.loads(pkg.read_text(encoding="utf-8"))
@@ -174,7 +176,7 @@ def detectar_tipo_proyecto(directorio: str) -> str:
     # Python — detectar sub-tipo
     py_indicators = ["requirements.txt", "pyproject.toml", "setup.py"]
     if any((d / f).exists() for f in py_indicators) or list(d.glob("*.py")):
-        req_file = d / "requirements.txt"
+        req_file = under_root(d, "requirements.txt")
         if req_file.exists():
             try:
                 req = req_file.read_text(encoding="utf-8", errors="ignore").lower()

@@ -71,6 +71,21 @@ describe('defensive security hardening', function () {
     expect(reserva).to.include('pendienteFundador');
   });
 
+  it('clears Snyk mediums that are not real passwords or open redirects', function () {
+    const policy = fs.readFileSync(path.join(root, 'utils', 'passwordPolicy.ts'), 'utf8');
+    const landing = fs.readFileSync(path.join(root, 'web', 'index.html'), 'utf8');
+    const worker = fs.readFileSync(path.join(root, 'scripts', 'notify-worker.mjs'), 'utf8');
+    const aprender = fs.readFileSync(path.join(root, 'aprender_error.py'), 'utf8');
+    const safeIo = fs.readFileSync(path.join(root, 'qa_safe_io.py'), 'utf8');
+    expect(policy).to.include('GENERATED_SECRET_CHARS');
+    expect(policy).to.not.include('PASSWORD_ALPHABET');
+    expect(landing).to.include('encodeURIComponent(code)');
+    expect(landing).to.not.include('+ location.search');
+    expect(worker).to.include('javascript:S5332');
+    expect(aprender).to.include('len(patron) > 120');
+    expect(safeIo).to.include('def under_root');
+  });
+
   it('leaves Sumsub ready behind Render env and does not put secrets in the admin panel', function () {
     const worker = fs.readFileSync(path.join(root, 'scripts', 'notify-worker.mjs'), 'utf8');
     const panel = fs.readFileSync(path.join(root, 'components', 'AdminPanel.tsx'), 'utf8');

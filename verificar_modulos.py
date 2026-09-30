@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from qa_safe_io import resto_bullet_estado
+from qa_safe_io import resto_bullet_estado, under_root
 
 # Forzar UTF-8 en Windows (ERR-003: reconfigure + hasattr, no TextIOWrapper)
 if sys.platform == "win32":
@@ -323,7 +323,7 @@ def detectar_modulos_documentados_ausentes(
     """Módulos listados en CONTEXTO.md / VISION.md que no existen en disco."""
     hallazgos: list[dict] = []
     for doc_name in ("CONTEXTO.md", "VISION.md"):
-        ruta = raiz / doc_name
+        ruta = under_root(raiz, doc_name)
         if not ruta.is_file():
             continue
         texto = _leer(ruta)
