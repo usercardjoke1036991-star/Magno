@@ -4,6 +4,7 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
 
 ## Decisiones
+- [2026-09-30] El Dockerfile del worker declara USER node para Sonar. Persistencia /data se recupera si el runtime arranca como root; si no, fallback a /app/data.
 - [2026-09-30] Las politicas informan y no sustituyen licencia ni abogado. Reserva no menciona al fundador en la UI.
 - [2026-09-29] La recuperacion por correo solo cambia la contraseña en el mismo telefono. En uno nuevo se usa la frase. El wrap no sale del dispositivo.
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
@@ -33,9 +34,9 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] Politicas de privacidad y terminos se aceptan una vez tras el idioma y quedan en Ajustes para releer. El boton se activa al final del texto.
 - [2026-09-14] La wrap de sesion nunca vive en AsyncStorage. Apagar Desbloquear sigue abriendo sin PIN; la llave queda solo en SecureStore del aparato.
 - [2026-09-14] Los 12 rangos se muestran con nombres de gema. No volver a Bronce, Oro ni Platino.
-- [2026-09-14] El escaneo KYC es foto local del documento. No hay OCR. La declaracion on-chain sigue siendo declararKyc().
 
 ## Cambios realizados
+- [2026-09-30] Sonar docker:S6471: USER node + entrypoint root-aware. Snyk ReDoS Expo 54 sin upgrade. Hardhat 198/198.
 - [2026-09-30] Reserva sin texto de fundador y countdown en el boton. Politicas ampliadas version 2026-09-30.1.
 - [2026-09-29] Limpieza Snyk Code: invite acotado, regex acotado, rutas del kit con under_root. Render en vivo.
 - [2026-09-29] Endurecimiento bunker: worker purpose/replay/store, wallet SecureStore-first, lockout fondos, applyFundador 72h
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] 1 USDT primero para identidad. Rankings: 5 tableros (referidos, prestamos, fama, nivel, general), historial de referidos aparte, marcos de gema + medalla de podio, 1o arriba y mas grande.
 - [2026-09-16] Correo y OTP usan el worker (HTTPS o Metro 8787). KYC y telefono se completan en Demo con linea activa; Real on-chain espera mainnet.
 - [2026-09-16] PDF MobSF APK 1.0.2 61/100 A: HIGH es huella androidx.biometric; native canary JNA/NDK; sin Twilio ni claves. Release quita esquema exp+ de Metro. Sin regenerar APK ni mainnet.
-- [2026-09-16] APK release 1.0.2 arm-only firmado v3 SHA-256 CN=Quatrivium Finance copiado a Desktop Quatrivium-Finance-MobSF.apk (67.20 MB, SHA256 fea201d5...). Incluye auditoria final. Sin mainnet.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-30] Decisión: Las politicas informan y no sustituyen licencia ni abogado. Reserva no menciona al fundador en la UI.
+[2026-09-30] Decisión: El Dockerfile del worker declara USER node para Sonar. Persistencia /data se recupera si el runtime arranca como root; si no, fallback a /app/data.

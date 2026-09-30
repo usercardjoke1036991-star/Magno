@@ -1,5 +1,6 @@
 # Política Snyk de Quatrivium Finance. No pone secretos.
-# Expo 54 / Metro 0.83: no subir a Expo 55 ni image-size 2.x (decisión 2026-09-18).
+# Expo 54 / Metro 0.83: no subir a Expo 55 / RN 0.84-0.85 ni image-size 2.x (decisión 2026-09-18).
+# La UI de Snyk agrupa el ReDoS transitivo bajo expo/react-native/snarkjs; el CLI con esta política da 0.
 version: v1.25.0
 ignore:
   SNYK-JS-IMAGESIZE-9510753:

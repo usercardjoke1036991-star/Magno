@@ -9,7 +9,7 @@
  */
 // TLS lo termina Render/Caddy. El proceso solo escucha HTTP en el puerto privado.
 import { createServer } from 'node:http'; // NOSONAR javascript:S5332 -- edge TLS, not a public cleartext API
-import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, chmodSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, chmodSync, unlinkSync, accessSync, constants as fsConstants } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { randomBytes, createCipheriv, createDecipheriv, createHash, createHmac, timingSafeEqual } from 'node:crypto';
@@ -31,9 +31,33 @@ const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = createRequire(import.
 const { sendTextbeltSms, isTextbeltConfigured } = createRequire(import.meta.url)('./textbeltSms.cjs');
 
 const PORT = Number(process.env.PORT || process.env.NOTIFY_PORT || 8787);
-const DATA_FILE = process.env.NOTIFY_DATA_FILE
-  ? resolve(process.env.NOTIFY_DATA_FILE)
-  : resolve(process.cwd(), '.notify-data.json');
+const probeWritableDir = (dir) => {
+  try {
+    mkdirSync(dir, { recursive: true });
+    accessSync(dir, fsConstants.W_OK);
+    const probe = resolve(dir, `.w-${process.pid}`);
+    writeFileSync(probe, 'ok');
+    unlinkSync(probe);
+    return true;
+  } catch {
+    return false;
+  }
+};
+const resolveDataFile = () => {
+  const requested = process.env.NOTIFY_DATA_FILE
+    ? resolve(process.env.NOTIFY_DATA_FILE)
+    : resolve(process.cwd(), '.notify-data.json');
+  if (probeWritableDir(dirname(requested))) return requested;
+  const fallback = resolve(process.cwd(), 'data', '.notify-data.json');
+  if (fallback !== requested && probeWritableDir(dirname(fallback))) {
+    console.error(`NOTIFY_DATA_FILE no escribible (${requested}); persistencia en ${fallback}`);
+    return fallback;
+  }
+  console.error(`No se puede escribir el almacén en ${requested}`);
+  process.exit(1);
+  return requested;
+};
+const DATA_FILE = resolveDataFile();
 const CHAIN_ID = Number(process.env.EXPO_PUBLIC_CHAIN_ID || 97);
 const isMainnet = CHAIN_ID === BSC_MAINNET.chainId;
 const CONTRACT = (() => {
@@ -1459,6 +1483,7 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       reserva: Boolean(RESERVA),
       creditPaused: store.reservaGuard?.creditPaused ?? null,
       reservaPaused: store.reservaGuard?.reservaPaused ?? null,
+      dataWritable: true,
     });
     return;
   }

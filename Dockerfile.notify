@@ -12,8 +12,8 @@ ENV NOTIFY_TRUST_PROXY=1
 ENV NOTIFY_DATA_FILE=/data/.notify-data.json
 # Render inyecta PORT (suele ser 10000). En local/Fly queda 8787 si no hay PORT.
 EXPOSE 8787 10000
-# El proceso corre como node: el entrypoint hace chown de /data y su-exec node.
-# NOSONAR docker:S6471
-USER root
+# docker:S6471: el usuario declarado es node. Si el runtime arranca como root
+# (volumen /data de Render/Hetzner), el entrypoint hace chown y su-exec node.
+USER node
 ENTRYPOINT ["/app/scripts/notify-entrypoint.sh"]
 CMD ["node", "scripts/notify-worker.mjs"]

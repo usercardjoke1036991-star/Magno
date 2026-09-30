@@ -10,6 +10,7 @@ describe('Hetzner notify worker pack', function () {
     const caddy = fs.readFileSync(path.join(root, 'deploy', 'hetzner', 'Caddyfile'), 'utf8');
     const deploy = fs.readFileSync(path.join(root, 'scripts', 'deploy-hetzner.mjs'), 'utf8');
     expect(compose).to.include('NOTIFY_TRUST_PROXY');
+    expect(compose).to.include('user: "0:0"');
     expect(compose).to.include('expose:');
     expect(compose).to.not.match(/8787:8787/);
     expect(compose).to.match(/["']80:80["']/);

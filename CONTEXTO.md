@@ -157,7 +157,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 ## Lo que NO es un bug (deuda de diseño, no hay que “arreglarlo”)
 - **Lint Foundry (`tx.origin`, `block.timestamp`, `ecrecover` maleable, `feeCollector.call`)**: diseño conocido, igual que Slither. No son pérdida de fondos. `pagarPrestamo` cobra a `msg.sender`, no a un `from` arbitrario.
 - **Aderyn H-1 (CEI) y Lows L-1…L-13**: el High no drena el pool: `marcarMorosoSiVencido` y `destruirCuenta` ya tienen `nonReentrant`; USDT no tiene callbacks; destruir además exige EOA. Lows = gas, literales 10000 bps, `pragma ^0.8.24`, PUSH0 (BSC Cancun), `require` sin string (EIP-170), `ecrecover` en `vincularIdentidad` (el hash incluye `msg.sender`+chain+contrato; maleabilidad no cambia el attester), constante `REPUTACION_SANA` no referenciada (el bytecode no la incluye). No recortar el núcleo.
-- **Mythril SWC-101 / Semgrep INFO / Trivy lockfile**: Solidity 0.8.24 no envuelve enteros; Semgrep INFO es gas (EIP-170); las CVE del lockfile viven en Metro/snarkjs/xcode, no en el worker ni en el crédito. `npm audit --force` instalaría Expo 57. Docker USER root se mantiene porque Render monta `/data`.
+- **Mythril SWC-101 / Semgrep INFO / Trivy lockfile**: Solidity 0.8.24 no envuelve enteros; Semgrep INFO es gas (EIP-170); las CVE del lockfile viven en Metro/snarkjs/xcode, no en el worker ni en el crédito. `npm audit --force` instalaría Expo 57. Docker declara `USER node` (Sonar docker:S6471). Si el host arranca como root, el entrypoint hace chown de `/data` y `su-exec node`; si `/data` no es escribible el worker usa `/app/data`.
 - **ZK real en React Native**: `snarkjs` no es bundleable; el registro es `registrarHumanoConPadre()`. Decisión consciente.
 - **Pool no se retira**: no hay circuit breaker de retiros al 50% — el pool está cerrado a propósito (`revert("pool locked")`). La pausa de emergencia es el freno.
 - **`eas.json` sin dirección mainnet**: correcto hasta el deploy. No rellenar con un placeholder.
@@ -259,6 +259,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-30 | Dockerfile.notify declara USER node; el entrypoint solo hace chown/su-exec si arranca como root. Worker prueba /data y cae a /app/data. Contratos y app sin hallazgo nuevo. ReDoS Expo 54 se ignora, no se sube a 55. | — |
 | 2026-09-30 | Reserva: texto solo de funcionamiento, sin fundador, cuenta atras en Desbloquear. Politicas 2026-09-30.1 con Reserva, riesgos y ley local. No se afirma legalidad universal ni Play 100. | — |
 | 2026-09-29 | Snyk: alfabeto no es password, invite sin redirect abierto, regex acotado, rutas del kit con under_root; HTTP del worker sigue detras de TLS de Render | — |
 | 2026-09-29 | Bunker: purpose EIP-712 por ruta, replay persistido, store atomico, wallet SecureStore-first, lockout en fondos, timelock fundador Reserva | — |
