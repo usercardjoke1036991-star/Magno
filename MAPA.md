@@ -406,7 +406,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/contract-abi.test.js` — módulo JS/TS
 - `test/cuotas.test.js` — módulo JS/TS
 - `test/cyber-hardening.test.js` — módulo JS/TS
-  - Funciones/clases: confirmEmailOtp, verifyEmailOtp, loadReferralChildren, ensureAppWallet, wipeAppWallet
+  - Funciones/clases: loadWrapFromBiometric, clearBiometricWrap, confirmEmailOtp, verifyEmailOtp, loadReferralChildren, ensureAppWallet, wipeAppWallet
 - `test/demo-identity.test.js` — módulo JS/TS
 - `test/destroy.test.js` — módulo JS/TS
 - `test/fama-canje.test.js` — módulo JS/TS
@@ -442,7 +442,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `types/zkTypes.ts` — módulo JS/TS
   - Funciones/clases: asFieldElement, ZKTypeValidator, ZK_SECURITY_CONSTANTS
 - `utils/accountEntry.ts` — módulo JS/TS
-  - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, accountOnPhoneFromProbes, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase
+  - Funciones/clases: canSubmitCreateSecrets, canSubmitDeviceCredentials, canSubmitCreateCode, canSubmitSignIn, signInEmailMatches, signInEmailAllowed, welcomeShowsCreate, welcomeShowsSignIn, accountOnPhoneFromProbes, nextEntryScreen, welcomeActions, restoreMatchesDevice, walletRunsOnThisDevice, restoreAllowedOnThisDevice, orderUnlockMethods, unlockPromptMethods, nextUnlockAfterBiometricFail, appOffersDestroyAccount, networkChangeCreatesAccount, liveSecondCreditAllowed, signInUsernameMatches, signInUsernameAllowed, sessionOwnedHere, canSubmitReinstall, canSubmitRestorePhrase
 - `utils/adminAttester.ts` — módulo JS/TS
   - Funciones/clases: looksLikePrivateKey, attesterProposalError
 - `utils/adminProposal.ts` — módulo JS/TS

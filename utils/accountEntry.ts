@@ -114,6 +114,20 @@ export function unlockPromptMethods(
   return primaryOnly ? [ordered[0]] : ordered;
 }
 
+/** Si el cofre de huella no abre, no se desbloquea: PIN, luego contraseña. */
+export function nextUnlockAfterBiometricFail(
+  choices: readonly string[],
+  flags: { pinSet: boolean; passwordSet: boolean; authOn: boolean }
+): 'pin' | 'password' | 'authenticator' | null {
+  const allowed = new Set(choices.filter(Boolean));
+  if (flags.pinSet && (allowed.has('pin') || !allowed.size)) return 'pin';
+  if (flags.passwordSet && (allowed.has('password') || !allowed.size)) return 'password';
+  if (flags.authOn && allowed.has('authenticator')) return 'authenticator';
+  if (flags.pinSet) return 'pin';
+  if (flags.passwordSet) return 'password';
+  return null;
+}
+
 /** La app no ofrece destruir ni generar otra cuenta. */
 export function appOffersDestroyAccount(): boolean {
   return false;

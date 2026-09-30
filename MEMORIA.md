@@ -4,6 +4,8 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
 
 ## Decisiones
+- [2026-09-30] Huella en Xiaomi: si requireAuthentication falla, no desbloquear. Pedir PIN o contraseña.
+- [2026-09-30] El canje lee planPago del nucleo. No se anade estaVencido() a Credit: solo quedan 40 bytes de EIP-170.
 - [2026-09-30] En Cuenta Real, si SecureStore no guarda el sobre de la billetera, la app para. No se usa AsyncStorage. Demo sigue con respaldo. Cuentas nuevas AES-256-GCM; v1 se abre y se reescribe cuando el cofre responde.
 - [2026-09-30] Si Credit no cabe en EIP-170 se crea un hermano. No se borra cobrarBonoHito, _assertPeg ni _pagarBonosRed.
 - [2026-09-30] El Dockerfile del worker declara USER node para Sonar. Persistencia /data se recupera si el runtime arranca como root; si no, fallback a /app/data.
@@ -32,10 +34,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Analisis MobSF privado en localhost; no usar la instancia publica para que el APK no circule.
 - [2026-09-14] OTP de telefono usa Twilio SMS. El worker publico corre en Fly (min 1 maquina, sin ngrok). Hasta mainnet el worker Demo acepta firmas de Cuenta Real para correo/OTP.
 - [2026-09-14] La frase BIP-39 es universal entre telefonos (misma direccion). Wrap, contrasena, correo, foto KYC y hash de dispositivo no viajan. Recuperar pide volver a vincular telefono. ensureAppWallet nunca inventa otra cuenta.
-- [2026-09-14] Las politicas al usuario explican como trabaja la app, con que esta de acuerdo y que beneficios tiene. No incluyen detalle interno de proveedores, Demo ni codigo.
-- [2026-09-14] Politicas de privacidad y terminos se aceptan una vez tras el idioma y quedan en Ajustes para releer. El boton se activa al final del texto.
 
 ## Cambios realizados
+- [2026-09-30] Fail-closed contraseña Real y huella solo Keystore; si falla, PIN o clave.
+- [2026-09-30] Canje alineado a _estaVencido via planPago; Foundry constructor 7 args con FamaCaja. Credit no crece.
 - [2026-09-30] Fail-closed SecureStore en Cuenta Real y sobre AES-GCM v2 con lectura dual v1.
 - [2026-09-30] Cerrado drenaje de fama: donar del fundador bloqueado; canje rechaza mora y prestamo vencido; caja exige balance on-chain.
 - [2026-09-30] App: sala Canje, ABI famaHermano, ProtocolCaps.canCanjearFama, canjearFama en el hermano. Demo legado 0xD2d2 se detecta y avisa.
@@ -84,12 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Blueprint render.yaml, mkdir del almacén, health sin CORS, dockerignore con !scripts/, test Render.
 - [2026-09-16] Pack Hetzner: docker-compose + Caddy + npm run notify:hetzner. El fundador crea el VPS y apunta notify.quatriviumcredit.app.
 - [2026-09-16] Referido opcional solo en crear cuenta; se bloquea para siempre; activar credito ya no pide codigo.
-- [2026-09-16] Auditoria profunda: rankings con nombre/foto por division completa y la cuenta visible aunque el escaneo recorte. Hardhat 160. Premio estimado. Sin mainnet.
-- [2026-09-16] Rankings con nombre y foto, 6 tableros, divisiones de 100 y premio mensual del pool. L1000 cicla el bono. Nucleo Credit no se recorto.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-30] Decisión: En Cuenta Real, si SecureStore no guarda el sobre de la billetera, la app para. No se usa AsyncStorage. Demo sigue con respaldo. Cuentas nuevas AES-256-GCM; v1 se abre y se reescribe cuando el cofre responde.
+[2026-09-30] Decisión: Huella en Xiaomi: si requireAuthentication falla, no desbloquear. Pedir PIN o contraseña.

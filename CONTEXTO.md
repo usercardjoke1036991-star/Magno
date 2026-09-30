@@ -132,8 +132,9 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 ## Lo que está funcionando ✅
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
 - Sala **Reserva**: hermano `QuatriviumReserva.sol` (Hardhat 12/12). Visible desde el inicio, usable en nivel 10. Bote solo admin (no Donar ni pool). Extra de comisiones con corte del fundador. Demo práctica local; Real exige identidad. Sin contrato mainnet.
-- 17 suites Hardhat (164 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings y lock de referido…
-- Foundry 1.8.3 en WSL (`npm run test:forge`): EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24555 B (margen 21). Live Demo sigue 24457 B hasta el redespliegue.
+- Hermano **FamaCaja**: `canjearFama` usa el mismo criterio que Credit `_estaVencido` (cuota o vencimiento final) leyendo `planPago`; no se añade wrapper al núcleo.
+- 17 suites Hardhat (210 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings, lock de referido y canje de fama (incluye cuota vencida antes del plazo final)…
+- Foundry 1.8.3 en WSL (`npm run test:forge`): despliega FamaCaja + Credit (7 args). EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24536 B (margen 40). Live Demo sigue 24457 B hasta el redespliegue.
 - Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
 - i18n: 17 idiomas, 1040 claves
@@ -260,6 +261,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-09-30 | En Cuenta Real la contraseña no cae a AsyncStorage. Si el cofre de huella no abre, se pide PIN o contraseña; no se abre con wrap suelto. | — |
+| 2026-09-30 | Canje de fama usa el mismo vencido que Credit (cuota o plazo final). Foundry despliega FamaCaja y el constructor de 7 argumentos. Nucleo Credit intacto (EIP-170). Hardhat 210/210. Foundry 11/11. | — |
 | 2026-09-30 | Cuenta Real ya no guarda el sobre de la billetera en AsyncStorage si falla SecureStore. Cuentas nuevas se cifran con AES-256-GCM; las v1 se siguen abriendo. | — |
 | 2026-09-30 | Auditoria canje: el fundador ya no puede donarse fama; mora y vencido no canjean; sacarCaja exige saldo real. Credit 24536/24576. | — |
 | 2026-09-30 | Sala Canje cableada a QuatriviumFamaCaja (hermano). Credit no se recorta: 250 fama=1 USDT del pool; Reserva lock documentado en la misma sala. | — |

@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {QuatriviumCredit} from "../contracts/QuatriviumCredit.sol";
+import {QuatriviumFamaCaja} from "../contracts/QuatriviumFamaCaja.sol";
 import {QuatriviumLeveling} from "../contracts/QuatriviumLeveling.sol";
 import {ERC20Mock} from "../contracts/mocks/ERC20Mock.sol";
 import {MockV3Aggregator} from "../contracts/mocks/MockV3Aggregator.sol";
@@ -27,8 +28,22 @@ contract QuatriviumCreditForgeTest is Test {
         feed = new MockV3Aggregator(8, 100000000);
         address[] memory admins = new address[](1);
         admins[0] = owner;
-        vm.prank(owner);
-        credit = new QuatriviumCredit(address(token), address(feed), payable(owner), 500, admins, 1);
+        uint64 nonce = vm.getNonce(owner);
+        address predictedCredit = vm.computeCreateAddress(owner, nonce + 1);
+        vm.startPrank(owner);
+        QuatriviumFamaCaja fama = new QuatriviumFamaCaja(address(token), predictedCredit);
+        credit = new QuatriviumCredit(
+            address(token),
+            address(feed),
+            payable(owner),
+            500,
+            admins,
+            1,
+            address(fama)
+        );
+        vm.stopPrank();
+        require(address(credit) == predictedCredit, "credit pred");
+        require(credit.famaHermano() == address(fama), "fama hermano");
 
         token.mint(owner, 10_000 ether);
         vm.startPrank(owner, owner);

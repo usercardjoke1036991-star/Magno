@@ -22,6 +22,11 @@ interface ICreditCaja {
             address monedaActivo,
             uint256 tasaAplicadaBP
         );
+
+    function planPago(address)
+        external
+        view
+        returns (uint128 pagado, uint64 venceCuota, uint8 totales, uint8 pagadas, bool enPlazo);
 }
 
 /**
@@ -88,6 +93,12 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         ICreditCaja nucleo = ICreditCaja(credit);
         if (nucleo.paused()) revert CreditoPausado();
         (, uint256 montoActivo, uint256 vencimiento, bool enMora,,) = nucleo.usuarios(msg.sender);
+        (, uint64 venceCuota,,,) = nucleo.planPago(msg.sender);
+        bool vencido = montoActivo > 0
+            && (
+                (vencimiento > 0 && block.timestamp > vencimiento)
+                    || (venceCuota > 0 && block.timestamp > venceCuota)
+            );
         if (
             !nucleo.humanosVerificados(msg.sender)
                 || nucleo.blacklist(msg.sender)
@@ -95,7 +106,7 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
                 || nucleo.cuentaDestruida(msg.sender)
                 || nucleo.esMoroso(msg.sender)
                 || enMora
-                || (montoActivo > 0 && vencimiento != 0 && block.timestamp > vencimiento)
+                || vencido
         ) revert NoHumano();
         if (fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT != 0) revert FamaInvalida();
         if (fama > famaDisponible(msg.sender)) revert SinFama();

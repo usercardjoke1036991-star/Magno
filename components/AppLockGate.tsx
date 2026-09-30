@@ -66,6 +66,7 @@ import {
   orderUnlockMethods,
   signInUsernameAllowed,
   unlockPromptMethods,
+  nextUnlockAfterBiometricFail,
   restoreMatchesDevice,
   welcomeActions,
   welcomeShowsCreate,
@@ -539,6 +540,19 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       await passQueuedMethod(askingSignIn);
       return;
     }
+    const next = nextUnlockAfterBiometricFail(unlockChoices, {
+      pinSet: hasPin,
+      passwordSet: hasPassword,
+      authOn: hasAuth,
+    });
+    if (next) {
+      await applyQueuedMethod(next, {
+        passwordSet: hasPassword,
+        pinSet: hasPin,
+        authOn: hasAuth,
+        bioEnabled: bioOn,
+      });
+    }
     setError(t('securityAccessKeyFailed'));
   };
 
@@ -665,7 +679,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
           ? t('lockPasswordPrivateKey')
           : code === 'device-bound'
             ? t('errDeviceBound')
-            : code === 'wallet-persist'
+            : code === 'wallet-persist' || code === 'password-persist'
               ? t('errWalletPersist')
               : code === 'wallet-other-app' || code.includes('wallet-other-app')
                 ? t('errWalletOtherApp')
@@ -787,7 +801,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
           ? t('seedInvalid')
           : code === 'device-bound'
             ? t('errDeviceBound')
-            : code === 'wallet-persist'
+            : code === 'wallet-persist' || code === 'password-persist'
               ? t('errWalletPersist')
               : code === 'wallet-other-app' || code.includes('wallet-other-app')
                 ? t('errWalletOtherApp')

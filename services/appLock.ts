@@ -14,6 +14,8 @@ import {
 } from '../utils/passwordPolicy';
 import { deriveWrapKeyAsync, isSealedBlob, openSecret, sealSecret, timingSafeEqualHex } from '../utils/secretBox';
 import { APP_DISPLAY_NAME } from '../constants/brand';
+import { getProductMode } from '../constants/rpcConfig';
+import { allowWalletAsyncFallback } from '../utils/walletVaultPolicy';
 import { clearWalletSession, getWalletWrapKey, setWalletWrapKey } from './walletSession';
 import { sha256, toUtf8Bytes } from 'ethers';
 import { storeSlot } from '../utils/storeSlot';
@@ -158,6 +160,10 @@ async function probePasswordRecord(
       return parsed;
     }
   }
+  if (!allowWalletAsyncFallback(getProductMode())) {
+    void AsyncStorage.removeItem(PASSWORD_FALLBACK).catch(() => {});
+    return secureRaw === STORE_UNKNOWN ? STORE_UNKNOWN : null;
+  }
   try {
     const fallback = parsePasswordRecord(await AsyncStorage.getItem(PASSWORD_FALLBACK));
     if (fallback) return fallback;
@@ -265,15 +271,9 @@ export async function loadWrapFromBiometric(): Promise<string | null> {
     const withAuth = await SecureStore.getItemAsync(WRAP_STORE, BIO_WRAP_OPTIONS);
     if (withAuth) return applyWrap(withAuth);
   } catch {
-    // Algunos OEM (MIUI) rechazan la lectura con requireAuthentication.
+    // MIUI u otro OEM: el cofre con huella no respondió. No abrir con wrap suelto.
   }
-  const ok = await authenticateBiometric();
-  if (!ok) return null;
-  try {
-    return applyWrap(await SecureStore.getItemAsync(WRAP_STORE, OPTIONS));
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 export async function clearBiometricWrap(): Promise<void> {
@@ -489,16 +489,6 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
   const hash = await hashSecret(password, salt, PIN_ROUNDS);
   const record: PasswordRecord = { v: 1, salt, hash, rounds: PIN_ROUNDS };
   const nextWrap = await deriveWrapKeyAsync(password, salt, PIN_ROUNDS);
-  const previousWrap = getWalletWrapKey();
-  if (previousWrap) {
-    const { rewrapWalletWithNewKey } = await import('./appWallet');
-    await rewrapWalletWithNewKey(async () => {
-      setWalletWrapKey(nextWrap);
-      return nextWrap;
-    });
-  } else {
-    setWalletWrapKey(nextWrap);
-  }
   const serialized = JSON.stringify(record);
   const stored = await withTimeout(
     SecureStore.setItemAsync(PASSWORD_KEY, serialized, OPTIONS)
@@ -509,8 +499,24 @@ export async function setPassword(password: string, conveniencePin?: string): Pr
   );
   if (stored) {
     await AsyncStorage.removeItem(PASSWORD_FALLBACK).catch(() => {});
+  } else if (allowWalletAsyncFallback(getProductMode())) {
+    try {
+      await AsyncStorage.setItem(PASSWORD_FALLBACK, serialized);
+    } catch {
+      throw new Error('password-persist');
+    }
   } else {
-    await AsyncStorage.setItem(PASSWORD_FALLBACK, serialized).catch(() => {});
+    throw new Error('password-persist');
+  }
+  const previousWrap = getWalletWrapKey();
+  if (previousWrap) {
+    const { rewrapWalletWithNewKey } = await import('./appWallet');
+    await rewrapWalletWithNewKey(async () => {
+      setWalletWrapKey(nextWrap);
+      return nextWrap;
+    });
+  } else {
+    setWalletWrapKey(nextWrap);
   }
   if (conveniencePin) {
     await persistPinWrap(conveniencePin);

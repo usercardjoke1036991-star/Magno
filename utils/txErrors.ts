@@ -33,6 +33,7 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['device taken', 'errDeviceTaken'],
   ['device-bound', 'errDeviceBound'],
   ['wallet-persist', 'errWalletPersist'],
+  ['password-persist', 'errWalletPersist'],
   ['wallet-other-app', 'errWalletOtherApp'],
   ['device-mismatch', 'seedNeedDevice'],
   ['already bound', 'errAlreadyBound'],

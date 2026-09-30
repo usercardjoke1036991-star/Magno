@@ -4,10 +4,23 @@ const {
   deployProtocol,
   seedPool,
   registerAndFund,
+  proposeAndExecute,
   assertNavInvariant,
   expectAmt,
   drainToken,
 } = require('./helpers.cjs');
+
+async function advanceCooldown() {
+  await ethers.provider.send('evm_increaseTime', [48 * 60 * 60]);
+  await ethers.provider.send('evm_mine');
+}
+
+async function borrowAndPay(contract, user, tokenAddr) {
+  await advanceCooldown();
+  await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+  const debt = await contract.obtenerDeuda(user.address);
+  await contract.connect(user).pagarPrestamo(tokenAddr, debt.total);
+}
 
 describe('QuatriviumFamaCaja - fama de caja y canje', function () {
   it('exposes the agreed fame and redeem rates', async () => {
@@ -123,5 +136,38 @@ describe('QuatriviumFamaCaja - fama de caja y canje', function () {
     await contract.marcarMorosoSiVencido(user.address);
     expect(await contract.esMoroso(user.address)).to.equal(true);
     await expect(fama.connect(user).canjearFama(250n)).to.be.reverted;
+  });
+
+  it('blocks redeem when an installment is overdue before the final due date', async () => {
+    const { token, contract, fama, owner, user, tokenAddr, contractAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, user, '200');
+    await contract.connect(user).donar(tokenAddr, ethers.parseUnits('3', 18));
+
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const first = await contract.obtenerDeuda(user.address);
+    await contract.connect(user).pagarPrestamo(tokenAddr, first.total);
+    await borrowAndPay(contract, user, tokenAddr);
+    await borrowAndPay(contract, user, tokenAddr);
+
+    await proposeAndExecute(contract, owner, 'setNivel', [
+      2,
+      ethers.parseUnits('50', 18),
+      35 * 24 * 60 * 60,
+      1400,
+    ]);
+
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const plan = await contract.planPago(user.address);
+    const info = await contract.usuarios(user.address);
+    expect(plan.totales).to.equal(2);
+    expect(plan.venceCuota).to.be.lt(info.vencimiento);
+
+    await ethers.provider.send('evm_setNextBlockTimestamp', [Number(plan.venceCuota) + 10]);
+    await ethers.provider.send('evm_mine');
+    const now = (await ethers.provider.getBlock('latest')).timestamp;
+    expect(now).to.be.lt(Number(info.vencimiento));
+    await expect(fama.connect(user).canjearFama(250n)).to.be.reverted;
+    await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 });

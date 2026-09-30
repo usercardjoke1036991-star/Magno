@@ -139,9 +139,27 @@ describe('cyber hardening — PIN and secret box', function () {
   });
 
   it('keeps AsyncStorage wallet fallback only on Demo', function () {
-    const allowWalletAsyncFallback = (productMode) => productMode !== 'live';
-    expect(allowWalletAsyncFallback('live')).to.equal(false);
-    expect(allowWalletAsyncFallback('demo')).to.equal(true);
+    const fs = require('fs');
+    const path = require('path');
+    const policy = fs.readFileSync(path.join(__dirname, '..', 'utils', 'walletVaultPolicy.ts'), 'utf8');
+    expect(policy).to.include("productMode !== 'live'");
+    const lock = fs.readFileSync(path.join(__dirname, '..', 'services', 'appLock.ts'), 'utf8');
+    expect(lock).to.include('allowWalletAsyncFallback');
+    expect(lock).to.include("throw new Error('password-persist')");
+    const bio = lock.slice(
+      lock.indexOf('export async function loadWrapFromBiometric'),
+      lock.indexOf('export async function clearBiometricWrap')
+    );
+    expect(bio).to.include('BIO_WRAP_OPTIONS');
+    expect(bio).to.not.include('authenticateBiometric');
+    expect(bio).to.not.include('WRAP_STORE, OPTIONS');
+    const entry = fs.readFileSync(path.join(__dirname, '..', 'utils', 'accountEntry.ts'), 'utf8');
+    expect(entry).to.include('nextUnlockAfterBiometricFail');
+    expect(entry).to.include("if (flags.pinSet) return 'pin'");
+    expect(entry).to.include("if (flags.passwordSet) return 'password'");
+    const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(gate).to.include('nextUnlockAfterBiometricFail');
+    expect(gate).to.include("code === 'wallet-persist' || code === 'password-persist'");
   });
 
   it('accepts a user-chosen master password and rejects a private key', function () {
@@ -1933,6 +1951,13 @@ describe('account entry — password, email and session', () => {
     const lock = fs.readFileSync(path.join(__dirname, '..', 'services', 'appLock.ts'), 'utf8');
     expect(lock).to.include('AsyncStorage.removeItem(PASSWORD_FALLBACK)');
     expect(lock).to.match(/if \(stored\) \{[\s\S]*removeItem\(PASSWORD_FALLBACK\)/);
+    expect(lock).to.include('allowWalletAsyncFallback');
+    expect(lock).to.include("throw new Error('password-persist')");
+    const bio = lock.slice(
+      lock.indexOf('export async function loadWrapFromBiometric'),
+      lock.indexOf('export async function clearBiometricWrap')
+    );
+    expect(bio).to.not.include('authenticateBiometric');
   });
 
   it('keeps email and phone on the account until deleted, then blocks credit', function () {
