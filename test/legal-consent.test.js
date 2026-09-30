@@ -42,10 +42,10 @@ describe('legal consent gate', () => {
   });
 
   it('does not accept an old policy version', () => {
-    expect(isCurrentLegalAccepted(parseLegalRecord('{"version":"2020-01-01","at":"2020-01-01T00:00:00.000Z"}'), '2026-09-14.2')).to.equal(false);
-    expect(isCurrentLegalAccepted(parseLegalRecord('{"version":"2026-09-14.2","at":"2026-09-14T12:00:00.000Z"}'), '2026-09-14.2')).to.equal(true);
+    expect(isCurrentLegalAccepted(parseLegalRecord('{"version":"2020-01-01","at":"2020-01-01T00:00:00.000Z"}'), '2026-09-30.1')).to.equal(false);
+    expect(isCurrentLegalAccepted(parseLegalRecord('{"version":"2026-09-30.1","at":"2026-09-30T12:00:00.000Z"}'), '2026-09-30.1')).to.equal(true);
     expect(parseLegalRecord('nope')).to.equal(null);
-    expect(isCurrentLegalAccepted(null, '2026-09-14.2')).to.equal(false);
+    expect(isCurrentLegalAccepted(null, '2026-09-30.1')).to.equal(false);
   });
 
   it('enables accept only after the reader reaches the end', () => {
@@ -79,6 +79,19 @@ describe('legal consent gate', () => {
     }
     expect(copy).to.include('privacy: sections(');
     expect(copy).to.include('title, body');
+    expect(copy).to.include('legalExtrasFor');
     expect(copy).to.not.include('<AppText>{copy.privacy}</AppText>');
+    const extras = fs.readFileSync(path.join(__dirname, '..', 'i18n', 'legalExtras.ts'), 'utf8');
+    expect(extras).to.include('Reserva');
+    expect(extras).to.include('no son una licencia');
+    expect(extras.toLowerCase()).to.not.include('textbelt');
+    expect(extras.toLowerCase()).to.not.include('twilio');
+    const consent = fs.readFileSync(path.join(__dirname, '..', 'utils', 'legalConsent.ts'), 'utf8');
+    expect(consent).to.include("LEGAL_VERSION = '2026-09-30.1'");
+    const reservaUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReservaSection.tsx'), 'utf8');
+    expect(reservaUi).to.include('reservaUnlockWait');
+    expect(reservaUi).to.include('formatCountdownClock');
+    expect(reservaUi).to.not.include('reservaFounderNote');
+    expect(reservaUi).to.not.include('reservaBoostComision');
   });
 });

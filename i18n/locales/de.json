@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "USDT 30 Tage sperren. Bis zu 12 % jährlich geschätzt.",
+  "hubReservaLead": "USDT 30 Tage sperren. Betrag kehrt zurueck. Geschaetzte Rendite, nicht garantiert.",
   "reservaTitle": "Reserve",
-  "reservaLead": "Sperren Sie USDT 30 Tage. Der Betrag kommt zurück. Eine Rendite kommt aus einem eigenen Topf und ist nicht garantiert.",
+  "reservaLead": "Sperren Sie USDT fuer 30 Tage. Danach kehrt der Betrag auf Ihr Konto zurueck. Hat der Reserve-Topf Mittel, kann fuer diese Tage eine geschaetzte Rendite von bis zu 12 Prozent im Jahr hinzukommen. Nicht garantiert. Keine Bank und keine Einlage.",
   "reservaNotBank": "Kein Bankprodukt und keine Festgeldanlage.",
   "reservaLockNote": "30 Tage gesperrt. Danach können Sie entsperren oder verlängern.",
   "reservaCapNote": "Bis zu 12 % jährlich geschätzt. Die Obergrenze gilt für die Sperrzeit.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "Sperren Sie 50 USDT oder mehr, kann ein Extra auf Ihre Netzwerkprovisionen aus dem Topf kommen, solange die Reserve aktiv ist.",
   "reservaFounderNote": "Der Gründer erhält einen Anteil jedes Extras gemäß der Sperrstufe.",
   "hubReservaLeadLocked": "Schon sichtbar. Freischaltung auf Stufe 10.",
-  "reservaNeedLevel": "Die Reserve öffnet auf Stufe 10. Die Vorteile sind schon sichtbar.",
+  "reservaNeedLevel": "Sperren ab Stufe 10.",
   "reservaBoteLabel": "Premientopf",
   "reservaAdminPotTitle": "Reserve-Topf",
   "reservaAdminPotHint": "Nur Admins. Dieses USDT zahlt die Rendite. Weder Spende noch Pool.",
   "reservaAdminPot": "Topf füllen",
   "reservaAdminPotOk": "Reserve-Topf aufgefüllt.",
-  "reservaAdminOnly": "Nur ein Admin-Konto kann den Topf füllen."
+  "reservaAdminOnly": "Nur ein Admin-Konto kann den Topf füllen.",
+  "reservaUnlockWait": "Entsperren · {clock}"
 }

@@ -1,6 +1,6 @@
 import { storeSlot } from './storeSlot';
 
-export const LEGAL_VERSION = '2026-09-14.2';
+export const LEGAL_VERSION = '2026-09-30.1';
 export const LEGAL_STORAGE_KEY = storeSlot(['quatrivium', 'legalAccepted']);
 
 export type LegalRecord = {

@@ -4,7 +4,7 @@ import type { Signer } from 'ethers';
 import { formatUnits } from 'ethers';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { formatDueDate, formatUSD, parsePositiveDecimal } from '../utils/formatters';
+import { formatCountdownClock, formatDueDate, formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { showNotice } from '../utils/appNotice';
 import { RESERVA_MIN_LEVEL } from '../constants/reserva';
 import {
@@ -50,6 +50,7 @@ export function ReservaSection({
   const [acked, setAcked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<ReservaPreview | null>(null);
+  const [nowSec, setNowSec] = useState(() => Math.floor(Date.now() / 1000));
 
   const refresh = useCallback(() => {
     if (!walletAddress) {
@@ -64,6 +65,21 @@ export function ReservaSection({
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  const lockRemain = preview?.activa && preview.unlockAt
+    ? Math.max(0, preview.unlockAt - nowSec)
+    : 0;
+  const waitingUnlock = Boolean(preview?.activa && !preview.ready && lockRemain > 0);
+
+  useEffect(() => {
+    if (!waitingUnlock) return undefined;
+    const tick = setInterval(() => setNowSec(Math.floor(Date.now() / 1000)), 1000);
+    return () => clearInterval(tick);
+  }, [waitingUnlock]);
+
+  useEffect(() => {
+    if (preview?.activa && !preview.ready && lockRemain === 0) refresh();
+  }, [lockRemain, preview?.activa, preview?.ready, refresh]);
 
   const reservaPaused = Boolean(preview?.pausedOnChain);
   const creditPaused = paused;
@@ -110,11 +126,6 @@ export function ReservaSection({
     <View style={styles.stack}>
       <AppSubsection title={t('reservaTitle')} defaultOpen icon="lock">
         <AppText style={[styles.lead, { color: colors.text }]}>{t('reservaLead')}</AppText>
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaNotBank')}</AppText>
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaLockNote')}</AppText>
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaCapNote')}</AppText>
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaBoostComision')}</AppText>
-        <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaFounderNote')}</AppText>
         {preview ? (
           <AppText style={[styles.meta, { color: colors.textMuted }]}>
             {t('reservaBoteLabel')}: {formatUSD(Number(formatUnits(preview.boteWei, 18)))} {tokenSymbol}
@@ -147,11 +158,8 @@ export function ReservaSection({
               {t('reservaUntil')}: {formatDueDate(preview.unlockAt)}
             </AppText>
             <AppText style={[styles.meta, { color: colors.textMuted }]}>
-              {t('reservaYieldEst')}: {formatUSD(Number(formatUnits(preview.techoWei, 18)))} · {t('reservaTier', { tier: String(preview.tramo) })}
+              {t('reservaYieldEst')}: {formatUSD(Number(formatUnits(preview.techoWei, 18)))} {tokenSymbol}
             </AppText>
-            {preview.enRed ? (
-              <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaBoost')}</AppText>
-            ) : null}
           </>
         ) : null}
         {!preview?.activa ? (
@@ -174,15 +182,17 @@ export function ReservaSection({
             />
           </>
         ) : null}
-        <TouchableOpacity
-          onPress={() => setAcked((value) => !value)}
-          style={styles.ackRow}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: acked }}
-        >
-          <View style={[styles.box, { borderColor: colors.border, backgroundColor: acked ? colors.primary : colors.inputBg }]} />
-          <AppText style={[styles.ack, { color: colors.text }]}>{t('reservaAck')}</AppText>
-        </TouchableOpacity>
+        {!preview?.activa ? (
+          <TouchableOpacity
+            onPress={() => setAcked((value) => !value)}
+            style={styles.ackRow}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: acked }}
+          >
+            <View style={[styles.box, { borderColor: colors.border, backgroundColor: acked ? colors.primary : colors.inputBg }]} />
+            <AppText style={[styles.ack, { color: colors.text }]}>{t('reservaAck')}</AppText>
+          </TouchableOpacity>
+        ) : null}
         {!preview?.activa ? (
           <TouchableOpacity
             disabled={!canLock || !parsed}
@@ -208,7 +218,9 @@ export function ReservaSection({
               style={[styles.button, { backgroundColor: canUnlock ? colors.primary : colors.chip }]}
             >
               <AppText style={[styles.buttonText, { color: canUnlock ? colors.onPrimary : colors.textMuted }]}>
-                {t('reservaUnlock')}
+                {waitingUnlock
+                  ? t('reservaUnlockWait', { clock: formatCountdownClock(lockRemain) })
+                  : t('reservaUnlock')}
               </AppText>
             </TouchableOpacity>
             <TouchableOpacity

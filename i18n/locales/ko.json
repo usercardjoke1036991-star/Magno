@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "USDT를 30일 잠급니다. 연 최대 12% 예상.",
+  "hubReservaLead": "USDT를 30일 잠급니다. 원금이 돌아옵니다. 예상 수익, 보장 없음.",
   "reservaTitle": "리저브",
-  "reservaLead": "USDT를 30일 잠급니다. 원금은 돌아옵니다. 수익이 있으면 별도 팟에서 나오며 보장되지 않습니다.",
+  "reservaLead": "USDT를 30일 잠급니다. 기간이 끝나면 금액이 계정으로 돌아옵니다. 리저브 팟에 자금이 있으면 해당 일수에 대해 연 최대 12퍼센트 예상 수익이 더해질 수 있습니다. 보장되지 않습니다. 은행이나 예금이 아닙니다.",
   "reservaNotBank": "은행도 정기예금도 아닙니다.",
   "reservaLockNote": "30일 잠금. 이후 해제하거나 갱신할 수 있습니다.",
   "reservaCapNote": "연 최대 12% 예상. 한도는 잠금 기간으로 계산합니다.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "50 USDT 이상을 잠그면 Reserve가 활성인 동안 네트워크 수수료 추가분이 포트에서 나올 수 있습니다.",
   "reservaFounderNote": "창업자는 잠금 단계에 따라 각 추가분의 일부를 받습니다.",
   "hubReservaLeadLocked": "지금은 볼 수 있습니다. 레벨 10에서 열립니다.",
-  "reservaNeedLevel": "Reserve는 레벨 10에서 잠금 해제됩니다. 혜택은 미리 볼 수 있습니다.",
+  "reservaNeedLevel": "레벨 10부터 잠글 수 있습니다.",
   "reservaBoteLabel": "보상 포트",
   "reservaAdminPotTitle": "Reserve 포트",
   "reservaAdminPotHint": "관리자만. 이 USDT가 수익을 지급합니다. 기부도 풀도 아닙니다.",
   "reservaAdminPot": "포트 채우기",
   "reservaAdminPotOk": "Reserve 포트를 채웠습니다.",
-  "reservaAdminOnly": "관리자 계정만 포트를 채울 수 있습니다."
+  "reservaAdminOnly": "관리자 계정만 포트를 채울 수 있습니다.",
+  "reservaUnlockWait": "해제 · {clock}"
 }

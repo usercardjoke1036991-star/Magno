@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "USDT ৩০ দিন লক করুন। আনুমানিক বার্ষিক ১২% পর্যন্ত।",
+  "hubReservaLead": "USDT 30 দিন লক করুন। অর্থ ফেরে। আনুমানিক লাভ, নিশ্চয়তা নয়।",
   "reservaTitle": "রিজার্ভ",
-  "reservaLead": "USDT ৩০ দিন লক করুন। আসল ফিরে আসে। কোনো আয় আলাদা পট থেকে আসে এবং নিশ্চিত নয়।",
+  "reservaLead": "USDT 30 দিন লক করুন। মেয়াদ শেষে অর্থ অ্যাকাউন্টে ফেরে। রিজার্ভ পটে তহবিল থাকলে সেই দিনগুলির জন্য বছরে 12 শতাংশ পর্যন্ত আনুমানিক লাভ যোগ হতে পারে। নিশ্চিত নয়। এটি ব্যাংক বা আমানত নয়।",
   "reservaNotBank": "এটি ব্যাংক বা মেয়াদি আমানত নয়।",
   "reservaLockNote": "৩০ দিন লক। পরে আনলক বা নবায়ন করুন।",
   "reservaCapNote": "আনুমানিক বার্ষিক ১২% পর্যন্ত। সীমা লক সময়ের উপর হিসাব হয়।",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "আপনি 50 USDT বা তার বেশি লক করলে, Reserve সক্রিয় থাকাকালীন নেটওয়ার্ক কমিশনে অতিরিক্ত অর্থ পাত্র থেকে আসতে পারে।",
   "reservaFounderNote": "প্রতিষ্ঠাতা প্রতিটি অতিরিক্ত অর্থের একটি অংশ লক স্তর অনুযায়ী নেন।",
   "hubReservaLeadLocked": "এখন দেখা যায়। লেভেল 10-এ খোলে।",
-  "reservaNeedLevel": "Reserve লেভেল 10-এ খোলে। সুবিধা এখনও দেখা যায়।",
+  "reservaNeedLevel": "লেভেল 10 থেকে লক করা যায়।",
   "reservaBoteLabel": "পুরস্কারের পাত্র",
   "reservaAdminPotTitle": "Reserve পাত্র",
   "reservaAdminPotHint": "শুধু অ্যাডমিন। এই USDT রিটার্ন দেয়। দান বা পুল নয়।",
   "reservaAdminPot": "পাত্র ভরুন",
   "reservaAdminPotOk": "Reserve পাত্র ভরা হয়েছে।",
-  "reservaAdminOnly": "শুধু অ্যাডমিন অ্যাকাউন্ট পাত্র ভরতে পারে।"
+  "reservaAdminOnly": "শুধু অ্যাডমিন অ্যাকাউন্ট পাত্র ভরতে পারে।",
+  "reservaUnlockWait": "আনলক · {clock}"
 }

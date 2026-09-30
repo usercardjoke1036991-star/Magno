@@ -155,6 +155,7 @@
   - `confine_read()`
   - `confine_write()`
   - `write_under()`
+  - `under_root()`
   - `resto_bullet_estado()`
 - `reestructurar_peticion.py`
   - `resolver_directorio()`
@@ -293,7 +294,7 @@ python actualizar_readme.py
 | `memoria_proyecto.py` | `python memoria_proyecto.py --mostrar` | Memoria de sesión (MEMORIA.md) |
 | `reestructurar_peticion.py` | `python reestructurar_peticion.py "texto"` | Reestructura una petición informal en prompt profesional |
 
-_Actualizado automáticamente el 2026-09-29 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
+_Actualizado automáticamente el 2026-09-30 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
 
 <!-- AUTO-README:END -->
 Quatrivium Finance es crédito on-chain **sin colateral**: pides un préstamo, lo pagas dentro del plazo y subes de nivel para pedir más.

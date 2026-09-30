@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "USDT 30 دن لاک کریں۔ تخمینی سالانہ 12% تک۔",
+  "hubReservaLead": "USDT 30 دن لاک کریں۔ رقم واپس آتی ہے۔ تخمینی منافع، ضمانت نہیں۔",
   "reservaTitle": "ریزرو",
-  "reservaLead": "USDT 30 دن لاک کریں۔ اصل رقم واپس آتی ہے۔ کوئی منافع الگ برتن سے آتا ہے اور ضمانت نہیں۔",
+  "reservaLead": "USDT 30 دن لاک کریں۔ مدت ختم ہونے پر رقم اکاؤنٹ میں لوٹتی ہے۔ ریزرو پوٹ میں فنڈ ہو تو ان دنوں پر سالانہ 12 فیصد تک تخمینی منافع لگ سکتا ہے۔ ضمانت نہیں۔ یہ بینک یا جمع نہیں۔",
   "reservaNotBank": "یہ بینک یا فکسڈ ڈپازٹ نہیں ہے۔",
   "reservaLockNote": "30 دن لاک۔ پھر ان لاک یا تجدید کریں۔",
   "reservaCapNote": "تخمینی سالانہ 12% تک۔ حد لاک مدت پر لگتی ہے۔",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "اگر آپ 50 USDT یا زیادہ لاک کریں تو نیٹ ورک کمیشن پر اضافی رقم ریزرو فعال رہتے ہوئے برتن سے آ سکتی ہے۔",
   "reservaFounderNote": "بانی ہر اضافی رقم کا حصہ لاک کی سطح کے مطابق لیتا ہے۔",
   "hubReservaLeadLocked": "اب دکھائی دیتا ہے۔ سطح 10 پر کھلتا ہے۔",
-  "reservaNeedLevel": "ریزرو سطح 10 پر کھلتا ہے۔ فائدے اب بھی دیکھے جا سکتے ہیں۔",
+  "reservaNeedLevel": "سطح 10 سے لاک کر سکتے ہیں۔",
   "reservaBoteLabel": "انعام کا برتن",
   "reservaAdminPotTitle": "ریزرو برتن",
   "reservaAdminPotHint": "صرف ایڈمن۔ یہ USDT منافع دیتا ہے۔ عطیہ یا پول نہیں۔",
   "reservaAdminPot": "برتن بھریں",
   "reservaAdminPotOk": "ریزرو برتن بھر دیا گیا۔",
-  "reservaAdminOnly": "صرف ایڈمن اکاؤنٹ برتن بھر سکتا ہے۔"
+  "reservaAdminOnly": "صرف ایڈمن اکاؤنٹ برتن بھر سکتا ہے۔",
+  "reservaUnlockWait": "ان لاک · {clock}"
 }

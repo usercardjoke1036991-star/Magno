@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "USDT’yi 30 gün kilitleyin. Tahmini yıllık %12’ye kadar.",
+  "hubReservaLead": "USDT 30 gun kilitleyin. Tutar doner. Tahmini getiri, garanti yok.",
   "reservaTitle": "Rezerv",
-  "reservaLead": "USDT’yi 30 gün kilitleyin. Anapara geri gelir. Getiri varsa ayrı bir havuzdan gelir ve garanti değildir.",
+  "reservaLead": "USDT yi 30 gun kilitleyin. Sure bitince tutar hesabiniza doner. Reserve havuzunda fon varsa, o gunler icin yilda yuzde 12 ye kadar tahmini getiri eklenebilir. Garanti edilmez. Banka veya mevduat degildir.",
   "reservaNotBank": "Banka veya vadeli mevduat değildir.",
   "reservaLockNote": "30 gün kilitli. Sonra açabilir veya yenileyebilirsiniz.",
   "reservaCapNote": "Tahmini yıllık %12’ye kadar. Tavan kilit süresine göre hesaplanır.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "50 USDT veya daha fazlasını kilitleerseniz, Reserve aktifken ağ komisyonlarınıza potadan ekstra gelebilir.",
   "reservaFounderNote": "Kurucu, kilit kademesine göre her ekstradan pay alır.",
   "hubReservaLeadLocked": "Şimdiden görünür. 10. seviyede açılır.",
-  "reservaNeedLevel": "Reserve 10. seviyede açılır. Faydalar şimdiden görünür.",
+  "reservaNeedLevel": "10. duzeyden kilitleyebilirsiniz.",
   "reservaBoteLabel": "Ödül potu",
   "reservaAdminPotTitle": "Reserve potu",
   "reservaAdminPotHint": "Yalnızca yöneticiler. Bu USDT getiriyi öder. Bağış veya havuz değil.",
   "reservaAdminPot": "Pota ekle",
   "reservaAdminPotOk": "Reserve potu dolduruldu.",
-  "reservaAdminOnly": "Potu yalnızca bir yönetici hesabı doldurabilir."
+  "reservaAdminOnly": "Potu yalnızca bir yönetici hesabı doldurabilir.",
+  "reservaUnlockWait": "Kilidi ac · {clock}"
 }

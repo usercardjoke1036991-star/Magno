@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "Kunci USDT 30 hari. Hingga 12% tahunan perkiraan.",
+  "hubReservaLead": "Kunci USDT 30 hari. Jumlah kembali. Imbal hasil perkiraan, tidak dijamin.",
   "reservaTitle": "Cadangan",
-  "reservaLead": "Kunci USDT selama 30 hari. Pokok kembali. Imbal hasil, jika ada, dari pot terpisah dan tidak dijamin.",
+  "reservaLead": "Kunci USDT selama 30 hari. Setelah periode berakhir, jumlah kembali ke akun. Jika pot Reserve berisi dana, imbal hasil perkiraan hingga 12 persen per tahun dapat ditambahkan untuk hari itu. Tidak dijamin. Ini bukan bank atau simpanan.",
   "reservaNotBank": "Bukan bank dan bukan deposito berjangka.",
   "reservaLockNote": "Terkunci 30 hari. Lalu bisa buka atau perpanjang.",
   "reservaCapNote": "Hingga 12% tahunan perkiraan. Plafon dihitung pada masa kunci.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "Jika Anda mengunci 50 USDT atau lebih, tambahan komisi jaringan dapat keluar dari pot selama Reserve aktif.",
   "reservaFounderNote": "Pendiri mengambil bagian dari setiap tambahan sesuai tingkat kunci.",
   "hubReservaLeadLocked": "Sudah terlihat. Terbuka di level 10.",
-  "reservaNeedLevel": "Reserve terbuka di level 10. Manfaatnya sudah bisa dilihat.",
+  "reservaNeedLevel": "Dapat mengunci dari tingkat 10.",
   "reservaBoteLabel": "Pot hadiah",
   "reservaAdminPotTitle": "Pot Reserve",
   "reservaAdminPotHint": "Hanya admin. USDT ini membayar imbal hasil. Bukan Donasi dan bukan pool.",
   "reservaAdminPot": "Isi pot",
   "reservaAdminPotOk": "Pot Reserve diisi ulang.",
-  "reservaAdminOnly": "Hanya akun admin yang dapat mengisi pot."
+  "reservaAdminOnly": "Hanya akun admin yang dapat mengisi pot.",
+  "reservaUnlockWait": "Buka · {clock}"
 }

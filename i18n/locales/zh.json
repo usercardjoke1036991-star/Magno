@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "锁定 USDT 30 天。预计最高年化 12%。",
+  "hubReservaLead": "锁定 USDT 30 天。本金退回。预估收益，不保证。",
   "reservaTitle": "储备",
-  "reservaLead": "将 USDT 锁定 30 天。本金会返还。如有收益，来自单独资金池，并不保证。",
+  "reservaLead": "锁定 USDT 30 天。期满后金额退回账户。若 Reserve 奖池有资金，最多可按年化 12% 估算这些天数的收益，不保证。不是银行或存款。",
   "reservaNotBank": "这不是银行，也不是定期存款。",
   "reservaLockNote": "锁定 30 天。之后可解锁或续期。",
   "reservaCapNote": "预计最高年化 12%。上限按锁定期计算。",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "锁定 50 USDT 或更多时，网络佣金的额外部分可在 Reserve 有效期内从独立资金池支付。",
   "reservaFounderNote": "创始人按锁定档位从每笔额外收益中分成。",
   "hubReservaLeadLocked": "现在即可查看。达到第 10 级后才能使用。",
-  "reservaNeedLevel": "Reserve 在第 10 级解锁。此前仍可查看权益。",
+  "reservaNeedLevel": "10 级起可锁定。",
   "reservaBoteLabel": "奖励池",
   "reservaAdminPotTitle": "Reserve 资金池",
   "reservaAdminPotHint": "仅管理员。此 USDT 用于支付收益。不是捐赠，也不是贷款池。",
   "reservaAdminPot": "注入资金池",
   "reservaAdminPotOk": "Reserve 资金池已补充。",
-  "reservaAdminOnly": "只有管理员账户可以注入资金池。"
+  "reservaAdminOnly": "只有管理员账户可以注入资金池。",
+  "reservaUnlockWait": "解锁 · {clock}"
 }

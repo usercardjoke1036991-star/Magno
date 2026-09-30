@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "Заблокируйте USDT на 30 дней. До 12% годовых оценочно.",
+  "hubReservaLead": "Заблокируйте USDT на 30 дней. Сумма вернётся. Оценка дохода не гарантирована.",
   "reservaTitle": "Резерв",
-  "reservaLead": "Заблокируйте USDT на 30 дней. Основная сумма возвращается. Доход, если есть, идёт из отдельного фонда и не гарантирован.",
+  "reservaLead": "Заблокируйте USDT на 30 дней. По окончании сумма вернётся на счёт. Если в котле Reserve есть средства, за эти дни может добавиться оценка дохода до 12 процентов годовых. Не гарантируется. Это не банк и не вклад.",
   "reservaNotBank": "Это не банк и не срочный вклад.",
   "reservaLockNote": "Блокировка 30 дней. Затем можно разблокировать или продлить.",
   "reservaCapNote": "До 12% годовых оценочно. Потолок считается за период блокировки.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "Если вы блокируете 50 USDT или больше, надбавка к сетевым комиссиям может выплачиваться из котла, пока Резерв активен.",
   "reservaFounderNote": "Основатель получает долю каждого бонуса согласно уровню блокировки.",
   "hubReservaLeadLocked": "Уже видно. Откроется на уровне 10.",
-  "reservaNeedLevel": "Резерв откроется на уровне 10. Выгоды уже видны.",
+  "reservaNeedLevel": "Блокировка с 10-го уровня.",
   "reservaBoteLabel": "Котел наград",
   "reservaAdminPotTitle": "Котел Резерва",
   "reservaAdminPotHint": "Только админы. Этот USDT платит доход. Это не Донат и не пул.",
   "reservaAdminPot": "Пополнить котел",
   "reservaAdminPotOk": "Котел Резерва пополнен.",
-  "reservaAdminOnly": "Только админ может пополнить котел."
+  "reservaAdminOnly": "Только админ может пополнить котел.",
+  "reservaUnlockWait": "Разблокировать · {clock}"
 }

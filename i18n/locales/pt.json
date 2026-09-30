@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "Bloqueie USDT por 30 dias. Até 12% anual estimado.",
+  "hubReservaLead": "Bloqueie USDT 30 dias. O montante regressa. Rendimento estimado, nao garantido.",
   "reservaTitle": "Reserva",
-  "reservaLead": "Bloqueie USDT por 30 dias. O principal volta. Qualquer rendimento sai de um pote separado e não é garantido.",
+  "reservaLead": "Bloqueie USDT durante 30 dias. No fim, o montante volta a conta. Se o pote da Reserva tiver fundos, pode somar-se um rendimento estimado de ate 12 por cento ao ano nesses dias. Nao e garantido. Nao e um banco nem um deposito.",
   "reservaNotBank": "Não é um banco nem um depósito a prazo.",
   "reservaLockNote": "Bloqueado 30 dias. Depois pode desbloquear ou renovar.",
   "reservaCapNote": "Até 12% anual estimado. O teto é calculado sobre o período bloqueado.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "Se bloquear 50 USDT ou mais, um extra das comissões da sua rede pode sair do pote enquanto a Reserva estiver ativa.",
   "reservaFounderNote": "O fundador recebe uma parte de cada extra, conforme o tramo bloqueado.",
   "hubReservaLeadLocked": "Já se vê. Abre no nível 10.",
-  "reservaNeedLevel": "A Reserva abre no nível 10. Os benefícios já se veem.",
+  "reservaNeedLevel": "Pode bloquear a partir do nivel 10.",
   "reservaBoteLabel": "Pote de prêmios",
   "reservaAdminPotTitle": "Pote da Reserva",
   "reservaAdminPotHint": "Só admins. Este USDT paga o rendimento. Não é Doar nem o pool.",
   "reservaAdminPot": "Aportar ao pote",
   "reservaAdminPotOk": "Pote da Reserva recarregado.",
-  "reservaAdminOnly": "Só uma conta admin pode encher o pote."
+  "reservaAdminOnly": "Só uma conta admin pode encher o pote.",
+  "reservaUnlockWait": "Desbloquear · {clock}"
 }

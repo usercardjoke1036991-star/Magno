@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "Khóa USDT 30 ngày. Ước tính tối đa 12%/năm.",
+  "hubReservaLead": "Khoa USDT 30 ngay. So tien tra lai. Loi suat uoc tinh, khong bao dam.",
   "reservaTitle": "Dự trữ",
-  "reservaLead": "Khóa USDT 30 ngày. Gốc được hoàn. Lợi suất nếu có đến từ quỹ riêng và không được bảo đảm.",
+  "reservaLead": "Khoa USDT trong 30 ngay. Het han, so tien ve tai khoan. Neu quy Reserve con tien, co the cong loi suat uoc tinh toi 12 phan tram nam cho nhung ngay do. Khong bao dam. Khong phai ngan hang hay tien gui.",
   "reservaNotBank": "Không phải ngân hàng hay tiền gửi có kỳ hạn.",
   "reservaLockNote": "Khóa 30 ngày. Sau đó có thể mở hoặc gia hạn.",
   "reservaCapNote": "Ước tính tối đa 12%/năm. Trần tính theo thời gian khóa.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "Nếu khóa 50 USDT trở lên, phần cộng thêm trên hoa hồng mạng có thể lấy từ hũ khi Reserve còn hiệu lực.",
   "reservaFounderNote": "Người sáng lập nhận một phần mỗi khoản cộng thêm theo bậc khóa.",
   "hubReservaLeadLocked": "Đã xem được. Mở ở cấp 10.",
-  "reservaNeedLevel": "Reserve mở ở cấp 10. Vẫn xem được quyền lợi.",
+  "reservaNeedLevel": "Khoa tu cap 10.",
   "reservaBoteLabel": "Hũ thưởng",
   "reservaAdminPotTitle": "Hũ Reserve",
   "reservaAdminPotHint": "Chỉ admin. USDT này trả lợi suất. Không phải Quyên góp hay pool.",
   "reservaAdminPot": "Nạp hũ",
   "reservaAdminPotOk": "Đã nạp hũ Reserve.",
-  "reservaAdminOnly": "Chỉ tài khoản admin mới nạp hũ được."
+  "reservaAdminOnly": "Chỉ tài khoản admin mới nạp hũ được.",
+  "reservaUnlockWait": "Mo khoa · {clock}"
 }

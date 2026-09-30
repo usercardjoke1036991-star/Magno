@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "USDTを30日ロック。年率最大12%の目安。",
+  "hubReservaLead": "USDTを30日ロック。元本は戻ります。利回りは目安で保証されません。",
   "reservaTitle": "リザーブ",
-  "reservaLead": "USDTを30日ロックします。元本は戻ります。収益があれば別ポットからで、保証はありません。",
+  "reservaLead": "USDTを30日間ロックします。期間終了後、金額は口座に戻ります。Reserveのポットに資金があれば、その日数について年率最大12パーセントの目安が加算される場合があります。保証はありません。銀行でも預金でもありません。",
   "reservaNotBank": "銀行でも定期預金でもありません。",
   "reservaLockNote": "30日ロック。その後解除または更新できます。",
   "reservaCapNote": "年率最大12%の目安。上限はロック期間で計算します。",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "50 USDT以上をロックすると、Reserveが有効な間、ネットワーク手数料の上乗せがポットから支払われることがあります。",
   "reservaFounderNote": "創業者はロック段階に応じて各上乗せの一部を受け取ります。",
   "hubReservaLeadLocked": "今から見られます。レベル10で使えます。",
-  "reservaNeedLevel": "Reserveはレベル10で解除されます。特典は今から確認できます。",
+  "reservaNeedLevel": "レベル10からロックできます。",
   "reservaBoteLabel": "報酬ポット",
   "reservaAdminPotTitle": "Reserveポット",
   "reservaAdminPotHint": "管理者のみ。このUSDTが利回りを支払います。寄付でもプールでもありません。",
   "reservaAdminPot": "ポットに入れる",
   "reservaAdminPotOk": "Reserveポットを補充しました。",
-  "reservaAdminOnly": "ポットに入れられるのは管理者アカウントだけです。"
+  "reservaAdminOnly": "ポットに入れられるのは管理者アカウントだけです。",
+  "reservaUnlockWait": "解除 · {clock}"
 }

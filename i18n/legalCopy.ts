@@ -1,4 +1,5 @@
 import type { Lang } from './languages';
+import { legalExtrasFor } from './legalExtras';
 
 export type LegalSection = {
   title: string;
@@ -308,5 +309,10 @@ export const legalCopy: Record<Lang, LegalDoc> = {
 };
 
 export function legalDocsFor(lang: Lang): LegalDoc {
-  return legalCopy[lang] || legalCopy.es;
+  const base = legalCopy[lang] || legalCopy.es;
+  const extra = legalExtrasFor(lang);
+  return {
+    privacy: [...base.privacy, ...extra.privacy],
+    terms: [...base.terms, ...extra.terms],
+  };
 }

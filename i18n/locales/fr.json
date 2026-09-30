@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "Bloquez l’USDT 30 jours. Jusqu’à 12 % annuel estimé.",
+  "hubReservaLead": "Bloquez l USDT 30 jours. Le montant revient. Rendement estime, non garanti.",
   "reservaTitle": "Réserve",
-  "reservaLead": "Bloquez l’USDT 30 jours. Le principal revient. Tout rendement vient d’un pot séparé et n’est pas garanti.",
+  "reservaLead": "Bloquez l USDT pendant 30 jours. A la fin, le montant revient sur le compte. Si le pot Reserve a des fonds, un rendement estime jusqu a 12 pour cent par an peut s ajouter pour ces jours. Non garanti. Ce n est ni une banque ni un depot.",
   "reservaNotBank": "Ce n’est ni une banque ni un dépôt à terme.",
   "reservaLockNote": "Bloqué 30 jours. Ensuite vous pouvez débloquer ou renouveler.",
   "reservaCapNote": "Jusqu’à 12 % annuel estimé. Le plafond est calculé sur la période bloquée.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "Si vous bloquez 50 USDT ou plus, un extra sur vos commissions de réseau peut venir du pot tant que la Réserve est active.",
   "reservaFounderNote": "Le fondateur prend une part de chaque extra selon le palier bloqué.",
   "hubReservaLeadLocked": "Déjà visible. S’ouvre au niveau 10.",
-  "reservaNeedLevel": "La Réserve s’ouvre au niveau 10. Les avantages sont déjà visibles.",
+  "reservaNeedLevel": "Verrouillage a partir du niveau 10.",
   "reservaBoteLabel": "Pot de récompenses",
   "reservaAdminPotTitle": "Pot de la Réserve",
   "reservaAdminPotHint": "Admins seulement. Cet USDT paie le rendement. Ce n’est ni Don ni le pool.",
   "reservaAdminPot": "Alimenter le pot",
   "reservaAdminPotOk": "Pot de la Réserve rechargé.",
-  "reservaAdminOnly": "Seul un compte admin peut alimenter le pot."
+  "reservaAdminOnly": "Seul un compte admin peut alimenter le pot.",
+  "reservaUnlockWait": "Debloquer · {clock}"
 }

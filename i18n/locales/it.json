@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "Blocca USDT per 30 giorni. Fino al 12% annuo stimato.",
+  "hubReservaLead": "Blocca USDT 30 giorni. L importo torna. Rendimento stimato, non garantito.",
   "reservaTitle": "Riserva",
-  "reservaLead": "Blocca USDT per 30 giorni. Il capitale torna. Un eventuale rendimento esce da un fondo separato e non è garantito.",
+  "reservaLead": "Blocca USDT per 30 giorni. Al termine l importo torna sul conto. Se il fondo Reserve ha risorse, puo aggiungersi un rendimento stimato fino al 12 per cento annuo su quei giorni. Non e garantito. Non e una banca ne un deposito.",
   "reservaNotBank": "Non è una banca né un deposito vincolato.",
   "reservaLockNote": "Bloccato 30 giorni. Poi puoi sbloccare o rinnovare.",
   "reservaCapNote": "Fino al 12% annuo stimato. Il tetto si calcola sul periodo di blocco.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "Se blocchi 50 USDT o più, un extra sulle commissioni di rete può uscire dal pentolone mentre la Riserva è attiva.",
   "reservaFounderNote": "Il fondatore prende una quota di ogni extra secondo lo scaglione bloccato.",
   "hubReservaLeadLocked": "Già visibile. Si sblocca al livello 10.",
-  "reservaNeedLevel": "La Riserva si sblocca al livello 10. I vantaggi si vedono già.",
+  "reservaNeedLevel": "Si puo bloccare dal livello 10.",
   "reservaBoteLabel": "Pentolone premi",
   "reservaAdminPotTitle": "Pentolone Riserva",
   "reservaAdminPotHint": "Solo admin. Questo USDT paga il rendimento. Non è Dona né il pool.",
   "reservaAdminPot": "Riempi il pentolone",
   "reservaAdminPotOk": "Pentolone Riserva ricaricato.",
-  "reservaAdminOnly": "Solo un account admin può riempire il pentolone."
+  "reservaAdminOnly": "Solo un account admin può riempire il pentolone.",
+  "reservaUnlockWait": "Sblocca · {clock}"
 }

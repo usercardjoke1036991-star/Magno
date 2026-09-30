@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "اقفل USDT لمدة 30 يوماً. حتى 12% سنوياً تقديرياً.",
+  "hubReservaLead": "اقفل USDT لـ 30 يوماً. يعود المبلغ. عائد تقديري غير مضمون.",
   "reservaTitle": "احتياطي",
-  "reservaLead": "اقفل USDT لمدة 30 يوماً. يعود الأصل. أي عائد يأتي من وعاء منفصل وليس مضموناً.",
+  "reservaLead": "اقفل USDT لمدة 30 يوماً. عند انتهاء المدة يعود المبلغ إلى حسابك. إن وُجدت أموال في وعاء الاحتياطي قد يُضاف عائد تقديري حتى 12٪ سنوياً عن تلك الأيام. غير مضمون. ليست بنكاً ولا وديعة.",
   "reservaNotBank": "ليس بنكاً وليس وديعة ثابتة.",
   "reservaLockNote": "مقفل 30 يوماً. بعدها يمكنك الفتح أو التجديد.",
   "reservaCapNote": "حتى 12% سنوياً تقديرياً. يُحسب السقف على فترة القفل.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "إذا حجزت 50 USDT أو أكثر، قد يأتي مبلغ إضافي على عمولات شبكتك من الوعاء طالما الاحتياطي نشط.",
   "reservaFounderNote": "يحصل المؤسس على نسبة من كل مبلغ إضافي حسب شريحة الحجز.",
   "hubReservaLeadLocked": "ظاهر الآن. يُفتح عند المستوى 10.",
-  "reservaNeedLevel": "يُفتح الاحتياطي عند المستوى 10. يمكنكم رؤية المزايا الآن.",
+  "reservaNeedLevel": "يمكن القفل من المستوى 10.",
   "reservaBoteLabel": "وعاء المكافآت",
   "reservaAdminPotTitle": "وعاء الاحتياطي",
   "reservaAdminPotHint": "للمشرفين فقط. هذا الـ USDT يدفع العائد. ليس تبرعًا ولا مجمع القروض.",
   "reservaAdminPot": "تعبئة الوعاء",
   "reservaAdminPotOk": "تم تعبئة وعاء الاحتياطي.",
-  "reservaAdminOnly": "حساب مشرف فقط يمكنه تعبئة الوعاء."
+  "reservaAdminOnly": "حساب مشرف فقط يمكنه تعبئة الوعاء.",
+  "reservaUnlockWait": "إلغاء القفل · {clock}"
 }

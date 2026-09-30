@@ -43,7 +43,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `qa_autonomo.py` — módulo Python
   - Funciones/clases: ResultadoQA, ReporteQA, detectar_tipo_proyecto, verificar_python, verificar_mql5, verificar_nodejs, verificar_android, verificar_rust, verificar_go, _iterar_archivos_auditables, _obtener_raices_subproyectos, _es_subproyecto, _verificar_secretos, _verificar_gitignore, verificar_ci, verificar_readme, _encontrar_errores_json, verificar_errores_aprendidos, verificar_logica, verificar_conectores_sueltos, verificar_modulos_proyecto, verificar_mapa_proyecto, ejecutar_qa, imprimir_reporte, main
 - `qa_safe_io.py` — módulo Python
-  - Funciones/clases: confine, confine_read, confine_write, write_under, resto_bullet_estado
+  - Funciones/clases: confine, confine_read, confine_write, write_under, under_root, resto_bullet_estado
 - `reestructurar_peticion.py` — módulo Python
   - Funciones/clases: resolver_directorio, normalizar, _contiene_patron, detectar_intencion, detectar_tipo_proyecto, habla_espanol, _primera_linea_util, leer_contexto_una_linea, inferir_alcance, sugerir_herramientas, inferir_entregable, reformular_objetivo, construir_restricciones, construir_prompt_agente, PromptProfesional, reestructurar, formatear_texto, formatear_json, _parse_args, _resolver_texto, main
 - `run_tests.py` — módulo Python
@@ -59,6 +59,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `web3Config.tsx` — módulo JS/TS
   - Funciones/clases: Web3Provider, toEthersWeb3Provider, getEthersSignerFromProvider, web3ConfigDebug
 - `zkService.ts` — módulo JS/TS
+- `.audit-phone/ui_texts.py` — módulo Python
 - `android/app/src/debug/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/debugOptimized/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/main/AndroidManifest.xml` — manifiesto Android
@@ -263,6 +264,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: LANGUAGES, RTL_LANGS, isRtl, detectDeviceLang
 - `i18n/legalCopy.ts` — módulo JS/TS
   - Funciones/clases: legalCopy, legalDocsFor
+- `i18n/legalExtras.ts` — módulo JS/TS
+  - Funciones/clases: legalExtrasFor
 - `i18n/translations.ts` — módulo JS/TS
   - Funciones/clases: translations
 - `plugins/withQuatriviumAndroidSecurity.js` — módulo JS/TS
@@ -471,7 +474,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/moraHistory.ts` — módulo JS/TS
   - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement, isSupportMovement
 - `utils/passwordPolicy.ts` — módulo JS/TS
-  - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, PASSWORD_ALPHABET, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, passwordRuleFlags, masterPasswordFromRandomBytes
+  - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, GENERATED_SECRET_CHARS, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, passwordRuleFlags, masterPasswordFromRandomBytes
 - `utils/pendingDeepLink.ts` — módulo JS/TS
   - Funciones/clases: rememberAppUrl, takePendingAppUrl
 - `utils/pinPolicy.ts` — módulo JS/TS

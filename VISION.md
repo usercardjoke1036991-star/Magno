@@ -141,6 +141,7 @@
 - Reserva visible desde el inicio, usable en nivel 10; el bote solo lo llenan admins (no Donar ni pool)
 - Blindar recovery, autofund e attester para que un atacante no robe el wrap ni drene gas ni use la llave del owner
 - auditoria bunker: endurecer worker purpose/replay/store, wallet SecureStore-first, lockout en fondos, timelock fundador Reserva
+- Texto profesional de Reserva con cuenta atras y politicas ampliadas para Play Store, sin afirmar legalidad universal
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -258,3 +259,4 @@
 - [2026-09-29 10:45] Idea añadida al backlog: "Reserva visible desde el inicio, usable en nivel 10; el bote solo lo llenan admi"
 - [2026-09-29 21:08] Idea añadida al backlog: "Blindar recovery, autofund e attester para que un atacante no robe el wrap ni dr"
 - [2026-09-29 23:00] Idea añadida al backlog: "auditoria bunker: endurecer worker purpose/replay/store, wallet SecureStore-firs"
+- [2026-09-30 01:55] Idea añadida al backlog: "Texto profesional de Reserva con cuenta atras y politicas ampliadas para Play St"

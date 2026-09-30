@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "USDT 30 दिन लॉक करें। अनुमानित वार्षिक 12% तक।",
+  "hubReservaLead": "USDT 30 दिन लॉक करें। राशि वापस आती है। अनुमानित लाभ, गारंटी नहीं।",
   "reservaTitle": "रिज़र्व",
-  "reservaLead": "USDT 30 दिन लॉक करें। मूल राशि वापस आती है। कोई लाभ अलग पॉट से आता है और गारंटी नहीं है।",
+  "reservaLead": "USDT 30 दिनों के लिए लॉक करें। अवधि खत्म होने पर राशि खाते में लौटती है। यदि रिजर्व पॉट में धन हो तो उन दिनों पर सालाना 12 प्रतिशत तक अनुमानित लाभ जुड़ सकता है। गारंटी नहीं। यह बैंक या जमा नहीं है।",
   "reservaNotBank": "यह बैंक या सावधि जमा नहीं है।",
   "reservaLockNote": "30 दिन लॉक। फिर अनलॉक या नवीनीकरण करें।",
   "reservaCapNote": "अनुमानित वार्षिक 12% तक। सीमा लॉक अवधि पर गणना होती है।",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "यदि आप 50 USDT या अधिक लॉक करते हैं, तो आपकी नेटवर्क कमीशन पर अतिरिक्त राशि Reserve सक्रिय रहते बॉट से आ सकती है।",
   "reservaFounderNote": "संस्थापक प्रत्येक अतिरिक्त राशि का हिस्सा लॉक स्तर के अनुसार लेते हैं।",
   "hubReservaLeadLocked": "अभी दिखता है। स्तर 10 पर खुलता है।",
-  "reservaNeedLevel": "Reserve स्तर 10 पर खुलता है। लाभ अभी देख सकते हैं।",
+  "reservaNeedLevel": "स्तर 10 से लॉक कर सकते हैं।",
   "reservaBoteLabel": "इनाम का बर्तन",
   "reservaAdminPotTitle": "Reserve बर्तन",
   "reservaAdminPotHint": "केवल एडमिन। यह USDT रिटर्न देता है। दान या पूल नहीं है।",
   "reservaAdminPot": "बर्तन भरें",
   "reservaAdminPotOk": "Reserve बर्तन भर दिया गया।",
-  "reservaAdminOnly": "केवल एडमिन खाता बर्तन भर सकता है।"
+  "reservaAdminOnly": "केवल एडमिन खाता बर्तन भर सकता है।",
+  "reservaUnlockWait": "अनलॉक · {clock}"
 }

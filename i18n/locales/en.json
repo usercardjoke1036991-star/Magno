@@ -1016,9 +1016,9 @@
   "verifyFeePhoneLead": "Confirming the number costs {amount} USDT. You pay it, not the pool.",
   "verifyFeeNeed": "Pay {amount} USDT to confirm.",
   "verifyFeeFailed": "The fee was not charged. The code was not saved.",
-  "hubReservaLead": "Lock USDT for 30 days. Up to 12% estimated yearly.",
+  "hubReservaLead": "Lock USDT for 30 days. Principal returns. Estimated yield, not guaranteed.",
   "reservaTitle": "Reserve",
-  "reservaLead": "Lock USDT for 30 days. Principal comes back. Any yield comes from a separate pot and is not guaranteed.",
+  "reservaLead": "Lock USDT for 30 days. When the period ends, the amount returns to your account. If the Reserva pot has funds, an estimated yield of up to 12 percent a year may be added for those days. It is not guaranteed. This is not a bank or a deposit.",
   "reservaNotBank": "Not a bank and not a fixed deposit.",
   "reservaLockNote": "Locked for 30 days. Then you can unlock or renew.",
   "reservaCapNote": "Up to 12% estimated yearly. The cap is calculated on the locked period.",
@@ -1046,11 +1046,12 @@
   "reservaBoostComision": "If you lock 50 USDT or more, an extra on your network commissions may come from the pot while Reserve is active.",
   "reservaFounderNote": "The founder takes a share of each extra, according to the lock tier.",
   "hubReservaLeadLocked": "Visible now. Unlocks at level 10.",
-  "reservaNeedLevel": "Reserve unlocks at level 10. You can still see the benefits.",
+  "reservaNeedLevel": "You can lock from level 10.",
   "reservaBoteLabel": "Reward pot",
   "reservaAdminPotTitle": "Reserve pot",
   "reservaAdminPotHint": "Admins only. This USDT pays yield. Not Donate and not the pool.",
   "reservaAdminPot": "Fill the pot",
   "reservaAdminPotOk": "Reserve pot refilled.",
-  "reservaAdminOnly": "Only an admin account can fill the pot."
+  "reservaAdminOnly": "Only an admin account can fill the pot.",
+  "reservaUnlockWait": "Unlock · {clock}"
 }
