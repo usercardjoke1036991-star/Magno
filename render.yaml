@@ -24,6 +24,7 @@ services:
         - scripts/notify-worker.mjs
         - scripts/bscNetworks.cjs
         - scripts/textbeltSms.cjs
+        - scripts/notify-entrypoint.sh
         - render.yaml
     envVars:
       - key: NOTIFY_BIND

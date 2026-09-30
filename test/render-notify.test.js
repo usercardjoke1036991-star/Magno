@@ -27,8 +27,11 @@ describe('Render notify worker', function () {
     expect(docker).to.include('NOTIFY_TRUST_PROXY=1');
     expect(docker).to.include('NOTIFY_DATA_FILE=/data/.notify-data.json');
     expect(docker).to.include('mkdir -p /data');
-    expect(docker).to.match(/^USER node$/m);
+    expect(docker).to.include('notify-entrypoint.sh');
+    expect(docker).to.include('su-exec');
     expect(docker).to.include('chown -R node:node /app /data');
+    const entry = fs.readFileSync(path.join(root, 'scripts', 'notify-entrypoint.sh'), 'utf8');
+    expect(entry).to.include('su-exec node');
     expect(dockerignore).to.include('!scripts/');
     expect(dockerignore).to.include('textbeltSms.cjs');
     expect(worker).to.include("path === '/health'");

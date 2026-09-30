@@ -251,7 +251,8 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(zap).to.include('env -i');
     expect(zap).to.include('seq 1 40');
     const docker = fs.readFileSync(path.join(__dirname, '..', 'Dockerfile.notify'), 'utf8');
-    expect(docker).to.match(/^USER node$/m);
+    expect(docker).to.match(/^USER root$/m);
+    expect(docker).to.include('notify-entrypoint.sh');
     expect(docker).to.include('chown -R node:node /app /data');
     const logos = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'fetch-wallet-logos.py'), 'utf8');
     expect(logos).to.include('startswith("https://")');
