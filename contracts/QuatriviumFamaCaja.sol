@@ -2,7 +2,6 @@
 pragma solidity ^0.8.24;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface ICreditCaja {
     function pagarCanje(address token, address to, uint256 amount) external;
@@ -11,6 +10,18 @@ interface ICreditCaja {
     function dispersionCongelada(address usuario) external view returns (bool);
     function paused() external view returns (bool);
     function cuentaDestruida(address) external view returns (bool);
+    function esMoroso(address) external view returns (bool);
+    function usuarios(address)
+        external
+        view
+        returns (
+            uint256 nivelActual,
+            uint256 montoActivo,
+            uint256 vencimiento,
+            bool enMora,
+            address monedaActivo,
+            uint256 tasaAplicadaBP
+        );
 }
 
 /**
@@ -76,11 +87,15 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         if (tx.origin != msg.sender) revert SoloEOA();
         ICreditCaja nucleo = ICreditCaja(credit);
         if (nucleo.paused()) revert CreditoPausado();
+        (, uint256 montoActivo, uint256 vencimiento, bool enMora,,) = nucleo.usuarios(msg.sender);
         if (
             !nucleo.humanosVerificados(msg.sender)
                 || nucleo.blacklist(msg.sender)
                 || nucleo.dispersionCongelada(msg.sender)
                 || nucleo.cuentaDestruida(msg.sender)
+                || nucleo.esMoroso(msg.sender)
+                || enMora
+                || (montoActivo > 0 && vencimiento != 0 && block.timestamp > vencimiento)
         ) revert NoHumano();
         if (fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT != 0) revert FamaInvalida();
         if (fama > famaDisponible(msg.sender)) revert SinFama();

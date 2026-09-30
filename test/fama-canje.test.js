@@ -6,6 +6,7 @@ const {
   registerAndFund,
   assertNavInvariant,
   expectAmt,
+  drainToken,
 } = require('./helpers.cjs');
 
 describe('QuatriviumFamaCaja - fama de caja y canje', function () {
@@ -90,6 +91,37 @@ describe('QuatriviumFamaCaja - fama de caja y canje', function () {
     await seedPool(token, contract, owner, '1');
     await registerAndFund(token, contract, user, '20');
     await contract.connect(user).donar(tokenAddr, ethers.parseUnits('3', 18));
+    await expect(fama.connect(user).canjearFama(250n)).to.be.reverted;
+  });
+
+  it('rejects founder self-donate so fame cannot be printed against the pool', async () => {
+    const { token, contract, owner, tokenAddr, contractAddr } = await deployProtocol();
+    await token.mint(owner.address, ethers.parseUnits('5', 18));
+    await token.connect(owner).approve(contractAddr, ethers.MaxUint256);
+    await expect(contract.connect(owner).donar(tokenAddr, ethers.parseUnits('5', 18))).to.be.reverted;
+  });
+
+  it('rejects pagarCanje from anyone but the fame sibling', async () => {
+    const { contract, user, tokenAddr } = await deployProtocol();
+    await expect(
+      contract.connect(user).pagarCanje(tokenAddr, user.address, ethers.parseUnits('1', 18))
+    ).to.be.reverted;
+  });
+
+  it('blocks redeem while the loan is overdue or in mora', async () => {
+    const { token, contract, fama, owner, extra, user, tokenAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, user, '20');
+    await contract.connect(user).donar(tokenAddr, ethers.parseUnits('3', 18));
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const info = await contract.usuarios(user.address);
+    await ethers.provider.send('evm_setNextBlockTimestamp', [Number(info.vencimiento) + 10]);
+    await ethers.provider.send('evm_mine');
+    await expect(fama.connect(user).canjearFama(250n)).to.be.reverted;
+
+    await drainToken(token, user, extra);
+    await contract.marcarMorosoSiVencido(user.address);
+    expect(await contract.esMoroso(user.address)).to.equal(true);
     await expect(fama.connect(user).canjearFama(250n)).to.be.reverted;
   });
 });

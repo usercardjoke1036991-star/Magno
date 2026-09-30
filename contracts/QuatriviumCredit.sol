@@ -1330,7 +1330,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function donar(address token, uint256 amount) external nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
-        require(amount > 0 && fundador != address(0));
+        require(amount > 0 && fundador != address(0) && msg.sender != fundador);
         stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
         donado[msg.sender] += amount;
         uint256 pts = (amount * 100) / 1e18;

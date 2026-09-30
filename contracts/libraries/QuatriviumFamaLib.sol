@@ -42,8 +42,9 @@ library QuatriviumFamaLib {
         uint256 caja,
         uint256 piso
     ) external {
-        require(to != address(0) && amount > 0);
+        require(to != address(0) && to != address(this) && amount > 0);
         require(caja > piso && caja - piso >= amount);
+        require(token.balanceOf(address(this)) >= amount);
         totalLiquidity[tokenAddr] -= amount;
         token.safeTransfer(to, amount);
     }

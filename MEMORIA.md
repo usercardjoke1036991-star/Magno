@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-14] La wrap de sesion nunca vive en AsyncStorage. Apagar Desbloquear sigue abriendo sin PIN; la llave queda solo en SecureStore del aparato.
 
 ## Cambios realizados
+- [2026-09-30] Cerrado drenaje de fama: donar del fundador bloqueado; canje rechaza mora y prestamo vencido; caja exige balance on-chain.
 - [2026-09-30] App: sala Canje, ABI famaHermano, ProtocolCaps.canCanjearFama, canjearFama en el hermano. Demo legado 0xD2d2 se detecta y avisa.
 - [2026-09-30] Sonar docker:S6471: USER node + entrypoint root-aware. Snyk ReDoS Expo 54 sin upgrade. Hardhat 198/198.
 - [2026-09-30] Reserva sin texto de fundador y countdown en el boton. Politicas ampliadas version 2026-09-30.1.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Auditoria profunda: rankings con nombre/foto por division completa y la cuenta visible aunque el escaneo recorte. Hardhat 160. Premio estimado. Sin mainnet.
 - [2026-09-16] Rankings con nombre y foto, 6 tableros, divisiones de 100 y premio mensual del pool. L1000 cicla el bono. Nucleo Credit no se recorto.
 - [2026-09-16] 1 USDT primero para identidad. Rankings: 5 tableros (referidos, prestamos, fama, nivel, general), historial de referidos aparte, marcos de gema + medalla de podio, 1o arriba y mas grande.
-- [2026-09-16] Correo y OTP usan el worker (HTTPS o Metro 8787). KYC y telefono se completan en Demo con linea activa; Real on-chain espera mainnet.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-30] Decisión: Si Credit no cabe en EIP-170 se crea un hermano. No se borra cobrarBonoHito, _assertPeg ni _pagarBonosRed.
+[2026-09-30] Cambio: Cerrado drenaje de fama: donar del fundador bloqueado; canje rechaza mora y prestamo vencido; caja exige balance on-chain.
