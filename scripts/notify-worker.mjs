@@ -27,7 +27,9 @@ if (existsSync(workerEnv)) {
   dotenv.config({ path: workerEnv, override: wantProd });
 }
 
-const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = createRequire(import.meta.url)('./bscNetworks.cjs');
+const require = createRequire(import.meta.url);
+const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = require('./bscNetworks.cjs');
+const { sanitizeTelegramBot } = require('../utils/telegramBotName.cjs');
 const { sendTextbeltSms, isTextbeltConfigured } = createRequire(import.meta.url)('./textbeltSms.cjs');
 
 const PORT = Number(process.env.PORT || process.env.NOTIFY_PORT || 8787);
@@ -123,11 +125,6 @@ const rpcUnhealthy = (error) =>
   /timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN|502|503|504|missing response|failed to detect network|server error|network/i
     .test(String(error?.message || error || ''));
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const sanitizeTelegramBot = (value) =>
-  String(value || '')
-    .replace(/^@/, '')
-    .replace(/[^a-zA-Z0-9_]/g, '')
-    .slice(0, 32);
 const TELEGRAM_PUBLIC = sanitizeTelegramBot(
   process.env.TELEGRAM_BOT || process.env.EXPO_PUBLIC_TELEGRAM_BOT || ''
 );

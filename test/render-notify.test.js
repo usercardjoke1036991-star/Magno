@@ -157,6 +157,7 @@ describe('Render notify worker', function () {
       expect(botParsed.bot).to.equal('QuatriviumNotifyBot');
       expect(botParsed).to.not.have.property('token');
       expect(botBody.data).to.not.include('TELEGRAM_BOT_TOKEN');
+      expect(botBody.data).to.not.match(/\d{6,}:AA/);
     } finally {
       child.kill('SIGTERM');
     }
@@ -226,6 +227,72 @@ describe('Render notify worker', function () {
       expect(parsed).to.not.have.property('chainId');
       expect(parsed).to.not.have.property('sms');
       expect(parsed).to.not.have.property('attester');
+    } finally {
+      child.kill('SIGTERM');
+    }
+  });
+
+  it('does not publish a Telegram token on GET /telegram/bot', async function () {
+    this.timeout(20000);
+    const { spawn } = require('child_process');
+    const http = require('http');
+    const os = require('os');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'notify-tg-token-'));
+    const port = 20787 + Math.floor(Math.random() * 1000);
+    const fakeToken = '123456789:AAHfakeTokenForTestsOnly000001';
+    const child = spawn(process.execPath, [path.join(root, 'scripts', 'notify-worker.mjs')], {
+      cwd: root,
+      env: {
+        ...process.env,
+        PORT: String(port),
+        NOTIFY_BIND: '127.0.0.1',
+        NOTIFY_DATA_KEY: ['render-tg-key-', '32chars-ok!!'].join(''),
+        NOTIFY_DATA_FILE: path.join(dir, '.notify-data.json'),
+        EXPO_PUBLIC_CHAIN_ID: '97',
+        EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET: '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f',
+        NOTIFY_CORS_ORIGIN: '*',
+        TEXTBELT_API_KEY: ['paid-textbelt-', 'key-16'].join(''),
+        TELEGRAM_BOT: fakeToken,
+        EXPO_PUBLIC_TELEGRAM_BOT: fakeToken,
+        TELEGRAM_BOT_TOKEN: '',
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const waitStart = () =>
+      new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('worker start timeout')), 12000);
+        const onExit = (code) => {
+          clearTimeout(timer);
+          reject(new Error(`worker exited ${code}`));
+        };
+        const onData = (buf) => {
+          if (String(buf).includes('Avisos Quatrivium')) {
+            clearTimeout(timer);
+            child.removeListener('exit', onExit);
+            resolve();
+          }
+        };
+        child.stdout.on('data', onData);
+        child.stderr.on('data', onData);
+        child.once('exit', onExit);
+      });
+    try {
+      await waitStart();
+      const botBody = await new Promise((resolve, reject) => {
+        http
+          .get({ hostname: '127.0.0.1', port, path: '/telegram/bot' }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => {
+              data += chunk;
+            });
+            res.on('end', () => resolve({ status: res.statusCode, data }));
+          })
+          .on('error', reject);
+      });
+      expect(botBody.status).to.equal(200);
+      expect(botBody.data).to.not.include(fakeToken);
+      expect(botBody.data).to.not.include('AAHfakeTokenForTestsOnly000001');
+      expect(JSON.parse(botBody.data).bot).to.equal('');
     } finally {
       child.kill('SIGTERM');
     }
