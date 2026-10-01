@@ -41,6 +41,8 @@ describe('Render notify worker', function () {
     expect(worker).to.include('probeWritableDir');
     expect(dockerignore).to.include('!scripts/');
     expect(dockerignore).to.include('textbeltSms.cjs');
+    expect(dockerignore).to.include('telegramBotName.cjs');
+    expect(docker).to.include('telegramBotName.cjs');
     expect(worker).to.include("path === '/health'");
     expect(worker).to.include("path === '/'");
     expect(worker).to.include("service: 'quatrivium-notify'");

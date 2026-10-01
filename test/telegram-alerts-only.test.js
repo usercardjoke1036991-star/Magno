@@ -44,7 +44,7 @@ describe('alerts use Telegram only', function () {
     expect(worker).to.include('EXPO_PUBLIC_TELEGRAM_BOT');
     expect(worker).to.include('json(res, 200, { bot })');
     expect(worker).to.include('sanitizeTelegramBot');
-    expect(worker).to.include('telegramBotName.cjs');
+    expect(worker).to.include('./telegramBotName.cjs');
     expect(worker).to.not.match(/json\(res, 200, \{[^}]*TELEGRAM_TOKEN/);
   });
 

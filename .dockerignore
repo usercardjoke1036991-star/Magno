@@ -4,3 +4,4 @@
 !scripts/bscNetworks.cjs
 !scripts/textbeltSms.cjs
 !scripts/notify-entrypoint.sh
+!scripts/telegramBotName.cjs

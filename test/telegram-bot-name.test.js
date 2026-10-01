@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { looksLikeTelegramToken, sanitizeTelegramBot } = require('../utils/telegramBotName.cjs');
+const { looksLikeTelegramToken, sanitizeTelegramBot } = require('../scripts/telegramBotName.cjs');
 
 describe('telegram public bot name', function () {
   it('keeps a real username and drops tokens', function () {

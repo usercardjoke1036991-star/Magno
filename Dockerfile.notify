@@ -1,6 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY scripts/notify-worker.mjs scripts/bscNetworks.cjs scripts/textbeltSms.cjs scripts/notify-entrypoint.sh ./scripts/
+COPY scripts/notify-worker.mjs scripts/bscNetworks.cjs scripts/textbeltSms.cjs scripts/telegramBotName.cjs scripts/notify-entrypoint.sh ./scripts/
 RUN npm init -y && npm install ethers@6.15.0 dotenv@16.3.1 --omit=dev --ignore-scripts \
   && apk add --no-cache su-exec \
   && mkdir -p /data \

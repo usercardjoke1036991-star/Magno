@@ -29,7 +29,7 @@ if (existsSync(workerEnv)) {
 
 const require = createRequire(import.meta.url);
 const { BSC_MAINNET, BSC_TESTNET, isHexAddress, isZero } = require('./bscNetworks.cjs');
-const { sanitizeTelegramBot } = require('../utils/telegramBotName.cjs');
+const { sanitizeTelegramBot } = require('./telegramBotName.cjs');
 const { sendTextbeltSms, isTextbeltConfigured } = createRequire(import.meta.url)('./textbeltSms.cjs');
 
 const PORT = Number(process.env.PORT || process.env.NOTIFY_PORT || 8787);
