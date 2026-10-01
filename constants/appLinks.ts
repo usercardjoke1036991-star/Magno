@@ -4,9 +4,13 @@ export const PLAY_STORE_URL =
   process.env.EXPO_PUBLIC_PLAY_STORE_URL ||
   'https://play.google.com/store/apps/details?id=com.quatrivium.credit';
 
-export const INVITE_WEB_BASE = (process.env.EXPO_PUBLIC_INVITE_WEB_BASE || '').replace(/\/$/, '');
+const rawInviteWeb = (process.env.EXPO_PUBLIC_INVITE_WEB_BASE || 'https://quatriviumcredit.app').replace(
+  /\/$/,
+  ''
+);
+export const INVITE_WEB_BASE = isHttpsUrl(rawInviteWeb) ? rawInviteWeb : '';
 
-/** Enlace de referido mientras no hay Play ni web pública. Abre la app si está instalada. */
+/** Deep link si no hay web HTTPS. El enlace público es INVITE_WEB_BASE/invite. */
 export const INVITE_APP_SCHEME = 'quatrivium';
 
 export const TELEGRAM_BOT = (process.env.EXPO_PUBLIC_TELEGRAM_BOT || '').replace(/^@/, '');

@@ -219,6 +219,20 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
             setInviteDraft(value);
             setInviteError('');
           }}
+          onEndEditing={() => {
+            const trimmed = inviteDraft.trim();
+            if (!trimmed) {
+              setInviteError('');
+              return;
+            }
+            const resolved = resolveSponsorInput(trimmed, walletAddress);
+            if (!resolved.ok) {
+              setInviteError(resolved.reason === 'self' ? t('cannotSelfInvite') : t('invalidSponsor'));
+              return;
+            }
+            if (resolved.code) setInviteDraft(resolved.code);
+            setInviteError('');
+          }}
           placeholder={t('invitePlaceholder')}
           placeholderTextColor={colors.textMuted}
           autoCapitalize="characters"

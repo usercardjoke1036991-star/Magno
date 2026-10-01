@@ -331,6 +331,8 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(sonar).to.include('sonar.projectKey=usercardjoke1036991-star_Magno');
     expect(sonar).to.include('sonar.organization=usercardjoke1036991-star');
     expect(sonar).to.include('sonarcloud.io');
+    expect(sonar).to.include('**/i18n/gap-translations.json');
+    expect(sonar).to.include('secrets:S6703');
     expect(sonar).to.not.match(/sonar\.login=/);
     expect(sonar).to.not.match(/sonar\.token=/);
     const compose = fs.readFileSync(path.join(root, 'docker-compose.sonar.yml'), 'utf8');

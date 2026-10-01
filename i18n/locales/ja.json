@@ -144,7 +144,7 @@
   "remainingDebt": "残高 {amount}",
   "moraBlocked": "口座が延滞しています。操作とコミッション受取には債務の清算が必要です。",
   "shareDisabledMora": "支払いが延滞している間は招待できません。",
-  "inviteLinkHint": "リンクは https なので WhatsApp では青く表示されます。サイトがまだ公開されていない場合、リンクは Google Play を開き、コードが付きます。",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "WhatsApp で共有",
   "referralHistoryTitle": "紹介履歴",
   "referralPeopleOpen": "メンバーを見る",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "どの枠も装飾として着用できます。",
   "linkWalletSignNeed": "アドレスを保存するにはウォレットで署名が必要です。接続だけでは足りません。",
-  "splashTagline": "BNB Smart Chain上のプライベートクレジット"
+  "splashTagline": "BNB Smart Chain上のプライベートクレジット",
+  "notificationTelegramDone": "Telegram 連携済み",
+  "notificationTelegramLinked": "この口座は連携済みです。通知は Telegram に届きます。",
+  "notificationTelegramLinking": "Telegram を開いています…",
+  "notificationTelegramChange": "Telegram を変更",
+  "notificationTelegramChangeHint": "その Telegram アカウントを失った場合は、ここで別のものを連携します。",
+  "notificationTelegramChangeConfirm": "通知は新しい Telegram に届きます。現在のアカウントは届かなくなります。続けますか？",
+  "inviteLinkLabel": "Your invite link"
 }

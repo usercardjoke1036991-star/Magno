@@ -1073,11 +1073,24 @@ const notifyWallet = async (wallet, kind, text) => {
   await sendTelegram(chatId, text);
 };
 
+const telegramLinked = (wallet) => Boolean(store.telegramByWallet[String(wallet || '').toLowerCase()]);
+
 const bindTelegram = (wallet, chatId) => {
   const key = String(wallet).toLowerCase();
-  store.telegramByWallet[key] = String(chatId);
-  store.walletByChat[String(chatId)] = key;
+  const nextChat = String(chatId);
+  const prevChat = String(store.telegramByWallet[key] || '');
+  const same = Boolean(prevChat) && prevChat === nextChat;
+  if (prevChat && !same && store.walletByChat[prevChat] === key) {
+    delete store.walletByChat[prevChat];
+  }
+  const previousOwner = store.walletByChat[nextChat];
+  if (previousOwner && previousOwner !== key) {
+    delete store.telegramByWallet[previousOwner];
+  }
+  store.telegramByWallet[key] = nextChat;
+  store.walletByChat[nextChat] = key;
   saveStore(store);
+  return { same, replaced: Boolean(prevChat) && !same };
 };
 
 const consumeBindCode = (payload) => {
@@ -1116,10 +1129,15 @@ const pollTelegram = async () => {
         const payload = text.replace('/start', '').trim();
         const wallet = consumeBindCode(payload);
         if (wallet) {
-          bindTelegram(wallet, chatId);
-          await sendTelegram(chatId, 'Quatrivium Finance: Telegram quedó vinculado. Recibirá los dos avisos de pago (mitad de plazo y antes del corte). El resto de avisos es opcional.');
+          const bound = bindTelegram(wallet, chatId);
+          const text = bound.same
+            ? 'Quatrivium Finance: esta cuenta ya estaba vinculada. Recibirá los avisos aquí.'
+            : bound.replaced
+              ? 'Quatrivium Finance: Telegram se actualizó. Los avisos llegarán a este chat.'
+              : 'Quatrivium Finance: Telegram quedó vinculado. Recibirá los dos avisos de pago (mitad de plazo y antes del corte). El resto de avisos es opcional.';
+          await sendTelegram(chatId, text);
         } else {
-          await sendTelegram(chatId, 'Abra el vínculo desde Quatrivium Finance para vincular su billetera. No envíe una dirección a mano.');
+          await sendTelegram(chatId, 'Abra el vínculo desde Quatrivium Finance para vincular esta cuenta. No envíe una dirección a mano.');
         }
       }
     } catch {
@@ -1564,6 +1582,28 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
     json(res, 200, { ok: true });
     return;
   }
+  if (path === '/telegram/status') {
+    if (!rateLimit(ip, 30)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    let statusBody;
+    try {
+      statusBody = await readBody(req);
+    } catch (error) {
+      bodyError(res, error);
+      return;
+    }
+    let statusWallet;
+    try {
+      statusWallet = requireAuth(statusBody, ['vincular-avisos']).wallet;
+    } catch (error) {
+      json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    json(res, 200, { linked: telegramLinked(statusWallet) });
+    return;
+  }
   if (path === '/telegram/prepare') {
     if (!rateLimit(ip, 20)) {
       json(res, 429, { error: 'rate' });
@@ -1587,10 +1627,17 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       json(res, 401, { error: 'purpose' });
       return;
     }
+    if (telegramLinked(wallet) && body.replace !== true) {
+      json(res, 200, { linked: true });
+      return;
+    }
     store.pendingBinds = store.pendingBinds || {};
     const now = Date.now();
+    const walletKey = String(wallet).toLowerCase();
     for (const [code, item] of Object.entries(store.pendingBinds)) {
-      if (Number(item?.exp) < now) delete store.pendingBinds[code];
+      if (Number(item?.exp) < now || String(item?.wallet || '').toLowerCase() === walletKey) {
+        delete store.pendingBinds[code];
+      }
     }
     const pendingCount = Object.keys(store.pendingBinds).length;
     if (pendingCount > 2000) {

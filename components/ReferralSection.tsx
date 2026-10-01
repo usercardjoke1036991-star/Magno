@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Share, Alert, Pressable, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { addressToInviteCode, buildInviteLink } from '../utils/inviteCode';
+import { addressToInviteCode, buildInviteLink, inviteLinkPreview } from '../utils/inviteCode';
 import { AppIcon } from './icons';
 import { ProfileAvatar } from './ProfileAvatar';
 import { useUserProfile } from '../profile/ProfileContext';
@@ -260,9 +260,32 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           </View>
         </TouchableOpacity>
         {inviteLink ? (
-          <AppText selectable style={[styles.link, { color: colors.primary }]}>
-            {inviteLink}
-          </AppText>
+          <View>
+            <TouchableOpacity
+              style={styles.labelRow}
+              onPress={() => void handleCopyLink()}
+              disabled={isRestricted}
+              accessibilityRole="button"
+              accessibilityLabel={t('copyInviteLink')}
+            >
+              <AppIcon name="copy" size={14} color={colors.textMuted} />
+              <AppText style={[styles.label, { color: colors.textMuted }]}>{t('inviteLinkLabel')}</AppText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => void handleCopyLink()}
+              disabled={isRestricted}
+              accessibilityRole="button"
+              accessibilityLabel={t('copyInviteLink')}
+              style={[styles.linkBox, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <AppIcon name="globe" size={16} color={colors.primary} />
+              <AppText numberOfLines={2} selectable style={[styles.linkText, { color: colors.primary }]}>
+                {inviteLinkPreview(inviteLink)}
+              </AppText>
+              <AppIcon name="copy" size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+            <AppText style={[styles.linkHint, { color: colors.textMuted }]}>{t('inviteLinkHint')}</AppText>
+          </View>
         ) : null}
 
         <View style={styles.actions}>
@@ -501,7 +524,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   codePart: { fontFamily: 'monospace', fontSize: 15, letterSpacing: 0.6, fontWeight: '600' },
-  link: { fontSize: 12, marginBottom: 10 },
+  linkBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 6,
+  },
+  linkText: { flex: 1, fontSize: 13, fontWeight: '600' },
+  linkHint: { fontSize: 12, lineHeight: 18, marginBottom: 10 },
   actions: { gap: 8, marginBottom: 12 },
   action: {
     borderRadius: 12,

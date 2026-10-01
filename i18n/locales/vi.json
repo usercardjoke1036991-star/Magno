@@ -144,7 +144,7 @@
   "remainingDebt": "Dư nợ còn lại {amount}",
   "moraBlocked": "Tài khoản quá hạn. Tất toán nợ để vận hành và nhận hoa hồng.",
   "shareDisabledMora": "Bạn không thể mời khi một khoản thanh toán quá hạn.",
-  "inviteLinkHint": "Liên kết là https để WhatsApp hiện màu xanh. Nếu trang web chưa hoạt động, liên kết mở Google Play kèm mã của bạn.",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "Chia sẻ trên WhatsApp",
   "referralHistoryTitle": "Lịch sử giới thiệu",
   "referralPeopleOpen": "Xem người",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "Quý vị có thể đeo bất kỳ khung nào như phụ kiện.",
   "linkWalletSignNeed": "Phải ký trong ví để lưu địa chỉ. Chỉ kết nối thì chưa đủ.",
-  "splashTagline": "Tín dụng riêng trên BNB Smart Chain"
+  "splashTagline": "Tín dụng riêng trên BNB Smart Chain",
+  "notificationTelegramDone": "Đã liên kết Telegram",
+  "notificationTelegramLinked": "Tài khoản này đã được liên kết. Thông báo sẽ đến Telegram.",
+  "notificationTelegramLinking": "Đang mở Telegram…",
+  "notificationTelegramChange": "Đổi Telegram",
+  "notificationTelegramChangeHint": "Nếu mất tài khoản Telegram đó, hãy liên kết tài khoản khác tại đây.",
+  "notificationTelegramChangeConfirm": "Thông báo sẽ đến Telegram mới. Tài khoản hiện tại sẽ ngừng nhận. Tiếp tục?",
+  "inviteLinkLabel": "Your invite link"
 }

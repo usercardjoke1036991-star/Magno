@@ -144,7 +144,7 @@
   "remainingDebt": "Offener Saldo {amount}",
   "moraBlocked": "Konto überfällig. Begleichen Sie Ihre Schuld, um zu arbeiten und Provisionen zu erhalten.",
   "shareDisabledMora": "Sie können nicht einladen, solange eine Zahlung überfällig ist.",
-  "inviteLinkHint": "Der Link ist https, damit WhatsApp ihn blau anzeigt. Ist die Website noch nicht live, öffnet der Link Google Play mit Ihrem Code.",
+  "inviteLinkHint": "Wer den Link öffnet, tritt mit Ihrem Code bei. Der Code kann auch beim Kontoerstellen eingefügt werden.",
   "shareInviteWhatsApp": "Auf WhatsApp teilen",
   "referralHistoryTitle": "Empfehlungsverlauf",
   "referralPeopleOpen": "Personen ansehen",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "Sie können jeden Rahmen als Zierde tragen.",
   "linkWalletSignNeed": "Sie müssen in der Wallet signieren, um die Adresse zu speichern. Verbinden allein genügt nicht.",
-  "splashTagline": "Privater Kredit auf der BNB Smart Chain"
+  "splashTagline": "Privater Kredit auf der BNB Smart Chain",
+  "notificationTelegramDone": "Telegram verknüpft",
+  "notificationTelegramLinked": "Dieses Konto ist bereits verknüpft. Hinweise kommen in Telegram.",
+  "notificationTelegramLinking": "Telegram wird geöffnet…",
+  "notificationTelegramChange": "Telegram ändern",
+  "notificationTelegramChangeHint": "Wenn Sie dieses Telegram-Konto verlieren, verknüpfen Sie hier ein anderes.",
+  "notificationTelegramChangeConfirm": "Hinweise gehen an das neue Telegram. Das bisherige erhält keine mehr. Fortfahren?",
+  "inviteLinkLabel": "Your invite link"
 }

@@ -6,6 +6,12 @@ describe('alerts use Telegram only', function () {
   it('hides email, phone and WhatsApp from the alerts panel', function () {
     const ui = fs.readFileSync(path.join(__dirname, '..', 'components', 'NotificationChannels.tsx'), 'utf8');
     expect(ui).to.include('notificationOpenTelegram');
+    expect(ui).to.include('notificationTelegramDone');
+    expect(ui).to.include('disabled={telegramLocked}');
+    expect(ui).to.include('/telegram/status');
+    expect(ui).to.include('notificationTelegramChange');
+    expect(ui).to.include('confirmChangeTelegram');
+    expect(ui).to.include('replace: Boolean(replace)');
     expect(ui).to.not.include('notificationEmail');
     expect(ui).to.not.include('notificationWhatsApp');
     expect(ui).to.not.include('notificationPhone');
@@ -40,6 +46,11 @@ describe('alerts use Telegram only', function () {
     expect(bot).to.include("'/telegram/bot'");
     expect(bot).to.not.include('TELEGRAM_BOT_TOKEN');
     expect(worker).to.include("path === '/telegram/bot'");
+    expect(worker).to.include("path === '/telegram/status'");
+    expect(worker).to.include('telegramLinked');
+    expect(worker).to.include('{ linked: true }');
+    expect(worker).to.include('body.replace !== true');
+    expect(worker).to.include('replaced:');
     expect(worker).to.include('/getMe');
     expect(worker).to.include('EXPO_PUBLIC_TELEGRAM_BOT');
     expect(worker).to.include('json(res, 200, { bot })');
@@ -61,6 +72,7 @@ describe('alerts use Telegram only', function () {
   it('shares an app invite link, not Play Store', function () {
     const invite = fs.readFileSync(path.join(__dirname, '..', 'utils', 'inviteCode.ts'), 'utf8');
     expect(invite).to.include('INVITE_APP_SCHEME');
+    expect(invite).to.include('INVITE_WEB_BASE');
     expect(invite).to.include('://invite?c=');
     expect(invite).to.not.include('PLAY_STORE_URL');
   });

@@ -144,7 +144,7 @@
   "remainingDebt": "বকেয়া ব্যালেন্স {amount}",
   "moraBlocked": "অ্যাকাউন্ট বকেয়া। চালাতে ও কমিশন পেতে ঋণ নিষ্পত্তি করুন।",
   "shareDisabledMora": "পরিশোধ বকেয়া থাকলে আমন্ত্রণ জানাতে পারবেন না।",
-  "inviteLinkHint": "লিঙ্ক https যাতে WhatsApp নীল দেখায়। ওয়েবসাইট এখনো চালু না থাকলে লিঙ্ক আপনার কোডসহ Google Play খোলে।",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "WhatsApp-এ শেয়ার করুন",
   "referralHistoryTitle": "রেফারেল ইতিহাস",
   "referralPeopleOpen": "ব্যক্তি দেখুন",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "যে কোনো ফ্রেম আনুষঙ্গিক হিসেবে পরতে পারেন।",
   "linkWalletSignNeed": "ঠিকানা সংরক্ষণে ওয়ালেটে স্বাক্ষর করতে হবে। শুধু সংযোগ যথেষ্ট নয়।",
-  "splashTagline": "BNB Smart Chain-এ ব্যক্তিগত ঋণ"
+  "splashTagline": "BNB Smart Chain-এ ব্যক্তিগত ঋণ",
+  "notificationTelegramDone": "Telegram যুক্ত",
+  "notificationTelegramLinked": "এই অ্যাকাউন্ট ইতিমধ্যে যুক্ত। বিজ্ঞপ্তি Telegram-এ যাবে।",
+  "notificationTelegramLinking": "Telegram খোলা হচ্ছে…",
+  "notificationTelegramChange": "Telegram বদলান",
+  "notificationTelegramChangeHint": "সেই Telegram অ্যাকাউন্ট হারালে এখানে অন্যটি যুক্ত করুন।",
+  "notificationTelegramChangeConfirm": "বিজ্ঞপ্তি নতুন Telegram-এ যাবে। বর্তমানটি পাবে না। চালিয়ে যাবেন?",
+  "inviteLinkLabel": "Your invite link"
 }

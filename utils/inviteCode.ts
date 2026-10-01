@@ -1,6 +1,6 @@
 import { getAddress, isAddress } from 'ethers';
 import * as Linking from 'expo-linking';
-import { INVITE_APP_SCHEME } from '../constants/appLinks';
+import { INVITE_APP_SCHEME, INVITE_WEB_BASE } from '../constants/appLinks';
 import { stripUnsafeText } from './sanitize';
 import { storeSlot } from './storeSlot';
 
@@ -177,6 +177,27 @@ export function parseInviteInput(raw?: string): string | null | '' {
 
 export function buildInviteLink(code: string, displayName = ''): string {
   const compact = normalizeCode(code);
-  const nameQuery = displayName ? `&n=${encodeURIComponent(displayName.slice(0, 24))}` : '';
-  return `${INVITE_APP_SCHEME}://invite?c=${compact}${nameQuery}`;
+  if (compact.length !== 32) return '';
+  const nameQuery = displayName ? `&n=${encodeURIComponent(stripUnsafeText(displayName, 24))}` : '';
+  const appLink = `${INVITE_APP_SCHEME}://invite?c=${compact}${nameQuery}`;
+  if (INVITE_WEB_BASE) {
+    return `${INVITE_WEB_BASE}/invite?c=${compact}${nameQuery}`;
+  }
+  return appLink;
+}
+
+/** Texto corto para la tarjeta. El copiado sigue siendo la URL completa. */
+export function inviteLinkPreview(link: string): string {
+  const trimmed = String(link || '').trim();
+  if (!trimmed) return '';
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol === 'https:') {
+      return `${url.host}${url.pathname}`.replace(/\/$/, '') || trimmed;
+    }
+    if (url.protocol === `${INVITE_APP_SCHEME}:`) return `${INVITE_APP_SCHEME}://invite`;
+  } catch {
+    // ignore
+  }
+  return trimmed.length > 42 ? `${trimmed.slice(0, 36)}…` : trimmed;
 }

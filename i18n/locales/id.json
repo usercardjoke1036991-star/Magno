@@ -144,7 +144,7 @@
   "remainingDebt": "Sisa utang {amount}",
   "moraBlocked": "Akun tunggakan. Lunasi utang untuk beroperasi dan menerima komisi.",
   "shareDisabledMora": "Anda tidak bisa mengundang selagi pembayaran menunggak.",
-  "inviteLinkHint": "Tautannya https agar WhatsApp menampilkannya biru. Jika situs belum hidup, tautan membuka Google Play dengan kode Anda.",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "Bagikan di WhatsApp",
   "referralHistoryTitle": "Riwayat referral",
   "referralPeopleOpen": "Lihat orang",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "Anda dapat memakai bingkai apa pun sebagai aksesori.",
   "linkWalletSignNeed": "Anda harus menandatangani di dompet untuk menyimpan alamat. Menghubungkan saja tidak cukup.",
-  "splashTagline": "Kredit privat di BNB Smart Chain"
+  "splashTagline": "Kredit privat di BNB Smart Chain",
+  "notificationTelegramDone": "Telegram tertaut",
+  "notificationTelegramLinked": "Akun ini sudah tertaut. Pemberitahuan akan masuk ke Telegram.",
+  "notificationTelegramLinking": "Membuka Telegram…",
+  "notificationTelegramChange": "Ganti Telegram",
+  "notificationTelegramChangeHint": "Jika akun Telegram itu hilang, tautkan yang lain di sini.",
+  "notificationTelegramChangeConfirm": "Pemberitahuan akan ke Telegram baru. Yang sekarang berhenti menerima. Lanjutkan?",
+  "inviteLinkLabel": "Your invite link"
 }

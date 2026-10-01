@@ -144,7 +144,7 @@
   "remainingDebt": "Outstanding balance {amount}",
   "moraBlocked": "Payment overdue. 30-day grace; then earnings and reputation lock until you pay.",
   "shareDisabledMora": "You cannot invite while you have an overdue payment.",
-  "inviteLinkHint": "Share your link.",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "Share on WhatsApp",
   "referralHistoryTitle": "Referral history",
   "referralPeopleOpen": "View people",
@@ -1014,7 +1014,7 @@
   "famePageOf": "Page {page} of {pages}",
   "fameYou": "You",
   "signupInviteLabel": "Invite code (optional)",
-  "signupInviteLead": "Only when you open the account. Leave it blank to start your own line. It cannot be changed later.",
+  "signupInviteLead": "Only when you open the account. You can paste the code with dashes or spaces, or the invite link. Leave it blank to start your own line. It cannot be changed later.",
   "referralOwnChain": "No code. Starts a new line.",
   "referralUplineLocked": "Upline locked: {code}",
   "verifyFeeEmailLead": "Confirm the code sent to your email.",
@@ -1150,6 +1150,7 @@
   "guideHistoryBody": "Loans, payments, transfers, access, bonuses and donations on this account.",
   "copyInviteLink": "Copy link",
   "inviteLinkCopied": "Link copied.",
+  "inviteLinkLabel": "Your invite link",
   "referralEarnColGen": "Generation",
   "referralEarnColPct": "Of interest",
   "referralEarnExamples": "If a direct referral repays these levels, you earn:",
@@ -1175,5 +1176,11 @@
   "wearingFrame": "In use",
   "founderFramesHint": "You can wear any frame as an accessory.",
   "linkWalletSignNeed": "Sign in the linked wallet to save the address. Connecting it is not enough.",
-  "splashTagline": "Private credit on BNB Smart Chain"
+  "splashTagline": "Private credit on BNB Smart Chain",
+  "notificationTelegramDone": "Telegram linked",
+  "notificationTelegramLinked": "This account is already linked. You will receive alerts in Telegram.",
+  "notificationTelegramLinking": "Opening Telegram…",
+  "notificationTelegramChange": "Change Telegram",
+  "notificationTelegramChangeHint": "If you lose that Telegram account, link another one here.",
+  "notificationTelegramChangeConfirm": "Alerts will go to the new Telegram. The current one will stop receiving them. Continue?"
 }

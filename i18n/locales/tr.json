@@ -144,7 +144,7 @@
   "remainingDebt": "Kalan bakiye {amount}",
   "moraBlocked": "Hesap gecikmede. İşlem yapmak ve komisyon almak için borcunuzu kapatın.",
   "shareDisabledMora": "Ödeme gecikmişken davet edemezsiniz.",
-  "inviteLinkHint": "Bağlantı https olduğu için WhatsApp mavi gösterir. Site henüz yayında değilse bağlantı kodunuzla Google Play’i açar.",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "WhatsApp’ta paylaş",
   "referralHistoryTitle": "Referans geçmişi",
   "referralPeopleOpen": "Kişileri gör",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "Her çerçeveyi aksesuar olarak takabilirsiniz.",
   "linkWalletSignNeed": "Adresi kaydetmek için cüzdanda imzalamanız gerekir. Bağlamak yetmez.",
-  "splashTagline": "BNB Smart Chain üzerinde özel kredi"
+  "splashTagline": "BNB Smart Chain üzerinde özel kredi",
+  "notificationTelegramDone": "Telegram bağlı",
+  "notificationTelegramLinked": "Bu hesap zaten bağlı. Bildirimler Telegram’a gelir.",
+  "notificationTelegramLinking": "Telegram açılıyor…",
+  "notificationTelegramChange": "Telegram’ı değiştir",
+  "notificationTelegramChangeHint": "O Telegram hesabını kaybederseniz, buradan başka birini bağlayın.",
+  "notificationTelegramChangeConfirm": "Bildirimler yeni Telegram’a gider. Eski hesap almayı bırakır. Devam?",
+  "inviteLinkLabel": "Your invite link"
 }

@@ -144,7 +144,7 @@
   "remainingDebt": "Saldo em aberto {amount}",
   "moraBlocked": "Conta em atraso. Regularize a dívida para operar e receber comissões.",
   "shareDisabledMora": "Você não pode convidar enquanto um pagamento estiver em atraso.",
-  "inviteLinkHint": "O link é https para o WhatsApp mostrar em azul. Se o site ainda não estiver no ar, o link abre o Google Play com o seu código.",
+  "inviteLinkHint": "Quem abrir entra com o seu código. Também pode colar o código ao criar a conta.",
   "shareInviteWhatsApp": "Compartilhar no WhatsApp",
   "referralHistoryTitle": "Histórico de indicações",
   "referralPeopleOpen": "Ver pessoas",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "Pode usar qualquer moldura como acessório.",
   "linkWalletSignNeed": "É preciso assinar na carteira para guardar o endereço. Conectar não basta.",
-  "splashTagline": "Crédito privado na BNB Smart Chain"
+  "splashTagline": "Crédito privado na BNB Smart Chain",
+  "notificationTelegramDone": "Telegram vinculado",
+  "notificationTelegramLinked": "Esta conta já está vinculada. Os avisos chegam no Telegram.",
+  "notificationTelegramLinking": "A abrir o Telegram…",
+  "notificationTelegramChange": "Alterar Telegram",
+  "notificationTelegramChangeHint": "Se perder essa conta de Telegram, vincule outra aqui.",
+  "notificationTelegramChangeConfirm": "Os avisos passam para o Telegram novo. O atual deixa de os receber. Continuar?",
+  "inviteLinkLabel": "Your invite link"
 }

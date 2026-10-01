@@ -144,7 +144,7 @@
   "remainingDebt": "الرصيد المتبقي {amount}",
   "moraBlocked": "الحساب متعثر. سوِّ دينك للعمل وتلقي العمولات.",
   "shareDisabledMora": "لا يمكنك الدعوة أثناء تأخر دفعة.",
-  "inviteLinkHint": "الرابط بصيغة https ليظهر أزرق في WhatsApp. إن لم يكن الموقع جاهزاً بعد، يفتح الرابط Google Play مع رمزك.",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "مشاركة عبر WhatsApp",
   "referralHistoryTitle": "سجل الإحالات",
   "referralPeopleOpen": "عرض الأشخاص",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "يمكنكم ارتداء أي إطار كإكسسوار.",
   "linkWalletSignNeed": "يجب التوقيع في المحفظة لحفظ العنوان. الربط وحده لا يكفي.",
-  "splashTagline": "ائتمان خاص على شبكة BNB Smart Chain"
+  "splashTagline": "ائتمان خاص على شبكة BNB Smart Chain",
+  "notificationTelegramDone": "تيليغرام مرتبط",
+  "notificationTelegramLinked": "هذا الحساب مرتبط مسبقاً. ستصل التنبيهات إلى تيليغرام.",
+  "notificationTelegramLinking": "جارٍ فتح تيليغرام…",
+  "notificationTelegramChange": "تغيير تيليغرام",
+  "notificationTelegramChangeHint": "إذا فقدت حساب تيليغرام ذلك، اربط حساباً آخر هنا.",
+  "notificationTelegramChangeConfirm": "ستصل التنبيهات إلى تيليغرام الجديد. الحالي سيتوقف عن استلامها. متابعة؟",
+  "inviteLinkLabel": "Your invite link"
 }

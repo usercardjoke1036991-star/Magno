@@ -144,7 +144,7 @@
   "remainingDebt": "बकाया शेष {amount}",
   "moraBlocked": "खाता बकाया। संचालन और कमीशन पाने के लिए कर्ज़ निपटाएँ।",
   "shareDisabledMora": "भुगतान बकाया रहने तक आमंत्रित नहीं कर सकते।",
-  "inviteLinkHint": "लिंक https है ताकि WhatsApp उसे नीला दिखाए। अगर वेबसाइट अभी चालू नहीं है, तो लिंक आपके कोड के साथ Google Play खोलता है।",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "WhatsApp पर साझा करें",
   "referralHistoryTitle": "रेफ़रल इतिहास",
   "referralPeopleOpen": "लोग देखें",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "आप कोई भी फ़्रेम सहायक के रूप में पहन सकते हैं।",
   "linkWalletSignNeed": "पता सहेजने के लिए वॉलेट में हस्ताक्षर आवश्यक है। केवल जोड़ना पर्याप्त नहीं।",
-  "splashTagline": "BNB Smart Chain पर निजी ऋण"
+  "splashTagline": "BNB Smart Chain पर निजी ऋण",
+  "notificationTelegramDone": "Telegram जुड़ गया",
+  "notificationTelegramLinked": "यह खाता पहले से जुड़ा है। सूचनाएँ Telegram पर आएंगी।",
+  "notificationTelegramLinking": "Telegram खुल रहा है…",
+  "notificationTelegramChange": "Telegram बदलें",
+  "notificationTelegramChangeHint": "अगर वह Telegram खाता खो जाए, तो यहाँ दूसरा जोड़ें।",
+  "notificationTelegramChangeConfirm": "सूचनाएँ नए Telegram पर जाएँगी। वर्तमान वाला बंद हो जाएगा। जारी रखें?",
+  "inviteLinkLabel": "Your invite link"
 }

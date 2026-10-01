@@ -144,7 +144,7 @@
   "remainingDebt": "잔여 채무 {amount}",
   "moraBlocked": "계정이 연체되었습니다. 운영하고 수수료를 받으려면 채무를 정산하세요.",
   "shareDisabledMora": "연체된 납부가 있으면 초대할 수 없습니다.",
-  "inviteLinkHint": "링크는 https라서 WhatsApp에서 파란색으로 표시됩니다. 웹사이트가 아직 없으면 링크가 Google Play를 열고 코드가 붙습니다.",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "WhatsApp으로 공유",
   "referralHistoryTitle": "추천 기록",
   "referralPeopleOpen": "사람 보기",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "어떤 테두리든 장식으로 착용할 수 있습니다.",
   "linkWalletSignNeed": "주소를 저장하려면 지갑에서 서명해야 합니다. 연결만으로는 부족합니다.",
-  "splashTagline": "BNB Smart Chain 기반 프라이빗 크레딧"
+  "splashTagline": "BNB Smart Chain 기반 프라이빗 크레딧",
+  "notificationTelegramDone": "Telegram 연결됨",
+  "notificationTelegramLinked": "이 계정은 이미 연결되었습니다. 알림은 Telegram으로 갑니다.",
+  "notificationTelegramLinking": "Telegram 여는 중…",
+  "notificationTelegramChange": "Telegram 변경",
+  "notificationTelegramChangeHint": "그 Telegram 계정을 잃으면 여기에서 다른 계정을 연결하세요.",
+  "notificationTelegramChangeConfirm": "알림은 새 Telegram으로 갑니다. 현재 계정은 더 이상 받지 않습니다. 계속할까요?",
+  "inviteLinkLabel": "Your invite link"
 }

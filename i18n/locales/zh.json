@@ -144,7 +144,7 @@
   "remainingDebt": "剩余欠款 {amount}",
   "moraBlocked": "账户已逾期。结清债务后才能操作并获得佣金。",
   "shareDisabledMora": "有逾期款项时无法邀请。",
-  "inviteLinkHint": "链接使用 https，以便 WhatsApp 显示为蓝色。若网站尚未上线，链接会打开 Google Play 并带上您的邀请码。",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "通过 WhatsApp 分享",
   "referralHistoryTitle": "邀请记录",
   "referralPeopleOpen": "查看人员",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "您可将任意边框作为配饰佩戴。",
   "linkWalletSignNeed": "必须在钱包中签名才能保存地址。仅连接不足够。",
-  "splashTagline": "基于 BNB Smart Chain 的私人信贷"
+  "splashTagline": "基于 BNB Smart Chain 的私人信贷",
+  "notificationTelegramDone": "已关联 Telegram",
+  "notificationTelegramLinked": "此账户已关联。提醒将发到 Telegram。",
+  "notificationTelegramLinking": "正在打开 Telegram…",
+  "notificationTelegramChange": "更换 Telegram",
+  "notificationTelegramChangeHint": "若丢失该 Telegram 账户，可在此关联另一个。",
+  "notificationTelegramChangeConfirm": "提醒将发到新的 Telegram。当前账户将不再收到。继续？",
+  "inviteLinkLabel": "Your invite link"
 }

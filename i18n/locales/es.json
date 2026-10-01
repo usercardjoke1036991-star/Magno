@@ -144,7 +144,7 @@
   "remainingDebt": "Saldo pendiente {amount}",
   "moraBlocked": "Pago vencido. 30 días de gracia; luego se bloquean ganancias y reputación.",
   "shareDisabledMora": "No puede invitar mientras tenga un pago vencido.",
-  "inviteLinkHint": "Comparta su enlace.",
+  "inviteLinkHint": "Quien lo abre entra con su código. También puede pegar el código al crear la cuenta.",
   "shareInviteWhatsApp": "Compartir por WhatsApp",
   "referralHistoryTitle": "Historial de referidos",
   "referralPeopleOpen": "Ver personas",
@@ -1014,7 +1014,7 @@
   "famePageOf": "Página {page} de {pages}",
   "fameYou": "Usted",
   "signupInviteLabel": "Código de referido (opcional)",
-  "signupInviteLead": "Únicamente al abrir la cuenta. Si lo deja en blanco, inicia su propia cadena. Después no puede cambiarse.",
+  "signupInviteLead": "Únicamente al abrir la cuenta. Acepta el código con guiones o espacios, o el enlace. Si lo deja en blanco, inicia su propia cadena. Después no puede cambiarse.",
   "referralOwnChain": "Sin código. Empieza una cadena nueva.",
   "referralUplineLocked": "Invitación fijada: {code}",
   "verifyFeeEmailLead": "Confirme el código enviado a su correo.",
@@ -1150,6 +1150,7 @@
   "guideHistoryBody": "Préstamos, pagos, transferencias, acceso, bonos y donaciones de esta cuenta.",
   "copyInviteLink": "Copiar enlace",
   "inviteLinkCopied": "Enlace copiado.",
+  "inviteLinkLabel": "Su enlace de invitación",
   "referralEarnColGen": "Generación",
   "referralEarnColPct": "Del interés",
   "referralEarnExamples": "Si un directo cancela estos niveles, usted cobra:",
@@ -1175,5 +1176,11 @@
   "wearingFrame": "En uso",
   "founderFramesHint": "Puede poner cualquier marco como accesorio.",
   "linkWalletSignNeed": "Firme en la billetera para guardar la dirección. Conectarla no basta.",
-  "splashTagline": "Crédito privado sobre BNB Smart Chain"
+  "splashTagline": "Crédito privado sobre BNB Smart Chain",
+  "notificationTelegramDone": "Telegram vinculado",
+  "notificationTelegramLinked": "Esta cuenta ya está vinculada. Recibirá los avisos en Telegram.",
+  "notificationTelegramLinking": "Abriendo Telegram…",
+  "notificationTelegramChange": "Cambiar Telegram",
+  "notificationTelegramChangeHint": "Si pierde esa cuenta de Telegram, vincule otra aquí.",
+  "notificationTelegramChangeConfirm": "Los avisos pasarán al Telegram nuevo. El actual dejará de recibirlos. ¿Continuar?"
 }

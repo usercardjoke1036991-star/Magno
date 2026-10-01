@@ -144,7 +144,7 @@
   "remainingDebt": "Остаток долга {amount}",
   "moraBlocked": "Счёт в просрочке. Погасите долг, чтобы работать и получать комиссии.",
   "shareDisabledMora": "Нельзя приглашать, пока платёж просрочен.",
-  "inviteLinkHint": "Ссылка на https, чтобы WhatsApp показывал её синим. Если сайт ещё не запущен, ссылка откроет Google Play с вашим кодом.",
+  "inviteLinkHint": "Whoever opens it joins with your code. They can also paste the code when creating the account.",
   "shareInviteWhatsApp": "Поделиться в WhatsApp",
   "referralHistoryTitle": "История рефералов",
   "referralPeopleOpen": "Смотреть людей",
@@ -1175,5 +1175,12 @@
   "wearingFrame": "In use",
   "founderFramesHint": "Вы можете носить любую рамку как аксессуар.",
   "linkWalletSignNeed": "Нужно подписать в кошельке, чтобы сохранить адрес. Одного подключения недостаточно.",
-  "splashTagline": "Частный кредит в сети BNB Smart Chain"
+  "splashTagline": "Частный кредит в сети BNB Smart Chain",
+  "notificationTelegramDone": "Telegram привязан",
+  "notificationTelegramLinked": "Этот счёт уже привязан. Уведомления придут в Telegram.",
+  "notificationTelegramLinking": "Открытие Telegram…",
+  "notificationTelegramChange": "Сменить Telegram",
+  "notificationTelegramChangeHint": "Если этот аккаунт Telegram потеряется, привяжите другой здесь.",
+  "notificationTelegramChangeConfirm": "Уведомления пойдут в новый Telegram. Текущий перестанет их получать. Продолжить?",
+  "inviteLinkLabel": "Your invite link"
 }

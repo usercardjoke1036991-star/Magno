@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -20,6 +20,12 @@ interface NotificationChannelsProps {
   walletAddress: string;
 }
 
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   walletAddress,
 }) => {
@@ -34,6 +40,8 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
   const [botName, setBotName] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [linked, setLinked] = useState(false);
 
   React.useEffect(() => {
     loadNotificationProfile()
@@ -57,6 +65,37 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       live = false;
     };
   }, []);
+
+  const readLinked = useCallback(async (): Promise<boolean> => {
+    if (!walletAddress || !notifyApiConfigured()) return false;
+    try {
+      const signer = await loadAppWallet();
+      if (!signer) return false;
+      const auth = await signedAuthBody(signer, walletAddress, 'vincular-avisos');
+      const { response, body } = await notifyJsonBody<{ linked?: boolean }>('/telegram/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(auth),
+      });
+      const ok = Boolean(response.ok && body.linked);
+      if (ok) setLinked(true);
+      return ok;
+    } catch {
+      return false;
+    }
+  }, [walletAddress]);
+
+  React.useEffect(() => {
+    let live = true;
+    readLinked()
+      .then((ok) => {
+        if (live && ok) setLinked(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [readLinked]);
 
   const toggle = (key: keyof NotificationPrefs) => {
     if (key === 'email' || key === 'debt') return;
@@ -90,7 +129,8 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
     }
   };
 
-  const handleTelegram = async () => {
+  const handleTelegram = async (replace = false) => {
+    if (busy || (!replace && linked)) return;
     const bot = botName || (await resolveTelegramBot());
     if (!bot) {
       Alert.alert(t('notificationTelegram'), t('telegramNeedApi'));
@@ -104,40 +144,84 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       Alert.alert(t('notificationTelegram'), t('telegramNeedApi'));
       return;
     }
+    setBusy(true);
     try {
+      if (!replace && (await readLinked())) return;
       const signer = await loadAppWallet();
       if (!signer) {
         Alert.alert(t('connect'), t('appWalletNotReady'));
         return;
       }
       const auth = await signedAuthBody(signer, walletAddress, 'vincular-avisos');
-      const { response, body } = await notifyJsonBody<{ code?: string }>('/telegram/prepare', {
+      const { response, body } = await notifyJsonBody<{ code?: string; linked?: boolean }>('/telegram/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(auth),
+        body: JSON.stringify({ ...auth, replace: Boolean(replace) }),
       });
       if (!response.ok) {
         throw new Error('prepare');
       }
+      if (body.linked && !replace) {
+        setLinked(true);
+        return;
+      }
       if (!body.code || !/^[a-z0-9]{8,16}$/.test(body.code)) throw new Error('code');
       const opened = await openSafeUrl(`https://t.me/${bot}?start=${body.code}`);
       if (!opened) throw new Error('open');
+      for (let i = 0; i < 8; i += 1) {
+        await wait(2000);
+        if (await readLinked()) return;
+      }
     } catch {
       Alert.alert(t('error'), t('telegramNeedApi'));
+    } finally {
+      setBusy(false);
     }
   };
+
+  const confirmChangeTelegram = () => {
+    if (busy) return;
+    Alert.alert(t('notificationTelegramChange'), t('notificationTelegramChangeConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('notificationTelegramChange'), onPress: () => void handleTelegram(true) },
+    ]);
+  };
+
+  const telegramLocked = linked || busy;
+  const telegramLabel = linked
+    ? t('notificationTelegramDone')
+    : busy
+      ? t('notificationTelegramLinking')
+      : t('notificationOpenTelegram');
+  const telegramHint = linked ? t('notificationTelegramLinked') : t('notificationTelegramHint');
 
   return (
     <View>
       <AppText style={[styles.lead, { color: colors.text }]}>{t('notificationLead')}</AppText>
 
-      <TouchableOpacity style={[styles.secondary, { borderColor: colors.border }]} onPress={handleTelegram}>
+      <TouchableOpacity
+        style={[styles.secondary, { borderColor: colors.border }, telegramLocked && styles.disabled]}
+        onPress={() => void handleTelegram()}
+        disabled={telegramLocked}
+      >
         <View style={styles.btnRow}>
           <AppIcon name="telegram" size={16} color={colors.text} />
-          <AppText style={[styles.secondaryText, { color: colors.text }]}>{t('notificationOpenTelegram')}</AppText>
+          <AppText style={[styles.secondaryText, { color: colors.text }]}>{telegramLabel}</AppText>
         </View>
       </TouchableOpacity>
-      <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationTelegramHint')}</AppText>
+      <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{telegramHint}</AppText>
+      {linked ? (
+        <TouchableOpacity
+          style={[styles.change, { borderColor: colors.border }, busy && styles.disabled]}
+          onPress={confirmChangeTelegram}
+          disabled={busy}
+        >
+          <AppText style={[styles.changeText, { color: colors.text }]}>{t('notificationTelegramChange')}</AppText>
+        </TouchableOpacity>
+      ) : null}
+      {linked ? (
+        <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationTelegramChangeHint')}</AppText>
+      ) : null}
 
       <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <View style={styles.switchLabelRow}>
@@ -198,6 +282,17 @@ const styles = StyleSheet.create({
   secondaryText: {
     fontWeight: '500',
     fontSize: 13,
+  },
+  change: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  changeText: {
+    fontWeight: '500',
+    fontSize: 12,
   },
   alwaysOn: {
     borderWidth: 1,
