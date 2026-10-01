@@ -63,6 +63,10 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     mapping(address => Posicion) public posiciones;
     mapping(address => uint256) public boostPagado;
     mapping(bytes32 => bool) public boostUsado;
+    mapping(address => uint256) public lastBoostAt;
+    address public pendienteFamaCaja;
+    uint256 public pendienteFamaCajaDesde;
+    uint256 public constant BOOST_GAP = 1 days;
 
     error SoloOwner();
     error NoAutorizado();
@@ -174,26 +178,49 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
 
     function setFamaCaja(address next) external onlyOwner {
         if (next == address(0)) revert DestinoCero();
-        famaCaja = next;
+        if (famaCaja == address(0)) {
+            famaCaja = next;
+            return;
+        }
+        pendienteFamaCaja = next;
+        pendienteFamaCajaDesde = block.timestamp;
+    }
+
+    function applyFamaCaja() external onlyOwner {
+        if (pendienteFamaCaja == address(0) || pendienteFamaCajaDesde == 0) revert NadaQueMover();
+        if (block.timestamp < pendienteFamaCajaDesde + CAMBIO_ESPERA) revert EsperaTimelock();
+        famaCaja = pendienteFamaCaja;
+        pendienteFamaCaja = address(0);
+        pendienteFamaCajaDesde = 0;
+    }
+
+    function boostIdOf(address beneficiario, uint256 montoBase, bytes32 salt) public view returns (bytes32) {
+        return keccak256(abi.encode(block.chainid, credit, beneficiario, montoBase, salt));
     }
 
     /// @notice Extra sobre una comisión de red ya pagada por Credit. Sale del pool, no del bote.
     ///         Lo llama el attester con un id único por evento.
-    function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 id)
+    function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 salt)
         external
         onlyEOA
         whenNotPaused
         nonReentrant
     {
         if (!_esAttesterCredit()) revert NoAutorizado();
-        if (id == bytes32(0) || boostUsado[id]) revert YaPagado();
-        if (beneficiario == address(0) || montoBase == 0) revert MontoCero();
+        if (credit != address(0) && IQuatriviumCreditView(credit).paused()) revert CreditoPausado();
+        if (beneficiario == address(0) || montoBase == 0 || salt == bytes32(0)) revert MontoCero();
+        bytes32 id = boostIdOf(beneficiario, montoBase, salt);
+        if (boostUsado[id]) revert YaPagado();
+        if (lastBoostAt[beneficiario] != 0 && block.timestamp < lastBoostAt[beneficiario] + BOOST_GAP) {
+            revert YaPagado();
+        }
 
         (uint256 extra, uint256 founderCut) = extraComisionDe(beneficiario, montoBase);
         if (extra == 0) revert NadaQueMover();
 
         if (famaCaja == address(0)) revert DestinoCero();
         boostUsado[id] = true;
+        lastBoostAt[beneficiario] = block.timestamp;
         boostPagado[beneficiario] += extra;
         uint256 userPay = extra - founderCut;
         if (userPay > 0) IFamaPoolPay(famaCaja).pagarDesdePool(beneficiario, userPay);

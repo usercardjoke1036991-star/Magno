@@ -114,9 +114,9 @@ contract QuatriviumCreditForgeTest is Test {
     function _onboard(address who) internal {
         vm.prank(who, who);
         credit.registrarHumanoConPadre(address(0));
+        _attest(who);
         vm.prank(who, who);
         credit.declararKyc();
-        _attest(who);
         token.mint(who, 50 ether);
         vm.prank(who);
         token.approve(address(credit), type(uint256).max);
@@ -127,7 +127,7 @@ contract QuatriviumCreditForgeTest is Test {
         bytes32 deviceHash = keccak256(abi.encodePacked(who, ":device"));
         uint256 deadline = block.timestamp + 3600;
         bytes32 packed = keccak256(
-            abi.encode(who, phoneHash, deviceHash, deadline, block.chainid, address(credit))
+            abi.encode(who, phoneHash, deviceHash, deadline, credit.attestNonce(who), block.chainid, address(credit))
         );
         bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", packed));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPk, digest);

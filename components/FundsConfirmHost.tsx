@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { authenticateBiometric, checkPassword, checkPin } from '../services/appLock';
+import { checkPassword, checkPin, loadWrapFromBiometric } from '../services/appLock';
 import { verifyAuthenticator } from '../services/authenticator';
 import { getAuthMethods, isAuthEnabled, isMethodReady, type AuthMethod, type AuthPurpose } from '../services/authPrefs';
 import { listSecurityConfirmMethods, type FundsConfirmPurpose } from '../services/fundsConfirm';
@@ -63,7 +63,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
         if (!queue.length) return false;
         for (const chosen of queue) {
           if (chosen === 'biometric') {
-            if (await authenticateBiometric()) return true;
+            if (await loadWrapFromBiometric()) return true;
             continue;
           }
           return askSecret(chosen);
@@ -78,11 +78,11 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
       for (const method of preferred) {
         if (await isMethodReady(method)) queue.push(method);
       }
-      if (!queue.length) return true;
+      if (!queue.length) return false;
       for (const chosen of queue) {
         if (chosen === 'biometric') {
-          const bio = await authenticateBiometric();
-          if (!bio) return false;
+          const wrap = await loadWrapFromBiometric();
+          if (!wrap) return false;
           continue;
         }
         const ok = await askSecret(chosen);

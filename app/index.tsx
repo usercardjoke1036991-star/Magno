@@ -3,7 +3,8 @@ import { Linking as RNLinking, ScrollView, StyleSheet, View } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
-import { parseAppDeepLink } from '../utils/appDeepLink';
+import { LOCKED_DEEP_LINK_ROOMS, parseAppDeepLink } from '../utils/appDeepLink';
+import { getWalletWrapKey } from '../services/walletSession';
 import { rankingVisible } from '../utils/fameRankings';
 import { rememberAppUrl, takePendingAppUrl } from '../utils/pendingDeepLink';
 import { AppKit, useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
@@ -90,7 +91,10 @@ function HomeScreenWithHooks() {
     const apply = (url?: string | null) => {
       if (url) rememberAppUrl(url);
       const link = parseAppDeepLink(url || takePendingAppUrl());
-      if (link?.kind === 'room') setRoom(link.room);
+      if (link?.kind === 'room') {
+        if (LOCKED_DEEP_LINK_ROOMS.has(link.room) && !getWalletWrapKey()) return;
+        setRoom(link.room);
+      }
     };
     apply(takePendingAppUrl());
     Linking.getInitialURL().then(apply).catch(() => {});

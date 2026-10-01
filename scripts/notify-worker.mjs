@@ -252,7 +252,8 @@ const RESERVA_ABI = [
   'function posiciones(address) view returns (uint256 principal, uint256 desde, bool activa, bool enRed)',
   'function extraComisionDe(address beneficiario, uint256 montoBase) view returns (uint256 extra, uint256 founderCut)',
   'function boostUsado(bytes32) view returns (bool)',
-  'function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 id)',
+  'function boostIdOf(address beneficiario, uint256 montoBase, bytes32 salt) view returns (bytes32)',
+  'function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 salt)',
   'event Bloqueado(address indexed usuario, uint256 monto, uint256 desbloqueo)',
   'event Desbloqueado(address indexed usuario, uint256 principal, uint256 rendimiento, uint256 corteFundador)',
   'event BoostComision(address indexed beneficiario, uint256 montoBase, uint256 extra, uint256 corteFundador)',
@@ -1025,16 +1026,21 @@ const attestIdentity = async (wallet, phoneHash, deviceHash) => {
     throw new Error('attester');
   }
   const deadline = Math.floor(Date.now() / 1000) + 30 * 60;
+  let nonce = 0n;
+  if (identityProvider) {
+    const credit = new Contract(CONTRACT, ['function attestNonce(address) view returns (uint256)'], identityProvider);
+    nonce = await credit.attestNonce(getAddress(wallet));
+  }
   const packed = keccak256(
     AbiCoder.defaultAbiCoder().encode(
-      ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'address'],
-      [getAddress(wallet), phoneHash, deviceHash, deadline, CHAIN_ID, getAddress(CONTRACT)]
+      ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'uint256', 'address'],
+      [getAddress(wallet), phoneHash, deviceHash, deadline, nonce, CHAIN_ID, getAddress(CONTRACT)]
     )
   );
   const signer = new Wallet(ATTESTER_KEY);
   const signature = await signer.signMessage(getBytes(packed));
   const parsed = Signature.from(signature);
-  return { phoneHash, deviceHash, deadline, v: parsed.v, r: parsed.r, s: parsed.s };
+  return { phoneHash, deviceHash, deadline, nonce: nonce.toString(), v: parsed.v, r: parsed.r, s: parsed.s };
 };
 
 const notifyWallet = async (wallet, kind, text) => {
@@ -1199,12 +1205,13 @@ const pagarBoostReserva = async (event) => {
     const reservaContract = new Contract(RESERVA, RESERVA_ABI, identityProvider);
     const [extra] = await reservaContract.extraComisionDe(beneficiario, monto);
     if (!extra) return;
-    const id = keccak256(
+    const salt = keccak256(
       AbiCoder.defaultAbiCoder().encode(['bytes32', 'uint256'], [event.transactionHash, event.index])
     );
+    const id = await reservaContract.boostIdOf(beneficiario, monto, salt);
     if (await reservaContract.boostUsado(id)) return;
     const signer = new Wallet(ATTESTER_KEY, identityProvider);
-    const tx = await reservaContract.connect(signer).pagarBoostComision(beneficiario, monto, id);
+    const tx = await reservaContract.connect(signer).pagarBoostComision(beneficiario, monto, salt);
     await tx.wait(1);
     await notifyWallet(
       beneficiario,
@@ -1469,22 +1476,7 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
     return;
   }
   if (isHealth) {
-    json(res, 200, {
-      ok: true,
-      chainId: CHAIN_ID,
-      rpc: Boolean(identityProvider),
-      email: hasEmail,
-      sms: hasSms,
-      textbelt: hasTextbelt,
-      resend: hasEmail,
-      attester: attesterReady,
-      kycProvider: hasKycProvider,
-      attesterKms: false,
-      reserva: Boolean(RESERVA),
-      creditPaused: store.reservaGuard?.creditPaused ?? null,
-      reservaPaused: store.reservaGuard?.reservaPaused ?? null,
-      dataWritable: true,
-    });
+    json(res, 200, { ok: true, kycProvider: hasKycProvider });
     return;
   }
   if (req.method !== 'POST') {

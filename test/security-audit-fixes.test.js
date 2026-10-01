@@ -1,0 +1,54 @@
+const fs = require('fs');
+const path = require('path');
+const { expect } = require('chai');
+const { ethers } = require('hardhat');
+const { deployProtocol, seedPool, registerAndFund, attestIdentity } = require('./helpers.cjs');
+
+describe('security audit remediations', function () {
+  it('blocks donate while paused and rejects a KYC checkbox without a phone', async () => {
+    const { token, contract, owner, user, tokenAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '50');
+    await token.mint(user.address, ethers.parseUnits('2', 18));
+    await token.connect(user).approve(await contract.getAddress(), ethers.MaxUint256);
+    await contract.connect(owner).pausarContrato();
+    await expect(contract.connect(user).donar(tokenAddr, ethers.parseUnits('2', 18))).to.be.reverted;
+    const fresh = await deployProtocol();
+    await fresh.contract.connect(fresh.user).registrarHumanoConPadre(ethers.ZeroAddress);
+    await expect(fresh.contract.connect(fresh.user).declararKyc()).to.be.reverted;
+    await attestIdentity(fresh.contract, fresh.user);
+    await expect(fresh.contract.connect(fresh.user).declararKyc()).to.not.be.reverted;
+  });
+
+  it('keeps leftover USDT with the user when the account is destroyed', async () => {
+    const { token, contract, owner, user, tokenAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, user);
+    const before = await token.balanceOf(user.address);
+    await contract.connect(user).destruirCuenta(tokenAddr);
+    expect(await token.balanceOf(user.address)).to.equal(before);
+  });
+
+  it('binds FundsConfirm to Keystore wrap and fail-closed empty queues', function () {
+    const funds = fs.readFileSync(path.join(__dirname, '..', 'components', 'FundsConfirmHost.tsx'), 'utf8');
+    expect(funds).to.include('loadWrapFromBiometric');
+    expect(funds).to.not.include('authenticateBiometric');
+    expect(funds).to.include('if (!queue.length) return false');
+    expect(funds).to.not.include('if (!queue.length) return true');
+    const lock = fs.readFileSync(path.join(__dirname, '..', 'services', 'appLock.ts'), 'utf8');
+    expect(lock).to.include("biometricsSecurityLevel: 'strong'");
+    expect(lock).to.include('PIN_ROUNDS = 20_000');
+    expect(lock).to.include('SecureStore.getItemAsync(RECOVERY_WRAP, BIO_WRAP_OPTIONS)');
+    const email = fs.readFileSync(path.join(__dirname, '..', 'services', 'accountEmail.ts'), 'utf8');
+    expect(email).to.include('allowWalletAsyncFallback');
+    const worker = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'notify-worker.mjs'), 'utf8');
+    expect(worker).to.include('json(res, 200, { ok: true, kycProvider: hasKycProvider })');
+    expect(worker).to.not.include('attester: attesterReady');
+    const fama = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'libraries', 'QuatriviumFamaLib.sol'), 'utf8');
+    expect(fama).to.include('uint256 nonce');
+    expect(fama).to.include('v != 27 && v != 28');
+    const reserva = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'QuatriviumReserva.sol'), 'utf8');
+    expect(reserva).to.include('function boostIdOf');
+    expect(reserva).to.include('function applyFamaCaja');
+    expect(reserva).to.include('BOOST_GAP');
+  });
+});

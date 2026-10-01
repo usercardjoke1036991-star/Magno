@@ -63,6 +63,7 @@ export const CONTRACT_ABI = [
   'function blacklist(address) view returns (bool)',
   'function calcularTasaUtilizacion(address tokenAddress) view returns (uint256)',
   'function vincularIdentidad(bytes32 phoneHash, bytes32 deviceHash, uint256 deadline, uint8 v, bytes32 r, bytes32 s)',
+  'function attestNonce(address) view returns (uint256)',
   'function setIdentidadExigida(bool exigido)',
   'function setAttester(address next)',
   'function phoneHashOf(address) view returns (bytes32)',

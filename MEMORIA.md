@@ -4,6 +4,7 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
 
 ## Decisiones
+- [2026-10-01] El fundador entra en mora y se puede liquidar. declararKyc exige identidad atestada. Confirmacion de fondos fail-closed con wrap de Keystore.
 - [2026-09-30] Bono de hito L200 es 30000 USDT, no 4000. L100 sigue en 2000. Desde 200 hasta 1000: 30000 cada 100.
 - [2026-09-30] Fama misma tasa, pero solo se cobra por la via que se gano: caja en Canje, red en pestaña red, racha solo en Racha. Si la racha se retrasa bajan dias, no fama.
 - [2026-09-30] Reserva: el extra de comisiones multiplicadas sale del pool (fondo de prestamos), no del bote. El 12% de rendimiento sigue saliendo del bote.
@@ -33,9 +34,9 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.
 - [2026-09-17] El usuario de sesion no viaja a rankings. El padrino se bloquea al validar el codigo, antes de persistir el usuario.
 - [2026-09-16] Render es el host 24/7 del notify-worker: Dockerfile.notify, disco /data, PORT inyectado, clave de cifrado generada, sin llave de owner.
-- [2026-09-16] Worker 24/7 en Hetzner (CX23 Ubuntu, Caddy HTTPS) como alternativa a Fly. Mismo notify-worker y .env.worker.
 
 ## Cambios realizados
+- [2026-10-01] Implementadas remediaciones de auditoria: contratos (nonce, pausa, KYC, fundador, destroy, boost) y app (Keystore, fail-closed, PII, PIN 20000, health).
 - [2026-09-30] SonarCloud: 5 S5845 de bigint en tests MLM/canje pasados a expectAmt. Snyk Code/SCA high 0. MobSF CLI solo abre apk/aab/ipa.
 - [2026-09-30] Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display.
 - [2026-09-30] Guia de Ajustes reescrita en tres partes con como se gana. Bono L200 a 30000. Red: invitacion con enlace, comisiones por generacion y tablero con refresco.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] Demo libre de identidad y de 1 USDT; Real sigue pidiendo primero el acceso y luego correo, numero y KYC.
 - [2026-09-17] Auditoria de conexion: health del worker reporta textbelt/resend/attester; Render pide TEXTBELT, Resend y attester; la app de preview/produccion apunta a notify.quatriviumcredit.app
 - [2026-09-17] Worker, Render y production:check usan Textbelt como SMS principal del OTP
-- [2026-09-17] Mythril 0.24.8, Semgrep 1.177.0 y Trivy 0.74.0 en vivo. SWC-101 es overflow de 0.8.24 en getters/vistas. Semgrep solo INFO de gas. Trivy no toca el credito. Sin cambio de codigo.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-30] Cambio: SonarCloud: 5 S5845 de bigint en tests MLM/canje pasados a expectAmt. Snyk Code/SCA high 0. MobSF CLI solo abre apk/aab/ipa.
+[2026-10-01] Cambio: Implementadas remediaciones de auditoria: contratos (nonce, pausa, KYC, fundador, destroy, boost) y app (Keystore, fail-closed, PII, PIN 20000, health).

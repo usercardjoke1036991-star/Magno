@@ -6,6 +6,7 @@ export type AppDeepLink =
   | { kind: 'mode'; mode: 'demo' | 'live' };
 
 const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'people', 'pool', 'reserva', 'admin', 'history', 'ranks', 'fame']);
+export const LOCKED_DEEP_LINK_ROOMS = new Set(['donate', 'admin', 'pool', 'credit', 'loans', 'reserva', 'bonuses']);
 
 function trimPathSlashes(path: string): string {
   let s = path;

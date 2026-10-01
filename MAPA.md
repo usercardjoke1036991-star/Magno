@@ -59,7 +59,6 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `web3Config.tsx` — módulo JS/TS
   - Funciones/clases: Web3Provider, toEthersWeb3Provider, getEthersSignerFromProvider, web3ConfigDebug
 - `zkService.ts` — módulo JS/TS
-- `.audit-phone/ui_texts.py` — módulo Python
 - `android/app/src/debug/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/debugOptimized/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/main/AndroidManifest.xml` — manifiesto Android
@@ -438,6 +437,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/render-notify.test.js` — módulo JS/TS
 - `test/reserva.test.js` — módulo JS/TS
 - `test/secret-box.test.js` — módulo JS/TS
+- `test/security-audit-fixes.test.js` — módulo JS/TS
 - `test/security-hardening.test.js` — módulo JS/TS
 - `test/security.test.js` — módulo JS/TS
 - `test/sponsor-lock.test.js` — módulo JS/TS
@@ -459,7 +459,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/adminProposal.ts` — módulo JS/TS
   - Funciones/clases: describeAdminCalldata
 - `utils/appDeepLink.ts` — módulo JS/TS
-  - Funciones/clases: parseAppDeepLink
+  - Funciones/clases: LOCKED_DEEP_LINK_ROOMS, parseAppDeepLink
 - `utils/appKitStorage.ts` — módulo JS/TS
   - Funciones/clases: appKitStorage
 - `utils/appNotice.ts` — módulo JS/TS

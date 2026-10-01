@@ -99,12 +99,17 @@ library QuatriviumFamaLib {
         bytes32 phoneHash,
         bytes32 deviceHash,
         uint256 deadline,
+        uint256 nonce,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) external view returns (address recovered) {
+        if (v != 27 && v != 28) return address(0);
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return address(0);
+        }
         bytes32 packed = keccak256(
-            abi.encode(user, phoneHash, deviceHash, deadline, block.chainid, address(this))
+            abi.encode(user, phoneHash, deviceHash, deadline, nonce, block.chainid, address(this))
         );
         recovered = ecrecover(
             keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", packed)),
@@ -128,7 +133,7 @@ library QuatriviumFamaLib {
         require(dec >= 2 && dec <= 18);
         int256 threshold = int256(uint256(98) * (10 ** uint256(dec - 2)));
         require(price >= threshold);
-        require(updatedAt > 0 && block.timestamp - updatedAt <= 1 hours);
+        require(updatedAt > 0 && block.timestamp - updatedAt <= 30 minutes);
         require(roundId > 0 && answeredInRound == roundId);
         require(startedAt > 0 && startedAt <= updatedAt);
     }

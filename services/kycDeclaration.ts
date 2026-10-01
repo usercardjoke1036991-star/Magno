@@ -217,7 +217,7 @@ export async function persistKycDocPhoto(
   if (!uri && asset.base64) {
     uri = `data:${mime};base64,${asset.base64}`;
   }
-  if (uri) {
+  if (uri && !uri.startsWith('data:')) {
     await AsyncStorage.setItem(PHOTO_KEY + walletKey(wallet), uri);
   }
   return uri;

@@ -8,8 +8,8 @@ async function advanceCooldown() {
 }
 
 async function enableFounderBorrow(contract, owner) {
-  await contract.connect(owner).declararKyc();
   await attestIdentity(contract, owner, 'founder-phone', 'founder-device');
+  await contract.connect(owner).declararKyc();
 }
 
 describe('QuatriviumCredit - Morosity', function () {
@@ -122,7 +122,7 @@ describe('QuatriviumCredit - Morosity', function () {
     expect((await contract.obtenerProgresoUsuario(user.address)).solicitudesCompletadas).to.equal(0n);
   });
 
-  it('lets the pool cover the founder loan without mora and still enforces the 48h wait', async () => {
+  it('marks the founder delinquent like any other unpaid loan', async () => {
     const { token, contract, owner, extra, tokenAddr, contractAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await enableFounderBorrow(contract, owner);
@@ -136,11 +136,10 @@ describe('QuatriviumCredit - Morosity', function () {
     const liqBefore = await contract.totalLiquidity(tokenAddr);
     await contract.marcarMorosoSiVencido(owner.address);
 
-    expect(await contract.esMoroso(owner.address)).to.equal(false);
-    expect(await contract.dispersionCongelada(owner.address)).to.equal(false);
-    expect((await contract.usuarios(owner.address)).montoActivo).to.equal(0n);
-    expect(liqBefore - (await contract.totalLiquidity(tokenAddr))).to.equal(ethers.parseUnits('1', 18));
-    await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
+    expect(await contract.esMoroso(owner.address)).to.equal(true);
+    expect((await contract.usuarios(owner.address)).montoActivo).to.equal(ethers.parseUnits('1', 18));
+    expect(await contract.totalLiquidity(tokenAddr)).to.equal(liqBefore);
+    await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
     const cash = await token.balanceOf(contractAddr);
     const outstanding = await contract.outstandingLoans(tokenAddr);
     const liquidity = await contract.totalLiquidity(tokenAddr);

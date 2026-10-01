@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { deployProtocol, seedPool, registerAndFund, drainToken } = require('./helpers.cjs');
+const { deployProtocol, seedPool, registerAndFund, drainToken, signAttest } = require('./helpers.cjs');
 
 describe('QuatriviumCredit - destroy account', function () {
   it('blocks destroy while a loan is active and lets the founder keep the root', async () => {
@@ -27,7 +27,7 @@ describe('QuatriviumCredit - destroy account', function () {
     await expect(contract.connect(user).destruirCuenta(tokenAddr)).to.be.reverted;
   });
 
-  it('sends leftover tokens and LP to the pool, frees phone/device, and wipes progress', async () => {
+  it('frees phone/device and wipes progress without confiscating leftover tokens', async () => {
     const { token, contract, owner, user, extra, tokenAddr, contractAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await registerAndFund(token, contract, user);
@@ -37,6 +37,7 @@ describe('QuatriviumCredit - destroy account', function () {
     const phoneHash = await contract.phoneHashOf(user.address);
     const deviceHash = await contract.deviceHashOf(user.address);
     const liqBefore = await contract.totalLiquidity(tokenAddr);
+    const cashBefore = await token.balanceOf(user.address);
 
     await expect(contract.connect(user).destruirCuenta(tokenAddr)).to.not.be.reverted;
 
@@ -45,22 +46,14 @@ describe('QuatriviumCredit - destroy account', function () {
     expect(await contract.phoneHashOf(user.address)).to.equal(ethers.ZeroHash);
     expect(await contract.walletOfPhone(phoneHash)).to.equal(ethers.ZeroAddress);
     expect(await contract.walletOfDevice(deviceHash)).to.equal(ethers.ZeroAddress);
-    expect(await contract.totalLiquidity(tokenAddr)).to.be.gt(liqBefore);
+    expect(await contract.totalLiquidity(tokenAddr)).to.equal(liqBefore);
+    expect(await token.balanceOf(user.address)).to.equal(cashBefore);
     await expect(contract.connect(user).registrarHumanoConPadre(ethers.ZeroAddress)).to.be.reverted;
 
     await contract.connect(extra).registrarHumanoConPadre(ethers.ZeroAddress);
-    await contract.connect(extra).declararKyc();
     const latest = await ethers.provider.getBlock('latest');
     const deadline = BigInt((latest?.timestamp || 0) + 3600);
-    const network = await ethers.provider.getNetwork();
-    const packed = ethers.keccak256(
-      ethers.AbiCoder.defaultAbiCoder().encode(
-        ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'address'],
-        [extra.address, phoneHash, deviceHash, deadline, network.chainId, contractAddr]
-      )
-    );
-    const sig = await owner.signMessage(ethers.getBytes(packed));
-    const parsed = ethers.Signature.from(sig);
+    const parsed = await signAttest(contract, owner, extra.address, phoneHash, deviceHash, deadline);
     await contract
       .connect(extra)
       .vincularIdentidad(phoneHash, deviceHash, deadline, parsed.v, parsed.r, parsed.s);

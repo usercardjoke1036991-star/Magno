@@ -193,9 +193,9 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(worker).to.include('process.env.PORT || process.env.NOTIFY_PORT');
     expect(worker).to.include("process.env.NOTIFY_BIND || (process.env.PORT ? '0.0.0.0'");
     expect(worker).to.include('NOTIFY_DATA_FILE');
-    expect(worker).to.include('sms: hasSms');
-    expect(worker).to.include('textbelt: hasTextbelt');
-    expect(worker).to.include('resend: hasEmail');
+    expect(worker).to.include('json(res, 200, { ok: true, kycProvider: hasKycProvider })');
+    expect(worker).to.not.include('sms: hasSms');
+    expect(worker).to.not.include('attester: attesterReady');
     const textbelt = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'textbeltSms.cjs'), 'utf8');
     expect(textbelt).to.include('https://textbelt.com/text');
     expect(worker).to.include('BSC_MAINNET.chainId');

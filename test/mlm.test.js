@@ -332,8 +332,8 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     expect(await contract.reputacion(b.address)).to.equal(100n);
 
     await seedPool(token, contract, owner, '2000');
-    await contract.connect(c).declararKyc();
     await attestIdentity(contract, c);
+    await contract.connect(c).declararKyc();
     await token.mint(c.address, ethers.parseUnits('20', 18));
     await token.connect(c).approve(await contract.getAddress(), ethers.MaxUint256);
     await borrowAndPay(contract, token, c, tokenAddr);

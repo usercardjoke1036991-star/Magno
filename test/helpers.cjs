@@ -65,22 +65,30 @@ async function seedPool(token, contract, owner, amount = '500') {
   await contract.connect(owner).depositarLiquidez(tokenAddr, ethers.parseUnits(amount, 18));
 }
 
+async function encodeAttestPacked(contract, wallet, phoneHash, deviceHash, deadline) {
+  const nonce = await contract.attestNonce(wallet);
+  const network = await ethers.provider.getNetwork();
+  return ethers.keccak256(
+    ethers.AbiCoder.defaultAbiCoder().encode(
+      ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'uint256', 'address'],
+      [wallet, phoneHash, deviceHash, deadline, nonce, network.chainId, await contract.getAddress()]
+    )
+  );
+}
+
+async function signAttest(contract, attester, wallet, phoneHash, deviceHash, deadline) {
+  const packed = await encodeAttestPacked(contract, wallet, phoneHash, deviceHash, deadline);
+  const sig = await attester.signMessage(ethers.getBytes(packed));
+  return ethers.Signature.from(sig);
+}
+
 async function attestIdentity(contract, user, phoneSalt = 'phone', deviceSalt = 'device') {
   const [attester] = await ethers.getSigners();
   const phoneHash = ethers.keccak256(ethers.toUtf8Bytes(`${user.address}:${phoneSalt}`));
   const deviceHash = ethers.keccak256(ethers.toUtf8Bytes(`${user.address}:${deviceSalt}`));
   const latest = await ethers.provider.getBlock('latest');
   const deadline = BigInt((latest?.timestamp || 0) + 3600);
-  const contractAddr = await contract.getAddress();
-  const network = await ethers.provider.getNetwork();
-  const packed = ethers.keccak256(
-    ethers.AbiCoder.defaultAbiCoder().encode(
-      ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'address'],
-      [user.address, phoneHash, deviceHash, deadline, network.chainId, contractAddr]
-    )
-  );
-  const sig = await attester.signMessage(ethers.getBytes(packed));
-  const { v, r, s } = ethers.Signature.from(sig);
+  const { v, r, s } = await signAttest(contract, attester, user.address, phoneHash, deviceHash, deadline);
   await contract.connect(user).vincularIdentidad(phoneHash, deviceHash, deadline, v, r, s);
 }
 
@@ -88,8 +96,8 @@ async function registerAndFund(token, contract, user, amount = '50', padre = eth
   const contractAddr = await contract.getAddress();
   const tokenAddr = await token.getAddress();
   await contract.connect(user).registrarHumanoConPadre(padre);
-  await contract.connect(user).declararKyc();
   await attestIdentity(contract, user);
+  await contract.connect(user).declararKyc();
   await token.mint(user.address, ethers.parseUnits(amount, 18));
   await token.connect(user).approve(contractAddr, ethers.MaxUint256);
 }
@@ -143,6 +151,8 @@ module.exports = {
   deployProtocol,
   seedPool,
   attestIdentity,
+  signAttest,
+  encodeAttestPacked,
   registerAndFund,
   proposeAndExecute,
   drainToken,

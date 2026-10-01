@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { getProductMode } from '../constants/rpcConfig';
 import { isValidEmail, normalizeEmail } from '../utils/emailPolicy';
 import { storeSlot } from '../utils/storeSlot';
+import { allowWalletAsyncFallback } from '../utils/walletVaultPolicy';
 
 const KEY = storeSlot(['quatrivium', 'account', 'email']);
 const FALLBACK = storeSlot(['quatrivium', 'account', 'email', 'fallback']);
@@ -31,6 +33,7 @@ async function withLimit<T>(promise: Promise<T>, ms: number, fallback: T): Promi
 export async function loadVerifiedEmail(): Promise<string> {
   const secure = parseEmail(await withLimit(SecureStore.getItemAsync(KEY).catch(() => null), 1500, null));
   if (secure) return secure;
+  if (!allowWalletAsyncFallback(getProductMode())) return '';
   return parseEmail(await AsyncStorage.getItem(FALLBACK).catch(() => null));
 }
 
@@ -43,7 +46,11 @@ export async function saveVerifiedEmail(email: string): Promise<string> {
   if (!isValidEmail(next)) {
     throw new Error('email');
   }
-  await AsyncStorage.setItem(FALLBACK, next).catch(() => {});
+  if (allowWalletAsyncFallback(getProductMode())) {
+    await AsyncStorage.setItem(FALLBACK, next).catch(() => {});
+  } else {
+    await AsyncStorage.removeItem(FALLBACK).catch(() => {});
+  }
   await withLimit(SecureStore.setItemAsync(KEY, next, OPTIONS).then(() => true), 2500, false);
   return next;
 }

@@ -1,31 +1,19 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { deployProtocol, seedPool, attestIdentity, registerAndFund, proposeAndExecute } = require('./helpers.cjs');
+const { deployProtocol, seedPool, attestIdentity, signAttest, registerAndFund, proposeAndExecute } = require('./helpers.cjs');
 
 describe('QuatriviumCredit - identity binding', function () {
-  async function signAttest(contract, attester, wallet, phoneHash, deviceHash, deadline) {
-    const contractAddr = await contract.getAddress();
-    const network = await ethers.provider.getNetwork();
-    const packed = ethers.keccak256(
-      ethers.AbiCoder.defaultAbiCoder().encode(
-        ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'address'],
-        [wallet, phoneHash, deviceHash, deadline, network.chainId, contractAddr]
-      )
-    );
-    const sig = await attester.signMessage(ethers.getBytes(packed));
-    return ethers.Signature.from(sig);
-  }
 
   it('blocks borrowing until phone and device are attested', async () => {
     const { token, contract, owner, user, tokenAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await contract.connect(user).registrarHumanoConPadre(ethers.ZeroAddress);
-    await contract.connect(user).declararKyc();
     await token.mint(user.address, ethers.parseUnits('50', 18));
     await token.connect(user).approve(await contract.getAddress(), ethers.MaxUint256);
 
     await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
     await attestIdentity(contract, user);
+    await contract.connect(user).declararKyc();
     await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
   });
 
@@ -41,7 +29,6 @@ describe('QuatriviumCredit - identity binding', function () {
     const sig = await signAttest(contract, owner, extra.address, phoneHash, deviceHash, deadline);
 
     await contract.connect(extra).registrarHumanoConPadre(ethers.ZeroAddress);
-    await contract.connect(extra).declararKyc();
     await expect(
       contract.connect(extra).vincularIdentidad(phoneHash, deviceHash, deadline, sig.v, sig.r, sig.s)
     ).to.be.reverted;
@@ -77,12 +64,11 @@ describe('QuatriviumCredit - identity binding', function () {
     const { token, contract, owner, extra, tokenAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
-    await contract.connect(owner).declararKyc();
     await attestIdentity(contract, owner, 'founder-phone', 'founder-device');
+    await contract.connect(owner).declararKyc();
     await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
 
     await contract.connect(extra).registrarHumanoConPadre(ethers.ZeroAddress);
-    await contract.connect(extra).declararKyc();
     await token.mint(extra.address, ethers.parseUnits('50', 18));
     await token.connect(extra).approve(await contract.getAddress(), ethers.MaxUint256);
     await expect(contract.connect(extra).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
@@ -113,14 +99,7 @@ describe('QuatriviumCredit - identity binding', function () {
     const deadline = BigInt((latest?.timestamp || 0) + 3600);
     const [attester] = await ethers.getSigners();
     const extraDevice = ethers.keccak256(ethers.toUtf8Bytes(`${extra.address}:dev`));
-    const packed = ethers.keccak256(
-      ethers.AbiCoder.defaultAbiCoder().encode(
-        ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'address'],
-        [extra.address, oldPhone, extraDevice, deadline, (await ethers.provider.getNetwork()).chainId, await contract.getAddress()]
-      )
-    );
-    const raw = await attester.signMessage(ethers.getBytes(packed));
-    const sig = ethers.Signature.from(raw);
+    const sig = await signAttest(contract, attester, extra.address, oldPhone, extraDevice, deadline);
     await expect(contract.connect(extra).vincularIdentidad(oldPhone, extraDevice, deadline, sig.v, sig.r, sig.s)).to.not
       .be.reverted;
   });
@@ -143,23 +122,25 @@ describe('QuatriviumCredit - identity binding', function () {
     const deadline = BigInt((latest?.timestamp || 0) + 3600);
     const extraPhone = ethers.keccak256(ethers.toUtf8Bytes(`${extra.address}:phone`));
     const [attester] = await ethers.getSigners();
-    const packed = ethers.keccak256(
-      ethers.AbiCoder.defaultAbiCoder().encode(
-        ['address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'address'],
-        [
-          extra.address,
-          extraPhone,
-          oldDevice,
-          deadline,
-          (await ethers.provider.getNetwork()).chainId,
-          await contract.getAddress(),
-        ]
-      )
-    );
-    const raw = await attester.signMessage(ethers.getBytes(packed));
-    const sig = ethers.Signature.from(raw);
+    const sig = await signAttest(contract, attester, extra.address, extraPhone, oldDevice, deadline);
     await expect(
       contract.connect(extra).vincularIdentidad(extraPhone, oldDevice, deadline, sig.v, sig.r, sig.s)
     ).to.not.be.reverted;
+  });
+
+  it('rejects a replayed attestation after the nonce moves', async () => {
+    const { contract, user } = await deployProtocol();
+    await contract.connect(user).registrarHumanoConPadre(ethers.ZeroAddress);
+    const phoneHash = ethers.keccak256(ethers.toUtf8Bytes(`${user.address}:nonce-phone`));
+    const deviceHash = ethers.keccak256(ethers.toUtf8Bytes(`${user.address}:nonce-device`));
+    const latest = await ethers.provider.getBlock('latest');
+    const deadline = BigInt((latest?.timestamp || 0) + 3600);
+    const [attester] = await ethers.getSigners();
+    const first = await signAttest(contract, attester, user.address, phoneHash, deviceHash, deadline);
+    await contract.connect(user).vincularIdentidad(phoneHash, deviceHash, deadline, first.v, first.r, first.s);
+    expect(await contract.attestNonce(user.address)).to.equal(1n);
+    await expect(
+      contract.connect(user).vincularIdentidad(phoneHash, deviceHash, deadline, first.v, first.r, first.s)
+    ).to.be.reverted;
   });
 });

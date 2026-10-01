@@ -14,8 +14,8 @@ describe('Quatrivium Finance - uncollateralized credit and admin locks', functio
     await seedPool(token, contract, owner, '500');
 
     await contract.connect(user).registrarHumanoConPadre(ethers.ZeroAddress);
-    await contract.connect(user).declararKyc();
     await attestIdentity(contract, user);
+    await contract.connect(user).declararKyc();
     const walletBefore = await token.balanceOf(user.address);
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
     const walletAfter = await token.balanceOf(user.address);

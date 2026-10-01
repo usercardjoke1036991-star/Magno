@@ -151,6 +151,7 @@ describe('QuatriviumReserva', function () {
     const id = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [1n]));
     const [extra, founderCut] = await reserva.extraComisionDe(user.address, commission);
     expect(extra).to.equal(ethers.parseUnits('0.5', 18));
+    expect(await reserva.boostIdOf(user.address, commission, id)).to.not.equal(ethers.ZeroHash);
     const userBefore = await token.balanceOf(user.address);
     const founderBefore = await token.balanceOf(founder.address);
     await expect(reserva.connect(attester).pagarBoostComision(user.address, commission, id))

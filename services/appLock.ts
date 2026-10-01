@@ -38,7 +38,7 @@ const BIO_WRAP_OPTIONS = {
 
 export const PIN_LENGTH = 6;
 export { PASSWORD_LENGTH, isValidMasterPassword };
-export const PIN_ROUNDS = 8000;
+export const PIN_ROUNDS = 20_000;
 const BACKGROUND_LOCK_MS = 20_000;
 
 interface PinRecord {
@@ -287,7 +287,7 @@ export async function clearBiometricWrap(): Promise<void> {
 export async function persistLocalRecoveryWrap(wrap = getWalletWrapKey()): Promise<void> {
   if (!wrap) return;
   try {
-    await SecureStore.setItemAsync(RECOVERY_WRAP, wrap, OPTIONS);
+    await SecureStore.setItemAsync(RECOVERY_WRAP, wrap, BIO_WRAP_OPTIONS);
   } catch {
     // El correo no debe depender de un wrap en el worker.
   }
@@ -295,7 +295,7 @@ export async function persistLocalRecoveryWrap(wrap = getWalletWrapKey()): Promi
 
 export async function loadLocalRecoveryWrap(): Promise<string | null> {
   try {
-    const raw = String((await SecureStore.getItemAsync(RECOVERY_WRAP)) || '').toLowerCase();
+    const raw = String((await SecureStore.getItemAsync(RECOVERY_WRAP, BIO_WRAP_OPTIONS)) || '').toLowerCase();
     return /^0x[0-9a-f]{64}$/.test(raw) ? raw : null;
   } catch {
     return null;
@@ -704,7 +704,7 @@ export async function authenticateBiometric(): Promise<boolean> {
       cancelLabel: 'Cancel',
       disableDeviceFallback: true,
       requireConfirmation: false,
-      biometricsSecurityLevel: 'weak',
+      biometricsSecurityLevel: 'strong',
     });
     return result.success === true;
   } catch {

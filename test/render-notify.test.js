@@ -38,7 +38,7 @@ describe('Render notify worker', function () {
     expect(entry).to.include('su-exec node');
     expect(entry).to.include('id -u');
     expect(worker).to.include('resolveDataFile');
-    expect(worker).to.include('dataWritable');
+    expect(worker).to.include('probeWritableDir');
     expect(dockerignore).to.include('!scripts/');
     expect(dockerignore).to.include('textbeltSms.cjs');
     expect(worker).to.include("path === '/health'");
@@ -122,11 +122,9 @@ describe('Render notify worker', function () {
       expect(body.status).to.equal(200);
       const parsed = JSON.parse(body.data);
       expect(parsed.ok).to.equal(true);
-      expect(parsed.chainId).to.equal(97);
-      expect(parsed.sms).to.equal(true);
-      expect(parsed.email).to.equal(true);
-      expect(parsed.textbelt).to.equal(true);
-      expect(parsed.resend).to.equal(true);
+      expect(parsed).to.not.have.property('chainId');
+      expect(parsed).to.not.have.property('sms');
+      expect(parsed).to.not.have.property('attester');
       expect(parsed).to.not.have.property('TEXTBELT_API_KEY');
       const rootBody = await new Promise((resolve, reject) => {
         http
@@ -207,11 +205,9 @@ describe('Render notify worker', function () {
       expect(body.status).to.equal(200);
       const parsed = JSON.parse(body.data);
       expect(parsed.ok).to.equal(true);
-      expect(parsed.chainId).to.equal(97);
-      expect(parsed.sms).to.equal(true);
-      expect(parsed.email).to.equal(false);
-      expect(parsed.resend).to.equal(false);
-      expect(parsed.attester).to.equal(false);
+      expect(parsed).to.not.have.property('chainId');
+      expect(parsed).to.not.have.property('sms');
+      expect(parsed).to.not.have.property('attester');
     } finally {
       child.kill('SIGTERM');
     }

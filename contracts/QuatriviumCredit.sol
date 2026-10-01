@@ -161,6 +161,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     mapping(address => bytes32) public deviceHashOf;
     mapping(bytes32 => address) public walletOfPhone;
     mapping(bytes32 => address) public walletOfDevice;
+    mapping(address => uint256) public attestNonce;
     mapping(address => bool) public cuentaDestruida;
     /// @notice Hermano de fama/canje. Se crea en el constructor (no cabe en este bytecode).
     address public immutable famaHermano;
@@ -579,8 +580,9 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         emit AfiliadoRegistrado(msg.sender, padre);
     }
 
-    function declararKyc() external {
+    function declararKyc() external whenNotPaused {
         require(humanosVerificados[msg.sender], "not verified");
+        require(phoneHashOf[msg.sender] != bytes32(0), "identity required");
         kycDeclarado[msg.sender] = true;
         emit KycDeclarado(msg.sender);
     }
@@ -608,22 +610,25 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external {
+    ) external whenNotPaused {
         require(tx.origin == msg.sender, "no contracts");
         require(humanosVerificados[msg.sender], "not verified");
         require(block.timestamp <= deadline, "expired");
         require(phoneHash != bytes32(0) && deviceHash != bytes32(0), "empty");
 
+        uint256 nonce = attestNonce[msg.sender];
         address recovered = QuatriviumFamaLib.recoverAttest(
             msg.sender,
             phoneHash,
             deviceHash,
             deadline,
+            nonce,
             v,
             r,
             s
         );
         require(recovered != address(0) && recovered == attester, "bad attest");
+        attestNonce[msg.sender] = nonce + 1;
 
         address takenPhone = walletOfPhone[phoneHash];
         require(takenPhone == address(0) || takenPhone == msg.sender, "phone taken");
@@ -658,10 +663,10 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         } else {
             shares = (_monto * totalShares[token]) / totalLiquidity[token];
         }
-        require(shares > 0, "zero shares");
-
-        lpShares[msg.sender][token] += shares;
-        totalShares[token] += shares;
+        if (shares > 0) {
+            lpShares[msg.sender][token] += shares;
+            totalShares[token] += shares;
+        }
         totalLiquidity[token] += _monto;
         uint256 pts = (_monto * 100) / 1e18;
         reputacion[msg.sender] += pts;
@@ -1112,7 +1117,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function _aplicarMoraSiVencido(address usuario) internal {
-        if (usuario == fundador || !_estaVencido(usuario) || esMoroso[usuario]) return;
+        if (!_estaVencido(usuario) || esMoroso[usuario]) return;
         esMoroso[usuario] = true;
         usuarios[usuario].enMora = true;
         moraDesde[usuario] = block.timestamp;
@@ -1136,14 +1141,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         IERC20 erc = stableTokens[token];
         if (erc.balanceOf(usuario) >= amount && erc.allowance(usuario, address(this)) >= amount) {
             _pagarComo(usuario, token, amount);
-        } else if (usuario == fundador) {
-            uint256 principal = usuarios[usuario].montoActivo;
-            uint256 prinRest = principal - ((principal * pagado) / totalDue);
-            _reducirOutstanding(token, prinRest);
-            uint256 liq = totalLiquidity[token];
-            totalLiquidity[token] = liq > prinRest ? liq - prinRest : 0;
-            _limpiarPrestamo(usuario);
-            emit PrestamoPagado(usuario, principal, 0, token);
         } else {
             _aplicarMoraSiVencido(usuario);
         }
@@ -1153,7 +1150,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(tx.origin == msg.sender, "no contracts");
         require(usuarios[deudor].montoActivo > 0, "no active loan");
         require(usuarios[deudor].monedaActivo == tokenAddress, "token mismatch");
-        require(deudor != fundador && _estaVencido(deudor), "not defaulted");
+        require(_estaVencido(deudor), "not defaulted");
 
         uint256 principal = usuarios[deudor].montoActivo;
         (, uint256 interest, uint256 totalDue, ) = _deudaActual(deudor);
@@ -1263,13 +1260,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(!esMoroso[msg.sender], "in mora");
         require(usuarios[msg.sender].montoActivo == 0, "active loan");
 
-        IERC20 erc = stableTokens[token];
-        uint256 pulled = erc.balanceOf(msg.sender);
-        if (pulled > 0) {
-            erc.safeTransferFrom(msg.sender, address(this), pulled);
-            totalLiquidity[token] += pulled;
-        }
-
         uint256 shares = lpShares[msg.sender][token];
         if (shares > 0) {
             lpShares[msg.sender][token] = 0;
@@ -1305,7 +1295,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         donado[msg.sender] = 0;
         cuentaDestruida[msg.sender] = true;
         _tocarFama(msg.sender, 0);
-        emit CuentaDestruida(msg.sender, token, pulled);
+        emit CuentaDestruida(msg.sender, token, 0);
     }
 
     function cobrarBonoHito(address token) external whenNotPaused nonReentrant onlySupportedToken(token) {
@@ -1325,7 +1315,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         emit BonoHitoPagado(msg.sender, next, bono, token);
     }
 
-    function donar(address token, uint256 amount) external nonReentrant onlySupportedToken(token) {
+    function donar(address token, uint256 amount) external nonReentrant whenNotPaused onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
         require(amount > 0 && fundador != address(0) && msg.sender != fundador);
         uint256 prev = donado[msg.sender];

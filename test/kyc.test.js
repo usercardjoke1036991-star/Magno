@@ -11,10 +11,10 @@ describe('QuatriviumCredit - KYC declaration', function () {
     await token.connect(user).approve(await contract.getAddress(), ethers.MaxUint256);
 
     await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
+    await expect(contract.connect(user).declararKyc()).to.be.reverted;
+    await attestIdentity(contract, user);
     await contract.connect(user).declararKyc();
     expect(await contract.kycDeclarado(user.address)).to.equal(true);
-    await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
-    await attestIdentity(contract, user);
     await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
   });
 
@@ -22,8 +22,8 @@ describe('QuatriviumCredit - KYC declaration', function () {
     const { token, contract, owner, extra, tokenAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
-    await contract.connect(owner).declararKyc();
     await attestIdentity(contract, owner, 'founder-phone', 'founder-device');
+    await contract.connect(owner).declararKyc();
     await expect(contract.connect(owner).solicitarPrestamo(tokenAddr, 0)).to.not.be.reverted;
 
     await contract.connect(extra).registrarHumanoConPadre(ethers.ZeroAddress);

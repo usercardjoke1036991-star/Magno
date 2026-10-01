@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { getProductMode } from '../constants/rpcConfig';
 import { storeSlot } from '../utils/storeSlot';
+import { allowWalletAsyncFallback } from '../utils/walletVaultPolicy';
 import { isValidPhone, normalizePhone } from './notificationProfile';
 
 const PHONE_KEY = storeSlot(['quatrivium', 'account', 'phone']);
@@ -39,6 +41,7 @@ export function maskPhone(phone: string): string {
 export async function loadVerifiedPhone(): Promise<string> {
   const secure = parsePhone(await withLimit(SecureStore.getItemAsync(PHONE_KEY).catch(() => null), 1500, null));
   if (secure) return secure;
+  if (!allowWalletAsyncFallback(getProductMode())) return '';
   return parsePhone(await AsyncStorage.getItem(PHONE_FALLBACK).catch(() => null));
 }
 
@@ -47,7 +50,11 @@ export async function saveVerifiedPhone(phone: string): Promise<string> {
   if (!next || !isValidPhone(next)) {
     throw new Error('phone');
   }
-  await AsyncStorage.setItem(PHONE_FALLBACK, next).catch(() => {});
+  if (allowWalletAsyncFallback(getProductMode())) {
+    await AsyncStorage.setItem(PHONE_FALLBACK, next).catch(() => {});
+  } else {
+    await AsyncStorage.removeItem(PHONE_FALLBACK).catch(() => {});
+  }
   await withLimit(SecureStore.setItemAsync(PHONE_KEY, next, OPTIONS).then(() => true), 2500, false);
   await setPhoneActive(true);
   return next;
@@ -77,7 +84,11 @@ async function loadActiveFlag(): Promise<string> {
 
 export async function setPhoneActive(active: boolean): Promise<void> {
   const value = active ? '1' : '0';
-  await AsyncStorage.setItem(ACTIVE_FALLBACK, value).catch(() => {});
+  if (allowWalletAsyncFallback(getProductMode())) {
+    await AsyncStorage.setItem(ACTIVE_FALLBACK, value).catch(() => {});
+  } else {
+    await AsyncStorage.removeItem(ACTIVE_FALLBACK).catch(() => {});
+  }
   await withLimit(SecureStore.setItemAsync(ACTIVE_KEY, value, OPTIONS).then(() => true), 2500, false);
   if (!active) await clearVerifiedPhone();
 }

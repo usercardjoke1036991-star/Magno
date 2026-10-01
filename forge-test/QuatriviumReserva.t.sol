@@ -105,6 +105,7 @@ contract QuatriviumReservaForgeTest is Test {
         vm.prank(locker, locker);
         local.bloquear(100 ether);
         bytes32 id = keccak256("comision-1");
+        require(id != bytes32(0), "salt");
         (uint256 extra, uint256 founderCut) = local.extraComisionDe(locker, 5 ether);
         uint256 userBefore = token.balanceOf(locker);
         uint256 founderBefore = token.balanceOf(founder);
