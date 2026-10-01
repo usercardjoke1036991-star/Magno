@@ -61,15 +61,23 @@ export function commissionBandsForLoan(
   }));
 }
 
-/** Lista completa por nivel: una fila por generación, sin resumir 6–12 ni 13–40. */
+/** Lista por nivel: gens 1–12 una a una; 13–40 en una sola fila (misma tasa). */
 export function commissionRowsForLoan(
   usdAmount: number,
   interestBps: number
 ): Array<{ range: string; amount: number }> {
-  return commissionLine().map((gen) => ({
-    range: String(gen),
-    amount: commissionForGeneration(usdAmount, interestBps, gen),
-  }));
+  const rows: Array<{ range: string; amount: number }> = [];
+  for (let gen = 1; gen <= 12; gen++) {
+    rows.push({
+      range: String(gen),
+      amount: commissionForGeneration(usdAmount, interestBps, gen),
+    });
+  }
+  rows.push({
+    range: '13–40',
+    amount: commissionForGeneration(usdAmount, interestBps, 13),
+  });
+  return rows;
 }
 
 /** Comisión directa (gen 1) por cada nivel de préstamo L1…L1000. */

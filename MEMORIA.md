@@ -1,9 +1,11 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
+Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.
 
 ## Decisiones
+- [2026-10-01] Token de Telegram ya rotado por el fundador. Tercer admin aplazado: proximo Demo nace 2-de-2 con 0x5023 y 0xD7af.
+- [2026-10-01] Segundo admin para el proximo Demo (2-de-2): 0xD7afC0D64703B306feA2005773e78f2FC03071C6. Primera sigue 0x5023. Attester sigue 0x55D3. No es el 2-de-3 todavia. 0xD2d2 no se parchea.
 - [2026-10-01] El fundador entra en mora y se puede liquidar. declararKyc exige identidad atestada. Confirmacion de fondos fail-closed con wrap de Keystore.
 - [2026-09-30] Bono de hito L200 es 30000 USDT, no 4000. L100 sigue en 2000. Desde 200 hasta 1000: 30000 cada 100.
 - [2026-09-30] Fama misma tasa, pero solo se cobra por la via que se gano: caja en Canje, red en pestaña red, racha solo en Racha. Si la racha se retrasa bajan dias, no fama.
@@ -32,10 +34,9 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] Demo no pide correo, numero, KYC ni el 1 USDT. Esos requisitos son de la cuenta Real y, al hacerlos ahi, quedan.
 - [2026-09-17] Cambiar Textbelt o Resend se hace en el panel de Render, no en el AdminPanel de la app. El attester de firma OTP si va en Render; la llave de owner no.
 - [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.
-- [2026-09-17] El usuario de sesion no viaja a rankings. El padrino se bloquea al validar el codigo, antes de persistir el usuario.
-- [2026-09-16] Render es el host 24/7 del notify-worker: Dockerfile.notify, disco /data, PORT inyectado, clave de cifrado generada, sin llave de owner.
 
 ## Cambios realizados
+- [2026-10-01] Auditoria 1 oct: Hardhat 243/244 (test de copy del pool alineado). Worker Render attester nuevo 0x140F coincide con .env.worker. Demo live 0xD2d2 sigue legado (owner=attester 0xdb13). Mainnet vacio.
 - [2026-10-01] 5+6: vincular pide EIP-712 BindWallet antes de guardar address; Pool y Como funciona dicen que lo aportado no se retira
 - [2026-10-01] Implementadas remediaciones de auditoria: contratos (nonce, pausa, KYC, fundador, destroy, boost) y app (Keystore, fail-closed, PII, PIN 20000, health).
 - [2026-09-30] SonarCloud: 5 S5845 de bigint en tests MLM/canje pasados a expectAmt. Snyk Code/SCA high 0. MobSF CLI solo abre apk/aab/ipa.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] Auditoria de contratos: sin perdida de fondos. Nucleo 24555 B. LoanLadder L1000 requiredCount alineado a 4955.
 - [2026-09-17] Auditoria para iniciar Render: worker testnet sin correo; attester explicito; EMAIL_FROM no se fuerza.
 - [2026-09-17] Demo libre de identidad y de 1 USDT; Real sigue pidiendo primero el acceso y luego correo, numero y KYC.
-- [2026-09-17] Auditoria de conexion: health del worker reporta textbelt/resend/attester; Render pide TEXTBELT, Resend y attester; la app de preview/produccion apunta a notify.quatriviumcredit.app
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-01] Cambio: 5+6: vincular pide EIP-712 BindWallet antes de guardar address; Pool y Como funciona dicen que lo aportado no se retira
+[2026-10-01] Cambio: Auditoria 1 oct: Hardhat 243/244 (test de copy del pool alineado). Worker Render attester nuevo 0x140F coincide con .env.worker. Demo live 0xD2d2 sigue legado (owner=attester 0xdb13). Mainnet vacio.

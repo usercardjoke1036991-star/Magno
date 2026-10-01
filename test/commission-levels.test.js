@@ -3,17 +3,18 @@ const fs = require('fs');
 const path = require('path');
 
 describe('level commission list', function () {
-  it('exposes one row per generation instead of 6–12 / 13–40 bands', function () {
+  it('lists gens 1–12 and collapses 13–40 on each loan tier', function () {
     const commissions = fs.readFileSync(path.join(__dirname, '..', 'constants', 'commissions.ts'), 'utf8');
     expect(commissions).to.include('commissionRowsForLoan');
     expect(commissions).to.include('commissionLine()');
     expect(commissions).to.include('MAX_COMMISSION_LINE = 40');
-    expect(commissions).to.match(/range: String\(gen\)/);
+    expect(commissions).to.include("range: '13–40'");
+    expect(commissions).to.match(/gen <= 12/);
     expect(commissions).to.include('directCommissionRowsForTiers');
     expect(commissions).to.include('COMMISSION_BANDS');
   });
 
-  it('keeps the 40 rows behind an accordion on each loan tier', function () {
+  it('keeps the compact gen list behind an accordion on each loan tier', function () {
     const card = fs.readFileSync(path.join(__dirname, '..', 'components', 'LoanTierCard.tsx'), 'utf8');
     expect(card).to.include('commissionRowsForLoan');
     expect(card).to.include('commsOpen');
@@ -32,7 +33,9 @@ describe('level commission list', function () {
     expect(referrals).to.include('directCommissionRowsForTiers');
     expect(referrals).to.include('levelCommsOpen');
     expect(referrals).to.include('MAX_LOAN_LEVEL');
-    expect(referrals).to.include('FlatList');
+    expect(referrals).to.include('nestedScrollEnabled');
+    expect(referrals).to.include('LEVEL_LIST_HEIGHT');
+    expect(referrals).to.not.include('FlatList');
     expect(referrals).to.include("useState(false)");
   });
 });

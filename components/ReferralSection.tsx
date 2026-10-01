@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Share, Alert, Pressable, FlatList } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Share, Alert, Pressable, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { addressToInviteCode, buildInviteLink } from '../utils/inviteCode';
@@ -49,6 +49,11 @@ interface ReferralSectionProps {
 
 const ZERO = '0x0000000000000000000000000000000000000000';
 const EXAMPLE_LEVELS = [1, 10, 100, 1000] as const;
+const LEVEL_ROW_HEIGHT = 34;
+const LEVEL_LIST_HEIGHT = 320;
+const LEVEL_OVERSCAN = 8;
+
+type LevelCommissionRow = { id: number; usdAmount: number; amount: number };
 
 export const ReferralSection: React.FC<ReferralSectionProps> = ({
   walletAddress,
@@ -66,6 +71,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   const { profile, lookup } = useUserProfile();
   const [lockedSponsor, setLockedSponsor] = useState<LockedSponsor | null>(null);
   const [levelCommsOpen, setLevelCommsOpen] = useState(false);
+  const [levelListOffset, setLevelListOffset] = useState(0);
   const padre = referral?.padre || '';
   const isFundador = Boolean(referral?.isFundador);
   const bonoActivacionCobrado = Boolean(referral?.bonoActivacionCobrado);
@@ -96,17 +102,20 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   );
 
   const renderLevelCommission = useCallback(
-    ({ item }: { item: { id: number; usdAmount: number; amount: number } }) => {
+    (item: LevelCommissionRow) => {
       const earn = formatCommissionUSD(item.amount);
       return (
-        <View style={[styles.earnRow, { borderColor: colors.border }]}>
-          <AppText style={[styles.earnCell, { color: colors.text, flex: 1.2 }]}>
+        <View
+          key={item.id}
+          style={[styles.earnRow, styles.levelRow, { borderColor: colors.border }]}
+        >
+          <AppText numberOfLines={1} style={[styles.earnCell, { color: colors.text, flex: 1.2 }]}>
             {t('level')} {item.id}
           </AppText>
-          <AppText style={[styles.earnCell, { color: colors.text, flex: 1 }]}>
+          <AppText numberOfLines={1} style={[styles.earnCell, { color: colors.text, flex: 1 }]}>
             {formatUSD(item.usdAmount)}
           </AppText>
-          <AppText style={[styles.earnCell, { color: colors.primary, flex: 1.4 }]}>
+          <AppText numberOfLines={1} style={[styles.earnCell, { color: colors.primary, flex: 1.4 }]}>
             {item.id === 1
               ? `${t('referralEarnFirst', { bonus: formatCommissionUSD(ACTIVATION_BONUS_USD) })} · ${t('referralEarnNext', { amount: earn })}`
               : earn}
@@ -116,6 +125,21 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
     },
     [colors.border, colors.primary, colors.text, t]
   );
+
+  const visibleLevelRows = useMemo(() => {
+    const start = Math.max(0, Math.floor(levelListOffset / LEVEL_ROW_HEIGHT) - LEVEL_OVERSCAN);
+    const count = Math.ceil(LEVEL_LIST_HEIGHT / LEVEL_ROW_HEIGHT) + LEVEL_OVERSCAN * 2;
+    const end = Math.min(levelCommissionRows.length, start + count);
+    return {
+      topPad: start * LEVEL_ROW_HEIGHT,
+      bottomPad: Math.max(0, (levelCommissionRows.length - end) * LEVEL_ROW_HEIGHT),
+      items: levelCommissionRows.slice(start, end),
+    };
+  }, [levelListOffset, levelCommissionRows]);
+
+  const onLevelListScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setLevelListOffset(event.nativeEvent.contentOffset.y);
+  }, []);
 
   useEffect(() => {
     let done = false;
@@ -389,7 +413,12 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         })}
 
         <Pressable
-          onPress={() => setLevelCommsOpen((open) => !open)}
+          onPress={() => {
+            setLevelCommsOpen((open) => {
+              if (open) setLevelListOffset(0);
+              return !open;
+            });
+          }}
           style={styles.earnToggle}
           accessibilityRole="button"
           accessibilityState={{ expanded: levelCommsOpen }}
@@ -410,16 +439,17 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
               <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1 }]}>{t('referralEarnColLoan')}</AppText>
               <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</AppText>
             </View>
-            <FlatList
-              data={levelCommissionRows}
-              keyExtractor={(item) => String(item.id)}
-              renderItem={renderLevelCommission}
-              initialNumToRender={20}
-              maxToRenderPerBatch={24}
-              windowSize={7}
+            <ScrollView
               nestedScrollEnabled
               style={styles.levelList}
-            />
+              onScroll={onLevelListScroll}
+              scrollEventThrottle={16}
+              showsVerticalScrollIndicator
+            >
+              <View style={{ height: visibleLevelRows.topPad }} />
+              {visibleLevelRows.items.map(renderLevelCommission)}
+              <View style={{ height: visibleLevelRows.bottomPad }} />
+            </ScrollView>
           </View>
         ) : null}
       </AppSubsection>
@@ -433,6 +463,7 @@ const styles = StyleSheet.create({
   earnHead: { flexDirection: 'row', marginBottom: 4 },
   earnHeadCell: { fontSize: 10, fontWeight: '700' },
   earnRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 7, borderTopWidth: 1 },
+  levelRow: { height: LEVEL_ROW_HEIGHT, paddingVertical: 0 },
   earnCell: { fontSize: 12, fontWeight: '700' },
   table: { marginBottom: 12 },
   examplesTitle: { fontSize: 13, fontWeight: '800', marginBottom: 8, marginTop: 4 },
@@ -445,7 +476,7 @@ const styles = StyleSheet.create({
   earnToggleText: { flex: 1, fontSize: 13, fontWeight: '800' },
   chevron: { fontSize: 18, fontWeight: '700', lineHeight: 20 },
   levelListBox: { marginTop: 8 },
-  levelList: { maxHeight: 320 },
+  levelList: { height: LEVEL_LIST_HEIGHT },
   founderBadge: {
     borderRadius: 12,
     borderWidth: 1,

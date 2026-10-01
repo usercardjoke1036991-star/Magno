@@ -1170,7 +1170,7 @@ describe('demo credit gates', function () {
     expect(sol).to.include('revert("pool locked")');
     expect(sol).to.include('insufficient liquidity');
     const es = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'i18n', 'locales', 'es.json'), 'utf8'));
-    expect(es.poolPublicLead).to.match(/No se retira/);
+    expect(es.poolPublicLead).to.match(/no se (puede )?retirar/i);
     expect(es.poolPublicLead).to.not.match(/rendimiento/);
     expect(es.poolLockedNote).to.match(/no se retira/i);
   });
