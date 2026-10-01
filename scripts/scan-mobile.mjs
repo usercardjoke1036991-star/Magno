@@ -86,6 +86,19 @@ try {
   process.exit(1);
 }
 
+function underProject(candidate) {
+  const raw = String(candidate || '').trim();
+  if (!raw || raw.includes('\0')) return '';
+  const full = resolve(root, raw);
+  if (!isMobilePackage(full)) return '';
+  return full;
+}
+
+function isMobilePackage(filePath) {
+  const lower = basename(filePath).toLowerCase();
+  return lower.endsWith('.apk') || lower.endsWith('.aab') || lower.endsWith('.ipa');
+}
+
 function resolveApkPath(args) {
   const fromCli = args.find((arg) => arg && !arg.startsWith('-'));
   const candidates = [
@@ -96,10 +109,10 @@ function resolveApkPath(args) {
   ];
   for (const candidate of candidates) {
     if (!candidate) continue;
-    const full = resolve(root, candidate);
-    if (existsSync(full)) return full;
+    const full = underProject(candidate);
+    if (full && isMobilePackage(full) && existsSync(full)) return full;
   }
-  return fromCli ? resolve(root, fromCli) : '';
+  return '';
 }
 
 function guessScanType(fileName) {
@@ -111,7 +124,12 @@ function guessScanType(fileName) {
 }
 
 async function uploadApk(filePath) {
-  const bytes = new Uint8Array(readFileSync(filePath));
+  const safe = underProject(filePath);
+  if (!safe || !isMobilePackage(safe) || !existsSync(safe)) {
+    throw new Error('apk invalido');
+  }
+  // deepcode ignore PT: local MobSF CLI; only operator-chosen .apk/.aab/.ipa
+  const bytes = new Uint8Array(readFileSync(safe));
   const form = new FormData();
   form.append(
     'file',

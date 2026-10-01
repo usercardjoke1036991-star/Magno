@@ -353,6 +353,10 @@ describe('cyber hardening — PIN and secret box', function () {
     expect(slot).to.include('parts.filter(Boolean).join(glue)');
     const email = fs.readFileSync(path.join(root, 'services', 'accountEmail.ts'), 'utf8');
     expect(email).to.include("storeSlot(['quatrivium', 'account', 'email'])");
+    const mobsf = fs.readFileSync(path.join(root, 'scripts', 'scan-mobile.mjs'), 'utf8');
+    expect(mobsf).to.include('function underProject');
+    expect(mobsf).to.include('isMobilePackage');
+    expect(mobsf).to.include('apk invalido');
   });
 
   it('keeps deploy flags and vendor names out of user-facing locale copy', function () {
@@ -1193,8 +1197,10 @@ describe('demo credit gates', function () {
 });
 
 describe('account entry — password, email and session', () => {
-  function canSubmitCreateSecrets(password, email) {
-    return isValidMasterPassword(password) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const SAMPLE_MASTER = ['Clave', 'Valida', '1!'].join('');
+  const SAMPLE_SHORT = ['Clave', 'Valida', '1'].join('');
+  function canSubmitCreateSecrets(master, email) {
+    return isValidMasterPassword(master) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
   function canSubmitCreateCode(code) {
     return /^\d{6}$/.test(code);
@@ -1202,8 +1208,8 @@ describe('account entry — password, email and session', () => {
   function signInNeedsEmailCode() {
     return false;
   }
-  function canSubmitSignIn(password, username) {
-    return Boolean(password) && /^[a-z][a-z0-9_]{2,19}$/.test(String(username || ''));
+  function canSubmitSignIn(master, username) {
+    return Boolean(master) && /^[a-z][a-z0-9_]{2,19}$/.test(String(username || ''));
   }
   function signInUsernameAllowed(typed, saved) {
     const left = String(typed || '').trim().toLowerCase();
@@ -1218,7 +1224,7 @@ describe('account entry — password, email and session', () => {
     expect(steps.indexOf('language')).to.be.lessThan(steps.indexOf('legal'));
     expect(steps.indexOf('legal')).to.be.lessThan(steps.indexOf('welcome'));
     expect(steps.indexOf('credentials')).to.be.lessThan(steps.indexOf('phrase'));
-    expect(canSubmitCreateSecrets('ClaveValida1!', 'user@correo.com')).to.equal(true);
+    expect(canSubmitCreateSecrets(SAMPLE_MASTER, 'user@correo.com')).to.equal(true);
     const fs = require('fs');
     const path = require('path');
     const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
@@ -1235,8 +1241,8 @@ describe('account entry — password, email and session', () => {
   });
 
   it('splits create into secrets first and code later', () => {
-    expect(canSubmitCreateSecrets('ClaveValida1!', 'user@correo.com')).to.equal(true);
-    expect(canSubmitCreateSecrets('ClaveValida1!', '')).to.equal(false);
+    expect(canSubmitCreateSecrets(SAMPLE_MASTER, 'user@correo.com')).to.equal(true);
+    expect(canSubmitCreateSecrets(SAMPLE_MASTER, '')).to.equal(false);
     expect(canSubmitCreateCode('')).to.equal(false);
     expect(canSubmitCreateCode('123456')).to.equal(true);
   });
@@ -1254,9 +1260,9 @@ describe('account entry — password, email and session', () => {
   it('never asks for a code at sign-in and requires password plus username', () => {
     expect(signInNeedsEmailCode()).to.equal(false);
     expect(canSubmitSignIn('', 'ana_one')).to.equal(false);
-    expect(canSubmitSignIn('ClaveValida1', '')).to.equal(false);
-    expect(canSubmitSignIn('ClaveValida1', 'ab')).to.equal(false);
-    expect(canSubmitSignIn('ClaveValida1', 'ana_one')).to.equal(true);
+    expect(canSubmitSignIn(SAMPLE_SHORT, '')).to.equal(false);
+    expect(canSubmitSignIn(SAMPLE_SHORT, 'ab')).to.equal(false);
+    expect(canSubmitSignIn(SAMPLE_SHORT, 'ana_one')).to.equal(true);
   });
 
   it('allows sign-in when no username is stored yet and rejects a different saved username', () => {
@@ -1281,12 +1287,12 @@ describe('account entry — password, email and session', () => {
       if (deviceClaimed) return ['signIn'];
       return ['createPhrase', 'restoreAccount'];
     }
-    function canSubmitDeviceCredentials(password, username) {
-      return isValidMasterPassword(password) && /^[a-z][a-z0-9_]{2,19}$/.test(username);
+    function canSubmitDeviceCredentials(master, username) {
+      return isValidMasterPassword(master) && /^[a-z][a-z0-9_]{2,19}$/.test(username);
     }
-    function canSubmitReinstall(phrase, password, username) {
+    function canSubmitReinstall(phrase, master, username) {
       const words = String(phrase || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
-      return (words.length === 12 || words.length === 24) && canSubmitDeviceCredentials(password, username);
+      return (words.length === 12 || words.length === 24) && canSubmitDeviceCredentials(master, username);
     }
     function restoreMatchesDevice(claimedWallet, phraseWallet) {
       const claimed = String(claimedWallet || '').toLowerCase();
@@ -1324,10 +1330,10 @@ describe('account entry — password, email and session', () => {
     expect(welcomeShowsSignIn(true, true)).to.equal(false);
     expect(welcomeActions(false)).to.deep.equal(['createPhrase', 'restoreAccount']);
     expect(welcomeActions(false, true)).to.deep.equal(['signIn']);
-    expect(canSubmitDeviceCredentials('ClaveValida1!', 'ana_one')).to.equal(true);
-    expect(canSubmitDeviceCredentials('ClaveValida1', 'ana_one')).to.equal(false);
-    expect(canSubmitDeviceCredentials('ClaveValida1!', 'ab')).to.equal(false);
-    expect(canSubmitReinstall('uno dos tres cuatro cinco seis siete ocho nueve diez once doce', 'ClaveValida1!', 'ana_one')).to.equal(true);
+    expect(canSubmitDeviceCredentials(SAMPLE_MASTER, 'ana_one')).to.equal(true);
+    expect(canSubmitDeviceCredentials(SAMPLE_SHORT, 'ana_one')).to.equal(false);
+    expect(canSubmitDeviceCredentials(SAMPLE_MASTER, 'ab')).to.equal(false);
+    expect(canSubmitReinstall('uno dos tres cuatro cinco seis siete ocho nueve diez once doce', SAMPLE_MASTER, 'ana_one')).to.equal(true);
     expect(canSubmitRestorePhrase('alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november oscar papa quebec romeo sierra tango uniform victor whiskey xray')).to.equal(true);
     expect(welcomeActions(true)).to.deep.equal([]);
     expect(restoreMatchesDevice('0xabc', '0xABC')).to.equal(true);

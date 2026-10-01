@@ -97,9 +97,9 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     expect(await contract.reputacion(padre.address)).to.equal(100n + 100n);
     expect(await fama.famaCaja(padre.address)).to.equal(0n);
     expect(await fama.famaPorGeneracion(1)).to.equal(0n);
-    expect(await fama.famaPorGeneracion(2)).to.equal(53n);
-    expect(await fama.famaRed(abuelo.address)).to.equal(53n);
-    expect((await fama.famaRed(owner.address)) - founderFame0).to.equal(140n);
+    expectAmt(await fama.famaPorGeneracion(2), 53n);
+    expectAmt(await fama.famaRed(abuelo.address), 53n);
+    expectAmt((await fama.famaRed(owner.address)) - founderFame0, 140n);
     expect(await contract.puntosRed(padre.address)).to.equal(0n);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
@@ -290,7 +290,7 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
     expect(await contract.bonosRedCobrados(padre.address)).to.equal(0n);
     expect(await contract.reputacion(padre.address)).to.equal(padreRep0 + 100n);
     expect(await fama.famaCaja(padre.address)).to.equal(0n);
-    expect(await fama.famaRed(owner.address) - founderFame0).to.equal(153n);
+    expectAmt((await fama.famaRed(owner.address)) - founderFame0, 153n);
 
     const padreBefore = await token.balanceOf(padre.address);
     const bonoActivacion = await contract.BONO_ACTIVACION();
@@ -302,12 +302,12 @@ describe('QuatriviumCredit - Unilevel MLM', function () {
 
     expect(await contract.puntosRed(padre.address)).to.equal(0n);
     expect(await contract.bonosRedCobrados(padre.address)).to.equal(0n);
-    expect((await token.balanceOf(padre.address)) - padreBefore).to.equal(4n * bonoActivacion);
+    expectAmt((await token.balanceOf(padre.address)) - padreBefore, 4n * bonoActivacion);
     const red = await contract.obtenerRedReputacion(padre.address);
     expect(red.puntos).to.equal(0n);
     expect(red.bonosCobrados).to.equal(0n);
     expect(await fama.famaCaja(padre.address)).to.equal(0n);
-    expect((await fama.famaRed(owner.address)) - founderFame0).to.equal(5n * 153n);
+    expectAmt((await fama.famaRed(owner.address)) - founderFame0, 5n * 153n);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
 

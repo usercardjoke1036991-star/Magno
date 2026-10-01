@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Worker 24/7 en Hetzner (CX23 Ubuntu, Caddy HTTPS) como alternativa a Fly. Mismo notify-worker y .env.worker.
 
 ## Cambios realizados
+- [2026-09-30] SonarCloud: 5 S5845 de bigint en tests MLM/canje pasados a expectAmt. Snyk Code/SCA high 0. MobSF CLI solo abre apk/aab/ipa.
 - [2026-09-30] Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display.
 - [2026-09-30] Guia de Ajustes reescrita en tres partes con como se gana. Bono L200 a 30000. Red: invitacion con enlace, comisiones por generacion y tablero con refresco.
 - [2026-09-30] Cerrado el paquete pendiente: extra Reserva desde pool; botones de cobro de racha 7/30/100/365; fama por via; verificacion oculta; guia en Ajustes; hitos 30000 desde L300; rankings desde nivel 15; textos de usuario sin fundador ni tarifa de verificar.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] Auditoria de conexion: health del worker reporta textbelt/resend/attester; Render pide TEXTBELT, Resend y attester; la app de preview/produccion apunta a notify.quatriviumcredit.app
 - [2026-09-17] Worker, Render y production:check usan Textbelt como SMS principal del OTP
 - [2026-09-17] Mythril 0.24.8, Semgrep 1.177.0 y Trivy 0.74.0 en vivo. SWC-101 es overflow de 0.8.24 en getters/vistas. Semgrep solo INFO de gas. Trivy no toca el credito. Sin cambio de codigo.
-- [2026-09-17] Aderyn 0.6.8 en vivo: High 1 (CEI en marcarMorosoSiVencido ~1163 y destruirCuenta ~1301, ambas nonReentrant) y 13 Low de estilo. No se toco el nucleo. No hay bug de fondos.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-09-30] Cambio: Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display.
+[2026-09-30] Cambio: SonarCloud: 5 S5845 de bigint en tests MLM/canje pasados a expectAmt. Snyk Code/SCA high 0. MobSF CLI solo abre apk/aab/ipa.

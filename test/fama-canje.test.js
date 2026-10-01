@@ -63,8 +63,8 @@ describe('QuatriviumFamaCaja - fama de caja y canje', function () {
     expect(await fama.famaCaja(padre.address)).to.equal(0n);
     expect(await fama.famaRed(padre.address)).to.equal(0n);
     expect(await fama.famaCanjeada(padre.address)).to.equal(0n);
-    expect(await fama.famaRed(abuelo.address)).to.equal(53n);
-    expect((await fama.famaRed(owner.address)) - founderFame0).to.equal(140n);
+    expectAmt(await fama.famaRed(abuelo.address), 53n);
+    expectAmt((await fama.famaRed(owner.address)) - founderFame0, 140n);
     expect(await contract.reputacion(padre.address)).to.equal(200n);
     await assertNavInvariant(token, contract, tokenAddr, contractAddr);
   });
