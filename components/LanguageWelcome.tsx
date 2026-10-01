@@ -1,12 +1,12 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { AppText } from './AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LANGUAGES } from '../i18n/languages';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { APP_DISPLAY_NAME } from '../constants/brand';
 import { BrandLogo } from './BrandLogo';
+import { BrandSplash, BrandWordmark } from './BrandSplash';
 import { AppIcon } from './icons';
 
 export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -19,11 +19,7 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
   }
 
   if (!langReady) {
-    return (
-      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center' }]}>
-        <ActivityIndicator color={colors.primary} />
-      </SafeAreaView>
-    );
+    return <BrandSplash />;
   }
 
   if (langChosen) {
@@ -33,8 +29,10 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <BrandLogo size={72} style={styles.logo} />
-        <AppText style={[styles.brand, { color: colors.text, textAlign: align }]}>{APP_DISPLAY_NAME}</AppText>
+        <View style={styles.hero}>
+          <BrandLogo size={96} />
+          <BrandWordmark compact titleColor={colors.text} lineColor={colors.primary} />
+        </View>
         <AppText style={[styles.title, { color: colors.text, textAlign: align }]}>{t('chooseLanguage')}</AppText>
         <AppText style={[styles.lead, { color: colors.textMuted, textAlign: align }]}>{t('chooseLanguageLead')}</AppText>
         {LANGUAGES.map((item) => {
@@ -84,12 +82,8 @@ const styles = StyleSheet.create({
     paddingTop: 36,
     paddingBottom: 40,
   },
-  logo: {
-    marginBottom: 16,
-  },
-  brand: {
-    fontSize: 22,
-    fontWeight: '600',
+  hero: {
+    alignItems: 'center',
     marginBottom: 24,
   },
   title: {

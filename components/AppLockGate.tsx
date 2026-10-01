@@ -15,7 +15,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppIcon } from './icons';
 import { AppText, AppTextInput } from './AppText';
-import { BrandLogo } from './BrandLogo';
+import { BrandSplash, BrandWordmark } from './BrandSplash';
 import { SecretInput } from './SecretInput';
 import { PasswordRulesHint } from './PasswordRulesHint';
 import {
@@ -997,11 +997,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   }, [hasPassword, sessionReady]);
 
   if (!ready) {
-    return (
-      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center' }]}>
-        <ActivityIndicator color={colors.primary} />
-      </SafeAreaView>
-    );
+    return <BrandSplash />;
   }
 
   if (!needsSetup && !locked && !askingSignIn) {
@@ -1028,7 +1024,11 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       >
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.hero}>
-            {welcomeStage ? <BrandLogo size={72} /> : <AppIcon name="lock" size={28} color={colors.primary} />}
+            {welcomeStage ? (
+              <BrandWordmark compact titleColor={colors.text} lineColor={colors.primary} />
+            ) : (
+              <AppIcon name="lock" size={28} color={colors.primary} />
+            )}
             <AppText style={[styles.title, { color: colors.text }]}>
               {sessionReady
                 ? t('saveSession')

@@ -160,6 +160,7 @@
 - Guia de funciones en Ajustes y extra de Reserva desde el pool
 - Fundador puede poner cualquier marco de rango como accesorio exclusivo; el marco del hub se ve completo; el codigo de referido se fija al crear cuenta y se registra on-chain cuando el credito esta listo
 - Avisos de comision y deuda solo por Telegram; correo y telefono siguen para identidad
+- textos institucionales, traducciones 17 idiomas y pantalla de carga con logo grande Quatrivium Finance
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -296,3 +297,4 @@
 - [2026-09-30 21:32] Idea añadida al backlog: "Guia de funciones en Ajustes y extra de Reserva desde el pool"
 - [2026-10-01 02:51] Idea añadida al backlog: "Fundador puede poner cualquier marco de rango como accesorio exclusivo; el marco"
 - [2026-10-01 03:11] Idea añadida al backlog: "Avisos de comision y deuda solo por Telegram; correo y telefono siguen para iden"
+- [2026-10-01 15:27] Idea añadida al backlog: "textos institucionales, traducciones 17 idiomas y pantalla de carga con logo gra"

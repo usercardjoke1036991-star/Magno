@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.
 
 ## Cambios realizados
+- [2026-10-01] Pantalla de carga con emblema y wordmark; textos de usuario en tono institucional; 17 idiomas alineados (1177 claves).
 - [2026-10-01] Auditoria 1 oct: Hardhat 243/244 (test de copy del pool alineado). Worker Render attester nuevo 0x140F coincide con .env.worker. Demo live 0xD2d2 sigue legado (owner=attester 0xdb13). Mainnet vacio.
 - [2026-10-01] 5+6: vincular pide EIP-712 BindWallet antes de guardar address; Pool y Como funciona dicen que lo aportado no se retira
 - [2026-10-01] Implementadas remediaciones de auditoria: contratos (nonce, pausa, KYC, fundador, destroy, boost) y app (Keystore, fail-closed, PII, PIN 20000, health).
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] Auditoria USB en vivo Xiaomi M2102J20SG: app abierta con Metro 8081, APK 1.0.0 sin reinstalar. Real=Acceso pendiente y Pronto sin credito falso; Demo=linea activa y Solicitar; pool Demo 2000.70 solo lectura 0xD2d2; gemas Granate; Ajustes Demo sin KYC/correo/telefono/contrasena; rankings L50. Sin bug de fondos. Telefono dejado en Cuenta Real.
 - [2026-09-17] Auditoria de contratos: sin perdida de fondos. Nucleo 24555 B. LoanLadder L1000 requiredCount alineado a 4955.
 - [2026-09-17] Auditoria para iniciar Render: worker testnet sin correo; attester explicito; EMAIL_FROM no se fuerza.
-- [2026-09-17] Demo libre de identidad y de 1 USDT; Real sigue pidiendo primero el acceso y luego correo, numero y KYC.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-01] Cambio: Auditoria 1 oct: Hardhat 243/244 (test de copy del pool alineado). Worker Render attester nuevo 0x140F coincide con .env.worker. Demo live 0xD2d2 sigue legado (owner=attester 0xdb13). Mainnet vacio.
+[2026-10-01] Cambio: Pantalla de carga con emblema y wordmark; textos de usuario en tono institucional; 17 idiomas alineados (1177 claves).
