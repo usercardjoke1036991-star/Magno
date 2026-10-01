@@ -48,6 +48,16 @@ describe('alerts use Telegram only', function () {
     expect(worker).to.not.match(/json\(res, 200, \{[^}]*TELEGRAM_TOKEN/);
   });
 
+  it('keeps Telegram bind codes the same length in the app and the worker', function () {
+    const ui = fs.readFileSync(path.join(__dirname, '..', 'components', 'NotificationChannels.tsx'), 'utf8');
+    const worker = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'notify-worker.mjs'), 'utf8');
+    expect(worker).to.include("randomBytes(6).toString('hex')");
+    expect(worker).to.include('/^[a-z0-9]{8,16}$/');
+    expect(ui).to.include('/^[a-z0-9]{8,16}$/');
+    expect(worker).to.not.include("randomBytes(8).toString('hex')");
+    expect(ui).to.not.include('/^[a-z0-9]{8,12}$/');
+  });
+
   it('shares an app invite link, not Play Store', function () {
     const invite = fs.readFileSync(path.join(__dirname, '..', 'utils', 'inviteCode.ts'), 'utf8');
     expect(invite).to.include('INVITE_APP_SCHEME');

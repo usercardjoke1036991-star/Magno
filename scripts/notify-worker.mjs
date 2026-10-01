@@ -1082,7 +1082,7 @@ const bindTelegram = (wallet, chatId) => {
 
 const consumeBindCode = (payload) => {
   const code = String(payload || '').trim().toLowerCase();
-  if (!/^[a-z0-9]{8,12}$/.test(code)) return null;
+  if (!/^[a-z0-9]{8,16}$/.test(code)) return null;
   const pending = store.pendingBinds?.[code];
   if (!pending) return null;
   delete store.pendingBinds[code];
@@ -1597,7 +1597,7 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       json(res, 429, { error: 'rate' });
       return;
     }
-    const code = randomBytes(8).toString('hex');
+    const code = randomBytes(6).toString('hex');
     store.pendingBinds[code] = { wallet, exp: now + 10 * 60 * 1000 };
     await persist();
     json(res, 200, { code });

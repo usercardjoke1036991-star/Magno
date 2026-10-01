@@ -119,7 +119,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       if (!response.ok) {
         throw new Error('prepare');
       }
-      if (!body.code || !/^[a-z0-9]{8,12}$/.test(body.code)) throw new Error('code');
+      if (!body.code || !/^[a-z0-9]{8,16}$/.test(body.code)) throw new Error('code');
       const opened = await openSafeUrl(`https://t.me/${bot}?start=${body.code}`);
       if (!opened) throw new Error('open');
     } catch {
