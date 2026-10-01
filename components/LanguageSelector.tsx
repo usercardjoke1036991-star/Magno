@@ -15,6 +15,8 @@ export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel 
     setDraft(lang);
   }, [lang]);
 
+  const dirty = draft !== lang;
+
   return (
     <View style={styles.wrap}>
       {!hideLabel && (
@@ -45,12 +47,15 @@ export const LanguageSelector: React.FC<{ hideLabel?: boolean }> = ({ hideLabel 
         );
       })}
       <TouchableOpacity
+        disabled={!dirty}
         onPress={() => {
+          if (!dirty) return;
           setLang(draft);
           Alert.alert(t('ready'), t('settingsSaved'));
         }}
-        style={[styles.save, { backgroundColor: colors.connect }]}
+        style={[styles.save, { backgroundColor: colors.connect }, !dirty && styles.disabled]}
         accessibilityRole="button"
+        accessibilityState={{ disabled: !dirty }}
         accessibilityLabel={t('settingsSave')}
       >
         <AppText style={styles.saveText}>{t('settingsSave')}</AppText>
@@ -107,5 +112,8 @@ const styles = StyleSheet.create({
     color: '#111',
     fontSize: 15,
     fontWeight: '600',
+  },
+  disabled: {
+    opacity: 0.45,
   },
 });

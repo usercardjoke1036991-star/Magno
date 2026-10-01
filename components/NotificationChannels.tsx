@@ -15,6 +15,7 @@ import {
   type NotificationProfile,
 } from '../services/notificationProfile';
 import { AppText } from './AppText';
+import { hasUnsavedChanges } from '../utils/unsavedChanges';
 
 interface NotificationChannelsProps {
   walletAddress: string;
@@ -37,6 +38,12 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
     signup: false,
     email: false,
   });
+  const [savedPrefs, setSavedPrefs] = useState<NotificationPrefs>({
+    debt: true,
+    commission: false,
+    signup: false,
+    email: false,
+  });
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
   const [botName, setBotName] = useState('');
@@ -46,7 +53,9 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   React.useEffect(() => {
     loadNotificationProfile()
       .then((profile) => {
-        setPrefs({ ...profile.prefs, debt: true, email: false });
+        const next = { ...profile.prefs, debt: true, email: false };
+        setPrefs(next);
+        setSavedPrefs(next);
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -102,10 +111,10 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
     setPrefs((prev) => ({ ...prev, [key]: !prev[key], email: false, debt: true }));
   };
 
-  const persistPrefs = async (nextPrefs: NotificationPrefs) => {
+  const persistPrefs = async (nextPrefs: NotificationPrefs): Promise<boolean> => {
     if (!walletAddress) {
       Alert.alert(t('connect'), t('connectFirst'));
-      return;
+      return false;
     }
     const profile: NotificationProfile = {
       phone: '',
@@ -114,14 +123,20 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       prefs: { ...nextPrefs, debt: true, email: false },
     };
     const saved = await saveNotificationProfile(walletAddress, profile);
-    setPrefs({ ...saved.prefs, debt: true, email: false });
+    const next = { ...saved.prefs, debt: true, email: false };
+    setPrefs(next);
+    setSavedPrefs(next);
+    return true;
   };
 
+  const dirty = hasUnsavedChanges(prefs, savedPrefs);
+
   const handleSave = async () => {
+    if (saving || !dirty) return;
     setSaving(true);
     try {
-      await persistPrefs(prefs);
-      Alert.alert(t('ready'), t('notificationSaved'));
+      const ok = await persistPrefs(prefs);
+      if (ok) Alert.alert(t('ready'), t('notificationSaved'));
     } catch {
       Alert.alert(t('error'), t('notificationSaveError'));
     } finally {
@@ -248,9 +263,12 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       </View>
 
       <TouchableOpacity
-        style={[styles.save, { backgroundColor: colors.primary }, saving && styles.disabled]}
+        style={[styles.save, { backgroundColor: colors.primary }, (saving || !dirty) && styles.disabled]}
         onPress={() => void handleSave()}
-        disabled={saving}
+        disabled={saving || !dirty}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: saving || !dirty }}
+        accessibilityLabel={t('notificationSave')}
       >
         <View style={styles.btnRow}>
           <AppIcon name="save" size={16} color={colors.onPrimary} />

@@ -45,6 +45,8 @@ export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = fal
     setDraft(preference);
   }, [preference]);
 
+  const dirty = draft !== preference;
+
   const options: { value: ThemePreference; label: string }[] = [
     { value: 'system', label: t('themeSystem') },
     { value: 'light', label: t('themeLight') },
@@ -89,12 +91,15 @@ export const ThemeToggle: React.FC<{ hideLabel?: boolean }> = ({ hideLabel = fal
         })}
       </View>
       <TouchableOpacity
+        disabled={!dirty}
         onPress={() => {
+          if (!dirty) return;
           setTheme(draft);
           Alert.alert(t('ready'), t('settingsSaved'));
         }}
-        style={[styles.save, { backgroundColor: colors.connect }]}
+        style={[styles.save, { backgroundColor: colors.connect }, !dirty && styles.disabled]}
         accessibilityRole="button"
+        accessibilityState={{ disabled: !dirty }}
         accessibilityLabel={t('settingsSave')}
       >
         <AppText style={styles.saveText}>{t('settingsSave')}</AppText>
@@ -159,5 +164,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '600',
+  },
+  disabled: {
+    opacity: 0.45,
   },
 });

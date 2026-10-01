@@ -99,12 +99,10 @@ export const BiometricLockSection: React.FC<{
     return () => sub.remove();
   }, [refresh]);
 
+  const dirty = draft !== bioOn;
+
   const save = async () => {
-    if (busy) return;
-    if (draft === bioOn) {
-      Alert.alert(t('ready'), t('settingsSaved'));
-      return;
-    }
+    if (busy || !dirty) return;
     setBusy(true);
     try {
       if (!(await hasSecurityConfirmMethod())) {
@@ -157,10 +155,11 @@ export const BiometricLockSection: React.FC<{
             />
           </View>
           <TouchableOpacity
-            disabled={busy}
+            disabled={busy || !dirty}
             onPress={() => void save()}
-            style={[styles.button, { backgroundColor: colors.connect }, busy && { opacity: 0.6 }]}
+            style={[styles.button, { backgroundColor: colors.connect }, (busy || !dirty) && { opacity: 0.45 }]}
             accessibilityRole="button"
+            accessibilityState={{ disabled: busy || !dirty }}
             accessibilityLabel={t('settingsSave')}
           >
             <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>

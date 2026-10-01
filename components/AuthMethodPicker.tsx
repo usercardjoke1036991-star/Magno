@@ -16,6 +16,7 @@ import {
 import { hasSecurityConfirmMethod } from '../services/fundsConfirm';
 import { useFundsConfirm } from './FundsConfirmHost';
 import { AppText } from './AppText';
+import { hasUnsavedChanges } from '../utils/unsavedChanges';
 
 function methodKey(method: AuthMethod): TranslationKey {
   if (method === 'pin') return 'authMethodPin';
@@ -48,13 +49,16 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
   const { confirmFunds } = useFundsConfirm();
   const empty = useMemo(() => emptyPrefs(), []);
   const [draft, setDraft] = useState<AuthPrefs>(empty);
+  const [saved, setSaved] = useState<AuthPrefs>(empty);
   const [available, setAvailable] = useState<AuthMethod[]>(['password']);
   const [busy, setBusy] = useState(false);
+  const dirty = hasUnsavedChanges(draft, saved);
 
   useEffect(() => {
     Promise.all([loadAuthPrefs(), getAvailableMethods()])
       .then(([prefs, methods]) => {
         setDraft(prefs);
+        setSaved(prefs);
         setAvailable(methods);
       })
       .catch(() => {});
@@ -86,7 +90,7 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
   };
 
   const save = async () => {
-    if (busy) return;
+    if (busy || !dirty) return;
     const missing = AUTH_PURPOSES.filter(
       (purpose) => purpose !== 'signin' && draft[purpose].on && !draft[purpose].methods.length
     );
@@ -103,6 +107,7 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
       if (!(await confirmFunds('security'))) return;
       const next = await saveAuthPrefs(draft);
       setDraft(next);
+      setSaved(next);
       onChanged?.();
       Alert.alert(t('ready'), t('settingsSaved'));
     } catch {
@@ -158,10 +163,11 @@ export const AuthMethodPicker: React.FC<{ onChanged?: () => void }> = ({ onChang
         );
       })}
       <TouchableOpacity
-        disabled={busy}
+        disabled={busy || !dirty}
         onPress={() => void save()}
-        style={[styles.save, { backgroundColor: colors.connect }, busy && { opacity: 0.6 }]}
+        style={[styles.save, { backgroundColor: colors.connect }, (busy || !dirty) && { opacity: 0.45 }]}
         accessibilityRole="button"
+        accessibilityState={{ disabled: busy || !dirty }}
         accessibilityLabel={t('settingsSave')}
       >
         <AppText style={styles.saveText}>{t('settingsSave')}</AppText>

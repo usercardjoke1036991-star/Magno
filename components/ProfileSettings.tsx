@@ -22,6 +22,7 @@ import { displayMaxLoanLevel } from '../constants/loanTiers';
 import { cachedProtocolCaps } from '../services/quatriviumCreditService';
 import { loadClaimedUsername } from '../services/accountUsername';
 import { AppText } from './AppText';
+import { hasUnsavedChanges } from '../utils/unsavedChanges';
 
 export const ProfileSettings: React.FC = () => {
   const { t } = useI18n();
@@ -71,7 +72,13 @@ export const ProfileSettings: React.FC = () => {
     }
   };
 
+  const dirty = hasUnsavedChanges(
+    { photoUri: draft.photoUri, avatarId: draft.avatarId, displayName: draft.displayName },
+    { photoUri: profile.photoUri, avatarId: profile.avatarId, displayName: profile.displayName }
+  );
+
   const handleSave = async () => {
+    if (saving || !dirty) return;
     setSaving(true);
     try {
       await saveProfile({
@@ -143,9 +150,12 @@ export const ProfileSettings: React.FC = () => {
       ) : null}
 
       <TouchableOpacity
-        style={[styles.save, { backgroundColor: colors.primary }, saving && styles.disabled]}
+        style={[styles.save, { backgroundColor: colors.primary }, (saving || !dirty) && styles.disabled]}
         onPress={() => void handleSave()}
-        disabled={saving || (Boolean(username) && !draft.publicFace && draft.avatarId < 0)}
+        disabled={saving || !dirty || (Boolean(username) && !draft.publicFace && draft.avatarId < 0)}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: saving || !dirty }}
+        accessibilityLabel={t('profileSave')}
       >
         <AppIcon name="save" size={16} color="#111" />
         <AppText style={styles.saveText}>{t('profileSave')}</AppText>
