@@ -28,7 +28,7 @@ export function reservaCorteFundadorBp(tramo: 1 | 2 | 3): number {
   return 500;
 }
 
-/** Extra de comisión desde el bote: % del tramo sobre la comisión, tope % del principal. */
+/** Extra de comisión desde el pool: % del tramo sobre la comisión, tope % del principal. */
 export function reservaExtraComisionWei(
   montoBaseWei: bigint,
   principalWei: bigint,

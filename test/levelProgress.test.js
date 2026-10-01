@@ -10,7 +10,7 @@ function requiredCountPlanned(id) {
 }
 
 function bonusOf(level) {
-  return ethers.parseUnits(String(level * 20), 18);
+  return ethers.parseUnits(String(level >= 200 ? 30000 : level * 20), 18);
 }
 
 async function deployHarness() {
@@ -52,8 +52,8 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     expect(await leveling.requiredCount(1000)).to.equal(4955n);
     expect(await leveling.bonoDeHito(100)).to.equal(bonusOf(100));
     expect(await leveling.bonoDeHito(200)).to.equal(bonusOf(200));
-    expect(await leveling.bonoDeHito(1000)).to.equal(bonusOf(1000));
-    expect(await leveling.BONO_HITOS_TOTAL()).to.equal(ethers.parseUnits('110000', 18));
+    expect(await leveling.bonoDeHito(1000)).to.equal(ethers.parseUnits('30000', 18));
+    expect(await leveling.BONO_HITOS_TOTAL()).to.equal(ethers.parseUnits('272000', 18));
     for (let id = 1; id <= 1000; id += 17) {
       expect(await leveling.requiredCount(id)).to.equal(BigInt(requiredCountPlanned(id)));
     }
@@ -132,7 +132,7 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     const leveling = await Factory.deploy();
     expect(await leveling.canPayHito(bonusOf(100), bonusOf(100), 100)).to.equal(false);
     expect(await leveling.canPayHito(ethers.parseUnits('3000', 18), ethers.parseUnits('3000', 18), 100)).to.equal(true);
-    expect(await leveling.canPayMaxBonus(ethers.parseUnits('30000', 18), ethers.parseUnits('30000', 18))).to.equal(true);
+    expect(await leveling.canPayMaxBonus(ethers.parseUnits('40000', 18), ethers.parseUnits('40000', 18))).to.equal(true);
   });
 });
 
@@ -147,6 +147,8 @@ describe('QuatriviumCredit - bono de hito cada 100 niveles', function () {
   it('pays a proportional bonus one milestone at a time from free cash above the floor', async () => {
     const { token, contract, owner, user, tokenAddr, contractAddr } = await deployHarness();
     await seedPool(token, contract, owner, '8000');
+    await token.mint(owner.address, ethers.parseUnits('80000', 18));
+    await contract.connect(owner).depositarLiquidez(tokenAddr, ethers.parseUnits('60000', 18));
     await registerAndFund(token, contract, user);
     await contract.forceNivel(user.address, 200);
 

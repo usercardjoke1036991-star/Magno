@@ -1,5 +1,5 @@
 export const FAME_PAGE_SIZE = 10;
-export const RANKING_UNLOCK_LEVEL = 50;
+export const RANKING_UNLOCK_LEVEL = 15;
 
 export type FameBoardKind = 'referrals' | 'loans' | 'fame' | 'streak' | 'level' | 'bonuses' | 'combined';
 

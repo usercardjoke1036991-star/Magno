@@ -148,6 +148,7 @@ export const useHomeHandlers = ({
     cobrarBonoHito,
     donarProyecto,
     canjearFama,
+    canjearFamaRed,
     cobrarBonoRacha,
     pagarPrestamo,
     pagarCuotas,
@@ -520,6 +521,53 @@ export const useHomeHandlers = ({
     if (!(await confirmFunds())) return;
     if (!(await ensureGasForTx())) return;
     const result = await canjearFama(fama);
+    if (result.success) {
+      void recordMovement(walletAddress, {
+        kind: 'bonus',
+        from: '',
+        to: walletAddress,
+        amountLabel: formatUSD(usdtFromFama(fama)),
+        tokenSymbol: selectedToken.symbol,
+        platform: 'Quatrivium',
+        timestamp: Date.now(),
+      });
+      refetch();
+    }
+  };
+
+  const handleCanjearFamaRed = async (fama: number) => {
+    if (!walletAddress) {
+      Alert.alert(t('connect'), t('appWalletNotReady'));
+      return;
+    }
+    if (!ensureCreditReady()) return;
+    if (userInfo.paused) {
+      Alert.alert(t('admin'), t('protocolPaused'));
+      return;
+    }
+    if (userInfo.isDelinquent) {
+      Alert.alert(t('delinquent'), t('moraBlocked'));
+      return;
+    }
+    if (!userInfo.isRegistered) {
+      Alert.alert(t('sectionCreditLine'), t('creditAccessNeed'));
+      return;
+    }
+    if (!userInfo.canCanjearFama) {
+      Alert.alert(t('hubCanje'), t('canjeLegacy'));
+      return;
+    }
+    if (!Number.isInteger(fama) || fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT !== 0) {
+      Alert.alert(t('amount'), t('invalidAmount'));
+      return;
+    }
+    if (fama > (userInfo.famaRedDisponible || 0)) {
+      Alert.alert(t('hubCanje'), t('canjeNeed', { points: String(fama - (userInfo.famaRedDisponible || 0)) }));
+      return;
+    }
+    if (!(await confirmFunds())) return;
+    if (!(await ensureGasForTx())) return;
+    const result = await canjearFamaRed(fama);
     if (result.success) {
       void recordMovement(walletAddress, {
         kind: 'bonus',
@@ -961,6 +1009,7 @@ export const useHomeHandlers = ({
     handleSolicitarCredito,
     handleCobrarBonoHito,
     handleCanjearFama,
+    handleCanjearFamaRed,
     handleCobrarBonoRacha,
     handlePagar,
     handleDepositarPool,

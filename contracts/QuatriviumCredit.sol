@@ -22,7 +22,7 @@ import {QuatriviumFamaLib} from "./libraries/QuatriviumFamaLib.sol";
  * El fundador cobra un recorte fijo de cada interes. Si una llave se compromete,
  * las otras fundadoras pueden reasignar fundador y owner (timelock + confirmaciones).
  * Las comisiones de red recorren toda la linea hacia arriba (no se cortan a 5).
- * Fama de caja (hermano QuatriviumFamaCaja): referir el primer L1 pagado, donar o aportar al pool.
+ * Fama de caja: donar/aportar (no la puerta), racha y red generacional desde gen 2.
  *
  * EIP-170: ESTE archivo no puede pasar de 24576 bytes (limite de Ethereum, no nuestro).
  * El protocolo no se recorta: cada pieza nueva vive en un hermano o libreria
@@ -956,7 +956,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
                 redGenealogica[deudor].bonoActivacionCobrado = true;
                 usoBonoA = true;
                 emit BonoActivacionPagado(padre, deudor, pagadoBono, token);
-                _acreditarRed(padre, token);
             }
         }
 
@@ -1316,7 +1315,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (nivel < 1) nivel = 1;
         uint256 next = hitoCobrado[msg.sender] + 100;
         require(next <= MAX_NIVEL_TOTAL && next <= nivel - (nivel % 100));
-        uint256 bono = next * 20e18;
+        uint256 bono = next >= 200 ? 30000e18 : next * 20e18;
         uint256 caja = _cajaLibre(token);
         uint256 piso = (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000;
         require(caja > piso && caja - piso >= bono);
@@ -1329,13 +1328,24 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     function donar(address token, uint256 amount) external nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
         require(amount > 0 && fundador != address(0) && msg.sender != fundador);
+        uint256 prev = donado[msg.sender];
         stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
         donado[msg.sender] += amount;
-        uint256 pts = (amount * 100) / 1e18;
-        reputacion[msg.sender] += pts;
-        _tocarFama(msg.sender, pts);
+        bool puerta = prev == 0 && amount == 2 * BONO_ACTIVACION;
+        if (!puerta) {
+            uint256 pts = (amount * 100) / 1e18;
+            reputacion[msg.sender] += pts;
+            _tocarFama(msg.sender, pts);
+        }
         emit Donacion(msg.sender, amount, token);
         emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
+    }
+
+    /// @notice Correo/teléfono: 0.50 o 1 USDT al pool. Sin fama ni participaciones LP.
+    function pagarVerificacion(address token, uint256 amount) external nonReentrant whenNotPaused onlySupportedToken(token) {
+        require(tx.origin == msg.sender, "no contracts");
+        _assertPeg(token);
+        QuatriviumFamaLib.alimentarPool(totalLiquidity, stableTokens[token], token, msg.sender, amount);
     }
 
     function pagarCanje(address token, address to, uint256 amount) external nonReentrant onlySupportedToken(token) {

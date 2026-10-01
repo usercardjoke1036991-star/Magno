@@ -1,6 +1,10 @@
 {
   "enfoque": "Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.",
   "decisiones": [
+    "- [2026-09-30] Bono de hito L200 es 30000 USDT, no 4000. L100 sigue en 2000. Desde 200 hasta 1000: 30000 cada 100.",
+    "- [2026-09-30] Fama misma tasa, pero solo se cobra por la via que se gano: caja en Canje, red en pestaña red, racha solo en Racha. Si la racha se retrasa bajan dias, no fama.",
+    "- [2026-09-30] Reserva: el extra de comisiones multiplicadas sale del pool (fondo de prestamos), no del bote. El 12% de rendimiento sigue saliendo del bote.",
+    "- [2026-09-30] Real: 2 USDT de acceso a la fundadora y 0.50+0.50 de correo/telefono al pool, sin fama. Captacion 1 USDT sin fama. Fama de red solo gen 2+ y recorte de fundador. No se recorta _pagarBonosRed; deja de acreditarse.",
     "- [2026-09-30] No recortar el nucleo por EIP-170. Si no cabe, hermano. No se borran cobrarBonoHito, _assertPeg ni _pagarBonosRed. L1000 cada 100 y cuotas opcionales viven en Credit porque el pago y la liquidacion no pueden delegarse.",
     "- [2026-09-30] Cambiar PIN, huella, metodos de confirmacion o autenticador exige un metodo ya listo. El QR TOTP no se vuelve a mostrar salvo Reemplazar.",
     "- [2026-09-30] Huella en Xiaomi: si requireAuthentication falla, no desbloquear. Pedir PIN o contraseña.",
@@ -26,13 +30,14 @@
     "- [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.",
     "- [2026-09-17] El usuario de sesion no viaja a rankings. El padrino se bloquea al validar el codigo, antes de persistir el usuario.",
     "- [2026-09-16] Render es el host 24/7 del notify-worker: Dockerfile.notify, disco /data, PORT inyectado, clave de cifrado generada, sin llave de owner.",
-    "- [2026-09-16] Worker 24/7 en Hetzner (CX23 Ubuntu, Caddy HTTPS) como alternativa a Fly. Mismo notify-worker y .env.worker.",
-    "- [2026-09-16] El codigo de referido solo se captura al crear la cuenta. Vacio = cadena propia colgada del fundador. Una vez vinculado no se cambia (local + on-chain already registered).",
-    "- [2026-09-16] No recortar funciones del nucleo por EIP-170: ranking y premio van en hermanos (QuatriviumLeveling). La sala Rankings permanece y los nombres se ven desde el nivel 50.",
-    "- [2026-09-16] Los puestos de ranking no son fijos: suben o bajan con el esfuerzo. El historial de referidos sigue en Red. Los marcos de gema de nivel se ven en cada persona del ranking; 1o/2o/3o llevan ademas medallas distintas.",
-    "- [2026-09-16] Analisis MobSF privado en localhost; no usar la instancia publica para que el APK no circule."
+    "- [2026-09-16] Worker 24/7 en Hetzner (CX23 Ubuntu, Caddy HTTPS) como alternativa a Fly. Mismo notify-worker y .env.worker."
   ],
   "cambios": [
+    "- [2026-09-30] Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display.",
+    "- [2026-09-30] Guia de Ajustes reescrita en tres partes con como se gana. Bono L200 a 30000. Red: invitacion con enlace, comisiones por generacion y tablero con refresco.",
+    "- [2026-09-30] Cerrado el paquete pendiente: extra Reserva desde pool; botones de cobro de racha 7/30/100/365; fama por via; verificacion oculta; guia en Ajustes; hitos 30000 desde L300; rankings desde nivel 15; textos de usuario sin fundador ni tarifa de verificar.",
+    "- [2026-09-30] Textos de acceso a 2 USDT en todos los idiomas; verificacion al pool con candado de selector; donacion voluntaria ya no esconde 0.50.",
+    "- [2026-09-30] Implementado el esquema de puerta 2 USDT a ti + 1 USDT de verificar al pool sin fama, captacion 1 sin fama y fama de red desde gen 2. El 0.50 de caja ya no se paga. Demo live 0xD2d2 sigue viejo hasta redesplegar.",
     "- [2026-09-30] Racha diaria en FamaCaja. Credit no crecio. Tras pagar, notificarRacha. Ranking de dias. Fama de racha no se pierde.",
     "- [2026-09-30] Cerrado el paquete de comisiones, L1000 y cuotas: lista por generacion, bono cada 100, mora solo al vencimiento. Tests del modulo 99/99. Snyk Code 0 en components y constants.",
     "- [2026-09-30] Textos de comisiones vs contrato; QR autenticador oculto tras validar; revalidacion al cambiar seguridad",
@@ -77,13 +82,8 @@
     "- [2026-09-17] Auditoria de conexion: health del worker reporta textbelt/resend/attester; Render pide TEXTBELT, Resend y attester; la app de preview/produccion apunta a notify.quatriviumcredit.app",
     "- [2026-09-17] Worker, Render y production:check usan Textbelt como SMS principal del OTP",
     "- [2026-09-17] Mythril 0.24.8, Semgrep 1.177.0 y Trivy 0.74.0 en vivo. SWC-101 es overflow de 0.8.24 en getters/vistas. Semgrep solo INFO de gas. Trivy no toca el credito. Sin cambio de codigo.",
-    "- [2026-09-17] Aderyn 0.6.8 en vivo: High 1 (CEI en marcarMorosoSiVencido ~1163 y destruirCuenta ~1301, ambas nonReentrant) y 13 Low de estilo. No se toco el nucleo. No hay bug de fondos.",
-    "- [2026-09-17] Foundry 1.8.3: 8/8 pass. No se cambio QuatriviumCredit (avisos de lint son diseno). Tests nuevos de premio en forge-test.",
-    "- [2026-09-17] Slither 0.11.3 en vivo (WSL, Hardhat): 19 contratos, 79 detectores, 2 avisos Medium divide-before-multiply en premioAsiento. Son n(n+1)/2 exacto y la formula multiply-first ya aplicada. Sin bug de fondos.",
-    "- [2026-09-17] PDF ssaas.pdf (scan 7am) confirma APK B5BD79B9 sin exp+. HIGH=huella. Sin cambios de codigo. Escanear solo localhost.",
-    "- [2026-09-17] Auditoria sss.pdf: HIGH=huella, se quito exp+ de release. APK Escritorio SHA256 B5BD79B9 version 1.0.2 vc3. Escanear solo en localhost:8000.",
-    "- [2026-09-17] APK MobSF regenerado 1.0.2 vc3 en Escritorio SHA256 1E36EC5B. Escanear solo en localhost:8000."
+    "- [2026-09-17] Aderyn 0.6.8 en vivo: High 1 (CEI en marcarMorosoSiVencido ~1163 y destruirCuenta ~1301, ambas nonReentrant) y 13 Low de estilo. No se toco el nucleo. No hay bug de fondos."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-09-30] Cambio: Racha diaria en FamaCaja. Credit no crecio. Tras pagar, notificarRacha. Ranking de dias. Fama de racha no se pierde."
+  "ultima_sesion": "[2026-09-30] Cambio: Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display."
 }

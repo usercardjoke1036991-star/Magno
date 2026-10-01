@@ -155,6 +155,9 @@
 - Textos de comisiones alineados al contrato; QR TOTP solo en alta o reemplazo autenticado; revalidacion obligatoria al cambiar seguridad
 - En cada nivel, lista de comisiones por generacion en dolares. L1000 sin subir; solicitudes se acumulan; bono de hito cada 100 pagos a tiempo. Comisiones mas jugosas por nivel. Cuotas opcionales: una, varias o todo antes del vencimiento.
 - Sala racha diaria: un referido que se registra pide y paga suma un dia, fama por dia, gracia de 1 dia, bono del pool en hitos 7/30/100/365 acumulable, ranking de racha; fama no se pierde al fallar
+- Puerta Real 2 USDT a la fundadora y 1 USDT de correo+telefono al pool, ambos sin fama. Captacion 1 USDT sin fama. Fama de red generacional desde gen 2. Sin bono de caja 0.50.
+- Reserva extra de comisiones del pool; racha cobro por dias; fama solo por la via que se gano; guia en Ajustes; hitos 30000 tras L200; historial desde nivel 15
+- Guia de funciones en Ajustes y extra de Reserva desde el pool
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -286,3 +289,6 @@
 - [2026-09-30 16:42] Idea añadida al backlog: "Textos de comisiones alineados al contrato; QR TOTP solo en alta o reemplazo aut"
 - [2026-09-30 16:58] Idea añadida al backlog: "En cada nivel, lista de comisiones por generacion en dolares. L1000 sin subir; s"
 - [2026-09-30 17:45] Idea añadida al backlog: "Sala racha diaria: un referido que se registra pide y paga suma un dia, fama por"
+- [2026-09-30 20:18] Idea añadida al backlog: "Puerta Real 2 USDT a la fundadora y 1 USDT de correo+telefono al pool, ambos sin"
+- [2026-09-30 20:50] Idea añadida al backlog: "Reserva extra de comisiones del pool; racha cobro por dias; fama solo por la via"
+- [2026-09-30 21:32] Idea añadida al backlog: "Guia de funciones en Ajustes y extra de Reserva desde el pool"

@@ -46,7 +46,8 @@ describe('QuatriviumFamaCaja - racha diaria', function () {
     expect(row.dias).to.equal(1);
     expect(row.diasMax).to.equal(1);
     expect(row.famaDias).to.equal(1);
-    expect(await fama.famaCaja(padre.address)).to.equal(200n);
+    expect(await fama.famaRacha(padre.address)).to.equal(100n);
+    expect(await fama.famaCaja(padre.address)).to.equal(0n);
   });
 
   it('does not add two ranking days on the same calendar day', async () => {
@@ -84,7 +85,8 @@ describe('QuatriviumFamaCaja - racha diaria', function () {
     const faded = await fama.obtenerRacha(padre.address);
     expect(faded.dias).to.equal(0);
     expect(faded.famaDias).to.equal(2);
-    expect(await fama.famaCaja(padre.address)).to.equal(300n);
+    expect(await fama.famaRacha(padre.address)).to.equal(200n);
+    expect(await fama.famaCaja(padre.address)).to.equal(0n);
   });
 
   it('lets the padrino accumulate and claim the 7-day streak bonus from the pool', async () => {

@@ -91,6 +91,7 @@ export const CONTRACT_ABI = [
   'function donado(address) view returns (uint256)',
   'function cobrarBonoHito(address token)',
   'function donar(address token, uint256 amount)',
+  'function pagarVerificacion(address token, uint256 amount)',
   'function famaHermano() view returns (address)',
   'function pagarCanje(address token, address to, uint256 amount)',
   'function obtenerDeuda(address usuario) view returns (uint256 principal, uint256 interes, uint256 total, address token)',

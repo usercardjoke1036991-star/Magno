@@ -673,20 +673,20 @@ describe('demo credit gates', function () {
     return Boolean(hash) && !/^0x0+$/i.test(hash);
   }
 
-  it('requires a one-time 1 USDT access fee in Real before any loan', function () {
+  it('requires a one-time 2 USDT access fee in Real before any loan', function () {
     function hasCreditAccess(paidUsd) {
       const paid = Number(paidUsd);
-      return Number.isFinite(paid) && paid + 1e-9 >= 1;
+      return Number.isFinite(paid) && paid + 1e-9 >= 2;
     }
     function liveNeedsAccess(demo, paidUsd) {
       return !demo && !hasCreditAccess(paidUsd);
     }
     expect(hasCreditAccess(0)).to.equal(false);
-    expect(hasCreditAccess(0.99)).to.equal(false);
-    expect(hasCreditAccess(1)).to.equal(true);
+    expect(hasCreditAccess(1)).to.equal(false);
+    expect(hasCreditAccess(2)).to.equal(true);
     expect(hasCreditAccess(5)).to.equal(true);
     expect(liveNeedsAccess(false, 0)).to.equal(true);
-    expect(liveNeedsAccess(false, 1)).to.equal(false);
+    expect(liveNeedsAccess(false, 2)).to.equal(false);
     expect(liveNeedsAccess(true, 0)).to.equal(false);
     function canPayCreditAccess({ protocolCanDonate, founderAddress, accessEnabled }) {
       return Boolean(protocolCanDonate && String(founderAddress || '').trim() && accessEnabled);
@@ -873,7 +873,7 @@ describe('demo credit gates', function () {
     expect(securityUi).to.include('identityNeedAccess');
   });
 
-  it('charges Real email and phone verification to the founder, not the pool', function () {
+  it('charges Real email and phone verification to the pool, not the founder', function () {
     const fs = require('fs');
     const path = require('path');
     function verificationFeeUsdt(kind, demo) {
@@ -912,12 +912,14 @@ describe('demo credit gates', function () {
     expect(phoneUi).to.not.include('verifyFeeFailed');
     const charge = fs.readFileSync(path.join(__dirname, '..', 'services', 'founderUsdtCharge.ts'), 'utf8');
     expect(charge).to.include('QuatriviumCreditService.donar');
+    expect(charge).to.include('QuatriviumCreditService.pagarVerificacion');
+    expect(charge).to.include('chargePoolUsdt');
     expect(charge).to.include('ensureExternalWalletOnAppChain');
     expect(charge).to.include('silent');
-    expect(charge).to.not.include('depositarLiquidez');
     expect(charge).to.not.include('retirarLiquidez');
     expect(charge).to.not.match(/TEXTBELT|RESEND_API|ATTESTER_PRIVATE/i);
     const hook = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useVerificationFee.ts'), 'utf8');
+    expect(hook).to.include('chargePoolUsdt');
     expect(hook).to.include('silent: true');
     expect(hook).to.not.include('useFundsConfirm');
     const historySvc = fs.readFileSync(path.join(__dirname, '..', 'services', 'movementHistory.ts'), 'utf8');
@@ -1005,14 +1007,12 @@ describe('demo credit gates', function () {
     function voluntaryDonateUsd(paidUsd) {
       const paid = Number(paidUsd);
       if (!Number.isFinite(paid) || paid <= 0) return 0;
-      if (!(paid + 1e-9 >= 1)) return 0;
-      const extra = paid - 1;
-      const hidden = Math.min(extra, 1);
-      return Math.max(0, extra - hidden);
+      if (!(paid + 1e-9 >= 2)) return 0;
+      return Math.max(0, paid - 2);
     }
     function classifyDonationKind(usdAmount, isFirstDonation) {
       const usd = Number(usdAmount);
-      if (isFirstDonation && Number.isFinite(usd) && usd > 0 && usd <= 1 + 1e-6) return 'access';
+      if (isFirstDonation && Number.isFinite(usd) && Math.abs(usd - 2) < 1e-6) return 'access';
       return 'donation';
     }
     function moraDays(startedAt, endedAt) {
@@ -1068,8 +1068,9 @@ describe('demo credit gates', function () {
     expect(voluntaryDonateUsd(2)).to.equal(0);
     expect(voluntaryDonateUsd(6)).to.equal(4);
     expect(voluntaryDonateUsd(0)).to.equal(0);
-    expect(classifyDonationKind(1, true)).to.equal('access');
+    expect(classifyDonationKind(2, true)).to.equal('access');
     expect(classifyDonationKind(5, true)).to.equal('donation');
+    expect(classifyDonationKind(1, true)).to.equal('donation');
     expect(classifyDonationKind(1, false)).to.equal('donation');
     const day = 86_400_000;
     const start = 1_700_000_000_000;
@@ -2133,7 +2134,7 @@ describe('account entry — password, email and session', () => {
     expect(card).to.include('MAX_LEVEL_BONUS_EVERY');
     expect(card).to.include("t('payChoiceLead')");
     expect(es.referralCommissionSchedule).to.include('0,8%');
-    expect(es.referralRepDirectOnly).to.include('2 a 40');
+    expect(es.referralRepDirectOnly).to.include('padrino directo');
     expect(es.jobCycle5.toLowerCase()).to.include('cancela');
     expect(es.jobCycle5.toLowerCase()).to.not.include('solicita y cancela');
     const referrals = fs.readFileSync(path.join(__dirname, '..', 'components', 'ReferralSection.tsx'), 'utf8');

@@ -20,7 +20,7 @@
 - Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
 - i18n: 17 idiomas, 1040 claves
-- Rankings: 6 tableros, divisiones de 100, premio mensual estimado, nombres y fotos públicas por lotes de 100, visibles desde el nivel 50
+- Rankings: 7 tableros (incluye racha), divisiones de 100, premio mensual estimado, nombres y fotos públicas, visibles desde el nivel 15
 - Referidos Unilevel en contrato y UI
 - Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono

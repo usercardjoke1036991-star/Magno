@@ -163,6 +163,10 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
             <AppIcon name="history" size={16} color={colors.textMuted} />
           </TouchableOpacity>
         ) : null}
+        <TouchableOpacity style={styles.refresh} onPress={refetch} accessibilityRole="button" accessibilityLabel={t('referralRefresh')}>
+          <AppIcon name="refresh" size={16} color="#146C2E" />
+          <AppText style={styles.refreshText}>{t('referralRefresh')}</AppText>
+        </TouchableOpacity>
       </View>
     );
   }

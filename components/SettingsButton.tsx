@@ -26,8 +26,9 @@ import { useAppMode } from '../wallet/AppModeContext';
 import type { TranslationKey } from '../i18n/translations';
 import { AppText } from './AppText';
 import { LegalDocuments } from './LegalDocuments';
+import { HowTheAppWorks } from './HowTheAppWorks';
 
-type Panel = 'home' | 'security' | 'appearance' | 'language' | 'mode' | 'admin' | 'privacy' | 'terms';
+type Panel = 'home' | 'security' | 'appearance' | 'language' | 'mode' | 'admin' | 'privacy' | 'terms' | 'guide';
 
 export const SettingsButton: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -76,6 +77,7 @@ export const SettingsButton: React.FC = () => {
     admin: 'settingsAdminTitle',
     privacy: 'legalPrivacy',
     terms: 'legalTerms',
+    guide: 'settingsGuideTitle',
   };
 
   const MenuRow = ({
@@ -159,6 +161,7 @@ export const SettingsButton: React.FC = () => {
                     })}
                     onPress={() => setPanel('mode')}
                   />
+                  <MenuRow icon="info" label={t('settingsGuideTitle')} onPress={() => setPanel('guide')} />
                   <MenuRow icon="info" label={t('legalPrivacy')} onPress={() => setPanel('privacy')} />
                   <MenuRow icon="info" label={t('legalTerms')} onPress={() => setPanel('terms')} />
                 </View>
@@ -167,6 +170,7 @@ export const SettingsButton: React.FC = () => {
               {panel === 'appearance' ? <ThemeToggle hideLabel /> : null}
               {panel === 'language' ? <LanguageSelector hideLabel /> : null}
               {panel === 'mode' ? <ModeToggle /> : null}
+              {panel === 'guide' ? <HowTheAppWorks /> : null}
               {panel === 'privacy' ? <LegalDocuments mode="read" doc="privacy" /> : null}
               {panel === 'terms' ? <LegalDocuments mode="read" doc="terms" /> : null}
               {panel === 'admin' ? <AdminAccess /> : null}

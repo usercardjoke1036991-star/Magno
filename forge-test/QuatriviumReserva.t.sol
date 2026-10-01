@@ -92,6 +92,9 @@ contract QuatriviumReservaForgeTest is Test {
         QuatriviumReserva local = new QuatriviumReserva(address(token), founder, address(credit));
         credit.setAttester(address(this));
         credit.setNivel(locker, 10);
+        credit.setPayToken(address(token));
+        token.mint(address(credit), 50 ether);
+        local.setFamaCaja(address(credit));
         token.mint(address(this), 200 ether);
         token.mint(locker, 200 ether);
         token.approve(address(local), type(uint256).max);
@@ -105,10 +108,12 @@ contract QuatriviumReservaForgeTest is Test {
         (uint256 extra, uint256 founderCut) = local.extraComisionDe(locker, 5 ether);
         uint256 userBefore = token.balanceOf(locker);
         uint256 founderBefore = token.balanceOf(founder);
+        uint256 poolBefore = token.balanceOf(address(credit));
         vm.prank(address(this), address(this));
         local.pagarBoostComision(locker, 5 ether, id);
         assertEq(token.balanceOf(locker) - userBefore, extra - founderCut);
         assertEq(token.balanceOf(founder) - founderBefore, founderCut);
-        assertEq(token.balanceOf(address(local)), 100 ether + 20 ether - extra);
+        assertEq(poolBefore - token.balanceOf(address(credit)), extra);
+        assertEq(token.balanceOf(address(local)), 100 ether + 20 ether);
     }
 }

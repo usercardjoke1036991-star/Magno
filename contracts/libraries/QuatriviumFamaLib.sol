@@ -78,8 +78,20 @@ library QuatriviumFamaLib {
         reputacion[padre] += 100;
         emit ReputationUpdated(padre, reputacion[padre]);
         if (hermano != address(0)) {
-            IQuatriviumFamaCaja(hermano).acreditar(padre, 100);
+            IQuatriviumFamaCaja(hermano).acreditarFamaRed(deudor);
         }
+    }
+
+    function alimentarPool(
+        mapping(address => uint256) storage totalLiquidity,
+        IERC20 token,
+        address tokenAddr,
+        address from,
+        uint256 amount
+    ) external {
+        require(from != address(0) && (amount == 5e17 || amount == 1e18));
+        token.safeTransferFrom(from, address(this), amount);
+        totalLiquidity[tokenAddr] += amount;
     }
 
     function recoverAttest(

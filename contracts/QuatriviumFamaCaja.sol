@@ -32,12 +32,14 @@ interface ICreditCaja {
         view
         returns (uint128 pagado, uint64 venceCuota, uint8 totales, uint8 pagadas, bool enPlazo);
     function prestamosCerrados(address) external view returns (uint256);
+    function fundador() external view returns (address);
 }
 
 /**
  * @title QuatriviumFamaCaja
  * @notice Hermano del crédito: fama de caja, canje y racha diaria.
- *         100 fama por USDT donado o aportado, 100 al padrino en el primer L1 pagado.
+ *         100 fama por USDT donado o aportado (no la puerta). El 1 USDT de captación no da fama.
+ *         Fama de red: generaciones 2–40 y recorte del fundador, misma escala que el dinero.
  *         Canje: 250 fama disponible = 1 USDT. El perfil de fama no baja.
  *         Racha: un referido que pide y paga suma un día; 1 día de gracia;
  *         la fama de racha no se pierde; el ranking sí puede bajar.
@@ -62,7 +64,11 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
     address public immutable token;
 
     mapping(address => uint256) public famaCaja;
+    mapping(address => uint256) public famaRed;
+    mapping(address => uint256) public famaRacha;
     mapping(address => uint256) public famaCanjeada;
+    mapping(address => uint256) public famaRedCanjeada;
+    address public reserva;
 
     struct Racha {
         uint32 dias;
@@ -84,6 +90,8 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
     error CreditoPausado();
     error SinBonoRacha();
     error SinCierre();
+    error SoloReserva();
+    error ReservaYaSet();
 
     event FamaAcreditada(address indexed usuario, uint256 pts);
     event FamaCanjeada(address indexed usuario, uint256 fama, uint256 monto, address indexed token);
@@ -108,15 +116,75 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         return ganada > cobrada ? ganada - cobrada : 0;
     }
 
+    function famaRedDisponible(address usuario) public view returns (uint256) {
+        uint256 ganada = famaRed[usuario];
+        uint256 cobrada = famaRedCanjeada[usuario];
+        return ganada > cobrada ? ganada - cobrada : 0;
+    }
+
+    function famaPerfil(address usuario) public view returns (uint256) {
+        return famaCaja[usuario] + famaRed[usuario] + famaRacha[usuario];
+    }
+
+    function setReserva(address next) external {
+        if (next == address(0)) revert DestinoCero();
+        if (reserva != address(0)) revert ReservaYaSet();
+        if (msg.sender != ICreditCaja(credit).fundador()) revert SoloCredit();
+        reserva = next;
+    }
+
+    function pagarDesdePool(address to, uint256 amount) external {
+        if (msg.sender != reserva) revert SoloReserva();
+        if (to == address(0) || amount == 0) revert DestinoCero();
+        ICreditCaja(credit).pagarCanje(token, to, amount);
+    }
+
     function acreditar(address who, uint256 pts) external onlyCredit {
         if (who == address(0) || pts == 0) return;
         famaCaja[who] += pts;
         emit FamaAcreditada(who, pts);
     }
 
+    function famaPorGeneracion(uint8 gen) public pure returns (uint256) {
+        if (gen <= 1) return 0;
+        uint256 bp = gen == 2 ? 800 : gen == 3 ? 600 : gen == 4 ? 400 : gen == 5 ? 200 : gen <= 12 ? 80 : 40;
+        return (FAMA_POR_REFERIDO_L1 * bp) / 1500;
+    }
+
+    function acreditarFamaRed(address deudor) external onlyCredit {
+        if (deudor == address(0)) return;
+        ICreditCaja nucleo = ICreditCaja(credit);
+        (address padre,) = nucleo.redGenealogica(deudor);
+        address fund = nucleo.fundador();
+        address cursor = padre;
+        for (uint8 gen = 1; gen <= 40; gen++) {
+            if (cursor == address(0) || cursor == deudor) break;
+            uint256 pts = famaPorGeneracion(gen);
+            if (
+                pts > 0
+                    && !nucleo.cuentaDestruida(cursor)
+                    && !nucleo.blacklist(cursor)
+                    && !nucleo.dispersionCongelada(cursor)
+            ) {
+                famaRed[cursor] += pts;
+                emit FamaAcreditada(cursor, pts);
+            }
+            (cursor,) = nucleo.redGenealogica(cursor);
+        }
+        if (fund != address(0) && fund != deudor && fund != padre) {
+            if (!nucleo.cuentaDestruida(fund) && !nucleo.blacklist(fund) && !nucleo.dispersionCongelada(fund)) {
+                famaRed[fund] += FAMA_POR_REFERIDO_L1;
+                emit FamaAcreditada(fund, FAMA_POR_REFERIDO_L1);
+            }
+        }
+    }
+
     function wipe(address who) external onlyCredit {
         famaCaja[who] = 0;
+        famaRed[who] = 0;
+        famaRacha[who] = 0;
         famaCanjeada[who] = 0;
+        famaRedCanjeada[who] = 0;
         delete racha[who];
         emit FamaBorrada(who);
     }
@@ -167,14 +235,8 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         famaDias = r.famaDias;
         hitoCobrado = r.hitoCobrado;
         siguienteHito = siguienteHitoRacha(hitoCobrado);
-        if (siguienteHito != 0 && diasMax >= siguienteHito) {
-            uint256 h = hitoCobrado;
-            while (true) {
-                uint256 next = siguienteHitoRacha(h);
-                if (next == 0 || diasMax < next) break;
-                bonoPendiente += bonoDeHitoRacha(next);
-                h = next;
-            }
+        if (siguienteHito != 0 && dias >= siguienteHito) {
+            bonoPendiente = bonoDeHitoRacha(siguienteHito);
         }
         graciaVigente = r.dias != 0 && r.ultimoDia != 0 && today <= r.ultimoDia + 1 + uint32(RACHA_GRACIA_DIAS);
     }
@@ -217,21 +279,36 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
                 || vencido
         ) revert NoHumano();
 
-        Racha storage r = racha[msg.sender];
-        uint256 total;
-        uint256 h = r.hitoCobrado;
-        uint256 last = h;
-        while (true) {
-            uint256 next = siguienteHitoRacha(h);
-            if (next == 0 || r.diasMax < next) break;
-            total += bonoDeHitoRacha(next);
-            last = next;
-            h = next;
-        }
-        if (total == 0) revert SinBonoRacha();
-        r.hitoCobrado = uint32(last);
+        uint32 vis = _persistDecay(msg.sender);
+        uint256 next = siguienteHitoRacha(racha[msg.sender].hitoCobrado);
+        if (next == 0 || vis < next) revert SinBonoRacha();
+        uint256 total = bonoDeHitoRacha(next);
+        racha[msg.sender].hitoCobrado = uint32(next);
         nucleo.pagarCanje(token, msg.sender, total);
-        emit BonoRachaPagado(msg.sender, uint32(last), total, token);
+        emit BonoRachaPagado(msg.sender, uint32(next), total, token);
+    }
+
+    function canjearFamaRed(uint256 fama) external nonReentrant {
+        if (tx.origin != msg.sender) revert SoloEOA();
+        ICreditCaja nucleo = ICreditCaja(credit);
+        if (nucleo.paused()) revert CreditoPausado();
+        (, uint256 montoActivo, uint256 vencimiento, bool enMora,,) = nucleo.usuarios(msg.sender);
+        bool vencido = montoActivo > 0 && vencimiento > 0 && block.timestamp > vencimiento;
+        if (
+            !nucleo.humanosVerificados(msg.sender)
+                || nucleo.blacklist(msg.sender)
+                || nucleo.dispersionCongelada(msg.sender)
+                || nucleo.cuentaDestruida(msg.sender)
+                || nucleo.esMoroso(msg.sender)
+                || enMora
+                || vencido
+        ) revert NoHumano();
+        if (fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT != 0) revert FamaInvalida();
+        if (fama > famaRedDisponible(msg.sender)) revert SinFama();
+        uint256 pago = (fama * 1e18) / FAMA_CANJE_POR_USDT;
+        famaRedCanjeada[msg.sender] += fama;
+        nucleo.pagarCanje(token, msg.sender, pago);
+        emit FamaCanjeada(msg.sender, fama, pago, token);
     }
 
     function canjearFama(uint256 fama) external nonReentrant {
@@ -266,6 +343,17 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         return true;
     }
 
+    function _persistDecay(address who) internal returns (uint32 vis) {
+        Racha storage r = racha[who];
+        uint32 today = diaActual();
+        vis = _diasTrasDecay(r, today);
+        if (r.dias == vis) return vis;
+        r.dias = vis;
+        if (r.ultimoDia != 0 && today > r.ultimoDia + 2) {
+            r.decayTaken = today - (r.ultimoDia + 2);
+        }
+    }
+
     function _diasTrasDecay(Racha memory r, uint32 today) internal pure returns (uint32) {
         uint32 dias = r.dias;
         if (dias == 0 || r.ultimoDia == 0 || today <= r.ultimoDia + 2) return dias;
@@ -285,7 +373,7 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         r.ultimoDia = today;
         r.decayTaken = 0;
         r.famaDias += 1;
-        famaCaja[padre] += FAMA_POR_DIA_RACHA;
+        famaRacha[padre] += FAMA_POR_DIA_RACHA;
         emit FamaAcreditada(padre, FAMA_POR_DIA_RACHA);
         emit RachaDiaSumado(padre, r.dias, r.famaDias, today);
     }

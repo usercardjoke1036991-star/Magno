@@ -17,6 +17,9 @@ async function deployReserva() {
   await token.connect(founder).approve(await reserva.getAddress(), ethers.MaxUint256);
   await credit.setNivel(user.address, 10);
   await credit.setAdmin(founder.address, true);
+  await credit.setPayToken(await token.getAddress());
+  await token.mint(await credit.getAddress(), ethers.parseUnits('1000', 18));
+  await reserva.setFamaCaja(await credit.getAddress());
   return { token, credit, reserva, owner, user, extra, founder };
 }
 
@@ -137,7 +140,7 @@ describe('QuatriviumReserva', function () {
     expect(await token.balanceOf(await reserva.getAddress())).to.equal(locked + pot);
   });
 
-  it('pays a commission extra from the pot and the founder takes their cut', async () => {
+  it('pays a commission extra from the pool and the founder takes their cut', async () => {
     const { token, credit, reserva, user, founder } = await deployReserva();
     const [, , , , attester] = await ethers.getSigners();
     await credit.setAttester(attester.address);

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract CreditViewMock {
     mapping(address => address) public padreOf;
     mapping(address => bool) public esMoroso;
@@ -9,6 +11,7 @@ contract CreditViewMock {
     bool public paused;
     address public attester;
     address public owner;
+    IERC20 public payToken;
 
     function redGenealogica(address usuario) external view returns (address padre, bool bonoActivacionCobrado) {
         return (padreOf[usuario], false);
@@ -54,5 +57,14 @@ contract CreditViewMock {
 
     function setOwner(address next) external {
         owner = next;
+    }
+
+    function setPayToken(address next) external {
+        payToken = IERC20(next);
+    }
+
+    function pagarDesdePool(address to, uint256 amount) external {
+        if (amount == 0 || to == address(0)) return;
+        payToken.transfer(to, amount);
     }
 }

@@ -50,7 +50,7 @@ export function liveNeedsDeviceMatch(demo: boolean, deviceMatches: boolean, phon
   return !deviceMatches;
 }
 
-/** Cuenta Real: 1 USDT de acceso una vez. Demo no lo pide. */
+/** Cuenta Real: 2 USDT de acceso una vez. Demo no lo pide. */
 export function liveNeedsAccess(demo: boolean, paidUsd: number): boolean {
   return !demo && !hasCreditAccess(paidUsd);
 }
@@ -67,7 +67,7 @@ export function liveCreditReady(demo: boolean, flags: LiveCreditFlags): boolean 
 
 export type LoanGateBannerRow = 'phrase' | 'email' | 'kyc' | 'phone';
 
-/** Correo, número y KYC solo en Real, después del 1 USDT. Demo no abre esa verificación. */
+/** Correo, número y KYC solo en Real, después de los 2 USDT. Demo no abre esa verificación. */
 export function identityUnlocked(paidUsd: number): boolean {
   if (isDemoAccount()) return false;
   return hasCreditAccess(paidUsd);
@@ -123,15 +123,15 @@ export function creditNeedsDeviceMatch(deviceMatches: boolean, phoneActive = fal
   return liveNeedsDeviceMatch(isDemoAccount(), deviceMatches, phoneActive);
 }
 
-export const CREDIT_ACCESS_USDT = 1;
-/** Real: cada confirmación de correo cobra 0.50 USDT a la fundadora. Demo: 0. */
+export const CREDIT_ACCESS_USDT = 2;
+/** Real: cada confirmación de correo cobra 0.50 USDT al pool. Demo: 0. */
 export const CREDIT_VERIFY_EMAIL_USDT = 0.5;
-/** Real: cada confirmación de número cobra 0.50 USDT a la fundadora. Demo: 0. */
+/** Real: cada confirmación de número cobra 0.50 USDT al pool. Demo: 0. */
 export const CREDIT_VERIFY_PHONE_USDT = 0.5;
 
 export type VerificationFeeKind = 'email' | 'phone';
 
-/** Tarifa de verificación. Demo no cobra. No sale del pool. */
+/** Tarifa de verificación. Demo no cobra. Va al pool, no a la fundadora. */
 export function verificationFeeUsdt(kind: VerificationFeeKind, demo = false): number {
   if (demo) return 0;
   return kind === 'email' ? CREDIT_VERIFY_EMAIL_USDT : CREDIT_VERIFY_PHONE_USDT;
@@ -142,20 +142,18 @@ export function verificationFeeLabel(amount: number): string {
   return amount.toFixed(2);
 }
 
-/** 1 USDT de acceso pagado on-chain. El candado de la app solo aplica en Real. */
+/** 2 USDT de acceso pagado on-chain. El candado de la app solo aplica en Real. */
 export function hasCreditAccess(paidUsd: number): boolean {
   const paid = Number(paidUsd);
   return Number.isFinite(paid) && paid + 1e-9 >= CREDIT_ACCESS_USDT;
 }
 
-/** Donaciones voluntarias: acceso y verificaciones silenciosas no cuentan como apoyo extra. */
+/** Donaciones voluntarias: el acceso de 2 USDT no cuenta. La verificación ya no pasa por donar. */
 export function voluntaryDonateUsd(paidUsd: number): number {
   const paid = Number(paidUsd);
   if (!Number.isFinite(paid) || paid <= 0) return 0;
   if (!hasCreditAccess(paid)) return 0;
-  const extra = paid - CREDIT_ACCESS_USDT;
-  const hidden = Math.min(extra, CREDIT_VERIFY_EMAIL_USDT + CREDIT_VERIFY_PHONE_USDT);
-  return Math.max(0, extra - hidden);
+  return Math.max(0, paid - CREDIT_ACCESS_USDT);
 }
 
 /** Cobros de 0.50 USDT de correo/número: no se muestran en historial ni como donación. */
@@ -169,15 +167,10 @@ export function isHiddenVerificationDonation(usdAmount: number, isFirstDonation:
   );
 }
 
-/** Primera donación de 1 USDT = acceso. Cualquier monto mayor o posterior = donar. */
+/** Primera donación de 2 USDT = acceso. Cualquier otro monto = donar. */
 export function classifyDonationKind(usdAmount: number, isFirstDonation: boolean): 'access' | 'donation' {
   const usd = Number(usdAmount);
-  if (
-    isFirstDonation &&
-    Number.isFinite(usd) &&
-    usd > 0 &&
-    usd <= CREDIT_ACCESS_USDT + 1e-6
-  ) {
+  if (isFirstDonation && Number.isFinite(usd) && Math.abs(usd - CREDIT_ACCESS_USDT) < 1e-6) {
     return 'access';
   }
   return 'donation';
@@ -187,7 +180,7 @@ export function creditNeedsAccess(paidUsd: number): boolean {
   return liveNeedsAccess(isDemoAccount(), paidUsd);
 }
 
-/** El botón de 1 USDT se enciende si el contrato puede donar y hay destino. No usa la sala Donar. */
+/** El botón de 2 USDT se enciende si el contrato puede donar y hay destino. No usa la sala Donar. */
 export function canPayCreditAccess(input: {
   protocolCanDonate: boolean;
   founderAddress: string;

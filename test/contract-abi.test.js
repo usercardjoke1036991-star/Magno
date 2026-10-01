@@ -51,6 +51,7 @@ describe('CONTRACT_ABI', function () {
       'solicitarPrestamo',
       'pagarPrestamo',
       'donar',
+      'pagarVerificacion',
       'depositarLiquidez',
       'retirarLiquidez',
       'vincularIdentidad',

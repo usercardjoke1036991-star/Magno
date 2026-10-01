@@ -118,6 +118,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: GraceMoraClock
 - `components/HomeHub.tsx` — módulo JS/TS
   - Funciones/clases: HomeHub
+- `components/HowTheAppWorks.tsx` — módulo JS/TS
+  - Funciones/clases: HowTheAppWorks
 - `components/icons.tsx` — módulo JS/TS
   - Funciones/clases: AppIcon, TokenLogo, IconBadge
 - `components/KycAccessBanner.tsx` — módulo JS/TS
@@ -231,7 +233,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
-  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, MAX_LEVEL_BONUS_EVERY, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
+  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_FLAT_AFTER_LEVEL, MILESTONE_FLAT_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, MAX_LEVEL_BONUS_EVERY, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/podium.ts` — módulo JS/TS
   - Funciones/clases: PODIUM_STYLE
 - `constants/racha.ts` — módulo JS/TS
@@ -359,7 +361,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/fameLeaderboard.ts` — módulo JS/TS
   - Funciones/clases: peekFameLeaderboard, clearFameLeaderboardCache, loadFameLeaderboard
 - `services/founderUsdtCharge.ts` — módulo JS/TS
-  - Funciones/clases: chargeFounderUsdt
+  - Funciones/clases: chargeFounderUsdt, chargePoolUsdt
 - `services/fundsConfirm.ts` — módulo JS/TS
   - Funciones/clases: listSecurityConfirmMethods, hasSecurityConfirmMethod, isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS

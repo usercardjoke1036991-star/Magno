@@ -16,7 +16,7 @@ import { enviarToken, loadAppWallet } from './appWallet';
 import { signedAuthBody } from './walletAuth';
 import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from './linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
-import { QuatriviumCreditService } from './quatriviumCreditService';
+import { cachedProtocolCaps, QuatriviumCreditService } from './quatriviumCreditService';
 import { recordMovement } from './movementHistory';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import type { TranslationKey } from '../i18n/translations';
@@ -296,6 +296,46 @@ export async function chargeFounderUsdt(
         timestamp: Date.now(),
       });
     }
+    ctx.refetch?.();
+    return 'paid';
+  } catch (error) {
+    alertUser(ctx, ctx.t('error'), humanizeTxError(error));
+    return 'failed';
+  }
+}
+
+/** Cobra USDT al pool con pagarVerificacion(). Sin fama. Nunca va a la fundadora. */
+export async function chargePoolUsdt(
+  ctx: FounderChargeContext,
+  amountUsdt: number
+): Promise<FounderChargeResult> {
+  const amount = Number(amountUsdt);
+  if (!Number.isFinite(amount) || amount <= 0) return 'paid';
+  if (!ctx.walletAddress) {
+    alertUser(ctx, ctx.t('connect'), ctx.t('appWalletNotReady'));
+    return 'failed';
+  }
+  if (!isAccessPaymentEnabled() || !isCreditReady() || !cachedProtocolCaps().canPagarVerificacion) {
+    alertUser(ctx, ctx.t('creditAccessTitle'), ctx.t('creditAccessPending'));
+    return 'failed';
+  }
+  if (!ctx.isTokenSupported && !isOfficialWorldToken(ctx.token.address)) {
+    alertUser(ctx, ctx.t('token'), ctx.t('tokenNotEnabledAlert'));
+    return 'failed';
+  }
+  const human = amount.toFixed(2);
+  let amountWei: string;
+  try {
+    amountWei = parseUnits(human, ctx.token.decimals).toString();
+  } catch {
+    alertUser(ctx, ctx.t('amount'), ctx.t('invalidAmount'));
+    return 'failed';
+  }
+  if (!ctx.silent && !(await ctx.confirmFunds())) return 'cancelled';
+  if (!(await fundInternalFromExternal(ctx, amountWei, ctx.token.address))) return 'failed';
+  if (!(await ensureGasForTx(ctx))) return 'failed';
+  try {
+    await QuatriviumCreditService.pagarVerificacion(amountWei, ctx.token.address);
     ctx.refetch?.();
     return 'paid';
   } catch (error) {

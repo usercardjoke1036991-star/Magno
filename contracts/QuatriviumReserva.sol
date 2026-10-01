@@ -6,6 +6,10 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+interface IFamaPoolPay {
+    function pagarDesdePool(address to, uint256 amount) external;
+}
+
 interface IQuatriviumCreditView {
     function redGenealogica(address usuario) external view returns (address padre, bool bonoActivacionCobrado);
     function esMoroso(address usuario) external view returns (bool);
@@ -40,6 +44,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     address public owner;
     address public fundador;
     address public credit;
+    address public famaCaja;
     address public pendienteOwner;
     uint256 public pendienteOwnerDesde;
     address public pendienteCredit;
@@ -167,8 +172,13 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         emit BoteAportado(msg.sender, monto);
     }
 
-    /// @notice Extra sobre una comisión de red ya pagada por Credit. Sale del bote, no del pool.
-    ///         Lo llama el attester (o el owner) con un id único por evento. El fundador cobra su tramo del extra.
+    function setFamaCaja(address next) external onlyOwner {
+        if (next == address(0)) revert DestinoCero();
+        famaCaja = next;
+    }
+
+    /// @notice Extra sobre una comisión de red ya pagada por Credit. Sale del pool, no del bote.
+    ///         Lo llama el attester con un id único por evento.
     function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 id)
         external
         onlyEOA
@@ -182,12 +192,12 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         (uint256 extra, uint256 founderCut) = extraComisionDe(beneficiario, montoBase);
         if (extra == 0) revert NadaQueMover();
 
+        if (famaCaja == address(0)) revert DestinoCero();
         boostUsado[id] = true;
         boostPagado[beneficiario] += extra;
-        bote -= extra;
         uint256 userPay = extra - founderCut;
-        if (userPay > 0) token.safeTransfer(beneficiario, userPay);
-        if (founderCut > 0) token.safeTransfer(fundador, founderCut);
+        if (userPay > 0) IFamaPoolPay(famaCaja).pagarDesdePool(beneficiario, userPay);
+        if (founderCut > 0) IFamaPoolPay(famaCaja).pagarDesdePool(fundador, founderCut);
         emit BoostComision(beneficiario, montoBase, extra, founderCut);
     }
 
@@ -202,7 +212,6 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         if (ya >= tope) return (0, 0);
         uint256 room = tope - ya;
         if (extra > room) extra = room;
-        if (extra > bote) extra = bote;
         founderCut = (extra * corteFundadorBp(t)) / 10000;
     }
 

@@ -8,6 +8,7 @@ import {
   ZeroAddress,
   ZeroHash,
   formatUnits,
+  id,
   isAddress,
   type AbstractProvider,
   type Signer,
@@ -116,6 +117,7 @@ export type ProtocolCaps = {
   canDonate: boolean;
   canCanjearFama: boolean;
   canRacha: boolean;
+  canPagarVerificacion: boolean;
 };
 
 const DEFAULT_CAPS: ProtocolCaps = {
@@ -124,6 +126,7 @@ const DEFAULT_CAPS: ProtocolCaps = {
   canDonate: false,
   canCanjearFama: false,
   canRacha: false,
+  canPagarVerificacion: false,
 };
 
 export function cachedProtocolCaps(): ProtocolCaps {
@@ -281,6 +284,7 @@ export const QuatriviumCreditService = {
     let canDonate = false;
     let canCanjearFama = false;
     let canRacha = false;
+    let canPagarVerificacion = false;
     try {
       const row = await credit.niveles(CORE_LOAN_LEVEL + 1);
       if (BigInt(row[0] ?? 0) > 0n) maxLevel = MAX_LOAN_LEVEL;
@@ -313,7 +317,14 @@ export const QuatriviumCreditService = {
         canRacha = false;
       }
     }
-    const caps = { maxLevel, canClaimHitos, canDonate, canCanjearFama, canRacha };
+    try {
+      const code = await provider.getCode(addr);
+      const sel = id('pagarVerificacion(address,uint256)').slice(2, 10).toLowerCase();
+      canPagarVerificacion = Boolean(code) && code.toLowerCase().includes(sel);
+    } catch {
+      canPagarVerificacion = false;
+    }
+    const caps = { maxLevel, canClaimHitos, canDonate, canCanjearFama, canRacha, canPagarVerificacion };
     capsCache = { addr, caps };
     return caps;
   },
@@ -359,7 +370,7 @@ export const QuatriviumCreditService = {
       const userAddress = await signer.getAddress();
       const credit = contractWith(signer);
       const donated = await credit.donado(userAddress).catch(() => 0n);
-      if (BigInt(donated.toString()) < 10n ** 18n) {
+      if (BigInt(donated.toString()) < 2n * 10n ** 18n) {
         throw new Error('access-required');
       }
       let kycDeclarado = false;
@@ -432,23 +443,57 @@ export const QuatriviumCreditService = {
     return tx.wait();
   },
 
+  pagarVerificacion: async (amountInWei: string, tokenAddress: string) => {
+    if (!isAccessPaymentEnabled()) {
+      throw new Error(isDemoAccount() || isDemoMode() ? 'access-not-ready' : 'donate-real-only');
+    }
+    assertToken(tokenAddress);
+    assertAmount(amountInWei);
+    const { signer } = await requireInternalSigner();
+    const userAddress = await signer.getAddress();
+    await asegurarAprobacionToken(signer, userAddress, tokenAddress, amountInWei);
+    const credit = contractWith(signer);
+    await credit.pagarVerificacion.staticCall(tokenAddress, amountInWei);
+    const tx = await credit.pagarVerificacion(tokenAddress, amountInWei);
+    return tx.wait();
+  },
+
   obtenerFama: async (userAddress: string) => {
-    const empty = { caja: 0, canjeada: 0, disponible: 0 };
+    const empty = {
+      caja: 0,
+      red: 0,
+      racha: 0,
+      canjeada: 0,
+      redCanjeada: 0,
+      disponible: 0,
+      redDisponible: 0,
+      perfil: 0,
+    };
     if (!isAddress(userAddress) || !isContractConfigured()) return empty;
     const { provider } = await getProviderAndSigner();
     const hermano = await readFamaHermano(contractWith(provider));
     if (!hermano) return empty;
     try {
       const fama = new Contract(hermano, FAMA_ABI, provider);
-      const [caja, canjeada, disponible] = await Promise.all([
+      const [caja, red, racha, canjeada, redCanjeada, disponible, redDisponible, perfil] = await Promise.all([
         fama.famaCaja(userAddress),
+        fama.famaRed(userAddress).catch(() => 0n),
+        fama.famaRacha(userAddress).catch(() => 0n),
         fama.famaCanjeada(userAddress),
+        fama.famaRedCanjeada(userAddress).catch(() => 0n),
         fama.famaDisponible(userAddress),
+        fama.famaRedDisponible(userAddress).catch(() => 0n),
+        fama.famaPerfil(userAddress).catch(() => 0n),
       ]);
       return {
         caja: asFamePoints(caja),
+        red: asFamePoints(red),
+        racha: asFamePoints(racha),
         canjeada: asFamePoints(canjeada),
+        redCanjeada: asFamePoints(redCanjeada),
         disponible: asFamePoints(disponible),
+        redDisponible: asFamePoints(redDisponible),
+        perfil: asFamePoints(perfil),
       };
     } catch {
       return empty;
@@ -525,6 +570,20 @@ export const QuatriviumCreditService = {
     const caja = new Contract(hermano, FAMA_ABI, signer);
     await caja.canjearFama.staticCall(fama);
     const tx = await caja.canjearFama(fama);
+    return tx.wait();
+  },
+
+  canjearFamaRed: async (fama: number) => {
+    if (!Number.isInteger(fama) || fama < FAMA_CANJE_POR_USDT || fama % FAMA_CANJE_POR_USDT !== 0) {
+      throw new Error('invalid-amount');
+    }
+    const { signer } = await requireInternalSigner();
+    const credit = contractWith(signer);
+    const hermano = await readFamaHermano(credit);
+    if (!hermano) throw new Error('canje-legacy');
+    const caja = new Contract(hermano, FAMA_ABI, signer);
+    await caja.canjearFamaRed.staticCall(fama);
+    const tx = await caja.canjearFamaRed(fama);
     return tx.wait();
   },
 

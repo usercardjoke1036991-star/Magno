@@ -6,7 +6,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useAppMode } from '../wallet/AppModeContext';
 import { useAppWallet } from '../wallet/AppWalletContext';
 import { useWeb3Balances } from './useWeb3Balances';
-import { chargeFounderUsdt, type FounderChargeResult } from '../services/founderUsdtCharge';
+import { chargePoolUsdt, type FounderChargeResult } from '../services/founderUsdtCharge';
 import { hasVerificationFeeReceipt, markVerificationFeeReceipt } from '../services/verificationFeeReceipt';
 import { verificationFeeUsdt, type VerificationFeeKind } from '../utils/creditGates';
 
@@ -28,7 +28,7 @@ export function useVerificationFee(kind: VerificationFeeKind) {
     const mark = String(target || '').trim();
     if (!wallet || !mark) return 'failed';
     if (await hasVerificationFeeReceipt(wallet, kind, mark)) return 'paid';
-    const result = await chargeFounderUsdt(
+    const result = await chargePoolUsdt(
       {
         walletAddress: wallet,
         token,

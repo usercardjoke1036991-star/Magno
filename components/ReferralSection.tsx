@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -12,16 +12,13 @@ import { useWalletLevel } from '../hooks/useWalletLevel';
 import { LOAN_TIERS } from '../constants/loanTiers';
 import {
   ACTIVATION_BONUS_USD,
+  COMMISSION_BANDS,
+  commissionForGeneration,
   directCommissionFromLoan,
   formatCommissionUSD,
+  generationCommissionBps,
 } from '../constants/commissions';
-import {
-  REFERRAL_BONUS_THRESHOLD,
-  REFERRAL_NETWORK_POINTS,
-  REFERRAL_REPUTATION_POINTS,
-  formatPoolBonus,
-  referralsForNextBonus,
-} from '../constants/reputation';
+import { REFERRAL_BONUS_THRESHOLD, REFERRAL_REPUTATION_POINTS } from '../constants/reputation';
 import { formatUSD } from '../utils/formatters';
 import { openSafeUrl } from '../utils/safeOpenUrl';
 import { AppSubsection } from './AppSection';
@@ -50,6 +47,7 @@ interface ReferralSectionProps {
 }
 
 const ZERO = '0x0000000000000000000000000000000000000000';
+const EXAMPLE_LEVELS = [1, 10, 100, 1000] as const;
 
 export const ReferralSection: React.FC<ReferralSectionProps> = ({
   walletAddress,
@@ -58,8 +56,8 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   curveRateBps = 0,
   referral,
   reputation = 0,
-  networkPoints = 0,
-  networkBonusThreshold = REFERRAL_BONUS_THRESHOLD,
+  networkPoints: _networkPoints = 0,
+  networkBonusThreshold: _networkBonusThreshold = REFERRAL_BONUS_THRESHOLD,
   children,
 }) => {
   const { t } = useI18n();
@@ -76,13 +74,16 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   const inviteLink = myCode ? buildInviteLink(myCode, profile.displayName) : '';
   const padreCode = hasPadre ? addressToInviteCode(padre) : '';
   const padreProfile = hasPadre ? lookup(padre) : undefined;
-  const padreLabel = hasPadre
-    ? labelForProfile(padreProfile, padreCode)
-    : '';
+  const padreLabel = hasPadre ? labelForProfile(padreProfile, padreCode) : '';
   const padreLevel = useWalletLevel(hasPadre ? padre : '');
 
   const shareName = profile.displayName || t('profileSomeone');
   const shareText = t('shareMessage', { code: myCode, link: inviteLink, name: shareName });
+
+  const exampleTiers = useMemo(
+    () => EXAMPLE_LEVELS.map((id) => LOAN_TIERS.find((tier) => tier.id === id)).filter(Boolean),
+    []
+  );
 
   useEffect(() => {
     let done = false;
@@ -126,6 +127,18 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
     }
   };
 
+  const handleCopyLink = async () => {
+    if (!guardShare() || !inviteLink) return;
+    const result = await copyText(inviteLink);
+    if (result === 'copied') {
+      Alert.alert(t('ready'), t('inviteLinkCopied'));
+      return;
+    }
+    if (result === 'failed') {
+      Alert.alert(t('invite'), inviteLink);
+    }
+  };
+
   const handleShare = async () => {
     if (!guardShare()) return;
     try {
@@ -134,7 +147,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         message: shareText,
       });
     } catch {
-      Alert.alert(t('invite'), myCode);
+      Alert.alert(t('invite'), `${myCode}\n${inviteLink}`);
     }
   };
 
@@ -151,160 +164,180 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
   return (
     <View style={styles.stack}>
-      {isRestricted && (
-        <AppText style={styles.warn}>{t('moraBlocked')}</AppText>
-      )}
-
-      {children}
+      {isRestricted ? <AppText style={styles.warn}>{t('moraBlocked')}</AppText> : null}
 
       <AppSubsection title={t('subsectionInvite')} defaultOpen icon="share">
-          {isFundador && (
-        <View style={[styles.founderBadge, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <AppIcon name="star" size={16} color={colors.text} />
-          <AppText style={[styles.founderBadgeText, { color: colors.text }]}>{t('youAreFounder')}</AppText>
-        </View>
-      )}
+        {isFundador ? (
+          <View style={[styles.founderBadge, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <AppIcon name="star" size={16} color={colors.text} />
+            <AppText style={[styles.founderBadgeText, { color: colors.text }]}>{t('youAreFounder')}</AppText>
+          </View>
+        ) : null}
 
+        <AppText style={[styles.sectionLead, { color: colors.textMuted }]}>{t('referralHint')}</AppText>
+        <TouchableOpacity
+          style={styles.labelRow}
+          onPress={() => void handleCopyCode()}
+          disabled={!myCode || isRestricted}
+          accessibilityRole="button"
+          accessibilityLabel={t('copyInvite')}
+        >
+          <AppIcon name="copy" size={14} color={colors.textMuted} />
+          <AppText style={[styles.label, { color: colors.textMuted }]}>{t('inviteCode')}</AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => void handleCopyCode()}
+          disabled={!myCode || isRestricted}
+          accessibilityRole="button"
+          accessibilityLabel={t('copyInvite')}
+        >
+          <View style={[styles.codeBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            {myCode
+              ? myCode.split('-').map((part, index) => (
+                  <AppText key={`${part}-${index}`} selectable style={[styles.codePart, { color: colors.text }]}>
+                    {part}
+                  </AppText>
+                ))
+              : (
+                  <AppText style={[styles.codePart, { color: colors.textMuted }]}>{t('connectForCode')}</AppText>
+                )}
+          </View>
+        </TouchableOpacity>
+        {inviteLink ? (
+          <AppText selectable style={[styles.link, { color: colors.primary }]}>
+            {inviteLink}
+          </AppText>
+        ) : null}
+
+        <View style={styles.actions}>
           <TouchableOpacity
-            style={styles.labelRow}
+            style={[styles.action, { backgroundColor: colors.connect }, isRestricted && styles.shareDisabled]}
             onPress={() => void handleCopyCode()}
             disabled={!myCode || isRestricted}
             accessibilityRole="button"
             accessibilityLabel={t('copyInvite')}
           >
-            <AppIcon name="copy" size={14} color={colors.textMuted} />
-            <AppText style={[styles.label, { color: colors.textMuted }]}>{t('inviteCode')}</AppText>
+            <AppIcon name="copy" size={16} color="#111" />
+            <AppText style={[styles.actionText, { color: '#111' }]}>{t('copyInvite')}</AppText>
           </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => void handleCopyCode()}
-        disabled={!myCode || isRestricted}
-        accessibilityRole="button"
-        accessibilityLabel={t('copyInvite')}
-      >
-        <View style={[styles.codeBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {myCode
-            ? myCode.split('-').map((part, index) => (
-                <AppText key={`${part}-${index}`} selectable style={[styles.codePart, { color: colors.text }]}>
-                  {part}
-                </AppText>
-              ))
-            : (
-                <AppText style={[styles.codePart, { color: colors.textMuted }]}>{t('connectForCode')}</AppText>
-              )}
+          <TouchableOpacity
+            style={[styles.action, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }, isRestricted && styles.shareDisabled]}
+            onPress={() => void handleCopyLink()}
+            disabled={!inviteLink || isRestricted}
+            accessibilityRole="button"
+            accessibilityLabel={t('copyInviteLink')}
+          >
+            <AppIcon name="share" size={16} color={colors.text} />
+            <AppText style={[styles.actionText, { color: colors.text }]}>{t('copyInviteLink')}</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.action, { backgroundColor: colors.primary }, isRestricted && styles.shareDisabled]}
+            onPress={handleShare}
+            disabled={!myCode || isRestricted}
+          >
+            <AppIcon name="share" size={16} color={colors.onPrimary} />
+            <AppText style={[styles.actionText, { color: colors.onPrimary }]}>{t('shareInvite')}</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.action, styles.whatsapp, isRestricted && styles.shareDisabled]}
+            onPress={handleWhatsApp}
+            disabled={!myCode || isRestricted}
+          >
+            <AppIcon name="whatsapp" size={16} color="#fff" />
+            <AppText style={[styles.actionText, { color: '#fff' }]}>{t('shareInviteWhatsApp')}</AppText>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
-      {Boolean(inviteLink) && (
-        <AppText selectable style={[styles.link, { color: colors.primary }]}>
-          {inviteLink}
-        </AppText>
-      )}
-      <TouchableOpacity
-        style={[styles.shareButton, { backgroundColor: colors.connect }, isRestricted && styles.shareDisabled]}
-        onPress={() => void handleCopyCode()}
-        disabled={!myCode || isRestricted}
-        accessibilityRole="button"
-        accessibilityLabel={t('copyInvite')}
-      >
-        <View style={styles.btnRow}>
-          <AppIcon name="copy" size={16} color="#111" />
-          <AppText style={[styles.shareButtonText, { color: '#111' }]}>{t('copyInvite')}</AppText>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.shareButton, { backgroundColor: colors.primary }, isRestricted && styles.shareDisabled]}
-        onPress={handleShare}
-        disabled={!myCode || isRestricted}
-      >
-        <View style={styles.btnRow}>
-          <AppIcon name="share" size={16} color={colors.onPrimary} />
-          <AppText style={[styles.shareButtonText, { color: colors.onPrimary }]}>{t('shareInvite')}</AppText>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.whatsappButton, isRestricted && styles.shareDisabled]}
-        onPress={handleWhatsApp}
-        disabled={!myCode || isRestricted}
-      >
-        <View style={styles.btnRow}>
-          <AppIcon name="whatsapp" size={18} color="#fff" />
-          <AppText style={styles.shareButtonText}>{t('shareInviteWhatsApp')}</AppText>
-        </View>
-      </TouchableOpacity>
 
-      {isRegistered ? (
-        <View style={[styles.meta, { backgroundColor: colors.card }]}>
-          {hasPadre && !isFundador ? (
-            <View style={styles.invitedBy}>
-              <ProfileAvatar
-                profile={padreProfile}
-                wallet={padre}
-                size={40}
-                publicView
-                level={padreLevel}
-                rankName={t(getRankForLevel(padreLevel).nameKey)}
-                showRankLabel={false}
-              />
-              <AppText style={[styles.metaLine, { color: colors.text, flex: 1 }]}>
-                {t('invitedBy')}: {padreLabel}
-                {'\n'}
-                {formatRankLabel(getRankForLevel(padreLevel || 1), t(getRankForLevel(padreLevel || 1).nameKey))}
+        {isRegistered ? (
+          <View style={[styles.meta, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            {hasPadre && !isFundador ? (
+              <View style={styles.invitedBy}>
+                <ProfileAvatar
+                  profile={padreProfile}
+                  wallet={padre}
+                  size={40}
+                  publicView
+                  level={padreLevel}
+                  rankName={t(getRankForLevel(padreLevel).nameKey)}
+                  showRankLabel={false}
+                />
+                <AppText style={[styles.metaLine, { color: colors.text, flex: 1 }]}>
+                  {t('invitedBy')}: {padreLabel}
+                  {'\n'}
+                  {formatRankLabel(getRankForLevel(padreLevel || 1), t(getRankForLevel(padreLevel || 1).nameKey))}
+                </AppText>
+              </View>
+            ) : (
+              <AppText style={[styles.metaLine, { color: colors.text }]}>
+                {t('invitedBy')}: {isFundador ? t('nobodyRoot') : t('pending')}
               </AppText>
-            </View>
-          ) : (
+            )}
             <AppText style={[styles.metaLine, { color: colors.text }]}>
-              {t('invitedBy')}: {isFundador ? t('nobodyRoot') : t('pending')}
+              {t('activationBonus')}:{' '}
+              {isFundador
+                ? t('notApplicable')
+                : bonoActivacionCobrado
+                  ? t('bonusPaid')
+                  : t('bonusPending')}
             </AppText>
-          )}
-          <AppText style={[styles.metaLine, { color: colors.text }]}>
-            {t('activationBonus')}:{' '}
-            {isFundador
-              ? t('notApplicable')
-              : bonoActivacionCobrado
-                ? t('bonusPaid')
-                : t('bonusPending')}
+            {royaltiesCongeladas ? <AppText style={styles.warn}>{t('royaltiesFrozen')}</AppText> : null}
+          </View>
+        ) : (
+          <AppText style={[styles.hint, { color: colors.textMuted }]}>
+            {lockedSponsor?.padre
+              ? t('referralUplineLocked', { code: lockedSponsor.code })
+              : t('referralOwnChain')}
           </AppText>
-          {royaltiesCongeladas && (
-            <AppText style={styles.warn}>{t('royaltiesFrozen')}</AppText>
-          )}
-        </View>
-      ) : (
-        <AppText style={[styles.hint, { color: colors.textMuted }]}>
-          {lockedSponsor?.padre
-            ? t('referralUplineLocked', { code: lockedSponsor.code })
-            : t('referralOwnChain')}
-        </AppText>
-      )}
+        )}
       </AppSubsection>
 
-      <AppSubsection title={t('referralRepTitle')} defaultOpen icon="star">
-        <AppText style={[styles.earnHint, { color: colors.textMuted }]}>
-          {t('referralRepLead', {
-            points: String(REFERRAL_REPUTATION_POINTS),
-            threshold: String(networkBonusThreshold),
-            bonus: formatPoolBonus(),
-          })}
+      {children}
+
+      <AppSubsection title={t('referralRepTitle')} defaultOpen={false} icon="star">
+        <AppText style={[styles.sectionLead, { color: colors.textMuted }]}>
+          {t('referralRepLead', { points: String(REFERRAL_REPUTATION_POINTS) })}
         </AppText>
         <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('referralRepDirectOnly')}</AppText>
-        <AppText style={[styles.metaLine, { color: colors.text }]}>
-          {t('referralRepScore', { score: String(reputation), network: String(networkPoints) })}
-        </AppText>
-        <AppText style={[styles.hint, { color: colors.textMuted }]}>
-          {t('referralRepNext', {
-            left: String(referralsForNextBonus(networkPoints, networkBonusThreshold)),
-            bonus: formatPoolBonus(),
-          })}
+        <AppText style={[styles.score, { color: colors.primary }]}>
+          {t('referralRepScore', { score: String(reputation) })}
         </AppText>
       </AppSubsection>
 
       <AppSubsection title={t('referralEarnTitle')} defaultOpen={false} icon="pay">
-        <AppText style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralLead')}</AppText>
-        <AppText style={[styles.earnHint, { color: colors.textMuted }]}>{t('referralCommissionSchedule')}</AppText>
+        <AppText style={[styles.sectionLead, { color: colors.textMuted }]}>{t('referralLead')}</AppText>
+        <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('referralCommissionSchedule')}</AppText>
+
+        <View style={styles.table}>
+          <View style={styles.earnHead}>
+            <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.1 }]}>{t('referralEarnColGen')}</AppText>
+            <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 0.9 }]}>{t('referralEarnColPct')}</AppText>
+            <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</AppText>
+          </View>
+          {COMMISSION_BANDS.map((band) => {
+            const sample = LOAN_TIERS.find((tier) => tier.id === 10) || LOAN_TIERS[0];
+            const appliedBps = Math.max(sample.interestBps, curveRateBps || 0);
+            const amount = formatCommissionUSD(commissionForGeneration(sample.usdAmount, appliedBps, band.gen));
+            const pct = generationCommissionBps(band.gen) / 100;
+            return (
+              <View key={band.range} style={[styles.earnRow, { borderColor: colors.border }]}>
+                <AppText style={[styles.earnCell, { color: colors.text, flex: 1.1 }]}>
+                  {t('referralGeneration', { n: band.range })}
+                </AppText>
+                <AppText style={[styles.earnCell, { color: colors.text, flex: 0.9 }]}>{`${pct}%`}</AppText>
+                <AppText style={[styles.earnCell, { color: colors.primary, flex: 1.4 }]}>{amount}</AppText>
+              </View>
+            );
+          })}
+        </View>
+
+        <AppText style={[styles.examplesTitle, { color: colors.text }]}>{t('referralEarnExamples')}</AppText>
         <View style={styles.earnHead}>
           <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.2 }]}>{t('referralEarnColRank')}</AppText>
           <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1 }]}>{t('referralEarnColLoan')}</AppText>
           <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</AppText>
         </View>
-        {LOAN_TIERS.filter((tier) => tier.id === 1 || tier.id === 10 || tier.id % 10 === 0).map((tier) => {
+        {exampleTiers.map((tier) => {
+          if (!tier) return null;
           const rank = getRankForLevel(tier.id);
           const rankLabel = formatRankLabel(rank, t(rank.nameKey));
           const appliedBps = Math.max(tier.interestBps, curveRateBps || 0);
@@ -327,49 +360,14 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 };
 
 const styles = StyleSheet.create({
-  stack: {
-    gap: 10,
-  },
-  lead: {
-    fontSize: 13,
-    color: '#2d4a38',
-    lineHeight: 19,
-    marginBottom: 12,
-  },
-  earnBox: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 12,
-  },
-  earnTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  earnHint: {
-    fontSize: 11,
-    lineHeight: 16,
-    marginBottom: 8,
-  },
-  earnHead: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  earnHeadCell: {
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  earnRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 5,
-    borderTopWidth: 1,
-  },
-  earnCell: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
+  stack: { gap: 10 },
+  sectionLead: { fontSize: 13, lineHeight: 19, marginBottom: 8 },
+  earnHead: { flexDirection: 'row', marginBottom: 4 },
+  earnHeadCell: { fontSize: 10, fontWeight: '700' },
+  earnRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 7, borderTopWidth: 1 },
+  earnCell: { fontSize: 12, fontWeight: '700' },
+  table: { marginBottom: 12 },
+  examplesTitle: { fontSize: 13, fontWeight: '800', marginBottom: 8, marginTop: 4 },
   founderBadge: {
     borderRadius: 12,
     borderWidth: 1,
@@ -381,21 +379,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  founderBadgeText: {
-    fontWeight: '500',
-    textAlign: 'center',
-    fontSize: 13,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
+  founderBadgeText: { fontWeight: '500', textAlign: 'center', fontSize: 13 },
+  label: { fontSize: 12, fontWeight: '500' },
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   codeBox: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -405,68 +391,25 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
   },
-  codePart: {
-    fontFamily: 'monospace',
-    fontSize: 15,
-    letterSpacing: 0.6,
-    fontWeight: '600',
-  },
-  link: {
-    fontSize: 12,
-    color: '#146C2E',
-    marginBottom: 8,
-  },
-  shareButton: {
+  codePart: { fontFamily: 'monospace', fontSize: 15, letterSpacing: 0.6, fontWeight: '600' },
+  link: { fontSize: 12, marginBottom: 10 },
+  actions: { gap: 8, marginBottom: 12 },
+  action: {
     borderRadius: 12,
     paddingVertical: 12,
+    paddingHorizontal: 12,
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  whatsappButton: {
-    backgroundColor: '#128C7E',
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  shareDisabled: {
-    opacity: 0.45,
-  },
-  shareButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  btnRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
-  meta: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 10,
-  },
-  invitedBy: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  metaLine: {
-    fontSize: 12,
-    color: '#333',
-    lineHeight: 18,
-    marginBottom: 4,
-  },
-  warn: {
-    fontSize: 12,
-    color: '#b42318',
-    marginTop: 4,
-  },
-  hint: {
-    fontSize: 12,
-    color: '#3d5c48',
-    lineHeight: 18,
-  },
+  actionText: { fontWeight: '600', fontSize: 15 },
+  whatsapp: { backgroundColor: '#128C7E' },
+  shareDisabled: { opacity: 0.45 },
+  meta: { borderRadius: 8, borderWidth: 1, padding: 10 },
+  invitedBy: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  metaLine: { fontSize: 12, lineHeight: 18, marginBottom: 4 },
+  score: { fontSize: 18, fontWeight: '800', marginTop: 8 },
+  warn: { fontSize: 12, color: '#b42318', marginTop: 4 },
+  hint: { fontSize: 12, lineHeight: 18 },
 });

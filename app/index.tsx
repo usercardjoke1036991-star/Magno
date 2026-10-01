@@ -197,6 +197,7 @@ function HomeScreenWithHooks() {
     handleSolicitarCredito,
     handleCobrarBonoHito,
     handleCanjearFama,
+    handleCanjearFamaRed,
     handleCobrarBonoRacha,
     handlePagar,
     handleDepositarPool,
@@ -685,8 +686,12 @@ function HomeScreenWithHooks() {
         {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
         <FameCanjeSection
           famaCaja={userInfo.famaCaja || 0}
+          famaRed={userInfo.famaRed || 0}
+          famaRacha={userInfo.famaRacha || 0}
           famaCanjeada={userInfo.famaCanjeada || 0}
+          famaRedCanjeada={userInfo.famaRedCanjeada || 0}
           famaDisponible={userInfo.famaDisponible || 0}
+          famaRedDisponible={userInfo.famaRedDisponible || 0}
           canRedeem={Boolean(
             creditReady &&
               userInfo.canCanjearFama &&
@@ -697,6 +702,7 @@ function HomeScreenWithHooks() {
           tokenSymbol={selectedToken.symbol}
           isPaying={txLoading}
           onRedeem={(fama) => void handleCanjearFama(fama)}
+          onRedeemRed={(fama) => void handleCanjearFamaRed(fama)}
         />
       </AppWindow>
 
@@ -742,12 +748,12 @@ function HomeScreenWithHooks() {
           networkPoints={userInfo.networkPoints}
           networkBonusThreshold={userInfo.networkBonusThreshold}
         >
-          {isConnected ? (
+          {walletAddress ? (
             <AppSubsection title={t('referralHistoryTitle')} defaultOpen icon="history">
               <ReferralHistory
                 variant="board"
                 walletAddress={walletAddress}
-                enabled={creditOnChain}
+                enabled={Boolean(walletAddress)}
                 onOpenPeople={() => setRoom('people')}
               />
             </AppSubsection>
@@ -764,7 +770,7 @@ function HomeScreenWithHooks() {
         <ReferralHistory
           variant="people"
           walletAddress={walletAddress}
-          enabled={room === 'people' && creditOnChain}
+          enabled={room === 'people' && Boolean(walletAddress)}
         />
       </AppWindow>
 

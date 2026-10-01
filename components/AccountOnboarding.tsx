@@ -132,19 +132,19 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     };
   }, [walletAddress]);
 
-  if (!walletReady || !usernameReady || !faceReady || !linkedReady) {
-    return (
-      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center' }]}>
-        <ActivityIndicator color={colors.primary} />
-      </SafeAreaView>
-    );
-  }
-
-  if (walletReady && !walletAddress) {
+  if (walletFailed || (walletReady && !walletAddress)) {
     return (
       <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center', paddingHorizontal: 24 }]}>
         <AppText style={[styles.title, { color: colors.text }]}>{t('appWalletFailed')}</AppText>
         <WalletFailedEscape onRetry={onRetryWallet} />
+      </SafeAreaView>
+    );
+  }
+
+  if (!walletReady || !usernameReady || !faceReady || !linkedReady) {
+    return (
+      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center' }]}>
+        <ActivityIndicator color={colors.primary} />
       </SafeAreaView>
     );
   }

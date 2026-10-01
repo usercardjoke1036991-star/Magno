@@ -1209,7 +1209,7 @@ const pagarBoostReserva = async (event) => {
     await notifyWallet(
       beneficiario,
       'commission',
-      'Quatrivium Finance: extra de Reserva sobre su comisión. Sale del bote, no del préstamo.'
+      'Quatrivium Finance: extra de Reserva sobre su comisión.'
     );
   } catch (error) {
     console.warn('reserva boost comisión:', error.message || error);

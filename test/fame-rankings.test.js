@@ -62,7 +62,7 @@ function fameListAfterPodium(rows) {
 }
 
 function rankingVisible(level) {
-  return Number.isFinite(level) && level >= 50;
+  return Number.isFinite(level) && level >= 15;
 }
 
 function monthlyPrizeBudgetUsd(poolCashUsd, poolNavUsd) {
@@ -177,9 +177,9 @@ describe('fame rankings', () => {
     expect(fameListAfterPodium(ranked).map((row) => row.address)).to.deep.equal(['0x4']);
   });
 
-  it('unlocks ranking names at level 50 and keeps the room available', () => {
-    expect(rankingVisible(49)).to.equal(false);
-    expect(rankingVisible(50)).to.equal(true);
+  it('unlocks ranking names at level 15 and keeps the room available', () => {
+    expect(rankingVisible(14)).to.equal(false);
+    expect(rankingVisible(15)).to.equal(true);
     expect(rankingVisible(1000)).to.equal(true);
     const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
     expect(home).to.include('rankingVisible(');
