@@ -93,7 +93,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   const handleTelegram = async () => {
     const bot = botName || (await resolveTelegramBot());
     if (!bot) {
-      Alert.alert(t('notificationTelegram'), t('notificationTelegramHint'));
+      Alert.alert(t('notificationTelegram'), t('telegramNeedApi'));
       return;
     }
     if (!walletAddress) {
@@ -123,7 +123,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       const opened = await openSafeUrl(`https://t.me/${bot}?start=${body.code}`);
       if (!opened) throw new Error('open');
     } catch {
-      Alert.alert(t('error'), t('notificationTelegramHint'));
+      Alert.alert(t('error'), t('telegramNeedApi'));
     }
   };
 
