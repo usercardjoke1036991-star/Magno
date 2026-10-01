@@ -123,6 +123,31 @@ const rpcUnhealthy = (error) =>
   /timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN|502|503|504|missing response|failed to detect network|server error|network/i
     .test(String(error?.message || error || ''));
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const sanitizeTelegramBot = (value) =>
+  String(value || '')
+    .replace(/^@/, '')
+    .replace(/[^a-zA-Z0-9_]/g, '')
+    .slice(0, 32);
+const TELEGRAM_PUBLIC = sanitizeTelegramBot(
+  process.env.TELEGRAM_BOT || process.env.EXPO_PUBLIC_TELEGRAM_BOT || ''
+);
+let cachedTelegramBot = TELEGRAM_PUBLIC;
+const publicTelegramBot = async () => {
+  if (cachedTelegramBot) return cachedTelegramBot;
+  if (!TELEGRAM_TOKEN) return '';
+  try {
+    const data = await (
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/getMe`, {
+        signal: AbortSignal.timeout(8000),
+      })
+    ).json();
+    const username = sanitizeTelegramBot(data?.result?.username);
+    if (username) cachedTelegramBot = username;
+    return username;
+  } catch {
+    return '';
+  }
+};
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || '';
 const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
 const TEXTBELT_KEY = process.env.TEXTBELT_API_KEY || process.env.TEXTBELT_KEY || '';
@@ -1047,13 +1072,8 @@ const notifyWallet = async (wallet, kind, text) => {
   const profile = store.profiles[wallet.toLowerCase()];
   const chatId = store.telegramByWallet[wallet.toLowerCase()];
   const pushChannels = kind === 'debt' || profile?.prefs?.[kind] === true;
-  const emailOn = Boolean(profile?.email) && profile?.prefs?.email !== false;
-  if (!pushChannels && !emailOn) return;
-  if (pushChannels) {
-    await sendTelegram(chatId, text);
-    if (profile) await sendWhatsApp(profile.whatsapp || profile.phone, text);
-  }
-  if (emailOn) await sendEmail(profile.email, 'Quatrivium Finance', text);
+  if (!pushChannels || !chatId) return;
+  await sendTelegram(chatId, text);
 };
 
 const bindTelegram = (wallet, chatId) => {
@@ -1453,8 +1473,9 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
   const path = requestPath(req);
   const isHealth = req.method === 'GET' && path === '/health';
   const isRoot = req.method === 'GET' && path === '/';
+  const isTelegramBot = req.method === 'GET' && path === '/telegram/bot';
   // Render (y Fly) sondan /health sin Origin. La raíz GET solo apunta al health.
-  if (!isHealth && !isRoot && !originAllowed()) {
+  if (!isHealth && !isRoot && !isTelegramBot && !originAllowed()) {
     json(res, 403, { error: 'origin' });
     return;
   }
@@ -1477,6 +1498,15 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
   }
   if (isHealth) {
     json(res, 200, { ok: true, kycProvider: hasKycProvider });
+    return;
+  }
+  if (isTelegramBot) {
+    if (!rateLimit(ip, 40)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    const bot = await publicTelegramBot();
+    json(res, 200, { bot });
     return;
   }
   if (req.method !== 'POST') {

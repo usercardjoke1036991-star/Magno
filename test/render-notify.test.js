@@ -85,6 +85,8 @@ describe('Render notify worker', function () {
         TEXTBELT_API_KEY: ['paid-textbelt-', 'key-16'].join(''),
         RESEND_API_KEY: ['re_test_', 'render_health_key'].join(''),
         EMAIL_FROM: 'soporte@quatriviumcredit.app',
+        TELEGRAM_BOT: 'QuatriviumNotifyBot',
+        TELEGRAM_BOT_TOKEN: '',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -139,6 +141,22 @@ describe('Render notify worker', function () {
       });
       expect(rootBody.status).to.equal(200);
       expect(JSON.parse(rootBody.data).health).to.equal('/health');
+      const botBody = await new Promise((resolve, reject) => {
+        http
+          .get({ hostname: '127.0.0.1', port, path: '/telegram/bot' }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => {
+              data += chunk;
+            });
+            res.on('end', () => resolve({ status: res.statusCode, data }));
+          })
+          .on('error', reject);
+      });
+      expect(botBody.status).to.equal(200);
+      const botParsed = JSON.parse(botBody.data);
+      expect(botParsed.bot).to.equal('QuatriviumNotifyBot');
+      expect(botParsed).to.not.have.property('token');
+      expect(botBody.data).to.not.include('TELEGRAM_BOT_TOKEN');
     } finally {
       child.kill('SIGTERM');
     }

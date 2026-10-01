@@ -9,6 +9,7 @@ import {
   loadRequiredExternalWallet,
   saveLinkedExternalWallet,
 } from '../services/linkedWallet';
+import { openWalletConnect } from '../utils/openWalletConnect';
 import { AppText } from './AppText';
 
 interface LinkedWalletCardProps {
@@ -41,7 +42,7 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
 
   const saveConnected = async () => {
     if (!hasLinkedExternalWallet(address || '')) {
-      open();
+      await openWalletConnect(open);
       return;
     }
     setBusy(true);
@@ -49,7 +50,7 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
       const saved = await saveLinkedExternalWallet(internalWallet, address || '');
       setLinked(saved);
     } catch {
-      open();
+      await openWalletConnect(open);
     } finally {
       setBusy(false);
     }
@@ -77,7 +78,7 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
       ) : null}
       <TouchableOpacity
         disabled={busy}
-        onPress={() => (linked && connectedReady && !mismatch ? open() : void saveConnected())}
+        onPress={() => (linked && connectedReady && !mismatch ? void openWalletConnect(open) : void saveConnected())}
         style={[styles.btn, { backgroundColor: linked ? colors.chip : colors.primary }]}
         accessibilityRole="button"
         accessibilityLabel={t('linkWalletBind')}

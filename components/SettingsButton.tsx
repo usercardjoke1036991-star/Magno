@@ -17,6 +17,9 @@ import { ModeToggle } from './ModeToggle';
 import { SecuritySettings } from './SecuritySettings';
 import { AdminAccess } from './AdminAccess';
 import { ProfileAvatar } from './ProfileAvatar';
+import { rankFrameOuterSize } from './RankFrame';
+import { useEquippedFrame } from '../hooks/useEquippedFrame';
+import { isFounderWallet } from '../utils/founderWallet';
 import { AppIcon } from './icons';
 import { BrandLogo } from './BrandLogo';
 import { useUserProfile } from '../profile/ProfileContext';
@@ -30,14 +33,29 @@ import { HowTheAppWorks } from './HowTheAppWorks';
 
 type Panel = 'home' | 'security' | 'appearance' | 'language' | 'mode' | 'admin' | 'privacy' | 'terms' | 'guide';
 
-export const SettingsButton: React.FC = () => {
+const HUB_PHOTO = 44;
+
+interface SettingsButtonProps {
+  isFounder?: boolean;
+  founderAddress?: string;
+  naturalLevel?: number;
+}
+
+export const SettingsButton: React.FC<SettingsButtonProps> = ({
+  isFounder = false,
+  founderAddress = '',
+  naturalLevel = 1,
+}) => {
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<Panel>('home');
   const [phraseWarning, setPhraseWarning] = useState(false);
   const { t } = useI18n();
   const { colors } = useTheme();
   const { profile, walletAddress } = useUserProfile();
-  const level = useWalletLevel(walletAddress);
+  const level = useWalletLevel(walletAddress, naturalLevel);
+  const founder = isFounder || isFounderWallet(walletAddress, founderAddress);
+  const { displayLevel } = useEquippedFrame(walletAddress, founder, level);
+  const frameBox = rankFrameOuterSize(HUB_PHOTO, displayLevel);
   const { mode } = useAppMode();
 
   useEffect(() => {
@@ -103,14 +121,15 @@ export const SettingsButton: React.FC = () => {
 
   return (
     <>
-      <View>
+      <View style={[styles.avatarSlot, { width: frameBox, height: frameBox }]}>
         <ProfileAvatar
           profile={profile}
           wallet={walletAddress}
-          size={40}
+          size={HUB_PHOTO}
           badge
           publicView
-          level={walletAddress ? level : undefined}
+          level={walletAddress ? displayLevel : undefined}
+          frameLevel={walletAddress ? displayLevel : undefined}
           showRankLabel={false}
           onPress={() => setOpen(true)}
           accessibilityLabel={t('settings')}
@@ -183,6 +202,11 @@ export const SettingsButton: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  avatarSlot: {
+    overflow: 'visible',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   frame: {
     flex: 1,
     justifyContent: 'flex-end',

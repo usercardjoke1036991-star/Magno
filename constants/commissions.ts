@@ -46,6 +46,11 @@ export const COMMISSION_BANDS: ReadonlyArray<{ range: string; gen: number }> = [
   { range: '13–40', gen: 13 },
 ];
 
+/** Lista 1–40 para la ficha de cada nivel (LoanTierCard). */
+export function commissionLine(): number[] {
+  return Array.from({ length: MAX_COMMISSION_LINE }, (_, index) => index + 1);
+}
+
 export function commissionBandsForLoan(
   usdAmount: number,
   interestBps: number
@@ -53,5 +58,28 @@ export function commissionBandsForLoan(
   return COMMISSION_BANDS.map((band) => ({
     range: band.range,
     amount: commissionForGeneration(usdAmount, interestBps, band.gen),
+  }));
+}
+
+/** Lista completa por nivel: una fila por generación, sin resumir 6–12 ni 13–40. */
+export function commissionRowsForLoan(
+  usdAmount: number,
+  interestBps: number
+): Array<{ range: string; amount: number }> {
+  return commissionLine().map((gen) => ({
+    range: String(gen),
+    amount: commissionForGeneration(usdAmount, interestBps, gen),
+  }));
+}
+
+/** Comisión directa (gen 1) por cada nivel de préstamo L1…L1000. */
+export function directCommissionRowsForTiers(
+  tiers: ReadonlyArray<{ id: number; usdAmount: number; interestBps: number }>,
+  curveRateBps = 0
+): Array<{ id: number; usdAmount: number; amount: number }> {
+  return tiers.map((tier) => ({
+    id: tier.id,
+    usdAmount: tier.usdAmount,
+    amount: directCommissionFromLoan(tier.usdAmount, Math.max(tier.interestBps, curveRateBps || 0)),
   }));
 }

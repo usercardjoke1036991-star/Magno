@@ -36,20 +36,18 @@
       font-weight: 700;
       font-size: 15px;
     }
-    a.ghost { background: #fff; color: #146C2E; border: 1px solid #146C2E; }
     .hint { font-size: 13px; color: #3d5c48; }
   </style>
 </head>
 <body>
   <main>
     <h1>Quatrivium Finance</h1>
-    <p>Lo invitan a activar su línea de crédito. Si ya tiene la aplicación, ábrala con este enlace. Si no, descárguela e ingrese el código.</p>
+    <p>Lo invitan a Quatrivium Finance. Si ya tiene la aplicación, ábrala con este enlace. Si no, copie el código y péguelo al crear la cuenta.</p>
     <div class="code" id="code">—</div>
     <p>
       <a class="btn" id="open">Abrir Quatrivium Finance</a>
-      <a class="btn ghost" id="store" href="https://play.google.com/store/apps/details?id=com.quatrivium.credit">Google Play</a>
     </p>
-    <p class="hint">Si la aplicación no se abre, copie el código y péguelo al activar su línea de crédito.</p>
+    <p class="hint">Si la aplicación no se abre, use el código. Aún no está en tiendas. Paquete id=com.quatrivium.credit.</p>
   </main>
   <script>
     const params = new URLSearchParams(location.search);
@@ -58,21 +56,15 @@
     const grouped = raw ? (raw.match(/.{1,4}/g) || []).join('-') : '';
     const codeEl = document.getElementById('code');
     const open = document.getElementById('open');
-    const store = document.getElementById('store');
     const lead = document.querySelector('main p');
     codeEl.textContent = grouped || 'Código no disponible';
     if (inviter && lead) {
-      lead.textContent = inviter + ' lo invita a activar su línea de crédito. Si ya tiene la aplicación, ábrala con este enlace. Si no, descárguela e ingrese el código.';
+      lead.textContent = inviter + ' lo invita a Quatrivium Finance. Si ya tiene la aplicación, ábrala con este enlace. Si no, copie el código y péguelo al crear la cuenta.';
     }
     const appUrl = 'quatrivium://invite?c=' + raw + (inviter ? '&n=' + encodeURIComponent(inviter) : '');
-    const play = 'https://play.google.com/store/apps/details?id=com.quatrivium.credit&referrer=' +
-      encodeURIComponent('utm_source=invite&c=' + raw + (inviter ? '&n=' + inviter : ''));
     open.href = appUrl;
-    store.href = play;
     if (raw) {
-      const timer = setTimeout(function () { location.href = play; }, 1600);
       try { location.href = appUrl; } catch (e) {}
-      window.addEventListener('pagehide', function () { clearTimeout(timer); });
     }
   </script>
 </body>

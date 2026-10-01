@@ -28,6 +28,16 @@ function framePad(size: number, rank: RankStyle, idx: number): number {
   return Math.max(16, Math.round(size * ratio));
 }
 
+export function rankFramePadFor(size: number, level: number): number {
+  const rank = getRankForLevel(level);
+  return framePad(size, rank, rankFamilyIndex(rank.family));
+}
+
+/** Caja completa del marco (foto + metal + piedras). El hueco del avatar debe reservar esto. */
+export function rankFrameOuterSize(size: number, level: number): number {
+  return size + rankFramePadFor(size, level) * 2;
+}
+
 function jewelCount(rank: RankStyle): number {
   return 4 + rank.division * 4;
 }
@@ -125,6 +135,7 @@ function StoneInlays({
 }) {
   const n = jewelCount(rank);
   const gem = Math.max(20, Math.round(pad * (0.82 + rank.division * 0.08)));
+  const half = gem / 2;
   return (
     <>
       {inlaySeats(box, pad, n).map((seat, i) => (
@@ -135,8 +146,8 @@ function StoneInlays({
             position: 'absolute',
             width: gem,
             height: gem,
-            left: seat.x - gem / 2,
-            top: seat.y - gem / 2,
+            left: Math.min(box - half, Math.max(0, seat.x - half)),
+            top: Math.min(box - half, Math.max(0, seat.y - half)),
           }}
         >
           <RankGem rank={rank} size={gem} mark={String(i)} />
@@ -261,6 +272,7 @@ export const RankFrame: React.FC<RankFrameProps> = ({
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
+    overflow: 'visible',
   },
   back: {
     position: 'absolute',

@@ -8,7 +8,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { RankMedal } from './RankMedal';
 import { AppIcon } from './icons';
-import { commissionBandsForLoan, formatCommissionUSD, ACTIVATION_BONUS_USD } from '../constants/commissions';
+import { commissionRowsForLoan, formatCommissionUSD, ACTIVATION_BONUS_USD } from '../constants/commissions';
 import { AppText } from './AppText';
 import { isMilestoneLevel, MAX_LEVEL_BONUS_EVERY, MAX_LOAN_LEVEL, milestoneBonusUsd } from '../constants/loanTiers';
 
@@ -72,6 +72,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const locked = tier.id > userLevel;
   const unlocked = !locked;
   const [detailsOpen, setDetailsOpen] = useState(!locked);
+  const [commsOpen, setCommsOpen] = useState(false);
   const showDetails = unlocked || detailsOpen;
   const appliedBps = Math.max(tier.interestBps, curveRateBps || 0);
   const interest = (tier.usdAmount * appliedBps) / 10000;
@@ -81,7 +82,7 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
   const isMaxLevel = tier.id >= MAX_LOAN_LEVEL;
   const rank = getRankForLevel(tier.id);
   const rankLabel = formatRankLabel(rank, t(rank.nameKey));
-  const earnBands = commissionBandsForLoan(tier.usdAmount, appliedBps);
+  const earnRows = commissionRowsForLoan(tier.usdAmount, appliedBps);
   const curveRaisesRate = appliedBps > tier.interestBps;
   const remainingInstallments = Math.max(0, cuotasTotales - cuotasPagadas);
   const cooldownLeft = useLiveCooldown(ultimoPrestamoTimestamp, cooldownRestante);
@@ -163,17 +164,30 @@ export const LoanTierCard: React.FC<LoanTierCardProps> = ({
       ) : (
         <AppText style={[styles.tierMeta, { color: colors.textMuted }]}>{t('payOnTimeToLevel', { count: tier.requiredCount })}</AppText>
       )}
-      <AppText style={[styles.earnNote, { color: colors.success }]}>{t('referralEarnLeadLevel')}</AppText>
+      <Pressable
+        onPress={() => setCommsOpen((open) => !open)}
+        style={styles.earnToggle}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: commsOpen }}
+        accessibilityLabel={t('referralEarnLeadLevel')}
+      >
+        <AppText style={[styles.earnNote, styles.earnToggleText, { color: colors.success }]}>
+          {t('referralEarnLeadLevel')}
+        </AppText>
+        <AppText style={[styles.chevron, { color: colors.success }]}>{commsOpen ? '–' : '+'}</AppText>
+      </Pressable>
       {tier.id === 1 ? (
         <AppText style={[styles.earnNote, { color: colors.success }]}>
           {t('referralEarnLevel1First', { bonus: formatCommissionUSD(ACTIVATION_BONUS_USD) })}
         </AppText>
       ) : null}
-      {earnBands.map((band) => (
-        <AppText key={band.range} style={[styles.earnBand, { color: colors.success }]}>
-          {t('referralEarnBand', { range: band.range, amount: formatCommissionUSD(band.amount) })}
-        </AppText>
-      ))}
+      {commsOpen
+        ? earnRows.map((band) => (
+            <AppText key={band.range} style={[styles.earnBand, { color: colors.success }]}>
+              {t('referralEarnBand', { range: band.range, amount: formatCommissionUSD(band.amount) })}
+            </AppText>
+          ))
+        : null}
 
       <View style={styles.tierActions}>
         {locked ? (
@@ -421,6 +435,16 @@ const styles = StyleSheet.create({
   tierMeta: {
     fontSize: 13,
     marginBottom: 2,
+  },
+  earnToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  earnToggleText: {
+    flex: 1,
+    marginTop: 0,
   },
   earnNote: {
     fontSize: 12,

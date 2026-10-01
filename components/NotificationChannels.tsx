@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { TELEGRAM_BOT, NOTIFY_API } from '../constants/appLinks';
 import { loadAppWallet } from '../services/appWallet';
+import { notifyApiConfigured, notifyJsonBody } from '../services/notifyClient';
+import { resolveTelegramBot } from '../services/telegramBot';
 import { signedAuthBody } from '../services/walletAuth';
-import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { openSafeUrl } from '../utils/safeOpenUrl';
 import { AppIcon } from './icons';
 import {
-  isValidPhone,
   loadNotificationProfile,
   saveNotificationProfile,
   type NotificationPrefs,
   type NotificationProfile,
 } from '../services/notificationProfile';
-import { loadVerifiedEmail } from '../services/accountEmail';
-import { AppText, AppTextInput } from './AppText';
+import { AppText } from './AppText';
 
 interface NotificationChannelsProps {
   walletAddress: string;
@@ -27,55 +25,63 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const [phone, setPhone] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [telegramUsername, setTelegramUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [prefs, setPrefs] = useState<NotificationPrefs>({
     debt: true,
     commission: false,
     signup: false,
-    email: true,
+    email: false,
   });
   const [saving, setSaving] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [botName, setBotName] = useState('');
 
-  useEffect(() => {
+  React.useEffect(() => {
     loadNotificationProfile()
       .then((profile) => {
-        setPhone(profile.phone);
-        setWhatsapp(profile.whatsapp);
-        setTelegramUsername(profile.telegramUsername);
-        setPrefs(profile.prefs);
+        setPrefs({ ...profile.prefs, debt: true, email: false });
+        setReady(true);
       })
-      .catch(() => {});
-    loadVerifiedEmail().then(setEmail).catch(() => {});
+      .catch(() => setReady(true));
+  }, []);
+
+  React.useEffect(() => {
+    let live = true;
+    resolveTelegramBot()
+      .then((bot) => {
+        if (live) setBotName(bot);
+      })
+      .catch(() => {
+        if (live) setBotName('');
+      });
+    return () => {
+      live = false;
+    };
   }, []);
 
   const toggle = (key: keyof NotificationPrefs) => {
-    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+    if (key === 'email' || key === 'debt') return;
+    setPrefs((prev) => ({ ...prev, [key]: !prev[key], email: false, debt: true }));
   };
 
-  const handleSave = async () => {
+  const persistPrefs = async (nextPrefs: NotificationPrefs) => {
     if (!walletAddress) {
       Alert.alert(t('connect'), t('connectFirst'));
       return;
     }
-    if (!isValidPhone(phone) || !isValidPhone(whatsapp)) {
-      Alert.alert(t('error'), t('notificationInvalidPhone'));
-      return;
-    }
+    const profile: NotificationProfile = {
+      phone: '',
+      whatsapp: '',
+      telegramUsername: '',
+      prefs: { ...nextPrefs, debt: true, email: false },
+    };
+    const saved = await saveNotificationProfile(walletAddress, profile);
+    setPrefs({ ...saved.prefs, debt: true, email: false });
+  };
+
+  const handleSave = async () => {
     setSaving(true);
     try {
-      const profile: NotificationProfile = {
-        phone,
-        whatsapp,
-        telegramUsername,
-        prefs: { ...prefs, debt: true },
-      };
-      const saved = await saveNotificationProfile(walletAddress, profile);
-      setPhone(saved.phone);
-      setWhatsapp(saved.whatsapp);
-      setTelegramUsername(saved.telegramUsername);
+      await persistPrefs(prefs);
       Alert.alert(t('ready'), t('notificationSaved'));
     } catch {
       Alert.alert(t('error'), t('notificationSaveError'));
@@ -85,7 +91,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   };
 
   const handleTelegram = async () => {
-    const bot = TELEGRAM_BOT.replace(/[^a-zA-Z0-9_]/g, '');
+    const bot = botName || (await resolveTelegramBot());
     if (!bot) {
       Alert.alert(t('notificationTelegram'), t('notificationTelegramHint'));
       return;
@@ -94,7 +100,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       Alert.alert(t('connect'), t('connectFirst'));
       return;
     }
-    if (!NOTIFY_API) {
+    if (!notifyApiConfigured()) {
       Alert.alert(t('notificationTelegram'), t('telegramNeedApi'));
       return;
     }
@@ -105,7 +111,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
         return;
       }
       const auth = await signedAuthBody(signer, walletAddress, 'vincular-avisos');
-      const response = await safeJsonFetch(`${NOTIFY_API}/telegram/prepare`, {
+      const { response, body } = await notifyJsonBody<{ code?: string }>('/telegram/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(auth),
@@ -113,9 +119,8 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       if (!response.ok) {
         throw new Error('prepare');
       }
-      const data = await readJsonLimited<{ code?: string }>(response);
-      if (!data.code || !/^[a-z0-9]{8,12}$/.test(data.code)) throw new Error('code');
-      const opened = await openSafeUrl(`https://t.me/${bot}?start=${data.code}`);
+      if (!body.code || !/^[a-z0-9]{8,12}$/.test(body.code)) throw new Error('code');
+      const opened = await openSafeUrl(`https://t.me/${bot}?start=${body.code}`);
       if (!opened) throw new Error('open');
     } catch {
       Alert.alert(t('error'), t('notificationTelegramHint'));
@@ -125,63 +130,6 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   return (
     <View>
       <AppText style={[styles.lead, { color: colors.text }]}>{t('notificationLead')}</AppText>
-      {email ? (
-        <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
-          <View style={styles.switchRow}>
-            <View style={styles.switchLabelRow}>
-              <AppIcon name="bell" size={16} color={colors.textMuted} />
-              <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationEmail')}</AppText>
-            </View>
-            <Switch value={prefs.email} onValueChange={() => toggle('email')} />
-          </View>
-          <AppText selectable style={[styles.switchLabel, { color: colors.text }]}>{email}</AppText>
-          <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationEmailHint')}</AppText>
-        </View>
-      ) : (
-        <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
-          <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationEmail')}</AppText>
-          <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationEmailLink')}</AppText>
-        </View>
-      )}
-
-      <View style={styles.labelRow}>
-        <AppIcon name="phone" size={15} color={colors.textMuted} />
-        <AppText style={[styles.label, { color: colors.textMuted }]}>{t('notificationPhone')}</AppText>
-      </View>
-      <AppTextInput
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        placeholder="+58412..."
-        placeholderTextColor={colors.textMuted}
-        style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-      />
-
-      <View style={styles.labelRow}>
-        <AppIcon name="whatsapp" size={15} color={colors.textMuted} />
-        <AppText style={[styles.label, { color: colors.textMuted }]}>{t('notificationWhatsApp')}</AppText>
-      </View>
-      <AppTextInput
-        value={whatsapp}
-        onChangeText={setWhatsapp}
-        keyboardType="phone-pad"
-        placeholder="+58412..."
-        placeholderTextColor={colors.textMuted}
-        style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-      />
-
-      <View style={styles.labelRow}>
-        <AppIcon name="telegram" size={15} color={colors.textMuted} />
-        <AppText style={[styles.label, { color: colors.textMuted }]}>{t('notificationTelegram')}</AppText>
-      </View>
-      <AppTextInput
-        value={telegramUsername}
-        onChangeText={setTelegramUsername}
-        autoCapitalize="none"
-        placeholder="@usuario"
-        placeholderTextColor={colors.textMuted}
-        style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
-      />
 
       <TouchableOpacity style={[styles.secondary, { borderColor: colors.border }]} onPress={handleTelegram}>
         <View style={styles.btnRow}>
@@ -189,6 +137,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
           <AppText style={[styles.secondaryText, { color: colors.text }]}>{t('notificationOpenTelegram')}</AppText>
         </View>
       </TouchableOpacity>
+      <AppText style={[styles.alwaysHint, { color: colors.textMuted }]}>{t('notificationTelegramHint')}</AppText>
 
       <View style={[styles.alwaysOn, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <View style={styles.switchLabelRow}>
@@ -204,19 +153,19 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
           <AppIcon name="pay" size={16} color={colors.text} />
           <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationCommission')}</AppText>
         </View>
-        <Switch value={prefs.commission} onValueChange={() => toggle('commission')} />
+        <Switch value={prefs.commission} onValueChange={() => toggle('commission')} disabled={!ready} />
       </View>
       <View style={styles.switchRow}>
         <View style={styles.switchLabelRow}>
           <AppIcon name="people" size={16} color={colors.text} />
           <AppText style={[styles.switchLabel, { color: colors.text }]}>{t('notificationSignup')}</AppText>
         </View>
-        <Switch value={prefs.signup} onValueChange={() => toggle('signup')} />
+        <Switch value={prefs.signup} onValueChange={() => toggle('signup')} disabled={!ready} />
       </View>
 
       <TouchableOpacity
         style={[styles.save, { backgroundColor: colors.primary }, saving && styles.disabled]}
-        onPress={handleSave}
+        onPress={() => void handleSave()}
         disabled={saving}
       >
         <View style={styles.btnRow}>
@@ -231,39 +180,20 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
 const styles = StyleSheet.create({
   lead: {
     fontSize: 12,
-    color: '#2d4a38',
     lineHeight: 18,
     marginBottom: 10,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#145c32',
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
   },
   btnRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 8,
-  },
   secondary: {
     borderWidth: 1,
     borderRadius: 12,
     paddingVertical: 10,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   secondaryText: {
     fontWeight: '500',
@@ -274,11 +204,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
+    marginTop: 8,
   },
   alwaysHint: {
     fontSize: 11,
     lineHeight: 16,
     marginTop: 4,
+    marginBottom: 8,
   },
   optionalTitle: {
     fontSize: 12,
@@ -294,7 +226,6 @@ const styles = StyleSheet.create({
   switchLabel: {
     flex: 1,
     fontSize: 12,
-    color: '#333',
     paddingRight: 8,
   },
   switchLabelRow: {

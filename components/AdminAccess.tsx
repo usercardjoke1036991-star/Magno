@@ -7,6 +7,7 @@ import { useWeb3Balances } from '../hooks/useWeb3Balances';
 import { getSupportedTokens } from '../constants/tokens';
 import { formatAddress } from '../utils/formatters';
 import { useAppMode } from '../wallet/AppModeContext';
+import { openWalletConnect } from '../utils/openWalletConnect';
 import { AppText } from './AppText';
 
 export const AdminAccess: React.FC = () => {
@@ -35,7 +36,7 @@ export const AdminAccess: React.FC = () => {
         <AppText style={[styles.warn, { color: colors.danger }]}>{t('settingsAdminNot')}</AppText>
       ) : null}
       <TouchableOpacity
-        onPress={() => open()}
+        onPress={() => void openWalletConnect(open)}
         style={[styles.btn, { backgroundColor: colors.primary }]}
         accessibilityRole="button"
         accessibilityLabel={t('settingsAdminConnect')}

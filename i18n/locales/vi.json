@@ -170,7 +170,7 @@
   "referralEarnGrand": "Tổng đã kiếm",
   "referralEarnFromOne": "Hoa hồng {commission} · Thưởng {bonus}",
   "notificationTitle": "Cảnh báo",
-  "notificationLead": "Ứng dụng gửi hai thông báo thanh toán mỗi kỳ: giữa kỳ và trước hạn chót. Những thông báo đó luôn bật. WhatsApp, Telegram, hoa hồng và đăng ký mới là tùy chọn.",
+  "notificationLead": "Payment, commission and signup alerts go only through Telegram. Account email and phone stay as they are.",
   "notificationPhone": "Số điện thoại",
   "notificationWhatsApp": "WhatsApp",
   "notificationTelegram": "Telegram",
@@ -1153,6 +1153,8 @@
   "referralEarnColGen": "Generation",
   "referralEarnColPct": "Of interest",
   "referralEarnExamples": "If a direct referral repays these levels, you earn:",
+  "referralEarnAllLevels": "Commissions by loan level (1–{to})",
+  "referralEarnAllLevelsLead": "Generation-1 commission when each loan level is repaid, from 1 to 1000.",
   "guideHowYouEarn": "How you earn",
   "guidePartStart": "1. Your account",
   "guidePartEarn": "2. How you earn",
@@ -1168,5 +1170,8 @@
   "guideDonateEarn": "Adds box fame: 100 fame per 1 USDT. Redeem it in Exchange, on the donate or contribute tab.",
   "guideRanksEarn": "If there is a monthly prize, it is estimated from 1.5% of free cash. Anyone in arrears does not receive it. The unassigned share stays in the fund.",
   "guideHistoryEarn": "It does not pay. It lets you review what already happened on your account.",
-  "guidePoolEarn": "Contributing adds box fame (100 per USDT), redeemed in Exchange. The capital stays in the fund."
+  "guidePoolEarn": "Contributing adds box fame (100 per USDT), redeemed in Exchange. The capital stays in the fund.",
+  "wearFrame": "Wear this frame",
+  "wearingFrame": "In use",
+  "founderFramesHint": "You can wear any frame as an accessory."
 }

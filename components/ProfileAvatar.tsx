@@ -1,10 +1,10 @@
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { AVATAR_PRESETS, clampAvatarId, type UserProfile } from '../services/userProfile';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { AppIcon } from './icons';
-import { RankFrame } from './RankFrame';
+import { RankFrame, rankFrameOuterSize } from './RankFrame';
 
 interface ProfileAvatarProps {
   profile?: UserProfile | null;
@@ -14,6 +14,7 @@ interface ProfileAvatarProps {
   badge?: boolean;
   accessibilityLabel?: string;
   level?: number;
+  frameLevel?: number;
   rankName?: string;
   showRankLabel?: boolean;
   publicView?: boolean;
@@ -58,6 +59,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   badge = false,
   accessibilityLabel,
   level,
+  frameLevel,
   rankName,
   showRankLabel,
   publicView = false,
@@ -72,8 +74,12 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     ? profile.photoUri
     : '';
   const photoUri = publicView ? publicPhoto || sharedPhoto : publicPhoto || localPhoto;
-  const rank = level ? getRankForLevel(level) : null;
+  const wornLevel = frameLevel || level;
+  const rank = wornLevel ? getRankForLevel(wornLevel) : null;
   const caption = rank && rankName ? formatRankLabel(rank, rankName) : '';
+  const showCaption = showRankLabel ?? size >= 36;
+  const outer = rank ? rankFrameOuterSize(size, rank.level) : size;
+  const outerH = outer + (showCaption && caption ? 14 : 0);
 
   const photoRadius = rank ? Math.max(3, Math.round(size * 0.08)) : size / 2;
   const photo = photoUri ? (
@@ -87,8 +93,8 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   );
 
   const framed = rank ? (
-    <View>
-      <RankFrame level={rank.level} size={size} label={caption} showLabel={showRankLabel ?? size >= 36}>
+    <View style={{ width: outer, height: outerH, overflow: 'visible' }}>
+      <RankFrame level={rank.level} size={size} label={caption} showLabel={showCaption}>
         {photo}
       </RankFrame>
       {badge ? (
@@ -98,7 +104,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       ) : null}
     </View>
   ) : (
-    <View style={{ width: size, height: size }}>
+    <View style={{ width: size, height: size, overflow: 'visible' }}>
       {photo}
       {badge ? (
         <View style={styles.badge}>
@@ -110,9 +116,14 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
 
   if (!onPress) return framed;
   return (
-    <TouchableOpacity onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={{ overflow: 'visible', width: rank ? outer : size, height: rank ? outerH : size }}
+    >
       {framed}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

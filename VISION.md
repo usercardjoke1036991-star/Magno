@@ -158,6 +158,8 @@
 - Puerta Real 2 USDT a la fundadora y 1 USDT de correo+telefono al pool, ambos sin fama. Captacion 1 USDT sin fama. Fama de red generacional desde gen 2. Sin bono de caja 0.50.
 - Reserva extra de comisiones del pool; racha cobro por dias; fama solo por la via que se gano; guia en Ajustes; hitos 30000 tras L200; historial desde nivel 15
 - Guia de funciones en Ajustes y extra de Reserva desde el pool
+- Fundador puede poner cualquier marco de rango como accesorio exclusivo; el marco del hub se ve completo; el codigo de referido se fija al crear cuenta y se registra on-chain cuando el credito esta listo
+- Avisos de comision y deuda solo por Telegram; correo y telefono siguen para identidad
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -292,3 +294,5 @@
 - [2026-09-30 20:18] Idea añadida al backlog: "Puerta Real 2 USDT a la fundadora y 1 USDT de correo+telefono al pool, ambos sin"
 - [2026-09-30 20:50] Idea añadida al backlog: "Reserva extra de comisiones del pool; racha cobro por dias; fama solo por la via"
 - [2026-09-30 21:32] Idea añadida al backlog: "Guia de funciones en Ajustes y extra de Reserva desde el pool"
+- [2026-10-01 02:51] Idea añadida al backlog: "Fundador puede poner cualquier marco de rango como accesorio exclusivo; el marco"
+- [2026-10-01 03:11] Idea añadida al backlog: "Avisos de comision y deuda solo por Telegram; correo y telefono siguen para iden"

@@ -309,7 +309,9 @@ describe('fame rankings', () => {
     expect(loans).to.include('payOnTimeToLevel');
     expect(loans).to.include('maxLevelNote');
     expect(loans).to.include('referralEarnBand');
-    expect(loans).to.include('commissionBandsForLoan');
+    expect(loans).to.include('commissionRowsForLoan');
+    expect(loans).to.include('commsOpen');
+    expect(loans).to.not.include('commissionBandsForLoan');
     expect(loans).to.include('MAX_LEVEL_BONUS_EVERY');
     expect(loans).to.match(/isMaxLevel \? \(/);
     const hub = fs.readFileSync(path.join(__dirname, '..', 'app/index.tsx'), 'utf8');

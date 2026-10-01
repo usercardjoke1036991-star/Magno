@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Share, Alert, Pressable, FlatList } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { addressToInviteCode, buildInviteLink } from '../utils/inviteCode';
@@ -9,12 +9,13 @@ import { useUserProfile } from '../profile/ProfileContext';
 import { labelForProfile } from '../services/userProfile';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { useWalletLevel } from '../hooks/useWalletLevel';
-import { LOAN_TIERS } from '../constants/loanTiers';
+import { LOAN_TIERS, MAX_LOAN_LEVEL } from '../constants/loanTiers';
 import {
   ACTIVATION_BONUS_USD,
   COMMISSION_BANDS,
   commissionForGeneration,
   directCommissionFromLoan,
+  directCommissionRowsForTiers,
   formatCommissionUSD,
   generationCommissionBps,
 } from '../constants/commissions';
@@ -64,6 +65,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   const { colors } = useTheme();
   const { profile, lookup } = useUserProfile();
   const [lockedSponsor, setLockedSponsor] = useState<LockedSponsor | null>(null);
+  const [levelCommsOpen, setLevelCommsOpen] = useState(false);
   const padre = referral?.padre || '';
   const isFundador = Boolean(referral?.isFundador);
   const bonoActivacionCobrado = Boolean(referral?.bonoActivacionCobrado);
@@ -83,6 +85,36 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   const exampleTiers = useMemo(
     () => EXAMPLE_LEVELS.map((id) => LOAN_TIERS.find((tier) => tier.id === id)).filter(Boolean),
     []
+  );
+  const levelCommissionRows = useMemo(
+    () => directCommissionRowsForTiers(LOAN_TIERS, curveRateBps),
+    [curveRateBps]
+  );
+  const sampleLoan = useMemo(
+    () => LOAN_TIERS.find((tier) => tier.id === 10) || LOAN_TIERS[0],
+    []
+  );
+
+  const renderLevelCommission = useCallback(
+    ({ item }: { item: { id: number; usdAmount: number; amount: number } }) => {
+      const earn = formatCommissionUSD(item.amount);
+      return (
+        <View style={[styles.earnRow, { borderColor: colors.border }]}>
+          <AppText style={[styles.earnCell, { color: colors.text, flex: 1.2 }]}>
+            {t('level')} {item.id}
+          </AppText>
+          <AppText style={[styles.earnCell, { color: colors.text, flex: 1 }]}>
+            {formatUSD(item.usdAmount)}
+          </AppText>
+          <AppText style={[styles.earnCell, { color: colors.primary, flex: 1.4 }]}>
+            {item.id === 1
+              ? `${t('referralEarnFirst', { bonus: formatCommissionUSD(ACTIVATION_BONUS_USD) })} · ${t('referralEarnNext', { amount: earn })}`
+              : earn}
+          </AppText>
+        </View>
+      );
+    },
+    [colors.border, colors.primary, colors.text, t]
   );
 
   useEffect(() => {
@@ -303,7 +335,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         </AppText>
       </AppSubsection>
 
-      <AppSubsection title={t('referralEarnTitle')} defaultOpen={false} icon="pay">
+      <AppSubsection title={t('referralEarnTitle')} defaultOpen icon="pay">
         <AppText style={[styles.sectionLead, { color: colors.textMuted }]}>{t('referralLead')}</AppText>
         <AppText style={[styles.hint, { color: colors.textMuted }]}>{t('referralCommissionSchedule')}</AppText>
 
@@ -314,9 +346,10 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
             <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</AppText>
           </View>
           {COMMISSION_BANDS.map((band) => {
-            const sample = LOAN_TIERS.find((tier) => tier.id === 10) || LOAN_TIERS[0];
-            const appliedBps = Math.max(sample.interestBps, curveRateBps || 0);
-            const amount = formatCommissionUSD(commissionForGeneration(sample.usdAmount, appliedBps, band.gen));
+            const appliedBps = Math.max(sampleLoan.interestBps, curveRateBps || 0);
+            const amount = formatCommissionUSD(
+              commissionForGeneration(sampleLoan.usdAmount, appliedBps, band.gen)
+            );
             const pct = generationCommissionBps(band.gen) / 100;
             return (
               <View key={band.range} style={[styles.earnRow, { borderColor: colors.border }]}>
@@ -354,6 +387,41 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
             </View>
           );
         })}
+
+        <Pressable
+          onPress={() => setLevelCommsOpen((open) => !open)}
+          style={styles.earnToggle}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: levelCommsOpen }}
+          accessibilityLabel={t('referralEarnAllLevels', { to: String(MAX_LOAN_LEVEL) })}
+        >
+          <AppText style={[styles.earnToggleText, { color: colors.primary }]}>
+            {t('referralEarnAllLevels', { to: String(MAX_LOAN_LEVEL) })}
+          </AppText>
+          <AppText style={[styles.chevron, { color: colors.primary }]}>{levelCommsOpen ? '–' : '+'}</AppText>
+        </Pressable>
+        {levelCommsOpen ? (
+          <View style={styles.levelListBox}>
+            <AppText style={[styles.hint, { color: colors.textMuted, marginBottom: 8 }]}>
+              {t('referralEarnAllLevelsLead')}
+            </AppText>
+            <View style={styles.earnHead}>
+              <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.2 }]}>{t('referralEarnColRank')}</AppText>
+              <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1 }]}>{t('referralEarnColLoan')}</AppText>
+              <AppText style={[styles.earnHeadCell, { color: colors.textMuted, flex: 1.4 }]}>{t('referralEarnColPay')}</AppText>
+            </View>
+            <FlatList
+              data={levelCommissionRows}
+              keyExtractor={(item) => String(item.id)}
+              renderItem={renderLevelCommission}
+              initialNumToRender={20}
+              maxToRenderPerBatch={24}
+              windowSize={7}
+              nestedScrollEnabled
+              style={styles.levelList}
+            />
+          </View>
+        ) : null}
       </AppSubsection>
     </View>
   );
@@ -368,6 +436,16 @@ const styles = StyleSheet.create({
   earnCell: { fontSize: 12, fontWeight: '700' },
   table: { marginBottom: 12 },
   examplesTitle: { fontSize: 13, fontWeight: '800', marginBottom: 8, marginTop: 4 },
+  earnToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    gap: 8,
+  },
+  earnToggleText: { flex: 1, fontSize: 13, fontWeight: '800' },
+  chevron: { fontSize: 18, fontWeight: '700', lineHeight: 20 },
+  levelListBox: { marginTop: 8 },
+  levelList: { maxHeight: 320 },
   founderBadge: {
     borderRadius: 12,
     borderWidth: 1,

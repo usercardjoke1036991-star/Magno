@@ -27,6 +27,7 @@ import { formatAddress, parsePositiveDecimal } from '../utils/formatters';
 import { humanizeTxError } from '../utils/txErrors';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { copyText } from '../utils/copyText';
+import { openWalletConnect } from '../utils/openWalletConnect';
 import { BrandLogo } from './BrandLogo';
 import { LinkWalletForm } from './LinkWalletForm';
 import type { Token } from '../constants/tokens';
@@ -129,7 +130,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
       if (direction === 'in') {
         if (!isConnected || !provider || String(address || '').toLowerCase() !== linked.toLowerCase()) {
           Alert.alert(t('linkWalletTitle'), t('linkWalletMismatch'));
-          void open();
+          void openWalletConnect(open);
           return;
         }
         const signer = await getEthersSignerFromProvider(provider as Eip1193Provider);
@@ -238,7 +239,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.send, { backgroundColor: colors.chip, marginTop: 8 }]}
-                    onPress={() => void open()}
+                    onPress={() => void openWalletConnect(open)}
                   >
                     <AppText style={[styles.sendText, { color: colors.text }]}>{t('connectWallet')}</AppText>
                   </TouchableOpacity>

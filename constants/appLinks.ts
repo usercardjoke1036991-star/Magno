@@ -6,6 +6,9 @@ export const PLAY_STORE_URL =
 
 export const INVITE_WEB_BASE = (process.env.EXPO_PUBLIC_INVITE_WEB_BASE || '').replace(/\/$/, '');
 
+/** Enlace de referido mientras no hay Play ni web pública. Abre la app si está instalada. */
+export const INVITE_APP_SCHEME = 'quatrivium';
+
 export const TELEGRAM_BOT = (process.env.EXPO_PUBLIC_TELEGRAM_BOT || '').replace(/^@/, '');
 
 const rawNotify = (process.env.EXPO_PUBLIC_NOTIFY_API || '').replace(/\/$/, '');

@@ -30,6 +30,8 @@ import { CreditAccessBanner } from '../components/CreditAccessBanner';
 import { BrandLogo } from '../components/BrandLogo';
 import { ReferralSection } from '../components/ReferralSection';
 import { SettingsButton } from '../components/SettingsButton';
+import { useEquippedFrame } from '../hooks/useEquippedFrame';
+import { isFounderWallet } from '../utils/founderWallet';
 import { AppSubsection } from '../components/AppSection';
 import { AppWindow } from '../components/AppWindow';
 import { HomeHub, type HomeRoom } from '../components/HomeHub';
@@ -157,6 +159,14 @@ function HomeScreenWithHooks() {
   );
   const debtReminder = useLoanPaymentReminders(userInfo);
   const creditReady = isCreditReady();
+  const founderHere =
+    Boolean(userInfo.referral.isFundador) ||
+    isFounderWallet(walletAddress, userInfo.founderAddress);
+  const { displayLevel, equippedLevel, wearFrame } = useEquippedFrame(
+    walletAddress || '',
+    founderHere,
+    userInfo.userProgress.nivelActual || 1
+  );
   const creditOnChain = creditLineLooksActive(
     creditReady,
     userInfo.isRegistered,
@@ -269,6 +279,7 @@ function HomeScreenWithHooks() {
       isLoading={txLoading}
       paused={userInfo.paused}
       inviteCode={pendingInviteCode}
+      canRegisterOnChain={Boolean(creditReady && !userInfo.paused)}
       onRegister={() => void handleRegistrarHumano()}
       onInviteLocked={() => { void clearPendingInvite(); }}
       onDeclareKyc={handleDeclararKyc}
@@ -308,7 +319,11 @@ function HomeScreenWithHooks() {
               {profile.displayName ? t('helloName', { name: profile.displayName }) : t('subtitle')}
             </AppText>
           </View>
-          <SettingsButton />
+          <SettingsButton
+            isFounder={founderHere}
+            founderAddress={userInfo.founderAddress}
+            naturalLevel={userInfo.userProgress.nivelActual || 1}
+          />
         </View>
 
         {walletReady && (walletFailed || !walletAddress) ? (
@@ -507,6 +522,7 @@ function HomeScreenWithHooks() {
               userInfo={userInfo}
               reminder={debtReminder}
               showDebt={false}
+              frameLevel={displayLevel}
               onOpenBonuses={() => setRoom('bonuses')}
               onOpenRanks={() => setRoom('ranks')}
               lpUsd={Number.parseFloat(balances.lpBalance) || 0}
@@ -644,7 +660,14 @@ function HomeScreenWithHooks() {
         lead={t('rankGalleryLead')}
         onClose={() => setRoom(null)}
       >
-        <RankLadder userLevel={userInfo.userProgress.nivelActual} />
+        <RankLadder
+          userLevel={userInfo.userProgress.nivelActual}
+          isFounder={founderHere}
+          equippedLevel={equippedLevel}
+          onWearFrame={(level) => {
+            void wearFrame(level);
+          }}
+        />
       </AppWindow>
 
       <AppWindow
@@ -926,6 +949,7 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    overflow: 'visible',
     marginBottom: 20,
     gap: 10,
   },

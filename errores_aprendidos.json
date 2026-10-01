@@ -57,7 +57,7 @@
       "ejemplo_malo": "# Busca en TODOS los subdirectorios, incluyendo subproyectos con su propio .git:\nmql_files = list(d.glob('**/*.mq5'))",
       "ejemplo_correcto": "# Buscar solo en raíz y src/ para no contaminar subproyectos independientes:\nmql_files = (list(d.glob('*.mq5')) + list(d.glob('*.mq4')) +\n             list(d.glob('src/*.mq5')) + list(d.glob('src/*.mq4')))",
       "fecha_aprendido": "2026-09-10",
-      "veces_detectado": 199,
+      "veces_detectado": 200,
       "severidad": "advertencia",
       "notas": "Al usar ** glob en el workspace raíz, se detectan archivos de subproyectos que tienen su propio tipo y contexto. Usar _es_subproyecto() para filtrar."
     },
@@ -88,7 +88,7 @@
       "ejemplo_malo": "def funcion():\n    \"\"\"Verifica \\src y \\config del proyecto.\"\"\"  # \\s y \\c son escapes inválidos\n    pass",
       "ejemplo_correcto": "def funcion():\n    \"\"\"Verifica src/ y config/ del proyecto.\"\"\"  # Sin backslash\n    # O usar raw string: r\"Verifica \\src y \\config\"\n    pass",
       "fecha_aprendido": "2026-09-10",
-      "veces_detectado": 199,
+      "veces_detectado": 200,
       "severidad": "advertencia",
       "notas": "En Python 3.12+ estas SyntaxWarnings se convertirán en SyntaxErrors. Usar r-strings para regex, o eliminar backslashes en docstrings."
     },
@@ -103,7 +103,7 @@
       "ejemplo_malo": "# Sin conftest.py ni testpaths en pytest.ini:\n# pytest descubre tests en TODA la carpeta, incluyendo subproyectos\npytest  # ← Ejecuta tests de MiBot/, MiWeb/, etc.",
       "ejemplo_correcto": "# En pytest.ini o pyproject.toml:\n[pytest]\ntestpaths = tests  # Solo busca en tests/ del proyecto raíz\n\n# O ejecutar pytest apuntando directamente:\npytest tests/  # Solo tests del workspace raíz",
       "fecha_aprendido": "2026-09-10",
-      "veces_detectado": 103,
+      "veces_detectado": 104,
       "severidad": "advertencia",
       "notas": "Cuando el workspace raíz tiene subproyectos con sus propios tests, pytest los descubre todos. Configurar testpaths o pasar la ruta explícita evita la contaminación."
     },

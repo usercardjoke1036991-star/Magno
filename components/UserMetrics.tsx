@@ -28,6 +28,7 @@ interface UserMetricsProps {
   onOpenRanks?: () => void;
   lpUsd?: number;
   isPaying?: boolean;
+  frameLevel?: number;
 }
 
 export const UserMetrics: React.FC<UserMetricsProps> = ({
@@ -43,11 +44,12 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   onOpenRanks,
   lpUsd = 0,
   isPaying = false,
+  frameLevel,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { profile, walletAddress } = useUserProfile();
-  const rank = getRankForLevel(userInfo.userProgress.nivelActual);
+  const rank = getRankForLevel(frameLevel || userInfo.userProgress.nivelActual);
   const rankLabel = formatRankLabel(rank, t(rank.nameKey));
   const remainingInstallments = userInfo.activeLoan
     ? Math.max(0, userInfo.activeLoan.cuotasTotales - userInfo.activeLoan.cuotasPagadas)
@@ -75,6 +77,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
               wallet={walletAddress}
               size={52}
               level={rank.level}
+              frameLevel={rank.level}
               rankName={t(rank.nameKey)}
               showRankLabel
             />
@@ -284,6 +287,7 @@ const styles = StyleSheet.create({
   rankBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    overflow: 'visible',
     borderWidth: 1,
     borderRadius: 12,
     padding: 12,

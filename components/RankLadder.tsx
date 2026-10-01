@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import {
   clampLoanLevel,
   FAMILY_BANDS,
@@ -18,9 +18,17 @@ import { AppText } from './AppText';
 
 interface RankLadderProps {
   userLevel: number;
+  isFounder?: boolean;
+  equippedLevel?: number;
+  onWearFrame?: (level: number) => void;
 }
 
-export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
+export const RankLadder: React.FC<RankLadderProps> = ({
+  userLevel,
+  isFounder = false,
+  equippedLevel = 0,
+  onWearFrame,
+}) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const current = getRankForLevel(clampLoanLevel(userLevel || 1));
@@ -29,13 +37,16 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
 
   return (
     <View style={styles.wrap}>
+      {isFounder ? (
+        <AppText style={[styles.founderHint, { color: colors.textMuted }]}>{t('founderFramesHint')}</AppText>
+      ) : null}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
         {FAMILY_BANDS.map((band) => {
           const sample = getRankForLevel(band.from);
           const active = band.family === family;
           const reached = band.from <= current.level;
           return (
-            <TouchableOpacity
+            <Pressable
               key={band.family}
               onPress={() => setFamily(band.family)}
               style={[
@@ -52,18 +63,25 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
               >
                 {t(sample.nameKey)}
               </AppText>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </ScrollView>
       <View style={styles.stage}>
         {row.map((rank) => {
-          const reached = rank.level <= current.level;
-          const mine = rank.family === current.family && rank.division === current.division;
+          const reached = isFounder || rank.level <= current.level;
+          const worn = isFounder && equippedLevel > 0
+            ? getRankForLevel(equippedLevel)
+            : current;
+          const mine = rank.family === worn.family && rank.division === worn.division;
           const caption = formatRankLabel(rank, t(rank.nameKey));
           return (
-            <View
+            <Pressable
               key={`${rank.family}-${rank.division}`}
+              onPress={isFounder && onWearFrame ? () => onWearFrame(rank.level) : undefined}
+              disabled={!isFounder || !onWearFrame}
+              accessibilityRole={isFounder && onWearFrame ? 'button' : undefined}
+              accessibilityLabel={isFounder ? t(mine ? 'wearingFrame' : 'wearFrame') : caption}
               style={[
                 styles.card,
                 { borderColor: mine ? rank.metal : colors.border, backgroundColor: colors.surface },
@@ -74,7 +92,12 @@ export const RankLadder: React.FC<RankLadderProps> = ({ userLevel }) => {
                 <AnonymousFace size={42} square />
               </RankFrame>
               <AppText style={[styles.roman, { color: rank.text }]}>{romanDivision(rank.division)}</AppText>
-            </View>
+              {isFounder ? (
+                <AppText style={[styles.wear, { color: mine ? rank.text : colors.textMuted }]}>
+                  {mine ? t('wearingFrame') : t('wearFrame')}
+                </AppText>
+              ) : null}
+            </Pressable>
           );
         })}
       </View>
@@ -129,5 +152,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 12,
     fontWeight: '800',
+  },
+  founderHint: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  wear: {
+    marginTop: 4,
+    fontSize: 10,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });

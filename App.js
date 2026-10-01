@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Linking as RNLinking, View } from 'react-native';
+import { ActivityIndicator, Linking as RNLinking, LogBox, View } from 'react-native';
 import { Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -16,6 +16,8 @@ import { AppModeProvider } from './wallet/AppModeContext';
 import { AppWalletProvider } from './wallet/AppWalletContext';
 import * as Linking from 'expo-linking';
 import { rememberAppUrl } from './utils/pendingDeepLink';
+
+LogBox.ignoreLogs(['User rejected methods', 'Reject Session', 'Proposal expired']);
 
 function DeferredWeb3({ children }) {
   const [Box, setBox] = useState(null);

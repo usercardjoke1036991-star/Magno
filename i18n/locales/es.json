@@ -172,7 +172,7 @@
   "referralEarnGrand": "Total generado",
   "referralEarnFromOne": "Comisiones {commission} · Bono {bonus}",
   "notificationTitle": "Avisos",
-  "notificationLead": "Avisos de pago automáticos.",
+  "notificationLead": "Los avisos de pago, comisiones y altas van solo por Telegram. El correo y el número de la cuenta no cambian.",
   "notificationPhone": "Número de teléfono",
   "notificationWhatsApp": "WhatsApp",
   "notificationTelegram": "Telegram",
@@ -1153,6 +1153,8 @@
   "referralEarnColGen": "Generación",
   "referralEarnColPct": "Del interés",
   "referralEarnExamples": "Si un directo cancela estos niveles, usted cobra:",
+  "referralEarnAllLevels": "Comisiones por nivel (1–{to})",
+  "referralEarnAllLevelsLead": "Comisión de generación 1 al cancelar cada nivel de préstamo, del 1 al 1000.",
   "guideHowYouEarn": "Cómo se gana",
   "guidePartStart": "1. Su cuenta",
   "guidePartEarn": "2. Cómo gana",
@@ -1168,5 +1170,8 @@
   "guideDonateEarn": "Suma fama de caja: 100 de fama por cada 1 USDT. Se cambia en Canje, pestaña de donar o aportar.",
   "guideRanksEarn": "Si hay premio del mes, se estima con el 1,5% de la caja libre. Quien está en mora no lo recibe. La parte no asignada permanece en el fondo.",
   "guideHistoryEarn": "No genera ingreso. Sirve para revisar lo que ya ocurrió en su cuenta.",
-  "guidePoolEarn": "Aportar suma fama de caja (100 por USDT), que se cambia en Canje. El capital queda en el fondo."
+  "guidePoolEarn": "Aportar suma fama de caja (100 por USDT), que se cambia en Canje. El capital queda en el fondo.",
+  "wearFrame": "Poner este marco",
+  "wearingFrame": "En uso",
+  "founderFramesHint": "Puede poner cualquier marco como accesorio."
 }

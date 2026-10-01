@@ -1,6 +1,6 @@
 import { getAddress, isAddress } from 'ethers';
 import * as Linking from 'expo-linking';
-import { INVITE_WEB_BASE, PLAY_STORE_URL } from '../constants/appLinks';
+import { INVITE_APP_SCHEME } from '../constants/appLinks';
 import { stripUnsafeText } from './sanitize';
 import { storeSlot } from './storeSlot';
 
@@ -178,12 +178,5 @@ export function parseInviteInput(raw?: string): string | null | '' {
 export function buildInviteLink(code: string, displayName = ''): string {
   const compact = normalizeCode(code);
   const nameQuery = displayName ? `&n=${encodeURIComponent(displayName.slice(0, 24))}` : '';
-  if (INVITE_WEB_BASE) {
-    return `${INVITE_WEB_BASE}/invite?c=${compact}${nameQuery}`;
-  }
-  const referrer = encodeURIComponent(
-    `utm_source=invite&c=${compact}${displayName ? `&n=${encodeURIComponent(displayName.slice(0, 24))}` : ''}`
-  );
-  const separator = PLAY_STORE_URL.includes('?') ? '&' : '?';
-  return `${PLAY_STORE_URL}${separator}referrer=${referrer}`;
+  return `${INVITE_APP_SCHEME}://invite?c=${compact}${nameQuery}`;
 }

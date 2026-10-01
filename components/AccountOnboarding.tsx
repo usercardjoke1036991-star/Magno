@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
@@ -27,6 +27,7 @@ interface AccountOnboardingProps {
   isLoading: boolean;
   paused?: boolean;
   inviteCode?: string;
+  canRegisterOnChain?: boolean;
   onRegister: (padre?: string) => void;
   onInviteLocked?: () => void;
   onDeclareKyc: () => Promise<boolean>;
@@ -39,7 +40,12 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   walletReady,
   walletFailed,
   onRetryWallet,
+  isRegistered,
+  isLoading,
+  paused,
   inviteCode = '',
+  canRegisterOnChain = false,
+  onRegister,
   onInviteLocked,
   children,
 }) => {
@@ -54,6 +60,7 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   const [linkedReady, setLinkedReady] = useState(false);
   const [inviteDraft, setInviteDraft] = useState(inviteCode);
   const [inviteError, setInviteError] = useState('');
+  const triedRegister = useRef(false);
 
   useEffect(() => {
     let done = false;
@@ -131,6 +138,15 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
       done = true;
     };
   }, [walletAddress]);
+
+  const onboardingDone = Boolean(username && hasFace && hasCompletedWalletLink(linkedWallet));
+
+  useEffect(() => {
+    if (triedRegister.current) return;
+    if (!onboardingDone || isRegistered || !canRegisterOnChain || paused || isLoading) return;
+    triedRegister.current = true;
+    onRegister();
+  }, [onboardingDone, isRegistered, canRegisterOnChain, paused, isLoading, onRegister]);
 
   if (walletFailed || (walletReady && !walletAddress)) {
     return (

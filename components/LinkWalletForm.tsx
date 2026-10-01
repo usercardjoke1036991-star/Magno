@@ -5,6 +5,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatAddress } from '../utils/formatters';
 import * as linkedWallet from '../services/linkedWallet';
+import { openWalletConnect } from '../utils/openWalletConnect';
 import { AppText } from './AppText';
 
 interface LinkWalletFormProps {
@@ -55,7 +56,10 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
   return (
     <View>
       <TouchableOpacity
-        onPress={() => open()}
+        onPress={() => {
+          setError('');
+          void openWalletConnect(open);
+        }}
         style={[styles.btn, { backgroundColor: colors.chip }]}
         accessibilityRole="button"
         accessibilityLabel={t('connectWallet')}
