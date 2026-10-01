@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-16] Render es el host 24/7 del notify-worker: Dockerfile.notify, disco /data, PORT inyectado, clave de cifrado generada, sin llave de owner.
 
 ## Cambios realizados
+- [2026-10-01] 5+6: vincular pide EIP-712 BindWallet antes de guardar address; Pool y Como funciona dicen que lo aportado no se retira
 - [2026-10-01] Implementadas remediaciones de auditoria: contratos (nonce, pausa, KYC, fundador, destroy, boost) y app (Keystore, fail-closed, PII, PIN 20000, health).
 - [2026-09-30] SonarCloud: 5 S5845 de bigint en tests MLM/canje pasados a expectAmt. Snyk Code/SCA high 0. MobSF CLI solo abre apk/aab/ipa.
 - [2026-09-30] Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] Auditoria para iniciar Render: worker testnet sin correo; attester explicito; EMAIL_FROM no se fuerza.
 - [2026-09-17] Demo libre de identidad y de 1 USDT; Real sigue pidiendo primero el acceso y luego correo, numero y KYC.
 - [2026-09-17] Auditoria de conexion: health del worker reporta textbelt/resend/attester; Render pide TEXTBELT, Resend y attester; la app de preview/produccion apunta a notify.quatriviumcredit.app
-- [2026-09-17] Worker, Render y production:check usan Textbelt como SMS principal del OTP
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-01] Cambio: Implementadas remediaciones de auditoria: contratos (nonce, pausa, KYC, fundador, destroy, boost) y app (Keystore, fail-closed, PII, PIN 20000, health).
+[2026-10-01] Cambio: 5+6: vincular pide EIP-712 BindWallet antes de guardar address; Pool y Como funciona dicen que lo aportado no se retira

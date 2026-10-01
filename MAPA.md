@@ -172,7 +172,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `components/RachaSection.tsx` — módulo JS/TS
   - Funciones/clases: RachaSection
 - `components/RankFrame.tsx` — módulo JS/TS
-  - Funciones/clases: RankFrame
+  - Funciones/clases: rankFramePadFor, rankFrameOuterSize, RankFrame
 - `components/RankGem.tsx` — módulo JS/TS
   - Funciones/clases: RankGem
 - `components/RankLadder.tsx` — módulo JS/TS
@@ -212,13 +212,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `components/WalletSection.tsx` — módulo JS/TS
   - Funciones/clases: WalletSection
 - `constants/appLinks.ts` — módulo JS/TS
-  - Funciones/clases: PLAY_STORE_URL, INVITE_WEB_BASE, TELEGRAM_BOT, NOTIFY_API, notifyApiBases
+  - Funciones/clases: PLAY_STORE_URL, INVITE_WEB_BASE, INVITE_APP_SCHEME, TELEGRAM_BOT, NOTIFY_API, notifyApiBases
 - `constants/brand.ts` — módulo JS/TS
   - Funciones/clases: APP_DISPLAY_NAME
 - `constants/bsc.ts` — módulo JS/TS
   - Funciones/clases: ZERO_ADDRESS, BSC_MAINNET, BSC_TESTNET, isZeroAddress, isTestnetOnlyToken
 - `constants/commissions.ts` — módulo JS/TS
-  - Funciones/clases: DIRECT_COMMISSION_BPS, ACTIVATION_BONUS_USD, MAX_COMMISSION_LINE, POOL_FLOOR_BP, interestFromLoan, generationCommissionBps, directCommissionFromLoan, formatCommissionUSD, commissionForGeneration, COMMISSION_BANDS, commissionBandsForLoan
+  - Funciones/clases: DIRECT_COMMISSION_BPS, ACTIVATION_BONUS_USD, MAX_COMMISSION_LINE, POOL_FLOOR_BP, interestFromLoan, generationCommissionBps, directCommissionFromLoan, formatCommissionUSD, commissionForGeneration, COMMISSION_BANDS, commissionLine, commissionBandsForLoan, commissionRowsForLoan, directCommissionRowsForTiers
 - `constants/compatibleWallets.ts` — módulo JS/TS
   - Funciones/clases: COMPATIBLE_WALLETS
 - `constants/contractConfig.ts` — módulo JS/TS
@@ -251,6 +251,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: SUPPORT_PATRON_USD, SUPPORT_CIRCLE_USD, FAME_PER_USDT_DONATE, FAME_PER_USDT_POOL, fameFromUsd, fameFromDonateUsd, fameFromPoolUsd, supportKind, supportNameKey
 - `constants/tokens.ts` — módulo JS/TS
   - Funciones/clases: getConfigurableStables, getSupportedTokens, getTokenMeta, isOfficialWorldToken
+- `hooks/useEquippedFrame.ts` — módulo JS/TS
+  - Funciones/clases: useEquippedFrame
 - `hooks/useFameLeaderboard.ts` — módulo JS/TS
   - Funciones/clases: useFameLeaderboard
 - `hooks/useHomeHandlers.ts` — módulo JS/TS
@@ -317,6 +319,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/simulateTx.js` — módulo JS/TS
 - `scripts/spawnEnv.mjs` — módulo JS/TS
   - Funciones/clases: spawnPath, spawnEnv, binDocker, binWsl, stripTrailSlash, binNpx
+- `scripts/telegramBotName.cjs` — módulo JS/TS
 - `scripts/textbeltSms.cjs` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
 - `scripts/_audit-bytecode.cjs` — módulo JS/TS
@@ -355,6 +358,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: lookupBoundWalletOnThisDevice, lookupDeviceHashOf, assertRestoreFitsThisDevice
 - `services/emailOtp.ts` — módulo JS/TS
   - Funciones/clases: requestEmailOtp, confirmEmailOtp, verifyEmailOtp
+- `services/equippedFrame.ts` — módulo JS/TS
+  - Funciones/clases: subscribeEquippedFrame, equippedFrameLevel, loadEquippedFrame, saveEquippedFrame
 - `services/exclusiveSession.ts` — módulo JS/TS
   - Funciones/clases: thisDeviceOwnsSession, claimExclusiveSession
 - `services/fameLeaderboard.ts` — módulo JS/TS
@@ -368,7 +373,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/kycProvider.ts` — módulo JS/TS
   - Funciones/clases: notifyKycProviderReady, openKycProvider
 - `services/linkedWallet.ts` — módulo JS/TS
-  - Funciones/clases: WALLET_LINK_SKIPPED, linkedWalletStorageKey, hasLinkedExternalWallet, hasCompletedWalletLink, loadLinkedExternalWallet, saveLinkedExternalWallet, skipLinkedExternalWallet, loadRequiredExternalWallet
+  - Funciones/clases: WALLET_LINK_SKIPPED, linkedWalletStorageKey, hasLinkedExternalWallet, hasCompletedWalletLink, loadLinkedExternalWallet, saveLinkedExternalWallet, proveAndSaveLinkedWallet, skipLinkedExternalWallet, loadRequiredExternalWallet
 - `services/movementHistory.ts` — módulo JS/TS
   - Funciones/clases: recordMovement, loadMovementHistory, loadMoraHistory
 - `services/notificationProfile.ts` — módulo JS/TS
@@ -393,12 +398,14 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: SecureStorageService
 - `services/sponsorLock.ts` — módulo JS/TS
   - Funciones/clases: loadLockedSponsor, lockSponsorOnce
+- `services/telegramBot.ts` — módulo JS/TS
+  - Funciones/clases: envTelegramBot, resolveTelegramBot
 - `services/userProfile.ts` — módulo JS/TS
   - Funciones/clases: PUBLIC_PROFILE_BATCH, AVATAR_PRESETS, EMPTY_PROFILE, PUBLIC_PHOTO_MAX, clampAvatarId, hasLockedPublicIdentity, isPublicIdentityLocked, sanitizePublicPhoto, canSubmitPublicIdentity, publicPhotoFromAsset, normalizeDisplayName, isValidDisplayName, persistPickedPhoto, initialsFromName, avatarColorForWallet, labelForProfile, loadOwnProfile, saveOwnProfile, clearOwnProfile, loadProfileDirectory, rememberProfiles, rememberProfile, publishOwnProfile, fetchPublicProfiles
 - `services/verificationFeeReceipt.ts` — módulo JS/TS
   - Funciones/clases: hasVerificationFeeReceipt, markVerificationFeeReceipt
 - `services/walletAuth.ts` — módulo JS/TS
-  - Funciones/clases: AUTH_TYPES, authDomain, signWalletAuth, signedAuthBody, recoverWalletAuth, isFreshTimestamp
+  - Funciones/clases: BIND_WALLET_PURPOSE, BIND_TYPES, AUTH_TYPES, authDomain, signWalletAuth, signedAuthBody, recoverWalletAuth, isFreshTimestamp, signBindExternalWallet, recoverBindExternalWallet
 - `services/walletOpenEscape.ts` — módulo JS/TS
   - Funciones/clases: subscribeWalletOpenEscape, requestWalletOpenEscape
 - `services/walletSession.ts` — módulo JS/TS
@@ -412,12 +419,15 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/accounting.test.js` — módulo JS/TS
 - `test/accountWorld.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
+- `test/commission-levels.test.js` — módulo JS/TS
 - `test/contract-abi.test.js` — módulo JS/TS
 - `test/cuotas.test.js` — módulo JS/TS
 - `test/cyber-hardening.test.js` — módulo JS/TS
   - Funciones/clases: loadWrapFromBiometric, clearBiometricWrap, confirmEmailOtp, verifyEmailOtp, loadReferralChildren, ensureAppWallet, wipeAppWallet
 - `test/demo-identity.test.js` — módulo JS/TS
 - `test/destroy.test.js` — módulo JS/TS
+- `test/equipped-frame.test.js` — módulo JS/TS
+  - Funciones/clases: rankFrameOuterSize
 - `test/fama-canje.test.js` — módulo JS/TS
 - `test/fame-rankings.test.js` — módulo JS/TS
 - `test/hardening-security.test.js` — módulo JS/TS
@@ -441,7 +451,11 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/security-hardening.test.js` — módulo JS/TS
 - `test/security.test.js` — módulo JS/TS
 - `test/sponsor-lock.test.js` — módulo JS/TS
+- `test/telegram-alerts-only.test.js` — módulo JS/TS
+- `test/telegram-bot-name.test.js` — módulo JS/TS
 - `test/textbelt-notify.test.js` — módulo JS/TS
+- `test/wallet-link-reject.test.js` — módulo JS/TS
+- `test/wallet-link-sign.test.js` — módulo JS/TS
 - `theme/androidText.ts` — módulo JS/TS
   - Funciones/clases: remapAndroidTextStyle, setInterReady
 - `theme/palette.ts` — módulo JS/TS
@@ -480,6 +494,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: FAME_PAGE_SIZE, RANKING_UNLOCK_LEVEL, FAME_BOARD_KINDS, rankingVisible, normalizeFameMetric, attachCombinedScores, fameBoardMetric, sortFameBoard, podiumPlayers, podiumPlace, rankedFameRows, fameListAfterPodium
 - `utils/formatters.ts` — módulo JS/TS
   - Funciones/clases: formatCooldown, formatCountdownClock, formatAddress, formatUSD, formatDueDate, parsePositiveDecimal, calculateLoanWithInterest
+- `utils/founderWallet.ts` — módulo JS/TS
+  - Funciones/clases: isFounderWallet
 - `utils/graceClock.ts` — módulo JS/TS
   - Funciones/clases: GRACE_SECONDS, paymentDueAt, graceEndsAt, graceMoraPhase, graceRemainingSeconds, moraElapsedSeconds, graceMoraSeconds
 - `utils/historyWorld.ts` — módulo JS/TS
@@ -492,6 +508,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: LEGAL_VERSION, LEGAL_STORAGE_KEY, parseLegalRecord, isCurrentLegalAccepted, makeLegalRecord, nextBootLegalScreen, hasReadToEnd
 - `utils/moraHistory.ts` — módulo JS/TS
   - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement, isSupportMovement
+- `utils/openWalletConnect.ts` — módulo JS/TS
+  - Funciones/clases: openWalletConnect
 - `utils/passwordPolicy.ts` — módulo JS/TS
   - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, GENERATED_SECRET_CHARS, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, passwordRuleFlags, masterPasswordFromRandomBytes
 - `utils/pendingDeepLink.ts` — módulo JS/TS
@@ -523,6 +541,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: SPONSOR_LOCK_PREFIX, sponsorLockKey, resolveSponsorInput, parseLockedSponsor, buildLockedSponsor, keepFirstLock
 - `utils/storeSlot.ts` — módulo JS/TS
   - Funciones/clases: storeSlot
+- `utils/telegramBotName.cjs` — módulo JS/TS
 - `utils/totp.ts` — módulo JS/TS
   - Funciones/clases: bytesToBase32, base32ToBytes, totpAt, verifyTotp, otpauthUrl
 - `utils/txErrors.ts` — módulo JS/TS

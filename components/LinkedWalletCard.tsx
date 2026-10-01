@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useAccount, useAppKit } from '@reown/appkit-react-native';
+import { useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
+import type { Eip1193Provider } from 'ethers';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatAddress } from '../utils/formatters';
 import {
   hasLinkedExternalWallet,
   loadRequiredExternalWallet,
-  saveLinkedExternalWallet,
+  proveAndSaveLinkedWallet,
 } from '../services/linkedWallet';
 import { openWalletConnect } from '../utils/openWalletConnect';
 import { AppText } from './AppText';
@@ -22,6 +23,7 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
   const { colors } = useTheme();
   const { open } = useAppKit();
   const { address, isConnected } = useAccount();
+  const { provider } = useProvider();
   const [linked, setLinked] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -47,10 +49,10 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
     }
     setBusy(true);
     try {
-      const saved = await saveLinkedExternalWallet(internalWallet, address || '');
+      const saved = await proveAndSaveLinkedWallet(provider as Eip1193Provider, internalWallet, address || '');
       setLinked(saved);
     } catch {
-      await openWalletConnect(open);
+      // Firma rechazada o provider ausente: no guardar. El usuario puede reintentar.
     } finally {
       setBusy(false);
     }

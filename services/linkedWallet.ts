@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAddress, isAddress } from 'ethers';
+import { getAddress, isAddress, type Eip1193Provider } from 'ethers';
 import { storeSlot } from '../utils/storeSlot';
+import { signBindExternalWallet } from './walletAuth';
+import { getEthersSignerFromProvider } from '../web3Config';
 
 const PREFIX = `${storeSlot(['quatrivium', 'linkedExternal', 'v1'])}:`;
 export const WALLET_LINK_SKIPPED = 'skipped';
@@ -39,6 +41,22 @@ export async function saveLinkedExternalWallet(
   const address = getAddress(externalWallet);
   await AsyncStorage.setItem(linkedWalletStorageKey(internalWallet), address);
   return address;
+}
+
+/** Pide EIP-712 en la billetera externa y solo entonces guarda la address. */
+export async function proveAndSaveLinkedWallet(
+  eip1193: Eip1193Provider | null | undefined,
+  internalWallet: string,
+  externalWallet: string
+): Promise<string> {
+  if (!eip1193) throw new Error('signer');
+  const signer = await getEthersSignerFromProvider(eip1193);
+  if (!signer) throw new Error('signer');
+  const from = getAddress(await signer.getAddress());
+  const external = getAddress(externalWallet);
+  if (from !== external) throw new Error('wallet');
+  await signBindExternalWallet(signer, internalWallet, external);
+  return saveLinkedExternalWallet(internalWallet, external);
 }
 
 export async function skipLinkedExternalWallet(internalWallet: string): Promise<string> {

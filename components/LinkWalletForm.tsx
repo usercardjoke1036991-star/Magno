@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useAccount, useAppKit } from '@reown/appkit-react-native';
+import { useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
+import type { Eip1193Provider } from 'ethers';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatAddress } from '../utils/formatters';
@@ -19,6 +20,7 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
   const { colors } = useTheme();
   const { open } = useAppKit();
   const { address, isConnected } = useAccount();
+  const { provider } = useProvider();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const connected = Boolean(isConnected && linkedWallet.hasLinkedExternalWallet(address || ''));
@@ -31,10 +33,14 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
     setBusy(true);
     setError('');
     try {
-      const saved = await linkedWallet.saveLinkedExternalWallet(internalWallet, address);
+      const saved = await linkedWallet.proveAndSaveLinkedWallet(
+        provider as Eip1193Provider,
+        internalWallet,
+        address
+      );
       await onLinked(saved);
     } catch {
-      setError(t('linkWalletNeed'));
+      setError(t('linkWalletSignNeed'));
     } finally {
       setBusy(false);
     }

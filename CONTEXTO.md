@@ -263,6 +263,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-01 | Vincular billetera: proveAndSaveLinkedWallet firma EIP-712 (purpose vincular-billetera) y solo entonces guarda. Texto de pool: no se puede retirar (poolPublicLead, poolLockedNote, guidePoolBody). | — |
 | 2026-10-01 | Cierra hallazgos de la auditoria: nonce de identidad, KYC con telefono, pausa en donar, mora/liquidacion del fundador, destroy sin confiscacion, boostId+rate limit, FundsConfirm Keystore fail-closed, /health minimo. | — |
 | 2026-09-30 | Guia profesional en Ajustes; bono nivel 200 = 30000 USDT; sala Red reorganizada con enlace de invitacion y tabla de generaciones. | — |
 | 2026-09-30 | Esquema de puerta 2+1: acceso 2 USDT a fundadora sin fama; correo y telefono 0.50+0.50 al pool sin fama; captacion 1 USDT sin fama de caja; fama de red gen 2+ y recorte fundador; ya no se paga el 0.50 de puntos de red. Credit EIP-170 24059 B. | — |

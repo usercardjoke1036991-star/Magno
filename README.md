@@ -3,29 +3,50 @@
 
 <!-- AUTO-README:START -->
 
-## Magno
+## Quatrivium Finance
 
-Proyecto Magno (tipo node).
+**Quatrivium Finance** es una app móvil de microcrédito on-chain sin colateral sobre BNB Smart Chain (BSC). El usuario activa una wallet interna, pide un préstamo en USDT del pool de liquidez, lo paga antes del vencimiento y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda bloqueado hasta regularizar. **No puede cerrar la cuenta mientras tenga deuda o esté en mora.**
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
-- **Tests detectados:** 35 archivo(s)
+- **Estado:** Testnet operativo — mainnet pendiente de deploy (acción manual del fundador)
+- **Tests detectados:** 37 archivo(s)
+
+### Qué funciona
+- Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
+- Sala **Reserva**: hermano `QuatriviumReserva.sol` (Hardhat 12/12). Visible desde el inicio, usable en nivel 10. Bote solo admin (no Donar ni pool). Extra de comisiones con corte del fundador. Demo práctica local; Real exige identidad. Sin contrato mainnet.
+- Hermano **FamaCaja**: `canjearFama` usa el mismo criterio que Credit `_estaVencido` (cuota o vencimiento final) leyendo `planPago`; no se añade wrapper al núcleo.
+- 17 suites Hardhat (210 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings, lock de referido y canje de fama (incluye cuota vencida antes del plazo final)…
+- Foundry 1.8.3 en WSL (`npm run test:forge`): despliega FamaCaja + Credit (7 args). EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24536 B (margen 40). Live Demo sigue 24457 B hasta el redespliegue.
+- Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
+- App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
+- i18n: 17 idiomas, 1040 claves
+- Rankings: 7 tableros (incluye racha), divisiones de 100, premio mensual estimado, nombres y fotos públicas, visibles desde el nivel 15
+- Referidos Unilevel en contrato y UI
+- Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
+- KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
+
+### En progreso
+- Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)
+- Configurar `EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET` en `eas.json` production **después** del deploy
+- Credenciales Textbelt (`TEXTBELT_API_KEY`) en `.env.worker` y en Render; Resend para correo
+- Publicación en Google Play Store (`eas build --platform android --profile production`)
 
 ### Módulos
-- ✅ lib/forge-std/scripts/vm.py — Vendor Foundry (no es módulo de producto)
-- ✅ index.js — Punto de entrada principal
-- ✅ app.js — Punto de entrada principal
-- ✅ package.json — Configuración de dependencias y scripts
-- 💡 main.py — Punto de entrada principal
-- 💡 tests/ — Suite de tests con pytest
-- 💡 requirements.txt — Gestión de dependencias
-- 💡 .env / configuración — Variables de entorno
-- 💡 CI/CD — GitHub Actions (comprobacion.yml)
-- ✅ salud_proyecto.py — Marcado como completado manualmente
-- ✅ escalera de 1000 niveles — Marcado como completado manualmente
-- ✅ comisiones de referidos — Marcado como completado manualmente
-- ✅ historial de referidos — Marcado como completado manualmente
-- ✅ auditoria profunda del proyecto y correccion de todo lo que falle para dejar Demo 100 por ciento productivo — Marcado como completado manualmente
-- ✅ marcos de rango mas cargados con piedras preciosas por division I II III — Marcado como completado manualmente
+- Pantalla home — `app/index.tsx`
+- Layout Expo — `app/_layout.tsx`
+- Tooling RN — `babel.config.js` · `metro.config.js`
+- Contratos JS — `hardhat.config.cjs`
+- ZK stub — `zkService.ts`
+- Handlers — `hooks/useHomeHandlers.ts`
+- Estado on-chain — `hooks/useWeb3Balances.ts`
+- Transacciones — `hooks/useWeb3Transactions.ts`
+- Servicio contrato — `services/quatriviumCreditService.ts`
+- Identidad demo — `services/demoIdentity.ts` + worker `/demo-identity`
+- Wallet interna — `services/appWallet.ts`
+- KYC local — `services/kycDeclaration.ts`
+- Lock — `services/appLock.ts` + `authPrefs.ts` + `authenticator.ts`
+- Historial — `services/movementHistory.ts` + `MovementHistory.tsx`
+- Storage seguro — `services/secureStorageService.ts`
 
 ### Funciones reales (código)
 - `actualizar_contexto.py`

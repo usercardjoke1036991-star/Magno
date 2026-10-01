@@ -1,0 +1,52 @@
+const { expect } = require('chai');
+const fs = require('fs');
+const path = require('path');
+const { Wallet, verifyTypedData } = require('ethers');
+
+const BIND_TYPES = {
+  BindWallet: [
+    { name: 'appWallet', type: 'address' },
+    { name: 'externalWallet', type: 'address' },
+    { name: 'purpose', type: 'string' },
+    { name: 'timestamp', type: 'uint256' },
+  ],
+};
+
+describe('wallet link requires a bind signature', function () {
+  it('recovers the external wallet from bind typed data', async function () {
+    const signer = Wallet.createRandom();
+    const app = Wallet.createRandom().address;
+    const timestamp = Date.now();
+    const domain = {
+      name: 'Quatrivium Credit',
+      version: '2',
+      chainId: 97,
+      verifyingContract: '0x0000000000000000000000000000000000000001',
+    };
+    const value = {
+      appWallet: app,
+      externalWallet: signer.address,
+      purpose: 'vincular-billetera',
+      timestamp,
+    };
+    const signature = await signer.signTypedData(domain, BIND_TYPES, value);
+    const recovered = verifyTypedData(domain, BIND_TYPES, value, signature);
+    expect(recovered).to.equal(signer.address);
+  });
+
+  it('does not save a link until proveAndSaveLinkedWallet runs', function () {
+    const form = fs.readFileSync(path.join(__dirname, '..', 'components', 'LinkWalletForm.tsx'), 'utf8');
+    const card = fs.readFileSync(path.join(__dirname, '..', 'components', 'LinkedWalletCard.tsx'), 'utf8');
+    const linked = fs.readFileSync(path.join(__dirname, '..', 'services', 'linkedWallet.ts'), 'utf8');
+    const auth = fs.readFileSync(path.join(__dirname, '..', 'services', 'walletAuth.ts'), 'utf8');
+    expect(form).to.include('proveAndSaveLinkedWallet');
+    expect(form).to.include('linkWalletSignNeed');
+    expect(form).to.not.match(/saveLinkedExternalWallet\(internalWallet, address\)/);
+    expect(card).to.include('proveAndSaveLinkedWallet');
+    expect(card).to.not.include('saveLinkedExternalWallet(');
+    expect(linked).to.include('signBindExternalWallet');
+    expect(auth).to.include("BIND_WALLET_PURPOSE = 'vincular-billetera'");
+    expect(auth).to.include('signBindExternalWallet');
+    expect(auth).to.include('purpose: BIND_WALLET_PURPOSE');
+  });
+});
