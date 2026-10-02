@@ -1483,8 +1483,7 @@ const bodyError = (res, error) => {
   else json(res, 413, { error: 'payload' });
 };
 
-// deepcode ignore HttpToHttps: Render and Caddy terminate TLS in front of this process
-const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
+const server = createServer(async (req, res) => { // NOSONAR javascript:S5332 — TLS en el edge (Render/Caddy) // deepcode ignore HttpToHttps: TLS at Render/Caddy private port
   try {
   requestOrigin = String(req.headers.origin || '');
   const path = requestPath(req);

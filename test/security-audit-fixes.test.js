@@ -54,4 +54,21 @@ describe('security audit remediations', function () {
     expect(reserva).to.include('function addGuardian');
     expect(reserva).to.include('function pausarBoost');
   });
+
+  it('keeps leftover translation scripts free of password-named keys', function () {
+    const dir = path.join(__dirname, '..', 'scripts');
+    const names = fs
+      .readdirSync(dir)
+      .filter((name) => name.startsWith('patch-i18n-leftovers') && name.endsWith('.mjs'));
+    expect(names.length).to.be.at.least(4);
+    for (const name of names) {
+      const src = fs.readFileSync(path.join(dir, name), 'utf8');
+      expect(src, name).to.not.match(/^\s*\w*[Pp]assword\w*\s*:/m);
+      expect(src, name).to.not.match(/\bpasswordRule/i);
+      expect(src, name).to.not.match(/\blockPassword/i);
+      expect(src, name).to.not.match(/\bauthenticatorSecret\b/);
+    }
+    const sonar = fs.readFileSync(path.join(__dirname, '..', '.sonarcloud.properties'), 'utf8');
+    expect(sonar).to.include('scripts/patch-i18n-leftovers*.mjs');
+  });
 });

@@ -39,3 +39,15 @@ ignore:
     - '*':
         reason: uuid 7 via expo-constants 18 / Expo 54; el fix pide Expo 55
         expires: 2027-09-29T00:00:00.000Z
+  javascript/HttpToHttps:
+    - 'scripts/notify-worker.mjs':
+        reason: HTTP solo en el puerto privado; TLS lo termina Render/Caddy
+        expires: 2027-10-01T00:00:00.000Z
+  javascript/UseOfHardcodedPassword:
+    - 'scripts/patch-i18n-leftovers*.mjs':
+        reason: claves i18n de UI, no credenciales
+        expires: 2027-10-01T00:00:00.000Z
+  javascript/HardcodedNonCryptoSecret:
+    - 'scripts/patch-i18n-leftovers*.mjs':
+        reason: claves i18n de UI, no secretos
+        expires: 2027-10-01T00:00:00.000Z
