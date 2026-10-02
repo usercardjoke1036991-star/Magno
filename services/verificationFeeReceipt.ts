@@ -10,7 +10,7 @@ function receiptKey(wallet: string, kind: VerificationFeeKind, target: string): 
   return `${PREFIX}${owner}.${kind}.${mark}`;
 }
 
-/** Recibo corto: si donar() cobró y el guardado/vínculo falló, no se cobra otra vez. */
+/** Recibo corto: si ya se cobró el 0,50 y el vínculo/guardado falló, no se cobra otra vez. El OTP sigue intentando vincular. */
 export async function hasVerificationFeeReceipt(
   wallet: string,
   kind: VerificationFeeKind,

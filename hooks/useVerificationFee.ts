@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
+import { useFundsConfirm } from '../components/FundsConfirmHost';
 import { isDemoAccount } from '../constants/rpcConfig';
 import { getSupportedTokens } from '../constants/tokens';
 import { useI18n } from '../i18n/LanguageContext';
@@ -19,6 +20,8 @@ export function useVerificationFee(kind: VerificationFeeKind) {
   const { address: adminAddress, isConnected: adminConnected } = useAccount();
   const { provider: adminProvider } = useProvider();
   const { open: openExternalWallet } = useAppKit();
+  const { confirmFunds } = useFundsConfirm();
+  const busyRef = useRef(false);
   const demo = isDemoAccount();
   const feeUsdt = verificationFeeUsdt(kind, demo);
 
@@ -27,30 +30,35 @@ export function useVerificationFee(kind: VerificationFeeKind) {
     const wallet = String(address || '').trim();
     const mark = String(target || '').trim();
     if (!wallet || !mark) return 'failed';
-    if (await hasVerificationFeeReceipt(wallet, kind, mark)) return 'paid';
-    const result = await chargePoolUsdt(
-      {
-        walletAddress: wallet,
-        token,
-        founderAddress: userInfo.founderAddress,
-        canDonate: userInfo.canDonate,
-        isTokenSupported: userInfo.isTokenSupported,
-        bnbBalance: balances.bnbBalance,
-        adminConnected,
-        adminProvider,
-        adminAddress,
-        openExternalWallet,
-        confirmFunds: async () => true,
-        t,
-        refetch,
-        silent: true,
-      },
-      feeUsdt
-    );
-    if (result === 'paid') {
-      await markVerificationFeeReceipt(wallet, kind, mark);
+    if (busyRef.current) return 'failed';
+    busyRef.current = true;
+    try {
+      if (await hasVerificationFeeReceipt(wallet, kind, mark)) return 'paid';
+      const result = await chargePoolUsdt(
+        {
+          walletAddress: wallet,
+          token,
+          founderAddress: userInfo.founderAddress,
+          canDonate: userInfo.canDonate,
+          isTokenSupported: userInfo.isTokenSupported,
+          bnbBalance: balances.bnbBalance,
+          adminConnected,
+          adminProvider,
+          adminAddress,
+          openExternalWallet,
+          confirmFunds,
+          t,
+          refetch,
+        },
+        feeUsdt
+      );
+      if (result === 'paid') {
+        await markVerificationFeeReceipt(wallet, kind, mark);
+      }
+      return result;
+    } finally {
+      busyRef.current = false;
     }
-    return result;
   };
 
   return { chargeVerificationFee };

@@ -3,6 +3,7 @@
  * Extraído de app/index.tsx para reducir complejidad del componente raíz.
  * Cada handler valida precondiciones y delega al hook useWeb3Transactions.
  */
+import { useRef } from 'react';
 import { Contract, formatUnits, parseEther, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
 import { Alert, Linking } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
@@ -141,6 +142,7 @@ export const useHomeHandlers = ({
   clearPendingInvite,
 }: HomeHandlersParams) => {
   const { t } = useI18n();
+  const accesoBusy = useRef(false);
 
   const {
     isLoading: txLoading,
@@ -748,6 +750,9 @@ export const useHomeHandlers = ({
 
   const handlePagarAcceso = async () => {
     if (isDemoAccount()) return;
+    if (accesoBusy.current) return;
+    accesoBusy.current = true;
+    try {
     if (!walletAddress) {
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return;
@@ -792,6 +797,9 @@ export const useHomeHandlers = ({
       }
     } catch {
       Alert.alert(t('amount'), t('invalidAmount'));
+    }
+    } finally {
+      accesoBusy.current = false;
     }
   };
 

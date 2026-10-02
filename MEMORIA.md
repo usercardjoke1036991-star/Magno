@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-29] Reserva no es producto de inversion ni banco. Rendimiento hasta 12% estimado desde un bote aparte; principal no se toca. Demo sin KYC; Real misma identidad que el credito.
 
 ## Cambios realizados
+- [2026-10-02] Auditoria: verificar correo/celular pide confirmacion de fondos y evita doble tap en alta. Sin MagnoPay ni pausa automatica.
 - [2026-10-02] Mejoras sin deploy: app Alta 3+1, APY Reserva, attester 2-de-2, panel de caja, tests de padrino/cuotas/sello.
 - [2026-10-02] Invariantes Foundry de NAV Credit y caja Reserva, mas centinela Python de solo lectura por Telegram.
 - [2026-10-02] Contratos: alta 4 USDT, hitos proporcionales, Reserva 12% movil y retiro bote. Sin deploy testnet.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-29] KYC Sumsub queda detras de variables de Render. Sin claves, la app sigue con la declaracion. HSM no es un interruptor universal.
 - [2026-09-29] Hardening defensivo: recovery sin wrap en el worker, autofund con firma EIP-712, approve de deuda restante, attester sin llave de owner en host publico, Reserva solo attester y timelock 72h
 - [2026-09-29] Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10
-- [2026-09-29] Extra de comisiones Reserva del bote; fundador cobra su tramo; Credit intacto
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-02] Decisión: Verificar es correo + celular: 0,50 + 0,50 = 1 USDT al pool. Ese 1 es el sello del primer credito, no un cobro aparte.
+[2026-10-02] Cambio: Auditoria: verificar correo/celular pide confirmacion de fondos y evita doble tap en alta. Sin MagnoPay ni pausa automatica.

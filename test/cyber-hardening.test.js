@@ -796,6 +796,7 @@ describe('demo credit gates', function () {
     expect(securityUi).to.include("openIdentity('kyc'");
     const handlers = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
     expect(handlers).to.match(/handlePagarAcceso = async \(\) => \{\s*if \(isDemoAccount\(\)\) return;/);
+    expect(handlers).to.include('accesoBusy');
   });
 
   it('blocks Solicitar in Real until phrase, email, phone and KYC are bound', function () {
@@ -954,8 +955,10 @@ describe('demo credit gates', function () {
     expect(charge).to.not.match(/TEXTBELT|RESEND_API|ATTESTER_PRIVATE/i);
     const hook = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useVerificationFee.ts'), 'utf8');
     expect(hook).to.include('chargePoolUsdt');
-    expect(hook).to.include('silent: true');
-    expect(hook).to.not.include('useFundsConfirm');
+    expect(hook).to.include('useFundsConfirm');
+    expect(hook).to.include('busyRef');
+    expect(hook).to.not.include('silent: true');
+    expect(hook).to.not.include('confirmFunds: async () => true');
     const historySvc = fs.readFileSync(path.join(__dirname, '..', 'services', 'movementHistory.ts'), 'utf8');
     expect(historySvc).to.include('isHiddenVerificationDonation');
     const gates = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
