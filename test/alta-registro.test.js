@@ -48,4 +48,21 @@ describe('Alta 4 USDT', function () {
     expect((await token.balanceOf(extra.address)) - padreBefore).to.equal(ethers.parseUnits('1', 18));
     expect(await contract.totalLiquidity(tokenAddr)).to.be.gte(liqBefore - ethers.parseUnits('1', 18));
   });
+
+  it('sin pagar Alta el padrino no cobra de la caja', async () => {
+    const { token, contract, alta, owner, user, extra, tokenAddr } = await deployAltaStack();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, extra, '20');
+    await registerAndFund(token, contract, user, '20', extra.address);
+    await contract.connect(user).pagarVerificacion(tokenAddr, ethers.parseUnits('1', 18));
+    const padreBefore = await token.balanceOf(extra.address);
+    const liqBefore = await contract.totalLiquidity(tokenAddr);
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const deuda = await contract.obtenerDeuda(user.address);
+    await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
+    expect(await alta.padrinoApartado(user.address)).to.equal(0n);
+    const padreGain = (await token.balanceOf(extra.address)) - padreBefore;
+    expect(padreGain).to.be.lt(ethers.parseUnits('1', 18));
+    expect(await contract.totalLiquidity(tokenAddr)).to.be.gte(liqBefore - ethers.parseUnits('1', 18));
+  });
 });

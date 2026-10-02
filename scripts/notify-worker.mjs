@@ -15,6 +15,7 @@ import { dirname, resolve } from 'node:path';
 import { randomBytes, createCipheriv, createDecipheriv, createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { Contract, JsonRpcProvider, Wallet, getAddress, verifyTypedData, keccak256, toUtf8Bytes, AbiCoder, getBytes, Signature, ZeroAddress } from 'ethers';
 import dotenv from 'dotenv';
+import { requireDistinctAttesterKeys, cosignPacked, verifyCosign } from './attest2of2.mjs';
 
 dotenv.config();
 const workerEnv = resolve(process.cwd(), '.env.worker');
@@ -156,6 +157,8 @@ let twilioVerifySid = process.env.TWILIO_VERIFY_SERVICE_SID || '';
 const RESEND_KEY = process.env.RESEND_API_KEY || '';
 const EMAIL_FROM = process.env.EMAIL_FROM || '';
 const ATTESTER_EXPLICIT = process.env.ATTESTER_PRIVATE_KEY || '';
+const ATTESTER_COSIGN_KEY = process.env.ATTESTER_COSIGN_KEY || '';
+const REQUIRE_ATTESTER_2OF2 = process.env.ATTESTER_2OF2 === '1';
 const DEPLOY_KEY = process.env.PRIVATE_KEY || '';
 const sameKey = (a, b) => {
   const n = (value) => String(value || '').replace(/^0x/i, '').toLowerCase();
@@ -220,6 +223,17 @@ if (isMainnet && !CONTRACT) {
 }
 if (isMainnet && !ATTESTER_KEY) {
   console.error('Mainnet: falta ATTESTER_PRIVATE_KEY distinta del owner.');
+  process.exit(1);
+}
+if ((isMainnet || REQUIRE_ATTESTER_2OF2) && ATTESTER_COSIGN_KEY) {
+  const two = requireDistinctAttesterKeys(ATTESTER_KEY, ATTESTER_COSIGN_KEY);
+  if (two) {
+    console.error('Attester 2-de-2: ATTESTER_COSIGN_KEY debe existir y ser distinta de ATTESTER_PRIVATE_KEY.');
+    process.exit(1);
+  }
+}
+if (REQUIRE_ATTESTER_2OF2 && !ATTESTER_COSIGN_KEY) {
+  console.error('ATTESTER_2OF2=1 exige ATTESTER_COSIGN_KEY distinta.');
   process.exit(1);
 }
 if (isMainnet && !hasSms) {
@@ -1060,6 +1074,14 @@ const attestIdentity = async (wallet, phoneHash, deviceHash) => {
       [getAddress(wallet), phoneHash, deviceHash, deadline, nonce, CHAIN_ID, getAddress(CONTRACT)]
     )
   );
+  if (REQUIRE_ATTESTER_2OF2 || ATTESTER_COSIGN_KEY) {
+    const two = requireDistinctAttesterKeys(ATTESTER_KEY, ATTESTER_COSIGN_KEY);
+    if (two) throw new Error('attester-2of2');
+    const cosign = await cosignPacked(ATTESTER_COSIGN_KEY, packed);
+    if (!verifyCosign(packed, cosign.signature, cosign.address)) {
+      throw new Error('attester-2of2');
+    }
+  }
   const signer = new Wallet(ATTESTER_KEY);
   const signature = await signer.signMessage(getBytes(packed));
   const parsed = Signature.from(signature);

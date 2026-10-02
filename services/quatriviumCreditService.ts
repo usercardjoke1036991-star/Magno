@@ -13,6 +13,7 @@ import {
   type AbstractProvider,
   type Signer,
 } from 'ethers';
+import { ALTA_ABI, getAltaAddress, isAltaConfigured } from '../constants/altaConfig';
 import { CONTRACT_ABI, ERC20_ABI, getContractAddress } from '../constants/contractConfig';
 import { FAMA_ABI, isFamaAddress } from '../constants/famaConfig';
 import { FAMA_CANJE_POR_USDT } from '../constants/fama';
@@ -180,15 +181,16 @@ const asegurarAprobacionToken = async (
   signer: Signer,
   userAddress: string,
   tokenAddress: string,
-  amountWei: string
+  amountWei: string,
+  spender = getContractAddress()
 ) => {
   const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-  const allowance = (await tokenContract.allowance(userAddress, getContractAddress())) as bigint;
+  const allowance = (await tokenContract.allowance(userAddress, spender)) as bigint;
   const required = BigInt(amountWei);
 
   if (allowance < required) {
     logInfo('Aprobando token para el contrato...');
-    const txApprove = await tokenContract.approve(getContractAddress(), required);
+    const txApprove = await tokenContract.approve(spender, required);
     await txApprove.wait();
     logInfo('Token aprobado');
   }
@@ -370,7 +372,16 @@ export const QuatriviumCreditService = {
       const userAddress = await signer.getAddress();
       const credit = contractWith(signer);
       const donated = await credit.donado(userAddress).catch(() => 0n);
-      if (BigInt(donated.toString()) < 2n * 10n ** 18n) {
+      let altaPaid = false;
+      if (isAltaConfigured()) {
+        try {
+          const alta = new Contract(getAltaAddress(), ALTA_ABI, signer);
+          altaPaid = BigInt(await alta.padrinoApartado(userAddress)) > 0n;
+        } catch {
+          altaPaid = false;
+        }
+      }
+      if (!altaPaid && BigInt(donated.toString()) < 2n * 10n ** 18n) {
         throw new Error('access-required');
       }
       let kycDeclarado = false;
@@ -456,6 +467,77 @@ export const QuatriviumCreditService = {
     await credit.pagarVerificacion.staticCall(tokenAddress, amountInWei);
     const tx = await credit.pagarVerificacion(tokenAddress, amountInWei);
     return tx.wait();
+  },
+
+  pagarRegistroAlta: async (tokenAddress: string) => {
+    if (!isAccessPaymentEnabled()) {
+      throw new Error(isDemoAccount() || isDemoMode() ? 'access-not-ready' : 'donate-real-only');
+    }
+    if (!isAltaConfigured()) {
+      throw new Error('access-not-ready');
+    }
+    assertToken(tokenAddress);
+    const amountInWei = (3n * 10n ** 18n).toString();
+    const { signer } = await requireInternalSigner();
+    const userAddress = await signer.getAddress();
+    await asegurarAprobacionToken(signer, userAddress, tokenAddress, amountInWei, getAltaAddress());
+    const alta = new Contract(getAltaAddress(), ALTA_ABI, signer);
+    await alta.pagarRegistro.staticCall();
+    const tx = await alta.pagarRegistro();
+    return tx.wait();
+  },
+
+  altaPagada: async (userAddress: string) => {
+    if (!isAltaConfigured() || !isAddress(userAddress)) return false;
+    try {
+      const { provider } = await getProviderAndSigner();
+      const alta = new Contract(getAltaAddress(), ALTA_ABI, provider);
+      return BigInt(await alta.padrinoApartado(userAddress)) > 0n;
+    } catch {
+      return false;
+    }
+  },
+
+  obtenerSaludAdmin: async (tokenAddress: string) => {
+    const empty = { cash: 0n, outstanding: 0n, liquidity: 0n, fees: 0n, reservaBote: 0n, reservaLocked: 0n, reservaApyBps: 0 };
+    if (!isContractConfigured() || !isAddress(tokenAddress)) return empty;
+    try {
+      const { provider } = await getProviderAndSigner();
+      const credit = contractWith(provider);
+      const token = new Contract(tokenAddress, ERC20_ABI, provider);
+      const [cash, outstanding, liquidity, fees] = await Promise.all([
+        token.balanceOf(getContractAddress()),
+        credit.outstandingLoans(tokenAddress),
+        credit.totalLiquidity(tokenAddress),
+        credit.collectedFees(tokenAddress),
+      ]);
+      let reservaBote = 0n;
+      let reservaLocked = 0n;
+      let reservaApyBps = 0;
+      try {
+        const { getReservaAddress, isReservaConfigured, RESERVA_ABI } = await import('../constants/reservaConfig');
+        if (isReservaConfigured()) {
+          const reserva = new Contract(getReservaAddress(), RESERVA_ABI, provider);
+          const salud = await reserva.saludReserva();
+          reservaBote = BigInt(salud.bote_ ?? salud[0] ?? 0n);
+          reservaLocked = BigInt(salud.bloqueado_ ?? salud[1] ?? 0n);
+          reservaApyBps = Number(salud.apyBps ?? salud[2] ?? 0);
+        }
+      } catch {
+        reservaBote = 0n;
+      }
+      return {
+        cash: BigInt(cash),
+        outstanding: BigInt(outstanding),
+        liquidity: BigInt(liquidity),
+        fees: BigInt(fees),
+        reservaBote,
+        reservaLocked,
+        reservaApyBps,
+      };
+    } catch {
+      return empty;
+    }
   },
 
   obtenerFama: async (userAddress: string) => {
@@ -785,6 +867,10 @@ export const QuatriviumCreditService = {
       } catch {
         donatedWei = '0';
       }
+    }
+    if (await QuatriviumCreditService.altaPagada(userAddress)) {
+      const floor = 3n * 10n ** 18n;
+      if (BigInt(donatedWei || '0') < floor) donatedWei = floor.toString();
     }
     return {
       nivelActual,

@@ -946,10 +946,10 @@
   "publicPhotoNeed": "Wählen Sie ein Bild aus der Galerie.",
   "publicPhotoTooBig": "Das Bild ist zu schwer. Wählen Sie ein einfacheres.",
   "creditAccessTitle": "Zugang",
-  "creditAccessLead": "Zahlen Sie 2 USDT einmal mit der verknüpften Wallet.",
+  "creditAccessLead": "Zahlen Sie 4 USDT einmal mit der verknüpften Wallet.",
   "creditAccessPay": "{amount} {symbol} zahlen",
   "creditAccessDone": "Zugang bezahlt.",
-  "creditAccessNeed": "Zahlen Sie 2 USDT, um Kredit zu beantragen.",
+  "creditAccessNeed": "Zahlen Sie 4 USDT, um Kredit zu beantragen.",
   "creditAccessPending": "Verfügbar, sobald das Live-Netz aktiv ist.",
   "lockPasswordLocked": "Dieses Telefon-Passwort ist festgelegt und kann nicht geändert werden.",
   "referralSearchPlaceholder": "Nach Namen suchen",
@@ -980,7 +980,7 @@
   "legalTerms": "Bedingungen",
   "legalAccept": "Ich habe gelesen und stimme zu",
   "legalMustRead": "Gehen Sie zum Ende, um zu bestätigen.",
-  "identityNeedAccess": "Zahlen Sie 2 USDT, um E-Mail, Telefon und Identität zu registrieren.",
+  "identityNeedAccess": "Zahlen Sie 4 USDT, um E-Mail, Telefon und Identität zu registrieren.",
   "fameBoardTitle": "Ranglisten",
   "fameBoardLead": "Gruppen zu 100. Alle beginnen in der höchsten Division; eine niedrigere öffnet sich, wenn sie voll ist. Sichtbar ab Stufe 15.",
   "hubFameLead": "Podium and network list.",
@@ -1183,5 +1183,8 @@
   "notificationTelegramChange": "Telegram ändern",
   "notificationTelegramChangeHint": "Wenn Sie dieses Telegram-Konto verlieren, verknüpfen Sie hier ein anderes.",
   "notificationTelegramChangeConfirm": "Hinweise gehen an das neue Telegram. Das bisherige erhält keine mehr. Fortfahren?",
-  "errLoanAlreadyActive": "Sie haben einen aktiven Kredit. Er muss beglichen werden, bevor Sie einen neuen beantragen."
+  "errLoanAlreadyActive": "Sie haben einen aktiven Kredit. Er muss beglichen werden, bevor Sie einen neuen beantragen.",
+  "reservaApyNow": "Bis 12%. Jetzt {apy}%.",
+  "adminPoolHealth": "Kasse {cash} · Verliehen {out}",
+  "adminReservaHealth": "Reserve Topf {bote} · Gesperrt {locked} · {apy}%"
 }

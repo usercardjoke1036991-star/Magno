@@ -4,7 +4,7 @@ import { FAMA_PER_USDT } from '../constants/fama';
 import { fameFromDonateUsd, supportKind, supportNameKey } from '../constants/support';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { CREDIT_ACCESS_USDT, hasCreditAccess, voluntaryDonateUsd } from '../utils/creditGates';
+import { accessPayUsdt, hasCreditAccess, voluntaryDonateUsd } from '../utils/creditGates';
 import { formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { AppSubsection } from './AppSection';
 import { AppText, AppTextInput } from './AppText';
@@ -69,7 +69,7 @@ export function DonateFounderSection({
         </AppText>
         {accessPaid ? (
           <AppText style={[styles.meta, { color: colors.textMuted }]}>
-            {t('donateAccessNote', { amount: String(CREDIT_ACCESS_USDT) })}
+            {t('donateAccessNote', { amount: String(accessPayUsdt()) })}
           </AppText>
         ) : null}
         <AppText style={[styles.label, { color: colors.primary }]}>

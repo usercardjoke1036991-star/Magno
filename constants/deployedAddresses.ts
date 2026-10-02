@@ -5,6 +5,7 @@ export const DEPLOYED_TESTNET = {
   usdt: '0x2d4AE5E6984D98777a24473F196326ff2604F5A6',
   reserva: '',
   fama: '',
+  alta: '',
   startBlock: 130652258,
 } as const;
 
@@ -14,6 +15,7 @@ export const DEPLOYED_MAINNET = {
   usdt: '0x55d398326f99059ff775485246999027b3197955',
   reserva: '',
   fama: '',
+  alta: '',
   /** Billetera personal Real (donaciones). El contrato mainnet sigue vacío hasta el deploy. */
   founder: '0x5023bf46dB7458B9bb9152a7ffE64f195CD1a047',
   startBlock: 0,

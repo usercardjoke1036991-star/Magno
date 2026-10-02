@@ -1,6 +1,7 @@
 {
   "enfoque": "Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.",
   "decisiones": [
+    "- [2026-10-02] Verificar es correo + celular: 0,50 + 0,50 = 1 USDT al pool. Ese 1 es el sello del primer credito, no un cobro aparte.",
     "- [2026-10-02] Hitos 100-1000 proporcionales. Padrino del 1 apartado en Alta, no de la caja. Reserva techo 12% segun lo bloqueado.",
     "- [2026-10-02] Tras pagar, Solicitar se bloquea con cuenta atras de 48h. Con credito abierto se ve Pagar, no la cuenta atras. El texto de error de 48h es respaldo.",
     "- [2026-10-02] El fondo emite si hay liquidez bajo el 80 por ciento. La primera de 1 USDT tras verificar no la puede tomar otro durante 7 dias.",
@@ -29,10 +30,11 @@
     "- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.",
     "- [2026-09-29] El multiplicador de comisiones del que bloquea se paga del bote de Reserva, no del pool. El fundador cobra corteFundadorBp de ese extra. Credit no se recorta (EIP-170).",
     "- [2026-09-29] Owner de Reserva sigue EOA; la pausa de emergencia se alinea con Credit via syncPauseFromCredit (attester, sin llave de owner). Unlock no se congela.",
-    "- [2026-09-29] Reserva no es producto de inversion ni banco. Rendimiento hasta 12% estimado desde un bote aparte; principal no se toca. Demo sin KYC; Real misma identidad que el credito.",
-    "- [2026-09-18] No subir image-size a 2.x (rompe Metro 0.83). No recortar Credit por Aderyn H-1 ni Mythril SWC-101. Worker Docker corre como USER node."
+    "- [2026-09-29] Reserva no es producto de inversion ni banco. Rendimiento hasta 12% estimado desde un bote aparte; principal no se toca. Demo sin KYC; Real misma identidad que el credito."
   ],
   "cambios": [
+    "- [2026-10-02] Mejoras sin deploy: app Alta 3+1, APY Reserva, attester 2-de-2, panel de caja, tests de padrino/cuotas/sello.",
+    "- [2026-10-02] Invariantes Foundry de NAV Credit y caja Reserva, mas centinela Python de solo lectura por Telegram.",
     "- [2026-10-02] Contratos: alta 4 USDT, hitos proporcionales, Reserva 12% movil y retiro bote. Sin deploy testnet.",
     "- [2026-10-02] El pool manda: 80 por ciento de uso, grandes al 70, sello de 7 dias en el USDT de verificar. Sin cupo diario de credito.",
     "- [2026-10-02] Formula B en el contrato: umbral max(50, 0.5% caja), potometros 10% chico y 10% grande. Hardhat cupo 8/8 Foundry 38/38.",
@@ -80,10 +82,8 @@
     "- [2026-09-29] KYC Sumsub queda detras de variables de Render. Sin claves, la app sigue con la declaracion. HSM no es un interruptor universal.",
     "- [2026-09-29] Hardening defensivo: recovery sin wrap en el worker, autofund con firma EIP-712, approve de deuda restante, attester sin llave de owner en host publico, Reserva solo attester y timelock 72h",
     "- [2026-09-29] Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10",
-    "- [2026-09-29] Extra de comisiones Reserva del bote; fundador cobra su tramo; Credit intacto",
-    "- [2026-09-29] Endurecimiento Reserva pre-testnet: unlock con pausa, allowlist, approve monto, guardian worker, invariante caja. Hardhat 9/9 Foundry 2/2.",
-    "- [2026-09-29] Analisis E2E Reserva: UI ya no bloquea desbloquear por mora/pausa del credito. Deploy testnet pendiente de tBNB en la fundadora."
+    "- [2026-09-29] Extra de comisiones Reserva del bote; fundador cobra su tramo; Credit intacto"
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-02] Cambio: Contratos: alta 4 USDT, hitos proporcionales, Reserva 12% movil y retiro bote. Sin deploy testnet."
+  "ultima_sesion": "[2026-10-02] Decisión: Verificar es correo + celular: 0,50 + 0,50 = 1 USDT al pool. Ese 1 es el sello del primer credito, no un cobro aparte."
 }

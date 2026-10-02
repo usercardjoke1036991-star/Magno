@@ -17,7 +17,8 @@ import { notifyApiBases } from '../constants/appLinks';
 import { getProviderWithFallback, isAccessPaymentEnabled, isCreditReady, isDemoAccount, isDemoMode, isDonationEnabled, isDonationVisible } from '../constants/rpcConfig';
 import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
-import { CREDIT_ACCESS_USDT, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
+import { isAltaConfigured } from '../constants/altaConfig';
+import { accessPayUsdt, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhoneActive } from '../services/accountPhone';
 import { enviarToken, isPhraseBackedUp, loadAppWallet } from '../services/appWallet';
@@ -760,7 +761,7 @@ export const useHomeHandlers = ({
       return;
     }
     if (!ensureCreditReady()) return;
-    if (!userInfo.canDonate) {
+    if (!isAltaConfigured() && !userInfo.canDonate) {
       Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
       return;
     }
@@ -768,13 +769,15 @@ export const useHomeHandlers = ({
       Alert.alert(t('token'), t('tokenNotEnabledAlert'));
       return;
     }
-    const amount = String(CREDIT_ACCESS_USDT);
+    const amount = String(accessPayUsdt());
     const amountWei = parseUnits(amount, selectedToken.decimals).toString();
     if (!(await confirmFunds())) return;
     if (!(await fundInternalFromExternal(amountWei, selectedToken.address))) return;
     if (!(await ensureGasForTx())) return;
     try {
-      const result = await donarProyecto(amountWei, selectedToken.address);
+      const result = isAltaConfigured()
+        ? { success: Boolean(await QuatriviumCreditService.pagarRegistroAlta(selectedToken.address)) }
+        : await donarProyecto(amountWei, selectedToken.address);
       if (result.success) {
         void recordMovement(walletAddress, {
           kind: 'access',

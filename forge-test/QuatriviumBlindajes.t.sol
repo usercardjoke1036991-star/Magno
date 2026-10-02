@@ -1,0 +1,144 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {Test} from "forge-std/Test.sol";
+import {QuatriviumCreditHarness} from "../contracts/test/QuatriviumCreditHarness.sol";
+import {QuatriviumFamaCaja} from "../contracts/QuatriviumFamaCaja.sol";
+import {QuatriviumReserva} from "../contracts/QuatriviumReserva.sol";
+import {QuatriviumAlta} from "../contracts/QuatriviumAlta.sol";
+import {ERC20Mock} from "../contracts/mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../contracts/mocks/MockV3Aggregator.sol";
+
+/// @notice Tres casos que el Handler grande no cubre: padrino sin Alta, cuotas y sello vs grande.
+contract QuatriviumBlindajesTest is Test {
+    QuatriviumCreditHarness internal credit;
+    QuatriviumFamaCaja internal fama;
+    QuatriviumReserva internal reserva;
+    QuatriviumAlta internal alta;
+    ERC20Mock internal token;
+    address internal owner;
+    uint256 internal ownerPk;
+    address internal padre;
+    address internal hijo;
+    address internal ballena;
+
+    function setUp() public {
+        vm.warp(1_704_000_000);
+        ownerPk = 0xA11CE;
+        owner = vm.addr(ownerPk);
+        padre = makeAddr("padre");
+        hijo = makeAddr("hijo");
+        ballena = makeAddr("ballena");
+        token = new ERC20Mock();
+        MockV3Aggregator feed = new MockV3Aggregator(8, 100000000);
+        address[] memory admins = new address[](1);
+        admins[0] = owner;
+        uint64 nonce = vm.getNonce(owner);
+        address predicted = vm.computeCreateAddress(owner, nonce + 1);
+        vm.startPrank(owner, owner);
+        fama = new QuatriviumFamaCaja(address(token), predicted);
+        credit = new QuatriviumCreditHarness(
+            address(token),
+            address(feed),
+            payable(owner),
+            500,
+            admins,
+            1,
+            address(fama)
+        );
+        reserva = new QuatriviumReserva(address(token), owner, address(credit), address(fama));
+        alta = new QuatriviumAlta(address(token), address(credit), address(reserva));
+        reserva.setAltaFuente(address(alta));
+        fama.setReserva(address(reserva));
+        fama.setAlta(address(alta));
+        token.mint(owner, 50_000 ether);
+        token.approve(address(credit), type(uint256).max);
+        credit.depositarLiquidez(address(token), 20_000 ether);
+        vm.stopPrank();
+    }
+
+    function test_sin_alta_el_padrino_no_come_caja() public {
+        _onboard(padre, address(0));
+        _onboard(hijo, padre);
+        vm.prank(hijo, hijo);
+        credit.pagarVerificacion(address(token), 1 ether);
+        uint256 liqBefore = credit.totalLiquidity(address(token));
+        uint256 padreBefore = token.balanceOf(padre);
+        vm.prank(hijo, hijo);
+        credit.solicitarPrestamo(address(token), 1);
+        (,, uint256 total,) = credit.obtenerDeuda(hijo);
+        vm.prank(hijo, hijo);
+        credit.pagarPrestamo(address(token), total);
+        assertLt(token.balanceOf(padre) - padreBefore, 1 ether, "padrino no cobra de caja");
+        assertGe(credit.totalLiquidity(address(token)), liqBefore - 1 ether);
+        _assertNav();
+    }
+
+    function test_cuotas_mantienen_nav() public {
+        _onboard(hijo, address(0));
+        credit.forceNivel(hijo, 15);
+        vm.prank(hijo, hijo);
+        credit.solicitarPrestamo(address(token), 15);
+        (uint256 principal, uint256 interes, uint256 total,) = credit.obtenerDeuda(hijo);
+        assertGt(total, principal);
+        (, , uint8 totales,,) = credit.planPago(hijo);
+        uint256 primera = totales > 1 ? total / uint256(totales) : total;
+        vm.prank(hijo, hijo);
+        credit.pagarPrestamo(address(token), primera);
+        _assertNav();
+        vm.prank(hijo, hijo);
+        credit.pagarPrestamo(address(token), primera);
+        _assertNav();
+        (,, uint256 resto,) = credit.obtenerDeuda(hijo);
+        if (resto > 0) {
+            vm.prank(hijo, hijo);
+            credit.pagarPrestamo(address(token), resto);
+        }
+        _assertNav();
+        assertGt(interes, 0);
+    }
+
+    function test_sello_y_grande_no_pasan_el_80() public {
+        _onboard(hijo, address(0));
+        _onboard(ballena, address(0));
+        credit.forceNivel(ballena, 10);
+        vm.prank(hijo, hijo);
+        credit.pagarVerificacion(address(token), 1 ether);
+        vm.prank(ballena, ballena);
+        credit.solicitarPrestamo(address(token), 10);
+        vm.prank(hijo, hijo);
+        credit.solicitarPrestamo(address(token), 1);
+        uint256 liq = credit.totalLiquidity(address(token));
+        uint256 out = credit.outstandingLoans(address(token));
+        assertLe(out * 10000, liq * 8000, "uso > 80%");
+        _assertNav();
+    }
+
+    function _onboard(address who, address padreRef) internal {
+        vm.prank(who, who);
+        credit.registrarHumanoConPadre(padreRef);
+        bytes32 phoneHash = keccak256(abi.encodePacked(who, ":phone"));
+        bytes32 deviceHash = keccak256(abi.encodePacked(who, ":device"));
+        uint256 deadline = block.timestamp + 3600;
+        bytes32 packed = keccak256(
+            abi.encode(who, phoneHash, deviceHash, deadline, credit.attestNonce(who), block.chainid, address(credit))
+        );
+        bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", packed));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPk, digest);
+        vm.prank(who, who);
+        credit.vincularIdentidad(phoneHash, deviceHash, deadline, v, r, s);
+        vm.prank(who, who);
+        credit.declararKyc();
+        token.mint(who, 5_000 ether);
+        vm.prank(who);
+        token.approve(address(credit), type(uint256).max);
+    }
+
+    function _assertNav() internal view {
+        assertEq(
+            token.balanceOf(address(credit)) + credit.outstandingLoans(address(token)),
+            credit.totalLiquidity(address(token)) + credit.collectedFees(address(token)),
+            "NAV"
+        );
+    }
+}

@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
-import { CREDIT_ACCESS_USDT, hasCreditAccess } from '../utils/creditGates';
+import { accessPayUsdt, hasCreditAccess } from '../utils/creditGates';
 import { AppText } from './AppText';
 import { useAppMode } from '../wallet/AppModeContext';
 
@@ -48,7 +48,7 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
             <ActivityIndicator color="#111" />
           ) : (
             <AppText style={[styles.payText, { color: colors.onPrimary }]}>
-              {t('creditAccessPay', { amount: String(CREDIT_ACCESS_USDT), symbol: tokenSymbol })}
+              {t('creditAccessPay', { amount: String(accessPayUsdt()), symbol: tokenSymbol })}
             </AppText>
           )}
         </TouchableOpacity>

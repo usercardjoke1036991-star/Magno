@@ -27,6 +27,9 @@ export const RESERVA_ABI = [
   'function renovar()',
   'function aportarBote(uint256 monto)',
   'function syncPauseFromCredit()',
+  'function apyHoyBps() view returns (uint256)',
+  'function saludReserva() view returns (uint256 bote_, uint256 bloqueado_, uint256 apyBps)',
+  'function totalBloqueado() view returns (uint256)',
 ];
 
 function envAddr(name: string): string {

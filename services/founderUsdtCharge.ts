@@ -16,6 +16,7 @@ import { enviarToken, loadAppWallet } from './appWallet';
 import { signedAuthBody } from './walletAuth';
 import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from './linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
+import { isAltaConfigured } from '../constants/altaConfig';
 import { cachedProtocolCaps, QuatriviumCreditService } from './quatriviumCreditService';
 import { recordMovement } from './movementHistory';
 import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
@@ -284,7 +285,11 @@ export async function chargeFounderUsdt(
   if (!(await fundInternalFromExternal(ctx, amountWei, ctx.token.address))) return 'failed';
   if (!(await ensureGasForTx(ctx))) return 'failed';
   try {
-    await QuatriviumCreditService.donar(amountWei, ctx.token.address);
+    if (isAltaConfigured()) {
+      await QuatriviumCreditService.pagarRegistroAlta(ctx.token.address);
+    } else {
+      await QuatriviumCreditService.donar(amountWei, ctx.token.address);
+    }
     if (!ctx.silent) {
       void recordMovement(ctx.walletAddress, {
         kind: 'donation',

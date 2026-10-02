@@ -1,5 +1,6 @@
-import { isAddress } from 'ethers';
-import React, { useState } from 'react';
+import { formatUnits, isAddress } from 'ethers';
+import React, { useEffect, useState } from 'react';
+import { QuatriviumCreditService } from '../services/quatriviumCreditService';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -84,6 +85,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [draft, setDraft] = useState('');
   const [debtorDraft, setDebtorDraft] = useState('');
   const [reservaPot, setReservaPot] = useState('100');
+  const [salud, setSalud] = useState<{ cash: bigint; outstanding: bigint; reservaBote: bigint; reservaLocked: bigint; reservaApyBps: number } | null>(null);
+  useEffect(() => {
+    if ((!isOwner && !isAdmin) || !tokenAddress) return;
+    void QuatriviumCreditService.obtenerSaludAdmin(tokenAddress)
+      .then((row) => setSalud(row))
+      .catch(() => setSalud(null));
+  }, [isOwner, isAdmin, tokenAddress]);
   if (!isOwner && !isAdmin) return null;
 
   const confirmToggle = (next: boolean, apply: (value: boolean) => void) => {
@@ -160,6 +168,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   return (
     <View>
       <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminLead')}</AppText>
+      {salud ? (
+        <>
+          <AppText style={[styles.meta, { color: colors.text }]}>
+            {t('adminPoolHealth', {
+              cash: formatUnits(salud.cash, 18),
+              out: formatUnits(salud.outstanding, 18),
+            })}
+          </AppText>
+          <AppText style={[styles.meta, { color: colors.text }]}>
+            {t('adminReservaHealth', {
+              bote: formatUnits(salud.reservaBote, 18),
+              locked: formatUnits(salud.reservaLocked, 18),
+              apy: ((salud.reservaApyBps || 0) / 100).toFixed(2),
+            })}
+          </AppText>
+        </>
+      ) : null}
       {paused ? <AppText style={[styles.paused, { color: colors.danger }]}>{t('protocolPaused')}</AppText> : null}
       <AppText style={[styles.meta, { color: colors.textMuted }]}>
         {t('adminRoster', {

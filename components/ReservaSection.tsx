@@ -166,6 +166,11 @@ export function ReservaSection({
             {t('reservaBoteLabel')}: {formatUSD(Number(formatUnits(preview.boteWei, 18)))} {tokenSymbol}
           </AppText>
         ) : null}
+        {preview ? (
+          <AppText style={[styles.meta, { color: colors.textMuted }]}>
+            {t('reservaApyNow', { apy: ((preview.apyBps || 0) / 100).toFixed(2) })}
+          </AppText>
+        ) : null}
         {boostPreview ? (
           <AppText style={[styles.meta, { color: colors.primary }]}>
             {t('reservaYourBoost', {

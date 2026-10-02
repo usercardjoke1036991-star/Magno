@@ -213,6 +213,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: WalletMark
 - `components/WalletSection.tsx` — módulo JS/TS
   - Funciones/clases: WalletSection
+- `constants/altaConfig.ts` — módulo JS/TS
+  - Funciones/clases: ALTA_ABI, CREDIT_ALTA_USDT, CREDIT_SELLO_USDT, getAltaAddress, isAltaConfigured
 - `constants/appLinks.ts` — módulo JS/TS
   - Funciones/clases: PLAY_STORE_URL, INVITE_WEB_BASE, INVITE_APP_SCHEME, TELEGRAM_BOT, NOTIFY_API, notifyApiBases
 - `constants/brand.ts` — módulo JS/TS
@@ -291,6 +293,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: ProfileProvider, useUserProfile
 - `scripts/apply-i18n-leftovers.mjs` — módulo JS/TS
 - `scripts/apply-i18n-professional.mjs` — módulo JS/TS
+- `scripts/attest2of2.mjs` — módulo JS/TS
+  - Funciones/clases: sameHexKey, requireDistinctAttesterKeys, cosignPacked, verifyCosign
 - `scripts/bscNetworks.cjs` — módulo JS/TS
 - `scripts/check-i18n.mjs` — módulo JS/TS
 - `scripts/check-production.mjs` — módulo JS/TS
@@ -326,7 +330,10 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/scan-mobile.mjs` — módulo JS/TS
 - `scripts/security-check.mjs` — módulo JS/TS
 - `scripts/seed-testnet.cjs` — módulo JS/TS
+- `scripts/sentinel.py` — módulo Python
+  - Funciones/clases: load_dotenv, env_addr, telegram_send, read_nav, read_reserva, check_once, parse_args, main
 - `scripts/set-sms-keys.mjs` — módulo JS/TS
+- `scripts/setup-safe-admin.cjs` — módulo JS/TS
 - `scripts/simulateTx.js` — módulo JS/TS
 - `scripts/spawnEnv.mjs` — módulo JS/TS
   - Funciones/clases: spawnPath, spawnEnv, binDocker, binWsl, stripTrailSlash, binNpx
@@ -431,6 +438,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/accounting.test.js` — módulo JS/TS
 - `test/accountWorld.test.js` — módulo JS/TS
 - `test/alta-registro.test.js` — módulo JS/TS
+- `test/attest2of2.test.js` — módulo JS/TS
 - `test/brand-splash.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
 - `test/commission-levels.test.js` — módulo JS/TS
@@ -504,7 +512,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, livePhoneStepDone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_USDT, CREDIT_VERIFY_EMAIL_USDT, CREDIT_VERIFY_PHONE_USDT, verificationFeeUsdt, verificationFeeLabel, hasCreditAccess, voluntaryDonateUsd, isHiddenVerificationDonation, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, livePhoneStepDone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_LEGACY_USDT, CREDIT_ACCESS_USDT, CREDIT_VERIFY_EMAIL_USDT, CREDIT_VERIFY_PHONE_USDT, accessPayUsdt, creditAccessPaidUsd, verificationFeeUsdt, verificationFeeLabel, hasCreditAccess, voluntaryDonateUsd, isHiddenVerificationDonation, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS

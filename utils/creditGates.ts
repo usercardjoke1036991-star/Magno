@@ -1,3 +1,4 @@
+import { CREDIT_ALTA_USDT, isAltaConfigured } from '../constants/altaConfig';
 import { isDemoAccount } from '../constants/rpcConfig';
 
 export type LiveCreditFlags = {
@@ -123,15 +124,27 @@ export function creditNeedsDeviceMatch(deviceMatches: boolean, phoneActive = fal
   return liveNeedsDeviceMatch(isDemoAccount(), deviceMatches, phoneActive);
 }
 
-export const CREDIT_ACCESS_USDT = 2;
-/** Real: cada confirmación de correo cobra 0.50 USDT al pool. Demo: 0. */
+export const CREDIT_ACCESS_LEGACY_USDT = 2;
+export const CREDIT_ACCESS_USDT = CREDIT_ALTA_USDT;
+/** Real: confirmar el correo cobra 0,50 USDT al pool. Con el celular suma 1. Demo: 0. */
 export const CREDIT_VERIFY_EMAIL_USDT = 0.5;
-/** Real: cada confirmación de número cobra 0.50 USDT al pool. Demo: 0. */
+/** Real: confirmar el celular cobra 0,50 USDT al pool. Con el correo suma 1. Demo: 0. */
 export const CREDIT_VERIFY_PHONE_USDT = 0.5;
+
+export function accessPayUsdt(): number {
+  return isAltaConfigured() ? CREDIT_ALTA_USDT : CREDIT_ACCESS_LEGACY_USDT;
+}
+
+export function creditAccessPaidUsd(donatedUsd: number, altaPaid = false): number {
+  const donated = Number(donatedUsd);
+  const gift = Number.isFinite(donated) && donated > 0 ? donated : 0;
+  if (altaPaid) return Math.max(gift, CREDIT_ALTA_USDT);
+  return gift;
+}
 
 export type VerificationFeeKind = 'email' | 'phone';
 
-/** Tarifa de verificación. Demo no cobra. Va al pool, no a la fundadora. */
+/** Correo 0,50 + celular 0,50 = el 1 USDT de verificar. Demo no cobra. Va al pool. */
 export function verificationFeeUsdt(kind: VerificationFeeKind, demo = false): number {
   if (demo) return 0;
   return kind === 'email' ? CREDIT_VERIFY_EMAIL_USDT : CREDIT_VERIFY_PHONE_USDT;
@@ -142,10 +155,13 @@ export function verificationFeeLabel(amount: number): string {
   return amount.toFixed(2);
 }
 
-/** 2 USDT de acceso pagado on-chain. El candado de la app solo aplica en Real. */
-export function hasCreditAccess(paidUsd: number): boolean {
+/** Alta nueva = 3 USDT. El legado acepta 2. El candado de la app solo aplica en Real. */
+export function hasCreditAccess(paidUsd: number, altaPaid = false): boolean {
+  if (altaPaid) return true;
   const paid = Number(paidUsd);
-  return Number.isFinite(paid) && paid + 1e-9 >= CREDIT_ACCESS_USDT;
+  if (!Number.isFinite(paid)) return false;
+  const need = isAltaConfigured() ? CREDIT_ALTA_USDT : CREDIT_ACCESS_LEGACY_USDT;
+  return paid + 1e-9 >= need;
 }
 
 /** Donaciones voluntarias: el acceso de 2 USDT no cuenta. La verificación ya no pasa por donar. */
@@ -185,8 +201,11 @@ export function canPayCreditAccess(input: {
   protocolCanDonate: boolean;
   founderAddress: string;
   accessEnabled: boolean;
+  altaReady?: boolean;
 }): boolean {
-  return Boolean(input.protocolCanDonate && String(input.founderAddress || '').trim() && input.accessEnabled);
+  const dest = Boolean(String(input.founderAddress || '').trim() && input.accessEnabled);
+  if (input.altaReady || isAltaConfigured()) return dest;
+  return Boolean(input.protocolCanDonate && dest);
 }
 
 /** Línea activa solo si el contrato del mundo actual existe. Real no hereda el registro de Demo. */

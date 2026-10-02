@@ -9,7 +9,7 @@
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
 - **Estado:** Testnet operativo — mainnet pendiente de deploy (acción manual del fundador)
-- **Tests detectados:** 43 archivo(s)
+- **Tests detectados:** 44 archivo(s)
 
 ### Qué funciona
 - Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)

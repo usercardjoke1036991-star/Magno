@@ -125,6 +125,7 @@ library QuatriviumFamaLib {
                         bono = abi.decode(data, (uint256));
                         if (bono > 0) return bono;
                     }
+                    return 0;
                 }
             }
         }
