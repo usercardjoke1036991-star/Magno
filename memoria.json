@@ -1,6 +1,9 @@
 {
   "enfoque": "Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.",
   "decisiones": [
+    "- [2026-10-02] Hitos 100-1000 proporcionales. Padrino del 1 apartado en Alta, no de la caja. Reserva techo 12% segun lo bloqueado.",
+    "- [2026-10-02] Tras pagar, Solicitar se bloquea con cuenta atras de 48h. Con credito abierto se ve Pagar, no la cuenta atras. El texto de error de 48h es respaldo.",
+    "- [2026-10-02] El fondo emite si hay liquidez bajo el 80 por ciento. La primera de 1 USDT tras verificar no la puede tomar otro durante 7 dias.",
     "- [2026-10-02] Cupo fractal B: no hay cifra magica de un millon. Chico o grande se mide contra la caja de ese momento.",
     "- [2026-10-02] Carril chico hasta 50 USDT independiente del 10 por ciento. Un ballenero no tapa altas ni niveles bajos.",
     "- [2026-10-02] El cupo de prestamos nuevos mide USDT del dia, no solo personas. 10 por ciento de caja, piso 50, freno 10000. El 80 por ciento de uso y el pool cerrado siguen.",
@@ -27,12 +30,11 @@
     "- [2026-09-29] El multiplicador de comisiones del que bloquea se paga del bote de Reserva, no del pool. El fundador cobra corteFundadorBp de ese extra. Credit no se recorta (EIP-170).",
     "- [2026-09-29] Owner de Reserva sigue EOA; la pausa de emergencia se alinea con Credit via syncPauseFromCredit (attester, sin llave de owner). Unlock no se congela.",
     "- [2026-09-29] Reserva no es producto de inversion ni banco. Rendimiento hasta 12% estimado desde un bote aparte; principal no se toca. Demo sin KYC; Real misma identidad que el credito.",
-    "- [2026-09-18] No subir image-size a 2.x (rompe Metro 0.83). No recortar Credit por Aderyn H-1 ni Mythril SWC-101. Worker Docker corre como USER node.",
-    "- [2026-09-18] El divide-before-multiply de premioAsiento es falso positivo: n(n+1)/2 es exacto y va en el denominador. No se reescribe la formula; queda blindada con test de exactitud e invariante de bote en Hardhat y fuzz en Foundry.",
-    "- [2026-09-18] El 1 USDT de Real se exige tambien en el servicio al pedir, no solo en la pantalla. Demo sigue libre.",
-    "- [2026-09-18] Correo y celular no son candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. El OTP de identidad sigue en Inicio y Ajustes."
+    "- [2026-09-18] No subir image-size a 2.x (rompe Metro 0.83). No recortar Credit por Aderyn H-1 ni Mythril SWC-101. Worker Docker corre como USER node."
   ],
   "cambios": [
+    "- [2026-10-02] Contratos: alta 4 USDT, hitos proporcionales, Reserva 12% movil y retiro bote. Sin deploy testnet.",
+    "- [2026-10-02] El pool manda: 80 por ciento de uso, grandes al 70, sello de 7 dias en el USDT de verificar. Sin cupo diario de credito.",
     "- [2026-10-02] Formula B en el contrato: umbral max(50, 0.5% caja), potometros 10% chico y 10% grande. Hardhat cupo 8/8 Foundry 38/38.",
     "- [2026-10-02] Dos carriles de originacion: 1-50 USDT no comen el 10 por ciento. Los grandes si. Hardhat cupo 7/7.",
     "- [2026-10-02] Cupo diario: 10 por ciento de caja libre, piso 50 USDT, max 10000 altas. Foundry 37/37 y Hardhat del modulo en verde.",
@@ -80,10 +82,8 @@
     "- [2026-09-29] Reserva: bote solo admin; se ve desde el inicio y se usa en nivel 10",
     "- [2026-09-29] Extra de comisiones Reserva del bote; fundador cobra su tramo; Credit intacto",
     "- [2026-09-29] Endurecimiento Reserva pre-testnet: unlock con pausa, allowlist, approve monto, guardian worker, invariante caja. Hardhat 9/9 Foundry 2/2.",
-    "- [2026-09-29] Analisis E2E Reserva: UI ya no bloquea desbloquear por mora/pausa del credito. Deploy testnet pendiente de tBNB en la fundadora.",
-    "- [2026-09-29] Implementada sala Reserva (contrato hermano, UI, i18n, tests Hardhat 5/5). Demo practica local; Real espera contrato oficial.",
-    "- [2026-09-29] Cierra los 10 issues restantes de SonarCloud Magno (bigint tests, I/O kit, spawn pytest, regex)."
+    "- [2026-09-29] Analisis E2E Reserva: UI ya no bloquea desbloquear por mora/pausa del credito. Deploy testnet pendiente de tBNB en la fundadora."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-02] Decisión: Cupo fractal B: no hay cifra magica de un millon. Chico o grande se mide contra la caja de ese momento."
+  "ultima_sesion": "[2026-10-02] Cambio: Contratos: alta 4 USDT, hitos proporcionales, Reserva 12% movil y retiro bote. Sin deploy testnet."
 }

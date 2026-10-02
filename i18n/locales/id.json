@@ -624,8 +624,8 @@
   "errAlreadyBound": "Dompet ini sudah punya telepon dan perangkat tertaut.",
   "errBadAttest": "Kode telepon tidak valid atau kedaluwarsa. Minta yang baru.",
   "errExpired": "Kode autentikasi kedaluwarsa. Minta yang baru.",
-  "errDailyCap": "Batas harian protokol untuk pinjaman baru tercapai.",
-  "errUtilizationCap": "Pool terlalu terpakai. Tunggu sampai pinjaman dilunasi.",
+  "errDailyCap": "Dana tidak dapat menerbitkan kredit ini saat ini. Penggunaan likuiditas telah mencapai batas aman. Penerbitan akan dilanjutkan ketika kas pulih melalui pelunasan atau kontribusi baru ke dana.",
+  "errUtilizationCap": "Dana tidak dapat menerbitkan kredit ini saat ini. Penggunaan likuiditas telah mencapai batas aman. Penerbitan akan dilanjutkan ketika kas pulih melalui pelunasan atau kontribusi baru ke dana.",
   "errNoPriceFeed": "Token ini tidak punya oracle. Pinjaman tidak bisa diterbitkan.",
   "errNoContracts": "Panggilan dari kontrak tidak diterima.",
   "errOnlyTimelock": "Tindakan admin itu butuh usulan, 72 jam, dan konfirmasi.",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "Lunasi pinjaman aktif sebelum menghancurkan dompet ini. Sisa dana masuk ke pool.",
   "errDead": "Dompet ini sudah dihancurkan. Buat akun baru di aplikasi.",
   "errFounderDestroy": "Akun pendiri tidak bisa dihancurkan.",
-  "errCooldown48h": "Anda harus menunggu 48 jam antara satu pinjaman dan berikutnya.",
-  "errInsufficientLiquidity": "Pool tidak punya cukup likuiditas untuk level ini.",
+  "errCooldown48h": "Harus berlalu 48 jam antara kredit. Ketentuan ini berlaku untuk akun Anda, bukan likuiditas dana.",
+  "errInsufficientLiquidity": "Likuiditas tersedia tidak menutupi jumlah tingkat ini. Anda dapat mengajukan tingkat yang lebih rendah atau menunggu dana menerima kas tambahan.",
   "errPegLost": "Oracle melaporkan token kehilangan peg. Pinjaman dijeda.",
   "errStalePrice": "Harga oracle usang. Coba lagi nanti.",
   "errUnsupportedToken": "Token ini tidak diaktifkan pada kontrak yang terpasang.",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "Membuka Telegram…",
   "notificationTelegramChange": "Ganti Telegram",
   "notificationTelegramChangeHint": "Jika akun Telegram itu hilang, tautkan yang lain di sini.",
-  "notificationTelegramChangeConfirm": "Pemberitahuan akan ke Telegram baru. Yang sekarang berhenti menerima. Lanjutkan?"
+  "notificationTelegramChangeConfirm": "Pemberitahuan akan ke Telegram baru. Yang sekarang berhenti menerima. Lanjutkan?",
+  "errLoanAlreadyActive": "Anda memiliki kredit aktif. Harus dilunasi sebelum mengajukan yang baru."
 }

@@ -68,6 +68,7 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
     mapping(address => uint256) public famaCanjeada;
     mapping(address => uint256) public famaRedCanjeada;
     address public reserva;
+    address public alta;
 
     struct Racha {
         uint32 dias;
@@ -91,6 +92,7 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
     error SinCierre();
     error SoloReserva();
     error ReservaYaSet();
+    error AltaYaSet();
 
     event FamaAcreditada(address indexed usuario, uint256 pts);
     event FamaCanjeada(address indexed usuario, uint256 fama, uint256 monto, address indexed token);
@@ -130,6 +132,13 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         if (reserva != address(0)) revert ReservaYaSet();
         if (msg.sender != ICreditCaja(credit).fundador()) revert SoloCredit();
         reserva = next;
+    }
+
+    function setAlta(address next) external {
+        if (next == address(0)) revert DestinoCero();
+        if (alta != address(0)) revert AltaYaSet();
+        if (msg.sender != ICreditCaja(credit).fundador()) revert SoloCredit();
+        alta = next;
     }
 
     function pagarDesdePool(address to, uint256 amount) external {

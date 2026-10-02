@@ -624,8 +624,8 @@
   "errAlreadyBound": "Questo wallet ha già telefono e dispositivo collegati.",
   "errBadAttest": "Il codice del telefono non è valido o è scaduto. Richiedine uno nuovo.",
   "errExpired": "Il codice di autenticazione è scaduto. Richiedine uno nuovo.",
-  "errDailyCap": "È stato raggiunto il tetto giornaliero del protocollo per i nuovi prestiti.",
-  "errUtilizationCap": "Il pool è troppo utilizzato. Aspetta che i prestiti vengano rimborsati.",
+  "errDailyCap": "Il fondo non può erogare questo credito in questo momento. L’utilizzo della liquidità ha raggiunto il limite di sicurezza. L’erogazione riprenderà quando la cassa sarà ricostituita da rimborsi o nuovi conferimenti.",
+  "errUtilizationCap": "Il fondo non può erogare questo credito in questo momento. L’utilizzo della liquidità ha raggiunto il limite di sicurezza. L’erogazione riprenderà quando la cassa sarà ricostituita da rimborsi o nuovi conferimenti.",
   "errNoPriceFeed": "Questo token non ha oracolo. I prestiti non possono essere erogati.",
   "errNoContracts": "Le chiamate da contratti non sono accettate.",
   "errOnlyTimelock": "Quell’azione admin richiede una proposta, 72 ore e conferme.",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "Rimborsa il prestito attivo prima di distruggere questo wallet. I fondi restanti vanno al pool.",
   "errDead": "Questo wallet è già stato distrutto. Crea un nuovo conto nell’app.",
   "errFounderDestroy": "Il conto fondatore non può essere distrutto.",
-  "errCooldown48h": "Devi aspettare 48 ore tra un prestito e il successivo.",
-  "errInsufficientLiquidity": "Il pool non ha liquidità sufficiente per questo livello.",
+  "errCooldown48h": "Devono trascorrere 48 ore tra un credito e l’altro. Questa condizione riguarda il Suo conto, non la liquidità del fondo.",
+  "errInsufficientLiquidity": "La liquidità disponibile non copre l’importo di questo livello. Può richiedere un livello inferiore o attendere che il fondo riceva ulteriore cassa.",
   "errPegLost": "L’oracolo indica che il token ha perso il peg. I prestiti sono in pausa.",
   "errStalePrice": "Il prezzo dell’oracolo è obsoleto. Riprova più tardi.",
   "errUnsupportedToken": "Questo token non è abilitato sul contratto deployato.",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "Apertura di Telegram…",
   "notificationTelegramChange": "Cambia Telegram",
   "notificationTelegramChangeHint": "Se perde quel conto Telegram, ne colleghi un altro qui.",
-  "notificationTelegramChangeConfirm": "Gli avvisi andranno al nuovo Telegram. Quello attuale smetterà di riceverli. Continuare?"
+  "notificationTelegramChangeConfirm": "Gli avvisi andranno al nuovo Telegram. Quello attuale smetterà di riceverli. Continuare?",
+  "errLoanAlreadyActive": "Ha un credito in essere. Deve estinguerlo prima di richiederne uno nuovo."
 }

@@ -104,7 +104,7 @@
   "token": "Token",
   "tokenNotEnabledAlert": "This token is not yet enabled.",
   "cooldownTitle": "Cooldown",
-  "cooldownWait": "After you pay the loan, wait {time} before requesting another.",
+  "cooldownWait": "You must wait {time} before requesting another credit.",
   "requestWait": "After payoff: {time}",
   "noDebt": "No debt",
   "noActiveLoan": "No active loan.",
@@ -624,8 +624,8 @@
   "errAlreadyBound": "This account already has a number and device linked.",
   "errBadAttest": "The verification code is invalid or expired. Request a new one.",
   "errExpired": "The authentication code expired. Request a new one.",
-  "errDailyCap": "The daily limit for new loans has been reached.",
-  "errUtilizationCap": "The pool is at maximum capacity. Wait for loans to be repaid.",
+  "errDailyCap": "The fund cannot issue this credit at this time. Liquidity utilization has reached its safety limit. Issuance will resume when cash is recovered through repayments or new contributions to the fund.",
+  "errUtilizationCap": "The fund cannot issue this credit at this time. Liquidity utilization has reached its safety limit. Issuance will resume when cash is recovered through repayments or new contributions to the fund.",
   "errNoPriceFeed": "This token has no reference price available.",
   "errNoContracts": "Calls from external contracts are not allowed.",
   "errOnlyTimelock": "This action requires a proposal and 72-hour wait.",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "Repay the active loan before closing this account.",
   "errDead": "This account was closed. Create a new account.",
   "errFounderDestroy": "The founder account cannot be destroyed.",
-  "errCooldown48h": "You must wait 48 hours between loans.",
-  "errInsufficientLiquidity": "The pool does not have enough liquidity for this level.",
+  "errCooldown48h": "A period of 48 hours must elapse between credits. This condition applies to your account, not to fund liquidity.",
+  "errInsufficientLiquidity": "Available liquidity does not cover this level. You may request a lower level or wait until the fund receives more cash.",
   "errPegLost": "The token lost its reference value. No loans now.",
   "errStalePrice": "The reference price is outdated. Try again later.",
   "errUnsupportedToken": "This token is not enabled.",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "Opening Telegram…",
   "notificationTelegramChange": "Change Telegram",
   "notificationTelegramChangeHint": "If you lose that Telegram account, link another one here.",
-  "notificationTelegramChangeConfirm": "Alerts will go to the new Telegram. The current one will stop receiving them. Continue?"
+  "notificationTelegramChangeConfirm": "Alerts will go to the new Telegram. The current one will stop receiving them. Continue?",
+  "errLoanAlreadyActive": "You have an active credit. It must be settled before requesting a new one."
 }

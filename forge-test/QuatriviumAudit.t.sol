@@ -62,6 +62,8 @@ contract QuatriviumAuditForgeTest is Test {
 
     function test_default_count_brake_is_10000() public view {
         assertEq(credit.maxOriginationsPerWindow(), 10000);
+        assertEq(credit.maxUtilizationBps(), 8000);
+        assertEq(credit.SELLO_PRIMERA(), 7 days);
     }
 
     function test_donate_exact_gate_gives_zero_fame() public {
@@ -356,10 +358,10 @@ contract FamaLibPtsTest is Test {
         if (prev + amount <= 2 ether) assertEq(pts, 0);
     }
 
-    function test_tope_diez_por_ciento() public pure {
-        assertEq(QuatriviumFamaLib.topeOriginacionDia(1000 ether), 100 ether);
-        assertEq(QuatriviumFamaLib.topeCarrilChico(1000 ether), 100 ether);
-        assertEq(QuatriviumFamaLib.topeCarrilChico(200 ether), 50 ether);
+    function test_tope_util_grande_es_70_de_80() public pure {
+        assertEq(QuatriviumFamaLib.topeUtilGrande(8000), 7000);
+        assertEq(QuatriviumFamaLib.liqGeneral(1000 ether, 1 ether), 999 ether);
+        assertEq(QuatriviumFamaLib.liqGeneral(1 ether, 2 ether), 0);
     }
 
     function test_umbral_piso_y_fractal() public pure {
@@ -371,48 +373,41 @@ contract FamaLibPtsTest is Test {
         assertFalse(QuatriviumFamaLib.esCarrilChico(20_000 ether, 101 ether));
     }
 
-    function test_tope_nunca_mas_que_caja() public pure {
-        assertEq(QuatriviumFamaLib.topeOriginacionDia(40 ether), 4 ether);
-        assertEq(QuatriviumFamaLib.topeCarrilChico(40 ether), 40 ether);
-        assertEq(QuatriviumFamaLib.topeOriginacionDia(0), 0);
-        assertEq(QuatriviumFamaLib.topeCarrilChico(0), 0);
-    }
-
-    function testFuzz_tope_never_exceeds_caja(uint256 caja) public pure {
+    function testFuzz_umbral_piso_o_medio_por_ciento(uint256 caja) public pure {
         caja = bound(caja, 0, 1e27);
-        uint256 grande = QuatriviumFamaLib.topeOriginacionDia(caja);
-        uint256 chico = QuatriviumFamaLib.topeCarrilChico(caja);
         uint256 umbral = QuatriviumFamaLib.umbralCarrilChico(caja);
-        assertLe(grande, caja);
-        assertLe(chico, caja);
-        assertEq(grande, (caja * 1000) / 10000);
         uint256 medioPorciento = (caja * 1000) / 200000;
         uint256 esperadoUmbral = medioPorciento < 50 ether ? 50 ether : medioPorciento;
         assertEq(umbral, esperadoUmbral);
     }
 
-    function test_carril_chico_no_consume_grande() public {
-        (uint256 c, uint256 g) = this.wrapConsumir(200 ether, 0, 0, 50 ether);
-        assertEq(c, 50 ether);
-        assertEq(g, 0);
-        (c, g) = this.wrapConsumir(200 ether, 0, 80 ether, 1 ether);
-        assertEq(c, 1 ether);
-        assertEq(g, 80 ether);
+    function test_sello_primera_solo_l1_a_tiempo() public pure {
+        assertTrue(QuatriviumFamaLib.usaSelloPrimera(1 ether, 100, 99, 1 ether, 1, true));
+        assertFalse(QuatriviumFamaLib.usaSelloPrimera(1 ether, 100, 101, 1 ether, 1, true));
+        assertFalse(QuatriviumFamaLib.usaSelloPrimera(1 ether, 100, 99, 1 ether, 1, false));
+        assertFalse(QuatriviumFamaLib.usaSelloPrimera(1 ether, 100, 99, 50 ether, 1, true));
     }
 
-    function test_assert_cupo_blocks_over_cap() public {
+    function test_acceso_grande_para_en_70() public {
+        this.wrapAcceso(1000 ether, 0, 0, 50 ether, 8000, true);
         vm.expectRevert();
-        this.wrapConsumir(200 ether, 0, 0, 60 ether);
-        vm.expectRevert();
-        this.wrapConsumir(200 ether, 50 ether, 0, 50 ether);
+        this.wrapAcceso(85 ether, 0, 0, 60 ether, 8000, false);
     }
 
-    function wrapConsumir(
-        uint256 caja,
-        uint256 yaChico,
-        uint256 yaGrande,
-        uint256 add
-    ) external pure returns (uint256, uint256) {
-        return QuatriviumFamaLib.consumirCupo(caja, yaChico, yaGrande, add);
+    function test_acceso_chico_para_en_80() public {
+        this.wrapAcceso(100 ether, 0, 79 ether, 1 ether, 8000, true);
+        vm.expectRevert();
+        this.wrapAcceso(100 ether, 0, 80 ether, 1 ether, 8000, true);
+    }
+
+    function wrapAcceso(
+        uint256 totalLiq,
+        uint256 reservado,
+        uint256 outstanding,
+        uint256 monto,
+        uint256 utilMaxBps,
+        bool esChico
+    ) external pure {
+        QuatriviumFamaLib.requireAcceso(totalLiq, reservado, outstanding, monto, utilMaxBps, esChico);
     }
 }

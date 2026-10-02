@@ -430,6 +430,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `stubs/zlib-stub.js` — módulo JS/TS
 - `test/accounting.test.js` — módulo JS/TS
 - `test/accountWorld.test.js` — módulo JS/TS
+- `test/alta-registro.test.js` — módulo JS/TS
 - `test/brand-splash.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
 - `test/commission-levels.test.js` — módulo JS/TS
@@ -455,6 +456,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/liquidation.test.js` — módulo JS/TS
 - `test/loanLevels.test.js` — módulo JS/TS
 - `test/mlm.test.js` — módulo JS/TS
+- `test/money-invariants.test.js` — módulo JS/TS
 - `test/morosity.test.js` — módulo JS/TS
 - `test/origination-cupo.test.js` — módulo JS/TS
 - `test/peg.test.js` — módulo JS/TS

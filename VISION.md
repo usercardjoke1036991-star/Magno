@@ -163,8 +163,9 @@
 - textos institucionales, traducciones 17 idiomas y pantalla de carga con logo grande Quatrivium Finance
 - Blindaje: quorum 2-de-N en Reserva, tope diario y pausa de boost, mora sin pull, peg en donar, pinning GTS, destroy sin approve
 - Quitar destruir cuenta del protocolo para que Demo nazca igual que mainnet: una billetera, un telefono, se recupera con la frase
-- Cupo de originacion diario segun caja libre: 10 por ciento, piso 50 USDT, maximo 10000 altas
+- El pool manda: 80% liquidez, 70% grandes, sello 7 dias en el 1 USDT de verificar
 - Los prestamos chicos de nivel 1 no deben quedar bloqueados el mismo dia por un prestamo grande; alcance mundial con carril para altas nuevas
+- El pool manda la emision de credito: mas caja mas personas, sello interno de 7 dias en la primera de 1 USDT
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -306,3 +307,4 @@
 - [2026-10-01 22:49] Idea añadida al backlog: "Quitar destruir cuenta del protocolo para que Demo nazca igual que mainnet: una "
 - [2026-10-02 09:05] Idea añadida al backlog: "Cupo de originacion diario segun caja libre: 10 por ciento, piso 50 USDT, maximo"
 - [2026-10-02 09:30] Idea añadida al backlog: "Los prestamos chicos de nivel 1 no deben quedar bloqueados el mismo dia por un p"
+- [2026-10-02 12:24] Idea añadida al backlog: "El pool manda la emision de credito: mas caja mas personas, sello interno de 7 d"

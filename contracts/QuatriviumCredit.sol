@@ -17,8 +17,8 @@ import {QuatriviumFamaLib} from "./libraries/QuatriviumFamaLib.sol";
  *         Oraculo, pausa de emergencia y admin con timelock + confirmaciones.
  *
  * Escala: 1000 niveles, $1 a $1 000 000. 1-100 en LoanTierSeed; 101-1000 por formula en _tier.
- * Nivel 1 = 1e18 (1 USDT). El bono de 1 USDT al padrino sale del pool
- * (caja libre con piso) cuando el referido pide y paga su primer L1.
+ * Nivel 1 = 1e18 (1 USDT). Alta Real: 4 USDT (1 fundador, 1 Reserva, 1 sello, 1 padrino
+ * apartado). El padrino cobra ese 1 al pagar el primer L1; el interés se parte en comisiones.
  * El fundador cobra un recorte fijo de cada interes. Si una llave se compromete,
  * las otras fundadoras pueden reasignar fundador y owner (timelock + confirmaciones).
  * Las comisiones de red recorren toda la linea hacia arriba (no se cortan a 5).
@@ -39,7 +39,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     uint256 public constant MAX_ADMINS = 3;
     uint256 internal constant MAX_NIVEL_TOTAL = 1000;
 
-    /// @notice Bono Ãºnico al referidor directo cuando el referido paga su primer Nivel 1 (1 USDT del pool).
+    /// @notice 1 USDT apartado en el registro; se suelta al padrino al pagar el primer L1.
     uint256 public constant BONO_ACTIVACION = 1e18;
     uint8 internal constant MAX_LINEA = 40;
     uint256 internal constant REPUTACION_INICIAL = 100;
@@ -47,7 +47,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     uint256 public constant UMBRAL_BONO_RED = 250;
     uint256 public constant BONO_RED_USDT = 5e17;
     uint256 internal constant BONO_RED_PISO_CAJA_BP = 2000;
-    /// @notice Bono de hito = 20 USDT Ã— nivel (100 â†’ 2000, 1000 â†’ 20 000).
+    /// @notice Hitos 100–1000: 400 / 4k / 7k / 8.5k / 9k / 11.5k / 13.5k / 16k / 18k / 20k.
     /// @dev 15% fundador + 15/8/6/4/2% las primeras 5 generaciones. El resto va al pool;
     ///      generaciones 6+ toman de ese resto (0,8% y luego 0,4%) sin bajar del piso del pool.
     uint256 internal constant POOL_RECURRENTE_BP = 5000;
@@ -94,10 +94,15 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     uint256 public originatedChicoInWindow;
     uint256 public originatedPrincipalInWindow;
     uint256 public originationWindowStart;
-    /// @notice Tope de altas/día. Dos carriles al 10 %: chico = máx(50, 0,5 % caja).
+    /// @notice Conservado en ABI. Ya no raciona crédito; el pool (80 %) manda.
     uint256 public maxOriginationsPerWindow = 10000;
     uint256 public maxUtilizationBps = 8000;
-
+    uint256 public constant SELLO_PRIMERA = 7 days;
+    mapping(address => uint256) public verificadoAlPool;
+    mapping(address => uint256) public reservaPrimera;
+    mapping(address => uint256) public reservaPrimeraExpira;
+    mapping(address => address) public reservaPrimeraToken;
+    mapping(address => uint256) public totalReservadoPrimera;
     struct Level { uint256 montoPrestamo; uint256 plazo; uint256 tasaInteresBP; }
     mapping(uint256 => Level) private _niveles;
 
@@ -710,24 +715,45 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         _assertPeg(token);
         Level memory L = _tier(pedido);
         require(L.montoPrestamo > 0, "tier not set");
-        require(totalLiquidity[token] >= outstandingLoans[token] + L.montoPrestamo, "insufficient liquidity");
-        uint256 utilAfter = ((outstandingLoans[token] + L.montoPrestamo) * 10000) / totalLiquidity[token];
-        require(utilAfter <= maxUtilizationBps, "utilization cap");
-
-        if (block.timestamp > originationWindowStart + ORIGINATION_WINDOW) {
-            originationWindowStart = block.timestamp;
-            originationsInWindow = 0;
-            originatedChicoInWindow = 0;
-            originatedPrincipalInWindow = 0;
-        }
-        originationsInWindow += 1;
-        require(originationsInWindow <= maxOriginationsPerWindow, "daily origination cap");
-        (originatedChicoInWindow, originatedPrincipalInWindow) = QuatriviumFamaLib.consumirCupo(
-            _cajaLibre(token),
-            originatedChicoInWindow,
-            originatedPrincipalInWindow,
-            L.montoPrestamo
+        QuatriviumFamaLib.liberarSelloSiExpiro(
+            reservaPrimera,
+            reservaPrimeraExpira,
+            reservaPrimeraToken,
+            totalReservadoPrimera,
+            token,
+            msg.sender
         );
+        bool sello = QuatriviumFamaLib.usaSelloPrimera(
+            reservaPrimera[msg.sender],
+            reservaPrimeraExpira[msg.sender],
+            block.timestamp,
+            L.montoPrestamo,
+            pedido,
+            progreso.ultimoPrestamoTimestamp == 0
+        ) && reservaPrimeraToken[msg.sender] == token;
+        if (sello) {
+            QuatriviumFamaLib.consumirSello(
+                reservaPrimera,
+                reservaPrimeraExpira,
+                reservaPrimeraToken,
+                totalReservadoPrimera,
+                token,
+                msg.sender
+            );
+        } else {
+            uint256 reservado = totalReservadoPrimera[token];
+            uint256 base = QuatriviumFamaLib.liqGeneral(totalLiquidity[token], reservado);
+            uint256 cajaVista = base > outstandingLoans[token] ? base - outstandingLoans[token] : 0;
+            QuatriviumFamaLib.requireAcceso(
+                totalLiquidity[token],
+                reservado,
+                outstandingLoans[token],
+                L.montoPrestamo,
+                maxUtilizationBps,
+                QuatriviumFamaLib.esCarrilChico(cajaVista, L.montoPrestamo)
+            );
+        }
+        require(stableTokens[token].balanceOf(address(this)) >= L.montoPrestamo, "insufficient liquidity");
 
         progreso.ultimoPrestamoTimestamp = block.timestamp;
         usuarios[msg.sender].nivelActual = pedido;
@@ -952,7 +978,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
         address padre = redGenealogica[deudor].padre;
         if (habriaBonoA) {
-            uint256 pagadoBono = QuatriviumFamaLib.pagarBonoPool(
+            uint256 pagadoBono = QuatriviumFamaLib.pagarActivacion(
                 totalLiquidity,
                 reputacion,
                 stableTokens[token],
@@ -1255,7 +1281,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (nivel < 1) nivel = 1;
         uint256 next = hitoCobrado[msg.sender] + 100;
         require(next <= MAX_NIVEL_TOTAL && next <= nivel - (nivel % 100));
-        uint256 bono = next >= 200 ? 30000e18 : next * 20e18;
+        uint256 bono = QuatriviumFamaLib.bonoDeHito(next);
         uint256 caja = _cajaLibre(token);
         uint256 piso = (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000;
         require(caja > piso && caja - piso >= bono);
@@ -1288,6 +1314,32 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(tx.origin == msg.sender, "no contracts");
         _assertPeg(token);
         QuatriviumFamaLib.alimentarPool(totalLiquidity, stableTokens[token], token, msg.sender, amount);
+        uint256 prev = verificadoAlPool[msg.sender];
+        verificadoAlPool[msg.sender] = prev + amount;
+        if (prev < 1e18 && prev + amount >= 1e18) {
+            QuatriviumFamaLib.sellarPrimera(
+                reservaPrimera,
+                reservaPrimeraExpira,
+                reservaPrimeraToken,
+                totalReservadoPrimera,
+                progresoUsuarios[msg.sender].ultimoPrestamoTimestamp,
+                token,
+                msg.sender,
+                SELLO_PRIMERA
+            );
+        }
+    }
+
+    /// @notice Si el sello de 7 días caducó, esa 1 USDT vuelve a la caja general.
+    function liberarSelloPrimeraSiExpiro(address token, address user) external onlySupportedToken(token) {
+        QuatriviumFamaLib.liberarSelloSiExpiro(
+            reservaPrimera,
+            reservaPrimeraExpira,
+            reservaPrimeraToken,
+            totalReservadoPrimera,
+            token,
+            user
+        );
     }
 
     function pagarCanje(address token, address to, uint256 amount) external nonReentrant onlySupportedToken(token) {

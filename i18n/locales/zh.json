@@ -624,8 +624,8 @@
   "errAlreadyBound": "此钱包已关联手机和设备。",
   "errBadAttest": "手机验证码无效或已过期。请重新获取。",
   "errExpired": "验证码已过期。请重新获取。",
-  "errDailyCap": "协议每日新增贷款额度已用尽。",
-  "errUtilizationCap": "资金池利用率过高。请等待贷款被偿还。",
+  "errDailyCap": "基金目前无法发放此信贷。流动性使用率已达安全上限。待还款或新资金进入基金、现金恢复后，将恢复发放。",
+  "errUtilizationCap": "基金目前无法发放此信贷。流动性使用率已达安全上限。待还款或新资金进入基金、现金恢复后，将恢复发放。",
   "errNoPriceFeed": "该代币没有预言机。无法发放贷款。",
   "errNoContracts": "不接受来自合约的调用。",
   "errOnlyTimelock": "该管理操作需要提案、72 小时和确认。",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "销毁此钱包前请先还清进行中的贷款。剩余资金将进入资金池。",
   "errDead": "此钱包已被销毁。请在应用中创建新账户。",
   "errFounderDestroy": "创始人账户无法销毁。",
-  "errCooldown48h": "两笔贷款之间必须等待 48 小时。",
-  "errInsufficientLiquidity": "资金池流动性不足以支持此等级。",
+  "errCooldown48h": "两笔信贷之间须间隔 48 小时。此条件适用于您的账户，而非基金流动性。",
+  "errInsufficientLiquidity": "可用流动性不足以覆盖该等级金额。您可以申请更低等级，或等待基金获得更多现金。",
   "errPegLost": "预言机报告该代币已脱锚。贷款已暂停。",
   "errStalePrice": "预言机价格已过期。请稍后再试。",
   "errUnsupportedToken": "已部署的合约尚未启用该代币。",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "正在打开 Telegram…",
   "notificationTelegramChange": "更换 Telegram",
   "notificationTelegramChangeHint": "若丢失该 Telegram 账户，可在此关联另一个。",
-  "notificationTelegramChangeConfirm": "提醒将发到新的 Telegram。当前账户将不再收到。继续？"
+  "notificationTelegramChangeConfirm": "提醒将发到新的 Telegram。当前账户将不再收到。继续？",
+  "errLoanAlreadyActive": "您有一笔未结清信贷。须结清后方可再申请。"
 }

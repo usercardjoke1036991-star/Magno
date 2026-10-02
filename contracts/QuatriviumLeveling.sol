@@ -6,14 +6,12 @@ pragma solidity ^0.8.24;
  * @notice Misma curva de solicitudes que el núcleo + bonos de hito cada 100 niveles.
  *         L1 → 3; L2–9 → 5; desde $100 (L10) → 5, 10, 15…; L1000 no sube.
  *         En L1000 las solicitudes se acumulan; cada 100 pagos a tiempo se puede volver a cobrar el hito 1000.
- *         Bono: L100 = 20 USDT × nivel; desde L200, 30 000 USDT fijos cada 100 hasta 1000.
+ *         Bono proporcional: 400 / 4k / 7k / 8.5k / 9k / 11.5k / 13.5k / 16k / 18k / 20k.
  */
 contract QuatriviumLeveling {
-    uint256 public constant BONO_POR_NIVEL = 20e18;
     uint256 public constant HITO_PASO = 100;
-    uint256 public constant BONO_DESPUES_200 = 30000e18;
-    uint256 public constant BONO_NIVEL_MAXIMO = 30000e18;
-    uint256 public constant BONO_HITOS_TOTAL = 272000e18;
+    uint256 public constant BONO_NIVEL_MAXIMO = 20000e18;
+    uint256 public constant BONO_HITOS_TOTAL = 108400e18;
     uint256 public constant MAX_NIVEL = 1000;
     uint256 public constant DIVISION_SIZE = 100;
     uint256 public constant L1000_BONO_CADA = 100;
@@ -44,8 +42,16 @@ contract QuatriviumLeveling {
 
     function bonoDeHito(uint256 hito) public pure returns (uint256) {
         if (hito < HITO_PASO || hito > MAX_NIVEL || hito % HITO_PASO != 0) return 0;
-        if (hito >= 200) return BONO_DESPUES_200;
-        return hito * BONO_POR_NIVEL;
+        if (hito == 100) return 400e18;
+        if (hito == 200) return 4000e18;
+        if (hito == 300) return 7000e18;
+        if (hito == 400) return 8500e18;
+        if (hito == 500) return 9000e18;
+        if (hito == 600) return 11500e18;
+        if (hito == 700) return 13500e18;
+        if (hito == 800) return 16000e18;
+        if (hito == 900) return 18000e18;
+        return 20000e18;
     }
 
     function canPayHito(uint256 cajaLibre, uint256 liquidezTotal, uint256 hito) public pure returns (bool) {

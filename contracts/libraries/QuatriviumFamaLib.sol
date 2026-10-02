@@ -14,46 +14,178 @@ library QuatriviumFamaLib {
     using SafeERC20 for IERC20;
 
     uint256 internal constant BONO_ACTIVACION = 1e18;
-    uint256 internal constant ORIGINACION_DIA_BP = 1000;
-    /// @notice Suelo humano. El 0,5 % de umbral es ORIGINACION_DIA_BP / 20.
-    uint256 internal constant ORIGINACION_DIA_PISO = 50e18;
+    uint256 internal constant CARRIL_REF_BP = 1000;
+    uint256 internal constant CARRIL_CHICO_PISO = 50e18;
+    uint256 internal constant UTIL_GRANDE_NUM = 7000;
+    uint256 internal constant UTIL_GRANDE_DEN = 8000;
 
-    /// @notice Chico si el préstamo no pasa de max(50 USDT, 0,5 % de caja).
+    /// @notice Chico si el préstamo no pasa de max(50 USDT, 0,5 % de caja general).
     function umbralCarrilChico(uint256 caja) public pure returns (uint256 u) {
-        u = (caja * ORIGINACION_DIA_BP) / 200000;
-        if (u < ORIGINACION_DIA_PISO) u = ORIGINACION_DIA_PISO;
+        u = (caja * CARRIL_REF_BP) / 200000;
+        if (u < CARRIL_CHICO_PISO) u = CARRIL_CHICO_PISO;
     }
 
     function esCarrilChico(uint256 caja, uint256 monto) public pure returns (bool) {
         return monto > 0 && monto <= umbralCarrilChico(caja);
     }
 
-    /// @notice Potómetro grande: 10 % de caja libre.
-    function topeOriginacionDia(uint256 caja) public pure returns (uint256 room) {
-        room = (caja * ORIGINACION_DIA_BP) / 10000;
-        if (room > caja) room = caja;
+    function liqGeneral(uint256 totalLiq, uint256 reservado) public pure returns (uint256) {
+        return totalLiq > reservado ? totalLiq - reservado : 0;
     }
 
-    /// @notice Potómetro chico: max(50 USDT, 10 % de caja), nunca más que la caja.
-    function topeCarrilChico(uint256 caja) public pure returns (uint256 room) {
-        room = (caja * ORIGINACION_DIA_BP) / 10000;
-        if (room < ORIGINACION_DIA_PISO) room = ORIGINACION_DIA_PISO;
-        if (room > caja) room = caja;
+    /// @notice Hitos cada 100 hasta 1000: ~mitad del interés de ese préstamo (no 30 000 fijos).
+    function bonoDeHito(uint256 hito) external pure returns (uint256) {
+        if (hito == 100) return 400e18;
+        if (hito == 200) return 4000e18;
+        if (hito == 300) return 7000e18;
+        if (hito == 400) return 8500e18;
+        if (hito == 500) return 9000e18;
+        if (hito == 600) return 11500e18;
+        if (hito == 700) return 13500e18;
+        if (hito == 800) return 16000e18;
+        if (hito == 900) return 18000e18;
+        if (hito == 1000) return 20000e18;
+        return 0;
     }
 
-    function consumirCupo(
-        uint256 caja,
-        uint256 yaChico,
-        uint256 yaGrande,
-        uint256 add
-    ) external pure returns (uint256, uint256) {
-        require(add > 0);
-        if (add <= umbralCarrilChico(caja)) {
-            require(yaChico + add <= topeCarrilChico(caja));
-            return (yaChico + add, yaGrande);
+    /// @notice Los grandes paran al 70 % si el tope global es 80 % (misma proporción si el admin mueve el 80 %).
+    function topeUtilGrande(uint256 utilMaxBps) public pure returns (uint256) {
+        return (utilMaxBps * UTIL_GRANDE_NUM) / UTIL_GRANDE_DEN;
+    }
+
+    function usaSelloPrimera(
+        uint256 reserved,
+        uint256 expira,
+        uint256 ts,
+        uint256 monto,
+        uint256 nivel,
+        bool nuncaPidio
+    ) public pure returns (bool) {
+        return nuncaPidio && nivel == 1 && monto == BONO_ACTIVACION && reserved >= BONO_ACTIVACION && ts <= expira;
+    }
+
+    function requireAcceso(
+        uint256 totalLiq,
+        uint256 reservado,
+        uint256 outstanding,
+        uint256 monto,
+        uint256 utilMaxBps,
+        bool esChico
+    ) internal pure {
+        require(monto > 0);
+        uint256 base = liqGeneral(totalLiq, reservado);
+        require(base >= outstanding + monto, "insufficient liquidity");
+        uint256 utilAfter = ((outstanding + monto) * 10000) / base;
+        if (!esChico) {
+            require(utilAfter <= topeUtilGrande(utilMaxBps), "insufficient liquidity");
         }
-        require(yaGrande + add <= topeOriginacionDia(caja));
-        return (yaChico, yaGrande + add);
+        require(utilAfter <= utilMaxBps, "utilization cap");
+    }
+
+    function liberarSelloSiExpiro(
+        mapping(address => uint256) storage reservaPrimera,
+        mapping(address => uint256) storage reservaPrimeraExpira,
+        mapping(address => address) storage reservaPrimeraToken,
+        mapping(address => uint256) storage totalReservadoPrimera,
+        address tokenHint,
+        address user
+    ) external {
+        uint256 r = reservaPrimera[user];
+        if (r == 0 || block.timestamp <= reservaPrimeraExpira[user]) return;
+        address tkn = reservaPrimeraToken[user];
+        if (tkn == address(0)) tkn = tokenHint;
+        reservaPrimera[user] = 0;
+        reservaPrimeraExpira[user] = 0;
+        reservaPrimeraToken[user] = address(0);
+        uint256 tot = totalReservadoPrimera[tkn];
+        totalReservadoPrimera[tkn] = tot > r ? tot - r : 0;
+    }
+
+    function pagarActivacion(
+        mapping(address => uint256) storage totalLiquidity,
+        mapping(address => uint256) storage reputacion,
+        IERC20 token,
+        address tokenAddr,
+        address padre,
+        address deudor,
+        bool padreOk,
+        uint256 caja,
+        uint256 piso,
+        address hermano
+    ) external returns (uint256 bono) {
+        if (hermano != address(0) && padreOk && padre != address(0) && padre != deudor) {
+            (bool okA, bytes memory rawA) = hermano.staticcall(abi.encodeWithSignature("alta()"));
+            if (okA && rawA.length >= 32) {
+                address alta = abi.decode(rawA, (address));
+                if (alta != address(0)) {
+                    (bool ok, bytes memory data) = alta.call(
+                        abi.encodeWithSignature("soltarPadrino(address,address)", deudor, padre)
+                    );
+                    if (ok && data.length >= 32) {
+                        bono = abi.decode(data, (uint256));
+                        if (bono > 0) return bono;
+                    }
+                }
+            }
+        }
+        return pagarBonoPool(
+            totalLiquidity,
+            reputacion,
+            token,
+            tokenAddr,
+            padre,
+            deudor,
+            padreOk,
+            caja,
+            piso,
+            hermano
+        );
+    }
+
+    function sellarPrimera(
+        mapping(address => uint256) storage reservaPrimera,
+        mapping(address => uint256) storage reservaPrimeraExpira,
+        mapping(address => address) storage reservaPrimeraToken,
+        mapping(address => uint256) storage totalReservadoPrimera,
+        uint256 yaPidioTimestamp,
+        address token,
+        address user,
+        uint256 selloDuracion
+    ) public {
+        if (yaPidioTimestamp != 0) return;
+        uint256 r = reservaPrimera[user];
+        if (r != 0 && block.timestamp <= reservaPrimeraExpira[user]) return;
+        if (r != 0) {
+            address tknOld = reservaPrimeraToken[user];
+            if (tknOld == address(0)) tknOld = token;
+            uint256 totOld = totalReservadoPrimera[tknOld];
+            totalReservadoPrimera[tknOld] = totOld > r ? totOld - r : 0;
+            reservaPrimera[user] = 0;
+            reservaPrimeraExpira[user] = 0;
+            reservaPrimeraToken[user] = address(0);
+        }
+        reservaPrimera[user] = BONO_ACTIVACION;
+        reservaPrimeraExpira[user] = block.timestamp + selloDuracion;
+        reservaPrimeraToken[user] = token;
+        totalReservadoPrimera[token] += BONO_ACTIVACION;
+    }
+
+    function consumirSello(
+        mapping(address => uint256) storage reservaPrimera,
+        mapping(address => uint256) storage reservaPrimeraExpira,
+        mapping(address => address) storage reservaPrimeraToken,
+        mapping(address => uint256) storage totalReservadoPrimera,
+        address token,
+        address user
+    ) external {
+        uint256 r = reservaPrimera[user];
+        address tkn = reservaPrimeraToken[user];
+        reservaPrimera[user] = 0;
+        reservaPrimeraExpira[user] = 0;
+        reservaPrimeraToken[user] = address(0);
+        if (tkn == address(0)) tkn = token;
+        uint256 tot = totalReservadoPrimera[tkn];
+        totalReservadoPrimera[tkn] = tot > r ? tot - r : 0;
     }
 
     event ReputationUpdated(address indexed usuario, uint256 nuevaReputacion);
@@ -114,7 +246,7 @@ library QuatriviumFamaLib {
         uint256 caja,
         uint256 piso,
         address hermano
-    ) external returns (uint256 bono) {
+    ) public returns (uint256 bono) {
         if (!padreOk || padre == address(0) || padre == deudor) {
             return 0;
         }

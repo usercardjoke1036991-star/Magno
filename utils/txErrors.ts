@@ -43,6 +43,7 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['expired', 'errExpired'],
   ['daily origination cap', 'errDailyCap'],
   ['utilization cap', 'errUtilizationCap'],
+  ['loan already active', 'errLoanAlreadyActive'],
   ['no price feed', 'errNoPriceFeed'],
   ['no contracts', 'errNoContracts'],
   ['only timelock', 'errOnlyTimelock'],

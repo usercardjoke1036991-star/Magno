@@ -624,8 +624,8 @@
   "errAlreadyBound": "Bu cüzdana zaten telefon ve cihaz bağlı.",
   "errBadAttest": "Telefon kodu geçersiz veya süresi dolmuş. Yeni bir tane isteyin.",
   "errExpired": "Kimlik doğrulama kodunun süresi doldu. Yeni bir tane isteyin.",
-  "errDailyCap": "Yeni krediler için protokolün günlük tavanına ulaşıldı.",
-  "errUtilizationCap": "Havuz çok dolu. Kredilerin geri ödenmesini bekleyin.",
+  "errDailyCap": "Fon şu anda bu krediyi kullandıramaz. Likidite kullanımı güvenlik sınırına ulaştı. Geri ödemeler veya fona yeni katkılarla nakit toparlandığında kullandırım yeniden başlar.",
+  "errUtilizationCap": "Fon şu anda bu krediyi kullandıramaz. Likidite kullanımı güvenlik sınırına ulaştı. Geri ödemeler veya fona yeni katkılarla nakit toparlandığında kullandırım yeniden başlar.",
   "errNoPriceFeed": "Bu token’ın oracle’ı yok. Kredi verilemez.",
   "errNoContracts": "Sözleşmelerden gelen çağrılar kabul edilmez.",
   "errOnlyTimelock": "Bu yönetim eylemi öneri, 72 saat ve onaylar ister.",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "Bu cüzdanı yok etmeden önce aktif krediyi ödeyin. Kalan fonlar havuza gider.",
   "errDead": "Bu cüzdan zaten yok edildi. Uygulamada yeni bir hesap oluşturun.",
   "errFounderDestroy": "Kurucu hesap yok edilemez.",
-  "errCooldown48h": "Bir kredi ile sonraki arasında 48 saat beklemelisiniz.",
-  "errInsufficientLiquidity": "Havuzda bu seviye için yeterli likidite yok.",
+  "errCooldown48h": "Krediler arasında 48 saat geçmelidir. Bu koşul hesabınıza aittir; fon likiditesine değil.",
+  "errInsufficientLiquidity": "Kullanılabilir likidite bu seviyenin tutarını karşılamıyor. Daha düşük bir seviye talep edebilir veya fonun daha fazla nakit almasını bekleyebilirsiniz.",
   "errPegLost": "Oracle token’ın bağını kaybettiğini bildiriyor. Krediler duraklatıldı.",
   "errStalePrice": "Oracle fiyatı eski. Daha sonra deneyin.",
   "errUnsupportedToken": "Bu token yayımlanan sözleşmede etkin değil.",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "Telegram açılıyor…",
   "notificationTelegramChange": "Telegram’ı değiştir",
   "notificationTelegramChangeHint": "O Telegram hesabını kaybederseniz, buradan başka birini bağlayın.",
-  "notificationTelegramChangeConfirm": "Bildirimler yeni Telegram’a gider. Eski hesap almayı bırakır. Devam?"
+  "notificationTelegramChangeConfirm": "Bildirimler yeni Telegram’a gider. Eski hesap almayı bırakır. Devam?",
+  "errLoanAlreadyActive": "Aktif bir krediniz var. Yeni talepte bulunmadan önce kapatılmalıdır."
 }

@@ -313,4 +313,27 @@ describe('QuatriviumReserva', function () {
       reserva.connect(attester).pagarBoostComision(user.address, ethers.parseUnits('1000000', 18), id)
     ).to.be.revertedWithCustomError(reserva, 'TopeDiario');
   });
+
+  it('lowers APY when locked capital is large versus the pot', async () => {
+    const { reserva, user, founder } = await deployReserva();
+    await reserva.connect(founder).aportarBote(ethers.parseUnits('10', 18));
+    await reserva.connect(user).bloquear(ethers.parseUnits('200', 18));
+    expect(await reserva.apyHoyBps()).to.equal(500n);
+    const salud = await reserva.saludReserva();
+    expect(salud[0]).to.equal(ethers.parseUnits('10', 18));
+    expect(salud[1]).to.equal(ethers.parseUnits('200', 18));
+    expect(salud[2]).to.equal(500n);
+  });
+
+  it('lets guardians withdraw pot after the 72h wait', async () => {
+    const { token, reserva, owner, founder, extra } = await deployReserva();
+    await reserva.connect(founder).aportarBote(ethers.parseUnits('8', 18));
+    await reserva.connect(owner).proponerRetiroBote(extra.address, ethers.parseUnits('3', 18));
+    await expect(reserva.connect(owner).applyRetiroBote()).to.be.revertedWithCustomError(reserva, 'EsperaTimelock');
+    await ethers.provider.send('evm_increaseTime', [72 * 60 * 60]);
+    await ethers.provider.send('evm_mine');
+    await reserva.connect(owner).applyRetiroBote();
+    expect(await reserva.bote()).to.equal(ethers.parseUnits('5', 18));
+    expect(await token.balanceOf(extra.address)).to.equal(ethers.parseUnits('3', 18));
+  });
 });

@@ -624,8 +624,8 @@
   "errAlreadyBound": "Esta carteira já tem telefone e dispositivo vinculados.",
   "errBadAttest": "O código do telefone é inválido ou expirou. Solicite um novo.",
   "errExpired": "O código de autenticação expirou. Solicite um novo.",
-  "errDailyCap": "O limite diário do protocolo para novos empréstimos foi atingido.",
-  "errUtilizationCap": "O pool está muito utilizado. Espere os empréstimos serem pagos.",
+  "errDailyCap": "O fundo não pode emitir este crédito neste momento. A utilização da liquidez atingiu o limite de segurança. A emissão será retomada quando houver recuperação de caixa: amortizações ou novos aportes ao fundo.",
+  "errUtilizationCap": "O fundo não pode emitir este crédito neste momento. A utilização da liquidez atingiu o limite de segurança. A emissão será retomada quando houver recuperação de caixa: amortizações ou novos aportes ao fundo.",
   "errNoPriceFeed": "Este token não tem oráculo. Não é possível emitir empréstimos.",
   "errNoContracts": "Chamadas de contratos não são aceitas.",
   "errOnlyTimelock": "Essa ação de admin precisa de uma proposta, 72 horas e confirmações.",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "Pague o empréstimo ativo antes de destruir esta carteira. Os fundos restantes vão para o pool.",
   "errDead": "Esta carteira já foi destruída. Crie uma conta nova no app.",
   "errFounderDestroy": "A conta fundadora não pode ser destruída.",
-  "errCooldown48h": "Você precisa esperar 48 horas entre um empréstimo e o próximo.",
-  "errInsufficientLiquidity": "O pool não tem liquidez suficiente para este nível.",
+  "errCooldown48h": "Devem decorrer 48 horas entre créditos. Esta condição corresponde à sua conta, não à liquidez do fundo.",
+  "errInsufficientLiquidity": "A liquidez disponível não cobre o montante deste nível. Pode solicitar um nível inferior ou aguardar que o fundo receba mais caixa.",
   "errPegLost": "O oráculo indica que o token perdeu o peg. Os empréstimos estão pausados.",
   "errStalePrice": "O preço do oráculo está desatualizado. Tente mais tarde.",
   "errUnsupportedToken": "Este token não está habilitado no contrato implantado.",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "A abrir o Telegram…",
   "notificationTelegramChange": "Alterar Telegram",
   "notificationTelegramChangeHint": "Se perder essa conta de Telegram, vincule outra aqui.",
-  "notificationTelegramChangeConfirm": "Os avisos passam para o Telegram novo. O atual deixa de os receber. Continuar?"
+  "notificationTelegramChangeConfirm": "Os avisos passam para o Telegram novo. O atual deixa de os receber. Continuar?",
+  "errLoanAlreadyActive": "Tem um crédito ativo. Deve liquidá-lo antes de solicitar um novo."
 }

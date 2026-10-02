@@ -624,8 +624,8 @@
   "errAlreadyBound": "このウォレットには既に電話と端末が連携されています。",
   "errBadAttest": "電話コードが無効か期限切れです。新しいものをリクエストしてください。",
   "errExpired": "認証コードの有効期限が切れました。新しいものをリクエストしてください。",
-  "errDailyCap": "新規ローンのプロトコル日次上限に達しました。",
-  "errUtilizationCap": "プールの利用率が高すぎます。ローンの返済をお待ちください。",
+  "errDailyCap": "現在、ファンドはこの与信を実行できません。流動性の使用率が安全上限に達しています。返済または新たな拠出により資金が回復次第、実行を再開します。",
+  "errUtilizationCap": "現在、ファンドはこの与信を実行できません。流動性の使用率が安全上限に達しています。返済または新たな拠出により資金が回復次第、実行を再開します。",
   "errNoPriceFeed": "このトークンにはオラクルがありません。ローンを実行できません。",
   "errNoContracts": "コントラクトからの呼び出しは受け付けません。",
   "errOnlyTimelock": "その管理操作には提案、72時間、確認が必要です。",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "このウォレットを破棄する前に進行中のローンを返済してください。残りの資金はプールに入ります。",
   "errDead": "このウォレットは既に破棄されています。アプリで新しい口座を作成してください。",
   "errFounderDestroy": "創業者口座は破棄できません。",
-  "errCooldown48h": "ローンと次のローンの間は48時間待つ必要があります。",
-  "errInsufficientLiquidity": "このレベルに対してプールの流動性が足りません。",
+  "errCooldown48h": "与信と与信の間に48時間を置く必要があります。この条件はお客様の口座に適用され、ファンドの流動性ではありません。",
+  "errInsufficientLiquidity": "利用可能な流動性がこのレベルの金額を賄いません。下位レベルを申し込むか、ファンドへの資金流入をお待ちください。",
   "errPegLost": "オラクルがトークンのペッグ喪失を報告しています。ローンは停止しています。",
   "errStalePrice": "オラクル価格が古くなっています。しばらくしてからお試しください。",
   "errUnsupportedToken": "デプロイ済みのコントラクトではこのトークンは有効ではありません。",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "Telegram を開いています…",
   "notificationTelegramChange": "Telegram を変更",
   "notificationTelegramChangeHint": "その Telegram アカウントを失った場合は、ここで別のものを連携します。",
-  "notificationTelegramChangeConfirm": "通知は新しい Telegram に届きます。現在のアカウントは届かなくなります。続けますか？"
+  "notificationTelegramChangeConfirm": "通知は新しい Telegram に届きます。現在のアカウントは届かなくなります。続けますか？",
+  "errLoanAlreadyActive": "有効な与信があります。新規お申込みの前に完済してください。"
 }

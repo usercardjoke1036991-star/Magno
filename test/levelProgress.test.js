@@ -9,8 +9,21 @@ function requiredCountPlanned(id) {
   return 5 * (id - 9);
 }
 
+const HITO_USDT = {
+  100: 400,
+  200: 4000,
+  300: 7000,
+  400: 8500,
+  500: 9000,
+  600: 11500,
+  700: 13500,
+  800: 16000,
+  900: 18000,
+  1000: 20000,
+};
+
 function bonusOf(level) {
-  return ethers.parseUnits(String(level >= 200 ? 30000 : level * 20), 18);
+  return ethers.parseUnits(String(HITO_USDT[level] || 0), 18);
 }
 
 async function deployHarness() {
@@ -52,8 +65,8 @@ describe('QuatriviumLeveling - hermano de solicitudes', function () {
     expect(await leveling.requiredCount(1000)).to.equal(4955n);
     expect(await leveling.bonoDeHito(100)).to.equal(bonusOf(100));
     expect(await leveling.bonoDeHito(200)).to.equal(bonusOf(200));
-    expect(await leveling.bonoDeHito(1000)).to.equal(ethers.parseUnits('30000', 18));
-    expect(await leveling.BONO_HITOS_TOTAL()).to.equal(ethers.parseUnits('272000', 18));
+    expect(await leveling.bonoDeHito(1000)).to.equal(ethers.parseUnits('20000', 18));
+    expect(await leveling.BONO_HITOS_TOTAL()).to.equal(ethers.parseUnits('108400', 18));
     for (let id = 1; id <= 1000; id += 17) {
       expect(await leveling.requiredCount(id)).to.equal(BigInt(requiredCountPlanned(id)));
     }
@@ -170,7 +183,7 @@ describe('QuatriviumCredit - bono de hito cada 100 niveles', function () {
 
   it('locks the milestone bonus when free cash is below the 20% floor', async () => {
     const { token, contract, owner, user, tokenAddr } = await deployHarness();
-    await seedPool(token, contract, owner, '500');
+    await seedPool(token, contract, owner, '300');
     await registerAndFund(token, contract, user);
     await contract.forceNivel(user.address, 100);
     await expect(contract.connect(user).cobrarBonoHito(tokenAddr)).to.be.reverted;

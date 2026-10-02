@@ -624,8 +624,8 @@
   "errAlreadyBound": "Ví này đã có điện thoại và thiết bị liên kết.",
   "errBadAttest": "Mã điện thoại không hợp lệ hoặc hết hạn. Yêu cầu mã mới.",
   "errExpired": "Mã xác thực đã hết hạn. Yêu cầu mã mới.",
-  "errDailyCap": "Đã đạt trần ngày của giao thức cho khoản vay mới.",
-  "errUtilizationCap": "Quỹ đang dùng quá mức. Đợi các khoản vay được trả.",
+  "errDailyCap": "Quỹ hiện không thể cấp tín dụng này. Mức sử dụng thanh khoản đã đạt giới hạn an toàn. Việc cấp sẽ tiếp tục khi dòng tiền được phục hồi nhờ hoàn trả hoặc đóng góp mới vào quỹ.",
+  "errUtilizationCap": "Quỹ hiện không thể cấp tín dụng này. Mức sử dụng thanh khoản đã đạt giới hạn an toàn. Việc cấp sẽ tiếp tục khi dòng tiền được phục hồi nhờ hoàn trả hoặc đóng góp mới vào quỹ.",
   "errNoPriceFeed": "Token này không có oracle. Không thể cấp khoản vay.",
   "errNoContracts": "Không chấp nhận lệnh gọi từ hợp đồng.",
   "errOnlyTimelock": "Hành động quản trị đó cần đề xuất, 72 giờ và xác nhận.",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "Trả khoản vay đang hoạt động trước khi hủy ví này. Tiền còn lại vào quỹ.",
   "errDead": "Ví này đã bị hủy. Tạo tài khoản mới trong ứng dụng.",
   "errFounderDestroy": "Không thể hủy tài khoản người sáng lập.",
-  "errCooldown48h": "Bạn phải đợi 48 giờ giữa khoản vay này và khoản tiếp theo.",
-  "errInsufficientLiquidity": "Quỹ không đủ thanh khoản cho cấp này.",
+  "errCooldown48h": "Phải cách 48 giờ giữa các khoản tín dụng. Điều kiện này áp dụng cho tài khoản của bạn, không phải thanh khoản của quỹ.",
+  "errInsufficientLiquidity": "Thanh khoản khả dụng không đủ cho số tiền của cấp này. Bạn có thể yêu cầu cấp thấp hơn hoặc chờ quỹ nhận thêm tiền.",
   "errPegLost": "Oracle báo token mất neo. Khoản vay đã tạm dừng.",
   "errStalePrice": "Giá oracle đã cũ. Thử lại sau.",
   "errUnsupportedToken": "Token này chưa được bật trên hợp đồng đã triển khai.",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "Đang mở Telegram…",
   "notificationTelegramChange": "Đổi Telegram",
   "notificationTelegramChangeHint": "Nếu mất tài khoản Telegram đó, hãy liên kết tài khoản khác tại đây.",
-  "notificationTelegramChangeConfirm": "Thông báo sẽ đến Telegram mới. Tài khoản hiện tại sẽ ngừng nhận. Tiếp tục?"
+  "notificationTelegramChangeConfirm": "Thông báo sẽ đến Telegram mới. Tài khoản hiện tại sẽ ngừng nhận. Tiếp tục?",
+  "errLoanAlreadyActive": "Bạn đang có tín dụng còn hiệu lực. Phải tất toán trước khi yêu cầu khoản mới."
 }

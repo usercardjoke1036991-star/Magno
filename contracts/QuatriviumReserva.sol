@@ -58,6 +58,12 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     uint256 public pendienteFundadorDesde;
     address public pendienteFundadorProposer;
     uint256 public bote;
+    address public altaFuente;
+    uint256 public totalBloqueado;
+    address public pendienteRetiroA;
+    uint256 public pendienteRetiroMonto;
+    uint256 public pendienteRetiroDesde;
+    address public pendienteRetiroProposer;
     address public pendienteFamaCaja;
     uint256 public pendienteFamaCajaDesde;
     address public pendienteFamaCajaProposer;
@@ -109,6 +115,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     event Desbloqueado(address indexed usuario, uint256 principal, uint256 rendimiento, uint256 corteFundador);
     event Renovado(address indexed usuario, uint256 principal, uint256 rendimiento, uint256 corteFundador);
     event BoteAportado(address indexed de, uint256 monto);
+    event BoteRetirado(address indexed a, uint256 monto);
     event BoostComision(address indexed beneficiario, uint256 montoBase, uint256 extra, uint256 corteFundador);
     event FundadorCambiado(address indexed next);
     event CreditCambiado(address indexed next);
@@ -158,9 +165,19 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         return 500;
     }
 
-    function techoRendimiento(uint256 principal, uint256 elapsed) public pure returns (uint256) {
+    function apyHoyBps() public view returns (uint256) {
+        if (totalBloqueado == 0) return MAX_APY_BP;
+        uint256 raw = (bote * 10000) / totalBloqueado;
+        return raw > MAX_APY_BP ? MAX_APY_BP : raw;
+    }
+
+    function saludReserva() external view returns (uint256 bote_, uint256 bloqueado_, uint256 apyBps) {
+        return (bote, totalBloqueado, apyHoyBps());
+    }
+
+    function techoRendimiento(uint256 principal, uint256 elapsed) public view returns (uint256) {
         if (elapsed > LOCK) elapsed = LOCK;
-        return (principal * MAX_APY_BP * elapsed) / (10000 * YEAR);
+        return (principal * apyHoyBps() * elapsed) / (10000 * YEAR);
     }
 
     function desbloqueoDe(address usuario) public view returns (uint256) {
@@ -183,6 +200,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
 
         token.safeTransferFrom(msg.sender, address(this), monto);
         posiciones[msg.sender] = Posicion(monto, block.timestamp, true, enRed);
+        totalBloqueado += monto;
         boostPagado[msg.sender] = 0;
         emit Bloqueado(msg.sender, monto, block.timestamp + LOCK);
     }
@@ -204,6 +222,42 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         token.safeTransferFrom(msg.sender, address(this), monto);
         bote += monto;
         emit BoteAportado(msg.sender, monto);
+    }
+
+    function setAltaFuente(address next) external {
+        if (msg.sender != owner && !_esAdminCredit()) revert SoloAdmin();
+        if (altaFuente != address(0) || next == address(0)) revert DestinoCero();
+        altaFuente = next;
+    }
+
+    function onAlta(uint256 monto) external {
+        if (msg.sender != altaFuente && msg.sender != credit) revert SoloAdmin();
+        if (monto == 0) revert MontoCero();
+        bote += monto;
+        emit BoteAportado(msg.sender, monto);
+    }
+
+    function proponerRetiroBote(address a, uint256 monto) external onlyGuardian {
+        if (a == address(0) || monto == 0 || monto > bote) revert MontoCero();
+        pendienteRetiroA = a;
+        pendienteRetiroMonto = monto;
+        pendienteRetiroDesde = block.timestamp;
+        pendienteRetiroProposer = msg.sender;
+    }
+
+    function applyRetiroBote() external onlyGuardian {
+        if (pendienteRetiroA == address(0) || pendienteRetiroDesde == 0) revert NadaQueMover();
+        _exigirQuorum(pendienteRetiroProposer, pendienteRetiroDesde);
+        uint256 monto = pendienteRetiroMonto;
+        address a = pendienteRetiroA;
+        if (monto == 0 || monto > bote) revert NadaQueMover();
+        pendienteRetiroA = address(0);
+        pendienteRetiroMonto = 0;
+        pendienteRetiroDesde = 0;
+        pendienteRetiroProposer = address(0);
+        bote -= monto;
+        token.safeTransfer(a, monto);
+        emit BoteRetirado(a, monto);
     }
 
     function setFamaCaja(address next) external onlyGuardian {
@@ -464,6 +518,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
                 p.enRed = padre != address(0);
             }
         } else {
+            totalBloqueado -= principal;
             delete posiciones[msg.sender];
             delete boostPagado[msg.sender];
             token.safeTransfer(msg.sender, principal);

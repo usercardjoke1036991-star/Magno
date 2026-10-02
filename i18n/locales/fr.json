@@ -624,8 +624,8 @@
   "errAlreadyBound": "Ce portefeuille a déjà un téléphone et un appareil liés.",
   "errBadAttest": "Le code téléphone est invalide ou expiré. Demandez-en un nouveau.",
   "errExpired": "Le code d’authentification a expiré. Demandez-en un nouveau.",
-  "errDailyCap": "Le plafond quotidien du protocole pour les nouveaux prêts a été atteint.",
-  "errUtilizationCap": "Le pool est trop utilisé. Attendez que des prêts soient remboursés.",
+  "errDailyCap": "Le fonds ne peut pas émettre ce crédit pour le moment. L’utilisation de la liquidité a atteint sa limite de sécurité. L’émission reprendra lorsque la trésorerie sera reconstituée par des remboursements ou de nouveaux apports.",
+  "errUtilizationCap": "Le fonds ne peut pas émettre ce crédit pour le moment. L’utilisation de la liquidité a atteint sa limite de sécurité. L’émission reprendra lorsque la trésorerie sera reconstituée par des remboursements ou de nouveaux apports.",
   "errNoPriceFeed": "Ce token n’a pas d’oracle. Les prêts ne peuvent pas être émis.",
   "errNoContracts": "Les appels depuis des contrats ne sont pas acceptés.",
   "errOnlyTimelock": "Cette action admin nécessite une proposition, 72 heures et des confirmations.",
@@ -636,8 +636,8 @@
   "errActiveLoanDestroy": "Remboursez le prêt actif avant de détruire ce portefeuille. Les fonds restants vont au pool.",
   "errDead": "Ce portefeuille a déjà été détruit. Créez un nouveau compte dans l’app.",
   "errFounderDestroy": "Le compte fondateur ne peut pas être détruit.",
-  "errCooldown48h": "Vous devez attendre 48 heures entre un prêt et le suivant.",
-  "errInsufficientLiquidity": "Le pool n’a pas assez de liquidité pour ce niveau.",
+  "errCooldown48h": "Un délai de 48 heures doit s’écouler entre deux crédits. Cette condition concerne votre compte, et non la liquidité du fonds.",
+  "errInsufficientLiquidity": "La liquidité disponible ne couvre pas le montant de ce niveau. Vous pouvez demander un niveau inférieur ou attendre que le fonds reçoive davantage de trésorerie.",
   "errPegLost": "L’oracle indique que le token a perdu son peg. Les prêts sont en pause.",
   "errStalePrice": "Le prix de l’oracle est périmé. Réessayez plus tard.",
   "errUnsupportedToken": "Ce token n’est pas activé sur le contrat déployé.",
@@ -1182,5 +1182,6 @@
   "notificationTelegramLinking": "Ouverture de Telegram…",
   "notificationTelegramChange": "Changer Telegram",
   "notificationTelegramChangeHint": "Si vous perdez ce compte Telegram, liez-en un autre ici.",
-  "notificationTelegramChangeConfirm": "Les avis iront vers le nouveau Telegram. L’actuel n’en recevra plus. Continuer ?"
+  "notificationTelegramChangeConfirm": "Les avis iront vers le nouveau Telegram. L’actuel n’en recevra plus. Continuer ?",
+  "errLoanAlreadyActive": "Vous avez un crédit en cours. Il doit être soldé avant d’en demander un nouveau."
 }
