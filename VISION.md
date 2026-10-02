@@ -162,6 +162,7 @@
 - Avisos de comision y deuda solo por Telegram; correo y telefono siguen para identidad
 - textos institucionales, traducciones 17 idiomas y pantalla de carga con logo grande Quatrivium Finance
 - Blindaje: quorum 2-de-N en Reserva, tope diario y pausa de boost, mora sin pull, peg en donar, pinning GTS, destroy sin approve
+- Quitar destruir cuenta del protocolo para que Demo nazca igual que mainnet: una billetera, un telefono, se recupera con la frase
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -300,3 +301,4 @@
 - [2026-10-01 03:11] Idea añadida al backlog: "Avisos de comision y deuda solo por Telegram; correo y telefono siguen para iden"
 - [2026-10-01 15:27] Idea añadida al backlog: "textos institucionales, traducciones 17 idiomas y pantalla de carga con logo gra"
 - [2026-10-01 20:46] Idea añadida al backlog: "Blindaje: quorum 2-de-N en Reserva, tope diario y pausa de boost, mora sin pull,"
+- [2026-10-01 22:49] Idea añadida al backlog: "Quitar destruir cuenta del protocolo para que Demo nazca igual que mainnet: una "

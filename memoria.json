@@ -1,6 +1,8 @@
 {
   "enfoque": "Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.",
   "decisiones": [
+    "- [2026-10-01] No hay cerrar cuenta on-chain. Demo y mainnet: se recupera con la frase.",
+    "- [2026-10-01] Los primeros 2 USDT donados en la vida no dan fama. El deudor no puede liquidarse a si mismo.",
     "- [2026-10-01] Reserva usa guardianes 2-de-N para apply Credit/FamaCaja/fundador. El attester sigue pagando boost con tope diario y pausa de guardian. marcarMorosoSiVencido ya no hace pull.",
     "- [2026-10-01] Token de Telegram ya rotado por el fundador. Tercer admin aplazado: proximo Demo nace 2-de-2 con 0x5023 y 0xD7af.",
     "- [2026-10-01] Segundo admin para el proximo Demo (2-de-2): 0xD7afC0D64703B306feA2005773e78f2FC03071C6. Primera sigue 0x5023. Attester sigue 0x55D3. No es el 2-de-3 todavia. 0xD2d2 no se parchea.",
@@ -28,11 +30,12 @@
     "- [2026-09-18] Correo y celular no son candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. El OTP de identidad sigue en Inicio y Ajustes.",
     "- [2026-09-18] Correo y numero son de la cuenta. Otro celular los restaura sin OTP. Cambiar o volver a agregar cobra 0.50. Quitar no cobra, pero bloquea el credito hasta verificar de nuevo en Inicio o Ajustes. No se desata on-chain al quitar el numero.",
     "- [2026-09-18] Correo y numero se ven gratis. El 0.50 USDT se cobra por detras al confirmar el codigo, sin mostrarlo.",
-    "- [2026-09-18] La tarifa de verificacion Real sale de la billetera del usuario hacia la fundadora con donar, nunca del pool. Cada confirmacion cobra; si donar pasa y el vinculo falla, un recibo de 2h evita doble cobro.",
-    "- [2026-09-17] Demo no pide correo, numero, KYC ni el 1 USDT. Esos requisitos son de la cuenta Real y, al hacerlos ahi, quedan.",
-    "- [2026-09-17] Cambiar Textbelt o Resend se hace en el panel de Render, no en el AdminPanel de la app. El attester de firma OTP si va en Render; la llave de owner no."
+    "- [2026-09-18] La tarifa de verificacion Real sale de la billetera del usuario hacia la fundadora con donar, nunca del pool. Cada confirmacion cobra; si donar pasa y el vinculo falla, un recibo de 2h evita doble cobro."
   ],
   "cambios": [
+    "- [2026-10-02] Examen Trivy: parcheados adm-zip serialize-javascript undici y bn.js. Queda tmp de solc. Docker y lock de produccion en cero.",
+    "- [2026-10-01] Sin destruirCuenta en nucleo ABI y servicio. Identidad no se libera.",
+    "- [2026-10-01] Foundry: puerta 2 USDT sin fama (ni con polvo), sin autoliquidar, execute admin solo si corre, Reserva reanuda boost 2-de-N",
     "- [2026-10-01] Blindaje: Reserva 2-de-N, tope diario 50 USDT y pausa de boost; Credit mora sin pull, peg en donar y bucle de bonos acotado; pinning GTS; destroy sin approve si hay shares del pool",
     "- [2026-10-01] 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador.",
     "- [2026-10-01] Sonar usa tsconfig propio y deja fuera JSON de i18n. Guardar no muestra listo si falta la billetera.",
@@ -79,11 +82,8 @@
     "- [2026-09-18] Auditoria PDF MobSF descsdsadarga.pdf: APK 35CADA22 1.0.2 vc4, 61/100 A. HIGH=huella CBC (se mantiene). Sin exp+/Twilio/claves. Corregido networkNotMainnet en 15 idiomas (ya no filtra CONFIRM_MAINNET). Hardhat verde. Real sigue sin contrato mainnet.",
     "- [2026-09-18] APK release 1.0.2 versionCode 4 para MobSF local: Escritorio Quatrivium-Finance-MobSF.apk (67.29 MB, SHA256 35CADA22F7FB85C733A4898FE0E876244A0D45A78FD354B16ECD039A4125EFD7, v3 CN=Quatrivium Finance, sin exp+, arm-only). No se reinstalo en Xiaomi. Liberados ~1.6 GB de Temp/NDK/Gradle residual.",
     "- [2026-09-18] Auditoria USB en vivo: Real credito en lanzamiento, Demo linea activa, pool Demo 2000.70 0xD2d2 solo lectura, donar no abre en Demo, marcos Granate, Ajustes Demo sin KYC/correo/telefono. Hardhat 177. Worker notify ok.",
-    "- [2026-09-18] Kit ciber en vivo: Aderyn/Slither/Forge verdes; Trivy Docker 0; compression 1.8.2; ZAP health OK 0 alertas; Semgrep urllib https; Mythril SWC-101 de 0.8.24 sin recortar nucleo",
-    "- [2026-09-18] Slither queda como semaforo real: silenciado el unico hallazgo (divide-before-multiply) en su linea con la razon visible. 0 hallazgos, exit 0. Bytecode intacto 24555/1599, Hardhat 176/176.",
-    "- [2026-09-18] Slither en vivo: arreglado el lanzador en Windows (forzaba Foundry y buscaba forge). 18 contratos, 99 detectores, 7 avisos, 0 criticos. Nuevo test: premio de asiento exacto y suma de premios <= bote. Hardhat 176/176, Foundry 8/8, salud 14/14, EIP-170 24555/24576.",
-    "- [2026-09-18] Auditoria USB en vivo: Metro + Xiaomi. Corregido Ajustes/Seguridad en Real para mostrar lanzamiento en vez de Pague 1 USDT mientras no hay mainnet. Candado ya no considera correo como metodo disponible."
+    "- [2026-09-18] Kit ciber en vivo: Aderyn/Slither/Forge verdes; Trivy Docker 0; compression 1.8.2; ZAP health OK 0 alertas; Semgrep urllib https; Mythril SWC-101 de 0.8.24 sin recortar nucleo"
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-01] Decisión: Reserva usa guardianes 2-de-N para apply Credit/FamaCaja/fundador. El attester sigue pagando boost con tope diario y pausa de guardian. marcarMorosoSiVencido ya no hace pull."
+  "ultima_sesion": "[2026-10-02] Cambio: Examen Trivy: parcheados adm-zip serialize-javascript undici y bn.js. Queda tmp de solc. Docker y lock de produccion en cero."
 }

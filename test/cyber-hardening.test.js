@@ -364,6 +364,18 @@ describe('cyber hardening — PIN and secret box', function () {
     const policy = fs.readFileSync(path.join(root, '.snyk'), 'utf8');
     expect(policy).to.include('image-size');
     expect(policy).to.include('Metro 0.83');
+    const trivyIgnore = fs.readFileSync(path.join(root, '.trivyignore'), 'utf8');
+    expect(trivyIgnore).to.include('CVE-2025-71329');
+    expect(trivyIgnore).to.include('CVE-2026-41907');
+    expect(trivyIgnore).to.include('CVE-2026-44705');
+    expect(trivyIgnore).to.include('Metro 0.83');
+    expect(pkg.scripts['security:trivy']).to.include('trivy-lock.sh');
+    expect(pkg.overrides.undici).to.equal('6.28.1');
+    expect(pkg.overrides['adm-zip']).to.equal('0.6.1');
+    const trivyYaml = fs.readFileSync(path.join(root, 'trivy.yaml'), 'utf8');
+    expect(trivyYaml).to.include('store-assets');
+    const notifyIgnore = fs.readFileSync(path.join(root, 'Dockerfile.notify.dockerignore'), 'utf8');
+    expect(notifyIgnore).to.include('telegramBotName.cjs');
     const slot = fs.readFileSync(path.join(root, 'utils', 'storeSlot.ts'), 'utf8');
     expect(slot).to.include('parts.filter(Boolean).join(glue)');
     const email = fs.readFileSync(path.join(root, 'services', 'accountEmail.ts'), 'utf8');

@@ -745,18 +745,6 @@ export const QuatriviumCreditService = {
     return tx.wait();
   },
 
-  destruirCuenta: async (tokenAddress: string) => {
-    assertToken(tokenAddress);
-    const { signer } = await requireInternalSigner();
-    const userAddress = await signer.getAddress();
-    const shares = (await contractWith(signer).valorLp(userAddress, tokenAddress)) as bigint;
-    if (shares > 0n) {
-      throw new Error('pool-shares');
-    }
-    const tx = await contractWith(signer).destruirCuenta(tokenAddress);
-    return tx.wait();
-  },
-
   obtenerDatosUsuario: async (userAddress: string, tokenAddress: string) => {
     const { provider } = await getProviderAndSigner();
     const contract = contractWith(provider);

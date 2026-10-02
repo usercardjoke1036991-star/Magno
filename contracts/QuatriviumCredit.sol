@@ -162,7 +162,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     mapping(bytes32 => address) public walletOfPhone;
     mapping(bytes32 => address) public walletOfDevice;
     mapping(address => uint256) public attestNonce;
-    mapping(address => bool) public cuentaDestruida;
     /// @notice Hermano de fama/canje. Se crea en el constructor (no cabe en este bytecode).
     address public immutable famaHermano;
 
@@ -206,7 +205,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     event IdentidadVinculada(address indexed usuario, bytes32 phoneHash, bytes32 deviceHash);
     event IdentidadExigidaUpdated(bool exigido);
     event AttesterUpdated(address indexed attester);
-    event CuentaDestruida(address indexed usuario, address indexed token, uint256 confiscado);
 
     modifier onlyAdmin() {
         require(admins[msg.sender], "only admin");
@@ -375,9 +373,9 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(p.confirms >= _requiredConfirms(), "confirmations");
         bytes4 sel = bytes4(p.data);
         require(allowedAdminSelector[sel], "selector not allowed");
-        p.executed = true;
         (bool ok, ) = address(this).call(p.data);
         require(ok);
+        p.executed = true;
         emit AdminActionExecuted(id, sel);
     }
 
@@ -556,7 +554,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function registrarHumanoConPadre(address _padre) external whenNotPaused {
         require(msg.sender == tx.origin, "no contracts");
-        require(!cuentaDestruida[msg.sender], "dead");
         require(!humanosVerificados[msg.sender], "already registered");
         require(!blacklist[msg.sender], "blacklisted");
         require(msg.sender != fundador, "already registered");
@@ -946,7 +943,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (habriaBonoA) {
             uint256 pagadoBono = QuatriviumFamaLib.pagarBonoPool(
                 totalLiquidity,
-                cuentaDestruida,
                 reputacion,
                 stableTokens[token],
                 token,
@@ -1011,7 +1007,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         address deudor,
         uint8 generacion
     ) internal returns (uint256) {
-        if (amount == 0 || to == address(0) || to == deudor || cuentaDestruida[to]) {
+        if (amount == 0 || to == address(0) || to == deudor) {
             return 0;
         }
         if (generacion != 0 && dispersionCongelada(to)) {
@@ -1033,7 +1029,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function _acreditarRed(address padre, address token) internal {
-        if (padre == address(0) || cuentaDestruida[padre]) {
+        if (padre == address(0)) {
             return;
         }
         puntosRed[padre] += PUNTOS_POR_REFERIDO;
@@ -1135,6 +1131,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function liquidate(address deudor, address tokenAddress) external nonReentrant onlySupportedToken(tokenAddress) {
         require(tx.origin == msg.sender, "no contracts");
+        require(msg.sender != deudor, "self");
         require(usuarios[deudor].montoActivo > 0, "no active loan");
         require(usuarios[deudor].monedaActivo == tokenAddress, "token mismatch");
         require(_estaVencido(deudor), "not defaulted");
@@ -1239,52 +1236,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return (level, progreso.solicitudesCompletadas, progreso.ultimoPrestamoTimestamp);
     }
 
-    function destruirCuenta(address token) external nonReentrant onlySupportedToken(token) {
-        require(tx.origin == msg.sender, "no contracts");
-        require(msg.sender != fundador, "founder");
-        require(humanosVerificados[msg.sender], "not verified");
-        require(!cuentaDestruida[msg.sender], "dead");
-        require(!esMoroso[msg.sender], "in mora");
-        require(usuarios[msg.sender].montoActivo == 0, "active loan");
-
-        uint256 shares = lpShares[msg.sender][token];
-        if (shares > 0) {
-            lpShares[msg.sender][token] = 0;
-            totalShares[token] -= shares;
-        }
-
-        bytes32 ph = phoneHashOf[msg.sender];
-        bytes32 dh = deviceHashOf[msg.sender];
-        if (ph != bytes32(0)) {
-            delete walletOfPhone[ph];
-            delete phoneHashOf[msg.sender];
-        }
-        if (dh != bytes32(0)) {
-            delete walletOfDevice[dh];
-            delete deviceHashOf[msg.sender];
-        }
-
-        delete redGenealogica[msg.sender];
-        delete progresoUsuarios[msg.sender];
-        delete planPago[msg.sender];
-        humanosVerificados[msg.sender] = false;
-        kycDeclarado[msg.sender] = false;
-        esMoroso[msg.sender] = false;
-        reputacion[msg.sender] = 0;
-        puntosRed[msg.sender] = 0;
-        bonosRedCobrados[msg.sender] = 0;
-        prestamosPagadosATiempo[msg.sender] = 0;
-        prestamosMorosos[msg.sender] = 0;
-        prestamosCerrados[msg.sender] = 0;
-        penalizacionesAcumuladas[msg.sender] = 0;
-        delete moraDesde[msg.sender];
-        hitoCobrado[msg.sender] = 0;
-        donado[msg.sender] = 0;
-        cuentaDestruida[msg.sender] = true;
-        _tocarFama(msg.sender, 0);
-        emit CuentaDestruida(msg.sender, token, 0);
-    }
-
     function cobrarBonoHito(address token) external whenNotPaused nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
         require(humanosVerificados[msg.sender] && !blacklist[msg.sender] && !dispersionCongelada(msg.sender));
@@ -1309,9 +1260,8 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint256 prev = donado[msg.sender];
         stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
         donado[msg.sender] += amount;
-        bool puerta = prev == 0 && amount == 2 * BONO_ACTIVACION;
-        if (!puerta) {
-            uint256 pts = (amount * 100) / 1e18;
+        uint256 pts = QuatriviumFamaLib.ptsDonacion(prev, amount);
+        if (pts != 0) {
             reputacion[msg.sender] += pts;
             _tocarFama(msg.sender, pts);
         }

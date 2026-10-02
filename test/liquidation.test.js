@@ -96,4 +96,17 @@ describe('QuatriviumCredit - Liquidation', function () {
     await token.connect(liquidator).approve(contractAddr, ethers.MaxUint256);
     await expect(contract.connect(liquidator).liquidate(user.address, tokenAddr)).to.not.be.reverted;
   });
+
+  it('rejects self-liquidation so the borrower cannot take the 5% bounty', async () => {
+    const { token, contract, owner, user, tokenAddr, contractAddr } = await deployProtocol();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, user, '20');
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const userInfo = await contract.usuarios(user.address);
+    await ethers.provider.send('evm_setNextBlockTimestamp', [Number(userInfo.vencimiento) + 10]);
+    await ethers.provider.send('evm_mine');
+    await token.mint(user.address, ethers.parseUnits('10', 18));
+    await token.connect(user).approve(contractAddr, ethers.MaxUint256);
+    await expect(contract.connect(user).liquidate(user.address, tokenAddr)).to.be.reverted;
+  });
 });

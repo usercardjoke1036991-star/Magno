@@ -516,13 +516,4 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
-  destroy: {
-    backgroundColor: '#B42318',
-  },
-  destroyDisabled: {
-    backgroundColor: '#9CA3AF',
-  },
-  destroyDisabledText: {
-    color: '#F3F4F6',
-  },
 });

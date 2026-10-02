@@ -65,6 +65,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     uint256 public pendienteGuardianDesde;
     address public pendienteGuardianProposer;
     address public despausaProposer;
+    address public reanudaBoostProposer;
     bool public boostPausado;
     uint256 public boostDiaAcumulado;
     uint256 public boostDiaInicio;
@@ -381,10 +382,19 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     function pausarBoost() external {
         if (!isGuardian[msg.sender] && !_esAdminCredit()) revert SoloAdmin();
         boostPausado = true;
+        reanudaBoostProposer = address(0);
         emit BoostPausa(true);
     }
 
     function reanudarBoost() external onlyGuardian {
+        if (guardianList.length >= 2) {
+            if (reanudaBoostProposer == address(0)) {
+                reanudaBoostProposer = msg.sender;
+                return;
+            }
+            if (msg.sender == reanudaBoostProposer) revert MismaLlave();
+            reanudaBoostProposer = address(0);
+        }
         boostPausado = false;
         emit BoostPausa(false);
     }

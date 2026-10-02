@@ -9,7 +9,6 @@ interface ICreditCaja {
     function blacklist(address) external view returns (bool);
     function dispersionCongelada(address usuario) external view returns (bool);
     function paused() external view returns (bool);
-    function cuentaDestruida(address) external view returns (bool);
     function esMoroso(address) external view returns (bool);
     function redGenealogica(address)
         external
@@ -162,7 +161,6 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
             uint256 pts = famaPorGeneracion(gen);
             if (
                 pts > 0
-                    && !nucleo.cuentaDestruida(cursor)
                     && !nucleo.blacklist(cursor)
                     && !nucleo.dispersionCongelada(cursor)
             ) {
@@ -172,7 +170,7 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
             (cursor,) = nucleo.redGenealogica(cursor);
         }
         if (fund != address(0) && fund != deudor && fund != padre) {
-            if (!nucleo.cuentaDestruida(fund) && !nucleo.blacklist(fund) && !nucleo.dispersionCongelada(fund)) {
+            if (!nucleo.blacklist(fund) && !nucleo.dispersionCongelada(fund)) {
                 famaRed[fund] += FAMA_POR_REFERIDO_L1;
                 emit FamaAcreditada(fund, FAMA_POR_REFERIDO_L1);
             }
@@ -246,7 +244,7 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         ICreditCaja nucleo = ICreditCaja(credit);
         (address padreOnChain,) = nucleo.redGenealogica(deudor);
         if (padreOnChain != padre) return;
-        if (nucleo.cuentaDestruida(padre) || nucleo.blacklist(padre)) return;
+        if (nucleo.blacklist(padre)) return;
         _contarCierre(deudor, padre, nucleo);
     }
 
@@ -259,7 +257,7 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
         (address padre,) = nucleo.redGenealogica(hijo);
         if (padre == address(0) || padre == hijo) revert SinCierre();
         if (msg.sender != hijo && msg.sender != padre) revert SoloEOA();
-        if (nucleo.cuentaDestruida(padre) || nucleo.blacklist(padre)) revert NoHumano();
+        if (nucleo.blacklist(padre)) revert NoHumano();
         if (!_contarCierre(hijo, padre, nucleo)) revert SinCierre();
     }
 
@@ -273,7 +271,6 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
             !nucleo.humanosVerificados(msg.sender)
                 || nucleo.blacklist(msg.sender)
                 || nucleo.dispersionCongelada(msg.sender)
-                || nucleo.cuentaDestruida(msg.sender)
                 || nucleo.esMoroso(msg.sender)
                 || enMora
                 || vencido
@@ -298,7 +295,6 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
             !nucleo.humanosVerificados(msg.sender)
                 || nucleo.blacklist(msg.sender)
                 || nucleo.dispersionCongelada(msg.sender)
-                || nucleo.cuentaDestruida(msg.sender)
                 || nucleo.esMoroso(msg.sender)
                 || enMora
                 || vencido
@@ -321,7 +317,6 @@ contract QuatriviumFamaCaja is ReentrancyGuard {
             !nucleo.humanosVerificados(msg.sender)
                 || nucleo.blacklist(msg.sender)
                 || nucleo.dispersionCongelada(msg.sender)
-                || nucleo.cuentaDestruida(msg.sender)
                 || nucleo.esMoroso(msg.sender)
                 || enMora
                 || vencido

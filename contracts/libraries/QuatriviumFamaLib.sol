@@ -24,6 +24,14 @@ library QuatriviumFamaLib {
         address indexed token
     );
 
+    /// @notice Los primeros 2 USDT de donación son la puerta Real: no dan fama.
+    function ptsDonacion(uint256 prev, uint256 amount) external pure returns (uint256) {
+        uint256 gate = 2 * BONO_ACTIVACION;
+        if (amount == 0) return 0;
+        uint256 famable = prev >= gate ? amount : (prev + amount > gate ? prev + amount - gate : 0);
+        return (famable * 100) / 1e18;
+    }
+
     function tocar(address hermano, address who, uint256 pts) external {
         if (hermano == address(0) || who == address(0)) return;
         if (pts == 0) {
@@ -56,7 +64,6 @@ library QuatriviumFamaLib {
 
     function pagarBonoPool(
         mapping(address => uint256) storage totalLiquidity,
-        mapping(address => bool) storage cuentaDestruida,
         mapping(address => uint256) storage reputacion,
         IERC20 token,
         address tokenAddr,
@@ -67,7 +74,7 @@ library QuatriviumFamaLib {
         uint256 piso,
         address hermano
     ) external returns (uint256 bono) {
-        if (!padreOk || padre == address(0) || padre == deudor || cuentaDestruida[padre]) {
+        if (!padreOk || padre == address(0) || padre == deudor) {
             return 0;
         }
         bono = BONO_ACTIVACION;

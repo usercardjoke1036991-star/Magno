@@ -218,7 +218,7 @@ describe('QuatriviumCredit - donacion al fundador', function () {
       .withArgs(user.address, gift, tokenAddr);
     expect(await contract.donado(user.address)).to.equal(gift);
     expect(await token.balanceOf(owner.address)).to.equal(beforeFounder + gift);
-    expect(await contract.reputacion(user.address)).to.equal(beforeRep + 1000n);
+    expect(await contract.reputacion(user.address)).to.equal(beforeRep + 800n);
   });
 
   it('raises reputation when someone injects the common pool', async () => {
@@ -235,8 +235,8 @@ describe('QuatriviumCredit - donacion al fundador', function () {
     await registerAndFund(token, contract, user, '80');
     const before = await contract.reputacion(user.address);
     await contract.connect(user).donar(tokenAddr, ethers.parseUnits('25', 18));
-    expect(await contract.reputacion(user.address)).to.equal(before + 2500n);
+    expect(await contract.reputacion(user.address)).to.equal(before + 2300n);
     await contract.connect(user).depositarLiquidez(tokenAddr, ethers.parseUnits('4', 18));
-    expect(await contract.reputacion(user.address)).to.equal(before + 2500n + 400n);
+    expect(await contract.reputacion(user.address)).to.equal(before + 2300n + 400n);
   });
 });

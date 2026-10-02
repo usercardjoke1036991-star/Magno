@@ -71,7 +71,7 @@ Magno/
 - **Un solo préstamo activo por wallet**: no se puede pedir otro hasta pagar o liquidar el actual
 - **Sin colateral**: el pool absorbe el riesgo de impago (diseño intencional, no bug)
 - **Pool no redimible**: `retirarLiquidez` hace `revert("pool locked")` — el capital queda para prestar
-- **`tx.origin == msg.sender`**: bloquea contratos intermediarios en registro, préstamo, pago, depósito, liquidación y destrucción
+- **`tx.origin == msg.sender`**: bloquea contratos intermediarios en registro, préstamo, pago, depósito y liquidación
 - **Timelock de 72h + 2-de-3** para todas las acciones admin (excepto pausa, que es inmediata). Si una llave se pierde o la hackean, las otras 2 la echan.
 - **Wallet interna (app wallet)**: cada instalación genera una wallet HD (frase de 24 palabras BIP-39) cifrada en SecureStore. Recuperar aún acepta 12 palabras de cuentas antiguas. Pedir y pagar préstamos y guardar el saldo viven en esa cuenta. Depositar, retirar, donar, aportar al pool y el **2 USDT de acceso** se pagan con una billetera externa vinculada (WalletConnect); el USDT pasa a la interna y luego el contrato ve `msg.sender` = interna. Saltarse el vínculo en el alta no basta para mover fondos. La contraseña no se edita en Ajustes: se pide al desbloquear y para ver la frase. **La frase no se reemplaza**: es la llave de esa billetera; en otro teléfono se recupera con las mismas palabras.
 - **Identidad KYC inmutable**: nombre legal y tipo de documento se congelan en el primer submit on-chain; ciudad/región siguen editables. Verificar KYC permite escanear el documento con la cámara (foto local, sin OCR ni envío a la red). On-chain, `declararKyc()` exige teléfono atestado y contrato no pausado.
@@ -95,7 +95,7 @@ Magno/
 - **Reserva no es el pool**: el pool de préstamos no se retira. Reserva es un hermano: se ve desde el inicio y se usa desde el **nivel 10**. Bloqueo 30 días, principal de vuelta, techo de hasta 12% anual estimado pagado de un bote que **solo llenan las cuentas admin** (no es Donar ni depositar al pool). Extra de comisiones de red del mismo bote (tramo 2/3) con corte del fundador; Credit no se recorta. Demo practica en local; Real exige identidad como el crédito. No se llama “producto de inversión” ni banco.
 - **Fama y dinero no se mezclan**: el 1 USDT de captación no da fama de caja. La fama de red recorre generaciones 2–40 (misma escala que el interés) y el fundador suma 100 si no es el padrino directo. La puerta Real (2 USDT + correo/teléfono) no da fama. El 0,50 de puntos de red ya no se paga; `_pagarBonosRed` queda en el núcleo sin acreditarse.
 - **Mora con mes de gracia**: al vencer se cobra de la billetera. Si no hay saldo, 30 días sigue cobrando para poder pagar. Luego la reputación baja 10 × nivel por día y sus comisiones/bonos van al pool hasta que pague. El fundador **también entra en mora** y se le puede liquidar; el pool ya no cubre su préstamo. La fama de línea vive en `QuatriviumFamaLib` (delegatecall) para no romper EIP-170.
-- **Cerrar cuenta no confisca USDT**: `destruirCuenta` limpia identidad y quema LP no redimibles; el saldo del token se queda en la wallet.
+- **No hay cerrar cuenta on-chain**: el teléfono y el dispositivo quedan atados a esa billetera. Recuperar es con la frase, no se crea otra línea.
 - **Confirmación de fondos fail-closed**: huella abre el wrap del Keystore (`requireAuthentication`); si no hay método listo, se niega. PIN nuevo = 20 000 rondas. En Real, correo/teléfono no van a AsyncStorage.
 
 ---
@@ -137,7 +137,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Hermano **FamaCaja**: `canjearFama` usa el mismo criterio que Credit `_estaVencido` (cuota o vencimiento final) leyendo `planPago`; no se añade wrapper al núcleo.
 - 17 suites Hardhat (210 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings, lock de referido y canje de fama (incluye cuota vencida antes del plazo final)…
 - Foundry 1.8.3 en WSL (`npm run test:forge`): despliega FamaCaja + Credit (7 args). EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24536 B (margen 40). Live Demo sigue 24457 B hasta el redespliegue.
-- Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** lockfile 3 HIGH + 1 MEDIUM transitivos (`image-size`←Metro, `underscore`←jsonpath←bfj←snarkjs, `uuid@7`←xcode); Dockerfile DS-0002 USER no se aplica por el volumen `/data`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
+- Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** (examen 2026-10-01): lockfile de producción HIGH/MEDIUM 0; Dockerfile.notify 0; secretos 0 en app/services/scripts/contracts. Dev: se parchearon adm-zip 0.6.1, serialize-javascript 7.1.2, undici 6.28.1 y bn.js 4.12.5. Queda `tmp@0.0.33` de solc (sin parche 0.0.x). `.trivyignore` + `trivy.yaml`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
 - i18n: 17 idiomas, 1040 claves
 - Rankings: 7 tableros (incluye racha), divisiones de 100, premio mensual estimado, nombres y fotos públicas, visibles desde el nivel 15
@@ -228,13 +228,13 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | SafeERC20 | ✅ Transfers/approvals |
 | Pausable (emergencia) | ✅ Inmediato (cualquier admin) · despausar con timelock |
 | Timelock 72h + multisig | ✅ Acciones admin · 2-de-3 al tercer fundador. Si una se pierde o la hackean, las otras 2 la echan |
-| tx.origin == msg.sender | ✅ Registro, préstamo, pago, depósito, liquidación, destrucción |
+| tx.origin == msg.sender | ✅ Registro, préstamo, pago, depósito, liquidación |
 | Oráculo Chainlink (stale 1h) | ✅ Precio USDT/USD · peg ≥ 0.98 |
 | Pool locked | ✅ `retirarLiquidez` siempre revierte — no hay retiros LP |
 | Cooldown 48h entre préstamos | ✅ Anti-spam |
 | Tope 50 originaciones/día | ✅ Límite global |
 | Utilización máx 80% | ✅ No presta el pool entero |
-| destruirCuenta | ✅ Exige sin préstamo activo **y** `!esMoroso` |
+| destruirCuenta | ❌ Fuera del protocolo (Demo = mainnet). Identidad no se libera |
 
 ---
 
@@ -263,6 +263,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-02 | Trivy: overrides adm-zip 0.6.1, serialize-javascript 7.1.2, undici 6.28.1, bn.js 4.12.5. Politica .trivyignore y trivy.yaml. tmp 0.0.33 de solc se mantiene. | — |
+| 2026-10-01 | Demo alineado a mainnet: sin destruirCuenta. Identidad on-chain permanente; recuperar solo con frase. | — |
+| 2026-10-01 | Auditoria Foundry: fama de donacion solo sobre el exceso de 2 USDT; liquidate bloquea self; executeAdminAction marca executed despues de exito; reanudarBoost 2-de-N; suite forge-test/QuatriviumAudit.t.sol | — |
 | 2026-10-01 | Blindaje on-chain: Reserva con guardianes 2-de-N, tope diario y pausa de boost; Credit sin pull en mora, peg en donar, bucle de bonos <=20; Android pinning GTS; destroy no aprueba USDT si hay shares | — |
 | 2026-10-01 | Vincular billetera: proveAndSaveLinkedWallet firma EIP-712 (purpose vincular-billetera) y solo entonces guarda. Texto de pool: no se puede retirar (poolPublicLead, poolLockedNote, guidePoolBody). | — |
 | 2026-10-01 | Cierra hallazgos de la auditoria: nonce de identidad, KYC con telefono, pausa en donar, mora/liquidacion del fundador, destroy sin confiscacion, boostId+rate limit, FundsConfirm Keystore fail-closed, /health minimo. | — |

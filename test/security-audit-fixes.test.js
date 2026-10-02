@@ -19,12 +19,12 @@ describe('security audit remediations', function () {
     await expect(fresh.contract.connect(fresh.user).declararKyc()).to.not.be.reverted;
   });
 
-  it('keeps leftover USDT with the user when the account is destroyed', async () => {
-    const { token, contract, owner, user, tokenAddr } = await deployProtocol();
+  it('has no on-chain destroy so leftover USDT stays in the wallet', async () => {
+    const { token, contract, owner, user } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await registerAndFund(token, contract, user);
     const before = await token.balanceOf(user.address);
-    await contract.connect(user).destruirCuenta(tokenAddr);
+    expect(contract.interface.hasFunction('destruirCuenta')).to.equal(false);
     expect(await token.balanceOf(user.address)).to.equal(before);
   });
 
