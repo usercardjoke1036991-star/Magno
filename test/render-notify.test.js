@@ -34,6 +34,8 @@ describe('Render notify worker', function () {
     expect(docker).to.include('notify-entrypoint.sh');
     expect(docker).to.include('su-exec');
     expect(docker).to.include('chown -R node:node /app /data');
+    expect(docker).to.include('overrides.ws=8.21.0');
+    expect(docker).to.include('/usr/local/lib/node_modules/npm');
     const entry = fs.readFileSync(path.join(root, 'scripts', 'notify-entrypoint.sh'), 'utf8');
     expect(entry).to.include('su-exec node');
     expect(entry).to.include('id -u');
