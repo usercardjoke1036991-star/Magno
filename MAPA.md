@@ -456,6 +456,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/loanLevels.test.js` — módulo JS/TS
 - `test/mlm.test.js` — módulo JS/TS
 - `test/morosity.test.js` — módulo JS/TS
+- `test/origination-cupo.test.js` — módulo JS/TS
 - `test/peg.test.js` — módulo JS/TS
 - `test/racha.test.js` — módulo JS/TS
 - `test/render-notify.test.js` — módulo JS/TS

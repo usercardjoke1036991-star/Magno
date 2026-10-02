@@ -14,6 +14,47 @@ library QuatriviumFamaLib {
     using SafeERC20 for IERC20;
 
     uint256 internal constant BONO_ACTIVACION = 1e18;
+    uint256 internal constant ORIGINACION_DIA_BP = 1000;
+    /// @notice Suelo humano. El 0,5 % de umbral es ORIGINACION_DIA_BP / 20.
+    uint256 internal constant ORIGINACION_DIA_PISO = 50e18;
+
+    /// @notice Chico si el préstamo no pasa de max(50 USDT, 0,5 % de caja).
+    function umbralCarrilChico(uint256 caja) public pure returns (uint256 u) {
+        u = (caja * ORIGINACION_DIA_BP) / 200000;
+        if (u < ORIGINACION_DIA_PISO) u = ORIGINACION_DIA_PISO;
+    }
+
+    function esCarrilChico(uint256 caja, uint256 monto) public pure returns (bool) {
+        return monto > 0 && monto <= umbralCarrilChico(caja);
+    }
+
+    /// @notice Potómetro grande: 10 % de caja libre.
+    function topeOriginacionDia(uint256 caja) public pure returns (uint256 room) {
+        room = (caja * ORIGINACION_DIA_BP) / 10000;
+        if (room > caja) room = caja;
+    }
+
+    /// @notice Potómetro chico: max(50 USDT, 10 % de caja), nunca más que la caja.
+    function topeCarrilChico(uint256 caja) public pure returns (uint256 room) {
+        room = (caja * ORIGINACION_DIA_BP) / 10000;
+        if (room < ORIGINACION_DIA_PISO) room = ORIGINACION_DIA_PISO;
+        if (room > caja) room = caja;
+    }
+
+    function consumirCupo(
+        uint256 caja,
+        uint256 yaChico,
+        uint256 yaGrande,
+        uint256 add
+    ) external pure returns (uint256, uint256) {
+        require(add > 0);
+        if (add <= umbralCarrilChico(caja)) {
+            require(yaChico + add <= topeCarrilChico(caja));
+            return (yaChico + add, yaGrande);
+        }
+        require(yaGrande + add <= topeOriginacionDia(caja));
+        return (yaChico, yaGrande + add);
+    }
 
     event ReputationUpdated(address indexed usuario, uint256 nuevaReputacion);
     event ComisionGeneracional(

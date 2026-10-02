@@ -91,8 +91,11 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     mapping(address => uint256) public collectedFees;
 
     uint256 public originationsInWindow;
+    uint256 public originatedChicoInWindow;
+    uint256 public originatedPrincipalInWindow;
     uint256 public originationWindowStart;
-    uint256 public maxOriginationsPerWindow = 50;
+    /// @notice Tope de altas/día. Dos carriles al 10 %: chico = máx(50, 0,5 % caja).
+    uint256 public maxOriginationsPerWindow = 10000;
     uint256 public maxUtilizationBps = 8000;
 
     struct Level { uint256 montoPrestamo; uint256 plazo; uint256 tasaInteresBP; }
@@ -705,18 +708,26 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         );
 
         _assertPeg(token);
-        if (block.timestamp > originationWindowStart + ORIGINATION_WINDOW) {
-            originationWindowStart = block.timestamp;
-            originationsInWindow = 0;
-        }
-        originationsInWindow += 1;
-        require(originationsInWindow <= maxOriginationsPerWindow, "daily origination cap");
-
         Level memory L = _tier(pedido);
         require(L.montoPrestamo > 0, "tier not set");
         require(totalLiquidity[token] >= outstandingLoans[token] + L.montoPrestamo, "insufficient liquidity");
         uint256 utilAfter = ((outstandingLoans[token] + L.montoPrestamo) * 10000) / totalLiquidity[token];
         require(utilAfter <= maxUtilizationBps, "utilization cap");
+
+        if (block.timestamp > originationWindowStart + ORIGINATION_WINDOW) {
+            originationWindowStart = block.timestamp;
+            originationsInWindow = 0;
+            originatedChicoInWindow = 0;
+            originatedPrincipalInWindow = 0;
+        }
+        originationsInWindow += 1;
+        require(originationsInWindow <= maxOriginationsPerWindow, "daily origination cap");
+        (originatedChicoInWindow, originatedPrincipalInWindow) = QuatriviumFamaLib.consumirCupo(
+            _cajaLibre(token),
+            originatedChicoInWindow,
+            originatedPrincipalInWindow,
+            L.montoPrestamo
+        );
 
         progreso.ultimoPrestamoTimestamp = block.timestamp;
         usuarios[msg.sender].nivelActual = pedido;

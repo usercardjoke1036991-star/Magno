@@ -70,6 +70,7 @@ Magno/
 ## Decisiones importantes tomadas
 - **Un solo préstamo activo por wallet**: no se puede pedir otro hasta pagar o liquidar el actual
 - **Sin colateral**: el pool absorbe el riesgo de impago (diseño intencional, no bug)
+- **Cupo diario de originación (fórmula B)**: chico si el préstamo ≤ `máx(50 USDT, 0,5 % de caja libre)`. Cada carril tiene potómetro `máx(50, 10 %)` (chicos) y `10 %` (grandes) ese día. El millón no es una cifra especial: si es grande respecto a la caja, va al carril grande. Siguen 80 % de uso, 10 000 altas/día y 48 h. Demo live `0xD2d2` sigue en 50 altas fijas hasta redesplegar.
 - **Pool no redimible**: `retirarLiquidez` hace `revert("pool locked")` — el capital queda para prestar
 - **`tx.origin == msg.sender`**: bloquea contratos intermediarios en registro, préstamo, pago, depósito y liquidación
 - **Timelock de 72h + 2-de-3** para todas las acciones admin (excepto pausa, que es inmediata). Si una llave se pierde o la hackean, las otras 2 la echan.
@@ -263,6 +264,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-02 | Cupo formula B: max(50 USDT, 0.5% caja) para carril chico; dos potometros del 10%. Demo 0xD2d2 sin parche. | — |
+| 2026-10-02 | Cupo en dos carriles: chicos 1-50 USDT fuera del 10%; grandes limitados al 10% de caja libre. Demo 0xD2d2 sigue en 50 hasta redesplegar. | — |
+| 2026-10-02 | Cupo de originacion: 10% de caja libre, piso 50 USDT, freno 10000 altas/dia. Math en FamaLib. Demo 0xD2d2 sigue en 50 hasta redesplegar. | — |
 | 2026-10-02 | SonarCloud 1550fe0 gate OK 0 issues. Credit: CEI en depositar, donar y liquidate (estado antes de transferencias). | — |
 | 2026-10-02 | Worker Docker: override ws 8.21.0 y se quita npm/yarn de la imagen. Trivy image HIGH/MEDIUM 0 con DB del 2026-10-02. | — |
 | 2026-10-02 | Trivy: overrides adm-zip 0.6.1, serialize-javascript 7.1.2, undici 6.28.1, bn.js 4.12.5. Politica .trivyignore y trivy.yaml. tmp 0.0.33 de solc se mantiene. | — |

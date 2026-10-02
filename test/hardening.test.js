@@ -87,7 +87,7 @@ describe('QuatriviumCredit - hardening', function () {
 
   it('splits $60 into three installments and keeps NAV', async () => {
     const { token, contract, owner, user, tokenAddr, contractAddr } = await deployProtocol();
-    await seedPool(token, contract, owner, '500');
+    await seedPool(token, contract, owner, '1000');
     await registerAndFund(token, contract, user, '200');
 
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);

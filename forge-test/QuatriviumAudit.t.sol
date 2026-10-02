@@ -60,6 +60,10 @@ contract QuatriviumAuditForgeTest is Test {
         assertLe(address(credit).code.length, EIP170);
     }
 
+    function test_default_count_brake_is_10000() public view {
+        assertEq(credit.maxOriginationsPerWindow(), 10000);
+    }
+
     function test_donate_exact_gate_gives_zero_fame() public {
         _onboard(user);
         _donate(user, 2 ether);
@@ -350,5 +354,65 @@ contract FamaLibPtsTest is Test {
         uint256 famable = prev >= 2 ether ? amount : (prev + amount > 2 ether ? prev + amount - 2 ether : 0);
         assertEq(pts, (famable * 100) / 1e18);
         if (prev + amount <= 2 ether) assertEq(pts, 0);
+    }
+
+    function test_tope_diez_por_ciento() public pure {
+        assertEq(QuatriviumFamaLib.topeOriginacionDia(1000 ether), 100 ether);
+        assertEq(QuatriviumFamaLib.topeCarrilChico(1000 ether), 100 ether);
+        assertEq(QuatriviumFamaLib.topeCarrilChico(200 ether), 50 ether);
+    }
+
+    function test_umbral_piso_y_fractal() public pure {
+        assertEq(QuatriviumFamaLib.umbralCarrilChico(200 ether), 50 ether);
+        assertEq(QuatriviumFamaLib.umbralCarrilChico(20_000 ether), 100 ether);
+        assertTrue(QuatriviumFamaLib.esCarrilChico(200 ether, 50 ether));
+        assertFalse(QuatriviumFamaLib.esCarrilChico(200 ether, 50 ether + 1));
+        assertTrue(QuatriviumFamaLib.esCarrilChico(20_000 ether, 80 ether));
+        assertFalse(QuatriviumFamaLib.esCarrilChico(20_000 ether, 101 ether));
+    }
+
+    function test_tope_nunca_mas_que_caja() public pure {
+        assertEq(QuatriviumFamaLib.topeOriginacionDia(40 ether), 4 ether);
+        assertEq(QuatriviumFamaLib.topeCarrilChico(40 ether), 40 ether);
+        assertEq(QuatriviumFamaLib.topeOriginacionDia(0), 0);
+        assertEq(QuatriviumFamaLib.topeCarrilChico(0), 0);
+    }
+
+    function testFuzz_tope_never_exceeds_caja(uint256 caja) public pure {
+        caja = bound(caja, 0, 1e27);
+        uint256 grande = QuatriviumFamaLib.topeOriginacionDia(caja);
+        uint256 chico = QuatriviumFamaLib.topeCarrilChico(caja);
+        uint256 umbral = QuatriviumFamaLib.umbralCarrilChico(caja);
+        assertLe(grande, caja);
+        assertLe(chico, caja);
+        assertEq(grande, (caja * 1000) / 10000);
+        uint256 medioPorciento = (caja * 1000) / 200000;
+        uint256 esperadoUmbral = medioPorciento < 50 ether ? 50 ether : medioPorciento;
+        assertEq(umbral, esperadoUmbral);
+    }
+
+    function test_carril_chico_no_consume_grande() public {
+        (uint256 c, uint256 g) = this.wrapConsumir(200 ether, 0, 0, 50 ether);
+        assertEq(c, 50 ether);
+        assertEq(g, 0);
+        (c, g) = this.wrapConsumir(200 ether, 0, 80 ether, 1 ether);
+        assertEq(c, 1 ether);
+        assertEq(g, 80 ether);
+    }
+
+    function test_assert_cupo_blocks_over_cap() public {
+        vm.expectRevert();
+        this.wrapConsumir(200 ether, 0, 0, 60 ether);
+        vm.expectRevert();
+        this.wrapConsumir(200 ether, 50 ether, 0, 50 ether);
+    }
+
+    function wrapConsumir(
+        uint256 caja,
+        uint256 yaChico,
+        uint256 yaGrande,
+        uint256 add
+    ) external pure returns (uint256, uint256) {
+        return QuatriviumFamaLib.consumirCupo(caja, yaChico, yaGrande, add);
     }
 }

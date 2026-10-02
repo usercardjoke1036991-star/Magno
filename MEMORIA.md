@@ -4,6 +4,9 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.
 
 ## Decisiones
+- [2026-10-02] Cupo fractal B: no hay cifra magica de un millon. Chico o grande se mide contra la caja de ese momento.
+- [2026-10-02] Carril chico hasta 50 USDT independiente del 10 por ciento. Un ballenero no tapa altas ni niveles bajos.
+- [2026-10-02] El cupo de prestamos nuevos mide USDT del dia, no solo personas. 10 por ciento de caja, piso 50, freno 10000. El 80 por ciento de uso y el pool cerrado siguen.
 - [2026-10-01] No hay cerrar cuenta on-chain. Demo y mainnet: se recupera con la frase.
 - [2026-10-01] Los primeros 2 USDT donados en la vida no dan fama. El deudor no puede liquidarse a si mismo.
 - [2026-10-01] Reserva usa guardianes 2-de-N para apply Credit/FamaCaja/fundador. El attester sigue pagando boost con tope diario y pausa de guardian. marcarMorosoSiVencido ya no hace pull.
@@ -31,11 +34,11 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-18] El divide-before-multiply de premioAsiento es falso positivo: n(n+1)/2 es exacto y va en el denominador. No se reescribe la formula; queda blindada con test de exactitud e invariante de bote en Hardhat y fuzz en Foundry.
 - [2026-09-18] El 1 USDT de Real se exige tambien en el servicio al pedir, no solo en la pantalla. Demo sigue libre.
 - [2026-09-18] Correo y celular no son candado. Desbloquear, pedir, pagar y transferir solo usan PIN, autenticador, huella o contraseña. El OTP de identidad sigue en Inicio y Ajustes.
-- [2026-09-18] Correo y numero son de la cuenta. Otro celular los restaura sin OTP. Cambiar o volver a agregar cobra 0.50. Quitar no cobra, pero bloquea el credito hasta verificar de nuevo en Inicio o Ajustes. No se desata on-chain al quitar el numero.
-- [2026-09-18] Correo y numero se ven gratis. El 0.50 USDT se cobra por detras al confirmar el codigo, sin mostrarlo.
-- [2026-09-18] La tarifa de verificacion Real sale de la billetera del usuario hacia la fundadora con donar, nunca del pool. Cada confirmacion cobra; si donar pasa y el vinculo falla, un recibo de 2h evita doble cobro.
 
 ## Cambios realizados
+- [2026-10-02] Formula B en el contrato: umbral max(50, 0.5% caja), potometros 10% chico y 10% grande. Hardhat cupo 8/8 Foundry 38/38.
+- [2026-10-02] Dos carriles de originacion: 1-50 USDT no comen el 10 por ciento. Los grandes si. Hardhat cupo 7/7.
+- [2026-10-02] Cupo diario: 10 por ciento de caja libre, piso 50 USDT, max 10000 altas. Foundry 37/37 y Hardhat del modulo en verde.
 - [2026-10-02] SonarCloud en cero. CEI en depositar donar y liquidate. Sin PoC de exploit.
 - [2026-10-02] Imagen del worker: ws 8.21.0 y sin npm de Node. Trivy image HIGH MEDIUM 0. DB actualizada 2026-10-02.
 - [2026-10-02] Examen Trivy: parcheados adm-zip serialize-javascript undici y bn.js. Queda tmp de solc. Docker y lock de produccion en cero.
@@ -83,13 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-29] Analisis E2E Reserva: UI ya no bloquea desbloquear por mora/pausa del credito. Deploy testnet pendiente de tBNB en la fundadora.
 - [2026-09-29] Implementada sala Reserva (contrato hermano, UI, i18n, tests Hardhat 5/5). Demo practica local; Real espera contrato oficial.
 - [2026-09-29] Cierra los 10 issues restantes de SonarCloud Magno (bigint tests, I/O kit, spawn pytest, regex).
-- [2026-09-29] Corrige hallazgos SonarCloud Magno (paths, spawn, regex, tests MLM, Telegram) y sube a GitHub.
-- [2026-09-18] Auditoria PDF MobSF descsdsadarga.pdf: APK 35CADA22 1.0.2 vc4, 61/100 A. HIGH=huella CBC (se mantiene). Sin exp+/Twilio/claves. Corregido networkNotMainnet en 15 idiomas (ya no filtra CONFIRM_MAINNET). Hardhat verde. Real sigue sin contrato mainnet.
-- [2026-09-18] APK release 1.0.2 versionCode 4 para MobSF local: Escritorio Quatrivium-Finance-MobSF.apk (67.29 MB, SHA256 35CADA22F7FB85C733A4898FE0E876244A0D45A78FD354B16ECD039A4125EFD7, v3 CN=Quatrivium Finance, sin exp+, arm-only). No se reinstalo en Xiaomi. Liberados ~1.6 GB de Temp/NDK/Gradle residual.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-02] Cambio: SonarCloud en cero. CEI en depositar donar y liquidate. Sin PoC de exploit.
+[2026-10-02] Decisión: Cupo fractal B: no hay cifra magica de un millon. Chico o grande se mide contra la caja de ese momento.
