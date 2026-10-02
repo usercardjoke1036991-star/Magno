@@ -386,6 +386,7 @@ describe('cyber hardening — PIN and secret box', function () {
       expect(blob, name).to.not.include('CONFIRM_MAINNET');
       expect(blob, name).to.not.include('PRIVATE_KEY');
       expect(blob, name).to.not.include('TEXTBELT');
+      expect(blob, name).to.not.include('EXPO_PUBLIC_');
       expect(String(data.networkNotMainnet || ''), name).to.match(/\S/);
     }
   });

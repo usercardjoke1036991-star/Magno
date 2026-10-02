@@ -38,9 +38,21 @@ for (const lang of langs) {
       failed = true;
     }
     if (lang !== 'en' && value === enVal && enVal.length > 24) copied += 1;
+    if (/EXPO_PUBLIC_|CONFIRM_MAINNET|PRIVATE_KEY|TEXTBELT/.test(String(value || ''))) {
+      console.error(`${lang}.${key} leaks internal token`);
+      failed = true;
+    }
   }
   if (empty) {
     console.error(`${lang} empty=${empty}`);
+    failed = true;
+  }
+  if (copied) {
+    console.error(`${lang} leftover English sentences=${copied}`);
+    failed = true;
+  }
+  if (/fundador|founder|Gründer|fondateur|основател/i.test(String(data.reservaFounderNote || ''))) {
+    console.error(`${lang} reservaFounderNote still names the founder`);
     failed = true;
   }
   if (data.appWalletDestroyType && !String(data.appWalletDestroyType).includes('DESTRUIR')) {

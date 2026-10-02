@@ -36,6 +36,7 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.
 
 ## Cambios realizados
+- [2026-10-01] 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador.
 - [2026-10-01] Sonar usa tsconfig propio y deja fuera JSON de i18n. Guardar no muestra listo si falta la billetera.
 - [2026-10-01] Ajustes: Guardar queda desactivado tras guardar y se activa solo si hay cambios nuevos.
 - [2026-10-01] Red: enlace de invitacion en tarjeta con copiar (HTTPS quatriviumcredit.app/invite). El codigo de referido acepta guiones, espacios o el enlace al crear la cuenta.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-18] Slither en vivo: arreglado el lanzador en Windows (forzaba Foundry y buscaba forge). 18 contratos, 99 detectores, 7 avisos, 0 criticos. Nuevo test: premio de asiento exacto y suma de premios <= bote. Hardhat 176/176, Foundry 8/8, salud 14/14, EIP-170 24555/24576.
 - [2026-09-18] Auditoria USB en vivo: Metro + Xiaomi. Corregido Ajustes/Seguridad en Real para mostrar lanzamiento en vez de Pague 1 USDT mientras no hay mainnet. Candado ya no considera correo como metodo disponible.
 - [2026-09-18] Auditoria: restaurar telefono on-chain sin MSISDN, 1 USDT al pedir, preview de vinculo antes del 0.50, candado sin OTP de correo.
-- [2026-09-18] Correo y celular fuera del candado para no gastar Textbelt ni Resend al desbloquear.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-01] Cambio: Sonar usa tsconfig propio y deja fuera JSON de i18n. Guardar no muestra listo si falta la billetera.
+[2026-10-01] Cambio: 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador.
