@@ -33,7 +33,7 @@ describe('QuatriviumCredit - Morosity', function () {
     expect(await contract.prestamosMorosos(user.address)).to.equal(1n);
   });
 
-  it('debits the linked wallet on due date when it has allowance and cash', async () => {
+  it('marks mora on due date without pulling allowance', async () => {
     const { token, contract, owner, user, tokenAddr, contractAddr } = await deployProtocol();
     await seedPool(token, contract, owner, '500');
     await registerAndFund(token, contract, user);
@@ -44,9 +44,9 @@ describe('QuatriviumCredit - Morosity', function () {
     await ethers.provider.send('evm_mine');
 
     await contract.marcarMorosoSiVencido(user.address);
-    expect(await contract.usuarios(user.address).then((u) => u.montoActivo)).to.equal(0n);
-    expect(await contract.esMoroso(user.address)).to.equal(false);
-    expect(before - (await token.balanceOf(user.address))).to.equal(ethers.parseUnits('2', 18));
+    expect(await contract.usuarios(user.address).then((u) => u.montoActivo)).to.equal(ethers.parseUnits('1', 18));
+    expect(await contract.esMoroso(user.address)).to.equal(true);
+    expect(await token.balanceOf(user.address)).to.equal(before);
     const cash = await token.balanceOf(contractAddr);
     const outstanding = await contract.outstandingLoans(tokenAddr);
     const liquidity = await contract.totalLiquidity(tokenAddr);

@@ -653,7 +653,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function depositarLiquidez(address token, uint256 _monto) external nonReentrant whenNotPaused onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
-        require(_monto > 0, "monto>0");
+        require(_monto >= 1e18, "monto>0");
         _assertPeg(token);
         stableTokens[token].safeTransferFrom(msg.sender, address(this), _monto);
 
@@ -1047,6 +1047,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint256 already = bonosRedCobrados[usuario];
         if (earned <= already) return;
         uint256 n = earned - already;
+        if (n > 20) n = 20;
         for (uint256 i = 0; i < n; i++) {
             uint256 caja = _cajaLibre(token);
             uint256 piso = (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000;
@@ -1129,21 +1130,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     function marcarMorosoSiVencido(address usuario) external nonReentrant {
         require(usuarios[usuario].montoActivo > 0 && _estaVencido(usuario), "not due");
         _aplicarPenalizacionDiaria(usuario);
-        address token = usuarios[usuario].monedaActivo;
-        (, , uint256 totalDue, ) = _deudaActual(usuario);
-        uint256 pagado = planPago[usuario].pagado;
-        uint256 restante = totalDue - pagado;
-        require(restante > 0, "already paid");
-        uint8 tot = planPago[usuario].totales == 0 ? 1 : planPago[usuario].totales;
-        uint256 amount = block.timestamp > usuarios[usuario].vencimiento
-            ? restante
-            : _montoCuota(totalDue, pagado, tot, planPago[usuario].pagadas);
-        IERC20 erc = stableTokens[token];
-        if (erc.balanceOf(usuario) >= amount && erc.allowance(usuario, address(this)) >= amount) {
-            _pagarComo(usuario, token, amount);
-        } else {
-            _aplicarMoraSiVencido(usuario);
-        }
+        _aplicarMoraSiVencido(usuario);
     }
 
     function liquidate(address deudor, address tokenAddress) external nonReentrant onlySupportedToken(tokenAddress) {
@@ -1318,6 +1305,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     function donar(address token, uint256 amount) external nonReentrant whenNotPaused onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
         require(amount > 0 && fundador != address(0) && msg.sender != fundador);
+        _assertPeg(token);
         uint256 prev = donado[msg.sender];
         stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
         donado[msg.sender] += amount;

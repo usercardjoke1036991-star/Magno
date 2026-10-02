@@ -275,6 +275,7 @@ const RESERVA_ABI = [
   'function extraComisionDe(address beneficiario, uint256 montoBase) view returns (uint256 extra, uint256 founderCut)',
   'function boostUsado(bytes32) view returns (bool)',
   'function boostIdOf(address beneficiario, uint256 montoBase, bytes32 salt) view returns (bytes32)',
+  'function boostPausado() view returns (bool)',
   'function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 salt)',
   'event Bloqueado(address indexed usuario, uint256 monto, uint256 desbloqueo)',
   'event Desbloqueado(address indexed usuario, uint256 principal, uint256 rendimiento, uint256 corteFundador)',
@@ -1238,6 +1239,7 @@ const pagarBoostReserva = async (event) => {
   if (!/^0x[0-9a-fA-F]{40}$/.test(beneficiario) || !monto) return;
   try {
     const reservaContract = new Contract(RESERVA, RESERVA_ABI, identityProvider);
+    if (await reservaContract.boostPausado()) return;
     const [extra] = await reservaContract.extraComisionDe(beneficiario, monto);
     if (!extra) return;
     const salt = keccak256(

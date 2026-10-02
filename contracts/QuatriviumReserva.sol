@@ -26,7 +26,7 @@ interface IQuatriviumCreditView {
  * @title QuatriviumReserva
  * @notice Hermano del crédito: bloqueo de USDT 30 días con techo de 12% anual.
  *         El principal vuelve. El rendimiento sale de un bote aparte, no del pool de préstamos.
- *         EIP-170: no vive en QuatriviumCredit.
+ *         Gobernanza: guardianes 2-de-N (como Credit) + timelock 72h. EIP-170: no vive en Credit.
  */
 contract QuatriviumReserva is ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -37,8 +37,10 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     uint256 public constant TRAMO_MEDIO = 50e18;
     uint256 public constant TRAMO_ALTO = 500e18;
     uint256 public constant NIVEL_MINIMO = 10;
-
     uint256 public constant CAMBIO_ESPERA = 72 hours;
+    uint256 public constant BOOST_GAP = 1 days;
+    uint256 public constant BOOST_DIA_TOPE = 50e18;
+    uint256 public constant MAX_GUARDIANES = 3;
 
     IERC20 public immutable token;
     address public owner;
@@ -47,11 +49,28 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     address public famaCaja;
     address public pendienteOwner;
     uint256 public pendienteOwnerDesde;
+    address public pendienteOwnerProposer;
+    bool public ownerCambioConfirmado;
     address public pendienteCredit;
     uint256 public pendienteCreditDesde;
+    address public pendienteCreditProposer;
     address public pendienteFundador;
     uint256 public pendienteFundadorDesde;
+    address public pendienteFundadorProposer;
     uint256 public bote;
+    address public pendienteFamaCaja;
+    uint256 public pendienteFamaCajaDesde;
+    address public pendienteFamaCajaProposer;
+    address public pendienteGuardian;
+    uint256 public pendienteGuardianDesde;
+    address public pendienteGuardianProposer;
+    address public despausaProposer;
+    bool public boostPausado;
+    uint256 public boostDiaAcumulado;
+    uint256 public boostDiaInicio;
+
+    address[] public guardianList;
+    mapping(address => bool) public isGuardian;
 
     struct Posicion {
         uint256 principal;
@@ -64,9 +83,6 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     mapping(address => uint256) public boostPagado;
     mapping(bytes32 => bool) public boostUsado;
     mapping(address => uint256) public lastBoostAt;
-    address public pendienteFamaCaja;
-    uint256 public pendienteFamaCajaDesde;
-    uint256 public constant BOOST_GAP = 1 days;
 
     error SoloOwner();
     error NoAutorizado();
@@ -83,6 +99,10 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     error NivelInsuficiente();
     error SoloAdmin();
     error EsperaTimelock();
+    error MismaLlave();
+    error TopeDiario();
+    error BoostCerrado();
+    error GuardianLleno();
 
     event Bloqueado(address indexed usuario, uint256 monto, uint256 desbloqueo);
     event Desbloqueado(address indexed usuario, uint256 principal, uint256 rendimiento, uint256 corteFundador);
@@ -91,9 +111,11 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     event BoostComision(address indexed beneficiario, uint256 montoBase, uint256 extra, uint256 corteFundador);
     event FundadorCambiado(address indexed next);
     event CreditCambiado(address indexed next);
+    event GuardianAgregado(address indexed next);
+    event BoostPausa(bool cerrado);
 
-    modifier onlyOwner() {
-        if (msg.sender != owner) revert SoloOwner();
+    modifier onlyGuardian() {
+        if (!isGuardian[msg.sender]) revert SoloAdmin();
         _;
     }
 
@@ -102,12 +124,19 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         _;
     }
 
-    constructor(address token_, address fundador_, address credit_) {
+    constructor(address token_, address fundador_, address credit_, address famaCaja_) {
         if (token_ == address(0) || fundador_ == address(0) || credit_ == address(0)) revert DestinoCero();
         token = IERC20(token_);
         owner = msg.sender;
         fundador = fundador_;
         credit = credit_;
+        famaCaja = famaCaja_;
+        isGuardian[msg.sender] = true;
+        guardianList.push(msg.sender);
+    }
+
+    function guardianes() external view returns (uint256) {
+        return guardianList.length;
     }
 
     function tramo(uint256 principal) public pure returns (uint256) {
@@ -140,7 +169,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     }
 
     function bloquear(uint256 monto) external onlyEOA whenNotPaused nonReentrant {
-        if (monto == 0) revert MontoCero();
+        if (monto < 1e18) revert MontoCero();
         Posicion storage p = posiciones[msg.sender];
         if (p.activa) revert PeriodoActivo();
         _exigirNuevoPeriodo();
@@ -176,22 +205,20 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         emit BoteAportado(msg.sender, monto);
     }
 
-    function setFamaCaja(address next) external onlyOwner {
+    function setFamaCaja(address next) external onlyGuardian {
         if (next == address(0)) revert DestinoCero();
-        if (famaCaja == address(0)) {
-            famaCaja = next;
-            return;
-        }
         pendienteFamaCaja = next;
         pendienteFamaCajaDesde = block.timestamp;
+        pendienteFamaCajaProposer = msg.sender;
     }
 
-    function applyFamaCaja() external onlyOwner {
+    function applyFamaCaja() external onlyGuardian {
         if (pendienteFamaCaja == address(0) || pendienteFamaCajaDesde == 0) revert NadaQueMover();
-        if (block.timestamp < pendienteFamaCajaDesde + CAMBIO_ESPERA) revert EsperaTimelock();
+        _exigirQuorum(pendienteFamaCajaProposer, pendienteFamaCajaDesde);
         famaCaja = pendienteFamaCaja;
         pendienteFamaCaja = address(0);
         pendienteFamaCajaDesde = 0;
+        pendienteFamaCajaProposer = address(0);
     }
 
     function boostIdOf(address beneficiario, uint256 montoBase, bytes32 salt) public view returns (bytes32) {
@@ -199,13 +226,14 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     }
 
     /// @notice Extra sobre una comisión de red ya pagada por Credit. Sale del pool, no del bote.
-    ///         Lo llama el attester con un id único por evento.
+    ///         Lo llama el attester. Tope diario + pausa de boost (guardián) limitan una llave filtrada.
     function pagarBoostComision(address beneficiario, uint256 montoBase, bytes32 salt)
         external
         onlyEOA
         whenNotPaused
         nonReentrant
     {
+        if (boostPausado) revert BoostCerrado();
         if (!_esAttesterCredit()) revert NoAutorizado();
         if (credit != address(0) && IQuatriviumCreditView(credit).paused()) revert CreditoPausado();
         if (beneficiario == address(0) || montoBase == 0 || salt == bytes32(0)) revert MontoCero();
@@ -217,6 +245,7 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
 
         (uint256 extra, uint256 founderCut) = extraComisionDe(beneficiario, montoBase);
         if (extra == 0) revert NadaQueMover();
+        _consumirTopeDia(extra);
 
         if (famaCaja == address(0)) revert DestinoCero();
         boostUsado[id] = true;
@@ -228,7 +257,6 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         emit BoostComision(beneficiario, montoBase, extra, founderCut);
     }
 
-    /// @dev Tope del extra = % del principal bloqueado (mismo boost del tramo). No drena el bote de un solo evento.
     function extraComisionDe(address beneficiario, uint256 montoBase) public view returns (uint256 extra, uint256 founderCut) {
         Posicion memory p = posiciones[beneficiario];
         if (!p.activa || montoBase == 0) return (0, 0);
@@ -242,59 +270,123 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         founderCut = (extra * corteFundadorBp(t)) / 10000;
     }
 
-    function setFundador(address next) external onlyOwner {
+    function addGuardian(address next) external onlyGuardian {
+        if (next == address(0)) revert DestinoCero();
+        if (isGuardian[next] || next == pendienteGuardian) revert YaPagado();
+        if (guardianList.length >= MAX_GUARDIANES) revert GuardianLleno();
+        pendienteGuardian = next;
+        pendienteGuardianDesde = block.timestamp;
+        pendienteGuardianProposer = msg.sender;
+    }
+
+    function applyGuardian() external onlyGuardian {
+        if (pendienteGuardian == address(0) || pendienteGuardianDesde == 0) revert NadaQueMover();
+        _exigirQuorum(pendienteGuardianProposer, pendienteGuardianDesde);
+        address next = pendienteGuardian;
+        if (isGuardian[next]) revert YaPagado();
+        if (guardianList.length >= MAX_GUARDIANES) revert GuardianLleno();
+        isGuardian[next] = true;
+        guardianList.push(next);
+        pendienteGuardian = address(0);
+        pendienteGuardianDesde = 0;
+        pendienteGuardianProposer = address(0);
+        emit GuardianAgregado(next);
+    }
+
+    function setFundador(address next) external onlyGuardian {
         if (next == address(0)) revert DestinoCero();
         pendienteFundador = next;
         pendienteFundadorDesde = block.timestamp;
+        pendienteFundadorProposer = msg.sender;
     }
 
-    function applyFundador() external onlyOwner {
+    function applyFundador() external onlyGuardian {
         if (pendienteFundador == address(0) || pendienteFundadorDesde == 0) revert NadaQueMover();
-        if (block.timestamp < pendienteFundadorDesde + CAMBIO_ESPERA) revert EsperaTimelock();
+        _exigirQuorum(pendienteFundadorProposer, pendienteFundadorDesde);
         fundador = pendienteFundador;
         pendienteFundador = address(0);
         pendienteFundadorDesde = 0;
+        pendienteFundadorProposer = address(0);
         emit FundadorCambiado(fundador);
     }
 
-    function setCredit(address next) external onlyOwner {
+    function setCredit(address next) external onlyGuardian {
         if (next == address(0)) revert DestinoCero();
         pendienteCredit = next;
         pendienteCreditDesde = block.timestamp;
+        pendienteCreditProposer = msg.sender;
     }
 
-    function applyCredit() external onlyOwner {
+    function applyCredit() external onlyGuardian {
         if (pendienteCredit == address(0) || pendienteCreditDesde == 0) revert NadaQueMover();
-        if (block.timestamp < pendienteCreditDesde + CAMBIO_ESPERA) revert EsperaTimelock();
+        _exigirQuorum(pendienteCreditProposer, pendienteCreditDesde);
         credit = pendienteCredit;
         pendienteCredit = address(0);
         pendienteCreditDesde = 0;
+        pendienteCreditProposer = address(0);
         emit CreditCambiado(credit);
     }
 
-    function setOwner(address next) external onlyOwner {
+    function setOwner(address next) external onlyGuardian {
         if (next == address(0)) revert DestinoCero();
         pendienteOwner = next;
         pendienteOwnerDesde = block.timestamp;
+        pendienteOwnerProposer = msg.sender;
+        ownerCambioConfirmado = guardianList.length < 2;
+    }
+
+    function confirmOwner() external onlyGuardian {
+        if (pendienteOwner == address(0)) revert NadaQueMover();
+        if (msg.sender == pendienteOwnerProposer) revert MismaLlave();
+        ownerCambioConfirmado = true;
     }
 
     function acceptOwner() external {
         if (msg.sender != pendienteOwner) revert SoloOwner();
+        if (!ownerCambioConfirmado) revert NoAutorizado();
         if (pendienteOwnerDesde == 0 || block.timestamp < pendienteOwnerDesde + CAMBIO_ESPERA) {
             revert EsperaTimelock();
+        }
+        if (!isGuardian[msg.sender]) {
+            if (guardianList.length >= MAX_GUARDIANES) revert GuardianLleno();
+            isGuardian[msg.sender] = true;
+            guardianList.push(msg.sender);
         }
         owner = pendienteOwner;
         pendienteOwner = address(0);
         pendienteOwnerDesde = 0;
+        pendienteOwnerProposer = address(0);
+        ownerCambioConfirmado = false;
     }
 
     function pausar() external {
-        if (msg.sender != owner && !_esOwnerCredit()) revert SoloOwner();
+        if (msg.sender != owner && !isGuardian[msg.sender] && !_esOwnerCredit() && !_esAdminCredit()) {
+            revert SoloOwner();
+        }
         _pause();
     }
 
-    function despausar() external onlyOwner {
+    function despausar() external onlyGuardian {
+        if (guardianList.length >= 2) {
+            if (despausaProposer == address(0)) {
+                despausaProposer = msg.sender;
+                return;
+            }
+            if (msg.sender == despausaProposer) revert MismaLlave();
+            despausaProposer = address(0);
+        }
         _unpause();
+    }
+
+    function pausarBoost() external {
+        if (!isGuardian[msg.sender] && !_esAdminCredit()) revert SoloAdmin();
+        boostPausado = true;
+        emit BoostPausa(true);
+    }
+
+    function reanudarBoost() external onlyGuardian {
+        boostPausado = false;
+        emit BoostPausa(false);
     }
 
     /// @dev Cualquiera puede alinear la pausa de Reserva si Credit ya está pausado. No usa la llave de owner.
@@ -320,6 +412,20 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
         (bool ok, bytes memory data) = credit.staticcall(abi.encodeWithSignature("admins(address)", msg.sender));
         if (!ok || data.length < 32) return false;
         return abi.decode(data, (bool));
+    }
+
+    function _exigirQuorum(address proposer, uint256 desde) internal view {
+        if (desde == 0 || block.timestamp < desde + CAMBIO_ESPERA) revert EsperaTimelock();
+        if (guardianList.length >= 2 && msg.sender == proposer) revert MismaLlave();
+    }
+
+    function _consumirTopeDia(uint256 extra) internal {
+        if (boostDiaInicio == 0 || block.timestamp >= boostDiaInicio + 1 days) {
+            boostDiaInicio = block.timestamp;
+            boostDiaAcumulado = 0;
+        }
+        if (boostDiaAcumulado + extra > BOOST_DIA_TOPE) revert TopeDiario();
+        boostDiaAcumulado += extra;
     }
 
     /// @dev Bloquear/renovar respetan mora, pausa y nivel 10. Desbloquear no, para no atrapar el principal.

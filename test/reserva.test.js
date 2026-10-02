@@ -10,7 +10,12 @@ async function deployReserva() {
   const Reserva = await ethers.getContractFactory('QuatriviumReserva');
   const token = await Token.deploy();
   const credit = await Mock.deploy();
-  const reserva = await Reserva.deploy(await token.getAddress(), founder.address, await credit.getAddress());
+  const reserva = await Reserva.deploy(
+    await token.getAddress(),
+    founder.address,
+    await credit.getAddress(),
+    await credit.getAddress()
+  );
   await token.mint(user.address, ethers.parseUnits('1000', 18));
   await token.mint(founder.address, ethers.parseUnits('1000', 18));
   await token.connect(user).approve(await reserva.getAddress(), ethers.MaxUint256);
@@ -19,11 +24,19 @@ async function deployReserva() {
   await credit.setAdmin(founder.address, true);
   await credit.setPayToken(await token.getAddress());
   await token.mint(await credit.getAddress(), ethers.parseUnits('1000', 18));
-  await reserva.setFamaCaja(await credit.getAddress());
   return { token, credit, reserva, owner, user, extra, founder };
 }
 
 describe('QuatriviumReserva', function () {
+  it('rejects locks below 1 USDT', async () => {
+    const { reserva, user } = await deployReserva();
+    await expect(reserva.connect(user).bloquear(1)).to.be.revertedWithCustomError(reserva, 'MontoCero');
+    await expect(reserva.connect(user).bloquear(ethers.parseUnits('0.99', 18))).to.be.revertedWithCustomError(
+      reserva,
+      'MontoCero'
+    );
+  });
+
   it('returns principal after 30 days even if the reward pot is empty', async () => {
     const { token, reserva, user } = await deployReserva();
     const amount = ethers.parseUnits('100', 18);
@@ -245,5 +258,59 @@ describe('QuatriviumReserva', function () {
     await reserva.connect(user).bloquear(ethers.parseUnits('500', 18));
     const [extra] = await reserva.extraComisionDe(user.address, ethers.parseUnits('5', 18));
     expect(extra).to.equal(ethers.parseUnits('1', 18));
+  });
+
+  it('adds a second guardian after 72h and then blocks same-key applyCredit', async () => {
+    const { reserva, credit, owner, extra } = await deployReserva();
+    await reserva.connect(owner).addGuardian(extra.address);
+    await expect(reserva.connect(owner).applyGuardian()).to.be.revertedWithCustomError(reserva, 'EsperaTimelock');
+    await ethers.provider.send('evm_increaseTime', [72 * 60 * 60]);
+    await ethers.provider.send('evm_mine');
+    await reserva.connect(owner).applyGuardian();
+    expect(await reserva.isGuardian(extra.address)).to.equal(true);
+    expect(await reserva.guardianes()).to.equal(2n);
+    const Mock = await ethers.getContractFactory('CreditViewMock');
+    const nextCredit = await Mock.deploy();
+    await reserva.connect(owner).setCredit(await nextCredit.getAddress());
+    await ethers.provider.send('evm_increaseTime', [72 * 60 * 60]);
+    await ethers.provider.send('evm_mine');
+    await expect(reserva.connect(owner).applyCredit()).to.be.revertedWithCustomError(reserva, 'MismaLlave');
+    await reserva.connect(extra).applyCredit();
+    expect(await reserva.credit()).to.equal(await nextCredit.getAddress());
+    expect(await credit.getAddress()).to.not.equal(await nextCredit.getAddress());
+  });
+
+  it('lets a guardian pause commission extras without freezing unlock', async () => {
+    const { token, reserva, credit, user, owner, founder } = await deployReserva();
+    const [, , , , attester] = await ethers.getSigners();
+    await credit.setAttester(attester.address);
+    await reserva.connect(founder).aportarBote(ethers.parseUnits('20', 18));
+    await reserva.connect(user).bloquear(ethers.parseUnits('100', 18));
+    await reserva.connect(owner).pausarBoost();
+    const id = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [11n]));
+    await expect(
+      reserva.connect(attester).pagarBoostComision(user.address, ethers.parseUnits('5', 18), id)
+    ).to.be.revertedWithCustomError(reserva, 'BoostCerrado');
+    await reserva.connect(owner).reanudarBoost();
+    await reserva.connect(attester).pagarBoostComision(user.address, ethers.parseUnits('5', 18), id);
+    await ethers.provider.send('evm_increaseTime', [LOCK]);
+    await ethers.provider.send('evm_mine');
+    await reserva.connect(owner).pausarBoost();
+    await reserva.connect(user).desbloquear();
+    expect(await token.balanceOf(user.address)).to.be.gt(ethers.parseUnits('900', 18));
+  });
+
+  it('caps attester extras at 50 USDT per day', async () => {
+    const { reserva, credit, user, founder } = await deployReserva();
+    const [, , , , attester] = await ethers.getSigners();
+    await credit.setAttester(attester.address);
+    await reserva.connect(founder).aportarBote(ethers.parseUnits('20', 18));
+    await reserva.connect(user).bloquear(ethers.parseUnits('500', 18));
+    const [extra] = await reserva.extraComisionDe(user.address, ethers.parseUnits('1000000', 18));
+    expect(extra).to.equal(ethers.parseUnits('100', 18));
+    const id = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [12n]));
+    await expect(
+      reserva.connect(attester).pagarBoostComision(user.address, ethers.parseUnits('1000000', 18), id)
+    ).to.be.revertedWithCustomError(reserva, 'TopeDiario');
   });
 });

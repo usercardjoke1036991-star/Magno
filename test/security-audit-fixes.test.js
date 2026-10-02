@@ -50,5 +50,8 @@ describe('security audit remediations', function () {
     expect(reserva).to.include('function boostIdOf');
     expect(reserva).to.include('function applyFamaCaja');
     expect(reserva).to.include('BOOST_GAP');
+    expect(reserva).to.include('BOOST_DIA_TOPE');
+    expect(reserva).to.include('function addGuardian');
+    expect(reserva).to.include('function pausarBoost');
   });
 });

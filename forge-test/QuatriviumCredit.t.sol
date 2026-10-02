@@ -104,7 +104,7 @@ contract QuatriviumCreditForgeTest is Test {
     }
 
     function testFuzz_nav_after_deposit(uint96 amount) public {
-        amount = uint96(bound(amount, 1, 1_000 ether));
+        amount = uint96(bound(amount, 1 ether, 1_000 ether));
         token.mint(owner, amount);
         vm.prank(owner, owner);
         credit.depositarLiquidez(address(token), amount);

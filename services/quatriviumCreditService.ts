@@ -749,14 +749,9 @@ export const QuatriviumCreditService = {
     assertToken(tokenAddress);
     const { signer } = await requireInternalSigner();
     const userAddress = await signer.getAddress();
-    const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-    const balance = (await tokenContract.balanceOf(userAddress)) as bigint;
-    if (balance > 0n) {
-      const allowance = (await tokenContract.allowance(userAddress, getContractAddress())) as bigint;
-      if (allowance < balance) {
-        const txApprove = await tokenContract.approve(getContractAddress(), balance);
-        await txApprove.wait();
-      }
+    const shares = (await contractWith(signer).valorLp(userAddress, tokenAddress)) as bigint;
+    if (shares > 0n) {
+      throw new Error('pool-shares');
     }
     const tx = await contractWith(signer).destruirCuenta(tokenAddress);
     return tx.wait();

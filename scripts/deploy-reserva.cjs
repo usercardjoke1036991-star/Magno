@@ -104,7 +104,9 @@ async function main() {
   console.log('credit.paused', await credit.paused());
 
   const Factory = await ethers.getContractFactory('QuatriviumReserva');
-  const reserva = await Factory.deploy(usdtAddr, fundador, creditAddr);
+  const famaCaja =
+    process.env.EXPO_PUBLIC_FAMA_ADDRESS_TESTNET || process.env.FAMA_CAJA_ADDRESS || ethers.ZeroAddress;
+  const reserva = await Factory.deploy(usdtAddr, fundador, creditAddr, famaCaja);
   await reserva.waitForDeployment();
   const address = await reserva.getAddress();
   console.log('QuatriviumReserva', address);

@@ -430,6 +430,8 @@ describe('cyber hardening — PIN and secret box', function () {
     );
     expect(plugin).to.include('usesCleartextTraffic');
     expect(plugin).to.include('network_security_config');
+    expect(plugin).to.include('pin-set expiration="2027-10-01"');
+    expect(plugin).to.include('mEflZT5enoR1FuXLgYYGqnVEoZvmf9c2bVBpiOjYQ0c=');
     expect(plugin).to.include('CropImageActivity');
     expect(plugin).to.include('DevLauncherActivity');
     expect(plugin).to.include('exp+quatrivium-credit');

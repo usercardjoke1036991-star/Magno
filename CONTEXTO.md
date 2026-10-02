@@ -263,6 +263,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-01 | Blindaje on-chain: Reserva con guardianes 2-de-N, tope diario y pausa de boost; Credit sin pull en mora, peg en donar, bucle de bonos <=20; Android pinning GTS; destroy no aprueba USDT si hay shares | — |
 | 2026-10-01 | Vincular billetera: proveAndSaveLinkedWallet firma EIP-712 (purpose vincular-billetera) y solo entonces guarda. Texto de pool: no se puede retirar (poolPublicLead, poolLockedNote, guidePoolBody). | — |
 | 2026-10-01 | Cierra hallazgos de la auditoria: nonce de identidad, KYC con telefono, pausa en donar, mora/liquidacion del fundador, destroy sin confiscacion, boostId+rate limit, FundsConfirm Keystore fail-closed, /health minimo. | — |
 | 2026-09-30 | Guia profesional en Ajustes; bono nivel 200 = 30000 USDT; sala Red reorganizada con enlace de invitacion y tabla de generaciones. | — |

@@ -100,6 +100,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: BiometricLockSection
 - `components/BrandLogo.tsx` — módulo JS/TS
   - Funciones/clases: BrandLogo
+- `components/BrandSplash.tsx` — módulo JS/TS
+  - Funciones/clases: BRAND_SPLASH_BG, BrandWordmark, BrandSplash
 - `components/CreditAccessBanner.tsx` — módulo JS/TS
   - Funciones/clases: CreditAccessBanner
 - `components/DemoModeBanner.tsx` — módulo JS/TS
@@ -287,6 +289,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: stripExpPlusFromManifestXml, ensureHttpsDeepLinks
 - `profile/ProfileContext.tsx` — módulo JS/TS
   - Funciones/clases: ProfileProvider, useUserProfile
+- `scripts/apply-i18n-leftovers.mjs` — módulo JS/TS
+- `scripts/apply-i18n-professional.mjs` — módulo JS/TS
 - `scripts/bscNetworks.cjs` — módulo JS/TS
 - `scripts/check-i18n.mjs` — módulo JS/TS
 - `scripts/check-production.mjs` — módulo JS/TS
@@ -306,6 +310,13 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: save, coinbase_wallet, rainbow_mark, main
 - `scripts/parse-zap-detail.py` — módulo Python
 - `scripts/parse-zap.py` — módulo Python
+- `scripts/patch-i18n-leftovers-asia.mjs` — módulo JS/TS
+  - Funciones/clases: PACK_ASIA
+- `scripts/patch-i18n-leftovers-east.mjs` — módulo JS/TS
+  - Funciones/clases: PACK_EAST
+- `scripts/patch-i18n-leftovers-rtl.mjs` — módulo JS/TS
+  - Funciones/clases: PACK_RTL
+- `scripts/patch-i18n-leftovers.mjs` — módulo JS/TS
 - `scripts/prepare-logo.py` — módulo Python
   - Funciones/clases: luma, is_backdrop, flood_transparent, crop_mark, color_transparent, punch_fringe, fit_mark, compose, lerp, colorize, circle_mask, write_android_icons, write_rank_icons, main
 - `scripts/prepare-production-local.mjs` — módulo JS/TS
@@ -323,6 +334,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/textbeltSms.cjs` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
 - `scripts/_audit-bytecode.cjs` — módulo JS/TS
+- `scripts/_check_attester_once.cjs` — módulo JS/TS
 - `scripts/_dump-ui-nodes.py` — módulo Python
 - `scripts/_dump-ui-texts.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
@@ -418,6 +430,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `stubs/zlib-stub.js` — módulo JS/TS
 - `test/accounting.test.js` — módulo JS/TS
 - `test/accountWorld.test.js` — módulo JS/TS
+- `test/brand-splash.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
 - `test/commission-levels.test.js` — módulo JS/TS
 - `test/contract-abi.test.js` — módulo JS/TS
@@ -435,6 +448,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/helpers.cjs` — módulo JS/TS
 - `test/hetzner-notify.test.js` — módulo JS/TS
 - `test/identity.test.js` — módulo JS/TS
+- `test/invite-code.test.js` — módulo JS/TS
 - `test/kyc.test.js` — módulo JS/TS
 - `test/legal-consent.test.js` — módulo JS/TS
 - `test/levelProgress.test.js` — módulo JS/TS
@@ -446,6 +460,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/racha.test.js` — módulo JS/TS
 - `test/render-notify.test.js` — módulo JS/TS
 - `test/reserva.test.js` — módulo JS/TS
+- `test/save-changes.test.js` — módulo JS/TS
+  - Funciones/clases: hasUnsavedChanges
 - `test/secret-box.test.js` — módulo JS/TS
 - `test/security-audit-fixes.test.js` — módulo JS/TS
 - `test/security-hardening.test.js` — módulo JS/TS
@@ -501,7 +517,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/historyWorld.ts` — módulo JS/TS
   - Funciones/clases: historyJournalSuffix, movementBelongsToWorld
 - `utils/inviteCode.ts` — módulo JS/TS
-  - Funciones/clases: INVITE_STORAGE_KEY, formatInviteCode, addressToInviteCode, inviteCodeToAddress, extractInviteFromText, extractInviteFromUrl, extractInviteNameFromUrl, parseInviteInput, buildInviteLink
+  - Funciones/clases: INVITE_STORAGE_KEY, formatInviteCode, addressToInviteCode, inviteCodeToAddress, extractInviteFromText, extractInviteFromUrl, extractInviteNameFromUrl, parseInviteInput, buildInviteLink, inviteLinkPreview
 - `utils/legacyStorage.ts` — módulo JS/TS
   - Funciones/clases: migrateLegacyStorage
 - `utils/legalConsent.ts` — módulo JS/TS
@@ -546,6 +562,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: bytesToBase32, base32ToBytes, totpAt, verifyTotp, otpauthUrl
 - `utils/txErrors.ts` — módulo JS/TS
   - Funciones/clases: setTxErrorLang, humanizeTxError
+- `utils/unsavedChanges.ts` — módulo JS/TS
+  - Funciones/clases: hasUnsavedChanges
 - `utils/usernamePolicy.ts` — módulo JS/TS
   - Funciones/clases: normalizeUsername, isValidUsername
 - `utils/walletChain.ts` — módulo JS/TS
@@ -570,7 +588,7 @@ Sin desfases detectados entre docs y código.
 
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
-- detectar_logica: 0 crítico(s), 3 aviso(s)
+- detectar_logica: 0 crítico(s), 4 aviso(s)
 - verificar_modulos: 0 crítico(s), 13 aviso(s)
 
 ## Estado

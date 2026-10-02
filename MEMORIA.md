@@ -4,6 +4,7 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.
 
 ## Decisiones
+- [2026-10-01] Reserva usa guardianes 2-de-N para apply Credit/FamaCaja/fundador. El attester sigue pagando boost con tope diario y pausa de guardian. marcarMorosoSiVencido ya no hace pull.
 - [2026-10-01] Token de Telegram ya rotado por el fundador. Tercer admin aplazado: proximo Demo nace 2-de-2 con 0x5023 y 0xD7af.
 - [2026-10-01] Segundo admin para el proximo Demo (2-de-2): 0xD7afC0D64703B306feA2005773e78f2FC03071C6. Primera sigue 0x5023. Attester sigue 0x55D3. No es el 2-de-3 todavia. 0xD2d2 no se parchea.
 - [2026-10-01] El fundador entra en mora y se puede liquidar. declararKyc exige identidad atestada. Confirmacion de fondos fail-closed con wrap de Keystore.
@@ -33,9 +34,9 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-18] La tarifa de verificacion Real sale de la billetera del usuario hacia la fundadora con donar, nunca del pool. Cada confirmacion cobra; si donar pasa y el vinculo falla, un recibo de 2h evita doble cobro.
 - [2026-09-17] Demo no pide correo, numero, KYC ni el 1 USDT. Esos requisitos son de la cuenta Real y, al hacerlos ahi, quedan.
 - [2026-09-17] Cambiar Textbelt o Resend se hace en el panel de Render, no en el AdminPanel de la app. El attester de firma OTP si va en Render; la llave de owner no.
-- [2026-09-17] El SMS del OTP sale por Textbelt. Twilio y WhatsApp Cloud quedan de respaldo. Esa clave no se sube a git.
 
 ## Cambios realizados
+- [2026-10-01] Blindaje: Reserva 2-de-N, tope diario 50 USDT y pausa de boost; Credit mora sin pull, peg en donar y bucle de bonos acotado; pinning GTS; destroy sin approve si hay shares del pool
 - [2026-10-01] 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador.
 - [2026-10-01] Sonar usa tsconfig propio y deja fuera JSON de i18n. Guardar no muestra listo si falta la billetera.
 - [2026-10-01] Ajustes: Guardar queda desactivado tras guardar y se activa solo si hay cambios nuevos.
@@ -85,11 +86,10 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-18] Slither queda como semaforo real: silenciado el unico hallazgo (divide-before-multiply) en su linea con la razon visible. 0 hallazgos, exit 0. Bytecode intacto 24555/1599, Hardhat 176/176.
 - [2026-09-18] Slither en vivo: arreglado el lanzador en Windows (forzaba Foundry y buscaba forge). 18 contratos, 99 detectores, 7 avisos, 0 criticos. Nuevo test: premio de asiento exacto y suma de premios <= bote. Hardhat 176/176, Foundry 8/8, salud 14/14, EIP-170 24555/24576.
 - [2026-09-18] Auditoria USB en vivo: Metro + Xiaomi. Corregido Ajustes/Seguridad en Real para mostrar lanzamiento en vez de Pague 1 USDT mientras no hay mainnet. Candado ya no considera correo como metodo disponible.
-- [2026-09-18] Auditoria: restaurar telefono on-chain sin MSISDN, 1 USDT al pedir, preview de vinculo antes del 0.50, candado sin OTP de correo.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-01] Cambio: 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador.
+[2026-10-01] Decisión: Reserva usa guardianes 2-de-N para apply Credit/FamaCaja/fundador. El attester sigue pagando boost con tope diario y pausa de guardian. marcarMorosoSiVencido ya no hace pull.

@@ -41,6 +41,18 @@ const NETWORK_XML = `<?xml version="1.0" encoding="utf-8"?>
       <certificates src="system" />
     </trust-anchors>
   </base-config>
+  <domain-config cleartextTrafficPermitted="false">
+    <domain includeSubdomains="true">quatriviumcredit.app</domain>
+    <pin-set expiration="2027-10-01">
+      <pin digest="SHA-256">hxqRlPTu1bMS/0DITB1SSu0vd4u/8l8TjPgfaAp63Gc=</pin>
+      <pin digest="SHA-256">Vfd95BwDeSQo+NUYxVEEIlvkOlWY2SalKK1lPhzOx78=</pin>
+      <pin digest="SHA-256">QXnt2YHvdHR3tJYmQIr0PaFZRMdIT8j0E5L/+G5kQcE=</pin>
+      <pin digest="SHA-256">mEflZT5enoR1FuXLgYYGqnVEoZvmf9c2bVBpiOjYQ0c=</pin>
+    </pin-set>
+    <trust-anchors>
+      <certificates src="system" />
+    </trust-anchors>
+  </domain-config>
 </network-security-config>
 `;
 
