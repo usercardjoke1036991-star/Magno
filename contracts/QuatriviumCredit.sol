@@ -652,7 +652,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(tx.origin == msg.sender, "no contracts");
         require(_monto >= 1e18, "monto>0");
         _assertPeg(token);
-        stableTokens[token].safeTransferFrom(msg.sender, address(this), _monto);
 
         uint256 shares;
         if (totalShares[token] == 0 || totalLiquidity[token] == 0) {
@@ -667,6 +666,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         totalLiquidity[token] += _monto;
         uint256 pts = (_monto * 100) / 1e18;
         reputacion[msg.sender] += pts;
+        stableTokens[token].safeTransferFrom(msg.sender, address(this), _monto);
         _tocarFama(msg.sender, pts);
         emit LiquidezAportada(msg.sender, _monto, token);
         emit ReputationUpdated(msg.sender, reputacion[msg.sender]);
@@ -1153,9 +1153,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         uint256 reward = (principalRestante * 5) / 100;
         uint256 availableForReward = restante - fee;
         if (reward > availableForReward) reward = availableForReward;
-        if (reward > 0) {
-            stableTokens[tokenAddress].safeTransfer(msg.sender, reward);
-        }
 
         _ajustarLiquidezPorInteres(tokenAddress, interestRestante, fee + reward);
 
@@ -1185,6 +1182,10 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
                 reputacion[deudor] = 0;
             }
             emit ReputationUpdated(deudor, reputacion[deudor]);
+        }
+
+        if (reward > 0) {
+            stableTokens[tokenAddress].safeTransfer(msg.sender, reward);
         }
 
         emit LiquidationExecuted(msg.sender, deudor, tokenAddress, restante, reward);
@@ -1258,11 +1259,13 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(amount > 0 && fundador != address(0) && msg.sender != fundador);
         _assertPeg(token);
         uint256 prev = donado[msg.sender];
-        stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
         donado[msg.sender] += amount;
         uint256 pts = QuatriviumFamaLib.ptsDonacion(prev, amount);
         if (pts != 0) {
             reputacion[msg.sender] += pts;
+        }
+        stableTokens[token].safeTransferFrom(msg.sender, fundador, amount);
+        if (pts != 0) {
             _tocarFama(msg.sender, pts);
         }
         emit Donacion(msg.sender, amount, token);

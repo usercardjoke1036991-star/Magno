@@ -263,6 +263,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-02 | SonarCloud 1550fe0 gate OK 0 issues. Credit: CEI en depositar, donar y liquidate (estado antes de transferencias). | — |
 | 2026-10-02 | Worker Docker: override ws 8.21.0 y se quita npm/yarn de la imagen. Trivy image HIGH/MEDIUM 0 con DB del 2026-10-02. | — |
 | 2026-10-02 | Trivy: overrides adm-zip 0.6.1, serialize-javascript 7.1.2, undici 6.28.1, bn.js 4.12.5. Politica .trivyignore y trivy.yaml. tmp 0.0.33 de solc se mantiene. | — |
 | 2026-10-01 | Demo alineado a mainnet: sin destruirCuenta. Identidad on-chain permanente; recuperar solo con frase. | — |
