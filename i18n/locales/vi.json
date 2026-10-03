@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… dấu điện thoại",
   "adminTotpWhere": "Mã 6 số không nhập ở đây. Sau Sẵn sàng, ký WalletConnect rồi cửa sổ xác thực mở ra.",
   "adminTotpBlocked": "Ký lời nhắc xác thực trên WalletConnect. Nếu hết hạn, nhấn lại.",
-  "txWaitTimeout": "Mạng không xác nhận kịp. Nếu đã ký, đừng gửi lại."
+  "txWaitTimeout": "Mạng không xác nhận kịp. Nếu đã ký, đừng gửi lại.",
+  "linkWalletNetworkDemo": "Trong Demo hãy gắn BNB Testnet. Đừng chọn BNB Smart Chain thật.",
+  "linkWalletNetworkLive": "Ở Tài khoản thật hãy gắn BNB Smart Chain. Mainnet chưa thu."
 }

@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… 電話の印",
   "adminTotpWhere": "6桁コードはここに書きません。準備完了の後、WalletConnectで署名すると認証画面が開きます。",
   "adminTotpBlocked": "WalletConnectで認証プロンプトに署名してください。期限切れなら再タップ。",
-  "txWaitTimeout": "ネットワークが時間内に確認しませんでした。署名済みなら再送しないでください。"
+  "txWaitTimeout": "ネットワークが時間内に確認しませんでした。署名済みなら再送しないでください。",
+  "linkWalletNetworkDemo": "デモではBNB Testnetに接続してください。本番のBNB Smart Chainは選ばないでください。",
+  "linkWalletNetworkLive": "本番口座ではBNB Smart Chainに接続。メインネットはまだ課金しません。"
 }

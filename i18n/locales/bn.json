@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… ফোনের মোহর",
   "adminTotpWhere": "৬ সংখ্যার কোড এখানে লেখা হয় না। প্রস্তুতের পর WalletConnect-এ স্বাক্ষর করলে প্রমাণক খুলবে।",
   "adminTotpBlocked": "WalletConnect-এ প্রমাণকের অনুরোধে স্বাক্ষর করুন। মেয়াদ শেষ হলে আবার চাপুন।",
-  "txWaitTimeout": "নেটওয়ার্ক সময়ে নিশ্চিত করেনি। স্বাক্ষর হয়ে থাকলে আর পাঠাবেন না।"
+  "txWaitTimeout": "নেটওয়ার্ক সময়ে নিশ্চিত করেনি। স্বাক্ষর হয়ে থাকলে আর পাঠাবেন না।",
+  "linkWalletNetworkDemo": "ডেমোতে BNB Testnet যুক্ত করুন। আসল BNB Smart Chain বেছে নেবেন না।",
+  "linkWalletNetworkLive": "রিয়েল অ্যাকাউন্টে BNB Smart Chain যুক্ত করুন। মেইননেট এখনো কাটে না।"
 }

@@ -35,9 +35,9 @@ export async function ensureExternalWalletOnAppChain(provider: Eip1193Provider):
   try {
     current = parseEvmChainId(await provider.request({ method: 'eth_chainId' }));
   } catch {
-    throw new Error('wrong-network');
+    throw new Error(getRuntimeMode() === 'demo' ? 'wrong-network-demo' : 'wrong-network');
   }
-  if (!current) throw new Error('wrong-network');
+  if (!current) throw new Error(getRuntimeMode() === 'demo' ? 'wrong-network-demo' : 'wrong-network');
   if (current === expected) return;
 
   const addParams = chainAddParams(expected);
@@ -47,7 +47,7 @@ export async function ensureExternalWalletOnAppChain(provider: Eip1193Provider):
       params: [{ chainId: addParams.chainId }],
     });
   } catch (error) {
-    if (!needsWalletAddChain(error)) throw new Error('wrong-network');
+    if (!needsWalletAddChain(error)) throw new Error(getRuntimeMode() === 'demo' ? 'wrong-network-demo' : 'wrong-network');
     try {
       await provider.request({
         method: 'wallet_addEthereumChain',
@@ -61,5 +61,5 @@ export async function ensureExternalWalletOnAppChain(provider: Eip1193Provider):
   const after = parseEvmChainId(
     await provider.request({ method: 'eth_chainId' }).catch(() => '0x0')
   );
-  if (after !== expected) throw new Error('wrong-network');
+  if (after !== expected) throw new Error(getRuntimeMode() === 'demo' ? 'wrong-network-demo' : 'wrong-network');
 }

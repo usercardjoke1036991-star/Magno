@@ -11,6 +11,7 @@ import {
   proveAndSaveLinkedWallet,
 } from '../services/linkedWallet';
 import { openWalletConnect } from '../utils/openWalletConnect';
+import { isDemoMode } from '../constants/rpcConfig';
 import { AppText } from './AppText';
 
 interface LinkedWalletCardProps {
@@ -70,6 +71,9 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
       ]}
     >
       <AppText style={[styles.title, { color: colors.text }]}>{t('wallet')}</AppText>
+      <AppText style={[styles.meta, { color: colors.textMuted }]}>
+        {t(isDemoMode() ? 'linkWalletNetworkDemo' : 'linkWalletNetworkLive')}
+      </AppText>
       {linked ? (
         <AppText selectable style={[styles.lead, { color: colors.textMuted }]}>
           {formatAddress(linked)}

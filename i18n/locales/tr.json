@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… telefon mührü",
   "adminTotpWhere": "6 haneli kod buraya yazılmaz. Hazır’dan sonra WalletConnect’te imzalayın, kimlik doğrulayıcı açılır.",
   "adminTotpBlocked": "WalletConnect’te kimlik doğrulayıcı istemini imzalayın. Süresi dolarsa tekrar dokunun.",
-  "txWaitTimeout": "Ağ zamanında onaylamadı. İmzaladıysanız tekrar göndermeyin."
+  "txWaitTimeout": "Ağ zamanında onaylamadı. İmzaladıysanız tekrar göndermeyin.",
+  "linkWalletNetworkDemo": "Demoda BNB Testnet bağlayın. Gerçek BNB Smart Chain seçmeyin.",
+  "linkWalletNetworkLive": "Gerçek Hesapta BNB Smart Chain bağlayın. Mainnet henüz tahsil etmiyor."
 }

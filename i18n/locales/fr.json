@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… sceau téléphone",
   "adminTotpWhere": "Le code à 6 chiffres ne s’écrit pas ici. Après Prêt, signez dans WalletConnect et l’authentificateur s’ouvre.",
   "adminTotpBlocked": "Signez dans WalletConnect l’avis de l’authentificateur. S’il expire, appuyez encore.",
-  "txWaitTimeout": "Le réseau n’a pas confirmé à temps. Si vous avez déjà signé, n’envoyez plus."
+  "txWaitTimeout": "Le réseau n’a pas confirmé à temps. Si vous avez déjà signé, n’envoyez plus.",
+  "linkWalletNetworkDemo": "En Démo, reliez BNB Testnet. Ne choisissez pas la BNB Smart Chain réelle.",
+  "linkWalletNetworkLive": "En Compte réel, reliez BNB Smart Chain. Le mainnet n’encaisse pas encore."
 }

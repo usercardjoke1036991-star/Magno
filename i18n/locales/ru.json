@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… печать телефона",
   "adminTotpWhere": "Код из 6 цифр не вводится здесь. После Готово подпишите в WalletConnect — откроется аутентификатор.",
   "adminTotpBlocked": "Подпишите в WalletConnect запрос аутентификатора. Если истечёт, нажмите снова.",
-  "txWaitTimeout": "Сеть не подтвердила вовремя. Если уже подписали, не отправляйте снова."
+  "txWaitTimeout": "Сеть не подтвердила вовремя. Если уже подписали, не отправляйте снова.",
+  "linkWalletNetworkDemo": "В Demo подключайте BNB Testnet. Не выбирайте настоящую BNB Smart Chain.",
+  "linkWalletNetworkLive": "В реальном счёте подключайте BNB Smart Chain. Mainnet ещё не списывает."
 }

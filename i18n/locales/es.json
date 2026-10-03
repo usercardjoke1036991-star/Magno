@@ -1196,5 +1196,7 @@
   "notificationTelegramChangeConfirm": "Los avisos pasarán al Telegram nuevo. El actual dejará de recibirlos. ¿Continuar?",
   "errLoanAlreadyActive": "Tiene un crédito activo. Debe liquidarlo antes de solicitar uno nuevo.",
   "adminTotpWhere": "El código de 6 dígitos no se escribe aquí. Tras Listo, firme en WalletConnect y se abre el autenticador.",
-  "txWaitTimeout": "La red no confirmó a tiempo. Si ya firmó, no vuelva a enviar."
+  "txWaitTimeout": "La red no confirmó a tiempo. Si ya firmó, no vuelva a enviar.",
+  "linkWalletNetworkDemo": "En Demo vincule BNB Testnet (prueba). No elija BNB Smart Chain real.",
+  "linkWalletNetworkLive": "En Cuenta Real vincule BNB Smart Chain. El mainnet aún no cobra."
 }

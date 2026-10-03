@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… फ़ोन की मोहर",
   "adminTotpWhere": "6 अंकों का कोड यहाँ नहीं लिखा जाता। तैयार के बाद WalletConnect में साइन करें, फिर प्रमाणक खुलेगा।",
   "adminTotpBlocked": "WalletConnect में प्रमाणक का संकेत साइन करें। समय निकलने पर फिर दबाएँ।",
-  "txWaitTimeout": "नेटवर्क समय पर पुष्टि नहीं कर पाया। यदि साइन हो चुका है तो दोबारा न भेजें।"
+  "txWaitTimeout": "नेटवर्क समय पर पुष्टि नहीं कर पाया। यदि साइन हो चुका है तो दोबारा न भेजें।",
+  "linkWalletNetworkDemo": "डेमो में BNB Testnet जोड़ें। असली BNB Smart Chain न चुनें।",
+  "linkWalletNetworkLive": "वास्तविक खाते में BNB Smart Chain जोड़ें। मेननेट अभी नहीं काटता।"
 }

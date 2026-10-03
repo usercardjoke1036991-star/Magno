@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… ختم الهاتف",
   "adminTotpWhere": "رمز الـ 6 أرقام لا يُكتب هنا. بعد جاهز وقّع في WalletConnect ثم تُفتح نافذة المصادقة.",
   "adminTotpBlocked": "وقّع في WalletConnect تنبيه المصادقة. إن انتهت المهلة اضغط مرة أخرى.",
-  "txWaitTimeout": "الشبكة لم تؤكد في الوقت. إذا وقّعت لا ترسل مرة أخرى."
+  "txWaitTimeout": "الشبكة لم تؤكد في الوقت. إذا وقّعت لا ترسل مرة أخرى.",
+  "linkWalletNetworkDemo": "في التجريب اربط BNB Testnet. لا تختر BNB Smart Chain الحقيقية.",
+  "linkWalletNetworkLive": "في الحساب الحقيقي اربط BNB Smart Chain. الشبكة الرئيسة لا تحصل بعد."
 }

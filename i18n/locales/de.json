@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… Telefon-Siegel",
   "adminTotpWhere": "Der 6-stellige Code steht nicht hier. Nach Fertig in WalletConnect signieren, dann öffnet sich der Authenticator.",
   "adminTotpBlocked": "In WalletConnect die Authenticator-Anfrage signieren. Wenn sie ablaeuft, erneut tippen.",
-  "txWaitTimeout": "Das Netz hat nicht rechtzeitig bestätigt. Wenn Sie schon signiert haben, nicht erneut senden."
+  "txWaitTimeout": "Das Netz hat nicht rechtzeitig bestätigt. Wenn Sie schon signiert haben, nicht erneut senden.",
+  "linkWalletNetworkDemo": "In Demo BNB Testnet verbinden. Nicht die echte BNB Smart Chain wählen.",
+  "linkWalletNetworkLive": "In Echtkonto BNB Smart Chain verbinden. Mainnet kassiert noch nicht."
 }

@@ -26,6 +26,7 @@ import { enviarToken, isPhraseBackedUp, loadAppWallet } from '../services/appWal
 import { signedAuthBody } from '../services/walletAuth';
 import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from '../services/linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
+import { openWalletConnect } from '../utils/openWalletConnect';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 import { formatCooldown, formatUSD, parsePositiveDecimal } from '../utils/formatters';
 import { milestoneBonusUsd } from '../constants/loanTiers';
@@ -185,6 +186,12 @@ export const useHomeHandlers = ({
       return;
     }
     try {
+      try {
+        await ensureExternalWalletOnAppChain(adminProvider as Eip1193Provider);
+      } catch (error) {
+        Alert.alert(t('connect'), humanizeTxError(error));
+        return;
+      }
       const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
       if (!signer) throw new Error('admin');
       const adminWallet = await signer.getAddress();
@@ -248,7 +255,7 @@ export const useHomeHandlers = ({
   const askToLinkExternal = (message: string) => {
     showNotice(t('linkWalletTitle'), message, [
       { text: t('cancel'), style: 'cancel' },
-      { text: t('connectWallet'), onPress: () => openExternalWallet?.() },
+      { text: t('connectWallet'), onPress: () => void openWalletConnect(() => openExternalWallet?.()) },
     ]);
   };
 

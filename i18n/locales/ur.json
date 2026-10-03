@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… فون کی مہر",
   "adminTotpWhere": "6 ہندسوں کا کوڈ یہاں نہیں لکھا جاتا۔ تیار کے بعد WalletConnect میں دستخط کریں، پھر تصدیق کھلے گی۔",
   "adminTotpBlocked": "WalletConnect میں تصدیق کار کا اشارہ دستخط کریں۔ میعاد ختم ہو تو دوبارہ دبائیں۔",
-  "txWaitTimeout": "نیٹ ورک وقت پر تصدیق نہ کر سکا۔ دستخط ہو چکے ہوں تو دوبارہ نہ بھیجیں۔"
+  "txWaitTimeout": "نیٹ ورک وقت پر تصدیق نہ کر سکا۔ دستخط ہو چکے ہوں تو دوبارہ نہ بھیجیں۔",
+  "linkWalletNetworkDemo": "ڈیمو میں BNB Testnet جوڑیں۔ اصلی BNB Smart Chain نہ چنیں۔",
+  "linkWalletNetworkLive": "اصل اکاؤنٹ میں BNB Smart Chain جوڑیں۔ مین نیٹ ابھی وصول نہیں کرتا۔"
 }

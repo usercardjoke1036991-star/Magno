@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… 전화 인장",
   "adminTotpWhere": "6자리 코드는 여기에 쓰지 않습니다. 준비 후 WalletConnect에서 서명한 뒤 인증기가 열립니다.",
   "adminTotpBlocked": "WalletConnect에서 인증기 요청에 서명하세요. 만료되면 다시 누르세요.",
-  "txWaitTimeout": "네트워크가 제때 확인하지 못했습니다. 이미 서명했다면 다시 보내지 마세요."
+  "txWaitTimeout": "네트워크가 제때 확인하지 못했습니다. 이미 서명했다면 다시 보내지 마세요.",
+  "linkWalletNetworkDemo": "데모에서는 BNB Testnet에 연결하세요. 실제 BNB Smart Chain을 고르지 마세요.",
+  "linkWalletNetworkLive": "실제 계정은 BNB Smart Chain에 연결하세요. 메인넷은 아직 청구하지 않습니다."
 }

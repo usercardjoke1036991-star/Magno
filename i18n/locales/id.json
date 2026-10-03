@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… stempel telepon",
   "adminTotpWhere": "Kode 6 digit tidak ditulis di sini. Setelah Siap, tanda tangani di WalletConnect lalu autentikator terbuka.",
   "adminTotpBlocked": "Tanda tangani di WalletConnect permintaan autentikator. Jika kedaluwarsa, ketuk lagi.",
-  "txWaitTimeout": "Jaringan tidak konfirmasi tepat waktu. Jika sudah menandatangani, jangan kirim lagi."
+  "txWaitTimeout": "Jaringan tidak konfirmasi tepat waktu. Jika sudah menandatangani, jangan kirim lagi.",
+  "linkWalletNetworkDemo": "Di Demo tautkan BNB Testnet. Jangan pilih BNB Smart Chain asli.",
+  "linkWalletNetworkLive": "Di Akun Nyata tautkan BNB Smart Chain. Mainnet belum menagih."
 }

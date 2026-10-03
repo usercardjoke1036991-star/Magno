@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… selo do telefone",
   "adminTotpWhere": "O código de 6 dígitos não se escreve aqui. Depois de Pronto, assine no WalletConnect e abre o autenticador.",
   "adminTotpBlocked": "Assine no WalletConnect o aviso do autenticador. Se caducar, toque de novo.",
-  "txWaitTimeout": "A rede não confirmou a tempo. Se já assinou, não envie de novo."
+  "txWaitTimeout": "A rede não confirmou a tempo. Se já assinou, não envie de novo.",
+  "linkWalletNetworkDemo": "No Demo vincule a BNB Testnet. Não escolha a BNB Smart Chain real.",
+  "linkWalletNetworkLive": "Na Conta Real vincule a BNB Smart Chain. A mainnet ainda não cobra."
 }

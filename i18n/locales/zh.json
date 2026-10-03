@@ -1196,5 +1196,7 @@
   "adminAttesterPlaceholder": "0x… 电话印章",
   "adminTotpWhere": "六位验证码不在此处填写。点就绪后先在 WalletConnect 签名，随后弹出验证器。",
   "adminTotpBlocked": "请先在 WalletConnect 签署验证器提示。若过期请再点一次。",
-  "txWaitTimeout": "网络未能及时确认。若已签名，请勿再次发送。"
+  "txWaitTimeout": "网络未能及时确认。若已签名，请勿再次发送。",
+  "linkWalletNetworkDemo": "演示模式请连接 BNB 测试网，不要选真实的 BNB Smart Chain。",
+  "linkWalletNetworkLive": "真实账户请连接 BNB Smart Chain。主网尚未收费。"
 }

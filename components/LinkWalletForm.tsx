@@ -7,6 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatAddress } from '../utils/formatters';
 import * as linkedWallet from '../services/linkedWallet';
 import { openWalletConnect } from '../utils/openWalletConnect';
+import { isDemoMode } from '../constants/rpcConfig';
 import { AppText } from './AppText';
 
 interface LinkWalletFormProps {
@@ -61,6 +62,9 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
 
   return (
     <View>
+      <AppText style={[styles.meta, { color: colors.textMuted, marginBottom: 10 }]}>
+        {t(isDemoMode() ? 'linkWalletNetworkDemo' : 'linkWalletNetworkLive')}
+      </AppText>
       <TouchableOpacity
         onPress={() => {
           setError('');
