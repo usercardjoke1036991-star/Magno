@@ -381,9 +381,9 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         require(p.confirms >= _requiredConfirms(), "confirmations");
         bytes4 sel = bytes4(p.data);
         require(allowedAdminSelector[sel], "selector not allowed");
+        p.executed = true;
         (bool ok, ) = address(this).call(p.data);
         require(ok);
-        p.executed = true;
         emit AdminActionExecuted(id, sel);
     }
 
@@ -1213,7 +1213,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     function pagarVerificacion(address token, uint256 amount) external nonReentrant whenNotPaused onlySupportedToken(token) {
         address user = QuatriviumFamaLib.usuarioVerificacion(famaHermano, msg.sender, tx.origin);
         _assertPeg(token);
-        QuatriviumFamaLib.alimentarPool(totalLiquidity, stableTokens[token], token, msg.sender, amount);
+        QuatriviumFamaLib.alimentarPool(totalLiquidity, stableTokens[token], token, amount);
         uint256 prev = verificadoAlPool[user];
         verificadoAlPool[user] = prev + amount;
         if (prev < 1e18 && prev + amount >= 1e18) {

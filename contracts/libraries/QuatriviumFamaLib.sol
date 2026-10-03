@@ -358,6 +358,7 @@ library QuatriviumFamaLib {
             uint256 out = outstandingLoans[token];
             uint256 caja = liq > out ? liq - out : 0;
             uint256 piso = (liq * PISO_CAJA_BP) / 10000;
+            red[deudor].bonoActivacionCobrado = true;
             uint256 pagadoBono = pagarActivacion(
                 totalLiquidity,
                 reputacion,
@@ -371,9 +372,10 @@ library QuatriviumFamaLib {
                 hermano
             );
             if (pagadoBono > 0) {
-                red[deudor].bonoActivacionCobrado = true;
                 usoBonoA = true;
                 emit BonoActivacionPagado(padre, deudor, pagadoBono, token);
+            } else {
+                red[deudor].bonoActivacionCobrado = false;
             }
         }
         uint256 floor = (interes * POOL_FLOOR_BP) / 10000;
@@ -422,12 +424,11 @@ library QuatriviumFamaLib {
         mapping(address => uint256) storage totalLiquidity,
         IERC20 token,
         address tokenAddr,
-        address from,
         uint256 amount
     ) external {
-        require(from != address(0) && (amount == 5e17 || amount == 1e18));
-        token.safeTransferFrom(from, address(this), amount);
+        require(amount == 5e17 || amount == 1e18);
         totalLiquidity[tokenAddr] += amount;
+        token.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function recoverAttest(
