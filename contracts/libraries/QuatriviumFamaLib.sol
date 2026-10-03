@@ -5,6 +5,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AggregatorV3Interface} from "../interfaces/AggregatorV3Interface.sol";
 import {IQuatriviumFamaCaja} from "../interfaces/IQuatriviumFamaCaja.sol";
+import {Usuario} from "./Usuario.sol";
+
+interface ICreditDisp {
+    function dispersionCongelada(address usuario) external view returns (bool);
+}
 
 /**
  * @title QuatriviumFamaLib
@@ -14,6 +19,10 @@ library QuatriviumFamaLib {
     using SafeERC20 for IERC20;
 
     uint256 internal constant BONO_ACTIVACION = 1e18;
+    uint256 internal constant POOL_FLOOR_BP = 4000;
+    uint256 internal constant FUNDADOR_BP = 1500;
+    uint256 internal constant PISO_CAJA_BP = 2000;
+    uint8 internal constant MAX_LINEA = 40;
     uint256 internal constant CARRIL_REF_BP = 1000;
     uint256 internal constant CARRIL_CHICO_PISO = 50e18;
     uint256 internal constant UTIL_GRANDE_NUM = 7000;
@@ -51,6 +60,24 @@ library QuatriviumFamaLib {
     /// @notice Los grandes paran al 70 % si el tope global es 80 % (misma proporción si el admin mueve el 80 %).
     function topeUtilGrande(uint256 utilMaxBps) public pure returns (uint256) {
         return (utilMaxBps * UTIL_GRANDE_NUM) / UTIL_GRANDE_DEN;
+    }
+
+    function tasaCurva(
+        uint256 utilBP,
+        uint256 baseBP,
+        uint256 optimoBP,
+        uint256 pendiente1,
+        uint256 pendiente2
+    ) public pure returns (uint256) {
+        if (utilBP < 1) return baseBP;
+        if (utilBP <= optimoBP) {
+            if (optimoBP < 1) return baseBP;
+            return baseBP + (pendiente1 * utilBP) / optimoBP;
+        }
+        uint256 extraBP = utilBP - optimoBP;
+        uint256 denom = 10000 - optimoBP;
+        if (denom < 1) return baseBP + pendiente1 + pendiente2;
+        return baseBP + pendiente1 + (pendiente2 * extraBP) / denom;
     }
 
     function usaSelloPrimera(
@@ -112,7 +139,7 @@ library QuatriviumFamaLib {
         uint256 caja,
         uint256 piso,
         address hermano
-    ) external returns (uint256 bono) {
+    ) public returns (uint256 bono) {
         if (hermano != address(0) && padreOk && padre != address(0) && padre != deudor) {
             (bool okA, bytes memory rawA) = hermano.staticcall(abi.encodeWithSignature("alta()"));
             if (okA && rawA.length >= 32) {
@@ -189,6 +216,7 @@ library QuatriviumFamaLib {
         totalReservadoPrimera[tkn] = tot > r ? tot - r : 0;
     }
 
+    event BonoRedPagado(address indexed usuario, uint256 umbral, uint256 monto, address indexed token);
     event ReputationUpdated(address indexed usuario, uint256 nuevaReputacion);
     event ComisionGeneracional(
         address indexed beneficiario,
@@ -197,11 +225,44 @@ library QuatriviumFamaLib {
         uint256 monto,
         address indexed token
     );
+    event BonoActivacionPagado(address indexed padre, address indexed referido, uint256 monto, address indexed token);
+    event InteresRetenidoPool(address indexed token, uint256 monto);
 
     /// @notice Donar y aportar: 100 fama por cada 1 USDT, desde el primero.
     function ptsDonacion(uint256, uint256 amount) external pure returns (uint256) {
         if (amount == 0) return 0;
         return (amount * 100) / 1e18;
+    }
+
+    function pagarBonosRed(
+        mapping(address => uint256) storage puntosRed,
+        mapping(address => uint256) storage bonosRedCobrados,
+        mapping(address => uint256) storage totalLiquidity,
+        mapping(address => uint256) storage outstandingLoans,
+        IERC20 pago,
+        address token,
+        address usuario,
+        uint256 umbral,
+        uint256 bonoUsdt,
+        uint256 pisoBp
+    ) external {
+        uint256 earned = puntosRed[usuario] / umbral;
+        uint256 already = bonosRedCobrados[usuario];
+        if (earned <= already) return;
+        uint256 n = earned - already;
+        if (n > 20) n = 20;
+        for (uint256 i = 0; i < n; i++) {
+            uint256 liq = totalLiquidity[token];
+            uint256 out = outstandingLoans[token];
+            uint256 caja = liq > out ? liq - out : 0;
+            uint256 piso = (liq * pisoBp) / 10000;
+            if (caja <= piso || caja - piso < bonoUsdt) break;
+            totalLiquidity[token] = liq - bonoUsdt;
+            pago.safeTransfer(usuario, bonoUsdt);
+            already += 1;
+            emit BonoRedPagado(usuario, already * umbral, bonoUsdt, token);
+        }
+        bonosRedCobrados[usuario] = already;
     }
 
     function tocar(address hermano, address who, uint256 pts) external {
@@ -261,6 +322,102 @@ library QuatriviumFamaLib {
         }
     }
 
+    function bpGeneracion(uint8 generacion) public pure returns (uint256) {
+        if (generacion == 1) return 1500;
+        if (generacion == 2) return 800;
+        if (generacion == 3) return 600;
+        if (generacion == 4) return 400;
+        if (generacion == 5) return 200;
+        if (generacion <= 12) return 80;
+        return 40;
+    }
+
+    function dispersarInteres(
+        mapping(address => Usuario) storage red,
+        mapping(address => bool) storage blacklist,
+        mapping(address => uint256) storage reputacion,
+        mapping(address => uint256) storage totalLiquidity,
+        mapping(address => uint256) storage outstandingLoans,
+        IERC20 pago,
+        address token,
+        address deudor,
+        address fundador,
+        uint256 interes,
+        uint256 nivelPrestamo,
+        uint256 pagosAntes,
+        address hermano
+    ) external returns (uint256 comisionesRed, uint256 retenidoPool, bool usoBonoA) {
+        if (interes == 0) return (0, 0, false);
+        bool habriaBonoA = pagosAntes == 0 && nivelPrestamo == 1 && !red[deudor].bonoActivacionCobrado;
+        uint256 remaining = interes;
+        uint256 corte = (interes * FUNDADOR_BP) / 10000;
+        remaining -= _pagarCapped(blacklist, pago, token, fundador, corte, remaining, deudor, 0);
+        address padre = red[deudor].padre;
+        if (habriaBonoA) {
+            uint256 liq = totalLiquidity[token];
+            uint256 out = outstandingLoans[token];
+            uint256 caja = liq > out ? liq - out : 0;
+            uint256 piso = (liq * PISO_CAJA_BP) / 10000;
+            uint256 pagadoBono = pagarActivacion(
+                totalLiquidity,
+                reputacion,
+                pago,
+                token,
+                padre,
+                deudor,
+                padre != address(0) && !ICreditDisp(address(this)).dispersionCongelada(padre),
+                caja,
+                piso,
+                hermano
+            );
+            if (pagadoBono > 0) {
+                red[deudor].bonoActivacionCobrado = true;
+                usoBonoA = true;
+                emit BonoActivacionPagado(padre, deudor, pagadoBono, token);
+            }
+        }
+        uint256 floor = (interes * POOL_FLOOR_BP) / 10000;
+        address cursor = padre;
+        for (uint8 gen = 1; gen <= MAX_LINEA; gen++) {
+            if (cursor == address(0) || cursor == deudor || remaining == 0) break;
+            if (!(usoBonoA && gen == 1)) {
+                uint256 share = (interes * bpGeneracion(gen)) / 10000;
+                if (gen >= 6) {
+                    if (remaining <= floor) break;
+                    uint256 room = remaining - floor;
+                    if (share > room) share = room;
+                }
+                remaining -= _pagarCapped(blacklist, pago, token, cursor, share, remaining, deudor, gen);
+            }
+            cursor = red[cursor].padre;
+        }
+        retenidoPool = remaining;
+        comisionesRed = interes - retenidoPool;
+        if (retenidoPool > 0) {
+            totalLiquidity[token] += retenidoPool;
+            emit InteresRetenidoPool(token, retenidoPool);
+        }
+    }
+
+    function _pagarCapped(
+        mapping(address => bool) storage blacklist,
+        IERC20 pago,
+        address token,
+        address to,
+        uint256 amount,
+        uint256 remaining,
+        address deudor,
+        uint8 generacion
+    ) private returns (uint256) {
+        if (remaining == 0 || amount == 0) return 0;
+        if (amount > remaining) amount = remaining;
+        if (amount == 0 || to == address(0) || to == deudor || blacklist[to]) return 0;
+        if (generacion != 0 && ICreditDisp(address(this)).dispersionCongelada(to)) return 0;
+        pago.safeTransfer(to, amount);
+        emit ComisionGeneracional(to, deudor, generacion, amount, token);
+        return amount;
+    }
+
     function alimentarPool(
         mapping(address => uint256) storage totalLiquidity,
         IERC20 token,
@@ -296,6 +453,31 @@ library QuatriviumFamaLib {
             r,
             s
         );
+    }
+
+    /// @notice Alta directa solo si no hay contrato Alta. Si Alta llama, el usuario es quien firmó,
+    /// salvo cargoDe(), que apunta al deudor cuando vence el padrino.
+    function usuarioVerificacion(address hermano, address caller, address origin)
+        external
+        view
+        returns (address user)
+    {
+        (bool okA, bytes memory rawA) = hermano.staticcall(abi.encodeWithSignature("alta()"));
+        address alta = (okA && rawA.length >= 32) ? abi.decode(rawA, (address)) : address(0);
+        if (origin != caller) {
+            require(alta == caller);
+            user = origin;
+            if (alta != address(0)) {
+                (bool okU, bytes memory rawU) = alta.staticcall(abi.encodeWithSignature("cargoDe()"));
+                if (okU && rawU.length >= 32) {
+                    address cargo = abi.decode(rawU, (address));
+                    if (cargo != address(0)) user = cargo;
+                }
+            }
+            return user;
+        }
+        require(alta == address(0));
+        return caller;
     }
 
     /// @notice Si Fama tiene Alta, el préstamo exige el pago de 4 USDT (registroHecho).

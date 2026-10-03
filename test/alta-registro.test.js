@@ -58,19 +58,30 @@ describe('Alta 4 USDT', function () {
     await expect(reserva.connect(owner).onAlta(ethers.parseUnits('1', 18))).to.be.reverted;
   });
 
-  it('con Alta, sin pagarRegistro el padrino no come caja', async () => {
+  it('con Alta, sin pagarRegistro el préstamo revierte', async () => {
     const { token, contract, owner, user, extra, tokenAddr } = await deployAltaStack();
     await seedPool(token, contract, owner, '500');
     await registerAndFund(token, contract, extra, '20');
     await registerAndFund(token, contract, user, '20', extra.address);
-    const padreBefore = await token.balanceOf(extra.address);
-    const liqBefore = await contract.totalLiquidity(tokenAddr);
-    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
-    const deuda = await contract.obtenerDeuda(user.address);
-    await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
-    const padreGain = (await token.balanceOf(extra.address)) - padreBefore;
-    expect(BigInt(padreGain) < ethers.parseUnits('1', 18)).to.equal(true);
-    expect(BigInt(await contract.totalLiquidity(tokenAddr)) >= BigInt(liqBefore) - ethers.parseUnits('1', 18)).to.equal(true);
+    await expect(contract.connect(user).solicitarPrestamo(tokenAddr, 0)).to.be.reverted;
+  });
+
+  it('al vencer, el USDT del padrino se anota al deudor', async () => {
+    const { token, contract, alta, owner, user, extra, tokenAddr } = await deployAltaStack();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, extra, '20');
+    await registerAndFund(token, contract, user, '20', extra.address);
+    await token.connect(extra).approve(await alta.getAddress(), ethers.MaxUint256);
+    await alta.connect(extra).pagarRegistro();
+    await alta.connect(user).pagarRegistro();
+    const extraAntes = await contract.verificadoAlPool(extra.address);
+    const userAntes = await contract.verificadoAlPool(user.address);
+    await ethers.provider.send('evm_increaseTime', [7 * 24 * 60 * 60 + 1]);
+    await ethers.provider.send('evm_mine', []);
+    await alta.connect(extra).vencerPadrinoAlPool(user.address);
+    expectAmt(await contract.verificadoAlPool(extra.address), extraAntes);
+    expectAmt(await contract.verificadoAlPool(user.address), userAntes + ethers.parseUnits('1', 18));
+    expectAmt(await alta.cargoDe(), 0n);
   });
 
   it('si no paga el L1 en 7 días el 1 del padrino va al pool', async () => {

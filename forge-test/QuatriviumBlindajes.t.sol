@@ -64,24 +64,18 @@ contract QuatriviumBlindajesTest is Test {
         credit.pagarVerificacion(address(token), 1 ether);
     }
 
-    function test_sin_registro_el_padrino_no_come_caja() public {
+    function test_sin_registro_el_prestamo_revierte() public {
         _onboard(padre, address(0));
         _onboard(hijo, padre);
-        uint256 liqBefore = credit.totalLiquidity(address(token));
-        uint256 padreBefore = token.balanceOf(padre);
         vm.prank(hijo, hijo);
+        vm.expectRevert();
         credit.solicitarPrestamo(address(token), 1);
-        (,, uint256 total,) = credit.obtenerDeuda(hijo);
-        vm.prank(hijo, hijo);
-        credit.pagarPrestamo(address(token), total);
-        assertLt(token.balanceOf(padre) - padreBefore, 1 ether, "padrino no cobra de caja");
-        assertGe(credit.totalLiquidity(address(token)), liqBefore - 1 ether);
-        _assertNav();
     }
 
     function test_cuotas_mantienen_nav() public {
         _onboard(hijo, address(0));
         credit.forceNivel(hijo, 15);
+        _pagarAlta(hijo);
         vm.prank(hijo, hijo);
         credit.solicitarPrestamo(address(token), 15);
         (uint256 principal, uint256 interes, uint256 total,) = credit.obtenerDeuda(hijo);
@@ -111,6 +105,7 @@ contract QuatriviumBlindajesTest is Test {
         token.approve(address(alta), type(uint256).max);
         vm.prank(hijo, hijo);
         alta.pagarRegistro();
+        _pagarAlta(ballena);
         vm.prank(ballena, ballena);
         credit.solicitarPrestamo(address(token), 10);
         vm.prank(hijo, hijo);
@@ -119,6 +114,13 @@ contract QuatriviumBlindajesTest is Test {
         uint256 out = credit.outstandingLoans(address(token));
         assertLe(out * 10000, liq * 8000, "uso > 80%");
         _assertNav();
+    }
+
+    function _pagarAlta(address who) internal {
+        vm.prank(who, who);
+        token.approve(address(alta), type(uint256).max);
+        vm.prank(who, who);
+        alta.pagarRegistro();
     }
 
     function _onboard(address who, address padreRef) internal {

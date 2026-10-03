@@ -84,6 +84,7 @@ function tokenFromUrl(url?: string | null): string {
 
 export function parseAppDeepLink(url?: string | null): AppDeepLink | null {
   const token = tokenFromUrl(url);
+  if (token === 'admin') return null;
   if (ROOMS.has(token)) {
     return { kind: 'room', room: token as Extract<AppDeepLink, { kind: 'room' }>['room'] };
   }

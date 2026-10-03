@@ -77,6 +77,8 @@ contract QuatriviumMoneyHandler is Test {
         }
         uint256 nivel = small ? 1 : 0;
         vm.prank(actor, actor);
+        try alta.pagarRegistro() {} catch {}
+        vm.prank(actor, actor);
         try credit.solicitarPrestamo(address(token), nivel) {} catch {}
     }
 

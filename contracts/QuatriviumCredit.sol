@@ -686,6 +686,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function solicitarPrestamo(address token, uint256 nivel) external whenNotPaused nonReentrant onlySupportedToken(token) {
         require(tx.origin == msg.sender, "no contracts");
+        QuatriviumFamaLib.requireAltaPagada(famaHermano, msg.sender);
         require(humanosVerificados[msg.sender], "not verified");
         if (kycExigido) {
             require(kycDeclarado[msg.sender], "kyc required");
@@ -878,8 +879,21 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         if (nivelPrestamo == 0) nivelPrestamo = 1;
         uint256 retenidoPool;
         bool usoBonoA;
-        (comisionesRed, retenidoPool, usoBonoA) =
-            _dispersarInteres(deudor, token, interesParte, nivelPrestamo, prestamosCerrados[deudor]);
+        (comisionesRed, retenidoPool, usoBonoA) = QuatriviumFamaLib.dispersarInteres(
+            redGenealogica,
+            blacklist,
+            reputacion,
+            totalLiquidity,
+            outstandingLoans,
+            stableTokens[token],
+            token,
+            deudor,
+            fundador,
+            interesParte,
+            nivelPrestamo,
+            prestamosCerrados[deudor],
+            famaHermano
+        );
         emit InteresDistribuido(deudor, token, interesParte, comisionesRed, retenidoPool, usoBonoA);
     }
 
@@ -947,114 +961,6 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         return desde != 0 && block.timestamp > desde + GRACIA_MORA;
     }
 
-    function _bpGeneracion(uint8 generacion) internal pure returns (uint256) {
-        if (generacion == 1) return GEN1_BP;
-        if (generacion == 2) return GEN2_BP;
-        if (generacion == 3) return GEN3_BP;
-        if (generacion == 4) return GEN4_BP;
-        if (generacion == 5) return GEN5_BP;
-        if (generacion <= 12) return 80;
-        return 40;
-    }
-
-    function _dispersarInteres(
-        address deudor,
-        address token,
-        uint256 interes,
-        uint256 nivelPrestamo,
-        uint256 pagosAntes
-    ) internal returns (uint256 comisionesRed, uint256 retenidoPool, bool usoBonoA) {
-        if (interes == 0) {
-            return (0, 0, false);
-        }
-
-        bool habriaBonoA = pagosAntes == 0
-            && nivelPrestamo == 1
-            && !redGenealogica[deudor].bonoActivacionCobrado;
-
-        uint256 remaining = interes;
-        uint256 corteFundador = (interes * FUNDADOR_BP) / 10000;
-        remaining -= _pagarCapped(token, fundador, corteFundador, remaining, deudor, 0);
-
-        address padre = redGenealogica[deudor].padre;
-        if (habriaBonoA) {
-            uint256 pagadoBono = QuatriviumFamaLib.pagarActivacion(
-                totalLiquidity,
-                reputacion,
-                stableTokens[token],
-                token,
-                padre,
-                deudor,
-                padre != address(0) && !dispersionCongelada(padre),
-                _cajaLibre(token),
-                (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000,
-                famaHermano
-            );
-            if (pagadoBono > 0) {
-                redGenealogica[deudor].bonoActivacionCobrado = true;
-                usoBonoA = true;
-                emit BonoActivacionPagado(padre, deudor, pagadoBono, token);
-            }
-        }
-
-        uint256 floor = (interes * POOL_FLOOR_BP) / 10000;
-        address cursor = padre;
-        for (uint8 gen = 1; gen <= MAX_LINEA; gen++) {
-            if (cursor == address(0) || cursor == deudor || remaining == 0) {
-                break;
-            }
-            if (!(usoBonoA && gen == 1)) {
-                uint256 share = (interes * _bpGeneracion(gen)) / 10000;
-                if (gen >= 6) {
-                    if (remaining <= floor) break;
-                    uint256 room = remaining - floor;
-                    if (share > room) share = room;
-                }
-                remaining -= _pagarCapped(token, cursor, share, remaining, deudor, gen);
-            }
-            cursor = redGenealogica[cursor].padre;
-        }
-
-        retenidoPool = remaining;
-        comisionesRed = interes - retenidoPool;
-        if (retenidoPool > 0) {
-            totalLiquidity[token] += retenidoPool;
-            emit InteresRetenidoPool(token, retenidoPool);
-        }
-        return (comisionesRed, retenidoPool, usoBonoA);
-    }
-
-    function _pagarCapped(
-        address token,
-        address to,
-        uint256 amount,
-        uint256 remaining,
-        address deudor,
-        uint8 generacion
-    ) internal returns (uint256) {
-        if (remaining == 0 || amount == 0) return 0;
-        if (amount > remaining) amount = remaining;
-        return _pagarComision(token, to, amount, deudor, generacion);
-    }
-
-    function _pagarComision(
-        address token,
-        address to,
-        uint256 amount,
-        address deudor,
-        uint8 generacion
-    ) internal returns (uint256) {
-        if (amount == 0 || to == address(0) || to == deudor || blacklist[to]) {
-            return 0;
-        }
-        if (generacion != 0 && dispersionCongelada(to)) {
-            return 0;
-        }
-        stableTokens[token].safeTransfer(to, amount);
-        emit ComisionGeneracional(to, deudor, generacion, amount, token);
-        return amount;
-    }
-
     function _cajaLibre(address token) internal view returns (uint256) {
         uint256 liq = totalLiquidity[token];
         uint256 out = outstandingLoans[token];
@@ -1076,21 +982,18 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     function _pagarBonosRed(address usuario, address token) internal {
         if (dispersionCongelada(usuario) || blacklist[usuario]) return;
-        uint256 earned = puntosRed[usuario] / UMBRAL_BONO_RED;
-        uint256 already = bonosRedCobrados[usuario];
-        if (earned <= already) return;
-        uint256 n = earned - already;
-        if (n > 20) n = 20;
-        for (uint256 i = 0; i < n; i++) {
-            uint256 caja = _cajaLibre(token);
-            uint256 piso = (totalLiquidity[token] * BONO_RED_PISO_CAJA_BP) / 10000;
-            if (caja <= piso || caja - piso < BONO_RED_USDT) break;
-            totalLiquidity[token] -= BONO_RED_USDT;
-            stableTokens[token].safeTransfer(usuario, BONO_RED_USDT);
-            already += 1;
-            emit BonoRedPagado(usuario, already * UMBRAL_BONO_RED, BONO_RED_USDT, token);
-        }
-        bonosRedCobrados[usuario] = already;
+        QuatriviumFamaLib.pagarBonosRed(
+            puntosRed,
+            bonosRedCobrados,
+            totalLiquidity,
+            outstandingLoans,
+            stableTokens[token],
+            token,
+            usuario,
+            UMBRAL_BONO_RED,
+            BONO_RED_USDT,
+            BONO_RED_PISO_CAJA_BP
+        );
     }
 
     function obtenerRedReputacion(address usuario) external view returns (
@@ -1236,16 +1139,13 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     }
 
     function obtenerTasaInteresActual(address tokenAddress) public view returns (uint256) {
-        uint256 utilBP = calcularTasaUtilizacion(tokenAddress);
-        if (utilBP < 1) return tasaBaseBP;
-        if (utilBP <= puntoOptimoUtilBP) {
-            if (puntoOptimoUtilBP < 1) return tasaBaseBP;
-            return tasaBaseBP + (pendiente1BP * utilBP) / puntoOptimoUtilBP;
-        }
-        uint256 extraBP = utilBP - puntoOptimoUtilBP;
-        uint256 denom = 10000 - puntoOptimoUtilBP;
-        if (denom < 1) return tasaBaseBP + pendiente1BP + pendiente2BP;
-        return tasaBaseBP + pendiente1BP + (pendiente2BP * extraBP) / denom;
+        return QuatriviumFamaLib.tasaCurva(
+            calcularTasaUtilizacion(tokenAddress),
+            tasaBaseBP,
+            puntoOptimoUtilBP,
+            pendiente1BP,
+            pendiente2BP
+        );
     }
 
     function obtenerHistorialUsuario(address usuario) external view returns (
@@ -1311,15 +1211,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     /// @notice Correo/teléfono: 0.50 o 1 USDT al pool. Sin fama ni participaciones LP.
     function pagarVerificacion(address token, uint256 amount) external nonReentrant whenNotPaused onlySupportedToken(token) {
-        address user = msg.sender;
-        (bool okA, bytes memory rawA) = famaHermano.staticcall(abi.encodeWithSignature("alta()"));
-        address alta = (okA && rawA.length >= 32) ? abi.decode(rawA, (address)) : address(0);
-        if (tx.origin != msg.sender) {
-            require(alta == msg.sender);
-            user = tx.origin;
-        } else {
-            require(alta == address(0));
-        }
+        address user = QuatriviumFamaLib.usuarioVerificacion(famaHermano, msg.sender, tx.origin);
         _assertPeg(token);
         QuatriviumFamaLib.alimentarPool(totalLiquidity, stableTokens[token], token, msg.sender, amount);
         uint256 prev = verificadoAlPool[user];

@@ -230,6 +230,7 @@
   - `cmd_json()`
   - `main()`
 - `web3Config.tsx`
+  - `syncAppKitNetwork()`
   - `Web3Provider()`
   - `toEthersWeb3Provider()`
   - `getEthersSignerFromProvider()`

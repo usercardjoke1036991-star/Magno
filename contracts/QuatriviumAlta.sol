@@ -27,6 +27,8 @@ contract QuatriviumAlta is ReentrancyGuard {
     mapping(address => uint256) public padrinoApartado;
     mapping(address => uint256) public padrinoExpira;
     mapping(address => bool) public registroHecho;
+    /// @notice Mientras vence un padrino, el crédito anota el sello a este deudor y no a quien llama.
+    address public cargoDe;
     uint256 public constant PLAZO_PADRINO = 7 days;
 
     error DestinoCero();
@@ -86,8 +88,10 @@ contract QuatriviumAlta is ReentrancyGuard {
         if (credit.verificadoAlPool(msg.sender) < 1e18) revert SinSello();
         padrinoApartado[deudor] = 0;
         padrinoExpira[deudor] = 0;
+        cargoDe = deudor;
         token.forceApprove(address(credit), monto);
         credit.pagarVerificacion(address(token), monto);
+        cargoDe = address(0);
         emit PadrinoSoltado(deudor, address(credit), monto);
     }
 }

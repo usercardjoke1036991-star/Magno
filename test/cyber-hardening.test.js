@@ -1901,7 +1901,9 @@ describe('account entry — password, email and session', () => {
     const deep = fs.readFileSync(path.join(__dirname, '..', 'utils', 'appDeepLink.ts'), 'utf8');
     const transfer = fs.readFileSync(path.join(__dirname, '..', 'components', 'TransferWalletsModal.tsx'), 'utf8');
     expect(famaLib).to.include('requireAltaPagada');
-    expect(credit).to.include('to == deudor || blacklist[to]');
+    expect(credit).to.include('requireAltaPagada');
+    expect(famaLib).to.include('to == deudor || blacklist[to]');
+    expect(deep).to.include("token === 'admin'");
     expect(deep).to.include('isAllowedAppUrl');
     expect(deep).to.include('quatriviumcredit.app');
     expect(deep).to.not.include("if (host && host !== 'expo-development-client') return host");

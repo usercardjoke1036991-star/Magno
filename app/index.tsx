@@ -96,6 +96,7 @@ function HomeScreenWithHooks() {
       if (url) rememberAppUrl(url);
       const link = parseAppDeepLink(url || takePendingAppUrl());
       if (link?.kind === 'room') {
+        if (link.room === 'admin') return;
         if (LOCKED_DEEP_LINK_ROOMS.has(link.room) && !getWalletWrapKey()) return;
         setRoom(link.room);
       }
