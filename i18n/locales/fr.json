@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "Vous avez un crédit en cours. Il doit être soldé avant d’en demander un nouveau.",
   "reservaApyNow": "Jusqu a 12%. Maintenant {apy}%.",
   "adminPoolHealth": "Caisse {cash} · Prete {out}",
-  "adminReservaHealth": "Reserve pot {bote} · Bloque {locked} · {apy}%"
+  "adminReservaHealth": "Reserve pot {bote} · Bloque {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Notez cette clé. Elle ne s affichera plus.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

@@ -10,8 +10,9 @@ export const ALTA_ABI = [
   'function reserva() view returns (address)',
 ];
 
-export const CREDIT_ALTA_USDT = 3;
-/** Suma de verificar correo (0,50) + celular (0,50). No es un cobro aparte. */
+/** Registro Real de una vez: 1 fundador + 1 Reserva + 1 padrino + 1 sello. */
+export const CREDIT_ALTA_USDT = 4;
+/** El 1 USDT de sello viaja dentro de los 4 del alta. */
 export const CREDIT_SELLO_USDT = 1;
 
 function envAddr(name: string): string {

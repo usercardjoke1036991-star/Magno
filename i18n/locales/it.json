@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "Ha un credito in essere. Deve estinguerlo prima di richiederne uno nuovo.",
   "reservaApyNow": "Fino al 12%. Ora {apy}%.",
   "adminPoolHealth": "Cassa {cash} · Prestato {out}",
-  "adminReservaHealth": "Riserva cassa {bote} · Bloccato {locked} · {apy}%"
+  "adminReservaHealth": "Riserva cassa {bote} · Bloccato {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Annoti questa chiave. Non si mostra più.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

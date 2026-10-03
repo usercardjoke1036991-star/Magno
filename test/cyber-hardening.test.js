@@ -911,18 +911,20 @@ describe('demo credit gates', function () {
   it('charges Real email and phone verification to the pool, not the founder', function () {
     const fs = require('fs');
     const path = require('path');
-    function verificationFeeUsdt(kind, demo) {
-      if (demo) return 0;
+    function verificationFeeUsdt(kind, demo, alta) {
+      if (demo || alta) return 0;
       return kind === 'email' ? 0.5 : 0.5;
     }
-    expect(verificationFeeUsdt('email', true)).to.equal(0);
-    expect(verificationFeeUsdt('phone', true)).to.equal(0);
-    expect(verificationFeeUsdt('email', false)).to.equal(0.5);
-    expect(verificationFeeUsdt('phone', false)).to.equal(0.5);
+    expect(verificationFeeUsdt('email', true, false)).to.equal(0);
+    expect(verificationFeeUsdt('phone', true, false)).to.equal(0);
+    expect(verificationFeeUsdt('email', false, true)).to.equal(0);
+    expect(verificationFeeUsdt('phone', false, true)).to.equal(0);
+    expect(verificationFeeUsdt('email', false, false)).to.equal(0.5);
+    expect(verificationFeeUsdt('phone', false, false)).to.equal(0.5);
     const gatesSrc = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
     expect(gatesSrc).to.include('CREDIT_VERIFY_EMAIL_USDT = 0.5');
     expect(gatesSrc).to.include('CREDIT_VERIFY_PHONE_USDT = 0.5');
-    expect(gatesSrc).to.include('if (demo) return 0');
+    expect(gatesSrc).to.include('if (demo || isAltaConfigured()) return 0');
     const emailUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'EmailOtpSection.tsx'), 'utf8');
     expect(emailUi).to.include('chargeVerificationFee');
     expect(emailUi).to.include('confirmEmailOtp');

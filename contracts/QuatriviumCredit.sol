@@ -1311,20 +1311,26 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
 
     /// @notice Correo/teléfono: 0.50 o 1 USDT al pool. Sin fama ni participaciones LP.
     function pagarVerificacion(address token, uint256 amount) external nonReentrant whenNotPaused onlySupportedToken(token) {
-        require(tx.origin == msg.sender, "no contracts");
+        address user = msg.sender;
+        if (tx.origin != msg.sender) {
+            (bool okA, bytes memory rawA) = famaHermano.staticcall(abi.encodeWithSignature("alta()"));
+            require(okA && rawA.length >= 32);
+            require(abi.decode(rawA, (address)) == msg.sender);
+            user = tx.origin;
+        }
         _assertPeg(token);
         QuatriviumFamaLib.alimentarPool(totalLiquidity, stableTokens[token], token, msg.sender, amount);
-        uint256 prev = verificadoAlPool[msg.sender];
-        verificadoAlPool[msg.sender] = prev + amount;
+        uint256 prev = verificadoAlPool[user];
+        verificadoAlPool[user] = prev + amount;
         if (prev < 1e18 && prev + amount >= 1e18) {
             QuatriviumFamaLib.sellarPrimera(
                 reservaPrimera,
                 reservaPrimeraExpira,
                 reservaPrimeraToken,
                 totalReservadoPrimera,
-                progresoUsuarios[msg.sender].ultimoPrestamoTimestamp,
+                progresoUsuarios[user].ultimoPrestamoTimestamp,
                 token,
-                msg.sender,
+                user,
                 SELLO_PRIMERA
             );
         }

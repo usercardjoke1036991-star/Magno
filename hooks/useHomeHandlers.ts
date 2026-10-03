@@ -34,6 +34,7 @@ import { readJsonLimited, safeJsonFetch } from '../utils/safeFetch';
 import { useI18n } from '../i18n/LanguageContext';
 import { humanizeTxError } from '../utils/txErrors';
 import type { FundsConfirmPurpose } from '../services/fundsConfirm';
+import { useAdminTotp } from '../components/AdminTotpHost';
 import type { LoanTier, UserInfo } from './useWeb3Balances';
 import type { Token } from '../constants/tokens';
 
@@ -143,6 +144,7 @@ export const useHomeHandlers = ({
 }: HomeHandlersParams) => {
   const { t } = useI18n();
   const accesoBusy = useRef(false);
+  const { confirmAdminStep } = useAdminTotp();
 
   const {
     isLoading: txLoading,
@@ -185,6 +187,8 @@ export const useHomeHandlers = ({
     try {
       const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
       if (!signer) throw new Error('admin');
+      const adminWallet = await signer.getAddress();
+      if (!(await confirmAdminStep(signer, adminWallet))) return;
       setWalletSigner(signer);
       await fn();
     } finally {

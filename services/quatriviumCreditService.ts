@@ -477,7 +477,7 @@ export const QuatriviumCreditService = {
       throw new Error('access-not-ready');
     }
     assertToken(tokenAddress);
-    const amountInWei = (3n * 10n ** 18n).toString();
+    const amountInWei = (4n * 10n ** 18n).toString();
     const { signer } = await requireInternalSigner();
     const userAddress = await signer.getAddress();
     await asegurarAprobacionToken(signer, userAddress, tokenAddress, amountInWei, getAltaAddress());
@@ -869,7 +869,7 @@ export const QuatriviumCreditService = {
       }
     }
     if (await QuatriviumCreditService.altaPagada(userAddress)) {
-      const floor = 3n * 10n ** 18n;
+      const floor = 4n * 10n ** 18n;
       if (BigInt(donatedWei || '0') < floor) donatedWei = floor.toString();
     }
     return {

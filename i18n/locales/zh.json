@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "您有一笔未结清信贷。须结清后方可再申请。",
   "reservaApyNow": "Zui gao 12%. Xianzai {apy}%.",
   "adminPoolHealth": "Xianjin {cash} · Daichu {out}",
-  "adminReservaHealth": "Chubei {bote} · Suoding {locked} · {apy}%"
+  "adminReservaHealth": "Chubei {bote} · Suoding {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "请记下此密钥。不会再显示。",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

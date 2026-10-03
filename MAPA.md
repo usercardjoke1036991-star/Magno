@@ -82,6 +82,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: AdminAccess
 - `components/AdminPanel.tsx` — módulo JS/TS
   - Funciones/clases: AdminPanel
+- `components/AdminTotpHost.tsx` — módulo JS/TS
+  - Funciones/clases: AdminTotpHost, useAdminTotp
 - `components/AppLockGate.tsx` — módulo JS/TS
   - Funciones/clases: AppLockGate
 - `components/AppSection.tsx` — módulo JS/TS
@@ -291,6 +293,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: stripExpPlusFromManifestXml, ensureHttpsDeepLinks
 - `profile/ProfileContext.tsx` — módulo JS/TS
   - Funciones/clases: ProfileProvider, useUserProfile
+- `scripts/adminTotp.mjs` — módulo JS/TS
+  - Funciones/clases: bytesToBase32, generateAdminTotpSecret, totpAt, verifyAdminTotp, adminTotpUrl
 - `scripts/apply-i18n-leftovers.mjs` — módulo JS/TS
 - `scripts/apply-i18n-professional.mjs` — módulo JS/TS
 - `scripts/attest2of2.mjs` — módulo JS/TS
@@ -361,6 +365,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: wipeLocalAccount
 - `services/accountUsername.ts` — módulo JS/TS
   - Funciones/clases: loadClaimedUsername, saveClaimedUsername, checkUsernameAvailable, claimUsername, clearClaimedUsername
+- `services/adminTotp.ts` — módulo JS/TS
+  - Funciones/clases: adminTotpStatus, enrollAdminTotp, confirmAdminTotp, verifyAdminTotp
 - `services/appLock.ts` — módulo JS/TS
   - Funciones/clases: PIN_LENGTH, PIN_ROUNDS, probePasswordSet, isPasswordSet, generateMasterPassword, persistWrapForBiometric, loadWrapFromBiometric, clearBiometricWrap, persistLocalRecoveryWrap, loadLocalRecoveryWrap, probePinSet, isPinSet, getPinLockRemaining, setPin, checkPin, matchPin, verifyPin, changePin, clearPin, setPassword, abortPasswordSetup, checkPassword, matchPassword, changePassword, isBiometricEnabled, setBiometricEnabled, toggleBiometric, isLockOnOpenEnabled, setLockOnOpenEnabled, getBiometricStatus, biometricAvailable, authenticateBiometric, lockNow, shouldRelockAfterBackground
 - `services/appWallet.ts` — módulo JS/TS
@@ -437,6 +443,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `stubs/zlib-stub.js` — módulo JS/TS
 - `test/accounting.test.js` — módulo JS/TS
 - `test/accountWorld.test.js` — módulo JS/TS
+- `test/admin-totp.test.js` — módulo JS/TS
 - `test/alta-registro.test.js` — módulo JS/TS
 - `test/attest2of2.test.js` — módulo JS/TS
 - `test/brand-splash.test.js` — módulo JS/TS
@@ -600,7 +607,7 @@ Sin desfases detectados entre docs y código.
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
 - detectar_logica: 0 crítico(s), 4 aviso(s)
-- verificar_modulos: 0 crítico(s), 13 aviso(s)
+- verificar_modulos: 0 crítico(s), 15 aviso(s)
 
 ## Estado
 **AL DÍA**

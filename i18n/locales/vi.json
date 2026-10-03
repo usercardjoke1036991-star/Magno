@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "Bạn đang có tín dụng còn hiệu lực. Phải tất toán trước khi yêu cầu khoản mới.",
   "reservaApyNow": "Toi da 12%. Bay gio {apy}%.",
   "adminPoolHealth": "Quy {cash} · Cho vay {out}",
-  "adminReservaHealth": "Du tru {bote} · Khoa {locked} · {apy}%"
+  "adminReservaHealth": "Du tru {bote} · Khoa {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Ghi lại khóa này. Sẽ không hiện lại.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

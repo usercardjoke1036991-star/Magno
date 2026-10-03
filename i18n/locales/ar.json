@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "لديك ائتمان قائم. يجب تسويته قبل طلب ائتمان جديد.",
   "reservaApyNow": "Hatta 12%. Alan {apy}%.",
   "adminPoolHealth": "Sanduq {cash} · Muqtarad {out}",
-  "adminReservaHealth": "Ihtiyati {bote} · Muqfal {locked} · {apy}%"
+  "adminReservaHealth": "Ihtiyati {bote} · Muqfal {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "سجّل هذا المفتاح. لن يظهر مرة أخرى.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

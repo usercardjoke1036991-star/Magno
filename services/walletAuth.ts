@@ -13,7 +13,8 @@ export type AuthPurpose =
   | 'demo-identity'
   | 'session'
   | 'identity'
-  | 'autofund';
+  | 'autofund'
+  | 'admin-totp';
 
 export const BIND_WALLET_PURPOSE = 'vincular-billetera' as const;
 

@@ -12,6 +12,7 @@ import { AppLockGate } from './components/AppLockGate';
 import { LanguageWelcome } from './components/LanguageWelcome';
 import { LegalWelcome } from './components/LegalWelcome';
 import { FundsConfirmHost } from './components/FundsConfirmHost';
+import { AdminTotpHost } from './components/AdminTotpHost';
 import { AppModeProvider } from './wallet/AppModeContext';
 import { AppWalletProvider } from './wallet/AppWalletContext';
 import * as Linking from 'expo-linking';
@@ -103,6 +104,7 @@ export default function App() {
                 <LegalWelcome>
                   <AppLockGate>
                   <FundsConfirmHost>
+                  <AdminTotpHost>
                     <DeferredWeb3>
                       <AppWalletProvider>
                         <ProfileProvider>
@@ -110,6 +112,7 @@ export default function App() {
                         </ProfileProvider>
                       </AppWalletProvider>
                     </DeferredWeb3>
+                  </AdminTotpHost>
                   </FundsConfirmHost>
                   </AppLockGate>
                 </LegalWelcome>

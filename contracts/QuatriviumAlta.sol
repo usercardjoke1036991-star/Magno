@@ -8,6 +8,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 interface ICreditAlta {
     function fundador() external view returns (address);
     function paused() external view returns (bool);
+    function pagarVerificacion(address token_, uint256 amount) external;
 }
 
 interface IReservaAlta {
@@ -15,7 +16,7 @@ interface IReservaAlta {
 }
 
 /// @title QuatriviumAlta
-/// @notice 3 USDT del registro (fundador + Reserva + padrino). El 4º es pagarVerificacion(1) del usuario.
+/// @notice 4 USDT de una vez: fundador + Reserva + padrino + sello al pool.
 contract QuatriviumAlta is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -45,11 +46,13 @@ contract QuatriviumAlta is ReentrancyGuard {
         if (padrinoApartado[msg.sender] != 0) revert YaRegistro();
         address fundador = credit.fundador();
         if (fundador == address(0)) revert DestinoCero();
-        token.safeTransferFrom(msg.sender, address(this), 3e18);
+        token.safeTransferFrom(msg.sender, address(this), 4e18);
         token.safeTransfer(fundador, 1e18);
         token.safeTransfer(reserva, 1e18);
         IReservaAlta(reserva).onAlta(1e18);
         padrinoApartado[msg.sender] = 1e18;
+        token.forceApprove(address(credit), 1e18);
+        credit.pagarVerificacion(address(token), 1e18);
         emit RegistroPagado(msg.sender);
     }
 

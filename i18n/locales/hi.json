@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "आपका एक सक्रिय ऋण है। नया अनुरोध करने से पहले इसे चुकाना होगा।",
   "reservaApyNow": "Adhik 12%. Ab {apy}%.",
   "adminPoolHealth": "Kosh {cash} · Udhari {out}",
-  "adminReservaHealth": "Arakshit {bote} · Band {locked} · {apy}%"
+  "adminReservaHealth": "Arakshit {bote} · Band {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "यह कुंजी लिख लें। फिर नहीं दिखेगी।",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

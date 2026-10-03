@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "آپ کا ایک فعال کریڈٹ ہے۔ نئی درخواست سے پہلے اسے ادا کرنا ہوگا۔",
   "reservaApyNow": "Zyada 12%. Ab {apy}%.",
   "adminPoolHealth": "Sanduq {cash} · Qarz {out}",
-  "adminReservaHealth": "Mehfooz {bote} · Band {locked} · {apy}%"
+  "adminReservaHealth": "Mehfooz {bote} · Band {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "یہ کلید لکھ لیں۔ دوبارہ نہیں دکھے گی۔",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

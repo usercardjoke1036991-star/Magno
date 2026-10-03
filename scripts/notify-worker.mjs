@@ -16,6 +16,7 @@ import { randomBytes, createCipheriv, createDecipheriv, createHash, createHmac, 
 import { Contract, JsonRpcProvider, Wallet, getAddress, verifyTypedData, keccak256, toUtf8Bytes, AbiCoder, getBytes, Signature, ZeroAddress } from 'ethers';
 import dotenv from 'dotenv';
 import { requireDistinctAttesterKeys, cosignPacked, verifyCosign } from './attest2of2.mjs';
+import { generateAdminTotpSecret, verifyAdminTotp, adminTotpUrl } from './adminTotp.mjs';
 
 dotenv.config();
 const workerEnv = resolve(process.cwd(), '.env.worker');
@@ -373,6 +374,7 @@ const emptyStore = () => ({
   recoveryWraps: {},
   recoverOtps: {},
   reservaGuard: { creditPaused: null, reservaPaused: null },
+  adminTotp: {},
 });
 
 const STORE_KEYS = Object.keys(emptyStore());
@@ -603,6 +605,7 @@ const AUTH_PURPOSES = [
   'session',
   'identity',
   'autofund',
+  'admin-totp',
 ];
 
 const requireAuth = (body, allowed) => {
@@ -622,7 +625,8 @@ const requireAuth = (body, allowed) => {
     purpose !== 'demo-identity' &&
     purpose !== 'session' &&
     purpose !== 'identity' &&
-    purpose !== 'autofund'
+    purpose !== 'autofund' &&
+    purpose !== 'admin-totp'
   ) {
     throw new Error('purpose');
   }
@@ -2435,6 +2439,88 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332 â€
     } catch (error) {
       json(res, Number(error.status) || 503, { error: error.message || 'provider' });
     }
+    return;
+  }
+  if (path === '/admin/totp/status' || path === '/admin/totp/enroll' || path === '/admin/totp/confirm' || path === '/admin/totp/verify') {
+    let body;
+    try {
+      body = await readBody(req);
+    } catch (error) {
+      bodyError(res, error);
+      return;
+    }
+    let authn;
+    try {
+      authn = requireAuth(body, ['admin-totp']);
+    } catch (error) {
+      json(res, error.message === 'wallet' || error.message === 'device' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    if (String(body.purpose) !== 'admin-totp') {
+      json(res, 401, { error: 'purpose' });
+      return;
+    }
+    if (!CONTRACT || !identityProvider) {
+      json(res, 503, { error: 'contract' });
+      return;
+    }
+    const wallet = getAddress(authn.wallet);
+    const key = wallet.toLowerCase();
+    try {
+      const credit = new Contract(CONTRACT, ['function admins(address) view returns (bool)'], identityProvider);
+      if (!(await credit.admins(wallet))) {
+        json(res, 403, { error: 'admin' });
+        return;
+      }
+    } catch {
+      json(res, 503, { error: 'admin' });
+      return;
+    }
+    if (!store.adminTotp || typeof store.adminTotp !== 'object') store.adminTotp = {};
+    const row = store.adminTotp[key] || {};
+    if (path === '/admin/totp/status') {
+      json(res, 200, { enrolled: Boolean(row.confirmed && row.secret), pending: Boolean(row.secret && !row.confirmed) });
+      return;
+    }
+    if (path === '/admin/totp/enroll') {
+      if (row.confirmed && row.secret) {
+        json(res, 200, { enrolled: true });
+        return;
+      }
+      if (!rateLimit(`totp-enroll:${key}`, 3, 60 * 60 * 1000)) {
+        json(res, 429, { error: 'rate' });
+        return;
+      }
+      const secret = generateAdminTotpSecret();
+      store.adminTotp[key] = { secret, confirmed: false, at: Date.now() };
+      persist();
+      json(res, 200, { secret, uri: adminTotpUrl(secret, wallet), enrolled: false });
+      return;
+    }
+    if (!rateLimit(`totp-try:${key}`, 8, 10 * 60 * 1000)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    const code = String(body.code || '');
+    if (path === '/admin/totp/confirm') {
+      if (!row.secret || row.confirmed) {
+        json(res, 400, { error: 'enroll' });
+        return;
+      }
+      if (!verifyAdminTotp(row.secret, code)) {
+        json(res, 401, { error: 'code' });
+        return;
+      }
+      store.adminTotp[key] = { secret: row.secret, confirmed: true, at: Date.now() };
+      persist();
+      json(res, 200, { ok: true });
+      return;
+    }
+    if (!row.confirmed || !row.secret || !verifyAdminTotp(row.secret, code)) {
+      json(res, 401, { error: 'code' });
+      return;
+    }
+    json(res, 200, { ok: true });
     return;
   }
   json(res, 404, { error: 'not found' });

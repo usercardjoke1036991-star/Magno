@@ -25,7 +25,6 @@ describe('Alta 4 USDT', function () {
     const founderBefore = await token.balanceOf(owner.address);
     const boteBefore = await reserva.bote();
     await alta.connect(user).pagarRegistro();
-    await contract.connect(user).pagarVerificacion(tokenAddr, ethers.parseUnits('1', 18));
     expect((await token.balanceOf(owner.address)) - founderBefore).to.equal(ethers.parseUnits('1', 18));
     expect((await reserva.bote()) - boteBefore).to.equal(ethers.parseUnits('1', 18));
     expect(await alta.padrinoApartado(user.address)).to.equal(ethers.parseUnits('1', 18));
@@ -38,7 +37,6 @@ describe('Alta 4 USDT', function () {
     await registerAndFund(token, contract, extra, '20');
     await registerAndFund(token, contract, user, '20', extra.address);
     await alta.connect(user).pagarRegistro();
-    await contract.connect(user).pagarVerificacion(tokenAddr, ethers.parseUnits('1', 18));
     const liqBefore = await contract.totalLiquidity(tokenAddr);
     const padreBefore = await token.balanceOf(extra.address);
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);

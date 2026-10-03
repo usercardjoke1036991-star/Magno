@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "Tem um crédito ativo. Deve liquidá-lo antes de solicitar um novo.",
   "reservaApyNow": "Ate 12%. Agora {apy}%.",
   "adminPoolHealth": "Caixa {cash} · Emprestado {out}",
-  "adminReservaHealth": "Reserva pote {bote} · Bloqueado {locked} · {apy}%"
+  "adminReservaHealth": "Reserva pote {bote} · Bloqueado {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Anote esta chave. Não aparece de novo.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

@@ -4,6 +4,7 @@
 Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.
 
 ## Decisiones
+- [2026-10-02] Alta Real cobra 4 USDT de una vez. Correo y celular se confirman sin cobro. Admins: TOTP en el worker atado a su billetera.
 - [2026-10-02] Verificar es correo + celular: 0,50 + 0,50 = 1 USDT al pool. Ese 1 es el sello del primer credito, no un cobro aparte.
 - [2026-10-02] Hitos 100-1000 proporcionales. Padrino del 1 apartado en Alta, no de la caja. Reserva techo 12% segun lo bloqueado.
 - [2026-10-02] Tras pagar, Solicitar se bloquea con cuenta atras de 48h. Con credito abierto se ve Pagar, no la cuenta atras. El texto de error de 48h es respaldo.
@@ -33,7 +34,6 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 - [2026-09-29] El multiplicador de comisiones del que bloquea se paga del bote de Reserva, no del pool. El fundador cobra corteFundadorBp de ese extra. Credit no se recorta (EIP-170).
 - [2026-09-29] Owner de Reserva sigue EOA; la pausa de emergencia se alinea con Credit via syncPauseFromCredit (attester, sin llave de owner). Unlock no se congela.
-- [2026-09-29] Reserva no es producto de inversion ni banco. Rendimiento hasta 12% estimado desde un bote aparte; principal no se toca. Demo sin KYC; Real misma identidad que el credito.
 
 ## Cambios realizados
 - [2026-10-02] Auditoria: verificar correo/celular pide confirmacion de fondos y evita doble tap en alta. Sin MagnoPay ni pausa automatica.
@@ -92,4 +92,4 @@ Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No main
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-02] Cambio: Auditoria: verificar correo/celular pide confirmacion de fondos y evita doble tap en alta. Sin MagnoPay ni pausa automatica.
+[2026-10-02] Decisión: Alta Real cobra 4 USDT de una vez. Correo y celular se confirman sin cobro. Admins: TOTP en el worker atado a su billetera.

@@ -265,6 +265,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-02 | Alta 4 USDT de una vez (sello incluido). Correo y celular sin tarifa. Autenticador de admin en el worker. | — |
 | 2026-10-02 | App y tests alineados al alta 4 USDT. Padrino ya no come caja si hay Alta. Attester 2-de-2 off-chain. Panel lee caja y Reserva. Sin testnet. | — |
 | 2026-10-02 | Invariantes Foundry NAV Credit y caja Reserva (Handler). Centinela Python solo lectura + Telegram, sin pausa. | — |
 | 2026-10-02 | Alta Real 4 USDT: 1 fundador + 1 Reserva (bote) + 1 sello + 1 padrino en QuatriviumAlta. Hitos proporcionales 400-20000 hasta L1000. Reserva APY movil techo 12 por lo bloqueado; admins retiran bote con quorum 72h. No desplegado. | — |

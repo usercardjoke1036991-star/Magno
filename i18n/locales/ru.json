@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "У вас есть действующий кредит. Его необходимо погасить до подачи новой заявки.",
   "reservaApyNow": "Do 12%. Sejchas {apy}%.",
   "adminPoolHealth": "Kassa {cash} · Zajmy {out}",
-  "adminReservaHealth": "Rezerv {bote} · Blok {locked} · {apy}%"
+  "adminReservaHealth": "Rezerv {bote} · Blok {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Запишите этот ключ. Он больше не покажется.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

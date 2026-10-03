@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "Anda memiliki kredit aktif. Harus dilunasi sebelum mengajukan yang baru.",
   "reservaApyNow": "Maks 12%. Sekarang {apy}%.",
   "adminPoolHealth": "Kas {cash} · Dipinjamkan {out}",
-  "adminReservaHealth": "Cadangan {bote} · Terkunci {locked} · {apy}%"
+  "adminReservaHealth": "Cadangan {bote} · Terkunci {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Catat kunci ini. Tidak ditampilkan lagi.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

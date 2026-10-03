@@ -168,6 +168,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   return (
     <View>
       <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminLead')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminTotpNeed')}</AppText>
       {salud ? (
         <>
           <AppText style={[styles.meta, { color: colors.text }]}>

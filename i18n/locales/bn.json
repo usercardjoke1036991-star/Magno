@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "আপনার একটি সক্রিয় ঋণ আছে। নতুন আবেদনের আগে তা পরিশোধ করতে হবে।",
   "reservaApyNow": "Sorboccho 12%. Ekhon {apy}%.",
   "adminPoolHealth": "Taka {cash} · Rin {out}",
-  "adminReservaHealth": "Sanchoy {bote} · Bondho {locked} · {apy}%"
+  "adminReservaHealth": "Sanchoy {bote} · Bondho {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "এই চাবি লিখে রাখুন। আর দেখাবে না।",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

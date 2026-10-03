@@ -126,9 +126,9 @@ export function creditNeedsDeviceMatch(deviceMatches: boolean, phoneActive = fal
 
 export const CREDIT_ACCESS_LEGACY_USDT = 2;
 export const CREDIT_ACCESS_USDT = CREDIT_ALTA_USDT;
-/** Real: confirmar el correo cobra 0,50 USDT al pool. Con el celular suma 1. Demo: 0. */
+/** Legado sin Alta: correo 0,50. Con Alta el sello ya va en los 4. Demo: 0. */
 export const CREDIT_VERIFY_EMAIL_USDT = 0.5;
-/** Real: confirmar el celular cobra 0,50 USDT al pool. Con el correo suma 1. Demo: 0. */
+/** Legado sin Alta: celular 0,50. Con Alta el sello ya va en los 4. Demo: 0. */
 export const CREDIT_VERIFY_PHONE_USDT = 0.5;
 
 export function accessPayUsdt(): number {
@@ -144,9 +144,9 @@ export function creditAccessPaidUsd(donatedUsd: number, altaPaid = false): numbe
 
 export type VerificationFeeKind = 'email' | 'phone';
 
-/** Correo 0,50 + celular 0,50 = el 1 USDT de verificar. Demo no cobra. Va al pool. */
+/** Con Alta el 1 USDT ya se cobró en el registro. Legado: 0,50+0,50. Demo: 0. */
 export function verificationFeeUsdt(kind: VerificationFeeKind, demo = false): number {
-  if (demo) return 0;
+  if (demo || isAltaConfigured()) return 0;
   return kind === 'email' ? CREDIT_VERIFY_EMAIL_USDT : CREDIT_VERIFY_PHONE_USDT;
 }
 
@@ -155,7 +155,7 @@ export function verificationFeeLabel(amount: number): string {
   return amount.toFixed(2);
 }
 
-/** Alta nueva = 3 USDT. El legado acepta 2. El candado de la app solo aplica en Real. */
+/** Alta nueva = 4 USDT de una vez. El legado acepta 2. */
 export function hasCreditAccess(paidUsd: number, altaPaid = false): boolean {
   if (altaPaid) return true;
   const paid = Number(paidUsd);

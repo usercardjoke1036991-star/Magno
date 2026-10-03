@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "有効な与信があります。新規お申込みの前に完済してください。",
   "reservaApyNow": "Saidai 12%. Ima {apy}%.",
   "adminPoolHealth": "Genkin {cash} · Kashitsuke {out}",
-  "adminReservaHealth": "Yoyaku {bote} · Lock {locked} · {apy}%"
+  "adminReservaHealth": "Yoyaku {bote} · Lock {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "この鍵を控えてください。再表示しません。",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

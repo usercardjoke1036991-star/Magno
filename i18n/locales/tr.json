@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "Aktif bir krediniz var. Yeni talepte bulunmadan önce kapatılmalıdır.",
   "reservaApyNow": "En fazla 12%. Simdi {apy}%.",
   "adminPoolHealth": "Kasa {cash} · Odunc {out}",
-  "adminReservaHealth": "Rezerv {bote} · Kilit {locked} · {apy}%"
+  "adminReservaHealth": "Rezerv {bote} · Kilit {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Bu anahtarı not edin. Bir daha gösterilmez.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

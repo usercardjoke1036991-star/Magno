@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "Sie haben einen aktiven Kredit. Er muss beglichen werden, bevor Sie einen neuen beantragen.",
   "reservaApyNow": "Bis 12%. Jetzt {apy}%.",
   "adminPoolHealth": "Kasse {cash} · Verliehen {out}",
-  "adminReservaHealth": "Reserve Topf {bote} · Gesperrt {locked} · {apy}%"
+  "adminReservaHealth": "Reserve Topf {bote} · Gesperrt {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "Notieren Sie diesen Schlüssel. Er erscheint nicht wieder.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }

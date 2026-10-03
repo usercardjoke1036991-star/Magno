@@ -1186,5 +1186,11 @@
   "errLoanAlreadyActive": "활성 신용이 있습니다. 새로 신청하기 전에 정산해야 합니다.",
   "reservaApyNow": "Choidae 12%. Jigeum {apy}%.",
   "adminPoolHealth": "Jageum {cash} · Daeyeo {out}",
-  "adminReservaHealth": "Junbi {bote} · Jamgeum {locked} · {apy}%"
+  "adminReservaHealth": "Junbi {bote} · Jamgeum {locked} · {apy}%",
+  "adminTotpTitle": "Admin authenticator",
+  "adminTotpNeed": "Enter the 6-digit code.",
+  "adminTotpSecret": "이 키를 적어두세요. 다시 보이지 않습니다.",
+  "adminTotpCode": "Code",
+  "adminTotpWrong": "Wrong code.",
+  "adminTotpConfirm": "Confirm"
 }
