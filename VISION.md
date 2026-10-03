@@ -166,6 +166,7 @@
 - El pool manda: 80% liquidez, 70% grandes, sello 7 dias en el 1 USDT de verificar
 - Los prestamos chicos de nivel 1 no deben quedar bloqueados el mismo dia por un prestamo grande; alcance mundial con carril para altas nuevas
 - El pool manda la emision de credito: mas caja mas personas, sello interno de 7 dias en la primera de 1 USDT
+- Sincronizar todos los textos de la app con contratos y codigo para que lo visual coincida con el protocolo real
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -308,3 +309,4 @@
 - [2026-10-02 09:05] Idea añadida al backlog: "Cupo de originacion diario segun caja libre: 10 por ciento, piso 50 USDT, maximo"
 - [2026-10-02 09:30] Idea añadida al backlog: "Los prestamos chicos de nivel 1 no deben quedar bloqueados el mismo dia por un p"
 - [2026-10-02 12:24] Idea añadida al backlog: "El pool manda la emision de credito: mas caja mas personas, sello interno de 7 d"
+- [2026-10-03 11:03] Idea añadida al backlog: "Sincronizar todos los textos de la app con contratos y codigo para que lo visual"

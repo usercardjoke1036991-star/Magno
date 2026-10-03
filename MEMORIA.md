@@ -36,6 +36,8 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-03] Textos de app alineados al protocolo: alta 4 USDT 1+1+1+1, fama 100 desde el primero, padrino del alta, hitos 400-20000. Limpiados temp y residuos.
+- [2026-10-03] Sonar S2699 en alta-registro: expect de registroHecho y expectAmt como asercion reconocida
 - [2026-10-03] App Demo+Alta: candado 4 USDT, banner Pagar 4, textos legales. Xiaomi con Metro ya muestra el alta. Credit no crecio.
 - [2026-10-03] Desplegado protocolo nuevo en BSC testnet: Credit 0xdF21, Fama 0x7491, Reserva 0x9058, Alta 0xa590. Pool 500 USDT. 2-de-2. 0xD2d2 no se toco. Mainnet vacio.
 - [2026-10-03] App: Alta se puede pagar aunque sea Demo si hay contrato Alta. El Xiaomi sigue con APK del 13-sep y Demo 0xD2d2 sin Alta; por eso no se ve el protocolo nuevo.
@@ -84,12 +86,10 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-09-30] Fail-closed SecureStore en Cuenta Real y sobre AES-GCM v2 con lectura dual v1.
 - [2026-09-30] Cerrado drenaje de fama: donar del fundador bloqueado; canje rechaza mora y prestamo vencido; caja exige balance on-chain.
 - [2026-09-30] App: sala Canje, ABI famaHermano, ProtocolCaps.canCanjearFama, canjearFama en el hermano. Demo legado 0xD2d2 se detecta y avisa.
-- [2026-09-30] Sonar docker:S6471: USER node + entrypoint root-aware. Snyk ReDoS Expo 54 sin upgrade. Hardhat 198/198.
-- [2026-09-30] Reserva sin texto de fundador y countdown en el boton. Politicas ampliadas version 2026-09-30.1.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-03] Decisión: En Demo el TOTP de admin no bloquea: 2-de-2 y WalletConnect bastan. El codigo de 6 digitos sale en ventana emergente, no en el panel. En Real sigue el TOTP si el worker HTTPS esta configurado.
+[2026-10-03] Cambio: Textos de app alineados al protocolo: alta 4 USDT 1+1+1+1, fama 100 desde el primero, padrino del alta, hitos 400-20000. Limpiados temp y residuos.

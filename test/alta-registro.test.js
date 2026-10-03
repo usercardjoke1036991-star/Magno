@@ -25,6 +25,7 @@ describe('Alta 4 USDT', function () {
     const founderBefore = await token.balanceOf(owner.address);
     const boteBefore = await reserva.bote();
     await alta.connect(user).pagarRegistro();
+    expect(await alta.registroHecho(user.address)).to.equal(true);
     expectAmt((await token.balanceOf(owner.address)) - founderBefore, ethers.parseUnits('1', 18));
     expectAmt((await reserva.bote()) - boteBefore, ethers.parseUnits('1', 18));
     expectAmt(await alta.padrinoApartado(user.address), ethers.parseUnits('1', 18));

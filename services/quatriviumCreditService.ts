@@ -789,7 +789,9 @@ export const QuatriviumCreditService = {
   confirmAdminAction: async (id: number) => {
     assertProposalId(id);
     const { signer } = await requireSigner();
-    const tx = await contractWith(signer).confirmAdminAction(id);
+    const credit = contractWith(signer);
+    await credit.confirmAdminAction.staticCall(id);
+    const tx = await credit.confirmAdminAction(id);
     return waitMined(tx);
   },
 

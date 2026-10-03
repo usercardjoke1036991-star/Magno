@@ -57,7 +57,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `vision_proyecto.py` — módulo Python
   - Funciones/clases: VisionProyecto, detectar_tipo_proyecto, analizar_modulos_existentes, _contar_funciones_py, _ruta_vision, leer_vision, _parsear_vision_md, escribir_vision, _generar_vision_md, cmd_init, cmd_agregar_idea, cmd_actualizar, cmd_mostrar, cmd_completar_modulo, cmd_json, _generar_arquitectura, _proximos_pasos, main
 - `web3Config.tsx` — módulo JS/TS
-  - Funciones/clases: Web3Provider, toEthersWeb3Provider, getEthersSignerFromProvider, web3ConfigDebug
+  - Funciones/clases: syncAppKitNetwork, Web3Provider, toEthersWeb3Provider, getEthersSignerFromProvider, web3ConfigDebug
 - `zkService.ts` — módulo JS/TS
 - `android/app/src/debug/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/debugOptimized/AndroidManifest.xml` — manifiesto Android
@@ -238,7 +238,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/feeConfig.ts` — módulo JS/TS
   - Funciones/clases: estimateNetworkGasWei, resolveFeeCollector
 - `constants/loanTiers.ts` — módulo JS/TS
-  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_PER_LEVEL_USD, MILESTONE_FLAT_AFTER_LEVEL, MILESTONE_FLAT_USD, MILESTONE_BONUS_USD, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, MAX_LEVEL_BONUS_EVERY, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
+  - Funciones/clases: MAX_LOAN_LEVEL, MAX_LOAN_USD, CORE_LOAN_LEVEL, CORE_LOAN_USD, USD100_LEVEL, MILESTONE_EVERY, MILESTONE_BONUS_BY_LEVEL, MAX_LEVEL_BONUS_USD, MILESTONE_BONUS_TOTAL_USD, LADDER_STEP_USD, LADDER_RATE_DROPS, MAX_LEVEL_BONUS_EVERY, ONCHAIN_TIER_SCAN, requiredCountForLevel, requiredCountForLiveLevel, requiredCountPlanned, milestoneReached, nextClaimableMilestone, nextUpcomingMilestone, isMilestoneLevel, milestoneBonusUsd, milestoneLevels, ladderUsdAmount, ladderInterestBps, ladderTermDays, CORE_LOAN_TIER_ROWS, LOAN_TIER_ROWS, LOAN_TIERS, displayMaxLoanLevel, visibleLoanTiers, installmentsForUsd, installmentsForPrincipalWei, overlayOnChainTier
 - `constants/podium.ts` — módulo JS/TS
   - Funciones/clases: PODIUM_STYLE
 - `constants/racha.ts` — módulo JS/TS
@@ -346,16 +346,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/telegramBotName.cjs` — módulo JS/TS
 - `scripts/textbeltSms.cjs` — módulo JS/TS
 - `scripts/verify-totp.mjs` — módulo JS/TS
-- `scripts/_audit-bytecode.cjs` — módulo JS/TS
-- `scripts/_check_attester_once.cjs` — módulo JS/TS
-- `scripts/_dump-ui-nodes.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
   - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
 - `scripts/_preflight_mainnet.cjs` — módulo JS/TS
-- `scripts/_probe-live-health.cjs` — módulo JS/TS
-- `scripts/_pull-rkstorage.py` — módulo Python
-- `scripts/_read-rkstorage.py` — módulo Python
-- `scripts/_set-demo-mode.py` — módulo Python
 - `services/accountEmail.ts` — módulo JS/TS
   - Funciones/clases: loadVerifiedEmail, isEmailVerified, saveVerifiedEmail, clearVerifiedEmail
 - `services/accountIdentity.ts` — módulo JS/TS
@@ -520,7 +513,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/creditCooldown.ts` — módulo JS/TS
   - Funciones/clases: PRESTAMO_COOLDOWN_SECS, cooldownRestanteDesdeTimestamp
 - `utils/creditGates.ts` — módulo JS/TS
-  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, livePhoneStepDone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_LEGACY_USDT, CREDIT_ACCESS_USDT, CREDIT_VERIFY_EMAIL_USDT, CREDIT_VERIFY_PHONE_USDT, accessPayUsdt, creditAccessPaidUsd, verificationFeeUsdt, verificationFeeLabel, hasCreditAccess, voluntaryDonateUsd, isHiddenVerificationDonation, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, identityHashBound
+  - Funciones/clases: liveNeedsKyc, liveNeedsPhone, livePhoneStepDone, phoneVerifiedOnThisDevice, liveNeedsEmail, liveNeedsPhrase, liveNeedsDeviceMatch, liveNeedsAccess, liveCreditReady, identityUnlocked, loanGateBannerRows, liveCreditBlockReason, creditNeedsKyc, creditNeedsPhone, creditNeedsEmail, creditNeedsPhrase, creditNeedsDeviceMatch, CREDIT_ACCESS_LEGACY_USDT, CREDIT_ACCESS_USDT, CREDIT_VERIFY_EMAIL_USDT, CREDIT_VERIFY_PHONE_USDT, accessPayUsdt, creditAccessPaidUsd, verificationFeeUsdt, verificationFeeLabel, hasCreditAccess, voluntaryDonateUsd, isHiddenVerificationDonation, classifyDonationKind, creditNeedsAccess, canPayCreditAccess, creditLineLooksActive, canHydrateCreditStatus, adminSeatOpen, identityHashBound
 - `utils/debtReminders.ts` — módulo JS/TS
   - Funciones/clases: getInstallmentWindows, visibleDebtReminder, canSendMidReminder, shouldSendDebtReminder, upcomingReminderTriggers
 - `utils/emailPolicy.ts` — módulo JS/TS
@@ -585,6 +578,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: hasUnsavedChanges
 - `utils/usernamePolicy.ts` — módulo JS/TS
   - Funciones/clases: normalizeUsername, isValidUsername
+- `utils/waitMined.ts` — módulo JS/TS
+  - Funciones/clases: waitMined
 - `utils/walletChain.ts` — módulo JS/TS
   - Funciones/clases: parseEvmChainId, needsWalletAddChain, ensureExternalWalletOnAppChain
 - `utils/walletVaultPolicy.ts` — módulo JS/TS

@@ -187,7 +187,12 @@ export const useHomeHandlers = ({
     }
     try {
       try {
-        await ensureExternalWalletOnAppChain(adminProvider as Eip1193Provider);
+        await Promise.race([
+          ensureExternalWalletOnAppChain(adminProvider as Eip1193Provider),
+          new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('wrong-network')), 25_000);
+          }),
+        ]);
       } catch (error) {
         Alert.alert(t('connect'), humanizeTxError(error));
         return;
@@ -195,6 +200,14 @@ export const useHomeHandlers = ({
       const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
       if (!signer) throw new Error('admin');
       const adminWallet = await signer.getAddress();
+      const adminBnb = await readOnChainBnb(adminWallet);
+      if (adminBnb === null || adminBnb < MIN_GAS_WEI) {
+        Alert.alert(t('errNeedGas'), t('errNeedGasAdmin'), [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('ready'), onPress: () => void Linking.openURL(BSC_TESTNET_FAUCET) },
+        ]);
+        return;
+      }
       if (!(await confirmAdminStep(signer, adminWallet))) {
         Alert.alert(t('admin'), t('adminTotpBlocked'));
         return;

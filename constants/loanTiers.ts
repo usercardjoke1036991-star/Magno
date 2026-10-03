@@ -6,13 +6,21 @@ export const CORE_LOAN_USD = 10_000;
 export const USD100_LEVEL = 10;
 /** Bono de pool al llegar a cada hito de 100 niveles (100, 200… 1000). */
 export const MILESTONE_EVERY = 100;
-/** 20 USDT × nivel en L100. Desde L200, 30 000 USDT fijos cada 100 niveles. */
-export const MILESTONE_BONUS_PER_LEVEL_USD = 20;
-export const MILESTONE_FLAT_AFTER_LEVEL = 200;
-export const MILESTONE_FLAT_USD = 30_000;
-export const MILESTONE_BONUS_USD = MILESTONE_EVERY * MILESTONE_BONUS_PER_LEVEL_USD;
-export const MAX_LEVEL_BONUS_USD = MILESTONE_FLAT_USD;
-export const MILESTONE_BONUS_TOTAL_USD = 272_000;
+/** Misma tabla que QuatriviumLeveling.bonoDeHito / QuatriviumFamaLib.bonoDeHito. */
+export const MILESTONE_BONUS_BY_LEVEL: Readonly<Record<number, number>> = {
+  100: 400,
+  200: 4_000,
+  300: 7_000,
+  400: 8_500,
+  500: 9_000,
+  600: 11_500,
+  700: 13_500,
+  800: 16_000,
+  900: 18_000,
+  1000: 20_000,
+};
+export const MAX_LEVEL_BONUS_USD = MILESTONE_BONUS_BY_LEVEL[1000];
+export const MILESTONE_BONUS_TOTAL_USD = Object.values(MILESTONE_BONUS_BY_LEVEL).reduce((sum, usd) => sum + usd, 0);
 export const LADDER_STEP_USD = 1_100;
 export const LADDER_RATE_DROPS = 394;
 /** Bono de hito 1000: cada 100 pagos a tiempo en el último nivel, sin reiniciar el contador. */
@@ -66,7 +74,7 @@ export function isMilestoneLevel(id: number): boolean {
 
 export function milestoneBonusUsd(level: number): number {
   if (!isMilestoneLevel(level)) return 0;
-  return level >= MILESTONE_FLAT_AFTER_LEVEL ? MILESTONE_FLAT_USD : level * MILESTONE_BONUS_PER_LEVEL_USD;
+  return MILESTONE_BONUS_BY_LEVEL[level] ?? 0;
 }
 
 export function milestoneLevels(): number[] {
