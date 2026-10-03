@@ -360,7 +360,15 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             canCanjearFama: false,
             canRacha: false,
             canPagarVerificacion: false,
-            founderAddress: getRealDonationWallet(),
+            founderAddress: prev.founderAddress || getRealDonationWallet(),
+            ownerAddress: prev.ownerAddress,
+            attesterAddress: prev.attesterAddress,
+            adminRoster: prev.adminRoster,
+            requiredConfirmations: prev.requiredConfirmations,
+            proposalCount: prev.proposalCount,
+            openProposal: prev.openProposal,
+            isAdmin: prev.isAdmin,
+            isOwner: prev.isOwner,
             maxLoanLevel: MAX_LOAN_LEVEL,
             canClaimHitos: false,
             isTokenSupported: isOfficialWorldToken(tokenAddress) || isTokenSupported,
@@ -831,7 +839,6 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }));
         } catch (e) {
           logErr('Error fetching owner status:', e);
-          setUserInfo((prev) => ({ ...prev, isOwner: false, isAdmin: false }));
         }
 
         try {

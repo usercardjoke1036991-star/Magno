@@ -707,7 +707,7 @@ describe('demo credit gates', function () {
     return Boolean(hash) && !/^0x0+$/i.test(hash);
   }
 
-  it('requires a one-time 2 USDT access fee in Real before any loan', function () {
+  it('requires a one-time access fee in Real before any loan', function () {
     function hasCreditAccess(paidUsd) {
       const paid = Number(paidUsd);
       return Number.isFinite(paid) && paid + 1e-9 >= 2;
@@ -771,8 +771,8 @@ describe('demo credit gates', function () {
     expect(banner).to.include('{canPay ? (');
     const gatesSrc = fs.readFileSync(path.join(__dirname, '..', 'utils', 'creditGates.ts'), 'utf8');
     expect(gatesSrc).to.include('liveNeedsAccess');
-    expect(gatesSrc).to.match(/return !demo && !hasCreditAccess\(paidUsd\)/);
-    expect(gatesSrc).to.include('liveNeedsAccess(isDemoAccount(), paidUsd)');
+    expect(gatesSrc).to.include('if (isAltaConfigured()) return true;');
+    expect(gatesSrc).to.include('liveNeedsAccess(isDemoAccount(), paidUsd');
   });
 
   it('lets a demo account operate without KYC, phone, email or 1 USDT but requires the 24-word backup', function () {
@@ -795,7 +795,7 @@ describe('demo credit gates', function () {
     expect(securityUi).to.include('demoAccount ? null');
     expect(securityUi).to.include("openIdentity('kyc'");
     const handlers = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
-    expect(handlers).to.match(/handlePagarAcceso = async \(\) => \{\s*if \(isDemoAccount\(\)\) return;/);
+    expect(handlers).to.match(/handlePagarAcceso = async \(\) => \{\s*if \(isDemoAccount\(\) && !isAltaConfigured\(\)\) return;/);
     expect(handlers).to.include('accesoBusy');
     expect(handlers).to.include('altaPagada');
     expect(handlers).to.match(/handleAportarReserva[\s\S]*runAsAdmin/);

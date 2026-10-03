@@ -946,11 +946,11 @@
   "publicPhotoNeed": "갤러리에서 이미지를 선택하세요.",
   "publicPhotoTooBig": "이미지가 너무 큽니다. 더 단순한 것을 고르세요.",
   "creditAccessTitle": "이용",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT 한 번. 이메일과 전화는 추가 요금 없음.",
   "creditAccessPay": "{amount} {symbol} 결제",
   "creditAccessDone": "이용료를 냈습니다.",
   "creditAccessNeed": "대출을 받으려면 4 USDT를 내세요.",
-  "creditAccessPending": "실시간 네트워크가 켜지면 이용할 수 있습니다.",
+  "creditAccessPending": "지갑을 연결해 가입비를 내세요.",
   "lockPasswordLocked": "이 전화 비밀번호는 설정되었으며 변경할 수 없습니다.",
   "referralSearchPlaceholder": "이름으로 검색",
   "referralSearchEmpty": "일치하는 사람이 없습니다.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "이 키를 적어두세요. 다시 보이지 않습니다.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… 전화 인장",
+  "adminTotpWhere": "6자리 코드는 여기에 쓰지 않습니다. 준비 후 WalletConnect에서 서명한 뒤 인증기가 열립니다.",
+  "adminTotpBlocked": "WalletConnect에서 인증기 요청에 서명하세요. 만료되면 다시 누르세요.",
+  "txWaitTimeout": "네트워크가 제때 확인하지 못했습니다. 이미 서명했다면 다시 보내지 마세요."
 }

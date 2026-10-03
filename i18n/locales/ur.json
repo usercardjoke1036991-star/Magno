@@ -946,11 +946,11 @@
   "publicPhotoNeed": "گیلری سے ایک تصویر چنیں۔",
   "publicPhotoTooBig": "تصویر بہت بھاری ہے۔ کوئی سادہ چنیں۔",
   "creditAccessTitle": "رسائی",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT ایک بار۔ ای میل اور فون پر اضافی فیس نہیں۔",
   "creditAccessPay": "{amount} {symbol} ادا کریں",
   "creditAccessDone": "رسائی ادا ہو گئی۔",
   "creditAccessNeed": "قرض مانگنے کے لیے 4 USDT ادا کریں۔",
-  "creditAccessPending": "لائیو نیٹ ورک چالو ہونے پر دستیاب۔",
+  "creditAccessPending": "داخلہ ادا کرنے کے لیے والیٹ جوڑیں۔",
   "lockPasswordLocked": "اس فون کا پاس ورڈ سیٹ ہے اور بدلا نہیں جا سکتا۔",
   "referralSearchPlaceholder": "نام سے تلاش",
   "referralSearchEmpty": "کوئی میل نہیں۔",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "یہ کلید لکھ لیں۔ دوبارہ نہیں دکھے گی۔",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… فون کی مہر",
+  "adminTotpWhere": "6 ہندسوں کا کوڈ یہاں نہیں لکھا جاتا۔ تیار کے بعد WalletConnect میں دستخط کریں، پھر تصدیق کھلے گی۔",
+  "adminTotpBlocked": "WalletConnect میں تصدیق کار کا اشارہ دستخط کریں۔ میعاد ختم ہو تو دوبارہ دبائیں۔",
+  "txWaitTimeout": "نیٹ ورک وقت پر تصدیق نہ کر سکا۔ دستخط ہو چکے ہوں تو دوبارہ نہ بھیجیں۔"
 }

@@ -87,6 +87,8 @@ const REVERT_KEYS: Array<[string, TranslationKey]> = [
   ['rate', 'otpRate'],
   ['internal-wallet-only', 'errInternalOnly'],
   ['no-admin-proposal', 'errNoAdminProposal'],
+  ['tx-timeout', 'txWaitTimeout'],
+  ['tx-reverted', 'txFailed'],
   ['user rejected', 'errRejected'],
   ['ACTION_REJECTED', 'errRejected'],
   ['4001', 'errRejected'],

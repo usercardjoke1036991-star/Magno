@@ -946,11 +946,11 @@
   "publicPhotoNeed": "Выберите фото из галереи.",
   "publicPhotoTooBig": "Фото слишком тяжёлое. Выберите более простое.",
   "creditAccessTitle": "Доступ",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT один раз. Почта и телефон без доплаты.",
   "creditAccessPay": "Оплатить {amount} {symbol}",
   "creditAccessDone": "Доступ оплачен.",
   "creditAccessNeed": "Оплатите 4 USDT, чтобы взять кредит.",
-  "creditAccessPending": "Доступно, когда сеть Real будет активна.",
+  "creditAccessPending": "Привяжите кошелёк, чтобы оплатить вход.",
   "lockPasswordLocked": "Пароль этого телефона установлен и не может быть изменён.",
   "referralSearchPlaceholder": "Поиск по имени",
   "referralSearchEmpty": "Никого не найдено.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "Запишите этот ключ. Он больше не покажется.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… печать телефона",
+  "adminTotpWhere": "Код из 6 цифр не вводится здесь. После Готово подпишите в WalletConnect — откроется аутентификатор.",
+  "adminTotpBlocked": "Подпишите в WalletConnect запрос аутентификатора. Если истечёт, нажмите снова.",
+  "txWaitTimeout": "Сеть не подтвердила вовремя. Если уже подписали, не отправляйте снова."
 }

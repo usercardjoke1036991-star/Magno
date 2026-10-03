@@ -946,11 +946,11 @@
   "publicPhotoNeed": "Choisissez une image de la galerie.",
   "publicPhotoTooBig": "L’image est trop lourde. Choisissez-en une plus simple.",
   "creditAccessTitle": "Accès",
-  "creditAccessLead": "Payez 4 USDT une fois avec le portefeuille lié.",
+  "creditAccessLead": "4 USDT une fois. E-mail et téléphone sans frais extra.",
   "creditAccessPay": "Payer {amount} {symbol}",
   "creditAccessDone": "Accès payé.",
   "creditAccessNeed": "Payez 4 USDT pour demander un crédit.",
-  "creditAccessPending": "Disponible lorsque le réseau Réel sera actif.",
+  "creditAccessPending": "Liez un portefeuille pour payer l'inscription.",
   "lockPasswordLocked": "Le mot de passe de ce téléphone est défini et ne peut pas être modifié.",
   "referralSearchPlaceholder": "Rechercher par nom",
   "referralSearchEmpty": "Personne ne correspond.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "Notez cette clé. Elle ne s affichera plus.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… sceau téléphone",
+  "adminTotpWhere": "Le code à 6 chiffres ne s’écrit pas ici. Après Prêt, signez dans WalletConnect et l’authentificateur s’ouvre.",
+  "adminTotpBlocked": "Signez dans WalletConnect l’avis de l’authentificateur. S’il expire, appuyez encore.",
+  "txWaitTimeout": "Le réseau n’a pas confirmé à temps. Si vous avez déjà signé, n’envoyez plus."
 }

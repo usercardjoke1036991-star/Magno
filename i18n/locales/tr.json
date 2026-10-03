@@ -946,11 +946,11 @@
   "publicPhotoNeed": "Galeriden bir görsel seçin.",
   "publicPhotoTooBig": "Görsel çok ağır. Daha yalın birini seçin.",
   "creditAccessTitle": "Erişim",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT bir kez. E-posta ve telefon ek ücret yok.",
   "creditAccessPay": "{amount} {symbol} öde",
   "creditAccessDone": "Erişim ödendi.",
   "creditAccessNeed": "Kredi istemek için 4 USDT ödeyin.",
-  "creditAccessPending": "Canlı ağ açıldığında kullanılabilir.",
+  "creditAccessPending": "Kaydı ödemek için bir cüzdan bağlayın.",
   "lockPasswordLocked": "Bu telefon parolası ayarlanmıştır ve değiştirilemez.",
   "referralSearchPlaceholder": "Ada göre ara",
   "referralSearchEmpty": "Eşleşme yok.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "Bu anahtarı not edin. Bir daha gösterilmez.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… telefon mührü",
+  "adminTotpWhere": "6 haneli kod buraya yazılmaz. Hazır’dan sonra WalletConnect’te imzalayın, kimlik doğrulayıcı açılır.",
+  "adminTotpBlocked": "WalletConnect’te kimlik doğrulayıcı istemini imzalayın. Süresi dolarsa tekrar dokunun.",
+  "txWaitTimeout": "Ağ zamanında onaylamadı. İmzaladıysanız tekrar göndermeyin."
 }

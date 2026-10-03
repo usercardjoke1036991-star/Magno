@@ -946,11 +946,11 @@
   "publicPhotoNeed": "ギャラリーから画像を選んでください。",
   "publicPhotoTooBig": "画像が重すぎます。もっと簡単なものを選んでください。",
   "creditAccessTitle": "アクセス",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT を一度だけ。メールと電話に追加料金はありません。",
   "creditAccessPay": "{amount} {symbol} を支払う",
   "creditAccessDone": "利用料を支払いました。",
   "creditAccessNeed": "与信を申し込むには 4 USDT を支払ってください。",
-  "creditAccessPending": "本番ネットワーク稼働後に利用できます。",
+  "creditAccessPending": "ウォレットを連携して入場料を支払ってください。",
   "lockPasswordLocked": "この端末のパスワードは設定済みで変更できません。",
   "referralSearchPlaceholder": "名前で検索",
   "referralSearchEmpty": "該当なし。",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "この鍵を控えてください。再表示しません。",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… 電話の印",
+  "adminTotpWhere": "6桁コードはここに書きません。準備完了の後、WalletConnectで署名すると認証画面が開きます。",
+  "adminTotpBlocked": "WalletConnectで認証プロンプトに署名してください。期限切れなら再タップ。",
+  "txWaitTimeout": "ネットワークが時間内に確認しませんでした。署名済みなら再送しないでください。"
 }

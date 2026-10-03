@@ -30,6 +30,7 @@ import { getDeviceHash } from './deviceBinding';
 import { cobrarComisionIntermediario, isPhraseBackedUp, loadAppWallet } from './appWallet';
 import { loadVerifiedEmail } from './accountEmail';
 import { requestDemoIdentity } from './demoIdentity';
+import { waitMined } from '../utils/waitMined';
 
 const logWarn = __DEV__ ? console.warn : () => {};
 const logInfo = __DEV__ ? console.log : () => {};
@@ -170,7 +171,7 @@ const proposeAdmin = async (fragment: string, args: unknown[]) => {
   const contract = contractWith(signer);
   const data = contract.interface.encodeFunctionData(fragment, args);
   const tx = await contract.proposeAdminAction(data);
-  return tx.wait();
+  return waitMined(tx);
 };
 
 const assertProposalId = (id: number) => {
@@ -191,7 +192,7 @@ const asegurarAprobacionToken = async (
   if (allowance < required) {
     logInfo('Aprobando token para el contrato...');
     const txApprove = await tokenContract.approve(spender, required);
-    await txApprove.wait();
+    await waitMined(txApprove);
     logInfo('Token aprobado');
   }
 };
@@ -221,7 +222,7 @@ async function topUpDemoUsdtToDebt(tokenAddress: string, neededWei = '0'): Promi
   const balance = (await token.balanceOf(userAddress)) as bigint;
   if (balance >= needed) return false;
   const tx = await token.mint(userAddress, needed - balance);
-  await tx.wait();
+  await waitMined(tx);
   return true;
 }
 
@@ -240,7 +241,7 @@ async function mintDemoUsdtTo(tokenAddress: string, to: string, amountWei: strin
   const balance = (await token.balanceOf(to)) as bigint;
   if (balance >= needed) return false;
   const tx = await token.mint(to, needed - balance);
-  await tx.wait();
+  await waitMined(tx);
   return true;
 }
 
@@ -256,7 +257,7 @@ async function prepareDemoCreditOnChain() {
   ]);
   if (!kyc) {
     const tx = await credit.declararKyc();
-    await tx.wait();
+    await waitMined(tx);
   }
   if (phoneHash === ZeroHash || deviceHash === ZeroHash) {
     const attestation = await requestDemoIdentity(address);
@@ -268,7 +269,7 @@ async function prepareDemoCreditOnChain() {
       attestation.r,
       attestation.s
     );
-    await tx.wait();
+    await waitMined(tx);
   }
 }
 
@@ -349,7 +350,7 @@ export const QuatriviumCreditService = {
     const userAddress = await signer.getAddress();
     await asegurarAprobacionToken(signer, userAddress, tokenAddress, amountInWei);
     const tx = await contractWith(signer).depositarLiquidez(tokenAddress, amountInWei);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   retirar: async (_amountInWei: string, _tokenAddress: string) => {
@@ -366,24 +367,24 @@ export const QuatriviumCreditService = {
     if (!phraseOk) {
       throw new Error('phrase-required');
     }
+    const userAddressForGate = await signer.getAddress();
+    if (isAltaConfigured()) {
+      let altaPaid = false;
+      try {
+        const alta = new Contract(getAltaAddress(), ALTA_ABI, signer);
+        altaPaid = Boolean(await alta.registroHecho(userAddressForGate));
+      } catch {
+        altaPaid = false;
+      }
+      if (!altaPaid) throw new Error('access-required');
+    }
     if (!isDemoAccount()) {
       const email = await loadVerifiedEmail();
       const phoneActive = await isPhoneActive().catch(() => false);
-      const userAddress = await signer.getAddress();
+      const userAddress = userAddressForGate;
       const credit = contractWith(signer);
       const donated = await credit.donado(userAddress).catch(() => 0n);
-      let altaPaid = false;
-      if (isAltaConfigured()) {
-        try {
-          const alta = new Contract(getAltaAddress(), ALTA_ABI, signer);
-          altaPaid = Boolean(await alta.registroHecho(userAddress));
-        } catch {
-          altaPaid = false;
-        }
-      }
-      if (isAltaConfigured()) {
-        if (!altaPaid) throw new Error('access-required');
-      } else if (BigInt(donated.toString()) < 2n * 10n ** 18n) {
+      if (!isAltaConfigured() && BigInt(donated.toString()) < 2n * 10n ** 18n) {
         throw new Error('access-required');
       }
       let kycDeclarado = false;
@@ -422,7 +423,7 @@ export const QuatriviumCreditService = {
     await credit.solicitarPrestamo.staticCall(tokenAddress, nivel);
     await cobrarComisionIntermediario(signer, true);
     const tx = await credit.solicitarPrestamo(tokenAddress, nivel);
-    const receipt = await tx.wait();
+    const receipt = await waitMined(tx);
     const userAddress = await signer.getAddress();
     const deuda = await credit.obtenerDeuda(userAddress);
     const remaining = deuda[2] as bigint;
@@ -438,7 +439,7 @@ export const QuatriviumCreditService = {
     const credit = contractWith(signer);
     await credit.cobrarBonoHito.staticCall(tokenAddress);
     const tx = await credit.cobrarBonoHito(tokenAddress);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   donar: async (amountInWei: string, tokenAddress: string) => {
@@ -453,7 +454,7 @@ export const QuatriviumCreditService = {
     const credit = contractWith(signer);
     await credit.donar.staticCall(tokenAddress, amountInWei);
     const tx = await credit.donar(tokenAddress, amountInWei);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   pagarVerificacion: async (amountInWei: string, tokenAddress: string) => {
@@ -468,7 +469,7 @@ export const QuatriviumCreditService = {
     const credit = contractWith(signer);
     await credit.pagarVerificacion.staticCall(tokenAddress, amountInWei);
     const tx = await credit.pagarVerificacion(tokenAddress, amountInWei);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   pagarRegistroAlta: async (tokenAddress: string) => {
@@ -483,7 +484,7 @@ export const QuatriviumCreditService = {
     const alta = new Contract(getAltaAddress(), ALTA_ABI, signer);
     await alta.pagarRegistro.staticCall();
     const tx = await alta.pagarRegistro();
-    return tx.wait();
+    return waitMined(tx);
   },
 
   altaPagada: async (userAddress: string) => {
@@ -623,7 +624,7 @@ export const QuatriviumCreditService = {
     try {
       await caja.notificarRacha.staticCall(hijo);
       const tx = await caja.notificarRacha(hijo);
-      await tx.wait();
+      await waitMined(tx);
     } catch {
       /* sin cierre nuevo, sin padrino o hermano legado */
     }
@@ -637,7 +638,7 @@ export const QuatriviumCreditService = {
     const caja = new Contract(hermano, FAMA_ABI, signer);
     await caja.cobrarBonoRacha.staticCall();
     const tx = await caja.cobrarBonoRacha();
-    return tx.wait();
+    return waitMined(tx);
   },
 
   canjearFama: async (fama: number) => {
@@ -651,7 +652,7 @@ export const QuatriviumCreditService = {
     const caja = new Contract(hermano, FAMA_ABI, signer);
     await caja.canjearFama.staticCall(fama);
     const tx = await caja.canjearFama(fama);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   canjearFamaRed: async (fama: number) => {
@@ -665,7 +666,7 @@ export const QuatriviumCreditService = {
     const caja = new Contract(hermano, FAMA_ABI, signer);
     await caja.canjearFamaRed.staticCall(fama);
     const tx = await caja.canjearFamaRed(fama);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   pagar: async (amountInWei: string, tokenAddress: string) => {
@@ -678,7 +679,7 @@ export const QuatriviumCreditService = {
     await credit.pagarPrestamo.staticCall(tokenAddress, amountInWei);
     await cobrarComisionIntermediario(signer, true);
     const tx = await credit.pagarPrestamo(tokenAddress, amountInWei);
-    const receipt = await tx.wait();
+    const receipt = await waitMined(tx);
     await QuatriviumCreditService.notificarRacha(userAddress);
     return receipt;
   },
@@ -709,7 +710,7 @@ export const QuatriviumCreditService = {
       await asegurarAprobacionToken(signer, userAddress, tokenAddress, amount.toString());
       await credit.pagarPrestamo.staticCall(tokenAddress, amount);
       const tx = await credit.pagarPrestamo(tokenAddress, amount);
-      last = await tx.wait();
+      last = await waitMined(tx);
       if (leftover >= left || left <= 1) break;
     }
     await QuatriviumCreditService.notificarRacha(userAddress);
@@ -720,7 +721,7 @@ export const QuatriviumCreditService = {
     const { signer } = await requireInternalSigner();
     const sponsor = padre && isAddress(padre) ? padre : ZeroAddress;
     const tx = await contractWith(signer).registrarHumanoConPadre(sponsor);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   /**
@@ -735,7 +736,7 @@ export const QuatriviumCreditService = {
   declararKyc: async () => {
     const { signer } = await requireInternalSigner();
     const tx = await contractWith(signer).declararKyc();
-    return tx.wait();
+    return waitMined(tx);
   },
 
   setKycExigido: async (exigido: boolean) => proposeAdmin('setKycExigido', [exigido]),
@@ -789,14 +790,14 @@ export const QuatriviumCreditService = {
     assertProposalId(id);
     const { signer } = await requireSigner();
     const tx = await contractWith(signer).confirmAdminAction(id);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   executeAdminAction: async (id: number) => {
     assertProposalId(id);
     const { signer } = await requireSigner();
     const tx = await contractWith(signer).executeAdminAction(id);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   canVincularIdentidad: async (
@@ -823,7 +824,7 @@ export const QuatriviumCreditService = {
     const credit = contractWith(signer);
     await credit.vincularIdentidad.staticCall(phoneHash, deviceHash, deadline, v, r, s);
     const tx = await credit.vincularIdentidad(phoneHash, deviceHash, deadline, v, r, s);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   obtenerDatosUsuario: async (userAddress: string, tokenAddress: string) => {
@@ -907,7 +908,7 @@ export const QuatriviumCreditService = {
   pausarContrato: async () => {
     const { signer } = await requireSigner();
     const tx = await contractWith(signer).pausarContrato();
-    return tx.wait();
+    return waitMined(tx);
   },
 
   despausarContrato: async () => proposeAdmin('despausarContrato', []),
@@ -916,7 +917,7 @@ export const QuatriviumCreditService = {
     assertProposalId(id);
     const { signer } = await requireSigner();
     const tx = await contractWith(signer).cancelAdminAction(id);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   liquidar: async (debtorAddress: string, tokenAddress: string) => {
@@ -935,14 +936,14 @@ export const QuatriviumCreditService = {
     if (remaining <= 0n) throw new Error('no-active-debt');
     await asegurarAprobacionToken(signer, userAddress, tokenAddress, remaining.toString());
     const tx = await credit.liquidate(debtorAddress, tokenAddress);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   marcarMorosoSiVencido: async (debtorAddress: string) => {
     if (!isAddress(debtorAddress)) throw new Error('invalid address');
     const { signer } = await requireSigner();
     const tx = await contractWith(signer).marcarMorosoSiVencido(debtorAddress);
-    return tx.wait();
+    return waitMined(tx);
   },
 
   prepareDeposit: async (tokenAddress: string, amountInWei: string) => {

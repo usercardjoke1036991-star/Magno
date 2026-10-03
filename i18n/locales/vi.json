@@ -946,11 +946,11 @@
   "publicPhotoNeed": "Hãy chọn một ảnh từ thư viện.",
   "publicPhotoTooBig": "Ảnh quá nặng. Hãy chọn ảnh đơn giản hơn.",
   "creditAccessTitle": "Truy cập",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT một lần. Email và điện thoại không phụ phí.",
   "creditAccessPay": "Trả {amount} {symbol}",
   "creditAccessDone": "Đã trả phí truy cập.",
   "creditAccessNeed": "Trả 4 USDT để xin tín dụng.",
-  "creditAccessPending": "Sẵn sàng khi mạng Real hoạt động.",
+  "creditAccessPending": "Liên kết ví để trả phí vào.",
   "lockPasswordLocked": "Mật khẩu điện thoại này đã đặt và không đổi được.",
   "referralSearchPlaceholder": "Tìm theo tên",
   "referralSearchEmpty": "Không có kết quả.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "Ghi lại khóa này. Sẽ không hiện lại.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… dấu điện thoại",
+  "adminTotpWhere": "Mã 6 số không nhập ở đây. Sau Sẵn sàng, ký WalletConnect rồi cửa sổ xác thực mở ra.",
+  "adminTotpBlocked": "Ký lời nhắc xác thực trên WalletConnect. Nếu hết hạn, nhấn lại.",
+  "txWaitTimeout": "Mạng không xác nhận kịp. Nếu đã ký, đừng gửi lại."
 }

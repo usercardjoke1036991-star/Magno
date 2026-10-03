@@ -946,11 +946,11 @@
   "publicPhotoNeed": "Wählen Sie ein Bild aus der Galerie.",
   "publicPhotoTooBig": "Das Bild ist zu schwer. Wählen Sie ein einfacheres.",
   "creditAccessTitle": "Zugang",
-  "creditAccessLead": "Zahlen Sie 4 USDT einmal mit der verknüpften Wallet.",
+  "creditAccessLead": "4 USDT einmal. E-Mail und Telefon ohne Extra-Gebühr.",
   "creditAccessPay": "{amount} {symbol} zahlen",
   "creditAccessDone": "Zugang bezahlt.",
   "creditAccessNeed": "Zahlen Sie 4 USDT, um Kredit zu beantragen.",
-  "creditAccessPending": "Verfügbar, sobald das Live-Netz aktiv ist.",
+  "creditAccessPending": "Verknüpfen Sie eine Wallet, um das Onboarding zu zahlen.",
   "lockPasswordLocked": "Dieses Telefon-Passwort ist festgelegt und kann nicht geändert werden.",
   "referralSearchPlaceholder": "Nach Namen suchen",
   "referralSearchEmpty": "Niemand passt.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "Notieren Sie diesen Schlüssel. Er erscheint nicht wieder.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… Telefon-Siegel",
+  "adminTotpWhere": "Der 6-stellige Code steht nicht hier. Nach Fertig in WalletConnect signieren, dann öffnet sich der Authenticator.",
+  "adminTotpBlocked": "In WalletConnect die Authenticator-Anfrage signieren. Wenn sie ablaeuft, erneut tippen.",
+  "txWaitTimeout": "Das Netz hat nicht rechtzeitig bestätigt. Wenn Sie schon signiert haben, nicht erneut senden."
 }

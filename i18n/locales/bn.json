@@ -946,11 +946,11 @@
   "publicPhotoNeed": "গ্যালারি থেকে একটি ছবি বেছে নিন।",
   "publicPhotoTooBig": "ছবিটি খুব ভারী। সহজ একটি বেছে নিন।",
   "creditAccessTitle": "প্রবেশ",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "একবার 4 USDT। ইমেইল ও ফোনে অতিরিক্ত ফি নেই।",
   "creditAccessPay": "{amount} {symbol} দিন",
   "creditAccessDone": "প্রবেশ পরিশোধ হয়েছে।",
   "creditAccessNeed": "ঋণ চাইতে 4 USDT দিন।",
-  "creditAccessPending": "রিয়েল নেটওয়ার্ক চালু হলে পাওয়া যাবে।",
+  "creditAccessPending": "প্রবেশ ফি দিতে ওয়ালেট যুক্ত করুন।",
   "lockPasswordLocked": "এই ফোনের পাসওয়ার্ড সেট এবং পরিবর্তনযোগ্য নয়।",
   "referralSearchPlaceholder": "নাম দিয়ে খুঁজুন",
   "referralSearchEmpty": "কেউ মেলেনি।",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "এই চাবি লিখে রাখুন। আর দেখাবে না।",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… ফোনের মোহর",
+  "adminTotpWhere": "৬ সংখ্যার কোড এখানে লেখা হয় না। প্রস্তুতের পর WalletConnect-এ স্বাক্ষর করলে প্রমাণক খুলবে।",
+  "adminTotpBlocked": "WalletConnect-এ প্রমাণকের অনুরোধে স্বাক্ষর করুন। মেয়াদ শেষ হলে আবার চাপুন।",
+  "txWaitTimeout": "নেটওয়ার্ক সময়ে নিশ্চিত করেনি। স্বাক্ষর হয়ে থাকলে আর পাঠাবেন না।"
 }

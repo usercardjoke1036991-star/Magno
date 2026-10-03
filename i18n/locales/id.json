@@ -946,11 +946,11 @@
   "publicPhotoNeed": "Pilih gambar dari galeri.",
   "publicPhotoTooBig": "Gambar terlalu berat. Pilih yang lebih sederhana.",
   "creditAccessTitle": "Akses",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT sekali. Email dan telepon tanpa biaya extra.",
   "creditAccessPay": "Bayar {amount} {symbol}",
   "creditAccessDone": "Akses sudah dibayar.",
   "creditAccessNeed": "Bayar 4 USDT untuk mengajukan kredit.",
-  "creditAccessPending": "Tersedia saat jaringan Real aktif.",
+  "creditAccessPending": "Tautkan dompet untuk membayar pendaftaran.",
   "lockPasswordLocked": "Kata sandi telepon ini sudah ditetapkan dan tidak dapat diubah.",
   "referralSearchPlaceholder": "Cari nama",
   "referralSearchEmpty": "Tidak ada yang cocok.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "Catat kunci ini. Tidak ditampilkan lagi.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… stempel telepon",
+  "adminTotpWhere": "Kode 6 digit tidak ditulis di sini. Setelah Siap, tanda tangani di WalletConnect lalu autentikator terbuka.",
+  "adminTotpBlocked": "Tanda tangani di WalletConnect permintaan autentikator. Jika kedaluwarsa, ketuk lagi.",
+  "txWaitTimeout": "Jaringan tidak konfirmasi tepat waktu. Jika sudah menandatangani, jangan kirim lagi."
 }

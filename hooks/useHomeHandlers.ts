@@ -188,9 +188,14 @@ export const useHomeHandlers = ({
       const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
       if (!signer) throw new Error('admin');
       const adminWallet = await signer.getAddress();
-      if (!(await confirmAdminStep(signer, adminWallet))) return;
+      if (!(await confirmAdminStep(signer, adminWallet))) {
+        Alert.alert(t('admin'), t('adminTotpBlocked'));
+        return;
+      }
       setWalletSigner(signer);
       await fn();
+    } catch (error) {
+      Alert.alert(t('admin'), humanizeTxError(error));
     } finally {
       if (appSigner) setWalletSigner(appSigner);
     }
@@ -753,7 +758,7 @@ export const useHomeHandlers = ({
   };
 
   const handlePagarAcceso = async () => {
-    if (isDemoAccount()) return;
+    if (isDemoAccount() && !isAltaConfigured()) return;
     if (accesoBusy.current) return;
     accesoBusy.current = true;
     try {

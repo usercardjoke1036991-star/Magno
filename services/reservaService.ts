@@ -20,6 +20,7 @@ import {
   loadDemoBote,
   loadDemoPosicion,
 } from './reservaDemoStore';
+import { waitMined } from '../utils/waitMined';
 
 export type ReservaPreview = {
   practice: boolean;
@@ -162,7 +163,7 @@ async function withToken(signer: Signer, amount: bigint) {
   const allowance = BigInt(await token.allowance(await signer.getAddress(), reservaAddr));
   if (allowance < amount) {
     const tx = await token.approve(reservaAddr, amount);
-    await tx.wait();
+    await waitMined(tx);
   }
   return reserva;
 }
@@ -178,7 +179,7 @@ export async function bloquearReserva(signer: Signer, amountUsd: string, enRed: 
   if (!isReservaConfigured()) throw new Error('reserva-not-ready');
   const reserva = await withToken(signer, amount);
   const tx = await reserva.bloquear(amount);
-  await tx.wait();
+  await waitMined(tx);
 }
 
 export async function desbloquearReserva(signer: Signer): Promise<void> {
@@ -189,7 +190,7 @@ export async function desbloquearReserva(signer: Signer): Promise<void> {
   if (!isReservaConfigured()) throw new Error('reserva-not-ready');
   const reserva = new Contract(getReservaAddress(), RESERVA_ABI, signer);
   const tx = await reserva.desbloquear();
-  await tx.wait();
+  await waitMined(tx);
 }
 
 export async function renovarReserva(signer: Signer, enRed: boolean): Promise<void> {
@@ -201,7 +202,7 @@ export async function renovarReserva(signer: Signer, enRed: boolean): Promise<vo
   if (!isReservaConfigured()) throw new Error('reserva-not-ready');
   const reserva = new Contract(getReservaAddress(), RESERVA_ABI, signer);
   const tx = await reserva.renovar();
-  await tx.wait();
+  await waitMined(tx);
 }
 
 export async function aportarReservaBote(signer: Signer, amountUsd: string): Promise<void> {
@@ -214,7 +215,7 @@ export async function aportarReservaBote(signer: Signer, amountUsd: string): Pro
   if (!isReservaConfigured()) throw new Error('reserva-not-ready');
   const reserva = await withToken(signer, amount);
   const tx = await reserva.aportarBote(amount);
-  await tx.wait();
+  await waitMined(tx);
 }
 
 export type ReservaErrorKey =

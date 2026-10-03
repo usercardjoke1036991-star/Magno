@@ -54,12 +54,12 @@ contract QuatriviumAlta is ReentrancyGuard {
         address fundador = credit.fundador();
         if (fundador == address(0)) revert DestinoCero();
         token.safeTransferFrom(msg.sender, address(this), 4e18);
-        token.safeTransfer(fundador, 1e18);
-        token.safeTransfer(reserva, 1e18);
-        IReservaAlta(reserva).onAlta(1e18);
         registroHecho[msg.sender] = true;
         padrinoApartado[msg.sender] = 1e18;
         padrinoExpira[msg.sender] = block.timestamp + PLAZO_PADRINO;
+        token.safeTransfer(fundador, 1e18);
+        token.safeTransfer(reserva, 1e18);
+        IReservaAlta(reserva).onAlta(1e18);
         token.forceApprove(address(credit), 1e18);
         credit.pagarVerificacion(address(token), 1e18);
         emit RegistroPagado(msg.sender);

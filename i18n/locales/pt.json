@@ -946,11 +946,11 @@
   "publicPhotoNeed": "Escolha uma imagem da galeria.",
   "publicPhotoTooBig": "A imagem é demasiado pesada. Escolha outra mais simples.",
   "creditAccessTitle": "Acesso",
-  "creditAccessLead": "Pague 4 USDT uma vez com a carteira vinculada.",
+  "creditAccessLead": "4 USDT de uma vez. E-mail e telefone sem taxa extra.",
   "creditAccessPay": "Pagar {amount} {symbol}",
   "creditAccessDone": "Acesso pago.",
   "creditAccessNeed": "Pague 4 USDT para pedir crédito.",
-  "creditAccessPending": "Disponível quando a rede Real estiver ativa.",
+  "creditAccessPending": "Vincule uma carteira para pagar o alta.",
   "lockPasswordLocked": "A senha deste telefone está definida e não pode ser alterada.",
   "referralSearchPlaceholder": "Buscar por nome",
   "referralSearchEmpty": "Ninguém corresponde.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "Anote esta chave. Não aparece de novo.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… selo do telefone",
+  "adminTotpWhere": "O código de 6 dígitos não se escreve aqui. Depois de Pronto, assine no WalletConnect e abre o autenticador.",
+  "adminTotpBlocked": "Assine no WalletConnect o aviso do autenticador. Se caducar, toque de novo.",
+  "txWaitTimeout": "A rede não confirmou a tempo. Se já assinou, não envie de novo."
 }

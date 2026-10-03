@@ -102,11 +102,20 @@ export function toEthersWeb3Provider(eip1193Provider: Eip1193Provider) {
 export async function getEthersSignerFromProvider(
   eip1193Provider: Eip1193Provider
 ): Promise<Signer | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    return await toEthersWeb3Provider(eip1193Provider).getSigner();
+    const signer = toEthersWeb3Provider(eip1193Provider).getSigner();
+    return await Promise.race([
+      signer,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('tx-timeout')), 45_000);
+      }),
+    ]);
   } catch (error) {
     if (__DEV__) console.log('Error getting signer from provider:', error);
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 

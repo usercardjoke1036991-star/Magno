@@ -51,7 +51,7 @@ import { APP_DISPLAY_NAME } from '../constants/brand';
 import { RESERVA_MIN_LEVEL } from '../constants/reserva';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
 import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
-import { canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, hasCreditAccess, liveCreditReady, livePhoneStepDone } from '../utils/creditGates';
+import { adminSeatOpen, canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, hasCreditAccess, liveCreditReady, livePhoneStepDone } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhoneActive } from '../services/accountPhone';
 import { isPhraseBackedUp } from '../services/appWallet';
@@ -157,6 +157,14 @@ function HomeScreenWithHooks() {
     adminConnected && adminAddress ? adminAddress.toLowerCase() : '',
     selectedToken
   );
+  const adminSeat = adminSeatOpen({
+    demo: isDemoAccount(),
+    connected: Boolean(adminConnected && adminAddress),
+    address: adminAddress,
+    isAdmin: adminInfo.isAdmin,
+    isOwner: adminInfo.isOwner,
+    roster: adminInfo.adminRoster,
+  });
   const debtReminder = useLoanPaymentReminders(userInfo);
   const creditReady = isCreditReady();
   const founderHere =
@@ -256,10 +264,10 @@ function HomeScreenWithHooks() {
   }, [appSigner]);
 
   useEffect(() => {
-    if (room === 'admin' && !adminInfo.isAdmin && !adminInfo.isOwner) {
+    if (room === 'admin' && !adminSeat) {
       setRoom(null);
     }
-  }, [room, adminInfo.isAdmin, adminInfo.isOwner]);
+  }, [room, adminSeat]);
 
   useEffect(() => {
     if (room === 'donate' && mode === 'demo') {
@@ -416,7 +424,7 @@ function HomeScreenWithHooks() {
                   { id: 'donate' as const, title: t('donateTitle'), lead: t('hubDonateLead'), icon: 'deposit' as const },
                 ]),
             { id: 'racha', title: t('rachaTitle'), lead: t('hubRachaLead'), icon: 'star' },
-            ...(adminInfo.isOwner || adminInfo.isAdmin
+            ...(adminSeat
               ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const }]
               : []),
           ]}

@@ -65,8 +65,13 @@ export const AdminTotpHost: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const confirmAdminStep = useCallback(async (signer: Signer, wallet: string) => {
+    // Demo: 2-de-2 + WalletConnect bastan. El TOTP del worker pedía otra firma
+    // y, si caducaba, el panel no hacía nada.
+    if (isDemoAccount() || isDemoMode()) {
+      return true;
+    }
     if (!notifyApiConfigured()) {
-      return isDemoAccount() || isDemoMode();
+      return false;
     }
     try {
       const status = await adminTotpStatus(signer, wallet);
@@ -83,7 +88,8 @@ export const AdminTotpHost: React.FC<{ children: React.ReactNode }> = ({ childre
           setSecret(String(enrolled.secret || ''));
         }
       }
-    } catch {
+    } catch (error) {
+      console.warn('[admin-totp]', error instanceof Error ? error.message : 'fail');
       return false;
     }
     setCode('');

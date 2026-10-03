@@ -1,6 +1,7 @@
 {
-  "enfoque": "Producto listo en Demo. Real espera contrato mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes. Telegram token ya rotado. Tercer admin despues; proximo Demo con 2-de-2.",
+  "enfoque": "Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.",
   "decisiones": [
+    "- [2026-10-03] En Demo el TOTP de admin no bloquea: 2-de-2 y WalletConnect bastan. El codigo de 6 digitos sale en ventana emergente, no en el panel. En Real sigue el TOTP si el worker HTTPS esta configurado.",
     "- [2026-10-03] Donar y aportar: 100 fama por cada USDT desde el primero. Si Ana no paga el primer L1 en 7 dias, el 1 de Pedro va al pool.",
     "- [2026-10-02] Alta Real cobra 4 USDT de una vez. Correo y celular se confirman sin cobro. Admins: TOTP en el worker atado a su billetera.",
     "- [2026-10-02] Verificar es correo + celular: 0,50 + 0,50 = 1 USDT al pool. Ese 1 es el sello del primer credito, no un cobro aparte.",
@@ -29,10 +30,10 @@
     "- [2026-09-30] El Dockerfile del worker declara USER node para Sonar. Persistencia /data se recupera si el runtime arranca como root; si no, fallback a /app/data.",
     "- [2026-09-30] Las politicas informan y no sustituyen licencia ni abogado. Reserva no menciona al fundador en la UI.",
     "- [2026-09-29] La recuperacion por correo solo cambia la contraseña en el mismo telefono. En uno nuevo se usa la frase. El wrap no sale del dispositivo.",
-    "- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.",
-    "- [2026-09-29] El multiplicador de comisiones del que bloquea se paga del bote de Reserva, no del pool. El fundador cobra corteFundadorBp de ese extra. Credit no se recorta (EIP-170)."
+    "- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool."
   ],
   "cambios": [
+    "- [2026-10-03] App Demo+Alta: candado 4 USDT, banner Pagar 4, textos legales. Xiaomi con Metro ya muestra el alta. Credit no crecio.",
     "- [2026-10-03] Desplegado protocolo nuevo en BSC testnet: Credit 0xdF21, Fama 0x7491, Reserva 0x9058, Alta 0xa590. Pool 500 USDT. 2-de-2. 0xD2d2 no se toco. Mainnet vacio.",
     "- [2026-10-03] App: Alta se puede pagar aunque sea Demo si hay contrato Alta. El Xiaomi sigue con APK del 13-sep y Demo 0xD2d2 sin Alta; por eso no se ve el protocolo nuevo.",
     "- [2026-10-03] ptsDonacion sin puerta de 2 USDT. Alta.vencerPadrinoAlPool manda el padrino vencido al pool. Credit no crecio (EIP-170).",
@@ -81,9 +82,8 @@
     "- [2026-09-30] Cerrado drenaje de fama: donar del fundador bloqueado; canje rechaza mora y prestamo vencido; caja exige balance on-chain.",
     "- [2026-09-30] App: sala Canje, ABI famaHermano, ProtocolCaps.canCanjearFama, canjearFama en el hermano. Demo legado 0xD2d2 se detecta y avisa.",
     "- [2026-09-30] Sonar docker:S6471: USER node + entrypoint root-aware. Snyk ReDoS Expo 54 sin upgrade. Hardhat 198/198.",
-    "- [2026-09-30] Reserva sin texto de fundador y countdown en el boton. Politicas ampliadas version 2026-09-30.1.",
-    "- [2026-09-29] Limpieza Snyk Code: invite acotado, regex acotado, rutas del kit con under_root. Render en vivo."
+    "- [2026-09-30] Reserva sin texto de fundador y countdown en el boton. Politicas ampliadas version 2026-09-30.1."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-03] Cambio: Desplegado protocolo nuevo en BSC testnet: Credit 0xdF21, Fama 0x7491, Reserva 0x9058, Alta 0xa590. Pool 500 USDT. 2-de-2. 0xD2d2 no se toco. Mainnet vacio."
+  "ultima_sesion": "[2026-10-03] Decisión: En Demo el TOTP de admin no bloquea: 2-de-2 y WalletConnect bastan. El codigo de 6 digitos sale en ventana emergente, no en el panel. En Real sigue el TOTP si el worker HTTPS esta configurado."
 }

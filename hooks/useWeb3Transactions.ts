@@ -29,8 +29,14 @@ export const useWeb3Transactions = () => {
     setIsLoading(true);
     setCurrentAction(actionName);
 
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      await transactionFn();
+      await Promise.race([
+        transactionFn(),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error('tx-timeout')), 90_000);
+        }),
+      ]);
       showNotice(t('ready'), successMessage || t('txConfirmed', { action: actionName }));
       return { success: true };
     } catch (error: unknown) {
@@ -38,6 +44,7 @@ export const useWeb3Transactions = () => {
       showNotice(t('error'), errorMessage);
       return { success: false, error: errorMessage };
     } finally {
+      if (timer) clearTimeout(timer);
       busyRef.current = false;
       setIsLoading(false);
       setCurrentAction(null);

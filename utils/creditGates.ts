@@ -51,9 +51,11 @@ export function liveNeedsDeviceMatch(demo: boolean, deviceMatches: boolean, phon
   return !deviceMatches;
 }
 
-/** Cuenta Real: 2 USDT de acceso una vez. Demo no lo pide. */
-export function liveNeedsAccess(demo: boolean, paidUsd: number): boolean {
-  return !demo && !hasCreditAccess(paidUsd);
+/** Con Alta: 4 USDT también en Demo. Sin Alta: solo Real (legado 2 USDT). */
+export function liveNeedsAccess(demo: boolean, paidUsd: number, altaPaid = false): boolean {
+  if (hasCreditAccess(paidUsd, altaPaid)) return false;
+  if (isAltaConfigured()) return true;
+  return !demo;
 }
 
 export function liveCreditReady(demo: boolean, flags: LiveCreditFlags): boolean {
@@ -68,7 +70,7 @@ export function liveCreditReady(demo: boolean, flags: LiveCreditFlags): boolean 
 
 export type LoanGateBannerRow = 'phrase' | 'email' | 'kyc' | 'phone';
 
-/** Correo, número y KYC solo en Real, después de los 2 USDT. Demo no abre esa verificación. */
+/** Correo, número y KYC solo en Real, después del alta. Demo no abre esa verificación. */
 export function identityUnlocked(paidUsd: number): boolean {
   if (isDemoAccount()) return false;
   return hasCreditAccess(paidUsd);
@@ -194,20 +196,20 @@ export function classifyDonationKind(usdAmount: number, isFirstDonation: boolean
   return 'donation';
 }
 
-export function creditNeedsAccess(paidUsd: number): boolean {
-  return liveNeedsAccess(isDemoAccount(), paidUsd);
+export function creditNeedsAccess(paidUsd: number, altaPaid = false): boolean {
+  return liveNeedsAccess(isDemoAccount(), paidUsd, altaPaid);
 }
 
-/** El botón de 2 USDT se enciende si el contrato puede donar y hay destino. No usa la sala Donar. */
+/** Con Alta basta el fundador. Legado: donar + destino + red Real. */
 export function canPayCreditAccess(input: {
   protocolCanDonate: boolean;
   founderAddress: string;
   accessEnabled: boolean;
   altaReady?: boolean;
 }): boolean {
-  const dest = Boolean(String(input.founderAddress || '').trim() && input.accessEnabled);
+  const dest = Boolean(String(input.founderAddress || '').trim());
   if (input.altaReady || isAltaConfigured()) return dest;
-  return Boolean(input.protocolCanDonate && dest);
+  return Boolean(input.protocolCanDonate && dest && input.accessEnabled);
 }
 
 /** Línea activa solo si el contrato del mundo actual existe. Real no hereda el registro de Demo. */
@@ -231,6 +233,22 @@ export function canHydrateCreditStatus(input: {
   const current = String(input.currentContract || '').trim().toLowerCase();
   if (saved && current && saved !== current) return false;
   return true;
+}
+
+/** Baldosa Admin: sesión externa + rol, o la dirección está en el roster ya leído. */
+export function adminSeatOpen(input: {
+  demo: boolean;
+  connected: boolean;
+  address?: string | null;
+  isAdmin?: boolean;
+  isOwner?: boolean;
+  roster?: string[];
+}): boolean {
+  if (!input.demo || !input.connected) return false;
+  if (input.isAdmin || input.isOwner) return true;
+  const wallet = String(input.address || '').trim().toLowerCase();
+  if (!wallet) return false;
+  return (input.roster || []).some((item) => String(item || '').toLowerCase() === wallet);
 }
 
 export function identityHashBound(value: string | null | undefined): boolean {

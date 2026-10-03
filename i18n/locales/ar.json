@@ -946,11 +946,11 @@
   "publicPhotoNeed": "اختر صورة من المعرض.",
   "publicPhotoTooBig": "الصورة ثقيلة جداً. اختر صورة أبسط.",
   "creditAccessTitle": "الوصول",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT مرة واحدة. البريد والهاتف بلا رسوم إضافية.",
   "creditAccessPay": "ادفع {amount} {symbol}",
   "creditAccessDone": "تم دفع الدخول.",
   "creditAccessNeed": "ادفع 4 USDT لطلب الائتمان.",
-  "creditAccessPending": "متاح عند تفعيل الشبكة الحقيقية.",
+  "creditAccessPending": "اربطوا محفظة لدفع الاشتراك.",
   "lockPasswordLocked": "كلمة مرور هذا الهاتف مضبوطة ولا يمكن تغييرها.",
   "referralSearchPlaceholder": "البحث بالاسم",
   "referralSearchEmpty": "لا أحد يطابق.",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "سجّل هذا المفتاح. لن يظهر مرة أخرى.",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… ختم الهاتف",
+  "adminTotpWhere": "رمز الـ 6 أرقام لا يُكتب هنا. بعد جاهز وقّع في WalletConnect ثم تُفتح نافذة المصادقة.",
+  "adminTotpBlocked": "وقّع في WalletConnect تنبيه المصادقة. إن انتهت المهلة اضغط مرة أخرى.",
+  "txWaitTimeout": "الشبكة لم تؤكد في الوقت. إذا وقّعت لا ترسل مرة أخرى."
 }

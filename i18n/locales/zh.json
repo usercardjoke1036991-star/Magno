@@ -946,11 +946,11 @@
   "publicPhotoNeed": "请从图库选择一张图片。",
   "publicPhotoTooBig": "图片太大。请选一张更简单的。",
   "creditAccessTitle": "开通",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "一次性 4 USDT。邮箱和电话不另收费。",
   "creditAccessPay": "支付 {amount} {symbol}",
   "creditAccessDone": "已支付准入。",
   "creditAccessNeed": "请支付 4 USDT 才能申请信贷。",
-  "creditAccessPending": "主网上线后可用。",
+  "creditAccessPending": "请绑定钱包以支付开通。",
   "lockPasswordLocked": "本机密码已设定且不可更改。",
   "referralSearchPlaceholder": "按名称搜索",
   "referralSearchEmpty": "没有匹配的人。",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "请记下此密钥。不会再显示。",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… 电话印章",
+  "adminTotpWhere": "六位验证码不在此处填写。点就绪后先在 WalletConnect 签名，随后弹出验证器。",
+  "adminTotpBlocked": "请先在 WalletConnect 签署验证器提示。若过期请再点一次。",
+  "txWaitTimeout": "网络未能及时确认。若已签名，请勿再次发送。"
 }

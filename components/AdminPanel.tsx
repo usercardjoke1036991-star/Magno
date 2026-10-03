@@ -83,6 +83,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const [draft, setDraft] = useState('');
+  const [selloDraft, setSelloDraft] = useState('');
   const [debtorDraft, setDebtorDraft] = useState('');
   const [reservaPot, setReservaPot] = useState('100');
   const [salud, setSalud] = useState<{ cash: bigint; outstanding: bigint; reservaBote: bigint; reservaLocked: bigint; reservaApyBps: number } | null>(null);
@@ -145,8 +146,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const proposeAttesterAddress = () => {
     if (!onProposeAttester) return;
+    const sello = selloDraft.trim() || trimmed;
     const blocked = [...adminRoster, founderAddress, ownerAddress];
-    const error = attesterProposalError(trimmed, ownerAddress, blocked);
+    const error = attesterProposalError(sello, ownerAddress, blocked);
     if (error === 'key') {
       Alert.alert(t('admin'), t('adminAttesterNoKey'));
       return;
@@ -160,15 +162,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
     confirmToggle(true, () => {
-      onProposeAttester(trimmed);
-      setDraft('');
+      onProposeAttester(sello);
+      setSelloDraft('');
     });
   };
 
   return (
     <View>
       <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminLead')}</AppText>
-      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminTotpNeed')}</AppText>
+      <AppText style={[styles.note, { color: colors.textMuted }]}>{t('adminTotpWhere')}</AppText>
       {salud ? (
         <>
           <AppText style={[styles.meta, { color: colors.text }]}>
@@ -265,13 +267,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </AppText>
       ) : null}
       {onProposeAttester ? (
-        <TouchableOpacity
-          disabled={isLoading}
-          onPress={proposeAttesterAddress}
-          style={[styles.button, { backgroundColor: colors.chip }]}
-        >
-          <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminSetAttester')}</AppText>
-        </TouchableOpacity>
+        <>
+          <AppTextInput
+            value={selloDraft}
+            onChangeText={setSelloDraft}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={t('adminAttesterPlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.surface }]}
+          />
+          <TouchableOpacity
+            disabled={isLoading}
+            onPress={proposeAttesterAddress}
+            style={[styles.button, { backgroundColor: colors.chip }]}
+          >
+            <AppText style={[styles.buttonText, { color: colors.text }]}>{t('adminSetAttester')}</AppText>
+          </TouchableOpacity>
+        </>
       ) : null}
       {onProposeConfirmations && adminRoster.length < 3 ? (
         <View style={styles.row}>

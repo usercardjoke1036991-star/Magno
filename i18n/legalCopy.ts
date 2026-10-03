@@ -23,7 +23,7 @@ const es: LegalDoc = {
     ],
     [
       'Cómo trabaja la aplicación',
-      'Usted abre su cuenta, guarda su frase de respaldo en este teléfono y, cuando lo desee, solicita crédito según su nivel. Un pago de acceso de 1 USDT se hace una sola vez. El correo y el teléfono sirven para su cuenta, avisos y para confirmar que la línea es suya. La foto del documento se toma en este aparato para verificar identidad; no se envía a nuestros archivos.',
+      'Usted abre su cuenta, guarda su frase de respaldo en este teléfono y, cuando lo desee, solicita crédito según su nivel. Un pago de alta de 4 USDT se hace una sola vez. El correo y el teléfono no cobran extra y sirven para su cuenta, avisos y para confirmar que la línea es suya. La foto del documento se toma en este aparato para verificar identidad; no se envía a nuestros archivos.',
     ],
     [
       'Información que tratamos',
@@ -62,7 +62,7 @@ const en: LegalDoc = {
     ],
     [
       'How the application works',
-      'You open your account, keep your recovery phrase on this phone and, when you wish, request credit at your level. A 1 USDT access payment is made once. Email and phone serve your account, notices and to confirm the line is yours. The identity photo is taken on this device; it is not sent to our files.',
+      'You open your account, keep your recovery phrase on this phone and, when you wish, request credit at your level. A 4 USDT onboarding payment is made once. Email and phone have no extra fee. Email and phone serve your account, notices and to confirm the line is yours. The identity photo is taken on this device; it is not sent to our files.',
     ],
     [
       'Information we handle',
@@ -99,7 +99,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   zh: {
     privacy: sections(
       ['我们的机构', 'Quatrivium Finance 是数字信贷机构，在公开网络上提供 USDT 额度。我们不是银行，也不吸收存款。本政策只说明如何保护您的信息。'],
-      ['应用如何运作', '您开立账户，将恢复短语保存在本机，并按等级申请信贷。1 USDT 准入只支付一次。邮箱和电话用于账户、通知并确认线路属于您。证件照片在本机拍摄，不会存入我们的档案。'],
+      ['应用如何运作', '您开立账户，将恢复短语保存在本机，并按等级申请信贷。4 USDT 开通只支付一次。邮箱和电话用于账户、通知并确认线路属于您。证件照片在本机拍摄，不会存入我们的档案。'],
       ['我们处理的信息', '我们使用邮箱、电话和头像来运营账户。信贷、声誉和您邀请的人会记录在网络上，依设计可见。账户密钥与 24 个词在本机加密，我们不保管。'],
       ['我们不会做的事', '我们不出售您的数据，不读取通讯录催收，不用定位审批信贷。您可要求我们从通知中删除邮箱和电话。写入网络的内容无法删除。服务仅限 18 岁以上。\n\n隐私：privacidad@quatriviumcredit.app']
     ),
@@ -113,7 +113,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   hi: {
     privacy: sections(
       ['हमारा संस्थान', 'Quatrivium Finance एक डिजिटल ऋण संस्थान है। हम सार्वजनिक नेटवर्क पर USDT रेखा देते हैं। हम बैंक नहीं हैं और जमा नहीं लेते। यह नीति केवल आपकी जानकारी की रक्षा बताती है।'],
-      ['ऐप कैसे काम करती है', 'आप खाता खोलते हैं, पुनर्प्राप्ति वाक्य इसी फ़ोन पर रखते हैं और अपने स्तर पर ऋण माँगते हैं। 1 USDT प्रवेश एक बार होता है। ईमेल और फ़ोन खाते, सूचनाओं और यह पुष्टि करने के लिए हैं कि रेखा आपकी है। पहचान फ़ोटो इसी उपकरण पर ली जाती है; हमारी फाइलों में नहीं जाती।'],
+      ['ऐप कैसे काम करती है', 'आप खाता खोलते हैं, पुनर्प्राप्ति वाक्य इसी फ़ोन पर रखते हैं और अपने स्तर पर ऋण माँगते हैं। 4 USDT प्रवेश एक बार होता है। ईमेल और फ़ोन खाते, सूचनाओं और यह पुष्टि करने के लिए हैं कि रेखा आपकी है। पहचान फ़ोटो इसी उपकरण पर ली जाती है; हमारी फाइलों में नहीं जाती।'],
       ['जो जानकारी हम संभालते हैं', 'खाता चलाने के लिए ईमेल, फ़ोन और प्रोफ़ाइल चित्र। ऋण, प्रतिष्ठा और आपके आमंत्रित नेटवर्क पर दर्ज होते हैं और दिखते हैं। कुंजियाँ और 24 शब्द आपके फ़ोन पर सुरक्षित रहते हैं। हम उन्हें नहीं रखते।'],
       ['जो हम नहीं करेंगे', 'डेटा नहीं बेचते, वसूली के लिए संपर्क नहीं पढ़ते, स्थान से ऋण मंज़ूर नहीं करते। सूचनाओं से ईमेल और फ़ोन हटाने को कह सकते हैं। नेटवर्क पर लिखा मिटता नहीं। सेवा 18 वर्ष या अधिक के लिए है।\n\nगोपनीयता: privacidad@quatriviumcredit.app']
     ),
@@ -127,7 +127,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   ar: {
     privacy: sections(
       ['دارنا', 'Quatrivium Finance دار ائتمان رقمية. نقدّم خطاً بـ USDT على شبكة عامة. لسنا مصرفاً ولا نتلقى ودائع. توضّح هذه السياسة فقط كيف نحمي معلوماتك.'],
-      ['كيف تعمل التطبيق', 'تفتح حسابك وتحفظ عبارة الاسترداد على هذا الهاتف وتطلب الائتمان حسب مستواك. دفع دخول 1 USDT مرة واحدة. البريد والهاتف للحساب والتنبيهات ولتأكيد أن الخط لك. صورة الهوية تُلتقط على هذا الجهاز ولا تُرسل إلى ملفاتنا.'],
+      ['كيف تعمل التطبيق', 'تفتح حسابك وتحفظ عبارة الاسترداد على هذا الهاتف وتطلب الائتمان حسب مستواك. دفع دخول 4 USDT مرة واحدة. البريد والهاتف للحساب والتنبيهات ولتأكيد أن الخط لك. صورة الهوية تُلتقط على هذا الجهاز ولا تُرسل إلى ملفاتنا.'],
       ['المعلومات التي نعالجها', 'نستخدم البريد والهاتف وصورة الملف لتشغيل حسابك. الائتمان والسمعة ومن تدعوهم يُسجَّلون على الشبكة ويظهرون بطبيعتها. مفاتيح الحساب وعبارة الـ 24 كلمة تبقى مشفّرة على هاتفك. لا نحتفظ بها.'],
       ['ما لن نفعله', 'لا نبيع بياناتك. لا نقرأ جهات الاتصال للتحصيل. لا نستخدم موقعك للموافقة على ائتمان. يمكنك طلب حذف البريد والهاتف من تنبيهاتنا. ما يُكتب على الشبكة لا يُمحى. الخدمة لمن أتمّ 18 عاماً.\n\nالخصوصية: privacidad@quatriviumcredit.app']
     ),
@@ -155,7 +155,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   pt: {
     privacy: sections(
       ['A nossa casa', 'A Quatrivium Finance é uma casa de crédito digital. Oferecemos uma linha em USDT numa rede pública. Não somos um banco nem recebemos depósitos. Esta política explica apenas como cuidamos da sua informação.'],
-      ['Como trabalha a aplicação', 'Abre a conta, guarda a frase de recuperação neste telefone e pede crédito segundo o seu nível. O acesso de 1 USDT paga-se uma vez. O correio e o telefone servem a conta, os avisos e a confirmar que a linha é sua. A foto do documento fica neste aparelho; não vai para os nossos ficheiros.'],
+      ['Como trabalha a aplicação', 'Abre a conta, guarda a frase de recuperação neste telefone e pede crédito segundo o seu nível. O acesso de 4 USDT paga-se uma vez. O correio e o telefone servem a conta, os avisos e a confirmar que a linha é sua. A foto do documento fica neste aparelho; não vai para os nossos ficheiros.'],
       ['Informação que tratamos', 'Usamos correio, telefone e imagem de perfil para operar a conta. O crédito, a reputação e os convidados ficam na rede, visíveis por desenho. As chaves e a frase de 24 palavras ficam cifradas no telefone. Não as custodiamos.'],
       ['O que não faremos', 'Não vendemos os seus dados. Não lemos a agenda para cobrar. Não usamos a localização para aprovar crédito. Pode pedir que retiremos correio e telefone dos avisos. O que está na rede não se apaga. O serviço é para maiores de 18 anos.\n\nPrivacidade: privacidad@quatriviumcredit.app']
     ),
@@ -169,7 +169,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   ru: {
     privacy: sections(
       ['Наш дом', 'Quatrivium Finance — цифровой кредитный дом. Мы даём линию в USDT в открытой сети. Мы не банк и не принимаем вклады. Эта политика объясняет лишь, как мы бережём ваши сведения.'],
-      ['Как работает приложение', 'Вы открываете счёт, храните фразу восстановления на этом телефоне и запрашиваете кредит по своему уровню. Плата за доступ 1 USDT вносится один раз. Почта и телефон нужны для счёта, уведомлений и подтверждения, что линия ваша. Фото документа делается на устройстве и не уходит в наши файлы.'],
+      ['Как работает приложение', 'Вы открываете счёт, храните фразу восстановления на этом телефоне и запрашиваете кредит по своему уровню. Плата за доступ 4 USDT вносится один раз. Почта и телефон нужны для счёта, уведомлений и подтверждения, что линия ваша. Фото документа делается на устройстве и не уходит в наши файлы.'],
       ['Какие сведения мы обрабатываем', 'Почта, телефон и изображение профиля для ведения счёта. Кредит, репутация и приглашённые записываются в сети и видны по её устройству. Ключи и 24 слова остаются зашифрованными на телефоне. Мы их не храним.'],
       ['Чего мы не делаем', 'Не продаём данные. Не читаем контакты для взыскания. Не используем геолокацию для одобрения кредита. Можно попросить убрать почту и телефон из уведомлений. Записанное в сети нельзя стереть. Сервис для лиц 18 лет и старше.\n\nКонфиденциальность: privacidad@quatriviumcredit.app']
     ),
@@ -183,7 +183,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   ur: {
     privacy: sections(
       ['ہمارا ادارہ', 'Quatrivium Finance ایک ڈیجیٹل قرض ادارہ ہے۔ ہم عوامی نیٹ ورک پر USDT لائن دیتے ہیں۔ ہم بینک نہیں اور جمعہ نہیں لیتے۔ یہ پالیسی صرف یہ بتاتی ہے کہ آپ کی معلومات کیسے سنبھالتے ہیں۔'],
-      ['ایپ کیسے کام کرتی ہے', 'آپ اکاؤنٹ کھولتے ہیں، بحالی کا جملہ اسی فون پر رکھتے ہیں اور اپنے درجے پر قرض مانگتے ہیں۔ 1 USDT رسائی ایک بار۔ ای میل اور فون اکاؤنٹ، نوٹس اور یہ تصدیق کہ لائن آپ کی ہے۔ شناختی تصویر اسی آلے پر لی جاتی ہے، ہماری فائلوں میں نہیں جاتی۔'],
+      ['ایپ کیسے کام کرتی ہے', 'آپ اکاؤنٹ کھولتے ہیں، بحالی کا جملہ اسی فون پر رکھتے ہیں اور اپنے درجے پر قرض مانگتے ہیں۔ 4 USDT رسائی ایک بار۔ ای میل اور فون اکاؤنٹ، نوٹس اور یہ تصدیق کہ لائن آپ کی ہے۔ شناختی تصویر اسی آلے پر لی جاتی ہے، ہماری فائلوں میں نہیں جاتی۔'],
       ['جو معلومات ہم سنبھالتے ہیں', 'اکاؤنٹ چلانے کے لیے ای میل، فون اور پروفائل تصویر۔ قرض، شہرت اور مدعو افراد نیٹ ورک پر درج اور نظر آتے ہیں۔ چابیاں اور 24 الفاظ آپ کے فون پر رہتے ہیں۔ ہم انہیں نہیں رکھتے۔'],
       ['جو ہم نہیں کریں گے', 'ڈیٹا نہیں بیچتے۔ وصولی کے لیے رابطے نہیں پڑھتے۔ مقام سے قرض منظور نہیں کرتے۔ نوٹس سے ای میل اور فون ہٹانے کو کہہ سکتے ہیں۔ نیٹ ورک پر لکھا مٹتا نہیں۔ خدمت 18 سال یا زیادہ کے لیے ہے۔\n\nرازداری: privacidad@quatriviumcredit.app']
     ),
@@ -197,7 +197,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   id: {
     privacy: sections(
       ['Rumah kami', 'Quatrivium Finance adalah rumah kredit digital. Kami menawarkan jalur USDT di jaringan publik. Kami bukan bank dan tidak menerima simpanan. Kebijakan ini hanya menjelaskan cara kami menjaga informasi Anda.'],
-      ['Cara kerja aplikasi', 'Anda membuka akun, menyimpan frasa pemulihan di ponsel ini, dan mengajukan kredit sesuai tingkat. Pembayaran akses 1 USDT sekali. Email dan telepon untuk akun, pemberitahuan, dan memastikan jalur itu milik Anda. Foto identitas diambil di perangkat ini; tidak dikirim ke berkas kami.'],
+      ['Cara kerja aplikasi', 'Anda membuka akun, menyimpan frasa pemulihan di ponsel ini, dan mengajukan kredit sesuai tingkat. Pembayaran akses 4 USDT sekali. Email dan telepon untuk akun, pemberitahuan, dan memastikan jalur itu milik Anda. Foto identitas diambil di perangkat ini; tidak dikirim ke berkas kami.'],
       ['Informasi yang kami kelola', 'Kami memakai email, telepon, dan gambar profil untuk menjalankan akun. Kredit, reputasi, dan undangan tercatat di jaringan dan terlihat secara desain. Kunci dan 24 kata tetap terenkripsi di ponsel. Kami tidak menyimpannya.'],
       ['Yang tidak akan kami lakukan', 'Kami tidak menjual data. Tidak membaca kontak untuk menagih. Tidak memakai lokasi untuk menyetujui kredit. Anda dapat meminta email dan telepon dihapus dari pemberitahuan. Tulisan di jaringan tidak dapat dihapus. Layanan untuk usia 18 tahun ke atas.\n\nPrivasi: privacidad@quatriviumcredit.app']
     ),
@@ -211,7 +211,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   fr: {
     privacy: sections(
       ['Notre maison', 'Quatrivium Finance est une maison de crédit numérique. Nous offrons une ligne en USDT sur un réseau public. Nous ne sommes pas une banque et n’acceptons pas de dépôts. Cette politique explique seulement comment nous protégeons vos informations.'],
-      ['Comment l’application travaille', 'Vous ouvrez votre compte, conservez la phrase de reprise sur ce téléphone et demandez un crédit selon votre niveau. L’accès de 1 USDT se paie une fois. L’e-mail et le téléphone servent le compte, les avis et à confirmer que la ligne est la vôtre. La photo d’identité est prise sur cet appareil ; elle n’est pas envoyée dans nos dossiers.'],
+      ['Comment l’application travaille', 'Vous ouvrez votre compte, conservez la phrase de reprise sur ce téléphone et demandez un crédit selon votre niveau. L’accès de 4 USDT se paie une fois. L’e-mail et le téléphone servent le compte, les avis et à confirmer que la ligne est la vôtre. La photo d’identité est prise sur cet appareil ; elle n’est pas envoyée dans nos dossiers.'],
       ['Informations que nous traitons', 'Nous utilisons l’e-mail, le téléphone et une image de profil pour tenir le compte. Le crédit, la réputation et les invités sont inscrits sur le réseau, visibles par conception. Les clés et la phrase de 24 mots restent chiffrées sur votre téléphone. Nous ne les conservons pas.'],
       ['Ce que nous ne ferons pas', 'Nous ne vendons pas vos données. Nous ne lisons pas l’agenda pour recouvrer. Nous n’utilisons pas la localisation pour accorder un crédit. Vous pouvez demander le retrait de l’e-mail et du téléphone de nos avis. Ce qui est écrit sur le réseau ne s’efface pas. Le service est réservé aux 18 ans et plus.\n\nConfidentialité : privacidad@quatriviumcredit.app']
     ),
@@ -225,7 +225,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   ja: {
     privacy: sections(
       ['私たちの家', 'Quatrivium Finance はデジタル与信の家です。公開ネットワーク上で USDT の枠を提供します。銀行ではなく、預金は扱いません。本方針は情報の守り方のみを説明します。'],
-      ['アプリの働き', '口座を開き、復旧フレーズをこの端末に保管し、等級に応じて与信を申込みます。1 USDT の入場は一度だけです。メールと電話は口座・通知・回線の確認に使います。身分証の写真はこの端末で撮り、当社のファイルには送りません。'],
+      ['アプリの働き', '口座を開き、復旧フレーズをこの端末に保管し、等級に応じて与信を申込みます。4 USDT の入場は一度だけです。メールと電話は口座・通知・回線の確認に使います。身分証の写真はこの端末で撮り、当社のファイルには送りません。'],
       ['取り扱う情報', '口座運営にメール、電話、プロフィール画像を用います。与信・評価・招待先はネットワークに記録され、その性質上見えます。鍵と24語は端末で暗号化され、当社は預かりません。'],
       ['行わないこと', 'データを販売しません。取立てに連絡先を使いません。位置情報で与信を承認しません。通知からメールと電話の削除を依頼できます。ネットワーク上の記録は消せません。18歳以上向けです。\n\nプライバシー: privacidad@quatriviumcredit.app']
     ),
@@ -239,7 +239,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   de: {
     privacy: sections(
       ['Unser Haus', 'Quatrivium Finance ist ein digitales Kreditshaus. Wir bieten eine USDT-Linie in einem öffentlichen Netz. Wir sind keine Bank und nehmen keine Einlagen. Diese Richtlinie erklärt nur, wie wir Ihre Angaben schützen.'],
-      ['Wie die Anwendung arbeitet', 'Sie eröffnen Ihr Konto, bewahren die Wiederherstellungsphrase auf diesem Telefon und beantragen Kredit nach Ihrem Niveau. Die Zugangsgebühr von 1 USDT fällt einmal an. E-Mail und Telefon dienen Konto, Hinweisen und der Bestätigung, dass die Linie Ihnen gehört. Das Ausweisfoto entsteht auf diesem Gerät und geht nicht in unsere Akten.'],
+      ['Wie die Anwendung arbeitet', 'Sie eröffnen Ihr Konto, bewahren die Wiederherstellungsphrase auf diesem Telefon und beantragen Kredit nach Ihrem Niveau. Die Zugangsgebühr von 4 USDT fällt einmal an. E-Mail und Telefon dienen Konto, Hinweisen und der Bestätigung, dass die Linie Ihnen gehört. Das Ausweisfoto entsteht auf diesem Gerät und geht nicht in unsere Akten.'],
       ['Angaben, die wir verarbeiten', 'Wir nutzen E-Mail, Telefon und ein Profilbild für Ihr Konto. Kredit, Ruf und Eingeladene stehen im Netz und sind so sichtbar. Schlüssel und 24 Wörter bleiben verschlüsselt auf dem Telefon. Wir verwahren sie nicht.'],
       ['Was wir nicht tun', 'Wir verkaufen Ihre Daten nicht. Wir lesen keine Kontakte zum Einzug. Wir nutzen keinen Standort zur Kreditfreigabe. Sie können E-Mail und Telefon aus den Hinweisen nehmen lassen. Im Netz Geschriebenes lässt sich nicht löschen. Der Dienst ist für Personen ab 18 Jahren.\n\nDatenschutz: privacidad@quatriviumcredit.app']
     ),
@@ -253,7 +253,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   ko: {
     privacy: sections(
       ['우리의 하우스', 'Quatrivium Finance는 디지털 신용 하우스입니다. 공개 네트워크에서 USDT 한도를 제공합니다. 은행이 아니며 예금을 받지 않습니다. 이 방침은 정보 보호 방식만 설명합니다.'],
-      ['앱이 일하는 방식', '계정을 열고 복구 구문을 이 휴대폰에 두며 등급에 따라 신용을 신청합니다. 1 USDT 입장은 한 번입니다. 이메일과 전화는 계정, 알림, 회선 확인에 씁니다. 신분증 사진은 이 기기에서 찍으며 당사 파일로 보내지 않습니다.'],
+      ['앱이 일하는 방식', '계정을 열고 복구 구문을 이 휴대폰에 두며 등급에 따라 신용을 신청합니다. 4 USDT 입장은 한 번입니다. 이메일과 전화는 계정, 알림, 회선 확인에 씁니다. 신분증 사진은 이 기기에서 찍으며 당사 파일로 보내지 않습니다.'],
       ['다루는 정보', '계정 운영에 이메일, 전화, 프로필 이미지를 씁니다. 신용, 평판, 초대는 네트워크에 기록되어 그 설계상 보입니다. 키와 24단어는 휴대폰에서 암호화되며 당사가 보관하지 않습니다.'],
       ['하지 않을 일', '데이터를 팔지 않습니다. 추심을 위해 연락처를 읽지 않습니다. 위치로 신용을 승인하지 않습니다. 알림에서 이메일과 전화 삭제를 요청할 수 있습니다. 네트워크에 적힌 것은 지울 수 없습니다. 만 18세 이상입니다.\n\n개인정보: privacidad@quatriviumcredit.app']
     ),
@@ -267,7 +267,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   tr: {
     privacy: sections(
       ['Evimiz', 'Quatrivium Finance dijital bir kredi evidir. Kamuya açık ağda USDT hattı sunarız. Banka değiliz, mevduat almayız. Bu politika yalnızca bilgilerinizi nasıl koruduğumuzu anlatır.'],
-      ['Uygulama nasıl çalışır', 'Hesabınızı açar, kurtarma cümlesini bu telefonda tutar ve düzeyinize göre kredi istersiniz. 1 USDT erişim bir kez ödenir. E-posta ve telefon hesap, bildirim ve hattın size ait olduğunu doğrulamak içindir. Kimlik fotoğrafı bu cihazda çekilir; dosyalarımıza gönderilmez.'],
+      ['Uygulama nasıl çalışır', 'Hesabınızı açar, kurtarma cümlesini bu telefonda tutar ve düzeyinize göre kredi istersiniz. 4 USDT erişim bir kez ödenir. E-posta ve telefon hesap, bildirim ve hattın size ait olduğunu doğrulamak içindir. Kimlik fotoğrafı bu cihazda çekilir; dosyalarımıza gönderilmez.'],
       ['İşlediğimiz bilgi', 'Hesabı yürütmek için e-posta, telefon ve profil görseli kullanırız. Kredi, itibar ve davet ettikleriniz ağda kayıtlıdır ve tasarımı gereği görünür. Anahtarlar ve 24 sözcük telefonunuzda şifrelidir. Onları saklamayız.'],
       ['Yapmayacaklarımız', 'Verilerinizi satmayız. Tahsilat için rehberi okumayız. Konumla kredi onaylamayız. Bildirimlerden e-posta ve telefonun silinmesini isteyebilirsiniz. Ağa yazılan silinmez. Hizmet 18 yaş ve üzeri içindir.\n\nGizlilik: privacidad@quatriviumcredit.app']
     ),
@@ -281,7 +281,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   vi: {
     privacy: sections(
       ['Ngôi nhà của chúng tôi', 'Quatrivium Finance là nhà tín dụng số. Chúng tôi cung cấp hạn mức USDT trên mạng công khai. Chúng tôi không phải ngân hàng và không nhận tiền gửi. Chính sách này chỉ giải thích cách chúng tôi bảo vệ thông tin của bạn.'],
-      ['Ứng dụng làm việc thế nào', 'Bạn mở tài khoản, giữ cụm khôi phục trên điện thoại này và xin tín dụng theo cấp. Phí vào 1 USDT trả một lần. Email và điện thoại phục vụ tài khoản, thông báo và xác nhận đường dây là của bạn. Ảnh giấy tờ chụp trên máy này, không gửi vào hồ sơ của chúng tôi.'],
+      ['Ứng dụng làm việc thế nào', 'Bạn mở tài khoản, giữ cụm khôi phục trên điện thoại này và xin tín dụng theo cấp. Phí vào 4 USDT trả một lần. Email và điện thoại phục vụ tài khoản, thông báo và xác nhận đường dây là của bạn. Ảnh giấy tờ chụp trên máy này, không gửi vào hồ sơ của chúng tôi.'],
       ['Thông tin chúng tôi xử lý', 'Chúng tôi dùng email, điện thoại và ảnh hồ sơ để vận hành tài khoản. Tín dụng, uy tín và người bạn mời được ghi trên mạng, hiển thị theo thiết kế. Khóa và 24 từ được mã hóa trên điện thoại. Chúng tôi không giữ chúng.'],
       ['Điều chúng tôi không làm', 'Không bán dữ liệu. Không đọc danh bạ để đòi nợ. Không dùng vị trí để duyệt tín dụng. Bạn có thể yêu cầu gỡ email và điện thoại khỏi thông báo. Nội dung trên mạng không xóa được. Dịch vụ dành cho người từ 18 tuổi.\n\nQuyền riêng tư: privacidad@quatriviumcredit.app']
     ),
@@ -295,7 +295,7 @@ export const legalCopy: Record<Lang, LegalDoc> = {
   it: {
     privacy: sections(
       ['La nostra casa', 'Quatrivium Finance è una casa di credito digitale. Offriamo una linea in USDT su una rete pubblica. Non siamo una banca e non raccogliamo depositi. Questa informativa spiega soltanto come custodiamo le sue informazioni.'],
-      ['Come lavora l’applicazione', 'Apre il conto, conserva la frase di ripristino su questo telefono e chiede credito secondo il livello. L’accesso di 1 USDT si paga una volta. Posta e telefono servono il conto, gli avvisi e a confermare che la linea è sua. La foto del documento resta su questo dispositivo; non va nei nostri fascicoli.'],
+      ['Come lavora l’applicazione', 'Apre il conto, conserva la frase di ripristino su questo telefono e chiede credito secondo il livello. L’accesso di 4 USDT si paga una volta. Posta e telefono servono il conto, gli avvisi e a confermare che la linea è sua. La foto del documento resta su questo dispositivo; non va nei nostri fascicoli.'],
       ['Informazioni che trattiamo', 'Usiamo posta, telefono e un’immagine di profilo per gestire il conto. Credito, reputazione e invitati restano sulla rete, visibili per disegno. Le chiavi e la frase di 24 parole restano cifrate sul telefono. Non le custodiamo.'],
       ['Ciò che non faremo', 'Non vendiamo i suoi dati. Non leggiamo la rubrica per riscuotere. Non usiamo la posizione per approvare un credito. Può chiedere di togliere posta e telefono dagli avvisi. Quanto è scritto sulla rete non si cancella. Il servizio è per chi ha 18 anni o più.\n\nPrivacy: privacidad@quatriviumcredit.app']
     ),

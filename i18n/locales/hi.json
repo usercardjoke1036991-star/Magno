@@ -946,11 +946,11 @@
   "publicPhotoNeed": "गैलरी से एक छवि चुनें।",
   "publicPhotoTooBig": "छवि बहुत भारी है। कोई सरल चुनें।",
   "creditAccessTitle": "पहुँच",
-  "creditAccessLead": "Pay 4 USDT once from your linked wallet.",
+  "creditAccessLead": "4 USDT एक बार। ईमेल और फ़ोन पर अतिरिक्त शुल्क नहीं।",
   "creditAccessPay": "{amount} {symbol} दें",
   "creditAccessDone": "प्रवेश भुगतान हो गया।",
   "creditAccessNeed": "ऋण मांगने के लिए 4 USDT दें।",
-  "creditAccessPending": "लाइव नेटवर्क चालू होने पर उपलब्ध।",
+  "creditAccessPending": "प्रवेश शुल्क चुकाने के लिए वॉलेट जोड़ें।",
   "lockPasswordLocked": "इस फ़ोन का पासवर्ड सेट है और बदला नहीं जा सकता।",
   "referralSearchPlaceholder": "नाम से खोजें",
   "referralSearchEmpty": "कोई मेल नहीं।",
@@ -1192,5 +1192,9 @@
   "adminTotpSecret": "यह कुंजी लिख लें। फिर नहीं दिखेगी।",
   "adminTotpCode": "Code",
   "adminTotpWrong": "Wrong code.",
-  "adminTotpConfirm": "Confirm"
+  "adminTotpConfirm": "Confirm",
+  "adminAttesterPlaceholder": "0x… फ़ोन की मोहर",
+  "adminTotpWhere": "6 अंकों का कोड यहाँ नहीं लिखा जाता। तैयार के बाद WalletConnect में साइन करें, फिर प्रमाणक खुलेगा।",
+  "adminTotpBlocked": "WalletConnect में प्रमाणक का संकेत साइन करें। समय निकलने पर फिर दबाएँ।",
+  "txWaitTimeout": "नेटवर्क समय पर पुष्टि नहीं कर पाया। यदि साइन हो चुका है तो दोबारा न भेजें।"
 }
