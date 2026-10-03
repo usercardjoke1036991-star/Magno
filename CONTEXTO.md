@@ -265,6 +265,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-03 | Testnet 97 redeploy: Credit 0xD318, Alta 0xE890, Reserva 0x98bE, Fama 0xEC27, startBlock 134721274. Pool 500. Mainnet vacio. | — |
 | 2026-10-03 | Prestamo exige registroHecho cuando Alta esta puesta. Padrino vencido anota el sello al deudor. Deep link no abre Admin. Nucleo 23254 bytes, bajo EIP-170. | — |
 | 2026-10-03 | Alta 4 USDT sin desglose en UI ni legales. Frase 24 palabras explicada como llave en el telefono, no en la red. | — |
 | 2026-10-03 | Catalogo y legales en 17 idiomas con tono institucional. Vincular/Vinculado. Politicas y extras nativos, no fallback ingles. | — |
