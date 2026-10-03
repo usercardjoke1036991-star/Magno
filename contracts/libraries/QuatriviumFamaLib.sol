@@ -198,12 +198,10 @@ library QuatriviumFamaLib {
         address indexed token
     );
 
-    /// @notice Los primeros 2 USDT de donación son la puerta Real: no dan fama.
-    function ptsDonacion(uint256 prev, uint256 amount) external pure returns (uint256) {
-        uint256 gate = 2 * BONO_ACTIVACION;
+    /// @notice Donar y aportar: 100 fama por cada 1 USDT, desde el primero.
+    function ptsDonacion(uint256, uint256 amount) external pure returns (uint256) {
         if (amount == 0) return 0;
-        uint256 famable = prev >= gate ? amount : (prev + amount > gate ? prev + amount - gate : 0);
-        return (famable * 100) / 1e18;
+        return (amount * 100) / 1e18;
     }
 
     function tocar(address hermano, address who, uint256 pts) external {
@@ -298,6 +296,18 @@ library QuatriviumFamaLib {
             r,
             s
         );
+    }
+
+    /// @notice Si Fama tiene Alta, el préstamo exige el pago de 4 USDT (registroHecho).
+    function requireAltaPagada(address hermano, address user) external view {
+        (bool okA, bytes memory rawA) = hermano.staticcall(abi.encodeWithSignature("alta()"));
+        if (!(okA && rawA.length >= 32)) return;
+        address alta = abi.decode(rawA, (address));
+        if (alta == address(0)) return;
+        (bool ok, bytes memory data) = alta.staticcall(
+            abi.encodeWithSignature("registroHecho(address)", user)
+        );
+        require(ok && data.length >= 32 && abi.decode(data, (bool)));
     }
 
     function assertPeg(AggregatorV3Interface feed) external view {

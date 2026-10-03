@@ -64,7 +64,7 @@ export function isDonationEnabled(): boolean {
   return donationAllowedInWorld(productMode, runtimeMode, isContractConfigured('mainnet'));
 }
 
-/** El 1 USDT de acceso es solo Cuenta Real con mainnet. Demo no lo cobra. La sala Donar sigue oculta en Demo. */
+/** El acceso viejo (2 USDT) es solo Cuenta Real con mainnet. Con Alta, el cobro lo decide isAltaConfigured. */
 export function accessPaymentAllowedInWorld(
   product: AppMode,
   runtime: AppMode,

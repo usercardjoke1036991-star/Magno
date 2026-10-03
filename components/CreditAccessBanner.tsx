@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { isAltaConfigured } from '../constants/altaConfig';
 import { accessPayUsdt, hasCreditAccess } from '../utils/creditGates';
 import { AppText } from './AppText';
 import { useAppMode } from '../wallet/AppModeContext';
@@ -24,7 +25,7 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const { mode } = useAppMode();
-  if (mode === 'demo' || hasCreditAccess(paidUsd)) {
+  if ((mode === 'demo' && !isAltaConfigured()) || hasCreditAccess(paidUsd)) {
     return null;
   }
 

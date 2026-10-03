@@ -37,7 +37,7 @@ interface ICreditCaja {
 /**
  * @title QuatriviumFamaCaja
  * @notice Hermano del crédito: fama de caja, canje y racha diaria.
- *         100 fama por USDT donado o aportado (no la puerta). El 1 USDT de captación no da fama.
+ *         100 fama por cada USDT donado o aportado, desde el primero. El alta de 4 no pasa por donar.
  *         Fama de red: generaciones 2–40 y recorte del fundador, misma escala que el dinero.
  *         Canje: 250 fama disponible = 1 USDT. El perfil de fama no baja.
  *         Racha: un referido que pide y paga suma un día; 1 día de gracia;

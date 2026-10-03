@@ -164,12 +164,13 @@ export function hasCreditAccess(paidUsd: number, altaPaid = false): boolean {
   return paid + 1e-9 >= need;
 }
 
-/** Donaciones voluntarias: el acceso de 2 USDT no cuenta. La verificación ya no pasa por donar. */
+/** Con Alta, todo lo donado cuenta. Legado sin Alta: los primeros 2 eran la puerta. */
 export function voluntaryDonateUsd(paidUsd: number): number {
   const paid = Number(paidUsd);
   if (!Number.isFinite(paid) || paid <= 0) return 0;
+  if (isAltaConfigured()) return paid;
   if (!hasCreditAccess(paid)) return 0;
-  return Math.max(0, paid - CREDIT_ACCESS_USDT);
+  return Math.max(0, paid - CREDIT_ACCESS_LEGACY_USDT);
 }
 
 /** Cobros de 0.50 USDT de correo/número: no se muestran en historial ni como donación. */
@@ -183,10 +184,11 @@ export function isHiddenVerificationDonation(usdAmount: number, isFirstDonation:
   );
 }
 
-/** Primera donación de 2 USDT = acceso. Cualquier otro monto = donar. */
+/** Con Alta el acceso no pasa por donar. Legado: la primera de 2 USDT era la puerta. */
 export function classifyDonationKind(usdAmount: number, isFirstDonation: boolean): 'access' | 'donation' {
+  if (isAltaConfigured()) return 'donation';
   const usd = Number(usdAmount);
-  if (isFirstDonation && Number.isFinite(usd) && Math.abs(usd - CREDIT_ACCESS_USDT) < 1e-6) {
+  if (isFirstDonation && Number.isFinite(usd) && Math.abs(usd - CREDIT_ACCESS_LEGACY_USDT) < 1e-6) {
     return 'access';
   }
   return 'donation';

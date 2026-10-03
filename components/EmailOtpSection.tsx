@@ -68,6 +68,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
   };
 
   const confirmCode = async () => {
+    if (busy) return;
     setBusy(true);
     setError('');
     try {

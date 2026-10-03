@@ -6,7 +6,9 @@ import { isDemoAccount } from './rpcConfig';
 export const ALTA_ABI = [
   'function pagarRegistro()',
   'function padrinoApartado(address) view returns (uint256)',
+  'function padrinoExpira(address) view returns (uint256)',
   'function registroHecho(address) view returns (bool)',
+  'function vencerPadrinoAlPool(address deudor)',
   'function credit() view returns (address)',
   'function reserva() view returns (address)',
 ];

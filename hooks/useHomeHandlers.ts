@@ -765,7 +765,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
       return;
     }
-    if (!isAccessPaymentEnabled()) {
+    if (!isAltaConfigured() && !isAccessPaymentEnabled()) {
       Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
       return;
     }

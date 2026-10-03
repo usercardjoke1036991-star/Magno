@@ -90,6 +90,7 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   };
 
   const confirmCode = async () => {
+    if (busy) return;
     setBusy(true);
     setError('');
     try {

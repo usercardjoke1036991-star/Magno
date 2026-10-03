@@ -9,6 +9,7 @@ interface ICreditAlta {
     function fundador() external view returns (address);
     function paused() external view returns (bool);
     function pagarVerificacion(address token_, uint256 amount) external;
+    function verificadoAlPool(address) external view returns (uint256);
 }
 
 interface IReservaAlta {
@@ -24,12 +25,17 @@ contract QuatriviumAlta is ReentrancyGuard {
     ICreditAlta public immutable credit;
     address public immutable reserva;
     mapping(address => uint256) public padrinoApartado;
+    mapping(address => uint256) public padrinoExpira;
     mapping(address => bool) public registroHecho;
+    uint256 public constant PLAZO_PADRINO = 7 days;
 
     error DestinoCero();
     error SoloEOA();
     error Pausado();
     error YaRegistro();
+    error PadrinoVivo();
+    error SinPadrino();
+    error SinSello();
 
     event RegistroPagado(address indexed usuario);
     event PadrinoSoltado(address indexed referido, address indexed padre, uint256 monto);
@@ -53,6 +59,7 @@ contract QuatriviumAlta is ReentrancyGuard {
         IReservaAlta(reserva).onAlta(1e18);
         registroHecho[msg.sender] = true;
         padrinoApartado[msg.sender] = 1e18;
+        padrinoExpira[msg.sender] = block.timestamp + PLAZO_PADRINO;
         token.forceApprove(address(credit), 1e18);
         credit.pagarVerificacion(address(token), 1e18);
         emit RegistroPagado(msg.sender);
@@ -63,8 +70,24 @@ contract QuatriviumAlta is ReentrancyGuard {
         uint256 monto = padrinoApartado[deudor];
         if (monto == 0 || padre == address(0) || padre == deudor) return 0;
         padrinoApartado[deudor] = 0;
+        padrinoExpira[deudor] = 0;
         token.safeTransfer(padre, monto);
         emit PadrinoSoltado(deudor, padre, monto);
         return monto;
+    }
+
+    /// @notice Si Ana no paga el primer L1 en 7 días, el 1 de Pedro pasa al pool.
+    function vencerPadrinoAlPool(address deudor) external nonReentrant {
+        if (deudor == address(0)) revert DestinoCero();
+        if (credit.paused()) revert Pausado();
+        uint256 monto = padrinoApartado[deudor];
+        if (monto == 0) revert SinPadrino();
+        if (block.timestamp < padrinoExpira[deudor]) revert PadrinoVivo();
+        if (credit.verificadoAlPool(msg.sender) < 1e18) revert SinSello();
+        padrinoApartado[deudor] = 0;
+        padrinoExpira[deudor] = 0;
+        token.forceApprove(address(credit), monto);
+        credit.pagarVerificacion(address(token), monto);
+        emit PadrinoSoltado(deudor, address(credit), monto);
     }
 }

@@ -1,51 +1,38 @@
 import { Platform, StyleSheet, type StyleProp, type TextStyle } from 'react-native';
 
 /**
- * MIUI reemplaza sans-serif por MiSans (variable). Fabric mide y pinta
- * con anchos distintos y duplica letras. Una sola cara embebida, sin peso.
+ * En Xiaomi/MIUI, Inter o cualquier fontWeight pinta la letra otra vez, un poco al lado.
+ * Solo caras nativas, sin peso.
  */
-const ANDROID_FACE = 'Inter_400Regular';
+function androidFace(weight: TextStyle['fontWeight'] | undefined, family: string): string {
+  if (family === 'monospace' || /mono|courier/i.test(family)) return 'monospace';
+  const n =
+    weight === 'bold' || weight === '700' || weight === '800' || weight === '900'
+      ? 700
+      : weight === '500' || weight === '600' || weight === 'medium'
+        ? 600
+        : 400;
+  if (n >= 700) return 'sans-serif-black';
+  if (n >= 500) return 'sans-serif-medium';
+  return 'sans-serif';
+}
 
-/**
- * MIUI sintetiza pesos 500/600 y duplica letras. Inter ya está cargada
- * antes del primer frame (App espera useFonts).
- */
 export function remapAndroidTextStyle(style: StyleProp<TextStyle>): StyleProp<TextStyle> {
   if (Platform.OS !== 'android') return style;
   const flat = StyleSheet.flatten(style) || {};
-  const family = flat.fontFamily;
-  const isCustom = Boolean(
-    family
-    && family !== 'System'
-    && family !== 'sans-serif'
-    && family !== 'sans-serif-medium'
-    && family !== 'Inter'
-    && family !== 'Inter_400Regular'
-    && family !== 'Inter_500Medium'
-    && family !== 'Inter_600SemiBold'
-    && family !== 'Inter_700Bold'
-    && family !== ANDROID_FACE
-  );
-
   const next: TextStyle = { ...flat };
-
-  if (!isCustom) {
-    next.fontFamily = ANDROID_FACE;
-    // Cualquier fontWeight hace que MIUI sintetice la cara y pinte la letra dos veces
-    // (Desbloquear → Desbloqueeear, contraseña → contraseeña).
-    delete next.fontWeight;
-  }
-
-  if (typeof next.letterSpacing === 'number' && Math.abs(next.letterSpacing) < 2) {
-    next.letterSpacing = 0;
-  }
+  next.fontFamily = androidFace(next.fontWeight, String(next.fontFamily || ''));
+  delete next.fontWeight;
+  delete next.fontStyle;
+  next.textShadowColor = 'transparent';
+  next.textShadowRadius = 0;
+  next.textShadowOffset = { width: 0, height: 0 };
+  if (typeof next.letterSpacing === 'number') next.letterSpacing = 0;
   if (next.textTransform === 'uppercase' || next.textTransform === 'lowercase') {
     next.textTransform = 'none';
   }
-  next.includeFontPadding = false;
-
   return next;
 }
 
-/** @deprecated Las fuentes se esperan en App.js; se mantiene por imports viejos. */
+/** @deprecated Las fuentes del sistema no esperan carga. */
 export function setInterReady(_ready: boolean) {}

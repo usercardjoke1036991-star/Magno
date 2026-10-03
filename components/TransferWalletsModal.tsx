@@ -99,6 +99,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
   };
 
   const send = async (direction: 'in' | 'out') => {
+    if (busy) return;
     const parsed = parsePositiveDecimal(amount);
     if (!parsed) {
       Alert.alert(t('amount'), t('invalidAmount'));

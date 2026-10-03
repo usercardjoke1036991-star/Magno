@@ -22,7 +22,7 @@ import {QuatriviumFamaLib} from "./libraries/QuatriviumFamaLib.sol";
  * El fundador cobra un recorte fijo de cada interes. Si una llave se compromete,
  * las otras fundadoras pueden reasignar fundador y owner (timelock + confirmaciones).
  * Las comisiones de red recorren toda la linea hacia arriba (no se cortan a 5).
- * Fama de caja: donar/aportar (no la puerta), racha y red generacional desde gen 2.
+ * Fama de caja: donar/aportar 100 por USDT desde el primero (mínimo 1 USDT).
  *
  * EIP-170: ESTE archivo no puede pasar de 24576 bytes (limite de Ethereum, no nuestro).
  * El protocolo no se recorta: cada pieza nueva vive en un hermano o libreria
@@ -1044,7 +1044,7 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
         address deudor,
         uint8 generacion
     ) internal returns (uint256) {
-        if (amount == 0 || to == address(0) || to == deudor) {
+        if (amount == 0 || to == address(0) || to == deudor || blacklist[to]) {
             return 0;
         }
         if (generacion != 0 && dispersionCongelada(to)) {

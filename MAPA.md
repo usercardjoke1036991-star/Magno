@@ -230,7 +230,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `constants/contractConfig.ts` — módulo JS/TS
   - Funciones/clases: getUsdtAddress, ERC20_ABI, CONTRACT_ABI
 - `constants/deployedAddresses.ts` — módulo JS/TS
-  - Funciones/clases: DEPLOYED_TESTNET, DEPLOYED_MAINNET, getRealDonationWallet, getKnownStartBlock
+  - Funciones/clases: LEGACY_DEMO_TESTNET, DEPLOYED_TESTNET, DEPLOYED_MAINNET, getRealDonationWallet, getKnownStartBlock
 - `constants/fama.ts` — módulo JS/TS
   - Funciones/clases: FAMA_PER_USDT, FAMA_PER_REFERRAL_L1, FAMA_CANJE_POR_USDT, CANJE_USDT_BUTTONS, famaFromUsd, famaNeededForUsdt, usdtFromFama, maxCanjeUsdt
 - `constants/famaConfig.ts` — módulo JS/TS
@@ -306,6 +306,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/deploy-notify.mjs` — módulo JS/TS
 - `scripts/deploy-reserva.cjs` — módulo JS/TS
   - Funciones/clases: DEPLOYED_TESTNET
+- `scripts/deploy-testnet-nuevo.cjs` — módulo JS/TS
+  - Funciones/clases: DEPLOYED_TESTNET, LEGACY_DEMO_TESTNET
 - `scripts/deploy.cjs` — módulo JS/TS
   - Funciones/clases: DEPLOYED_TESTNET
 - `scripts/fetch-wallet-logos.py` — módulo Python
@@ -347,7 +349,6 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/_audit-bytecode.cjs` — módulo JS/TS
 - `scripts/_check_attester_once.cjs` — módulo JS/TS
 - `scripts/_dump-ui-nodes.py` — módulo Python
-- `scripts/_dump-ui-texts.py` — módulo Python
 - `scripts/_gen_loan_tiers.py` — módulo Python
   - Funciones/clases: nice_amount, installments, build, assert_order, write_ts, write_sol_seed
 - `scripts/_preflight_mainnet.cjs` — módulo JS/TS
@@ -507,7 +508,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/adminProposal.ts` — módulo JS/TS
   - Funciones/clases: describeAdminCalldata
 - `utils/appDeepLink.ts` — módulo JS/TS
-  - Funciones/clases: LOCKED_DEEP_LINK_ROOMS, parseAppDeepLink
+  - Funciones/clases: LOCKED_DEEP_LINK_ROOMS, isAllowedAppUrl, parseAppDeepLink
 - `utils/appKitStorage.ts` — módulo JS/TS
   - Funciones/clases: appKitStorage
 - `utils/appNotice.ts` — módulo JS/TS

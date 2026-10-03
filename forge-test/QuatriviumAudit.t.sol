@@ -66,31 +66,30 @@ contract QuatriviumAuditForgeTest is Test {
         assertEq(credit.SELLO_PRIMERA(), 7 days);
     }
 
-    function test_donate_exact_gate_gives_zero_fame() public {
+    function test_donate_from_first_usdt_gives_100_fame() public {
         _onboard(user);
         _donate(user, 2 ether);
-        assertEq(fama.famaCaja(user), 0);
+        assertEq(fama.famaCaja(user), 200);
         assertEq(credit.donado(user), 2 ether);
     }
 
-    function test_donate_dust_then_gate_gives_zero_fame() public {
+    function test_donate_dust_gives_zero_then_first_usdt_100() public {
         _onboard(user);
         _donate(user, 1);
-        _donate(user, 2 ether);
         assertEq(fama.famaCaja(user), 0);
+        _donate(user, 1 ether);
+        assertEq(fama.famaCaja(user), 100);
+    }
+
+    function test_donate_three_credits_300_fame() public {
+        _onboard(user);
         _donate(user, 3 ether);
         assertEq(fama.famaCaja(user), 300);
     }
 
-    function test_donate_three_credits_only_excess() public {
-        _onboard(user);
-        _donate(user, 3 ether);
-        assertEq(fama.famaCaja(user), 100);
-    }
-
-    function testFuzz_donate_never_fames_first_two_usdt(uint96 aRaw, uint96 bRaw) public {
-        uint256 a = bound(aRaw, 1, 20 ether);
-        uint256 b = bound(bRaw, 1, 20 ether);
+    function testFuzz_donate_100_fame_per_usdt(uint96 aRaw, uint96 bRaw) public {
+        uint256 a = bound(aRaw, 1 ether, 20 ether);
+        uint256 b = bound(bRaw, 1 ether, 20 ether);
         _onboard(user);
         _donate(user, a);
         _donate(user, b);
@@ -205,7 +204,7 @@ contract QuatriviumAuditForgeTest is Test {
     function test_canje_respects_cash_floor() public {
         _onboard(user);
         _donate(user, 5 ether);
-        assertEq(fama.famaCaja(user), 300);
+        assertEq(fama.famaCaja(user), 500);
         // Pool is 500; 20% floor = 100. Redeem 250 fame = 1 USDT, allowed.
         vm.prank(user, user);
         fama.canjearFama(250);
@@ -349,13 +348,12 @@ contract BorrowProxy {
 }
 
 contract FamaLibPtsTest is Test {
-    function testFuzz_ptsDonacion_never_credits_gate(uint256 prev, uint256 amount) public pure {
+    function testFuzz_ptsDonacion_100_per_usdt(uint256 prev, uint256 amount) public pure {
         prev = bound(prev, 0, 100 ether);
         amount = bound(amount, 0, 100 ether);
         uint256 pts = QuatriviumFamaLib.ptsDonacion(prev, amount);
-        uint256 famable = prev >= 2 ether ? amount : (prev + amount > 2 ether ? prev + amount - 2 ether : 0);
-        assertEq(pts, (famable * 100) / 1e18);
-        if (prev + amount <= 2 ether) assertEq(pts, 0);
+        assertEq(pts, (amount * 100) / 1e18);
+        if (amount < 1 ether) assertEq(pts, (amount * 100) / 1e18);
     }
 
     function test_tope_util_grande_es_70_de_80() public pure {

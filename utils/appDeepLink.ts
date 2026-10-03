@@ -7,6 +7,7 @@ export type AppDeepLink =
 
 const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'people', 'pool', 'reserva', 'admin', 'history', 'ranks', 'fame']);
 export const LOCKED_DEEP_LINK_ROOMS = new Set(['donate', 'admin', 'pool', 'credit', 'loans', 'reserva', 'bonuses']);
+const APP_HTTPS_HOSTS = new Set(['quatriviumcredit.app', 'www.quatriviumcredit.app']);
 
 function trimPathSlashes(path: string): string {
   let s = path;
@@ -15,9 +16,39 @@ function trimPathSlashes(path: string): string {
   return s;
 }
 
-function tokenFromUrl(url?: string | null): string {
-  if (!url) return '';
+function isMetroDevUrl(url: string): boolean {
+  try {
+    const inner = new URL(url);
+    return (
+      (inner.protocol === 'http:' || inner.protocol === 'https:') &&
+      (inner.hostname === '127.0.0.1' || inner.hostname === 'localhost' || inner.hostname.startsWith('10.'))
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function isAllowedAppUrl(url?: string | null): boolean {
+  if (!url) return false;
+  try {
+    const parsed = Linking.parse(url);
+    const scheme = String(parsed.scheme || '').toLowerCase();
+    if (scheme === 'quatrivium') return true;
+    const host = String(parsed.hostname || '').toLowerCase();
+    if ((scheme === 'https' || scheme === 'http') && APP_HTTPS_HOSTS.has(host)) return true;
+    if (host === 'expo-development-client') {
+      const nested = String(parsed.queryParams?.url || '');
+      return !nested || isMetroDevUrl(nested) || isAllowedAppUrl(nested);
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function tokenFromAllowed(url: string): string {
   const parsed = Linking.parse(url);
+  const scheme = String(parsed.scheme || '').toLowerCase();
   const parts = trimPathSlashes(String(parsed.path || ''))
     .split('/')
     .filter((part) => part && part !== '--');
@@ -30,21 +61,25 @@ function tokenFromUrl(url?: string | null): string {
   if (host === 'room') return fromPath;
   if (host === 'settings') return (pathHead || 'settings').toLowerCase();
   if (host === 'mode') return (pathHead || '').toLowerCase();
-  if (host && host !== 'expo-development-client') return host;
-  try {
-    const nested = String(parsed.queryParams?.url || '');
-    if (nested) {
-      const inner = new URL(nested);
-      const nestedRoom = (inner.searchParams.get('room') || inner.searchParams.get('panel') || '').toLowerCase();
-      if (nestedRoom) return nestedRoom;
-      const nestedParts = trimPathSlashes(inner.pathname).split('/').filter((part) => part && part !== '--');
-      const nestedPath = nestedParts[0] === 'room' ? nestedParts[1] || '' : nestedParts[0] || '';
-      if (nestedPath) return nestedPath.toLowerCase();
+  if (host === 'expo-development-client') {
+    try {
+      const nested = String(parsed.queryParams?.url || '');
+      if (nested && isAllowedAppUrl(nested) && !isMetroDevUrl(nested)) {
+        return tokenFromAllowed(nested);
+      }
+    } catch {
+      // ignore
     }
-  } catch {
-    // ignore
+    return fromPath.toLowerCase();
   }
-  return fromPath.toLowerCase();
+  if (scheme === 'quatrivium' && host) return host;
+  if (APP_HTTPS_HOSTS.has(host)) return fromPath.toLowerCase();
+  return '';
+}
+
+function tokenFromUrl(url?: string | null): string {
+  if (!url || !isAllowedAppUrl(url)) return '';
+  return tokenFromAllowed(url);
 }
 
 export function parseAppDeepLink(url?: string | null): AppDeepLink | null {

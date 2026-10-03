@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Linking as RNLinking, LogBox, View } from 'react-native';
-import { Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LanguageProvider, useI18n } from './i18n/LanguageContext';
 import { ThemeProvider } from './theme/ThemeContext';
@@ -50,24 +49,12 @@ function DeferredWeb3({ children }) {
 }
 
 export default function App() {
-  // Arranque a prueba de colgados: fuentes, idioma y candado tienen tope de espera.
-  const [fontsLoaded] = useFonts({
-    QvSans: Inter_400Regular,
-    Inter_400Regular,
-  });
-  const [fontWaitOver, setFontWaitOver] = useState(false);
   const [brandHoldOver, setBrandHoldOver] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setFontWaitOver(true), 4000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!fontsLoaded && !fontWaitOver) return undefined;
     const timer = setTimeout(() => setBrandHoldOver(true), BRAND_HOLD_MS);
     return () => clearTimeout(timer);
-  }, [fontsLoaded, fontWaitOver]);
+  }, []);
 
   useEffect(() => {
     migrateLegacyStorage().catch(() => {});
@@ -83,11 +70,7 @@ export default function App() {
   }, []);
 
   if (__DEV__) {
-    console.log('[boot] App render', { fontsLoaded, fontWaitOver });
-  }
-
-  if (!fontsLoaded && !fontWaitOver) {
-    return <BrandSplash wordmark={false} />;
+    console.log('[boot] App render', { brandHoldOver });
   }
 
   if (!brandHoldOver) {

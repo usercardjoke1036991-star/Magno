@@ -72,6 +72,28 @@ describe('Alta 4 USDT', function () {
     expect(await contract.totalLiquidity(tokenAddr)).to.be.gte(liqBefore - ethers.parseUnits('1', 18));
   });
 
+  it('si no paga el L1 en 7 días el 1 del padrino va al pool', async () => {
+    const { token, contract, alta, owner, user, extra, tokenAddr } = await deployAltaStack();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, extra, '20');
+    await registerAndFund(token, contract, user, '20', extra.address);
+    await alta.connect(user).pagarRegistro();
+    const liqBefore = await contract.totalLiquidity(tokenAddr);
+    const padreBefore = await token.balanceOf(extra.address);
+    await expect(alta.connect(user).vencerPadrinoAlPool(user.address)).to.be.reverted;
+    await ethers.provider.send('evm_increaseTime', [7 * 24 * 60 * 60 + 1]);
+    await ethers.provider.send('evm_mine', []);
+    await alta.connect(user).vencerPadrinoAlPool(user.address);
+    expect(await alta.padrinoApartado(user.address)).to.equal(0n);
+    expect((await token.balanceOf(extra.address)) - padreBefore).to.equal(0n);
+    expect(await contract.totalLiquidity(tokenAddr)).to.equal(liqBefore + ethers.parseUnits('1', 18));
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const deuda = await contract.obtenerDeuda(user.address);
+    await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
+    const padreTrasPago = (await token.balanceOf(extra.address)) - padreBefore;
+    expect(padreTrasPago).to.be.lt(ethers.parseUnits('1', 18));
+  });
+
   it('tras el primer L1 no se puede pagar el alta otra vez', async () => {
     const { token, contract, alta, owner, user, extra, tokenAddr } = await deployAltaStack();
     await seedPool(token, contract, owner, '500');

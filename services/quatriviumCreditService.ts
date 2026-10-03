@@ -381,7 +381,9 @@ export const QuatriviumCreditService = {
           altaPaid = false;
         }
       }
-      if (!altaPaid && BigInt(donated.toString()) < 2n * 10n ** 18n) {
+      if (isAltaConfigured()) {
+        if (!altaPaid) throw new Error('access-required');
+      } else if (BigInt(donated.toString()) < 2n * 10n ** 18n) {
         throw new Error('access-required');
       }
       let kycDeclarado = false;
@@ -470,9 +472,6 @@ export const QuatriviumCreditService = {
   },
 
   pagarRegistroAlta: async (tokenAddress: string) => {
-    if (!isAccessPaymentEnabled()) {
-      throw new Error(isDemoAccount() || isDemoMode() ? 'access-not-ready' : 'donate-real-only');
-    }
     if (!isAltaConfigured()) {
       throw new Error('access-not-ready');
     }

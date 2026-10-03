@@ -1864,20 +1864,48 @@ describe('account entry — password, email and session', () => {
   });
 
   it('strips Android fontWeight so MIUI cannot double-paint letters', () => {
+    function androidFace(weight, family) {
+      if (family === 'monospace' || /mono|courier/i.test(String(family || ''))) return 'monospace';
+      const n = weight === 'bold' || weight === '700' ? 700 : weight === '600' || weight === '500' ? 600 : 400;
+      if (n >= 700) return 'sans-serif-black';
+      if (n >= 500) return 'sans-serif-medium';
+      return 'sans-serif';
+    }
     function remapAndroidTextStyle(style, os = 'android') {
       if (os !== 'android') return style;
       const next = { ...style };
+      next.fontFamily = androidFace(next.fontWeight, next.fontFamily);
       delete next.fontWeight;
-      next.fontFamily = 'QvSans';
-      next.includeFontPadding = false;
+      delete next.fontStyle;
+      next.textShadowColor = 'transparent';
+      next.textShadowRadius = 0;
+      next.textShadowOffset = { width: 0, height: 0 };
+      if (typeof next.letterSpacing === 'number') next.letterSpacing = 0;
       return next;
     }
     const painted = remapAndroidTextStyle({ fontSize: 22, fontWeight: '600' });
     expect(painted.fontWeight).to.equal(undefined);
-    expect(painted.fontFamily).to.equal('QvSans');
-    expect(painted.includeFontPadding).to.equal(false);
-    expect(painted.opacity).to.equal(undefined);
+    expect(painted.fontFamily).to.equal('sans-serif-medium');
+    expect(painted.textShadowColor).to.equal('transparent');
+    expect(painted.textShadowRadius).to.equal(0);
+    expect(remapAndroidTextStyle({ fontWeight: '700' }).fontFamily).to.equal('sans-serif-black');
+    expect(remapAndroidTextStyle({ fontWeight: '400' }).fontFamily).to.equal('sans-serif');
     expect(remapAndroidTextStyle({ fontWeight: '700' }, 'ios').fontWeight).to.equal('700');
+  });
+
+  it('gates Alta loans on-chain and ignores foreign https deep links', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const credit = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'QuatriviumCredit.sol'), 'utf8');
+    const famaLib = fs.readFileSync(path.join(__dirname, '..', 'contracts', 'libraries', 'QuatriviumFamaLib.sol'), 'utf8');
+    const deep = fs.readFileSync(path.join(__dirname, '..', 'utils', 'appDeepLink.ts'), 'utf8');
+    const transfer = fs.readFileSync(path.join(__dirname, '..', 'components', 'TransferWalletsModal.tsx'), 'utf8');
+    expect(famaLib).to.include('requireAltaPagada');
+    expect(credit).to.include('to == deudor || blacklist[to]');
+    expect(deep).to.include('isAllowedAppUrl');
+    expect(deep).to.include('quatriviumcredit.app');
+    expect(deep).to.not.include("if (host && host !== 'expo-development-client') return host");
+    expect(transfer).to.include('if (busy) return');
   });
 
   it('lets founders propose a phone stamp without pasting a private key', () => {
@@ -2116,6 +2144,8 @@ describe('account entry — password, email and session', () => {
     expect(walletCtx).to.include('hydrateAccountIdentity');
     const service = fs.readFileSync(path.join(__dirname, '..', 'services', 'quatriviumCreditService.ts'), 'utf8');
     expect(service).to.include('access-required');
+    expect(service).to.include('isAltaConfigured()');
+    expect(service).to.include('if (!altaPaid) throw new Error(\'access-required\')');
     expect(service).to.include('canVincularIdentidad');
     expect(service).to.include('.catch(() => false)');
     const home = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.tsx'), 'utf8');
