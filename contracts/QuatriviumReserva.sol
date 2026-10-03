@@ -225,15 +225,16 @@ contract QuatriviumReserva is ReentrancyGuard, Pausable {
     }
 
     function setAltaFuente(address next) external {
-        if (msg.sender != owner && !_esAdminCredit()) revert SoloAdmin();
+        if (msg.sender != owner) revert SoloOwner();
         if (altaFuente != address(0) || next == address(0)) revert DestinoCero();
         altaFuente = next;
     }
 
     function onAlta(uint256 monto) external {
-        if (msg.sender != altaFuente && msg.sender != credit) revert SoloAdmin();
+        if (msg.sender != altaFuente) revert SoloAdmin();
         if (monto == 0) revert MontoCero();
         bote += monto;
+        if (token.balanceOf(address(this)) < totalBloqueado + bote) revert NadaQueMover();
         emit BoteAportado(msg.sender, monto);
     }
 

@@ -57,11 +57,16 @@ contract QuatriviumBlindajesTest is Test {
         vm.stopPrank();
     }
 
-    function test_sin_alta_el_padrino_no_come_caja() public {
+    function test_con_alta_el_sello_no_entra_por_verificar() public {
+        _onboard(hijo, address(0));
+        vm.prank(hijo, hijo);
+        vm.expectRevert();
+        credit.pagarVerificacion(address(token), 1 ether);
+    }
+
+    function test_sin_registro_el_padrino_no_come_caja() public {
         _onboard(padre, address(0));
         _onboard(hijo, padre);
-        vm.prank(hijo, hijo);
-        credit.pagarVerificacion(address(token), 1 ether);
         uint256 liqBefore = credit.totalLiquidity(address(token));
         uint256 padreBefore = token.balanceOf(padre);
         vm.prank(hijo, hijo);
@@ -103,7 +108,9 @@ contract QuatriviumBlindajesTest is Test {
         _onboard(ballena, address(0));
         credit.forceNivel(ballena, 10);
         vm.prank(hijo, hijo);
-        credit.pagarVerificacion(address(token), 1 ether);
+        token.approve(address(alta), type(uint256).max);
+        vm.prank(hijo, hijo);
+        alta.pagarRegistro();
         vm.prank(ballena, ballena);
         credit.solicitarPrestamo(address(token), 10);
         vm.prank(hijo, hijo);

@@ -376,7 +376,7 @@ export const QuatriviumCreditService = {
       if (isAltaConfigured()) {
         try {
           const alta = new Contract(getAltaAddress(), ALTA_ABI, signer);
-          altaPaid = BigInt(await alta.padrinoApartado(userAddress)) > 0n;
+          altaPaid = Boolean(await alta.registroHecho(userAddress));
         } catch {
           altaPaid = false;
         }
@@ -492,7 +492,7 @@ export const QuatriviumCreditService = {
     try {
       const { provider } = await getProviderAndSigner();
       const alta = new Contract(getAltaAddress(), ALTA_ABI, provider);
-      return BigInt(await alta.padrinoApartado(userAddress)) > 0n;
+      return Boolean(await alta.registroHecho(userAddress));
     } catch {
       return false;
     }

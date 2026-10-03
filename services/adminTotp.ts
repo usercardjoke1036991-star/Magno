@@ -23,7 +23,8 @@ async function postAdminTotp<T>(
 
 export async function adminTotpStatus(signer: Signer, wallet: string): Promise<TotpStatus> {
   if (!notifyApiConfigured()) return {};
-  const { body } = await postAdminTotp<TotpStatus>('/admin/totp/status', signer, wallet);
+  const { status, body } = await postAdminTotp<TotpStatus>('/admin/totp/status', signer, wallet);
+  if (status >= 400) throw new Error('admin-totp');
   return body;
 }
 
@@ -34,11 +35,13 @@ export async function enrollAdminTotp(signer: Signer, wallet: string): Promise<T
 }
 
 export async function confirmAdminTotp(signer: Signer, wallet: string, code: string): Promise<boolean> {
-  const { body } = await postAdminTotp<TotpOk>('/admin/totp/confirm', signer, wallet, { code });
+  const { status, body } = await postAdminTotp<TotpOk>('/admin/totp/confirm', signer, wallet, { code });
+  if (status >= 400) return false;
   return Boolean(body.ok);
 }
 
 export async function verifyAdminTotp(signer: Signer, wallet: string, code: string): Promise<boolean> {
-  const { body } = await postAdminTotp<TotpOk>('/admin/totp/verify', signer, wallet, { code });
+  const { status, body } = await postAdminTotp<TotpOk>('/admin/totp/verify', signer, wallet, { code });
+  if (status >= 400) return false;
   return Boolean(body.ok);
 }

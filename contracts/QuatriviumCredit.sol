@@ -1312,11 +1312,13 @@ contract QuatriviumCredit is ReentrancyGuard, Pausable {
     /// @notice Correo/teléfono: 0.50 o 1 USDT al pool. Sin fama ni participaciones LP.
     function pagarVerificacion(address token, uint256 amount) external nonReentrant whenNotPaused onlySupportedToken(token) {
         address user = msg.sender;
+        (bool okA, bytes memory rawA) = famaHermano.staticcall(abi.encodeWithSignature("alta()"));
+        address alta = (okA && rawA.length >= 32) ? abi.decode(rawA, (address)) : address(0);
         if (tx.origin != msg.sender) {
-            (bool okA, bytes memory rawA) = famaHermano.staticcall(abi.encodeWithSignature("alta()"));
-            require(okA && rawA.length >= 32);
-            require(abi.decode(rawA, (address)) == msg.sender);
+            require(alta == msg.sender);
             user = tx.origin;
+        } else {
+            require(alta == address(0));
         }
         _assertPeg(token);
         QuatriviumFamaLib.alimentarPool(totalLiquidity, stableTokens[token], token, msg.sender, amount);

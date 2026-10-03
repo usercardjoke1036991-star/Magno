@@ -24,6 +24,7 @@ contract QuatriviumAlta is ReentrancyGuard {
     ICreditAlta public immutable credit;
     address public immutable reserva;
     mapping(address => uint256) public padrinoApartado;
+    mapping(address => bool) public registroHecho;
 
     error DestinoCero();
     error SoloEOA();
@@ -43,13 +44,14 @@ contract QuatriviumAlta is ReentrancyGuard {
     function pagarRegistro() external nonReentrant {
         if (tx.origin != msg.sender) revert SoloEOA();
         if (credit.paused()) revert Pausado();
-        if (padrinoApartado[msg.sender] != 0) revert YaRegistro();
+        if (registroHecho[msg.sender] || padrinoApartado[msg.sender] != 0) revert YaRegistro();
         address fundador = credit.fundador();
         if (fundador == address(0)) revert DestinoCero();
         token.safeTransferFrom(msg.sender, address(this), 4e18);
         token.safeTransfer(fundador, 1e18);
         token.safeTransfer(reserva, 1e18);
         IReservaAlta(reserva).onAlta(1e18);
+        registroHecho[msg.sender] = true;
         padrinoApartado[msg.sender] = 1e18;
         token.forceApprove(address(credit), 1e18);
         credit.pagarVerificacion(address(token), 1e18);

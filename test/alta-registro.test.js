@@ -47,20 +47,42 @@ describe('Alta 4 USDT', function () {
     expect(await contract.totalLiquidity(tokenAddr)).to.be.gte(liqBefore - ethers.parseUnits('1', 18));
   });
 
-  it('sin pagar Alta el padrino no cobra de la caja', async () => {
-    const { token, contract, alta, owner, user, extra, tokenAddr } = await deployAltaStack();
+  it('con Alta el sello no entra por pagarVerificacion directo', async () => {
+    const { contract, user, tokenAddr } = await deployAltaStack();
+    await expect(contract.connect(user).pagarVerificacion(tokenAddr, ethers.parseUnits('1', 18))).to.be.reverted;
+  });
+
+  it('onAlta solo lo llama el contrato Alta y exige tokens en caja', async () => {
+    const { reserva, owner } = await deployAltaStack();
+    await expect(reserva.connect(owner).onAlta(ethers.parseUnits('1', 18))).to.be.reverted;
+  });
+
+  it('con Alta, sin pagarRegistro el padrino no come caja', async () => {
+    const { token, contract, owner, user, extra, tokenAddr } = await deployAltaStack();
     await seedPool(token, contract, owner, '500');
     await registerAndFund(token, contract, extra, '20');
     await registerAndFund(token, contract, user, '20', extra.address);
-    await contract.connect(user).pagarVerificacion(tokenAddr, ethers.parseUnits('1', 18));
     const padreBefore = await token.balanceOf(extra.address);
     const liqBefore = await contract.totalLiquidity(tokenAddr);
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
     const deuda = await contract.obtenerDeuda(user.address);
     await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
-    expect(await alta.padrinoApartado(user.address)).to.equal(0n);
     const padreGain = (await token.balanceOf(extra.address)) - padreBefore;
     expect(padreGain).to.be.lt(ethers.parseUnits('1', 18));
     expect(await contract.totalLiquidity(tokenAddr)).to.be.gte(liqBefore - ethers.parseUnits('1', 18));
+  });
+
+  it('tras el primer L1 no se puede pagar el alta otra vez', async () => {
+    const { token, contract, alta, owner, user, extra, tokenAddr } = await deployAltaStack();
+    await seedPool(token, contract, owner, '500');
+    await registerAndFund(token, contract, extra, '20');
+    await registerAndFund(token, contract, user, '20', extra.address);
+    await alta.connect(user).pagarRegistro();
+    await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
+    const deuda = await contract.obtenerDeuda(user.address);
+    await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
+    expect(await alta.padrinoApartado(user.address)).to.equal(0n);
+    expect(await alta.registroHecho(user.address)).to.equal(true);
+    await expect(alta.connect(user).pagarRegistro()).to.be.reverted;
   });
 });

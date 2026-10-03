@@ -37,6 +37,8 @@ export function isDemoAccount(): boolean {
 
 /** Crédito on-chain listo en el mundo activo (testnet en Demo, mainnet en Real). */
 export function isCreditReady(): boolean {
+  if (productMode === 'live' && runtimeMode !== 'live') return false;
+  if (productMode === 'demo' && runtimeMode !== 'demo') return false;
   return isContractConfigured(productMode === 'live' ? 'mainnet' : 'testnet');
 }
 

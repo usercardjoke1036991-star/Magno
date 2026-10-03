@@ -797,6 +797,8 @@ describe('demo credit gates', function () {
     const handlers = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
     expect(handlers).to.match(/handlePagarAcceso = async \(\) => \{\s*if \(isDemoAccount\(\)\) return;/);
     expect(handlers).to.include('accesoBusy');
+    expect(handlers).to.include('altaPagada');
+    expect(handlers).to.match(/handleAportarReserva[\s\S]*runAsAdmin/);
   });
 
   it('blocks Solicitar in Real until phrase, email, phone and KYC are bound', function () {

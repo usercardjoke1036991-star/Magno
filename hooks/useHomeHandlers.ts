@@ -19,7 +19,7 @@ import { getProviderWithFallback, isAccessPaymentEnabled, isCreditReady, isDemoA
 import { isHttpsUrl } from '../utils/sanitize';
 import { showNotice } from '../utils/appNotice';
 import { isAltaConfigured } from '../constants/altaConfig';
-import { accessPayUsdt, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase } from '../utils/creditGates';
+import { accessPayUsdt, creditNeedsAccess, creditNeedsDeviceMatch, creditNeedsEmail, creditNeedsKyc, creditNeedsPhone, creditNeedsPhrase, hasCreditAccess } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhoneActive } from '../services/accountPhone';
 import { enviarToken, isPhraseBackedUp, loadAppWallet } from '../services/appWallet';
@@ -770,6 +770,8 @@ export const useHomeHandlers = ({
       return;
     }
     if (!ensureCreditReady()) return;
+    if (hasCreditAccess(Number(userInfo.donatedUsd || 0))) return;
+    if (walletAddress && (await QuatriviumCreditService.altaPagada(walletAddress))) return;
     if (!isAltaConfigured() && !userInfo.canDonate) {
       Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
       return;
@@ -808,10 +810,6 @@ export const useHomeHandlers = ({
   };
 
   const handleAportarReserva = async (amountHuman: string) => {
-    if (!adminConnected || !adminProvider) {
-      Alert.alert(t('admin'), t('appWalletAdminConnect'));
-      return;
-    }
     const parsed = parsePositiveDecimal(amountHuman);
     if (!parsed) {
       Alert.alert(t('amount'), t('amountGreaterZero'));
@@ -819,11 +817,13 @@ export const useHomeHandlers = ({
     }
     if (!(await confirmFunds())) return;
     try {
-      const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
-      if (!signer) throw new Error('admin');
-      await aportarReservaBote(signer, parsed);
-      showNotice(t('ready'), t('reservaAdminPotOk'));
-      refetch();
+      await runAsAdmin(async () => {
+        const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
+        if (!signer) throw new Error('admin');
+        await aportarReservaBote(signer, parsed);
+        showNotice(t('ready'), t('reservaAdminPotOk'));
+        refetch();
+      });
     } catch (error) {
       Alert.alert(t('error'), t(reservaErrorKey(error)));
     }
