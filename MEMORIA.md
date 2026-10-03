@@ -36,6 +36,7 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-03] SonarCloud S2699: el test del padrino vencido ahora tiene expect de chai, no solo expectAmt.
 - [2026-10-03] Protocolo nuevo en BSC testnet: Credit 0xD760f83C96e3A59a777525188EA15Bb50E2e8817, Alta 0x1De5C725B5883355F151CC40D7D486d40f6aFF58, pool 500. Mainnet sigue vacio.
 - [2026-10-03] El prestamo exige alta pagada si hay contrato Alta. El padrino vencido se anota al deudor. Un enlace no abre Admin. Credit queda en 23254 bytes.
 - [2026-10-03] Textos de Reserva dejan de decir bote o premio. 31 pantallas que seguian en ingles quedaron traducidas en los 15 idiomas.
@@ -85,11 +86,10 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-10-01] 5+6: vincular pide EIP-712 BindWallet antes de guardar address; Pool y Como funciona dicen que lo aportado no se retira
 - [2026-10-01] Implementadas remediaciones de auditoria: contratos (nonce, pausa, KYC, fundador, destroy, boost) y app (Keystore, fail-closed, PII, PIN 20000, health).
 - [2026-09-30] SonarCloud: 5 S5845 de bigint en tests MLM/canje pasados a expectAmt. Snyk Code/SCA high 0. MobSF CLI solo abre apk/aab/ipa.
-- [2026-09-30] Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-03] Cambio: Protocolo nuevo en BSC testnet: Credit 0xD760f83C96e3A59a777525188EA15Bb50E2e8817, Alta 0x1De5C725B5883355F151CC40D7D486d40f6aFF58, pool 500. Mainnet sigue vacio.
+[2026-10-03] Cambio: SonarCloud S2699: el test del padrino vencido ahora tiene expect de chai, no solo expectAmt.

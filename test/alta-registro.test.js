@@ -79,9 +79,9 @@ describe('Alta 4 USDT', function () {
     await ethers.provider.send('evm_increaseTime', [7 * 24 * 60 * 60 + 1]);
     await ethers.provider.send('evm_mine', []);
     await alta.connect(extra).vencerPadrinoAlPool(user.address);
+    expect(await alta.cargoDe()).to.equal(0n);
     expectAmt(await contract.verificadoAlPool(extra.address), extraAntes);
     expectAmt(await contract.verificadoAlPool(user.address), userAntes + ethers.parseUnits('1', 18));
-    expectAmt(await alta.cargoDe(), 0n);
   });
 
   it('si no paga el L1 en 7 días el 1 del padrino va al pool', async () => {
