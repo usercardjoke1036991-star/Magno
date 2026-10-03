@@ -4,13 +4,30 @@ import { useTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
 import { AppIcon, type IconName } from './icons';
 
-export type HomeRoom = 'wallet' | 'credit' | 'loans' | 'bonuses' | 'canje' | 'donate' | 'network' | 'people' | 'pool' | 'reserva' | 'racha' | 'admin' | 'history' | 'ranks' | 'fame';
+export type HomeRoom =
+  | 'alta'
+  | 'wallet'
+  | 'credit'
+  | 'loans'
+  | 'bonuses'
+  | 'canje'
+  | 'donate'
+  | 'network'
+  | 'people'
+  | 'pool'
+  | 'reserva'
+  | 'racha'
+  | 'admin'
+  | 'history'
+  | 'ranks'
+  | 'fame';
 
 interface HubTile {
   id: HomeRoom;
   title: string;
   lead: string;
   icon: IconName;
+  locked?: boolean;
 }
 
 interface HomeHubProps {
@@ -29,9 +46,12 @@ export const HomeHub: React.FC<HomeHubProps> = ({ tiles, onOpen }) => {
           onPress={() => onOpen(tile.id)}
           style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
           accessibilityRole="button"
-          accessibilityLabel={tile.title}
+          accessibilityLabel={tile.locked ? `${tile.title}. ${tile.lead}` : tile.title}
         >
-          <AppIcon name={tile.icon} size={22} color={colors.primary} />
+          <View style={styles.iconRow}>
+            <AppIcon name={tile.icon} size={22} color={colors.primary} />
+            {tile.locked ? <AppIcon name="lock" size={16} color={colors.warnText} /> : null}
+          </View>
           <AppText style={[styles.title, { color: colors.text }]}>{tile.title}</AppText>
           <AppText style={[styles.lead, { color: colors.textMuted }]}>{tile.lead}</AppText>
         </TouchableOpacity>
@@ -54,6 +74,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     gap: 8,
     minHeight: 132,
+  },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 15,

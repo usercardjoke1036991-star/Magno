@@ -17,7 +17,6 @@ import { enviarBnb, enviarToken, loadAppWallet } from '../services/appWallet';
 import {
   hasLinkedExternalWallet,
   loadRequiredExternalWallet,
-  saveLinkedExternalWallet,
 } from '../services/linkedWallet';
 import { recordMovement } from '../services/movementHistory';
 import { useI18n } from '../i18n/LanguageContext';
@@ -71,18 +70,9 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
     if (!visible) return;
     let live = true;
     loadRequiredExternalWallet(walletAddress)
-      .then(async (stored) => {
+      .then((stored) => {
         if (!live) return;
-        if (stored) {
-          setLinked(stored);
-          return;
-        }
-        if (isConnected && hasLinkedExternalWallet(address || '')) {
-          const saved = await saveLinkedExternalWallet(walletAddress, address || '');
-          if (live) setLinked(saved);
-          return;
-        }
-        setLinked('');
+        setLinked(stored && hasLinkedExternalWallet(stored) ? stored : '');
       })
       .catch(() => {
         if (live) setLinked('');

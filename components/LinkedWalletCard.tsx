@@ -10,7 +10,7 @@ import {
   loadRequiredExternalWallet,
   proveAndSaveLinkedWallet,
 } from '../services/linkedWallet';
-import { openWalletConnect } from '../utils/openWalletConnect';
+import { openWalletConnect, withWalletSignTimeout } from '../utils/openWalletConnect';
 import { isDemoMode } from '../constants/rpcConfig';
 import { AppText } from './AppText';
 
@@ -50,7 +50,10 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
     }
     setBusy(true);
     try {
-      const saved = await proveAndSaveLinkedWallet(provider as Eip1193Provider, internalWallet, address || '');
+      const saved = await withWalletSignTimeout(
+        proveAndSaveLinkedWallet(provider as Eip1193Provider, internalWallet, address || ''),
+        45000
+      );
       setLinked(saved);
     } catch {
       // Firma rechazada o provider ausente: no guardar. El usuario puede reintentar.
@@ -60,7 +63,10 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
   };
 
   const connectedReady = hasLinkedExternalWallet(address || '');
-  const mismatch = Boolean(linked && connectedReady && String(address).toLowerCase() !== linked.toLowerCase());
+  const sessionLive = Boolean(isConnected && connectedReady);
+  const mismatch = Boolean(linked && sessionLive && String(address).toLowerCase() !== linked.toLowerCase());
+  const looksBound = Boolean(linked && sessionLive && !mismatch);
+  const boundLabel = looksBound ? 'linkWalletBound' : linked ? 'connectWallet' : 'linkWalletBind';
 
   return (
     <View
@@ -79,21 +85,24 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
           {formatAddress(linked)}
         </AppText>
       ) : null}
+      {linked && !sessionLive ? (
+        <AppText style={[styles.meta, { color: colors.warnText }]}>{t('linkWalletSessionOff')}</AppText>
+      ) : null}
       {mismatch ? (
         <AppText style={[styles.meta, { color: colors.warnText }]}>{t('linkWalletMismatch')}</AppText>
       ) : null}
       <TouchableOpacity
         disabled={busy}
-        onPress={() => (linked && connectedReady && !mismatch ? void openWalletConnect(open) : void saveConnected())}
-        style={[styles.btn, { backgroundColor: linked ? colors.chip : colors.primary }]}
+        onPress={() => (looksBound ? void openWalletConnect(open) : void saveConnected())}
+        style={[styles.btn, { backgroundColor: looksBound ? colors.chip : colors.primary }]}
         accessibilityRole="button"
-        accessibilityLabel={t('linkWalletBind')}
+        accessibilityLabel={t(boundLabel)}
       >
         {busy ? (
-          <ActivityIndicator color={linked ? colors.text : colors.onPrimary} />
+          <ActivityIndicator color={looksBound ? colors.text : colors.onPrimary} />
         ) : (
-          <AppText style={[styles.btnText, { color: linked ? colors.text : colors.onPrimary }]}>
-            {t('linkWalletBind')}
+          <AppText style={[styles.btnText, { color: looksBound ? colors.text : colors.onPrimary }]}>
+            {t(boundLabel)}
           </AppText>
         )}
       </TouchableOpacity>

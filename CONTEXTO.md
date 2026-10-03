@@ -265,6 +265,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-03 | Alta 4 USDT sin desglose en UI ni legales. Frase 24 palabras explicada como llave en el telefono, no en la red. | — |
+| 2026-10-03 | Catalogo y legales en 17 idiomas con tono institucional. Vincular/Vinculado. Politicas y extras nativos, no fallback ingles. | — |
 | 2026-10-03 | Catalogo de hitos y 17 idiomas alineados a bonoDeHito (400-20000) y alta 4 USDT. Demo tambien pide el alta si hay contrato Alta. | — |
 | 2026-10-03 | Auditoria 3 oct: candados Alta en Demo, copy 4 USDT, CEI en pagarRegistro. Credit.solicitarPrestamo sigue sin requireAltaPagada por EIP-170. Xiaomi APK 13-sep + Metro. | — |
 | 2026-10-03 | Protocolo nuevo en BSC testnet 97: Credit 0xdF21Ec0bCBFb6F03b6929De4b37B3B6c40d31F5a, Fama 0x74914FD88E98F18f2D27EC343c00f28FcDA981F4, Reserva 0x9058C95bBdde3B215f86908aE66F1B2C03180420, Alta 0xa590f241868560AF3f9E2017c7d629FFDEA27e2B. Pool 500. 2-de-2. Demo viejo 0xD2d2 intacto. Mainnet sin deploy. | — |

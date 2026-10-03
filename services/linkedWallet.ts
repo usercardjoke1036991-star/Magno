@@ -3,9 +3,11 @@ import { getAddress, isAddress, type Eip1193Provider } from 'ethers';
 import { storeSlot } from '../utils/storeSlot';
 import { signBindExternalWallet } from './walletAuth';
 import { getEthersSignerFromProvider } from '../web3Config';
+import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 
 const PREFIX = `${storeSlot(['quatrivium', 'linkedExternal', 'v1'])}:`;
 export const WALLET_LINK_SKIPPED = 'skipped';
+const PROVEN_PREFIX = 'proven:';
 
 export function linkedWalletStorageKey(internalWallet: string): string {
   return `${PREFIX}${String(internalWallet || '').trim().toLowerCase()}`;
@@ -25,7 +27,11 @@ export async function loadLinkedExternalWallet(internalWallet: string): Promise<
   try {
     const stored = String((await AsyncStorage.getItem(linkedWalletStorageKey(internalWallet))) || '').trim();
     if (stored === WALLET_LINK_SKIPPED) return WALLET_LINK_SKIPPED;
-    return hasLinkedExternalWallet(stored) ? getAddress(stored) : '';
+    if (!stored.startsWith(PROVEN_PREFIX)) return '';
+    const address = stored.slice(PROVEN_PREFIX.length);
+    if (!hasLinkedExternalWallet(address)) return '';
+    if (getAddress(address).toLowerCase() === getAddress(internalWallet).toLowerCase()) return '';
+    return getAddress(address);
   } catch {
     return '';
   }
@@ -39,7 +45,10 @@ export async function saveLinkedExternalWallet(
     throw new Error('wallet');
   }
   const address = getAddress(externalWallet);
-  await AsyncStorage.setItem(linkedWalletStorageKey(internalWallet), address);
+  if (getAddress(internalWallet).toLowerCase() === address.toLowerCase()) {
+    throw new Error('wallet');
+  }
+  await AsyncStorage.setItem(linkedWalletStorageKey(internalWallet), `${PROVEN_PREFIX}${address}`);
   return address;
 }
 
@@ -50,11 +59,13 @@ export async function proveAndSaveLinkedWallet(
   externalWallet: string
 ): Promise<string> {
   if (!eip1193) throw new Error('signer');
+  await ensureExternalWalletOnAppChain(eip1193);
   const signer = await getEthersSignerFromProvider(eip1193);
   if (!signer) throw new Error('signer');
   const from = getAddress(await signer.getAddress());
   const external = getAddress(externalWallet);
   if (from !== external) throw new Error('wallet');
+  if (from.toLowerCase() === getAddress(internalWallet).toLowerCase()) throw new Error('wallet');
   await signBindExternalWallet(signer, internalWallet, external);
   return saveLinkedExternalWallet(internalWallet, external);
 }

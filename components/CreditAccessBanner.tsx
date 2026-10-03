@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-nat
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { isAltaConfigured } from '../constants/altaConfig';
-import { accessPayUsdt, hasCreditAccess } from '../utils/creditGates';
+import { hasCreditAccess } from '../utils/creditGates';
 import { AppText } from './AppText';
 import { useAppMode } from '../wallet/AppModeContext';
 
@@ -12,32 +12,45 @@ interface CreditAccessBannerProps {
   canPay: boolean;
   isLoading?: boolean;
   tokenSymbol?: string;
+  needRegister?: boolean;
+  canRegister?: boolean;
   onPay: () => void;
+  onRegister?: () => void;
 }
 
 export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
   paidUsd,
   canPay,
   isLoading = false,
-  tokenSymbol = 'USDT',
+  needRegister = false,
+  canRegister = false,
   onPay,
+  onRegister,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { mode } = useAppMode();
-  if ((mode === 'demo' && !isAltaConfigured()) || hasCreditAccess(paidUsd)) {
+  const paid = hasCreditAccess(paidUsd);
+  const showPay = !((mode === 'demo' && !isAltaConfigured()) || paid);
+  const showRegister = Boolean(needRegister && !showPay);
+
+  if (!showPay && !showRegister) {
     return null;
   }
 
-  const pendingLead = t('creditAccessPending');
-
   return (
-    <View style={[styles.box, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-      <AppText style={[styles.title, { color: colors.text }]}>{t('creditAccessTitle')}</AppText>
-      <AppText style={[styles.lead, { color: colors.textMuted }]}>
-        {canPay ? t('creditAccessLead') : pendingLead}
+    <View style={[styles.box, { borderColor: colors.primary, backgroundColor: colors.surface }]}>
+      <AppText style={[styles.title, { color: colors.text }]}>
+        {showPay ? t('creditAccessTitle') : t('register')}
       </AppText>
-      {canPay ? (
+      <AppText style={[styles.lead, { color: colors.text }]}>
+        {showPay
+          ? canPay
+            ? t('creditAccessGateLead')
+            : t('creditAccessPending')
+          : t('creditAccessRegisterNeed')}
+      </AppText>
+      {showPay && canPay ? (
         <TouchableOpacity
           disabled={isLoading}
           onPress={onPay}
@@ -46,10 +59,27 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
           accessibilityLabel={t('creditAccessPay')}
         >
           {isLoading ? (
-            <ActivityIndicator color="#111" />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <AppText style={[styles.payText, { color: colors.onPrimary }]}>
-              {t('creditAccessPay', { amount: String(accessPayUsdt()), symbol: tokenSymbol })}
+              {t('creditAccessPay')}
+            </AppText>
+          )}
+        </TouchableOpacity>
+      ) : null}
+      {showRegister && onRegister ? (
+        <TouchableOpacity
+          disabled={isLoading || !canRegister}
+          onPress={onRegister}
+          style={[styles.pay, { backgroundColor: canRegister ? colors.primary : colors.chip }]}
+          accessibilityRole="button"
+          accessibilityLabel={t('register')}
+        >
+          {isLoading ? (
+            <ActivityIndicator color={canRegister ? colors.onPrimary : colors.textMuted} />
+          ) : (
+            <AppText style={[styles.payText, { color: canRegister ? colors.onPrimary : colors.textMuted }]}>
+              {t('register')}
             </AppText>
           )}
         </TouchableOpacity>
@@ -60,28 +90,29 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
 
 const styles = StyleSheet.create({
   box: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
+    borderWidth: 2,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 14,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     marginBottom: 6,
   },
   lead: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 10,
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '600',
+    marginBottom: 12,
   },
   pay: {
     borderRadius: 12,
-    paddingVertical: 13,
+    paddingVertical: 14,
     alignItems: 'center',
   },
   payText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
   },
 });

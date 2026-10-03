@@ -38,6 +38,11 @@ for (const lang of langs) {
       failed = true;
     }
     if (lang !== 'en' && value === enVal && enVal.length > 24) copied += 1;
+    const englishBits = String(value || '').match(/\b(the|your|you|with|this|that|only|will|have|password|required|account)\b/gi) || [];
+    if (lang !== 'en' && englishBits.length >= 4) {
+      console.error(`${lang}.${key} still reads as English`);
+      failed = true;
+    }
     if (/EXPO_PUBLIC_|CONFIRM_MAINNET|PRIVATE_KEY|TEXTBELT/.test(String(value || ''))) {
       console.error(`${lang}.${key} leaks internal token`);
       failed = true;

@@ -14,7 +14,7 @@ import { humanizeTxError } from '../utils/txErrors';
 import { getEthersSignerFromProvider } from '../web3Config';
 import { enviarToken, loadAppWallet } from './appWallet';
 import { signedAuthBody } from './walletAuth';
-import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from './linkedWallet';
+import { loadRequiredExternalWallet } from './linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { isAltaConfigured } from '../constants/altaConfig';
 import { cachedProtocolCaps, QuatriviumCreditService } from './quatriviumCreditService';
@@ -135,14 +135,7 @@ async function requireLinkedExternal(ctx: FounderChargeContext): Promise<string>
     alertUser(ctx, ctx.t('connect'), ctx.t('appWalletNotReady'));
     return '';
   }
-  let linked = await loadRequiredExternalWallet(ctx.walletAddress);
-  if (!linked && ctx.adminConnected && hasLinkedExternalWallet(ctx.adminAddress || '')) {
-    try {
-      linked = await saveLinkedExternalWallet(ctx.walletAddress, ctx.adminAddress || '');
-    } catch {
-      linked = '';
-    }
-  }
+  const linked = await loadRequiredExternalWallet(ctx.walletAddress);
   if (!linked) {
     askToLinkExternal(ctx, ctx.t('linkWalletNeedFunds'));
     return '';

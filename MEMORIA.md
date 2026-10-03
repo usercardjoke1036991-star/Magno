@@ -36,6 +36,18 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-03] Textos de Reserva dejan de decir bote o premio. 31 pantallas que seguian en ingles quedaron traducidas en los 15 idiomas.
+- [2026-10-03] Si la sesion WalletConnect se cierra, la tarjeta deja de decir Vinculado y pide Conectar de nuevo. El vinculo guardado sigue.
+- [2026-10-03] Vincular en Real cambia la billetera de la red de prueba 0x61 a BNB Smart Chain 0x38 antes de firmar.
+- [2026-10-03] Conectar abre la billetera externa. Vincular es la firma. Si WalletConnect caduca, el boton deja de girar.
+- [2026-10-03] En Real, Vincular solo pasa a Vinculado despues de firmar la billetera externa. Conectarla ya no marca el vinculo.
+- [2026-10-03] Servicios se abren para verlos. El candado solo impide usarlos hasta pagar el alta y registrarse.
+- [2026-10-03] Iconos de Servicios siempre en verde. En Alta ya no se dice que correo y telefono van sin cargo.
+- [2026-10-03] Hub siempre visible: candado en servicios hasta alta pagada y registro. Banner de Pagar alta al entrar.
+- [2026-10-03] Alta visible en Servicios: baldosa Pagar alta y recuadro encima del hub.
+- [2026-10-03] Boton de alta: Pagar alta, al completar Alta pagada. Sin desglose del cobro.
+- [2026-10-03] Sin desglose de 4 USDT en la app. Aparato pasa a telefono. Frase de 24 palabras como llave local, no en la red.
+- [2026-10-03] Textos institucionales en 17 idiomas: Vincular/Vinculado, guia sin jerga interna, privacidad y terminos estilo auditoria Play.
 - [2026-10-03] Textos de app alineados al protocolo: alta 4 USDT 1+1+1+1, fama 100 desde el primero, padrino del alta, hitos 400-20000. Limpiados temp y residuos.
 - [2026-10-03] Sonar S2699 en alta-registro: expect de registroHecho y expectAmt como asercion reconocida
 - [2026-10-03] App Demo+Alta: candado 4 USDT, banner Pagar 4, textos legales. Xiaomi con Metro ya muestra el alta. Credit no crecio.
@@ -74,22 +86,10 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-09-30] Auditoria E2E: Hardhat 223/223, Foundry 11/11 (arreglado test Reserva DestinoCero), tsc/salud verdes. Demo live 0xD2d2 y mainnet siguen sin el protocolo nuevo. Premios de ranking solo display.
 - [2026-09-30] Guia de Ajustes reescrita en tres partes con como se gana. Bono L200 a 30000. Red: invitacion con enlace, comisiones por generacion y tablero con refresco.
 - [2026-09-30] Cerrado el paquete pendiente: extra Reserva desde pool; botones de cobro de racha 7/30/100/365; fama por via; verificacion oculta; guia en Ajustes; hitos 30000 desde L300; rankings desde nivel 15; textos de usuario sin fundador ni tarifa de verificar.
-- [2026-09-30] Textos de acceso a 2 USDT en todos los idiomas; verificacion al pool con candado de selector; donacion voluntaria ya no esconde 0.50.
-- [2026-09-30] Implementado el esquema de puerta 2 USDT a ti + 1 USDT de verificar al pool sin fama, captacion 1 sin fama y fama de red desde gen 2. El 0.50 de caja ya no se paga. Demo live 0xD2d2 sigue viejo hasta redesplegar.
-- [2026-09-30] Racha diaria en FamaCaja. Credit no crecio. Tras pagar, notificarRacha. Ranking de dias. Fama de racha no se pierde.
-- [2026-09-30] Cerrado el paquete de comisiones, L1000 y cuotas: lista por generacion, bono cada 100, mora solo al vencimiento. Tests del modulo 99/99. Snyk Code 0 en components y constants.
-- [2026-09-30] Textos de comisiones vs contrato; QR autenticador oculto tras validar; revalidacion al cambiar seguridad
-- [2026-09-30] Fama UI 100/USDT. Reserva hub sin visible desde ahora. Autenticador genera QR al abrir. USDT/USDC/FDUSD con gobernanza.
-- [2026-09-30] Canje chips hasta 1000. Reserva: extra de comisiones por tramo, min 1 USDT, una posicion 30d. Copy institucional es/en.
-- [2026-09-30] Fail-closed contraseña Real y huella solo Keystore; si falla, PIN o clave.
-- [2026-09-30] Canje alineado a _estaVencido via planPago; Foundry constructor 7 args con FamaCaja. Credit no crece.
-- [2026-09-30] Fail-closed SecureStore en Cuenta Real y sobre AES-GCM v2 con lectura dual v1.
-- [2026-09-30] Cerrado drenaje de fama: donar del fundador bloqueado; canje rechaza mora y prestamo vencido; caja exige balance on-chain.
-- [2026-09-30] App: sala Canje, ABI famaHermano, ProtocolCaps.canCanjearFama, canjearFama en el hermano. Demo legado 0xD2d2 se detecta y avisa.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-03] Cambio: Textos de app alineados al protocolo: alta 4 USDT 1+1+1+1, fama 100 desde el primero, padrino del alta, hitos 400-20000. Limpiados temp y residuos.
+[2026-10-03] Cambio: Textos de Reserva dejan de decir bote o premio. 31 pantallas que seguian en ingles quedaron traducidas en los 15 idiomas.

@@ -43,8 +43,17 @@ describe('wallet link requires a bind signature', function () {
     expect(form).to.include('linkWalletSignNeed');
     expect(form).to.not.match(/saveLinkedExternalWallet\(internalWallet, address\)/);
     expect(card).to.include('proveAndSaveLinkedWallet');
+    expect(card).to.include('sessionLive');
+    expect(card).to.include('linkWalletSessionOff');
     expect(card).to.not.include('saveLinkedExternalWallet(');
     expect(linked).to.include('signBindExternalWallet');
+    expect(linked).to.include('proven:');
+    const transfer = fs.readFileSync(path.join(__dirname, '..', 'components', 'TransferWalletsModal.tsx'), 'utf8');
+    const handlers = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
+    const charge = fs.readFileSync(path.join(__dirname, '..', 'services', 'founderUsdtCharge.ts'), 'utf8');
+    expect(transfer).to.not.include('saveLinkedExternalWallet');
+    expect(handlers).to.not.include('saveLinkedExternalWallet');
+    expect(charge).to.not.include('saveLinkedExternalWallet');
     expect(auth).to.include("BIND_WALLET_PURPOSE = 'vincular-billetera'");
     expect(auth).to.include('signBindExternalWallet');
     expect(auth).to.include('purpose: BIND_WALLET_PURPOSE');

@@ -167,6 +167,8 @@
 - Los prestamos chicos de nivel 1 no deben quedar bloqueados el mismo dia por un prestamo grande; alcance mundial con carril para altas nuevas
 - El pool manda la emision de credito: mas caja mas personas, sello interno de 7 dias en la primera de 1 USDT
 - Sincronizar todos los textos de la app con contratos y codigo para que lo visual coincida con el protocolo real
+- Textos institucionales: Vincular/Vinculado, guia y politicas listas para revision de tienda
+- Servicios visibles al entrar; no se abren hasta pagar el alta y registrarse
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -310,3 +312,5 @@
 - [2026-10-02 09:30] Idea añadida al backlog: "Los prestamos chicos de nivel 1 no deben quedar bloqueados el mismo dia por un p"
 - [2026-10-02 12:24] Idea añadida al backlog: "El pool manda la emision de credito: mas caja mas personas, sello interno de 7 d"
 - [2026-10-03 11:03] Idea añadida al backlog: "Sincronizar todos los textos de la app con contratos y codigo para que lo visual"
+- [2026-10-03 11:18] Idea añadida al backlog: "Textos institucionales: Vincular/Vinculado, guia y politicas listas para revisio"
+- [2026-10-03 12:31] Idea añadida al backlog: "Servicios visibles al entrar; no se abren hasta pagar el alta y registrarse"

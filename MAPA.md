@@ -106,6 +106,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: BRAND_SPLASH_BG, BrandWordmark, BrandSplash
 - `components/CreditAccessBanner.tsx` — módulo JS/TS
   - Funciones/clases: CreditAccessBanner
+- `components/CreditAccessGate.tsx` — módulo JS/TS
+  - Funciones/clases: CreditAccessGate
 - `components/DemoModeBanner.tsx` — módulo JS/TS
 - `components/DonateFounderSection.tsx` — módulo JS/TS
   - Funciones/clases: DonateFounderSection
@@ -537,7 +539,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/moraHistory.ts` — módulo JS/TS
   - Funciones/clases: MORA_GRACE_DAYS, FAMA_PER_MORA_DAY, GEN1_BP, moraDays, moraPenaltyDays, moraFameLost, moraBenefitsBlocked, gen1ShareWei, buildMoraSpells, addPoolToSpells, isTransferMovement, isLoanMovement, isSupportMovement
 - `utils/openWalletConnect.ts` — módulo JS/TS
-  - Funciones/clases: openWalletConnect
+  - Funciones/clases: openWalletConnect, withWalletSignTimeout
 - `utils/passwordPolicy.ts` — módulo JS/TS
   - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, GENERATED_SECRET_CHARS, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, passwordRuleFlags, masterPasswordFromRandomBytes
 - `utils/pendingDeepLink.ts` — módulo JS/TS

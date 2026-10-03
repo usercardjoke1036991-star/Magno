@@ -24,7 +24,7 @@ import { loadVerifiedEmail } from '../services/accountEmail';
 import { isPhoneActive } from '../services/accountPhone';
 import { enviarToken, isPhraseBackedUp, loadAppWallet } from '../services/appWallet';
 import { signedAuthBody } from '../services/walletAuth';
-import { loadRequiredExternalWallet, saveLinkedExternalWallet, hasLinkedExternalWallet } from '../services/linkedWallet';
+import { loadRequiredExternalWallet } from '../services/linkedWallet';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
 import { openWalletConnect } from '../utils/openWalletConnect';
 import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
@@ -277,14 +277,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('connect'), t('appWalletNotReady'));
       return '';
     }
-    let linked = await loadRequiredExternalWallet(walletAddress);
-    if (!linked && adminConnected && hasLinkedExternalWallet(adminAddress || '')) {
-      try {
-        linked = await saveLinkedExternalWallet(walletAddress, adminAddress || '');
-      } catch {
-        linked = '';
-      }
-    }
+    const linked = await loadRequiredExternalWallet(walletAddress);
     if (!linked) {
       askToLinkExternal(t('linkWalletNeedFunds'));
       return '';
@@ -825,6 +818,7 @@ export const useHomeHandlers = ({
           timestamp: Date.now(),
         });
         refetch();
+        Alert.alert(t('creditAccessTitle'), t('creditAccessDone'));
       }
     } catch {
       Alert.alert(t('amount'), t('invalidAmount'));

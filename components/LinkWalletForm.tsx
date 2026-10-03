@@ -6,7 +6,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { formatAddress } from '../utils/formatters';
 import * as linkedWallet from '../services/linkedWallet';
-import { openWalletConnect } from '../utils/openWalletConnect';
+import { openWalletConnect, withWalletSignTimeout } from '../utils/openWalletConnect';
 import { isDemoMode } from '../constants/rpcConfig';
 import { AppText } from './AppText';
 
@@ -34,14 +34,22 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
     setBusy(true);
     setError('');
     try {
-      const saved = await linkedWallet.proveAndSaveLinkedWallet(
-        provider as Eip1193Provider,
-        internalWallet,
-        address
+      const saved = await withWalletSignTimeout(
+        linkedWallet.proveAndSaveLinkedWallet(
+          provider as Eip1193Provider,
+          internalWallet,
+          address
+        ),
+        45000
       );
       await onLinked(saved);
-    } catch {
-      setError(t('linkWalletSignNeed'));
+    } catch (caught) {
+      const message = String((caught as Error)?.message || '');
+      setError(
+        message.includes('wrong-network')
+          ? t(isDemoMode() ? 'linkWalletNetworkDemo' : 'linkWalletNetworkLive')
+          : t('linkWalletSignNeed')
+      );
     } finally {
       setBusy(false);
     }
@@ -77,11 +85,15 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
         <AppText style={[styles.btnText, { color: colors.text }]}>{t('connectWallet')}</AppText>
       </TouchableOpacity>
       {connected && address ? (
-        <AppText style={[styles.meta, { color: colors.text }]}>{formatAddress(address)}</AppText>
+        <>
+          <AppText style={[styles.meta, { color: colors.text }]}>{formatAddress(address)}</AppText>
+          <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('linkWalletSignNeed')}</AppText>
+        </>
       ) : null}
       {error ? <AppText style={[styles.error, { color: colors.danger }]}>{error}</AppText> : null}
+      {connected ? (
       <TouchableOpacity
-        disabled={busy || !connected}
+        disabled={busy}
         onPress={() => void submit()}
         style={[styles.btn, { backgroundColor: connected ? colors.primary : colors.chip, marginTop: 12 }]}
         accessibilityRole="button"
@@ -95,6 +107,7 @@ export const LinkWalletForm: React.FC<LinkWalletFormProps> = ({ internalWallet, 
           </AppText>
         )}
       </TouchableOpacity>
+      ) : null}
       {allowSkip ? (
       <TouchableOpacity
         disabled={busy}

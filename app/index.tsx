@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Linking as RNLinking, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking as RNLinking, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
@@ -27,6 +27,7 @@ import { AccountOnboarding } from '../components/AccountOnboarding';
 import { WalletFailedEscape } from '../components/WalletFailedEscape';
 import { KycAccessBanner } from '../components/KycAccessBanner';
 import { CreditAccessBanner } from '../components/CreditAccessBanner';
+import { CreditAccessGate } from '../components/CreditAccessGate';
 import { BrandLogo } from '../components/BrandLogo';
 import { ReferralSection } from '../components/ReferralSection';
 import { SettingsButton } from '../components/SettingsButton';
@@ -50,6 +51,7 @@ import { GraceMoraClock } from '../components/GraceMoraClock';
 import { APP_DISPLAY_NAME } from '../constants/brand';
 import { RESERVA_MIN_LEVEL } from '../constants/reserva';
 import { getConfigurableStables, getSupportedTokens } from '../constants/tokens';
+import { isAltaConfigured } from '../constants/altaConfig';
 import { isAccessPaymentEnabled, isContractConfigured, isCreditReady, isDemoAccount, isDonationEnabled } from '../constants/rpcConfig';
 import { adminSeatOpen, canPayCreditAccess, creditLineLooksActive, creditNeedsAccess, hasCreditAccess, liveCreditReady, livePhoneStepDone } from '../utils/creditGates';
 import { loadVerifiedEmail } from '../services/accountEmail';
@@ -180,6 +182,13 @@ function HomeScreenWithHooks() {
     userInfo.isRegistered,
     userInfo.hasActiveLoan
   );
+  const altaPaid = hasCreditAccess(userInfo.donatedUsd || 0);
+  const altaVisible = !(mode === 'demo' && !isAltaConfigured()) && !altaPaid;
+  const canPayAlta = canPayCreditAccess({
+    protocolCanDonate: userInfo.canDonate,
+    founderAddress: userInfo.founderAddress,
+    accessEnabled: isAccessPaymentEnabled(),
+  });
   const creditPaused = userInfo.paused;
   const activeLoan = userInfo.activeLoan;
   const unlockedTiers = loanTiers.filter((tier) => tier.id <= userInfo.userProgress.nivelActual);
@@ -275,6 +284,24 @@ function HomeScreenWithHooks() {
     }
   }, [room, mode]);
 
+  const needPay = altaVisible;
+  const needRegister = !userInfo.isRegistered;
+  const servicesOpen = !needPay && !needRegister;
+
+  const roomLocked = (id: HomeRoom) =>
+    id !== 'wallet' && id !== 'alta' && id !== 'admin' && !servicesOpen;
+
+  const denyUse = () => {
+    Alert.alert(
+      needPay ? t('creditAccessTitle') : t('register'),
+      needPay ? t('creditAccessLook') : t('creditAccessRegisterNeed'),
+    );
+  };
+
+  const openRoom = (id: HomeRoom) => {
+    setRoom(id);
+  };
+
   return (
     <AccountOnboarding
       walletAddress={walletAddress}
@@ -334,24 +361,24 @@ function HomeScreenWithHooks() {
           />
         </View>
 
+        {needPay || needRegister ? (
+          <CreditAccessBanner
+            paidUsd={userInfo.donatedUsd || 0}
+            canPay={canPayAlta}
+            isLoading={txLoading}
+            needRegister={needRegister}
+            canRegister={Boolean(creditReady && !userInfo.paused)}
+            onPay={() => void handlePagarAcceso()}
+            onRegister={() => void handleRegistrarHumano()}
+          />
+        ) : null}
+
         {walletReady && (walletFailed || !walletAddress) ? (
           <View style={[styles.configWarn, { backgroundColor: colors.warnBg }]}>
             <AppText style={{ color: colors.warnText }}>{t('appWalletFailed')}</AppText>
             <WalletFailedEscape onRetry={retryWallet} />
           </View>
         ) : null}
-
-        <CreditAccessBanner
-          paidUsd={userInfo.donatedUsd || 0}
-          canPay={canPayCreditAccess({
-            protocolCanDonate: userInfo.canDonate,
-            founderAddress: userInfo.founderAddress,
-            accessEnabled: isAccessPaymentEnabled(),
-          })}
-          isLoading={txLoading}
-          tokenSymbol={selectedToken.symbol}
-          onPay={() => void handlePagarAcceso()}
-        />
 
         <KycAccessBanner
           kycDone={userInfo.kycDeclarado}
@@ -393,39 +420,57 @@ function HomeScreenWithHooks() {
         )}
 
         <AppText style={[styles.hubTitle, { color: colors.text }]}>{t('hubChoose')}</AppText>
+        {!servicesOpen ? (
+          <AppText style={[styles.lockedHint, rtl && styles.rtlText, { color: colors.warnText }]}>
+            {needPay ? t('creditAccessLook') : t('creditAccessRegisterNeed')}
+          </AppText>
+        ) : null}
         {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
         <HomeHub
-          onOpen={setRoom}
+          onOpen={openRoom}
           tiles={[
+            ...(needPay
+              ? [
+                  {
+                    id: 'alta' as const,
+                    title: t('creditAccessTitle'),
+                    lead: t('creditAccessPay'),
+                    icon: 'pay' as const,
+                    locked: false,
+                  },
+                ]
+              : []),
             {
               id: 'wallet',
               title: t('sectionAccount'),
               lead: mode === 'demo' ? t('hubWalletLeadDemo') : t('hubWalletLead'),
               icon: 'wallet',
+              locked: false,
             },
             {
               id: 'credit',
               title: t('sectionCreditLine'),
               lead: creditOnChain ? t('hubCreditLeadActive') : t('hubCreditLead'),
               icon: 'id',
+              locked: roomLocked('credit'),
             },
-            { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank' },
-            { id: 'ranks', title: t('rankGalleryTitle'), lead: t('hubRanksLead'), icon: 'star' },
-            { id: 'fame', title: t('fameBoardTitle'), lead: rankingVisible(userInfo.userProgress.nivelActual) ? t('hubFameLead') : t('hubFameLeadLocked'), icon: 'chart' },
-            { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star' },
-            { id: 'canje', title: t('hubCanje'), lead: t('hubCanjeLead'), icon: 'pay' },
-            { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people' },
-            { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history' },
-            { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool' },
-            { id: 'reserva', title: t('reservaTitle'), lead: userInfo.userProgress.nivelActual >= RESERVA_MIN_LEVEL ? t('hubReservaLead') : t('hubReservaLeadLocked'), icon: 'lock' },
+            { id: 'loans', title: t('loanLevels'), lead: t('hubLoansLead'), icon: 'bank', locked: roomLocked('loans') },
+            { id: 'ranks', title: t('rankGalleryTitle'), lead: t('hubRanksLead'), icon: 'star', locked: roomLocked('ranks') },
+            { id: 'fame', title: t('fameBoardTitle'), lead: rankingVisible(userInfo.userProgress.nivelActual) ? t('hubFameLead') : t('hubFameLeadLocked'), icon: 'chart', locked: roomLocked('fame') },
+            { id: 'bonuses', title: t('sectionBonuses'), lead: t('hubBonusesLead'), icon: 'star', locked: roomLocked('bonuses') },
+            { id: 'canje', title: t('hubCanje'), lead: t('hubCanjeLead'), icon: 'pay', locked: roomLocked('canje') },
+            { id: 'network', title: t('referralNetwork'), lead: t('hubNetworkLead'), icon: 'people', locked: roomLocked('network') },
+            { id: 'history', title: t('historyTitle'), lead: t('hubHistoryLead'), icon: 'history', locked: roomLocked('history') },
+            { id: 'pool', title: t('sectionPool'), lead: t('hubPoolLead'), icon: 'pool', locked: roomLocked('pool') },
+            { id: 'reserva', title: t('reservaTitle'), lead: userInfo.userProgress.nivelActual >= RESERVA_MIN_LEVEL ? t('hubReservaLead') : t('hubReservaLeadLocked'), icon: 'lock', locked: roomLocked('reserva') },
             ...(mode === 'demo'
               ? []
               : [
-                  { id: 'donate' as const, title: t('donateTitle'), lead: t('hubDonateLead'), icon: 'deposit' as const },
+                  { id: 'donate' as const, title: t('donateTitle'), lead: t('hubDonateLead'), icon: 'deposit' as const, locked: roomLocked('donate') },
                 ]),
-            { id: 'racha', title: t('rachaTitle'), lead: t('hubRachaLead'), icon: 'star' },
+            { id: 'racha', title: t('rachaTitle'), lead: t('hubRachaLead'), icon: 'star', locked: roomLocked('racha') },
             ...(adminSeat
-              ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const }]
+              ? [{ id: 'admin' as const, title: t('admin'), lead: t('hubAdminLead'), icon: 'shield' as const, locked: roomLocked('admin') }]
               : []),
           ]}
         />
@@ -470,6 +515,20 @@ function HomeScreenWithHooks() {
       </AppWindow>
 
       <AppWindow
+        visible={room === 'alta'}
+        title={t('creditAccessTitle')}
+        lead={t('creditAccessLead')}
+        onClose={() => setRoom(null)}
+      >
+        <CreditAccessGate
+          canPay={canPayAlta}
+          isLoading={txLoading}
+          walletAddress={walletAddress || ''}
+          onPay={() => void handlePagarAcceso()}
+        />
+      </AppWindow>
+
+      <AppWindow
         visible={room === 'credit'}
         title={t('sectionCreditLine')}
         lead={t('sectionCreditLineLead')}
@@ -479,11 +538,7 @@ function HomeScreenWithHooks() {
           <>
             <CreditAccessBanner
               paidUsd={userInfo.donatedUsd || 0}
-              canPay={canPayCreditAccess({
-                protocolCanDonate: userInfo.canDonate,
-                founderAddress: userInfo.founderAddress,
-                accessEnabled: isAccessPaymentEnabled(),
-              })}
+              canPay={canPayAlta}
               isLoading={txLoading}
               tokenSymbol={selectedToken.symbol}
               onPay={() => void handlePagarAcceso()}
@@ -503,11 +558,7 @@ function HomeScreenWithHooks() {
           <AppSubsection title={t('subsectionActivate')} icon="id">
             <CreditAccessBanner
               paidUsd={userInfo.donatedUsd || 0}
-              canPay={canPayCreditAccess({
-                protocolCanDonate: userInfo.canDonate,
-                founderAddress: userInfo.founderAddress,
-                accessEnabled: isAccessPaymentEnabled(),
-              })}
+              canPay={canPayAlta}
               isLoading={txLoading}
               tokenSymbol={selectedToken.symbol}
               onPay={() => void handlePagarAcceso()}
@@ -545,9 +596,9 @@ function HomeScreenWithHooks() {
               reminder={debtReminder}
               showRank={false}
               showDebt
-              onPayLoan={() => handlePagar('installment')}
-              onPayAll={() => handlePagar('all')}
-              onPayCount={(count) => handlePagar(count)}
+              onPayLoan={() => (servicesOpen ? handlePagar('installment') : denyUse())}
+              onPayAll={() => (servicesOpen ? handlePagar('all') : denyUse())}
+              onPayCount={(count) => (servicesOpen ? handlePagar(count) : denyUse())}
               isPaying={txLoading}
             />
           </AppSubsection>
@@ -562,11 +613,7 @@ function HomeScreenWithHooks() {
       >
         <CreditAccessBanner
           paidUsd={userInfo.donatedUsd || 0}
-          canPay={canPayCreditAccess({
-            protocolCanDonate: userInfo.canDonate,
-            founderAddress: userInfo.founderAddress,
-            accessEnabled: isAccessPaymentEnabled(),
-          })}
+          canPay={canPayAlta}
           isLoading={txLoading}
           tokenSymbol={selectedToken.symbol}
           onPay={() => void handlePagarAcceso()}
@@ -621,13 +668,13 @@ function HomeScreenWithHooks() {
               cooldownRestante={userInfo.userProgress.cooldownRestante}
               isRegistered={creditOnChain}
               identityBlocked={identityBlocked}
-              accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
+              accessBlocked={!servicesOpen || creditNeedsAccess(userInfo.donatedUsd || 0)}
               contractReady={creditReady}
               onActivateCredit={() => setRoom('credit')}
-              onRequestLoan={handleSolicitarCredito}
-              onPayLoan={() => handlePagar('installment')}
-              onPayAll={() => handlePagar('all')}
-              onPayCount={(count) => handlePagar(count)}
+              onRequestLoan={servicesOpen ? handleSolicitarCredito : () => denyUse()}
+              onPayLoan={() => (servicesOpen ? handlePagar('installment') : denyUse())}
+              onPayAll={() => (servicesOpen ? handlePagar('all') : denyUse())}
+              onPayCount={(count) => (servicesOpen ? handlePagar(count) : denyUse())}
               showMilestoneBonus
             />
           ))}
@@ -649,13 +696,13 @@ function HomeScreenWithHooks() {
               ultimoPrestamoTimestamp={0}
               isRegistered={creditOnChain}
               identityBlocked={identityBlocked}
-              accessBlocked={creditNeedsAccess(userInfo.donatedUsd || 0)}
+              accessBlocked={!servicesOpen || creditNeedsAccess(userInfo.donatedUsd || 0)}
               contractReady={creditReady}
               onActivateCredit={() => setRoom('credit')}
-              onRequestLoan={handleSolicitarCredito}
-              onPayLoan={() => handlePagar('installment')}
-              onPayAll={() => handlePagar('all')}
-              onPayCount={(count) => handlePagar(count)}
+              onRequestLoan={servicesOpen ? handleSolicitarCredito : () => denyUse()}
+              onPayLoan={() => (servicesOpen ? handlePagar('installment') : denyUse())}
+              onPayAll={() => (servicesOpen ? handlePagar('all') : denyUse())}
+              onPayCount={(count) => (servicesOpen ? handlePagar(count) : denyUse())}
               showMilestoneBonus
             />
           </AppSubsection>
@@ -704,10 +751,10 @@ function HomeScreenWithHooks() {
             userLevel={userInfo.userProgress.nivelActual}
             lastHito={userInfo.userProgress.lastHito}
             claimable={userInfo.userProgress.bonusPending}
-            canClaim={Boolean(creditReady && userInfo.canClaimHitos)}
+            canClaim={Boolean(servicesOpen && creditReady && userInfo.canClaimHitos)}
             maxLevel={userInfo.maxLoanLevel}
             isPaying={txLoading}
-            onClaim={handleCobrarBonoHito}
+            onClaim={servicesOpen ? handleCobrarBonoHito : () => denyUse()}
           />
         </AppSubsection>
       </AppWindow>
@@ -728,7 +775,8 @@ function HomeScreenWithHooks() {
           famaDisponible={userInfo.famaDisponible || 0}
           famaRedDisponible={userInfo.famaRedDisponible || 0}
           canRedeem={Boolean(
-            creditReady &&
+            servicesOpen &&
+              creditReady &&
               userInfo.canCanjearFama &&
               userInfo.isRegistered &&
               !creditPaused &&
@@ -756,8 +804,8 @@ function HomeScreenWithHooks() {
           founderAddress={userInfo.founderAddress}
           donatedUsd={userInfo.donatedUsd || 0}
           lpUsd={Number.parseFloat(balances.lpBalance) || 0}
-          canSend={isDonationEnabled()}
-          onDonate={handleDonar}
+          canSend={servicesOpen && isDonationEnabled()}
+          onDonate={servicesOpen ? handleDonar : () => denyUse()}
         />
       </AppWindow>
 
@@ -836,7 +884,7 @@ function HomeScreenWithHooks() {
           tokenBalance={balances.tokenBalance}
           identityBlocked={mode !== 'demo' && identityBlocked}
           delinquent={userInfo.isDelinquent}
-          paused={creditPaused}
+          paused={creditPaused || !servicesOpen}
           hasPadre={Boolean(userInfo.referral?.padre && !/^0x0+$/i.test(userInfo.referral.padre))}
           userLevel={userInfo.userProgress.nivelActual}
           isLoading={txLoading}
@@ -869,7 +917,7 @@ function HomeScreenWithHooks() {
           lpBalance={balances.lpBalance}
           walletConnected={Boolean(walletAddress)}
           paused={creditPaused}
-          onDepositPool={handleDepositarPool}
+          onDepositPool={servicesOpen ? handleDepositarPool : () => denyUse()}
         />
       </AppWindow>
 
@@ -882,9 +930,9 @@ function HomeScreenWithHooks() {
         {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
         <RachaSection
           racha={userInfo.racha || { dias: 0, diasMax: 0, famaDias: 0, hitoCobrado: 0, siguienteHito: 0, bonoPendienteUsd: 0, graciaVigente: false }}
-          canUse={Boolean(creditReady && userInfo.canRacha && userInfo.isRegistered && !creditPaused && !userInfo.isDelinquent)}
+          canUse={Boolean(servicesOpen && creditReady && userInfo.canRacha && userInfo.isRegistered && !creditPaused && !userInfo.isDelinquent)}
           isPaying={txLoading}
-          onClaim={() => void handleCobrarBonoRacha()}
+          onClaim={() => (servicesOpen ? void handleCobrarBonoRacha() : denyUse())}
         />
       </AppWindow>
 
