@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { deployProtocol, seedPool, registerAndFund } = require('./helpers.cjs');
+const { deployProtocol, seedPool, registerAndFund, expectAmt } = require('./helpers.cjs');
 
 async function deployAltaStack() {
   const { token, contract, fama, owner, user, extra, tokenAddr, contractAddr } = await deployProtocol();
@@ -25,10 +25,10 @@ describe('Alta 4 USDT', function () {
     const founderBefore = await token.balanceOf(owner.address);
     const boteBefore = await reserva.bote();
     await alta.connect(user).pagarRegistro();
-    expect((await token.balanceOf(owner.address)) - founderBefore).to.equal(ethers.parseUnits('1', 18));
-    expect((await reserva.bote()) - boteBefore).to.equal(ethers.parseUnits('1', 18));
-    expect(await alta.padrinoApartado(user.address)).to.equal(ethers.parseUnits('1', 18));
-    expect(await contract.reservaPrimera(user.address)).to.equal(ethers.parseUnits('1', 18));
+    expectAmt((await token.balanceOf(owner.address)) - founderBefore, ethers.parseUnits('1', 18));
+    expectAmt((await reserva.bote()) - boteBefore, ethers.parseUnits('1', 18));
+    expectAmt(await alta.padrinoApartado(user.address), ethers.parseUnits('1', 18));
+    expectAmt(await contract.reservaPrimera(user.address), ethers.parseUnits('1', 18));
   });
 
   it('al pagar el primer L1 suelta el 1 del padrino y no saca otro de la caja', async () => {
@@ -42,9 +42,9 @@ describe('Alta 4 USDT', function () {
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
     const deuda = await contract.obtenerDeuda(user.address);
     await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
-    expect(await alta.padrinoApartado(user.address)).to.equal(0n);
-    expect((await token.balanceOf(extra.address)) - padreBefore).to.equal(ethers.parseUnits('1', 18));
-    expect(await contract.totalLiquidity(tokenAddr)).to.be.gte(liqBefore - ethers.parseUnits('1', 18));
+    expectAmt(await alta.padrinoApartado(user.address), 0n);
+    expectAmt((await token.balanceOf(extra.address)) - padreBefore, ethers.parseUnits('1', 18));
+    expect(BigInt(await contract.totalLiquidity(tokenAddr)) >= BigInt(liqBefore) - ethers.parseUnits('1', 18)).to.equal(true);
   });
 
   it('con Alta el sello no entra por pagarVerificacion directo', async () => {
@@ -68,8 +68,8 @@ describe('Alta 4 USDT', function () {
     const deuda = await contract.obtenerDeuda(user.address);
     await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
     const padreGain = (await token.balanceOf(extra.address)) - padreBefore;
-    expect(padreGain).to.be.lt(ethers.parseUnits('1', 18));
-    expect(await contract.totalLiquidity(tokenAddr)).to.be.gte(liqBefore - ethers.parseUnits('1', 18));
+    expect(BigInt(padreGain) < ethers.parseUnits('1', 18)).to.equal(true);
+    expect(BigInt(await contract.totalLiquidity(tokenAddr)) >= BigInt(liqBefore) - ethers.parseUnits('1', 18)).to.equal(true);
   });
 
   it('si no paga el L1 en 7 días el 1 del padrino va al pool', async () => {
@@ -84,14 +84,14 @@ describe('Alta 4 USDT', function () {
     await ethers.provider.send('evm_increaseTime', [7 * 24 * 60 * 60 + 1]);
     await ethers.provider.send('evm_mine', []);
     await alta.connect(user).vencerPadrinoAlPool(user.address);
-    expect(await alta.padrinoApartado(user.address)).to.equal(0n);
-    expect((await token.balanceOf(extra.address)) - padreBefore).to.equal(0n);
-    expect(await contract.totalLiquidity(tokenAddr)).to.equal(liqBefore + ethers.parseUnits('1', 18));
+    expectAmt(await alta.padrinoApartado(user.address), 0n);
+    expectAmt((await token.balanceOf(extra.address)) - padreBefore, 0n);
+    expectAmt(await contract.totalLiquidity(tokenAddr), liqBefore + ethers.parseUnits('1', 18));
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
     const deuda = await contract.obtenerDeuda(user.address);
     await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
     const padreTrasPago = (await token.balanceOf(extra.address)) - padreBefore;
-    expect(padreTrasPago).to.be.lt(ethers.parseUnits('1', 18));
+    expect(BigInt(padreTrasPago) < ethers.parseUnits('1', 18)).to.equal(true);
   });
 
   it('tras el primer L1 no se puede pagar el alta otra vez', async () => {
@@ -103,7 +103,7 @@ describe('Alta 4 USDT', function () {
     await contract.connect(user).solicitarPrestamo(tokenAddr, 0);
     const deuda = await contract.obtenerDeuda(user.address);
     await contract.connect(user).pagarPrestamo(tokenAddr, deuda[2]);
-    expect(await alta.padrinoApartado(user.address)).to.equal(0n);
+    expectAmt(await alta.padrinoApartado(user.address), 0n);
     expect(await alta.registroHecho(user.address)).to.equal(true);
     await expect(alta.connect(user).pagarRegistro()).to.be.reverted;
   });
