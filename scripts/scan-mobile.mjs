@@ -9,7 +9,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, resolve } from 'node:path';
+import { basename, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnEnv, binDocker, stripTrailSlash } from './spawnEnv.mjs';
 
@@ -90,6 +90,8 @@ function underProject(candidate) {
   const raw = String(candidate || '').trim();
   if (!raw || raw.includes('\0')) return '';
   const full = resolve(root, raw);
+  const rel = relative(root, full);
+  if (!rel || rel.startsWith('..') || isAbsolute(rel)) return '';
   if (!isMobilePackage(full)) return '';
   return full;
 }

@@ -42,7 +42,11 @@ ignore:
   javascript/HttpToHttps:
     - 'scripts/notify-worker.mjs':
         reason: HTTP solo en el puerto privado; TLS lo termina Render/Caddy
-        expires: 2027-10-01T00:00:00.000Z
+        expires: 2027-10-02T00:00:00.000Z
+  javascript/PT:
+    - 'scripts/scan-mobile.mjs':
+        reason: CLI local de MobSF; solo lee .apk/.aab/.ipa dentro del repo
+        expires: 2027-10-02T00:00:00.000Z
   javascript/UseOfHardcodedPassword:
     - 'scripts/patch-i18n-leftovers*.mjs':
         reason: claves i18n de UI, no credenciales

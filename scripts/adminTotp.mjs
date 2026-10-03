@@ -23,8 +23,20 @@ export function generateAdminTotpSecret() {
   return bytesToBase32(randomBytes(20));
 }
 
+function sanitizeBase32(secret) {
+  const raw = String(secret || '').toUpperCase();
+  let end = raw.length;
+  while (end > 0 && raw.charCodeAt(end - 1) === 61) end -= 1;
+  let clean = '';
+  for (let i = 0; i < end; i += 1) {
+    const char = raw[i];
+    if ((char >= 'A' && char <= 'Z') || (char >= '2' && char <= '7')) clean += char;
+  }
+  return clean;
+}
+
 function base32ToBytes(secret) {
-  let clean = String(secret || '').toUpperCase().replace(/=+$/g, '').replace(/[^A-Z2-7]/g, '');
+  const clean = sanitizeBase32(secret);
   let bits = 0;
   let value = 0;
   const out = [];

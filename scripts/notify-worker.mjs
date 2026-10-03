@@ -1509,7 +1509,9 @@ const bodyError = (res, error) => {
   else json(res, 413, { error: 'payload' });
 };
 
-const server = createServer(async (req, res) => { // NOSONAR javascript:S5332 â€” TLS en el edge (Render/Caddy) // deepcode ignore HttpToHttps: TLS at Render/Caddy private port
+// TLS lo termina Render/Caddy. Este proceso solo escucha HTTP en el puerto privado.
+// deepcode ignore HttpToHttps: private bind; TLS at Render/Caddy
+const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
   try {
   requestOrigin = String(req.headers.origin || '');
   const path = requestPath(req);
@@ -2493,7 +2495,7 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332 â€
       }
       const secret = generateAdminTotpSecret();
       store.adminTotp[key] = { secret, confirmed: false, at: Date.now() };
-      persist();
+      await persist();
       json(res, 200, { secret, uri: adminTotpUrl(secret, wallet), enrolled: false });
       return;
     }
@@ -2512,7 +2514,7 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332 â€
         return;
       }
       store.adminTotp[key] = { secret: row.secret, confirmed: true, at: Date.now() };
-      persist();
+      await persist();
       json(res, 200, { ok: true });
       return;
     }

@@ -8,6 +8,7 @@ describe('admin TOTP', function () {
     const code = totpAt(secret, now);
     expect(code).to.match(/^\d{6}$/);
     expect(verifyAdminTotp(secret, code, now)).to.equal(true);
+    expect(verifyAdminTotp(`${secret}====`, code, now)).to.equal(true);
     expect(verifyAdminTotp(secret, '000000', now)).to.equal(false);
     expect(adminTotpUrl(secret, '0xabc')).to.include('otpauth://totp/');
   });
