@@ -97,9 +97,9 @@ async function main() {
   const isMainnet = chainId === BSC_MAINNET.chainId;
   const isTestnet = chainId === BSC_TESTNET.chainId;
 
-  if (isMainnet && process.env.CONFIRM_MAINNET !== 'yes') {
+  if (isMainnet) {
     throw new Error(
-      'Despliegue a BSC Mainnet bloqueado. Revise admins, oráculos y fee collector, luego ejecute con CONFIRM_MAINNET=yes'
+      'Mainnet usa scripts/deploy-mainnet-nuevo.cjs: crédito, fama, reserva y alta. No este script.'
     );
   }
 

@@ -42,7 +42,7 @@ async function main() {
   const local = loadEnv(path.join(root, '.env'));
   const worker = loadEnv(path.join(root, '.env.worker'));
   const founderWanted = '0x5023bf46dB7458B9bb9152a7ffE64f195CD1a047';
-  const attesterWanted = '0x55D3fA9F946d251423293c455Ec82a7D129d387E';
+  const attesterWanted = '0x140Fb8bD6611aC0c64cF254Dea1Ef4Caf15A821E';
   const staleMainnet = '0xa6aac9ce4923789a4095fbc0504db9a697f8a46d';
 
   const deployer = addrFromKey(local.PRIVATE_KEY);

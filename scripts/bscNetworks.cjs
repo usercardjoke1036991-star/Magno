@@ -3,7 +3,7 @@ const BSC_MAINNET = {
   chainId: 56,
   chainName: 'bsc',
   usdt: '0x55d398326f99059ff775485246999027b3197955',
-  usdtUsdFeed: '0xb97ad0e75fa537bf4d14e83bc6b2faab978903a6',
+  usdtUsdFeed: '0xB97Ad0E74fa7d920791E90258A6E2085088b4320',
   usdc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
   usdcUsdFeed: '0x51597f405303c4377e36123cbc172b13269ea163',
   fdusd: '0xc5f0f7b66764f6ec8c8dff7ba683102295e16409',

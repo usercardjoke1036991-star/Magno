@@ -230,14 +230,30 @@ describe('cyber hardening — PIN and secret box', function () {
     const fs = require('fs');
     const path = require('path');
     const prepare = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'prepare-production-local.mjs'), 'utf8');
-    expect(prepare).to.include("TESTNET_CONTRACT = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f'");
+    expect(prepare).to.include("TESTNET_CONTRACT = '0xD318f39834A5e798a11D2535c6c9D1E1270e6778'");
     expect(prepare).to.include("STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3'");
     expect(prepare).to.not.match(/TESTNET_CONTRACT = '0x1E5118/);
     expect(prepare).to.include('addressFromPrivateKey');
     expect(prepare).to.not.include("DEPLOYER = '0xdb135e9cd9be9bE262b3222eaD737c84d72Ef870'");
     const check = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'check-production.mjs'), 'utf8');
-    expect(check).to.include("LIVE_TESTNET = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f'");
+    expect(check).to.include("LIVE_TESTNET = '0xD318f39834A5e798a11D2535c6c9D1E1270e6778'");
     expect(check).to.include('demo-contract');
+  });
+
+  it('keeps the mainnet deploy on the full protocol and refuses to run without confirmation', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const script = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'deploy-mainnet-nuevo.cjs'), 'utf8');
+    const nets = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'bscNetworks.cjs'), 'utf8');
+    expect(script).to.include("process.env.CONFIRM_MAINNET !== 'yes'");
+    expect(script).to.include('chainId !== 56');
+    expect(script).to.include('QuatriviumReserva');
+    expect(script).to.include('QuatriviumAlta');
+    expect(script).to.include('setAltaFuente');
+    expect(script).to.not.include('mint(');
+    expect(script).to.not.include('EXPO_PUBLIC_CHAIN_ID');
+    expect(nets).to.include('0xB97Ad0E74fa7d920791E90258A6E2085088b4320');
+    expect(nets).to.not.include('0xb97ad0e75fa537bf4d14e83bc6b2faab978903a6');
   });
 
   it('keeps Slither money math multiply-first and treats timestamps as accepted lending windows', function () {

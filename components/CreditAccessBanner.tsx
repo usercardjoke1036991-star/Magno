@@ -45,9 +45,11 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
       </AppText>
       <AppText style={[styles.lead, { color: colors.text }]}>
         {showPay
-          ? canPay
+          ? isAltaConfigured()
             ? t('creditAccessGateLead')
-            : t('creditAccessPending')
+            : mode === 'live'
+              ? t('liveCreditNotReady')
+              : t('creditAccessPending')
           : t('creditAccessRegisterNeed')}
       </AppText>
       {showPay && canPay ? (

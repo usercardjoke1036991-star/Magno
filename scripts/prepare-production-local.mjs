@@ -13,7 +13,7 @@ const workerPath = resolve(root, '.env.worker');
 const STALE_MAINNET = '0xa6aac9ce4923789a4095fbc0504db9a697f8a46d';
 const STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3';
 const ZERO = '0x0000000000000000000000000000000000000000';
-const TESTNET_CONTRACT = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f';
+const TESTNET_CONTRACT = '0xD318f39834A5e798a11D2535c6c9D1E1270e6778';
 const INVITE = 'https://quatriviumcredit.app';
 const PLAY = 'https://play.google.com/store/apps/details?id=com.quatrivium.credit';
 
@@ -92,7 +92,7 @@ if (testnetNow === STALE_TESTNET.toLowerCase() || testnetNow !== TESTNET_CONTRAC
   upsert(envPath, 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET', TESTNET_CONTRACT);
   done.push(
     testnetNow === STALE_TESTNET.toLowerCase()
-      ? 'Contrato testnet retirado 0x1E5118 sustituido por Demo live 0xD2d2'
+      ? 'Contrato testnet retirado 0x1E5118 sustituido por el protocolo vivo 0xD318'
       : 'Contrato testnet actual escrito en .env'
   );
 }

@@ -14,6 +14,7 @@ import { useUserProfile } from '../profile/ProfileContext';
 import { labelForProfile } from '../services/userProfile';
 import { formatRankLabel, getRankForLevel } from '../constants/ranks';
 import { AppText, AppTextInput } from './AppText';
+import { SponsorPoolButton } from './SponsorPoolButton';
 
 interface ReferralHistoryProps {
   walletAddress: string;
@@ -179,6 +180,7 @@ export const ReferralHistory: React.FC<ReferralHistoryProps> = ({
         <AppText style={[styles.warn, { color: colors.warnText }]}>{t('referralHistoryPartial')}</AppText>
       ) : null}
       {board}
+      <SponsorPoolButton debtors={data.directs.map((node) => node.address)} />
       {!error && (
         <>
           <View style={[styles.search, { borderColor: colors.border, backgroundColor: colors.surface }]}>

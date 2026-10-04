@@ -4,13 +4,14 @@ import { storeSlot } from '../utils/storeSlot';
 import { signBindExternalWallet } from './walletAuth';
 import { getEthersSignerFromProvider } from '../web3Config';
 import { ensureExternalWalletOnAppChain } from '../utils/walletChain';
+import { NETWORK_CONFIG } from '../constants/rpcConfig';
 
 const PREFIX = `${storeSlot(['quatrivium', 'linkedExternal', 'v1'])}:`;
 export const WALLET_LINK_SKIPPED = 'skipped';
 const PROVEN_PREFIX = 'proven:';
 
-export function linkedWalletStorageKey(internalWallet: string): string {
-  return `${PREFIX}${String(internalWallet || '').trim().toLowerCase()}`;
+export function linkedWalletStorageKey(internalWallet: string, chainId = NETWORK_CONFIG.chainId): string {
+  return `${PREFIX}${chainId}:${String(internalWallet || '').trim().toLowerCase()}`;
 }
 
 export function hasLinkedExternalWallet(value: string): boolean {

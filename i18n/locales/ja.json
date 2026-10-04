@@ -574,7 +574,7 @@
   "adminRoster": "創業者 {count} 人 · 必要な署名 {confirms} · 提案 #{proposal}",
   "adminRoleFounder": "15% を受け取る",
   "adminRoleCofounder": "創業者",
-  "adminAddFoundersLead": "変更を提案するには 0x アドレスを貼り付けてください。創業者3人では署名2つが必要です。1つを失うか侵害されたら、残る2つが外します。",
+  "adminAddFoundersLead": "0x アドレスを貼り付けてください。定足数は署名2つです。",
   "adminCofounderLead": "追加、削除、15% の受取人を提案できます。タイムロック後に現行の提案を確認または実行してください。",
   "adminSetFundador": "15% の受取人を提案",
   "adminSetOwner": "オーナーを提案（出金）",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "現在の印: {address}",
   "adminAttesterNotOwner": "印は owner や創業者にはできません。",
   "adminAttesterNoKey": "秘密鍵のようです。ここには 0x アドレスだけ。",
-  "adminTwoOfThree": "創業者は3人。変更ごとに署名2つ。失うか侵害されたら、残る2つが外します。",
+  "adminTwoOfThree": "創業者は2人。変更ごとに署名2つ。失うか侵害されても、外す第三の鍵はありません。",
   "adminEnableToken": "{symbol} の有効化を提案",
   "adminEnableTokenLead": "USDT はコンストラクタですでに設定済みです。ここで USDC と FDUSD を有効化します。72時間の遅延、Chainlink オラクル、それぞれ別のプール。ローンは一度に1件、単一トークンです。",
   "settingsAdminTitle": "創業者",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "デモでは試験ネットワークを使用し、本ネットワークは選ばないでください。",
   "linkWalletNetworkLive": "本番口座では BNB Smart Chain を使用します。",
   "errNeedGasAdmin": "この管理口座には手数料用のネットワーク残高がありません。試験用 BNB を入手して再試行してください。",
-  "linkWalletBound": "連携済み"
+  "linkWalletBound": "連携済み",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

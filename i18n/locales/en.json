@@ -574,7 +574,7 @@
   "adminRoster": "{count} founders · {confirms} signature(s) required · proposal #{proposal}",
   "adminRoleFounder": "Receives the 15%",
   "adminRoleCofounder": "Founder",
-  "adminAddFoundersLead": "Paste a 0x address. With 3 founders, 2 signatures are required.",
+  "adminAddFoundersLead": "Paste a 0x address. The quorum is 2 signatures.",
   "adminCofounderLead": "Propose adds, removals and treasury. Confirm or execute after 72 h.",
   "adminSetFundador": "Propose who receives the 15%",
   "adminSetOwner": "Propose owner (withdrawals)",
@@ -584,7 +584,7 @@
   "adminAttesterCurrent": "Stamp now: {address}",
   "adminAttesterNotOwner": "The stamp cannot be the owner or a founder.",
   "adminAttesterNoKey": "That looks like a private key. Paste the 0x address only.",
-  "adminTwoOfThree": "3 founders. 2 signatures per change. If one is lost or hacked, the other 2 remove it.",
+  "adminTwoOfThree": "2 founders. 2 signatures per change. If one is lost or hacked, there is no third key to remove it.",
   "adminEnableToken": "Propose enabling {symbol}",
   "adminEnableTokenLead": "USDT is active. USDC and FDUSD are enabled here with a 72h wait.",
   "settingsAdminTitle": "Founders",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "In Demo use the test network. Do not select the main network.",
   "linkWalletNetworkLive": "On a Real account use BNB Smart Chain.",
   "errNeedGasAdmin": "This administrator account has no network balance for fees. Request test BNB and try again.",
-  "linkWalletBound": "Linked"
+  "linkWalletBound": "Linked",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

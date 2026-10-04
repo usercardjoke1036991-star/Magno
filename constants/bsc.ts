@@ -7,7 +7,8 @@ export const BSC_MAINNET = {
   chainName: 'bsc',
   /** Binance-Peg USDT (18 decimales). */
   usdt: '0x55d398326f99059ff775485246999027b3197955',
-  usdtUsdFeed: '0xb97ad0e75fa537bf4d14e83bc6b2faab978903a6',
+  /** Chainlink USDT/USD en BSC, 8 decimales. El proxy vivo; la dirección vieja 0xb97ad0e7…03a6 no tiene código. */
+  usdtUsdFeed: '0xB97Ad0E74fa7d920791E90258A6E2085088b4320',
   /** Binance-Peg USDC (18 decimales). No usar el USDC de Ethereum (6 decimales). */
   usdc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
   /** Chainlink USDC/USD en BSC (BscScan: Chainlink: USDC/USD Price Feed). */

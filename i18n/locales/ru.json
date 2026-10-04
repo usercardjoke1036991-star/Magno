@@ -574,7 +574,7 @@
   "adminRoster": "{count} основателей · требуется подписей: {confirms} · предложение #{proposal}",
   "adminRoleFounder": "Получает 15%",
   "adminRoleCofounder": "Основатель",
-  "adminAddFoundersLead": "Вставьте 0x-адрес, чтобы предложить изменения. При 3 основательницах нужны 2 подписи. Если ключ потерян или взломан, двое других его удаляют.",
+  "adminAddFoundersLead": "Вставьте 0x-адрес. Кворум — 2 подписи.",
   "adminCofounderLead": "Можно предлагать добавления, удаления и того, кто получает 15%. Подтвердите или исполните текущее предложение после таймлока.",
   "adminSetFundador": "Предложить, кто получает 15%",
   "adminSetOwner": "Предложить владельца (выводы)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Печать сейчас: {address}",
   "adminAttesterNotOwner": "Печать не может быть owner или основателем.",
   "adminAttesterNoKey": "Похоже на ключ. Здесь только адрес 0x.",
-  "adminTwoOfThree": "3 основательницы. 2 подписи на изменение. Если ключ потерян или взломан, двое других его удаляют.",
+  "adminTwoOfThree": "2 основательницы. 2 подписи на изменение. Если ключ потерян или взломан, третьего ключа, который его удалит, нет.",
   "adminEnableToken": "Предложить включение {symbol}",
   "adminEnableTokenLead": "USDT уже задан в конструкторе. Включите USDC и FDUSD здесь: задержка 72 ч, оракул Chainlink и отдельный пул для каждого. Один займ за раз, в одном токене.",
   "settingsAdminTitle": "Основатели",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "В демо используйте тестовую сеть. Не выбирайте основную сеть.",
   "linkWalletNetworkLive": "В реальном счёте используйте BNB Smart Chain.",
   "errNeedGasAdmin": "У этой учётной записи администратора нет сетевого остатка на комиссии. Запросите тестовый BNB и повторите.",
-  "linkWalletBound": "Привязано"
+  "linkWalletBound": "Привязано",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

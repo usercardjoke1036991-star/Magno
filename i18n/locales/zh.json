@@ -574,7 +574,7 @@
   "adminRoster": "{count} 名创始人 · 需要 {confirms} 个签名 · 提案 #{proposal}",
   "adminRoleFounder": "收取那 15%",
   "adminRoleCofounder": "创始人",
-  "adminAddFoundersLead": "粘贴 0x 地址以提议更改。满 3 名创始人需要 2 个签名。若一把密钥丢失或被盗，另外两把可将其移除。",
+  "adminAddFoundersLead": "粘贴 0x 地址。法定人数是 2 个签名。",
   "adminCofounderLead": "您可以提议添加、移除以及谁收取那 15%。时间锁结束后，确认或执行当前提案。",
   "adminSetFundador": "提议谁收取那 15%",
   "adminSetOwner": "提议所有人（提现）",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "当前印章：{address}",
   "adminAttesterNotOwner": "印章不能是 owner 或创始人。",
   "adminAttesterNoKey": "这像是私钥。这里只要 0x 地址。",
-  "adminTwoOfThree": "3 名创始人。每次变更需 2 个签名。若一把密钥丢失或被盗，另外两把可将其移除。",
+  "adminTwoOfThree": "2 名创始人。每次变更需 2 个签名。若一把密钥丢失或被盗，没有第三把可以移除它。",
   "adminEnableToken": "提议启用 {symbol}",
   "adminEnableTokenLead": "USDT 已在构造函数中设定。在此启用 USDC 和 FDUSD：延迟 72 小时、Chainlink 预言机，以及各自独立的资金池。同一时间只能有一笔贷款，且使用单一代币。",
   "settingsAdminTitle": "创始人",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "演示请使用测试网络，请勿选择主网。",
   "linkWalletNetworkLive": "真实账户请使用 BNB Smart Chain。",
   "errNeedGasAdmin": "此管理账户没有支付网络手续费的余额。请申请测试 BNB 后重试。",
-  "linkWalletBound": "已关联"
+  "linkWalletBound": "已关联",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

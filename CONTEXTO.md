@@ -265,6 +265,11 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-04 | Auditoria de app: identidad antes de KYC en Demo, y el banner de alta no dice Vincule si el contrato de alta ya esta. | — |
+| 2026-10-04 | La vinculación queda por red. El botón Pasar al fondo envía vencerPadrinoAlPool desde la billetera de la frase, sin cambiar contratos. | — |
+| 2026-10-04 | Historial y red usan el bloque de la direccion conocida. El texto de admin en 17 idiomas dice quorum de 2 fundadoras. | — |
+| 2026-10-04 | En el Xiaomi, Cuenta Real sin contratos muestra que el credito se firma en el lanzamiento, y Reserva sin contrato no publica una tasa actual. | — |
+| 2026-10-04 | El despliegue de mainnet queda escrito y bloqueado: cuatro contratos, feed USDT/USD vivo, sin sembrar la caja y sin tocar la red 97. No se ha enviado. | — |
 | 2026-10-03 | Testnet 97 redeploy: Credit 0xD318, Alta 0xE890, Reserva 0x98bE, Fama 0xEC27, startBlock 134721274. Pool 500. Mainnet vacio. | — |
 | 2026-10-03 | Prestamo exige registroHecho cuando Alta esta puesta. Padrino vencido anota el sello al deudor. Deep link no abre Admin. Nucleo 23254 bytes, bajo EIP-170. | — |
 | 2026-10-03 | Alta 4 USDT sin desglose en UI ni legales. Frase 24 palabras explicada como llave en el telefono, no en la red. | — |

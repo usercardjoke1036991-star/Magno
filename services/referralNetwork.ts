@@ -1,6 +1,6 @@
 import { Contract, formatUnits, getAddress, type AbstractProvider } from 'ethers';
 import { CONTRACT_ABI, getContractAddress } from '../constants/contractConfig';
-import { getKnownStartBlock } from '../constants/deployedAddresses';
+import { DEPLOYED_TESTNET, getKnownStartBlock } from '../constants/deployedAddresses';
 import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, NETWORK_CONFIG } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { addressToInviteCode } from '../utils/inviteCode';
@@ -159,10 +159,16 @@ async function resolveStartBlock(provider: AbstractProvider, contractAddress: st
   const configured = Number(process.env.EXPO_PUBLIC_CONTRACT_START_BLOCK || 0);
   const fromEnv = Number.isFinite(configured) && configured > 0 ? configured : 0;
   const fromKnown = getKnownStartBlock(contractAddress);
-  const fromConfigured = fromEnv > 0 ? fromEnv : fromKnown;
+  const demoContract =
+    contractAddress.toLowerCase() === DEPLOYED_TESTNET.contract.toLowerCase();
+  const fromConfigured = fromKnown > 0 ? fromKnown : demoContract ? fromEnv : 0;
   const fromLookback = Math.max(0, latest - DEFAULT_LOOKBACK);
   let fromBlock = fromConfigured > 0 ? fromConfigured : fromLookback;
   let truncated = fromConfigured === 0 && fromLookback > 0;
+  if (fromBlock > latest) {
+    fromBlock = fromLookback;
+    truncated = true;
+  }
   if (latest - fromBlock > MAX_SCAN_SPAN) {
     fromBlock = Math.max(0, latest - MAX_SCAN_SPAN);
     truncated = true;

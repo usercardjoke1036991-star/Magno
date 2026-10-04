@@ -574,7 +574,7 @@
   "adminRoster": "{count} প্রতিষ্ঠাতা · {confirms} স্বাক্ষর আবশ্যক · প্রস্তাব #{proposal}",
   "adminRoleFounder": "১৫% পায়",
   "adminRoleCofounder": "প্রতিষ্ঠাতা",
-  "adminAddFoundersLead": "পরিবর্তন প্রস্তাব করতে 0x ঠিকানা লাগান। ৩ প্রতিষ্ঠাতা থাকলে ২ স্বাক্ষর লাগে। একটি হারালে বা হ্যাক হলে অন্য দুজন সরায়।",
+  "adminAddFoundersLead": "0x ঠিকানা লাগান। কোরাম ২ স্বাক্ষর।",
   "adminCofounderLead": "আপনি যোগ, সরানো ও কে ১৫% পায় তা প্রস্তাব করতে পারেন। টাইমলকের পর বর্তমান প্রস্তাব নিশ্চিত বা কার্যকর করুন।",
   "adminSetFundador": "কে ১৫% পায় তার প্রস্তাব",
   "adminSetOwner": "মালিক প্রস্তাব করুন (তোলা)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "এখন সিল: {address}",
   "adminAttesterNotOwner": "সিল owner বা প্রতিষ্ঠাতা হতে পারে না।",
   "adminAttesterNoKey": "এটি কী মনে হচ্ছে। এখানে শুধু 0x ঠিকানা।",
-  "adminTwoOfThree": "৩ প্রতিষ্ঠাতা। প্রতি পরিবর্তনে ২ স্বাক্ষর। হারালে বা হ্যাক হলে অন্য দুজন সরায়।",
+  "adminTwoOfThree": "২ প্রতিষ্ঠাতা। প্রতি পরিবর্তনে ২ স্বাক্ষর। হারালে বা হ্যাক হলে তৃতীয় কেউ নেই যে সরাবে।",
   "adminEnableToken": "{symbol} সক্রিয় করার প্রস্তাব",
   "adminEnableTokenLead": "USDT ইতিমধ্যে কনস্ট্রাক্টরে সেট। এখানে USDC ও FDUSD সক্রিয় করুন: ৭২ ঘণ্টা বিলম্ব, Chainlink অরাকল ও প্রতিটির আলাদা পুল। একবারে একটি লোন, একটি টোকেনে।",
   "settingsAdminTitle": "প্রতিষ্ঠাতা",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "ডেমোতে পরীক্ষা নেটওয়ার্ক ব্যবহার করুন। মূল নেটওয়ার্ক বেছে নেবেন না।",
   "linkWalletNetworkLive": "আসল অ্যাকাউন্টে BNB Smart Chain ব্যবহার করুন।",
   "errNeedGasAdmin": "এই প্রশাসক অ্যাকাউন্টে ফির জন্য নেটওয়ার্ক স্থিতি নেই। পরীক্ষা BNB চান এবং আবার চেষ্টা করুন।",
-  "linkWalletBound": "সংযুক্ত"
+  "linkWalletBound": "সংযুক্ত",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

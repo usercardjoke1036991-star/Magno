@@ -574,7 +574,7 @@
   "adminRoster": "{count} fondatori · {confirms} firma/e richiesta/e · proposta #{proposal}",
   "adminRoleFounder": "Riceve il 15%",
   "adminRoleCofounder": "Fondatore",
-  "adminAddFoundersLead": "Incolla un indirizzo 0x per proporre modifiche. Con 3 fondatrici servono 2 firme. Se una si perde o viene violata, le altre 2 la rimuovono.",
+  "adminAddFoundersLead": "Incolla un indirizzo 0x. Il quorum è di 2 firme.",
   "adminCofounderLead": "Puoi proporre aggiunte, rimozioni e chi riceve il 15%. Conferma o esegui la proposta attuale dopo il timelock.",
   "adminSetFundador": "Proponi chi riceve il 15%",
   "adminSetOwner": "Proponi owner (prelievi)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Sigillo ora: {address}",
   "adminAttesterNotOwner": "Il sigillo non può essere owner o fondatrice.",
   "adminAttesterNoKey": "Sembra una chiave. Qui va solo l'indirizzo 0x.",
-  "adminTwoOfThree": "3 fondatrici. 2 firme per ogni modifica. Se una si perde o viene violata, le altre 2 la rimuovono.",
+  "adminTwoOfThree": "2 fondatrici. 2 firme per ogni modifica. Se una si perde o viene violata, non c’è una terza che la rimuova.",
   "adminEnableToken": "Proponi l’abilitazione di {symbol}",
   "adminEnableTokenLead": "USDT è già impostato nel costruttore. Abilita USDC e FDUSD qui: ritardo di 72 h, oracolo Chainlink e un pool distinto ciascuno. Un prestito alla volta, in un solo token.",
   "settingsAdminTitle": "Fondatori",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "In Demo usi la rete di prova. Non selezioni la rete principale.",
   "linkWalletNetworkLive": "Nel Conto reale usi BNB Smart Chain.",
   "errNeedGasAdmin": "Questo conto amministratore non ha saldo di rete per le commissioni. Richieda BNB di prova e riprovi.",
-  "linkWalletBound": "Collegato"
+  "linkWalletBound": "Collegato",
+  "padrinoSettleLead": "Se un invitato diretto non paga il livello 1 entro 7 giorni, può passare quell’importo al fondo.",
+  "padrinoSettleButton": "Passa al fondo",
+  "padrinoSettleNeedSeal": "Per passarlo al fondo bisogna aver pagato l’iscrizione.",
+  "padrinoSettleWait": "I 7 giorni non sono ancora trascorsi.",
+  "padrinoSettleFailed": "Non è stato possibile passarlo al fondo. Riprovi."
 }

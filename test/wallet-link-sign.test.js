@@ -58,4 +58,21 @@ describe('wallet link requires a bind signature', function () {
     expect(auth).to.include('signBindExternalWallet');
     expect(auth).to.include('purpose: BIND_WALLET_PURPOSE');
   });
+
+  it('keeps a chain 56 proof out of chain 97', function () {
+    const linked = fs.readFileSync(path.join(__dirname, '..', 'services', 'linkedWallet.ts'), 'utf8');
+    expect(linked).to.include('linkedWalletStorageKey(internalWallet: string, chainId = NETWORK_CONFIG.chainId)');
+    expect(linked).to.include('return `${PREFIX}${chainId}:${String(internalWallet || \'\').trim().toLowerCase()}`;');
+    expect(linked).to.include('AsyncStorage.getItem(linkedWalletStorageKey(internalWallet))');
+    expect(linked).to.not.include('AsyncStorage.getItem(`${PREFIX}${');
+
+    const prefix = 'qv:';
+    const wallet = '0xAbC';
+    const key = (chainId) => `${prefix}${chainId}:${wallet.trim().toLowerCase()}`;
+    const store = new Map();
+    store.set(key(56), 'proven:0x5023bf46dB7458B9bb9152a7ffE64f195CD1a047');
+    expect(store.get(key(97))).to.equal(undefined);
+    expect(store.get(key(56))).to.match(/^proven:/);
+    expect(key(56)).to.not.equal(key(97));
+  });
 });

@@ -161,12 +161,12 @@ export function ReservaSection({
         <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaLockOnce')}</AppText>
         <AppText style={[styles.lead, { color: colors.text }]}>{t('reservaCommissionLead')}</AppText>
         <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('reservaBoostComision')}</AppText>
-        {preview ? (
+        {preview?.configured ? (
           <AppText style={[styles.meta, { color: colors.textMuted }]}>
             {t('reservaBoteLabel')}: {formatUSD(Number(formatUnits(preview.boteWei, 18)))} {tokenSymbol}
           </AppText>
         ) : null}
-        {preview ? (
+        {preview?.configured ? (
           <AppText style={[styles.meta, { color: colors.textMuted }]}>
             {t('reservaApyNow', { apy: ((preview.apyBps || 0) / 100).toFixed(2) })}
           </AppText>

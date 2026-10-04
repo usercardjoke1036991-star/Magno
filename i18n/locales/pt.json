@@ -574,7 +574,7 @@
   "adminRoster": "{count} fundadores · {confirms} assinatura(s) exigida(s) · proposta #{proposal}",
   "adminRoleFounder": "Recebe os 15%",
   "adminRoleCofounder": "Fundador",
-  "adminAddFoundersLead": "Cole um endereço 0x para propor mudanças. Com 3 fundadoras, exigem-se 2 assinaturas. Se uma se perde ou é hackeada, as outras 2 a removem.",
+  "adminAddFoundersLead": "Cole um endereço 0x. O quórum é de 2 assinaturas.",
   "adminCofounderLead": "Você pode propor inclusões, remoções e quem recebe os 15%. Confirme ou execute a proposta atual após o timelock.",
   "adminSetFundador": "Propor quem recebe os 15%",
   "adminSetOwner": "Propor owner (saques)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Selo agora: {address}",
   "adminAttesterNotOwner": "O selo não pode ser o owner nem uma fundadora.",
   "adminAttesterNoKey": "Isso parece uma chave. Aqui só vai o endereço 0x.",
-  "adminTwoOfThree": "3 fundadoras. 2 assinaturas por mudança. Se uma se perde ou é hackeada, as outras 2 removem-na.",
+  "adminTwoOfThree": "2 fundadoras. 2 assinaturas por mudança. Se uma se perde ou é hackeada, não há uma terceira que a remova.",
   "adminEnableToken": "Propor habilitação de {symbol}",
   "adminEnableTokenLead": "USDT já entra no construtor. Habilite USDC e FDUSD aqui: atraso de 72 h, oráculo Chainlink e um pool próprio para cada um. Um empréstimo por vez, em um único token.",
   "settingsAdminTitle": "Fundadores",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "No Demo use a rede de teste. Não selecione a rede principal.",
   "linkWalletNetworkLive": "Na Conta Real use a BNB Smart Chain.",
   "errNeedGasAdmin": "Esta conta administradora não tem saldo de rede para comissões. Peça BNB de teste e tente de novo.",
-  "linkWalletBound": "Vinculada"
+  "linkWalletBound": "Vinculada",
+  "padrinoSettleLead": "Se um convidado direto não pagar o nível 1 em 7 dias, pode passar esse valor ao fundo.",
+  "padrinoSettleButton": "Passar ao fundo",
+  "padrinoSettleNeedSeal": "É preciso ter pago o registo para o passar ao fundo.",
+  "padrinoSettleWait": "Ainda não se cumpriram os 7 dias.",
+  "padrinoSettleFailed": "Não foi possível passar ao fundo. Tente de novo."
 }

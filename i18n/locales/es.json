@@ -574,7 +574,7 @@
   "adminRoster": "{count} fundadoras · se exigen {confirms} firmas · propuesta #{proposal}",
   "adminRoleFounder": "Cobra el 15%",
   "adminRoleCofounder": "Fundadora",
-  "adminAddFoundersLead": "Dirección 0x. Con 3 fundadoras se exigen 2 firmas.",
+  "adminAddFoundersLead": "Dirección 0x. El quórum es de 2 firmas.",
   "adminCofounderLead": "Proponga altas, bajas y tesorería. Confirme o ejecute tras 72 h.",
   "adminSetFundador": "Proponer quién cobra el 15%",
   "adminSetOwner": "Proponer owner (retiros)",
@@ -584,7 +584,7 @@
   "adminAttesterCurrent": "Sello ahora: {address}",
   "adminAttesterNotOwner": "El sello no puede ser el owner ni una fundadora.",
   "adminAttesterNoKey": "Eso parece una clave. Aquí solo va la dirección 0x.",
-  "adminTwoOfThree": "3 fundadoras. 2 firmas por cambio. Si una se pierde o la hackean, las otras 2 la echan.",
+  "adminTwoOfThree": "2 fundadoras. 2 firmas por cambio. Si una se pierde o la hackean, no hay una tercera que la eche.",
   "adminEnableToken": "Proponer alta de {symbol}",
   "adminEnableTokenLead": "USDT activo. USDC y FDUSD se habilitan aquí con 72 h de espera.",
   "settingsAdminTitle": "Fundadoras",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "En Demo use la red de prueba. No seleccione la red principal.",
   "linkWalletNetworkLive": "En Cuenta Real use BNB Smart Chain.",
   "errNeedGasAdmin": "Esta cuenta administradora no tiene saldo de red para comisiones. Solicite BNB de prueba e inténtelo de nuevo.",
-  "linkWalletBound": "Vinculado"
+  "linkWalletBound": "Vinculado",
+  "padrinoSettleLead": "Si un invitado directo no paga el nivel 1 en 7 días, puede pasar ese importe al fondo.",
+  "padrinoSettleButton": "Pasar al fondo",
+  "padrinoSettleNeedSeal": "Para pasarlo al fondo hace falta haber pagado el alta.",
+  "padrinoSettleWait": "Aún no se cumplen los 7 días.",
+  "padrinoSettleFailed": "No se pudo pasar al fondo. Inténtelo de nuevo."
 }

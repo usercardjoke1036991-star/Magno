@@ -62,7 +62,7 @@ const set = (key) => {
 const https = (key) => /^https:\/\//i.test(get(key));
 
 const STALE_MAINNET = '0xa6aac9ce4923789a4095fbc0504db9a697f8a46d';
-const LIVE_TESTNET = '0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f';
+const LIVE_TESTNET = '0xD318f39834A5e798a11D2535c6c9D1E1270e6778';
 const STALE_TESTNET = '0x1E5118B378c7BCB3F3c5de7ec046B93E60f417a3';
 
 const admins = get('ADMINS')
@@ -96,7 +96,7 @@ const checks = [
       !get('EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET') ||
       (get('EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET').toLowerCase() === LIVE_TESTNET.toLowerCase() &&
         get('EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET').toLowerCase() !== STALE_TESTNET),
-    need: 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET debe ser Demo live 0xD2d2… (no el retirado 0x1E5118)',
+    need: 'EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET debe ser el protocolo vivo 0xD318… (no el legado 0xD2d2 ni el retirado 0x1E5118)',
   },
   {
     id: 'admins',
@@ -105,10 +105,10 @@ const checks = [
     need: 'ADMINS=0xFundador (la primera es la fundadora). Las otras dos se listan ahora o se agregan después desde la app',
   },
   {
-    id: 'admins-2of3',
+    id: 'admins-2of2',
     who: 'you',
-    ok: admins.length >= 3,
-    need: '3 admins distintos antes de mainnet: el contrato solo hace 2-de-3 si hay tres llaves',
+    ok: admins.length >= 2,
+    need: 'ADMINS con las dos claves. El quórum de mainnet es 2.',
   },
   {
     id: 'confirms',

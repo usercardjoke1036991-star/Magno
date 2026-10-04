@@ -255,7 +255,11 @@ export async function chargeFounderUsdt(
     return 'failed';
   }
   if (!isAccessPaymentEnabled() || !isCreditReady()) {
-    alertUser(ctx, ctx.t('creditAccessTitle'), ctx.t('creditAccessPending'));
+    alertUser(
+      ctx,
+      ctx.t('creditAccessTitle'),
+      ctx.t(isDemoAccount() || isAltaConfigured() ? 'creditAccessPending' : 'liveCreditNotReady')
+    );
     return 'failed';
   }
   if (!ctx.canDonate) {
@@ -314,7 +318,11 @@ export async function chargePoolUsdt(
     return 'failed';
   }
   if (!isAccessPaymentEnabled() || !isCreditReady() || !cachedProtocolCaps().canPagarVerificacion) {
-    alertUser(ctx, ctx.t('creditAccessTitle'), ctx.t('creditAccessPending'));
+    alertUser(
+      ctx,
+      ctx.t('creditAccessTitle'),
+      ctx.t(isDemoAccount() || isAltaConfigured() ? 'creditAccessPending' : 'liveCreditNotReady')
+    );
     return 'failed';
   }
   if (!ctx.isTokenSupported && !isOfficialWorldToken(ctx.token.address)) {

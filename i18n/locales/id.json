@@ -574,7 +574,7 @@
   "adminRoster": "{count} pendiri · {confirms} tanda tangan diperlukan · usulan #{proposal}",
   "adminRoleFounder": "Menerima 15%",
   "adminRoleCofounder": "Pendiri",
-  "adminAddFoundersLead": "Tempel alamat 0x untuk mengusulkan perubahan. Ada 3 pendiri, wajib 2 tanda tangan. Jika satu hilang atau di-hack, dua lainnya menghapusnya.",
+  "adminAddFoundersLead": "Tempel alamat 0x. Kuorumnya 2 tanda tangan.",
   "adminCofounderLead": "Anda bisa mengusulkan penambahan, penghapusan, dan siapa yang menerima 15%. Konfirmasi atau eksekusi usulan saat ini setelah timelock.",
   "adminSetFundador": "Usulkan siapa yang menerima 15%",
   "adminSetOwner": "Usulkan pemilik (penarikan)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Stempel sekarang: {address}",
   "adminAttesterNotOwner": "Stempel tidak boleh owner atau pendiri.",
   "adminAttesterNoKey": "Ini seperti kunci. Di sini hanya alamat 0x.",
-  "adminTwoOfThree": "3 pendiri. 2 tanda tangan tiap perubahan. Jika hilang atau di-hack, dua lainnya menghapusnya.",
+  "adminTwoOfThree": "2 pendiri. 2 tanda tangan tiap perubahan. Jika hilang atau di-hack, tidak ada kunci ketiga yang menghapusnya.",
   "adminEnableToken": "Usulkan pengaktifan {symbol}",
   "adminEnableTokenLead": "USDT sudah disetel di konstruktor. Aktifkan USDC dan FDUSD di sini: tunda 72 jam, oracle Chainlink, dan pool terpisah masing-masing. Satu pinjaman dalam satu waktu, dalam satu token.",
   "settingsAdminTitle": "Pendiri",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "Di Demo gunakan jaringan uji. Jangan pilih jaringan utama.",
   "linkWalletNetworkLive": "Di Akun Nyata gunakan BNB Smart Chain.",
   "errNeedGasAdmin": "Akun administrator ini tidak punya saldo jaringan untuk biaya. Minta BNB uji dan coba lagi.",
-  "linkWalletBound": "Terhubung"
+  "linkWalletBound": "Terhubung",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

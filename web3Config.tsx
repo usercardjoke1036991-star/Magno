@@ -61,7 +61,7 @@ function getAppKit(): AppKitInstance {
   appKitSingleton = createAppKit({
     projectId: PROJECT_ID || (__DEV__ ? 'missing-project-id' : ''),
     metadata,
-    networks: live ? [bscMainnetNetwork] : [bscTestnetNetwork],
+    networks: [bscMainnetNetwork, bscTestnetNetwork],
     defaultNetwork: live ? bscMainnetNetwork : bscTestnetNetwork,
     adapters: [new EthersAdapter()],
     storage: appKitStorage,

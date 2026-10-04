@@ -12,6 +12,7 @@ import {
 } from '../services/linkedWallet';
 import { openWalletConnect, withWalletSignTimeout } from '../utils/openWalletConnect';
 import { isDemoMode } from '../constants/rpcConfig';
+import { useAppMode } from '../wallet/AppModeContext';
 import { AppText } from './AppText';
 
 interface LinkedWalletCardProps {
@@ -25,8 +26,10 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
   const { open } = useAppKit();
   const { address, isConnected } = useAccount();
   const { provider } = useProvider();
+  const { mode } = useAppMode();
   const [linked, setLinked] = useState('');
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!internalWallet) return undefined;
@@ -41,7 +44,7 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
     return () => {
       live = false;
     };
-  }, [internalWallet, address, isConnected]);
+  }, [internalWallet, address, isConnected, mode]);
 
   const saveConnected = async () => {
     if (!hasLinkedExternalWallet(address || '')) {
@@ -49,14 +52,21 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
       return;
     }
     setBusy(true);
+    setError('');
     try {
       const saved = await withWalletSignTimeout(
         proveAndSaveLinkedWallet(provider as Eip1193Provider, internalWallet, address || ''),
         45000
       );
       setLinked(saved);
-    } catch {
-      // Firma rechazada o provider ausente: no guardar. El usuario puede reintentar.
+    } catch (caught) {
+      const message = String((caught as Error)?.message || '');
+      const wrongNetwork = message.includes('wrong-network') || message.includes('chainId');
+      setError(
+        wrongNetwork
+          ? t(isDemoMode() ? 'linkWalletNetworkDemo' : 'linkWalletNetworkLive')
+          : t('linkWalletSignNeed')
+      );
     } finally {
       setBusy(false);
     }
@@ -90,6 +100,9 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
       ) : null}
       {mismatch ? (
         <AppText style={[styles.meta, { color: colors.warnText }]}>{t('linkWalletMismatch')}</AppText>
+      ) : null}
+      {error ? (
+        <AppText style={[styles.meta, { color: colors.warnText }]}>{error}</AppText>
       ) : null}
       <TouchableOpacity
         disabled={busy}

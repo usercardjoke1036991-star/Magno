@@ -2,6 +2,8 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { isAltaConfigured } from '../constants/altaConfig';
+import { isDemoAccount } from '../constants/rpcConfig';
 import { BrandLogo } from './BrandLogo';
 import { AppText } from './AppText';
 import { LinkedWalletCard } from './LinkedWalletCard';
@@ -30,7 +32,9 @@ export function CreditAccessGate({
       <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('creditAccessLead')}</AppText>
       {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
       {!canPay ? (
-        <AppText style={[styles.pending, { color: colors.warnText }]}>{t('creditAccessPending')}</AppText>
+        <AppText style={[styles.pending, { color: colors.warnText }]}>
+          {!isDemoAccount() && !isAltaConfigured() ? t('liveCreditNotReady') : t('creditAccessPending')}
+        </AppText>
       ) : null}
       <TouchableOpacity
         disabled={isLoading || !canPay}

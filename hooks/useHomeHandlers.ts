@@ -784,14 +784,14 @@ export const useHomeHandlers = ({
       return;
     }
     if (!isAltaConfigured() && !isAccessPaymentEnabled()) {
-      Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
+      Alert.alert(t('creditAccessTitle'), t(isDemoAccount() ? 'creditAccessPending' : 'liveCreditNotReady'));
       return;
     }
     if (!ensureCreditReady()) return;
     if (hasCreditAccess(Number(userInfo.donatedUsd || 0))) return;
     if (walletAddress && (await QuatriviumCreditService.altaPagada(walletAddress))) return;
     if (!isAltaConfigured() && !userInfo.canDonate) {
-      Alert.alert(t('creditAccessTitle'), t('creditAccessPending'));
+      Alert.alert(t('creditAccessTitle'), t(isDemoAccount() ? 'creditAccessPending' : 'liveCreditNotReady'));
       return;
     }
     if (!userInfo.isTokenSupported && !isOfficialWorldToken(selectedToken.address)) {

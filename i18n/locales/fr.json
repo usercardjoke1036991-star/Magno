@@ -574,7 +574,7 @@
   "adminRoster": "{count} fondateurs · {confirms} signature(s) requise(s) · proposition n°{proposal}",
   "adminRoleFounder": "Reçoit les 15 %",
   "adminRoleCofounder": "Fondateur",
-  "adminAddFoundersLead": "Collez une adresse 0x pour proposer des changements. Avec 3 fondatrices, 2 signatures sont exigées. Si une est perdue ou piratée, les 2 autres la retirent.",
+  "adminAddFoundersLead": "Collez une adresse 0x. Le quorum est de 2 signatures.",
   "adminCofounderLead": "Vous pouvez proposer des ajouts, des retraits et qui reçoit les 15 %. Confirmez ou exécutez la proposition actuelle après le timelock.",
   "adminSetFundador": "Proposer qui reçoit les 15 %",
   "adminSetOwner": "Proposer le owner (retraits)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Sceau actuel : {address}",
   "adminAttesterNotOwner": "Le sceau ne peut pas être l'owner ni une fondatrice.",
   "adminAttesterNoKey": "Cela ressemble à une clé. Ici, seulement l'adresse 0x.",
-  "adminTwoOfThree": "3 fondatrices. 2 signatures par changement. Si une est perdue ou piratée, les 2 autres la retirent.",
+  "adminTwoOfThree": "2 fondatrices. 2 signatures par changement. Si une est perdue ou piratée, il n’y a pas de troisième pour la retirer.",
   "adminEnableToken": "Proposer l’activation de {symbol}",
   "adminEnableTokenLead": "USDT est déjà défini dans le constructeur. Activez USDC et FDUSD ici : délai de 72 h, oracle Chainlink et un pool distinct chacun. Un prêt à la fois, dans un seul token.",
   "settingsAdminTitle": "Fondateurs",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "En démo, utilisez le réseau d’essai. Ne sélectionnez pas le réseau principal.",
   "linkWalletNetworkLive": "En compte réel, utilisez BNB Smart Chain.",
   "errNeedGasAdmin": "Ce compte administrateur n’a pas de solde réseau pour les frais. Demandez du BNB d’essai et réessayez.",
-  "linkWalletBound": "Associé"
+  "linkWalletBound": "Associé",
+  "padrinoSettleLead": "Si un invité direct ne paie pas le niveau 1 sous 7 jours, vous pouvez envoyer ce montant au fonds.",
+  "padrinoSettleButton": "Envoyer au fonds",
+  "padrinoSettleNeedSeal": "Il faut avoir payé l’inscription pour l’envoyer au fonds.",
+  "padrinoSettleWait": "Les 7 jours ne sont pas encore écoulés.",
+  "padrinoSettleFailed": "Envoi au fonds impossible. Réessayez."
 }

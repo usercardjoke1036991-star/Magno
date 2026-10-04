@@ -250,16 +250,15 @@ async function prepareDemoCreditOnChain() {
   const { signer } = await requireInternalSigner();
   const address = await signer.getAddress();
   const credit = contractWith(signer);
-  const [kyc, phoneHash, deviceHash] = await Promise.all([
+  const [kyc, phoneHash, deviceHash, registered] = await Promise.all([
     credit.kycDeclarado(address) as Promise<boolean>,
     credit.phoneHashOf(address) as Promise<string>,
     credit.deviceHashOf(address) as Promise<string>,
+    credit.humanosVerificados(address) as Promise<boolean>,
   ]);
-  if (!kyc) {
-    const tx = await credit.declararKyc();
-    await waitMined(tx);
-  }
-  if (phoneHash === ZeroHash || deviceHash === ZeroHash) {
+  if (!registered) return;
+  let bound = phoneHash !== ZeroHash && deviceHash !== ZeroHash;
+  if (!bound) {
     const attestation = await requestDemoIdentity(address);
     const tx = await credit.vincularIdentidad(
       attestation.phoneHash,
@@ -269,6 +268,11 @@ async function prepareDemoCreditOnChain() {
       attestation.r,
       attestation.s
     );
+    await waitMined(tx);
+    bound = true;
+  }
+  if (!kyc && bound) {
+    const tx = await credit.declararKyc();
     await waitMined(tx);
   }
 }

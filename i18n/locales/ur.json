@@ -574,7 +574,7 @@
   "adminRoster": "{count} بانی · {confirms} دستخط ضروری · تجویز #{proposal}",
   "adminRoleFounder": "15٪ وصول کرتا ہے",
   "adminRoleCofounder": "بانی",
-  "adminAddFoundersLead": "تبدیلی تجویز کرنے کے لیے 0x ایڈریس چسپاں کریں۔ 3 بانی ہوں تو 2 دستخط درکار ہیں۔ ایک کھو جائے یا ہیک ہو تو باقی 2 اسے ہٹاتے ہیں۔",
+  "adminAddFoundersLead": "0x ایڈریس چسپاں کریں۔ کورم 2 دستخط ہے۔",
   "adminCofounderLead": "آپ شامل، ہٹانا اور 15٪ پانے والا تجویز کر سکتے ہیں۔ ٹائم لاک کے بعد موجودہ تجویز تصدیق یا نافذ کریں۔",
   "adminSetFundador": "15٪ پانے والے کی تجویز",
   "adminSetOwner": "مالک تجویز کریں (نکاسی)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "اب مہر: {address}",
   "adminAttesterNotOwner": "مہر owner یا بانی نہیں ہو سکتی۔",
   "adminAttesterNoKey": "یہ کلید لگتی ہے۔ یہاں صرف 0x پتہ۔",
-  "adminTwoOfThree": "3 بانی۔ ہر تبدیلی پر 2 دستخط۔ کھو جائے یا ہیک ہو تو باقی 2 اسے ہٹاتے ہیں۔",
+  "adminTwoOfThree": "2 بانی۔ ہر تبدیلی پر 2 دستخط۔ کھو جائے یا ہیک ہو تو نکالنے والی تیسری کنجی نہیں۔",
   "adminEnableToken": "{symbol} فعال کرنے کی تجویز",
   "adminEnableTokenLead": "USDT پہلے سے کنسٹرکٹر میں سیٹ ہے۔ یہاں USDC اور FDUSD فعال کریں: 72 گھنٹے تاخیر، Chainlink اوریکل اور ہر ایک کا الگ پول۔ ایک وقت میں ایک قرضہ، ایک ہی ٹوکن میں۔",
   "settingsAdminTitle": "بانی",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "ڈیمو میں آزمائشی نیٹ ورک استعمال کریں۔ مرکزی نیٹ ورک نہ چنیں۔",
   "linkWalletNetworkLive": "حقیقی اکاؤنٹ میں BNB Smart Chain استعمال کریں۔",
   "errNeedGasAdmin": "اس منتظم اکاؤنٹ میں فیس کے لیے نیٹ ورک بقایا نہیں۔ آزمائشی BNB مانگیں اور دوبارہ کوشش کریں۔",
-  "linkWalletBound": "منسلک"
+  "linkWalletBound": "منسلک",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

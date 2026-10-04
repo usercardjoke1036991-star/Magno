@@ -21,7 +21,7 @@
     "security:snyk": "node scripts/run-snyk.mjs test --severity-threshold=high --policy-path=.snyk",
     "security:snyk:code": "node scripts/run-snyk.mjs code test --severity-threshold=high",
     "security:sonar": "node scripts/run-sonar.mjs",
-    "deploy:bsc": "hardhat run scripts/deploy.cjs --network bscMainnet",
+    "deploy:bsc": "hardhat --config hardhat.config.cjs run scripts/deploy-mainnet-nuevo.cjs --network bscMainnet",
     "deploy:testnet": "hardhat run scripts/deploy.cjs --network bscTestnet",
     "deploy:testnet:nuevo": "hardhat --config hardhat.config.cjs run scripts/deploy-testnet-nuevo.cjs --network bscTestnet",
     "deploy:reserva": "hardhat run scripts/deploy-reserva.cjs --network bscTestnet",

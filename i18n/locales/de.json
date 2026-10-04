@@ -574,7 +574,7 @@
   "adminRoster": "{count} Gründer · {confirms} Signatur(en) erforderlich · Vorschlag #{proposal}",
   "adminRoleFounder": "Erhält die 15 %",
   "adminRoleCofounder": "Gründer",
-  "adminAddFoundersLead": "Fügen Sie eine 0x-Adresse ein, um Änderungen vorzuschlagen. Bei 3 Gründerinnen braucht es 2 Signaturen. Geht eine verloren oder wird gehackt, entfernen sie die anderen 2.",
+  "adminAddFoundersLead": "Fügen Sie eine 0x-Adresse ein. Das Quorum ist 2 Signaturen.",
   "adminCofounderLead": "Sie können Hinzufügen, Entfernen und wer die 15 % erhält vorschlagen. Bestätigen oder führen Sie den aktuellen Vorschlag nach dem Timelock aus.",
   "adminSetFundador": "Vorschlagen, wer die 15 % erhält",
   "adminSetOwner": "Owner vorschlagen (Abhebungen)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Stempel jetzt: {address}",
   "adminAttesterNotOwner": "Der Stempel darf nicht Owner oder Gründerin sein.",
   "adminAttesterNoKey": "Das sieht nach einem Schlüssel aus. Hier nur die 0x-Adresse.",
-  "adminTwoOfThree": "3 Gründerinnen. 2 Signaturen je Änderung. Geht eine verloren oder wird gehackt, entfernen sie die anderen 2.",
+  "adminTwoOfThree": "2 Gründerinnen. 2 Signaturen je Änderung. Geht eine verloren oder wird gehackt, gibt es keine dritte, die sie entfernt.",
   "adminEnableToken": "Aktivierung von {symbol} vorschlagen",
   "adminEnableTokenLead": "USDT ist bereits im Konstruktor gesetzt. Aktivieren Sie USDC und FDUSD hier: 72-h-Verzögerung, Chainlink-Orakel und je ein eigener Pool. Ein Kredit nach dem anderen, in einem einzigen Token.",
   "settingsAdminTitle": "Gründer",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "In der Demo nutzen Sie das Testnetz. Wählen Sie nicht das Hauptnetz.",
   "linkWalletNetworkLive": "Im Real-Konto nutzen Sie BNB Smart Chain.",
   "errNeedGasAdmin": "Dieses Verwaltungskonto hat kein Netzsaldo für Gebühren. Fordern Sie Test-BNB an und versuchen Sie es erneut.",
-  "linkWalletBound": "Verbunden"
+  "linkWalletBound": "Verbunden",
+  "padrinoSettleLead": "Zahlt ein direkter Eingeladener Stufe 1 nicht in 7 Tagen, können Sie den Betrag an den Fonds geben.",
+  "padrinoSettleButton": "An den Fonds geben",
+  "padrinoSettleNeedSeal": "Die Anmeldung muss bezahlt sein, bevor der Betrag an den Fonds geht.",
+  "padrinoSettleWait": "Die 7 Tage sind noch nicht um.",
+  "padrinoSettleFailed": "Übergabe an den Fonds fehlgeschlagen. Bitte erneut versuchen."
 }

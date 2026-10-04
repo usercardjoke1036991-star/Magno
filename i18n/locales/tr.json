@@ -574,7 +574,7 @@
   "adminRoster": "{count} kurucu · {confirms} imza gerekli · öneri #{proposal}",
   "adminRoleFounder": "%15’i alır",
   "adminRoleCofounder": "Kurucu",
-  "adminAddFoundersLead": "Değişiklik önermek için bir 0x adresi yapıştırın. 3 kurucu varsa 2 imza gerekir. Biri kaybolur veya hacklenirse diğer 2’si onu çıkarır.",
+  "adminAddFoundersLead": "Bir 0x adresi yapıştırın. Yeter sayı 2 imzadır.",
   "adminCofounderLead": "Ekleme, çıkarma ve %15’i kimin alacağını önerebilirsiniz. Zaman kilidinden sonra mevcut öneriyi onaylayın veya yürütün.",
   "adminSetFundador": "%15’i kimin alacağını öner",
   "adminSetOwner": "Sahip öner (çekimler)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Mühür şimdi: {address}",
   "adminAttesterNotOwner": "Mühür owner veya kurucu olamaz.",
   "adminAttesterNoKey": "Bu bir anahtara benziyor. Buraya yalnızca 0x adresi.",
-  "adminTwoOfThree": "3 kurucu. Her değişiklik 2 imza. Biri kaybolur veya hacklenirse diğer 2’si onu çıkarır.",
+  "adminTwoOfThree": "2 kurucu. Her değişiklik 2 imza. Biri kaybolur veya hacklenirse onu çıkaracak üçüncü anahtar yoktur.",
   "adminEnableToken": "{symbol} etkinleştirmeyi öner",
   "adminEnableTokenLead": "USDT zaten kurucuda ayarlı. USDC ve FDUSD’yi burada etkinleştirin: 72 sa gecikme, Chainlink oracle ve her biri için ayrı havuz. Aynı anda bir kredi, tek token.",
   "settingsAdminTitle": "Kurucular",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "Demoda deneme ağını kullanın. Ana ağı seçmeyin.",
   "linkWalletNetworkLive": "Gerçek hesapta BNB Smart Chain kullanın.",
   "errNeedGasAdmin": "Bu yönetici hesabında ücret için ağ bakiyesi yok. Deneme BNB isteyin ve yeniden deneyin.",
-  "linkWalletBound": "Bağlandı"
+  "linkWalletBound": "Bağlandı",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

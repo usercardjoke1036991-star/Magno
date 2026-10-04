@@ -574,7 +574,7 @@
   "adminRoster": "{count} người sáng lập · cần {confirms} chữ ký · đề xuất #{proposal}",
   "adminRoleFounder": "Nhận 15%",
   "adminRoleCofounder": "Người sáng lập",
-  "adminAddFoundersLead": "Dán địa chỉ 0x để đề xuất thay đổi. Có 3 người sáng lập thì cần 2 chữ ký. Nếu một khóa mất hoặc bị hack, hai người kia gỡ nó.",
+  "adminAddFoundersLead": "Dán địa chỉ 0x. Số đông là 2 chữ ký.",
   "adminCofounderLead": "Bạn có thể đề xuất thêm, gỡ và ai nhận 15%. Xác nhận hoặc thực thi đề xuất hiện tại sau khóa thời gian.",
   "adminSetFundador": "Đề xuất ai nhận 15%",
   "adminSetOwner": "Đề xuất chủ (rút tiền)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "Dấu hiện tại: {address}",
   "adminAttesterNotOwner": "Dấu không thể là owner hoặc người sáng lập.",
   "adminAttesterNoKey": "Giống khóa riêng. Ở đây chỉ địa chỉ 0x.",
-  "adminTwoOfThree": "3 người sáng lập. Mỗi thay đổi cần 2 chữ ký. Mất hoặc bị hack thì hai người kia gỡ nó.",
+  "adminTwoOfThree": "2 người sáng lập. Mỗi thay đổi cần 2 chữ ký. Mất hoặc bị hack thì không có chìa thứ ba để gỡ.",
   "adminEnableToken": "Đề xuất bật {symbol}",
   "adminEnableTokenLead": "USDT đã được đặt trong constructor. Bật USDC và FDUSD tại đây: trễ 72 giờ, oracle Chainlink và quỹ riêng từng loại. Một khoản vay tại một thời điểm, một token.",
   "settingsAdminTitle": "Người sáng lập",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "Trong demo hãy dùng mạng thử. Đừng chọn mạng chính.",
   "linkWalletNetworkLive": "Ở tài khoản thật hãy dùng BNB Smart Chain.",
   "errNeedGasAdmin": "Tài khoản quản trị này không có số dư mạng cho phí. Hãy xin BNB thử và thử lại.",
-  "linkWalletBound": "Đã liên kết"
+  "linkWalletBound": "Đã liên kết",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }

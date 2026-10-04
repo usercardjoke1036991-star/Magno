@@ -574,7 +574,7 @@
   "adminRoster": "{count} مؤسسون · يُطلب {confirms} توقيع(ات) · اقتراح #{proposal}",
   "adminRoleFounder": "يستلم نسبة 15%",
   "adminRoleCofounder": "مؤسس",
-  "adminAddFoundersLead": "الصق عنوان 0x لاقتراح تغييرات. مع 3 مؤسسات يُشترط توقيعان. إن ضاع مفتاح أو اختُرق، يزيله الاثنان الآخران.",
+  "adminAddFoundersLead": "الصق عنوان 0x. النصاب توقيعان.",
   "adminCofounderLead": "يمكنك اقتراح إضافات وإزالات ومن يستلم الـ 15%. أكّد أو نفّذ الاقتراح الحالي بعد القفل الزمني.",
   "adminSetFundador": "اقتراح من يستلم الـ 15%",
   "adminSetOwner": "اقتراح المالك (السحوبات)",
@@ -583,7 +583,7 @@
   "adminAttesterCurrent": "الختم الآن: {address}",
   "adminAttesterNotOwner": "لا يمكن أن يكون الختم المالك أو مؤسساً.",
   "adminAttesterNoKey": "يبدو هذا مفتاحاً. هنا عنوان 0x فقط.",
-  "adminTwoOfThree": "3 مؤسسات. توقيعان لكل تغيير. إن ضاع مفتاح أو اختُرق، يزيله الاثنان الآخران.",
+  "adminTwoOfThree": "مؤسستان. توقيعان لكل تغيير. إن ضاع مفتاح أو اختُرق، لا توجد ثالثة تُخرجه.",
   "adminEnableToken": "اقتراح تفعيل {symbol}",
   "adminEnableTokenLead": "USDT مضبوط مسبقاً في المنشئ. فعّل USDC وFDUSD هنا: تأخير 72 ساعة، وأوراكل Chainlink ومجمع منفصل لكل منهما. قرض واحد في كل مرة، بتوكن واحد.",
   "settingsAdminTitle": "المؤسسون",
@@ -1204,5 +1204,10 @@
   "linkWalletNetworkDemo": "في التجريب استخدم شبكة الاختبار. لا تختر الشبكة الرئيسية.",
   "linkWalletNetworkLive": "في الحساب الحقيقي استخدم BNB Smart Chain.",
   "errNeedGasAdmin": "حساب الإدارة هذا بلا رصيد شبكة للرسوم. اطلب BNB تجريبياً وأعد المحاولة.",
-  "linkWalletBound": "مرتبط"
+  "linkWalletBound": "مرتبط",
+  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
+  "padrinoSettleButton": "Send to the pool",
+  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
+  "padrinoSettleWait": "The 7 days are not over yet.",
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
 }
