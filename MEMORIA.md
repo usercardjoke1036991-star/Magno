@@ -36,6 +36,7 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-04] Cada subida a GitHub pasa por Gitleaks y TruffleHog. El aviso no muestra el valor encontrado. El recorrido de todo el historial se lanza a mano.
 - [2026-10-04] En Demo, la identidad se vincula antes de declarar KYC. El aviso de alta ya no pide vincular la billetera cuando el alta existe.
 - [2026-10-04] Vinculado exige firma EIP-712 de la red actual. AppKit registra BSC 56 y 97. En Personas, Pasar al fondo llama vencerPadrinoAlPool si el invitado no pagó el nivel 1 en 7 días.
 - [2026-10-04] La app ya no usa el bloque de la red de prueba para otra direccion, y el texto de admin dice quorum de 2, no 3 fundadoras.
@@ -85,11 +86,10 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-10-01] Avisos: se puede cambiar el Telegram si pierde la cuenta; un vinculo por billetera.
 - [2026-10-01] Avisos: un vinculo Telegram por cuenta; el boton se bloquea si ya esta vinculado.
 - [2026-10-01] Telegram: el codigo de vinculo era 16 chars y la app solo aceptaba 8-12. Alineado a 12 hex.
-- [2026-10-01] Bot de avisos verificado: QuatriviumFinance_bot. Token de Render ya coincide (getMe).
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-04] Cambio: En Demo, la identidad se vincula antes de declarar KYC. El aviso de alta ya no pide vincular la billetera cuando el alta existe.
+[2026-10-04] Cambio: Cada subida a GitHub pasa por Gitleaks y TruffleHog. El aviso no muestra el valor encontrado. El recorrido de todo el historial se lanza a mano.

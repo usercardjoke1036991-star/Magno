@@ -265,6 +265,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-04 | Acciones de GitHub: Gitleaks y TruffleHog en cada push y pull request. Repositorio privado, Gitleaks usa el binario abierto. | — |
 | 2026-10-04 | Auditoria de app: identidad antes de KYC en Demo, y el banner de alta no dice Vincule si el contrato de alta ya esta. | — |
 | 2026-10-04 | La vinculación queda por red. El botón Pasar al fondo envía vencerPadrinoAlPool desde la billetera de la frase, sin cambiar contratos. | — |
 | 2026-10-04 | Historial y red usan el bloque de la direccion conocida. El texto de admin en 17 idiomas dice quorum de 2 fundadoras. | — |
