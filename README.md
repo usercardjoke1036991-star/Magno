@@ -8,7 +8,7 @@
 **Quatrivium Finance** es una app móvil de microcrédito on-chain sin colateral sobre BNB Smart Chain (BSC). El usuario activa una wallet interna, pide un préstamo en USDT del pool de liquidez, lo paga antes del vencimiento y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda bloqueado hasta regularizar. **No puede cerrar la cuenta mientras tenga deuda o esté en mora.**
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
-- **Estado:** Testnet operativo — mainnet pendiente de deploy (acción manual del fundador)
+- **Estado:** Testnet (chain 97) y mainnet (chain 56) desplegados y separados. El APK de producción y el worker público todavía no usan el contrato nuevo de mainnet.
 - **Tests detectados:** 45 archivo(s)
 
 ### Qué funciona
@@ -26,8 +26,8 @@
 - KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
 
 ### En progreso
-- Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)
-- Configurar `EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET` en `eas.json` production **después** del deploy
+- El APK de producción todavía no incluye las direcciones nuevas de chain 56
+- El worker público de avisos todavía no tiene el contrato de mainnet
 - Credenciales Textbelt (`TEXTBELT_API_KEY`) en `.env.worker` y en Render; Resend para correo
 - Publicación en Google Play Store (`eas build --platform android --profile production`)
 
@@ -297,7 +297,7 @@ python actualizar_readme.py
 | `memoria_proyecto.py` | `python memoria_proyecto.py --mostrar` | Memoria de sesión (MEMORIA.md) |
 | `reestructurar_peticion.py` | `python reestructurar_peticion.py "texto"` | Reestructura una petición informal en prompt profesional |
 
-_Actualizado automáticamente el 2026-10-04 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
+_Actualizado automáticamente el 2026-10-06 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
 
 <!-- AUTO-README:END -->
 Quatrivium Finance es crédito on-chain **sin colateral**: pides un préstamo, lo pagas dentro del plazo y subes de nivel para pedir más.

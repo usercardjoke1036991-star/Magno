@@ -1,7 +1,7 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No reinstalar APK. No mainnet sin CONFIRM_MAINNET=yes.
+Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El APK y el worker publico siguen sin esas direcciones.
 
 ## Decisiones
 - [2026-10-03] En Demo el TOTP de admin no bloquea: 2-de-2 y WalletConnect bastan. El codigo de 6 digitos sale en ventana emergente, no en el panel. En Real sigue el TOTP si el worker HTTPS esta configurado.
@@ -36,6 +36,7 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-06] Foundry 44/44 en el codigo actual. Credit de mainnet cae a la direccion oficial si falta la variable. Los RPC de Real exigen HTTPS.
 - [2026-10-04] TruffleHog en GitHub ya no usa la imagen de Docker. Corre el programa directo, que es lo que fallo con el codigo 125.
 - [2026-10-04] Cada subida a GitHub pasa por Gitleaks y TruffleHog. El aviso no muestra el valor encontrado. El recorrido de todo el historial se lanza a mano.
 - [2026-10-04] En Demo, la identidad se vincula antes de declarar KYC. El aviso de alta ya no pide vincular la billetera cuando el alta existe.
@@ -85,11 +86,10 @@ Producto listo en Demo con protocolo nuevo testnet. Real espera mainnet. No rein
 - [2026-10-01] Ajustes: Guardar queda desactivado tras guardar y se activa solo si hay cambios nuevos.
 - [2026-10-01] Red: enlace de invitacion en tarjeta con copiar (HTTPS quatriviumcredit.app/invite). El codigo de referido acepta guiones, espacios o el enlace al crear la cuenta.
 - [2026-10-01] Avisos: se puede cambiar el Telegram si pierde la cuenta; un vinculo por billetera.
-- [2026-10-01] Avisos: un vinculo Telegram por cuenta; el boton se bloquea si ya esta vinculado.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-04] Cambio: TruffleHog en GitHub ya no usa la imagen de Docker. Corre el programa directo, que es lo que fallo con el codigo 125.
+[2026-10-06] Cambio: Foundry 44/44 en el codigo actual. Credit de mainnet cae a la direccion oficial si falta la variable. Los RPC de Real exigen HTTPS.

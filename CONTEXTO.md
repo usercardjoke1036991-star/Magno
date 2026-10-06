@@ -9,7 +9,7 @@ y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda blo
 ## Tipo de proyecto
 - **Stack:** React Native 0.81 · Expo 54 · React 19 · TypeScript · Solidity 0.8.24 · ethers v6
 - **Tipo:** Mobile DeFi App + Smart Contracts (EVM)
-- **Estado actual:** Testnet operativo — mainnet pendiente de deploy (acción manual del fundador)
+- **Estado actual:** Testnet (chain 97) y mainnet (chain 56) desplegados y separados. El APK de producción y el worker público todavía no usan el contrato nuevo de mainnet.
 
 ---
 
@@ -90,11 +90,11 @@ Magno/
 - **Usuario y contraseña son el candado de este teléfono.** El correo y el número siguen para crédito Real, avisos y recuperar contraseña. No se usan para desbloquear, pedir, pagar ni transferir.
 - **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: PIN, autenticador, huella o contraseña). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar. El autenticador es TOTP real: al activarlo muestra un QR `otpauth://` escaneable y la clave por si la cámara no enfoca.
 - **Historial**: Demo y Real tienen diarios distintos (modo + chain + contrato + billetera). Dos ventanas (transferencias y préstamos) y mora. En el hub, al vencer empieza un reloj rojo: 30 días de gracia en cuenta atrás; al acabarse, cuenta hacia adelante hasta que pague. El fundador entra en mora como el resto.
-- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Hasta el deploy mainnet, Real muestra red en preparación (sin crédito on-chain). El **2 USDT** de acceso, el **1 USDT** de correo/teléfono al pool, el KYC son de Real; Demo opera sin esos candados (sí pide anotar las 24 palabras).
+- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Real usa el crédito de chain 56; si el APK no trae esas direcciones, la sala sigue en preparación. El **2 USDT** de acceso, el **1 USDT** de correo/teléfono al pool, el KYC son de Real; Demo opera sin esos candados (sí pide anotar las 24 palabras).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red, Reserva) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
 - **Reserva no es el pool**: el pool de préstamos no se retira. Reserva es un hermano: se ve desde el inicio y se usa desde el **nivel 10**. Bloqueo 30 días, principal de vuelta. Techo **hasta 12 %** anual: el % **baja si lo bloqueado es grande frente al bote** (`apyHoyBps` / `saludReserva`). Cada alta mete 1 USDT al bote. Admins también aportan; **retirar** el bote exige guardianes de acuerdo y 72 h. Extra de comisiones de red sigue del pool (tramo 2/3). Credit no se recorta. No se llama “producto de inversión” ni banco.
-- **Alta Real 4 USDT (código nuevo, no desplegado)**: 1 a la fundadora, 1 al bote Reserva, 1 de sello (`pagarVerificacion`) y 1 apartado al padrino en `QuatriviumAlta` (se suelta al pagar el primer L1; el interés de ese pago se parte en comisiones). Hitos cada 100 hasta 1000: 400 / 4k / 7k / 8.5k / 9k / 11.5k / 13.5k / 16k / 18k / 20k, con piso 20 %. Demo live `0xD2d2` sigue el protocolo viejo.
+- **Alta Real 4 USDT (desplegada en chain 56 y en el testnet nuevo)**: 1 a la fundadora, 1 al bote Reserva, 1 de sello (`pagarVerificacion`) y 1 apartado al padrino en `QuatriviumAlta` (se suelta al pagar el primer L1; el interés de ese pago se parte en comisiones). Hitos cada 100 hasta 1000: 400 / 4k / 7k / 8.5k / 9k / 11.5k / 13.5k / 16k / 18k / 20k, con piso 20 %. Demo live `0xD2d2` sigue el protocolo viejo.
 - **Fama y dinero no se mezclan**: el 1 USDT de captación no da fama de caja. La fama de red recorre generaciones 2–40 y el fundador suma 100 si no es el padrino directo. La puerta Real (los 4 USDT) no da fama. `_pagarBonosRed` queda en el núcleo sin acreditarse.
 - **Mora con mes de gracia**: al vencer se cobra de la billetera. Si no hay saldo, 30 días sigue cobrando para poder pagar. Luego la reputación baja 10 × nivel por día y sus comisiones/bonos van al pool hasta que pague. El fundador **también entra en mora** y se le puede liquidar; el pool ya no cubre su préstamo. La fama de línea vive en `QuatriviumFamaLib` (delegatecall) para no romper EIP-170.
 - **No hay cerrar cuenta on-chain**: el teléfono y el dispositivo quedan atados a esa billetera. Recuperar es con la frase, no se crea otra línea.
@@ -114,7 +114,7 @@ Reglas:
 - **101–1000**: la tasa no sube (baja 1 bps/nivel hasta 4,06 % y luego se sostiene; si bajara más el interés $ se rompería)
 
 `requiredCount` (la velocidad de llegada marca la de pago): L1 → 3; L2–9 → 5; desde **$100 (L10)** cada nivel pide **5 más** (5, 10, 15…; L100 = 455; L999 = 4950; L1000 = 4955). L1000 no sube de nivel: al completar las solicitudes el ciclo se reinicia y el bono de 20 000 USDT se puede volver a cobrar.
-Bono de pool cada 100 niveles: **20 USDT × nivel del hito**. Sala **Bonos** en Demo y Real. **Donar** (sala aparte, solo Real) y **aportar liquidez** suman fama **proporcional al monto** (10 y 5 puntos por USDT). El pool es el banco común. Cuenta Real muestra el producto completo (KYC, niveles 1–1000, hitos, donar, pool) antes del lanzamiento; firmar espera mainnet.
+Bono de pool cada 100 niveles: **20 USDT × nivel del hito**. Sala **Bonos** en Demo y Real. **Donar** (sala aparte, solo Real) y **aportar liquidez** suman **100 de fama por cada USDT**. El pool es el banco común. Cuenta Real firma contra el contrato de chain 56.
 Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina, peridoto, esmeralda, zafiro, rubí, ónix, diamante, amatista). Cada banda se parte en I / II / III. El marco es el logo 3D, más ancho que la foto, con incrustaciones fotográficas de esa piedra.
 
 | Nivel | Principal | Plazo | Tasa | Interés $ | Cuotas | Solicitudes |
@@ -155,8 +155,8 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Primera apertura en Cuenta Real; al cambiar a Demo o Real se restaura ese modo al reabrir (`wallet/AppModeContext.tsx`)
 
 ## Lo que está en progreso 🔄 (solo el fundador puede completar)
-- Deploy de contrato en BSC Mainnet (`CONFIRM_MAINNET=yes` + `npm run deploy:bsc`)
-- Configurar `EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET` en `eas.json` production **después** del deploy
+- El APK de producción todavía no incluye las direcciones nuevas de chain 56
+- El worker público de avisos todavía no tiene el contrato de mainnet
 - Credenciales Textbelt (`TEXTBELT_API_KEY`) en `.env.worker` y en Render; Resend para correo
 - Publicación en Google Play Store (`eas build --platform android --profile production`)
 
@@ -166,7 +166,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - **Mythril SWC-101 / Semgrep INFO / Trivy lockfile**: Solidity 0.8.24 no envuelve enteros; Semgrep INFO es gas (EIP-170); las CVE del lockfile viven en Metro/snarkjs/xcode, no en el worker ni en el crédito. `npm audit --force` instalaría Expo 57. Docker declara `USER node` (Sonar docker:S6471). Si el host arranca como root, el entrypoint hace chown de `/data` y `su-exec node`; si `/data` no es escribible el worker usa `/app/data`.
 - **ZK real en React Native**: `snarkjs` no es bundleable; el registro es `registrarHumanoConPadre()`. Decisión consciente.
 - **Pool no se retira**: no hay circuit breaker de retiros al 50% — el pool está cerrado a propósito (`revert("pool locked")`). La pausa de emergencia es el freno.
-- **`eas.json` sin dirección mainnet**: correcto hasta el deploy. No rellenar con un placeholder.
+- **`eas.json` production ya lleva las direcciones de chain 56.** No hace falta otro deploy para que el código las conozca. El APK instalado no cambia hasta un build nuevo.
 - **Premio mensual de rankings**: la UI muestra la estimación; el núcleo Credit no lo paga. Haría falta un contrato hermano fondeado o un redespliegue.
 - **Java 25 en la máquina local**: puede romper `expo run:android` local. Los builds EAS usan imagen `sdk-54` (JDK correcto). En local: usar JDK 17.
 
@@ -250,7 +250,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 | `hardhat test` | ✅ 103/103 | Incluye mora del fundador (pool cubre, 48h intacta) + FamaLib |
 | `npm audit` (ws high) | ✅ OK | GHSA-58qx/96hv corregidas con `override ws^8.21.0` |
 | `npm audit` (devDeps) | ⚠️ ~66 vulns | hardhat / solidity-coverage / expo SDK — **no van al APK** · no correr `--force` |
-| `production:check` | 🟡 **12/14** | Faltan 2 acciones **manuales**: deploy mainnet + Twilio/WhatsApp |
+| `production:check` | 🟡 | Mainnet desplegado. Siguen el APK nuevo, el worker público y Twilio/WhatsApp |
 | Imports rotos | ✅ 0 | TypeScript confirma resolución |
 | `.env.worker` en git | ✅ 0 | No trackeado |
 | ProGuard (APK release) | ✅ ON | Via Gradle en EAS, no en `app.json` (schema inválido) |
@@ -265,6 +265,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-06 | Mainnet chain 56 desplegado: Credit 0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6. Foundry 44/44. La app usa esa direccion si falta la variable de entorno. No redesplegar. | — |
 | 2026-10-04 | Acciones de GitHub: Gitleaks y TruffleHog en cada push y pull request. Repositorio privado, Gitleaks usa el binario abierto. | — |
 | 2026-10-04 | Auditoria de app: identidad antes de KYC en Demo, y el banner de alta no dice Vincule si el contrato de alta ya esta. | — |
 | 2026-10-04 | La vinculación queda por red. El botón Pasar al fondo envía vencerPadrinoAlPool desde la billetera de la frase, sin cambiar contratos. | — |

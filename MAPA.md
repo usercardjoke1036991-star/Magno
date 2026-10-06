@@ -59,6 +59,33 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `web3Config.tsx` — módulo JS/TS
   - Funciones/clases: syncAppKitNetwork, Web3Provider, toEthersWeb3Provider, getEthersSignerFromProvider, web3ConfigDebug
 - `zkService.ts` — módulo JS/TS
+- `.scannerwork/echidna-examples.py` — módulo Python
+- `.scannerwork/echidna-release.py` — módulo Python
+- `.scannerwork/fetch-config.py` — módulo Python
+- `.scannerwork/fetch-sig.py` — módulo Python
+- `.scannerwork/find-medusa-abi.py` — módulo Python
+- `.scannerwork/forge-help-filter.py` — módulo Python
+- `.scannerwork/grep-encodesig.py` — módulo Python
+- `.scannerwork/grep-filter.py` — módulo Python
+- `.scannerwork/halmos-ast.py` — módulo Python
+- `.scannerwork/halmos-links.py` — módulo Python
+- `.scannerwork/halmos-result.py` — módulo Python
+- `.scannerwork/halmos-summary.py` — módulo Python
+- `.scannerwork/halmos-tail.py` — módulo Python
+- `.scannerwork/list-filter.py` — módulo Python
+- `.scannerwork/medusa-pranks.py` — módulo Python
+- `.scannerwork/mythril-logs.py` — módulo Python
+- `.scannerwork/mythril-peek.py` — módulo Python
+- `.scannerwork/mythril-sum.py` — módulo Python
+- `.scannerwork/peek-buildinfo.py` — módulo Python
+- `.scannerwork/peek-bytecode.py` — módulo Python
+- `.scannerwork/print-encodesig.py` — módulo Python
+- `.scannerwork/search-filter.py` — módulo Python
+- `.scannerwork/semgrep-summarize.py` — módulo Python
+- `.scannerwork/slither-low.py` — módulo Python
+- `.scannerwork/slither-sum.py` — módulo Python
+- `.scannerwork/strip-cr.py` — módulo Python
+- `.scannerwork/trim-trace.py` — módulo Python
 - `android/app/src/debug/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/debugOptimized/AndroidManifest.xml` — manifiesto Android
 - `android/app/src/main/AndroidManifest.xml` — manifiesto Android
@@ -201,6 +228,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: SecuritySettings
 - `components/SettingsButton.tsx` — módulo JS/TS
   - Funciones/clases: SettingsButton
+- `components/SponsorPoolButton.tsx` — módulo JS/TS
+  - Funciones/clases: SponsorPoolButton
 - `components/ThemeToggle.tsx` — módulo JS/TS
   - Funciones/clases: ThemeToggle
 - `components/TokenSelector.tsx` — módulo JS/TS
@@ -305,6 +334,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/check-i18n.mjs` — módulo JS/TS
 - `scripts/check-production.mjs` — módulo JS/TS
 - `scripts/deploy-hetzner.mjs` — módulo JS/TS
+- `scripts/deploy-mainnet-nuevo.cjs` — módulo JS/TS
+  - Funciones/clases: DEPLOYED_MAINNET
 - `scripts/deploy-notify.mjs` — módulo JS/TS
 - `scripts/deploy-reserva.cjs` — módulo JS/TS
   - Funciones/clases: DEPLOYED_TESTNET
@@ -401,6 +432,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: normalizePhone, isValidPhone, loadNotificationProfile, saveNotificationProfile
 - `services/notifyClient.ts` — módulo JS/TS
   - Funciones/clases: notifyApiConfigured, notifyJsonFetch, notifyJsonBody
+- `services/padrinoSettle.ts` — módulo JS/TS
+  - Funciones/clases: expiredSponsorDebtors, settleExpiredSponsor
 - `services/passwordRecovery.ts` — módulo JS/TS
   - Funciones/clases: storePasswordRecovery, requestPasswordRecovery, resetPasswordWithEmail
 - `services/phoneOtp.ts` — módulo JS/TS
@@ -604,7 +637,7 @@ Sin desfases detectados entre docs y código.
 
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
-- detectar_logica: 0 crítico(s), 4 aviso(s)
+- detectar_logica: 0 crítico(s), 5 aviso(s)
 - verificar_modulos: 0 crítico(s), 15 aviso(s)
 
 ## Estado

@@ -43,6 +43,7 @@ module.exports = {
       url: process.env.BSC_MAINNET_RPC_URL || 'https://bsc-dataseed.binance.org/',
       chainId: 56,
       accounts: accountsFromEnv(),
+      timeout: 180000,
     },
   },
   paths: {

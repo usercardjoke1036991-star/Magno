@@ -58,7 +58,12 @@
         "EXPO_PUBLIC_INVITE_WEB_BASE": "https://quatriviumcredit.app",
         "EXPO_PUBLIC_PLAY_STORE_URL": "https://play.google.com/store/apps/details?id=com.quatrivium.credit",
         "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID": "546043cd7fbfac1902ccbbbe5b3d3fec",
-        "EXPO_PUBLIC_NOTIFY_API": "https://notify.quatriviumcredit.app"
+        "EXPO_PUBLIC_NOTIFY_API": "https://notify.quatriviumcredit.app",
+        "EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET": "0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6",
+        "EXPO_PUBLIC_FAMA_ADDRESS_MAINNET": "0xa590f241868560AF3f9E2017c7d629FFDEA27e2B",
+        "EXPO_PUBLIC_RESERVA_ADDRESS_MAINNET": "0xa81857F71A11a21d59F59C2190638793266233fB",
+        "EXPO_PUBLIC_ALTA_ADDRESS_MAINNET": "0x50146aDB887dB13Ee7Ffa66792d656127BCB96A4",
+        "EXPO_PUBLIC_CONTRACT_START_BLOCK": "126003181"
       }
     }
   },

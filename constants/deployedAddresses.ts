@@ -14,14 +14,14 @@ export const DEPLOYED_TESTNET = {
 
 export const DEPLOYED_MAINNET = {
   chainId: 56,
-  contract: '',
+  contract: '0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6',
   usdt: '0x55d398326f99059ff775485246999027b3197955',
-  reserva: '',
-  fama: '',
-  alta: '',
-  /** Billetera personal Real (donaciones). El contrato mainnet sigue vacío hasta el deploy. */
+  reserva: '0xa81857F71A11a21d59F59C2190638793266233fB',
+  fama: '0xa590f241868560AF3f9E2017c7d629FFDEA27e2B',
+  alta: '0x50146aDB887dB13Ee7Ffa66792d656127BCB96A4',
+  /** Billetera personal Real (donaciones). */
   founder: '0x5023bf46dB7458B9bb9152a7ffE64f195CD1a047',
-  startBlock: 0,
+  startBlock: 126003181,
 } as const;
 
 export function getRealDonationWallet(): string {
