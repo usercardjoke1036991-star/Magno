@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           version=3.97.9
-          curl -sSfL "https://github.com/trufflesecurity/trufflehog/releases/download/v${version}/trufflehog_${version}_linux_amd64.tar.gz" -o /tmp/trufflehog.tar.gz
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 -sSfL "https://github.com/trufflesecurity/trufflehog/releases/download/v${version}/trufflehog_${version}_linux_amd64.tar.gz" -o /tmp/trufflehog.tar.gz
           tar -xzf /tmp/trufflehog.tar.gz -C /tmp trufflehog
           sudo install -m 0755 /tmp/trufflehog /usr/local/bin/trufflehog
 

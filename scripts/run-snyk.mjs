@@ -18,9 +18,10 @@ if (!token) {
 process.env.SNYK_TOKEN = token;
 
 const extra = process.argv.slice(2);
-const args = extra.length
-  ? extra
-  : ['test', '--severity-threshold=high', '--policy-path=.snyk'];
+const args = extra.length ? extra.slice() : ['test', '--severity-threshold=high'];
+if (!args.some((arg) => arg === '--policy-path' || arg.startsWith('--policy-path='))) {
+  args.push('--policy-path=.snyk');
+}
 
 const ran = spawnSync(binNpx(), ['--yes', 'snyk', ...args], {
   cwd: root,
