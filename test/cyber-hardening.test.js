@@ -2274,6 +2274,8 @@ describe('account entry — password, email and session', () => {
     expect(read('components', 'ReservaSection.tsx')).to.include('preview?.configured && preview.apyKnown');
     const appJson = JSON.parse(read('app.json'));
     expect(appJson.expo.updates.enabled).to.equal(false);
+    expect(JSON.stringify(appJson.expo.android.intentFilters)).to.not.include('www.quatriviumcredit.app');
+    expect(read('plugins', 'withQuatriviumAndroidSecurity.js')).to.not.include('www.quatriviumcredit.app');
     const links = JSON.parse(read('web', '.well-known', 'assetlinks.json'));
     expect(links[0].target.package_name).to.equal('com.quatrivium.credit');
     expect(links[0].target.sha256_cert_fingerprints[0]).to.match(/^DF:EF:CC:D0/);

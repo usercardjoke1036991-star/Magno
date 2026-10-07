@@ -167,7 +167,7 @@ function stripExpPlusFromManifestXml(xml) {
   return out;
 }
 
-const DEEP_HOSTS = ['quatriviumcredit.app', 'www.quatriviumcredit.app'];
+const DEEP_HOSTS = ['quatriviumcredit.app'];
 const DEEP_PATHS = ['/invite', '/history', '/room'];
 
 function ensureHttpsDeepLinks(xml) {
