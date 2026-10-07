@@ -273,6 +273,16 @@ function withQuatriviumAndroidSecurity(config) {
       const proguardPath = path.join(androidRoot, 'app/proguard-rules.pro');
       if (fs.existsSync(proguardPath)) {
         let rules = fs.readFileSync(proguardPath, 'utf8');
+        if (!rules.includes('-dontwarn java.awt.Component')) {
+          rules += `
+
+# JNA desktop stubs pulled by WalletConnect; they do not exist on Android.
+-dontwarn java.awt.Component
+-dontwarn java.awt.**
+-dontwarn javax.swing.**
+-dontwarn com.sun.jna.**
+`;
+        }
         if (!rules.includes('public static *** *(...)')) {
           rules = rules.replace(
             /-assumenosideeffects class android\.util\.Log \{[\s\S]*?\}/,
@@ -289,8 +299,8 @@ function withQuatriviumAndroidSecurity(config) {
 }
 `;
           }
-          fs.writeFileSync(proguardPath, rules, 'utf8');
         }
+        fs.writeFileSync(proguardPath, rules, 'utf8');
       }
       return cfg;
     },

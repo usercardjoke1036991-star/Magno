@@ -9,11 +9,16 @@ export type LiveCreditFlags = {
   deviceMatches: boolean;
   /** False si el usuario quitó el número en Ajustes. */
   phoneActive?: boolean;
+  /** Lectura de `kycExigido()`. Sin el campo, Real sigue pidiendo KYC. */
+  kycExigido?: boolean;
+  /** Lectura de `identidadExigida()`. Sin el campo, Real sigue pidiendo número. */
+  identidadExigida?: boolean;
 };
 
-/** Cuenta Real: KYC obligatorio antes de pedir. Demo no lo pide. */
-export function liveNeedsKyc(demo: boolean, kycDeclarado: boolean): boolean {
-  return !demo && !kycDeclarado;
+/** Cuenta Real: KYC solo si el contrato lo exige. Demo no lo pide. */
+export function liveNeedsKyc(demo: boolean, kycDeclarado: boolean, required = true): boolean {
+  if (demo || !required) return false;
+  return !kycDeclarado;
 }
 
 /** Cuenta Real: número activo en la cuenta. Si lo quita, hay que volver a verificar. Demo no lo pide. */
@@ -59,21 +64,27 @@ export function liveNeedsAccess(demo: boolean, paidUsd: number, altaPaid = false
 }
 
 export function liveCreditReady(demo: boolean, flags: LiveCreditFlags): boolean {
+  const kycRequired = flags.kycExigido !== false;
+  const identityRequired = flags.identidadExigida !== false;
   return (
     !liveNeedsPhrase(flags.phraseBackedUp) &&
     !liveNeedsEmail(demo, flags.hasEmail) &&
-    !liveNeedsPhone(demo, flags.identityBound, flags.phoneActive !== false) &&
-    !liveNeedsKyc(demo, flags.kycDeclarado) &&
-    !liveNeedsDeviceMatch(demo, flags.deviceMatches, Boolean(flags.phoneActive))
+    (identityRequired
+      ? !liveNeedsPhone(demo, flags.identityBound, flags.phoneActive !== false)
+      : true) &&
+    !liveNeedsKyc(demo, flags.kycDeclarado, kycRequired) &&
+    (identityRequired
+      ? !liveNeedsDeviceMatch(demo, flags.deviceMatches, Boolean(flags.phoneActive))
+      : true)
   );
 }
 
 export type LoanGateBannerRow = 'phrase' | 'email' | 'kyc' | 'phone';
 
 /** Correo, número y KYC solo en Real, después del alta. Demo no abre esa verificación. */
-export function identityUnlocked(paidUsd: number): boolean {
+export function identityUnlocked(paidUsd: number, altaPaid = false): boolean {
   if (isDemoAccount()) return false;
-  return hasCreditAccess(paidUsd);
+  return hasCreditAccess(paidUsd, altaPaid);
 }
 
 /** En el hub solo quedan los requisitos de préstamo que aún no están confirmados. */
@@ -84,13 +95,15 @@ export function loanGateBannerRows(input: {
   emailDone: boolean;
   kycDone: boolean;
   phoneDone: boolean;
+  kycRequired?: boolean;
+  phoneRequired?: boolean;
 }): LoanGateBannerRow[] {
   const rows: LoanGateBannerRow[] = [];
   if (!input.phraseDone) rows.push('phrase');
   if (!input.accessPaid || !input.showIdentity) return rows;
   if (!input.emailDone) rows.push('email');
-  if (!input.kycDone) rows.push('kyc');
-  if (!input.phoneDone) rows.push('phone');
+  if (input.kycRequired !== false && !input.kycDone) rows.push('kyc');
+  if (input.phoneRequired !== false && !input.phoneDone) rows.push('phone');
   return rows;
 }
 
@@ -98,19 +111,25 @@ export function liveCreditBlockReason(
   demo: boolean,
   flags: LiveCreditFlags
 ): 'phrase' | 'email' | 'phone' | 'kyc' | 'device' | null {
+  const kycRequired = flags.kycExigido !== false;
+  const identityRequired = flags.identidadExigida !== false;
   if (liveNeedsPhrase(flags.phraseBackedUp)) return 'phrase';
   if (liveNeedsEmail(demo, flags.hasEmail)) return 'email';
-  if (liveNeedsPhone(demo, flags.identityBound, flags.phoneActive !== false)) return 'phone';
-  if (liveNeedsKyc(demo, flags.kycDeclarado)) return 'kyc';
-  if (liveNeedsDeviceMatch(demo, flags.deviceMatches, Boolean(flags.phoneActive))) return 'device';
+  if (identityRequired && liveNeedsPhone(demo, flags.identityBound, flags.phoneActive !== false)) return 'phone';
+  if (liveNeedsKyc(demo, flags.kycDeclarado, kycRequired)) return 'kyc';
+  if (identityRequired && liveNeedsDeviceMatch(demo, flags.deviceMatches, Boolean(flags.phoneActive))) return 'device';
   return null;
 }
 
-export function creditNeedsKyc(userInfo: { kycDeclarado: boolean }): boolean {
-  return liveNeedsKyc(isDemoAccount(), Boolean(userInfo.kycDeclarado));
+export function creditNeedsKyc(userInfo: { kycDeclarado: boolean; kycExigido?: boolean }): boolean {
+  return liveNeedsKyc(isDemoAccount(), Boolean(userInfo.kycDeclarado), userInfo.kycExigido !== false);
 }
 
-export function creditNeedsPhone(userInfo: { identityBound: boolean }, phoneActive = true): boolean {
+export function creditNeedsPhone(
+  userInfo: { identityBound: boolean; identidadExigida?: boolean },
+  phoneActive = true
+): boolean {
+  if (userInfo.identidadExigida === false) return false;
   return liveNeedsPhone(isDemoAccount(), Boolean(userInfo.identityBound), phoneActive);
 }
 
@@ -122,7 +141,12 @@ export function creditNeedsPhrase(phraseBackedUp: boolean): boolean {
   return liveNeedsPhrase(phraseBackedUp);
 }
 
-export function creditNeedsDeviceMatch(deviceMatches: boolean, phoneActive = false): boolean {
+export function creditNeedsDeviceMatch(
+  deviceMatches: boolean,
+  phoneActive = false,
+  identityRequired = true
+): boolean {
+  if (!identityRequired) return false;
   return liveNeedsDeviceMatch(isDemoAccount(), deviceMatches, phoneActive);
 }
 
@@ -157,13 +181,13 @@ export function verificationFeeLabel(amount: number): string {
   return amount.toFixed(2);
 }
 
-/** Alta nueva = 4 USDT de una vez. El legado acepta 2. */
+/** Alta nueva = `registroHecho`. Una donación no sustituye el alta. El legado acepta 2. */
 export function hasCreditAccess(paidUsd: number, altaPaid = false): boolean {
   if (altaPaid) return true;
+  if (isAltaConfigured()) return false;
   const paid = Number(paidUsd);
   if (!Number.isFinite(paid)) return false;
-  const need = isAltaConfigured() ? CREDIT_ALTA_USDT : CREDIT_ACCESS_LEGACY_USDT;
-  return paid + 1e-9 >= need;
+  return paid + 1e-9 >= CREDIT_ACCESS_LEGACY_USDT;
 }
 
 /** Con Alta, todo lo donado cuenta. Legado sin Alta: los primeros 2 eran la puerta. */

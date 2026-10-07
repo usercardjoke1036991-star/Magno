@@ -54,8 +54,21 @@ if (existsSync(easPath)) {
   try {
     const eas = JSON.parse(readFileSync(easPath, 'utf8'));
     const prod = eas?.build?.production?.env || {};
-    if (prod.EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET) {
-      failures.push('eas.json production no debe incluir EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET');
+    // El APK de producción también lleva Demo (97): una dirección de prueba fijada debe ser la viva del repo.
+    const deployedSrc = readFileSync(resolve(root, 'constants', 'deployedAddresses.ts'), 'utf8');
+    const testnetBlock = deployedSrc.match(/export const DEPLOYED_TESTNET = \{([\s\S]*?)\}/)?.[1] || '';
+    const pinned = {
+      EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET: 'contract',
+      EXPO_PUBLIC_FAMA_ADDRESS_TESTNET: 'fama',
+      EXPO_PUBLIC_RESERVA_ADDRESS_TESTNET: 'reserva',
+      EXPO_PUBLIC_ALTA_ADDRESS_TESTNET: 'alta',
+    };
+    for (const [envKey, field] of Object.entries(pinned)) {
+      if (!prod[envKey]) continue;
+      const live = testnetBlock.match(new RegExp(`${field}: '(0x[0-9a-fA-F]{40})'`))?.[1] || '';
+      if (!live || String(prod[envKey]).toLowerCase() !== live.toLowerCase()) {
+        failures.push(`eas.json production: ${envKey} no coincide con DEPLOYED_TESTNET.${field}`);
+      }
     }
     if (String(prod.EXPO_PUBLIC_CHAIN_ID) !== '56') {
       failures.push('eas.json production debe usar EXPO_PUBLIC_CHAIN_ID=56');

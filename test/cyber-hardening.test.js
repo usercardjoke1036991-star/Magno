@@ -2252,4 +2252,32 @@ describe('account entry — password, email and session', () => {
     const methodsUi = fs.readFileSync(path.join(__dirname, '..', 'components', 'AuthMethodPicker.tsx'), 'utf8');
     expect(methodsUi).to.include("confirmFunds('security')");
   });
+
+  it('reads alta, reserve rate and KYC flags from the chain instead of guessing', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const read = (...parts) => fs.readFileSync(path.join(__dirname, '..', ...parts), 'utf8');
+    const gates = read('utils', 'creditGates.ts');
+    expect(gates).to.match(/if \(altaPaid\) return true;\s*if \(isAltaConfigured\(\)\) return false;/);
+    expect(gates).to.include('liveNeedsKyc(demo, flags.kycDeclarado, kycRequired)');
+    const service = read('services', 'quatriviumCreditService.ts');
+    expect(service).to.not.include('const floor = 4n * 10n ** 18n');
+    expect(service).to.match(/kycExigido = Boolean\(await credit\.kycExigido\(\)\);\s*\} catch \{\s*kycExigido = true;/);
+    const home = read('app', 'index.tsx');
+    expect(home).to.include('hasCreditAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada))');
+    expect(home).to.not.match(/hasCreditAccess\(userInfo\.donatedUsd \|\| 0\)[^,]/);
+    const balances = read('hooks', 'useWeb3Balances.ts');
+    expect(balances).to.not.include('!isDemoAccount() || required');
+    expect(balances).to.include('altaPagada: altaHecha');
+    const reserva = read('services', 'reservaService.ts');
+    expect(reserva).to.not.include('apyBps: RESERVA_MAX_APY_BP');
+    expect(read('components', 'ReservaSection.tsx')).to.include('preview?.configured && preview.apyKnown');
+    const appJson = JSON.parse(read('app.json'));
+    expect(appJson.expo.updates.enabled).to.equal(false);
+    const links = JSON.parse(read('web', '.well-known', 'assetlinks.json'));
+    expect(links[0].target.package_name).to.equal('com.quatrivium.credit');
+    expect(links[0].target.sha256_cert_fingerprints[0]).to.match(/^DF:EF:CC:D0/);
+    const fr = JSON.parse(read('i18n', 'locales', 'fr.json'));
+    expect(fr.liveCreditNotReady).to.not.include('est ouvert');
+  });
 });

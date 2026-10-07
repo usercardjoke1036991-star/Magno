@@ -15,13 +15,8 @@ HTTPS, `Content-Type: application/json`, **sin** redirección HTTP→HTTPS rota 
 
 ## Huella SHA-256
 
-Después del primer `eas build --platform android --profile production`:
+La huella del APK de producción (certificado EAS, no el keystore local) ya está en el JSON:
 
-```powershell
-eas credentials -p android
-```
+`DF:EF:CC:D0:00:39:72:5E:B7:3A:A6:7D:B0:E7:7E:91:0A:E7:46:4D:EE:8D:F2:74:86:54:E2:1D:A7:3E:D2:4A`
 
-O en Play Console → Configuración → Integridad de la app → huella del certificado de firma de Play.
-
-Sustituye `REEMPLAZAR_SHA256_DEL_CERTIFICADO_PLAY_O_EAS` por el valor con dos puntos (`AA:BB:…`).
-Si usas Play App Signing, usa la huella **de Google**, no la de upload.
+El mismo archivo está en `web/.well-known/assetlinks.json`. El apex y `www` tienen que responder 200, sin redirección. Si Play firma la app con otro certificado, añade esa huella al mismo arreglo.

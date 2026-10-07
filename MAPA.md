@@ -368,6 +368,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `scripts/run-sonar.mjs` — módulo JS/TS
 - `scripts/scan-mobile.mjs` — módulo JS/TS
 - `scripts/security-check.mjs` — módulo JS/TS
+  - Funciones/clases: DEPLOYED_TESTNET
 - `scripts/seed-testnet.cjs` — módulo JS/TS
 - `scripts/sentinel.py` — módulo Python
   - Funciones/clases: load_dotenv, env_addr, telegram_send, read_nav, read_reserva, check_once, parse_args, main

@@ -33,6 +33,7 @@
     "- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool."
   ],
   "cambios": [
+    "- [2026-10-07] Cierre de auditoria APK: alta = registroHecho (no donacion), Reserva sin 'Ahora 12%' sin lectura, KYC/identidad siguen el contrato en Real, updates OTA apagadas para el proximo APK, assetlinks.json listo en web/.well-known, frances corregido; security:check acepta las direcciones Demo vivas en eas.json",
     "- [2026-10-06] Foundry 44/44 en el codigo actual. Credit de mainnet cae a la direccion oficial si falta la variable. Los RPC de Real exigen HTTPS.",
     "- [2026-10-04] TruffleHog en GitHub ya no usa la imagen de Docker. Corre el programa directo, que es lo que fallo con el codigo 125.",
     "- [2026-10-04] Cada subida a GitHub pasa por Gitleaks y TruffleHog. El aviso no muestra el valor encontrado. El recorrido de todo el historial se lanza a mano.",
@@ -81,9 +82,8 @@
     "- [2026-10-01] 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador.",
     "- [2026-10-01] Sonar usa tsconfig propio y deja fuera JSON de i18n. Guardar no muestra listo si falta la billetera.",
     "- [2026-10-01] Ajustes: Guardar queda desactivado tras guardar y se activa solo si hay cambios nuevos.",
-    "- [2026-10-01] Red: enlace de invitacion en tarjeta con copiar (HTTPS quatriviumcredit.app/invite). El codigo de referido acepta guiones, espacios o el enlace al crear la cuenta.",
-    "- [2026-10-01] Avisos: se puede cambiar el Telegram si pierde la cuenta; un vinculo por billetera."
+    "- [2026-10-01] Red: enlace de invitacion en tarjeta con copiar (HTTPS quatriviumcredit.app/invite). El codigo de referido acepta guiones, espacios o el enlace al crear la cuenta."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-06] Cambio: Foundry 44/44 en el codigo actual. Credit de mainnet cae a la direccion oficial si falta la variable. Los RPC de Real exigen HTTPS."
+  "ultima_sesion": "[2026-10-07] Cambio: Cierre de auditoria APK: alta = registroHecho (no donacion), Reserva sin 'Ahora 12%' sin lectura, KYC/identidad siguen el contrato en Real, updates OTA apagadas para el proximo APK, assetlinks.json listo en web/.well-known, frances corregido; security:check acepta las direcciones Demo vivas en eas.json"
 }

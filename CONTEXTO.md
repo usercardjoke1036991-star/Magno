@@ -265,6 +265,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-07 | Cierre de auditoria APK: alta = registroHecho (no donacion), Reserva sin 'Ahora 12%' sin lectura, KYC/identidad siguen el contrato en Real, updates OTA apagadas para el proximo APK, assetlinks.json listo en web/.well-known, frances corregido; security:check acepta las direcciones Demo vivas en eas.json | — |
 | 2026-10-06 | Mainnet chain 56 desplegado: Credit 0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6. Foundry 44/44. La app usa esa direccion si falta la variable de entorno. No redesplegar. | — |
 | 2026-10-04 | Acciones de GitHub: Gitleaks y TruffleHog en cada push y pull request. Repositorio privado, Gitleaks usa el binario abierto. | — |
 | 2026-10-04 | Auditoria de app: identidad antes de KYC en Demo, y el banner de alta no dice Vincule si el contrato de alta ya esta. | — |

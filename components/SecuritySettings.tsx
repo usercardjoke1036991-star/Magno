@@ -123,7 +123,7 @@ export const SecuritySettings: React.FC = () => {
 
   const kycOk = userInfo.kycDeclarado;
   const phoneOk = Boolean(phoneActive && userInfo.identityBound);
-  const accessPaid = identityUnlocked(userInfo.donatedUsd || 0);
+  const accessPaid = identityUnlocked(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada));
   const accessOpen = isAccessPaymentEnabled();
 
   const identityHint = (done: boolean, doneText: string, todoKey: TranslationKey) => {

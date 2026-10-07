@@ -17,6 +17,7 @@ interface DonateFounderSectionProps {
   walletConnected: boolean;
   founderAddress?: string;
   donatedUsd: number;
+  altaPaid?: boolean;
   lpUsd: number;
   canSend?: boolean;
   onDonate: (amount: string) => void;
@@ -29,6 +30,7 @@ export function DonateFounderSection({
   walletConnected,
   founderAddress,
   donatedUsd,
+  altaPaid = false,
   lpUsd,
   canSend = false,
   onDonate,
@@ -42,7 +44,7 @@ export function DonateFounderSection({
   const parsed = parsePositiveDecimal(amount);
   const fameGain = parsed ? fameFromDonateUsd(Number(parsed)) : 0;
   const voluntary = voluntaryDonateUsd(donatedUsd);
-  const accessPaid = hasCreditAccess(donatedUsd);
+  const accessPaid = hasCreditAccess(donatedUsd, altaPaid);
 
   return (
     <View style={styles.stack}>

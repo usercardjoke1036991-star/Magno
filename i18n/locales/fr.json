@@ -717,7 +717,7 @@
   "liveNetworkPendingLead": "Le crédit Réel n’est pas encore actif.",
   "errEmptyRevert": "Le crédit Réel n’est pas encore actif.",
   "errEmptyRevertDemo": "Attendez 48 heures entre deux prêts. Voyez le compte à rebours sur Demander.",
-  "liveCreditNotReady": "Le crédit du Compte réel est ouvert au lancement.",
+  "liveCreditNotReady": "Le crédit du Compte réel se signe au lancement.",
   "appModeLiveBannerLead": "Argent réel.",
   "termDays": "{days} jours",
   "lockedLevelsHint": "Ils restent verrouillés. Touchez un niveau pour voir montant, taux, délai et intérêts.",

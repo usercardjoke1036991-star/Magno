@@ -4,7 +4,6 @@ import { assertTrustedRpc, getProviderWithFallback, isDemoAccount } from '../con
 import { getReservaAddress, isReservaConfigured, reservaUsesPracticeLedger, RESERVA_ABI } from '../constants/reservaConfig';
 import {
   RESERVA_LOCK_SECONDS,
-  RESERVA_MAX_APY_BP,
   RESERVA_MIN_LEVEL,
   RESERVA_MIN_LOCK_WEI,
   reservaBoostRedBp,
@@ -33,6 +32,7 @@ export type ReservaPreview = {
   enRed: boolean;
   boteWei: bigint;
   apyBps: number;
+  apyKnown: boolean;
   techoWei: bigint;
   tramo: 1 | 2 | 3;
   boostBp: number;
@@ -69,7 +69,8 @@ function emptyPreview(practice: boolean, configured: boolean): ReservaPreview {
     activa: false,
     enRed: false,
     boteWei: 0n,
-    apyBps: RESERVA_MAX_APY_BP,
+    apyBps: 0,
+    apyKnown: false,
     techoWei: 0n,
     tramo: 1,
     boostBp: 0,
@@ -99,7 +100,8 @@ export async function loadReservaPreview(wallet: string, enRedHint = false): Pro
       activa: pos.activa,
       enRed,
       boteWei: await loadDemoBote(),
-      apyBps: RESERVA_MAX_APY_BP,
+      apyBps: 0,
+      apyKnown: false,
       techoWei: pos.activa ? reservaTechoWei(principal, elapsed) : 0n,
       tramo,
       boostBp: enRed ? reservaBoostRedBp(tramo) : 0,
@@ -124,6 +126,7 @@ export async function loadReservaPreview(wallet: string, enRedHint = false): Pro
   const now = Math.floor(Date.now() / 1000);
   const elapsed = activa ? now - desde : 0;
   const tramo = reservaTramoUsd(Number(formatUnits(principal || 0n, 18)));
+  const saludApy = salud ? Number(salud.apyBps ?? salud[2]) : Number.NaN;
   return {
     practice: false,
     configured: true,
@@ -134,7 +137,8 @@ export async function loadReservaPreview(wallet: string, enRedHint = false): Pro
     activa,
     enRed,
     boteWei: BigInt(salud ? (salud.bote_ ?? salud[0] ?? bote) : bote || 0n),
-    apyBps: Number(salud ? (salud.apyBps ?? salud[2] ?? RESERVA_MAX_APY_BP) : RESERVA_MAX_APY_BP),
+    apyBps: Number.isFinite(saludApy) ? saludApy : 0,
+    apyKnown: Number.isFinite(saludApy),
     techoWei: activa ? reservaTechoWei(principal, elapsed) : 0n,
     tramo,
     boostBp: enRed ? reservaBoostRedBp(tramo) : 0,

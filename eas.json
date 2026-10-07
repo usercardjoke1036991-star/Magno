@@ -48,7 +48,8 @@
       "autoIncrement": true,
       "channel": "production",
       "android": {
-        "image": "sdk-54"
+        "image": "sdk-54",
+        "buildType": "apk"
       },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
@@ -59,6 +60,10 @@
         "EXPO_PUBLIC_PLAY_STORE_URL": "https://play.google.com/store/apps/details?id=com.quatrivium.credit",
         "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID": "546043cd7fbfac1902ccbbbe5b3d3fec",
         "EXPO_PUBLIC_NOTIFY_API": "https://notify.quatriviumcredit.app",
+        "EXPO_PUBLIC_CONTRACT_ADDRESS_TESTNET": "0xD318f39834A5e798a11D2535c6c9D1E1270e6778",
+        "EXPO_PUBLIC_FAMA_ADDRESS_TESTNET": "0xEC2793986aE252993e179a5D7F3410c4A076a711",
+        "EXPO_PUBLIC_RESERVA_ADDRESS_TESTNET": "0x98bEd5162770621Dd57458C9BFbEC14aEfD147C8",
+        "EXPO_PUBLIC_ALTA_ADDRESS_TESTNET": "0xE890627734D7350132988561247945624991f063",
         "EXPO_PUBLIC_CONTRACT_ADDRESS_MAINNET": "0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6",
         "EXPO_PUBLIC_FAMA_ADDRESS_MAINNET": "0xa590f241868560AF3f9E2017c7d629FFDEA27e2B",
         "EXPO_PUBLIC_RESERVA_ADDRESS_MAINNET": "0xa81857F71A11a21d59F59C2190638793266233fB",

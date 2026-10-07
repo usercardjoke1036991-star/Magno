@@ -392,11 +392,23 @@ export const QuatriviumCreditService = {
         throw new Error('access-required');
       }
       let kycDeclarado = false;
+      let kycExigido = true;
+      let identidadExigida = true;
       let identityBound = false;
       try {
         kycDeclarado = Boolean(await credit.kycDeclarado(userAddress));
       } catch {
         kycDeclarado = false;
+      }
+      try {
+        kycExigido = Boolean(await credit.kycExigido());
+      } catch {
+        kycExigido = true;
+      }
+      try {
+        identidadExigida = Boolean(await credit.identidadExigida());
+      } catch {
+        identidadExigida = true;
       }
       let deviceMatches = false;
       try {
@@ -416,11 +428,14 @@ export const QuatriviumCreditService = {
         phraseBackedUp: true,
         deviceMatches,
         phoneActive,
+        kycExigido,
+        identidadExigida,
       })) {
         if (!email) throw new Error('email-required');
-        if (!identityBound || !phoneActive) throw new Error('identity required');
-        if (!deviceMatches && !phoneActive) throw new Error('device-mismatch');
-        throw new Error('kyc required');
+        if (identidadExigida && (!identityBound || !phoneActive)) throw new Error('identity required');
+        if (identidadExigida && !deviceMatches && !phoneActive) throw new Error('device-mismatch');
+        if (kycExigido) throw new Error('kyc required');
+        throw new Error('access-required');
       }
     }
     const credit = contractWith(signer);
@@ -873,10 +888,6 @@ export const QuatriviumCreditService = {
       } catch {
         donatedWei = '0';
       }
-    }
-    if (await QuatriviumCreditService.altaPagada(userAddress)) {
-      const floor = 4n * 10n ** 18n;
-      if (BigInt(donatedWei || '0') < floor) donatedWei = floor.toString();
     }
     return {
       nivelActual,

@@ -9,6 +9,7 @@ import { useAppMode } from '../wallet/AppModeContext';
 
 interface CreditAccessBannerProps {
   paidUsd: number;
+  altaPaid?: boolean;
   canPay: boolean;
   isLoading?: boolean;
   tokenSymbol?: string;
@@ -20,6 +21,7 @@ interface CreditAccessBannerProps {
 
 export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
   paidUsd,
+  altaPaid = false,
   canPay,
   isLoading = false,
   needRegister = false,
@@ -30,7 +32,7 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const { mode } = useAppMode();
-  const paid = hasCreditAccess(paidUsd);
+  const paid = hasCreditAccess(paidUsd, altaPaid);
   const showPay = !((mode === 'demo' && !isAltaConfigured()) || paid);
   const showRegister = Boolean(needRegister && !showPay);
 

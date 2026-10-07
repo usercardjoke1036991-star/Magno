@@ -122,7 +122,7 @@ export const AdminTotpHost: React.FC<{ children: React.ReactNode }> = ({ childre
             />
             {error ? <AppText style={[styles.err, { color: colors.danger }]}>{error}</AppText> : null}
             <TouchableOpacity onPress={() => void submit()} disabled={busy}>
-              {busy ? <ActivityIndicator /> : <AppText style={{ color: colors.accent }}>{t('adminTotpConfirm')}</AppText>}
+              {busy ? <ActivityIndicator /> : <AppText style={{ color: colors.primary }}>{t('adminTotpConfirm')}</AppText>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => finish(false)}>
               <AppText style={{ color: colors.textMuted }}>{t('fundsConfirmCancel')}</AppText>

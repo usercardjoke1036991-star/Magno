@@ -183,7 +183,7 @@ function HomeScreenWithHooks() {
     userInfo.isRegistered,
     userInfo.hasActiveLoan
   );
-  const altaPaid = hasCreditAccess(userInfo.donatedUsd || 0);
+  const altaPaid = hasCreditAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada));
   const altaVisible = !(mode === 'demo' && !isAltaConfigured()) && !altaPaid;
   const canPayAlta = canPayCreditAccess({
     protocolCanDonate: userInfo.canDonate,
@@ -202,6 +202,8 @@ function HomeScreenWithHooks() {
     phraseBackedUp,
     deviceMatches: userInfo.deviceMatches,
     phoneActive,
+    kycExigido: userInfo.kycExigido,
+    identidadExigida: userInfo.identidadExigida,
   });
   const identityBlocked = !liveIdentityReady;
   const labelTier = (tier: (typeof loanTiers)[number]) => ({
@@ -365,6 +367,7 @@ function HomeScreenWithHooks() {
         {needPay || needRegister ? (
           <CreditAccessBanner
             paidUsd={userInfo.donatedUsd || 0}
+            altaPaid={Boolean(userInfo.altaPagada)}
             canPay={canPayAlta}
             isLoading={txLoading}
             needRegister={needRegister}
@@ -387,7 +390,9 @@ function HomeScreenWithHooks() {
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}
-          accessPaid={hasCreditAccess(userInfo.donatedUsd || 0)}
+          kycRequired={userInfo.kycExigido}
+          phoneRequired={userInfo.identidadExigida}
+          accessPaid={hasCreditAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada))}
           deviceMatches={userInfo.deviceMatches}
           walletAddress={walletAddress || ''}
           isRegistered={userInfo.isRegistered}
@@ -539,6 +544,7 @@ function HomeScreenWithHooks() {
           <>
             <CreditAccessBanner
               paidUsd={userInfo.donatedUsd || 0}
+              altaPaid={Boolean(userInfo.altaPagada)}
               canPay={canPayAlta}
               isLoading={txLoading}
               tokenSymbol={selectedToken.symbol}
@@ -559,6 +565,7 @@ function HomeScreenWithHooks() {
           <AppSubsection title={t('subsectionActivate')} icon="id">
             <CreditAccessBanner
               paidUsd={userInfo.donatedUsd || 0}
+              altaPaid={Boolean(userInfo.altaPagada)}
               canPay={canPayAlta}
               isLoading={txLoading}
               tokenSymbol={selectedToken.symbol}
@@ -614,6 +621,7 @@ function HomeScreenWithHooks() {
       >
         <CreditAccessBanner
           paidUsd={userInfo.donatedUsd || 0}
+          altaPaid={Boolean(userInfo.altaPagada)}
           canPay={canPayAlta}
           isLoading={txLoading}
           tokenSymbol={selectedToken.symbol}
@@ -625,7 +633,9 @@ function HomeScreenWithHooks() {
           emailDone={hasVerifiedEmail}
           phraseDone={phraseBackedUp}
           showIdentity={mode !== 'demo'}
-          accessPaid={hasCreditAccess(userInfo.donatedUsd || 0)}
+          kycRequired={userInfo.kycExigido}
+          phoneRequired={userInfo.identidadExigida}
+          accessPaid={hasCreditAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada))}
           deviceMatches={userInfo.deviceMatches}
           walletAddress={walletAddress || ''}
           isRegistered={userInfo.isRegistered}
@@ -669,7 +679,7 @@ function HomeScreenWithHooks() {
               cooldownRestante={userInfo.userProgress.cooldownRestante}
               isRegistered={creditOnChain}
               identityBlocked={identityBlocked}
-              accessBlocked={!servicesOpen || creditNeedsAccess(userInfo.donatedUsd || 0)}
+              accessBlocked={!servicesOpen || creditNeedsAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada))}
               contractReady={creditReady}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={servicesOpen ? handleSolicitarCredito : () => denyUse()}
@@ -697,7 +707,7 @@ function HomeScreenWithHooks() {
               ultimoPrestamoTimestamp={0}
               isRegistered={creditOnChain}
               identityBlocked={identityBlocked}
-              accessBlocked={!servicesOpen || creditNeedsAccess(userInfo.donatedUsd || 0)}
+              accessBlocked={!servicesOpen || creditNeedsAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada))}
               contractReady={creditReady}
               onActivateCredit={() => setRoom('credit')}
               onRequestLoan={servicesOpen ? handleSolicitarCredito : () => denyUse()}
@@ -804,6 +814,7 @@ function HomeScreenWithHooks() {
           walletConnected={Boolean(walletAddress)}
           founderAddress={userInfo.founderAddress}
           donatedUsd={userInfo.donatedUsd || 0}
+          altaPaid={Boolean(userInfo.altaPagada)}
           lpUsd={Number.parseFloat(balances.lpBalance) || 0}
           canSend={servicesOpen && isDonationEnabled()}
           onDonate={servicesOpen ? handleDonar : () => denyUse()}

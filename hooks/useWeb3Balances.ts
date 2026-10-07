@@ -97,6 +97,7 @@ export interface UserInfo {
     lastHito: number;
   };
   donatedUsd: number;
+  altaPagada: boolean;
   famaCaja: number;
   famaRed: number;
   famaRacha: number;
@@ -168,6 +169,7 @@ const EMPTY_USER_INFO: UserInfo = {
   creditHistory: { paidOnTime: 0, missedLoans: 0, penalties: 0 },
   userProgress: { nivelActual: 1, solicitudesCompletadas: 0, ultimoPrestamoTimestamp: 0, cooldownRestante: 0, bonusPending: 0, nextMilestone: 100, lastHito: 0 },
   donatedUsd: 0,
+  altaPagada: false,
   famaCaja: 0,
   famaRed: 0,
   famaRacha: 0,
@@ -249,7 +251,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       let poolCash = '0.00';
       let isTokenSupported = false;
       let curveRateBps = 0;
-      let kycExigido = false;
+      let kycExigido = !isDemoAccount();
       if (isContractConfigured()) {
         try {
           const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
@@ -266,7 +268,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           try {
             kycExigido = Boolean(await creditContract.kycExigido());
           } catch {
-            kycExigido = false;
+            kycExigido = !isDemoAccount();
           }
           try {
             const nav = (await creditContract.totalLiquidity(tokenAddress)) as bigint;
@@ -295,7 +297,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           ...EMPTY_USER_INFO,
           isTokenSupported,
           curveRateBps,
-          kycExigido: !isDemoAccount() || kycExigido,
+          kycExigido,
           identidadExigida: !isDemoAccount(),
           canDonate: false,
           canCanjearFama: false,
@@ -372,7 +374,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             maxLoanLevel: MAX_LOAN_LEVEL,
             canClaimHitos: false,
             isTokenSupported: isOfficialWorldToken(tokenAddress) || isTokenSupported,
-            kycExigido: !isDemoAccount() || kycExigido,
+            kycExigido,
             identidadExigida: !isDemoAccount(),
           };
         });
@@ -538,6 +540,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           const lastTs = Number(progress.ultimoPrestamoTimestamp);
           const cooldown = cooldownRestanteDesdeTimestamp(lastTs);
           const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
+          const altaHecha = Boolean(await QuatriviumCreditService.altaPagada(walletAddress));
           if (live()) {
             setUserInfo((prev) => ({
               ...prev,
@@ -551,6 +554,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
                 lastHito: Number(progress.lastHito || 0),
               },
               donatedUsd: Number(formatUnits(BigInt(asWeiString(progress.donatedWei)), 18)),
+              altaPagada: altaHecha,
             }));
           }
         } catch (e) {
@@ -661,11 +665,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
         try {
           let declared = false;
-          let required = false;
+          let required = !isDemoAccount();
           try {
             required = Boolean(await creditContract.kycExigido());
           } catch {
-            required = false;
+            required = !isDemoAccount();
           }
           try {
             declared = Boolean(await creditContract.kycDeclarado(walletAddress));
@@ -675,19 +679,19 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           setUserInfo((prev) => ({
             ...prev,
             kycDeclarado: declared,
-            kycExigido: !isDemoAccount() || required,
+            kycExigido: required,
           }));
         } catch {
           setUserInfo((prev) => ({ ...prev, kycDeclarado: false, kycExigido: !isDemoAccount() }));
         }
 
         try {
-          let requiredIdentity = false;
+          let requiredIdentity = !isDemoAccount();
           let bound = false;
           try {
             requiredIdentity = Boolean(await creditContract.identidadExigida());
           } catch {
-            requiredIdentity = false;
+            requiredIdentity = !isDemoAccount();
           }
           try {
             const phoneHash = String((await creditContract.phoneHashOf(walletAddress)) || '');
@@ -701,7 +705,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             }
             setUserInfo((prev) => ({
               ...prev,
-              identidadExigida: !isDemoAccount() || requiredIdentity,
+              identidadExigida: requiredIdentity,
               identityBound: bound,
               deviceHash,
               deviceMatches: walletRunsOnThisDevice(deviceHash, localHash),
@@ -710,7 +714,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             bound = false;
             setUserInfo((prev) => ({
               ...prev,
-              identidadExigida: !isDemoAccount() || requiredIdentity,
+              identidadExigida: requiredIdentity,
               identityBound: false,
               deviceHash: '',
               deviceMatches: isDemoAccount(),

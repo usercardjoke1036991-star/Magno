@@ -392,7 +392,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('seedBannerTitle'), t('seedNeedBeforeLoan'));
       return;
     }
-    if (creditNeedsAccess(userInfo.donatedUsd || 0)) {
+    if (creditNeedsAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada))) {
       Alert.alert(t('creditAccessTitle'), t('creditAccessNeed'));
       return;
     }
@@ -408,7 +408,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('otpTitle'), t('otpNeedBeforeLoan'));
       return;
     }
-    if (creditNeedsDeviceMatch(userInfo.deviceMatches, phoneReady)) {
+    if (creditNeedsDeviceMatch(userInfo.deviceMatches, phoneReady, userInfo.identidadExigida !== false)) {
       Alert.alert(t('deviceBannerTitle'), t('seedNeedDevice'));
       return;
     }
@@ -788,7 +788,7 @@ export const useHomeHandlers = ({
       return;
     }
     if (!ensureCreditReady()) return;
-    if (hasCreditAccess(Number(userInfo.donatedUsd || 0))) return;
+    if (hasCreditAccess(Number(userInfo.donatedUsd || 0), Boolean(userInfo.altaPagada))) return;
     if (walletAddress && (await QuatriviumCreditService.altaPagada(walletAddress))) return;
     if (!isAltaConfigured() && !userInfo.canDonate) {
       Alert.alert(t('creditAccessTitle'), t(isDemoAccount() ? 'creditAccessPending' : 'liveCreditNotReady'));

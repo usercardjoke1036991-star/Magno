@@ -29,6 +29,8 @@ interface KycAccessBannerProps {
   phraseDone?: boolean;
   showIdentity?: boolean;
   accessPaid?: boolean;
+  kycRequired?: boolean;
+  phoneRequired?: boolean;
   deviceMatches?: boolean;
   walletAddress: string;
   isRegistered: boolean;
@@ -49,6 +51,8 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   phraseDone = false,
   showIdentity = true,
   accessPaid = false,
+  kycRequired = true,
+  phoneRequired = true,
   deviceMatches = false,
   walletAddress,
   isRegistered,
@@ -135,6 +139,8 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
     emailDone,
     kycDone,
     phoneDone,
+    kycRequired,
+    phoneRequired,
   });
 
   const onGreen = colors.onPrimary;

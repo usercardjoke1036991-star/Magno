@@ -166,7 +166,7 @@ export function ReservaSection({
             {t('reservaBoteLabel')}: {formatUSD(Number(formatUnits(preview.boteWei, 18)))} {tokenSymbol}
           </AppText>
         ) : null}
-        {preview?.configured ? (
+        {preview?.configured && preview.apyKnown ? (
           <AppText style={[styles.meta, { color: colors.textMuted }]}>
             {t('reservaApyNow', { apy: ((preview.apyBps || 0) / 100).toFixed(2) })}
           </AppText>
