@@ -443,6 +443,7 @@
   "otpOptionalNote": "Il numero è obbligatorio per chiedere, come il KYC.",
   "otpPhone": "Numero con prefisso internazionale",
   "otpSend": "Invia codice",
+  "otpWait": "Attendi {seconds} s",
   "otpResend": "Reinvia codice",
   "otpCode": "Codice",
   "otpConfirm": "Conferma numero",

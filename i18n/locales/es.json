@@ -443,6 +443,7 @@
   "otpOptionalNote": "El número es obligatorio para pedir crédito, igual que el KYC.",
   "otpPhone": "Número con código de país",
   "otpSend": "Enviar código",
+  "otpWait": "Espera {seconds}s",
   "otpResend": "Reenviar código",
   "otpCode": "Código",
   "otpConfirm": "Confirmar número",

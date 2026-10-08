@@ -443,6 +443,7 @@
   "otpOptionalNote": "Nomor wajib untuk meminjam, seperti KYC.",
   "otpPhone": "Nomor dengan kode negara",
   "otpSend": "Kirim kode",
+  "otpWait": "Tunggu {seconds} dtk",
   "otpResend": "Kirim ulang kode",
   "otpCode": "Kode",
   "otpConfirm": "Konfirmasi nomor",

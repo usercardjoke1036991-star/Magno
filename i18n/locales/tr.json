@@ -443,6 +443,7 @@
   "otpOptionalNote": "Borçlanmak için numara zorunludur, tıpkı KYC gibi.",
   "otpPhone": "Ülke kodlu numara",
   "otpSend": "Kod gönder",
+  "otpWait": "{seconds} sn bekleyin",
   "otpResend": "Kodu yeniden gönder",
   "otpCode": "Kod",
   "otpConfirm": "Numarayı doğrula",

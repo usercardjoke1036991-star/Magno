@@ -265,6 +265,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-08 | App: cambio Demo/Real espera la cadena, KYC declarado se comparte, la camara no cierra Ajustes, donado fallido conserva el apoyo, enlaces solo https de quatriviumcredit.app. Contratos sin cambios. | — |
+| 2026-10-08 | App: la camara de KYC no cierra el modal, las pantallas esperan la lectura de cadena antes de decir sin alta, el codigo de correo y telefono espera 60s, y hay logo transparente al cargar. Contratos sin cambios. Fondo de credito en BSC 1.85 USDT, reserva 1, comisiones pendientes 0. | — |
 | 2026-10-07 | Sincronizacion app-contratos: registroHecho fallido no se guarda como alta impaga; Reserva muestra el bote del contrato, no el saldo de la billetera. | — |
 | 2026-10-07 | App: huella sin requireAuthentication al guardar y prompt al usar; scroll con flex en ventanas congeladas; timeout de 8s ya no borra la sesion; alta muestra Firmar si el USDT ya esta en la billetera interna; BNB 0.001 solo al firmar y sin grifo en Real; PIN sin remount; espera en huella; reconectar sesion; i18n padrino. Contratos sin cambios. | — |
 | 2026-10-07 | Cierre de auditoria APK: alta = registroHecho (no donacion), Reserva sin 'Ahora 12%' sin lectura, KYC/identidad siguen el contrato en Real, updates OTA apagadas para el proximo APK, assetlinks.json listo en web/.well-known, frances corregido; security:check acepta las direcciones Demo vivas en eas.json | — |

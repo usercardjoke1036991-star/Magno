@@ -18,6 +18,7 @@ import { storePasswordRecovery } from '../services/passwordRecovery';
 import { isAllowedEmailProvider, isValidEmail, normalizeEmail } from '../utils/emailPolicy';
 import { useVerificationFee } from '../hooks/useVerificationFee';
 import { AppText, AppTextInput } from './AppText';
+import { useSendCooldown } from '../hooks/useSendCooldown';
 
 interface EmailOtpSectionProps {
   walletAddress: string;
@@ -41,6 +42,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(!verifiedEmail);
+  const { left: codeWait, start: lockCode } = useSendCooldown(60);
   const apiReady = notifyApiConfigured();
   const emailOk = isValidEmail(email);
   const allowed = isAllowedEmailProvider(email);
@@ -53,6 +55,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
     try {
       await requestEmailOtp(walletAddress, email);
       setSent(true);
+      lockCode();
     } catch (caught) {
       const reason = String((caught as Error)?.message || '');
       if (reason.includes('delivery')) setError(t('emailDeliveryFailed'));
@@ -157,11 +160,11 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
           <TouchableOpacity
-            disabled={busy || !emailOk || !apiReady || !walletAddress}
+            disabled={busy || codeWait > 0 || !emailOk || !apiReady || !walletAddress}
             onPress={() => void requestCode()}
-            style={[styles.button, { backgroundColor: colors.connect }, (busy || !emailOk) && { backgroundColor: colors.chip }]}
+            style={[styles.button, { backgroundColor: colors.connect }, (busy || codeWait > 0 || !emailOk) && { backgroundColor: colors.chip }]}
           >
-            {busy && !sent ? <ActivityIndicator color="#111" /> : <AppText style={styles.buttonText}>{sent ? t('emailResend') : t('emailSend')}</AppText>}
+            {busy && !sent ? <ActivityIndicator color="#111" /> : <AppText style={styles.buttonText}>{codeWait > 0 ? t('otpWait', { seconds: codeWait }) : sent ? t('emailResend') : t('emailSend')}</AppText>}
           </TouchableOpacity>
           {sent ? (
             <>

@@ -443,6 +443,7 @@
   "otpOptionalNote": "Номер обязателен для займа, как и KYC.",
   "otpPhone": "Номер с кодом страны",
   "otpSend": "Отправить код",
+  "otpWait": "Подождите {seconds} с",
   "otpResend": "Отправить код снова",
   "otpCode": "Код",
   "otpConfirm": "Подтвердить номер",

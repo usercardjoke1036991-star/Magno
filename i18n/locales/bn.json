@@ -443,6 +443,7 @@
   "otpOptionalNote": "ধার নিতে নম্বর আবশ্যক, KYC-এর মতো।",
   "otpPhone": "দেশের কোডসহ নম্বর",
   "otpSend": "কোড পাঠান",
+  "otpWait": "{seconds} সেকেন্ড অপেক্ষা",
   "otpResend": "কোড আবার পাঠান",
   "otpCode": "কোড",
   "otpConfirm": "নম্বর নিশ্চিত করুন",

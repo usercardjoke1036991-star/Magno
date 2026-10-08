@@ -7,7 +7,7 @@ export type AppDeepLink =
 
 const ROOMS = new Set(['wallet', 'credit', 'loans', 'bonuses', 'donate', 'network', 'people', 'pool', 'reserva', 'admin', 'history', 'ranks', 'fame']);
 export const LOCKED_DEEP_LINK_ROOMS = new Set(['donate', 'admin', 'pool', 'credit', 'loans', 'reserva', 'bonuses']);
-const APP_HTTPS_HOSTS = new Set(['quatriviumcredit.app', 'www.quatriviumcredit.app']);
+const APP_HOST = 'quatriviumcredit.app';
 
 function trimPathSlashes(path: string): string {
   let s = path;
@@ -35,7 +35,7 @@ export function isAllowedAppUrl(url?: string | null): boolean {
     const scheme = String(parsed.scheme || '').toLowerCase();
     if (scheme === 'quatrivium') return true;
     const host = String(parsed.hostname || '').toLowerCase();
-    if ((scheme === 'https' || scheme === 'http') && APP_HTTPS_HOSTS.has(host)) return true;
+    if (scheme === 'https' && host === APP_HOST) return true;
     if (host === 'expo-development-client') {
       const nested = String(parsed.queryParams?.url || '');
       return !nested || isMetroDevUrl(nested) || isAllowedAppUrl(nested);
@@ -73,7 +73,7 @@ function tokenFromAllowed(url: string): string {
     return fromPath.toLowerCase();
   }
   if (scheme === 'quatrivium' && host) return host;
-  if (APP_HTTPS_HOSTS.has(host)) return fromPath.toLowerCase();
+  if (host === APP_HOST) return fromPath.toLowerCase();
   return '';
 }
 

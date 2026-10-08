@@ -443,6 +443,7 @@
   "otpOptionalNote": "Cần số để vay, giống KYC.",
   "otpPhone": "Số kèm mã quốc gia",
   "otpSend": "Gửi mã",
+  "otpWait": "Chờ {seconds} giây",
   "otpResend": "Gửi lại mã",
   "otpCode": "Mã",
   "otpConfirm": "Xác nhận số",

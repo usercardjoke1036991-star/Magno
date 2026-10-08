@@ -22,6 +22,7 @@ interface KycSectionProps {
   isLoading: boolean;
   paused?: boolean;
   onDeclare: () => Promise<boolean>;
+  onPickerActive?: (active: boolean) => void;
 }
 
 const DOC_TYPES: KycDocType[] = ['nationalId', 'passport', 'other'];
@@ -33,6 +34,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
   isLoading,
   paused = false,
   onDeclare,
+  onPickerActive,
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
@@ -111,14 +113,14 @@ export const KycSection: React.FC<KycSectionProps> = ({
 
   const scanDoc = async () => {
     if (!walletAddress) return;
+    onPickerActive?.(true);
     try {
       const ImagePicker = await import('expo-image-picker');
       const camera = await ImagePicker.requestCameraPermissionsAsync();
       if (camera.granted) {
         const shot = await ImagePicker.launchCameraAsync({
           mediaTypes: ['images'],
-          allowsEditing: true,
-          aspect: [1, 1],
+          allowsEditing: false,
           quality: 0.7,
         });
         if (shot.canceled || !shot.assets?.[0]) return;
@@ -133,8 +135,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
       }
       const picked = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
+        allowsEditing: false,
         quality: 0.7,
       });
       if (picked.canceled || !picked.assets?.[0]) return;
@@ -142,6 +143,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
       if (uri) setDocPhoto(uri);
     } catch {
       Alert.alert(t('kycScreenTitle'), t('kycScanNeed'));
+    } finally {
+      onPickerActive?.(false);
     }
   };
 

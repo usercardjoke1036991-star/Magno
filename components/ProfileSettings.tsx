@@ -13,6 +13,7 @@ import {
   type UserProfile,
 } from '../services/userProfile';
 import { AppIcon } from './icons';
+import { setPickerActive } from '../utils/pickerHold';
 import { ProfileAvatar } from './ProfileAvatar';
 import { PublicFacePicker } from './PublicFacePicker';
 import { UsernameSection } from './UsernameSection';
@@ -46,6 +47,7 @@ export const ProfileSettings: React.FC = () => {
   };
 
   const pickPhoto = async () => {
+    setPickerActive(true);
     try {
       const ImagePicker = await import('expo-image-picker');
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -55,7 +57,7 @@ export const ProfileSettings: React.FC = () => {
       }
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
+        allowsEditing: false,
         aspect: [1, 1],
         quality: 0.45,
         base64: true,
@@ -69,6 +71,8 @@ export const ProfileSettings: React.FC = () => {
       apply({ photoUri: uri });
     } catch {
       Alert.alert(t('profilePhoto'), t('profilePhotoUnavailable'));
+    } finally {
+      setPickerActive(false);
     }
   };
 

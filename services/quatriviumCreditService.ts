@@ -872,7 +872,7 @@ export const QuatriviumCreditService = {
     const ultimoPrestamoTimestamp = Number(progress.ultimoPrestamoTimestamp ?? progress[2]);
     let lastHito = 0;
     let hitoSupported = false;
-    let donatedWei = '0';
+    let donatedWei: string | null = '0';
     const caps = await QuatriviumCreditService.detectarCapacidadProtocolo();
     if (caps.canClaimHitos) {
       try {
@@ -886,7 +886,7 @@ export const QuatriviumCreditService = {
       try {
         donatedWei = (await contractWith(provider).donado(userAddress)).toString();
       } catch {
-        donatedWei = '0';
+        donatedWei = null;
       }
     }
     return {
@@ -896,7 +896,7 @@ export const QuatriviumCreditService = {
       lastHito,
       bonusPending: hitoSupported ? nextClaimableMilestone(nivelActual, lastHito) : 0,
       nextMilestone: nextUpcomingMilestone(nivelActual, lastHito),
-      donatedWei: asWeiString(donatedWei),
+      donatedWei: donatedWei == null ? null : asWeiString(donatedWei),
     };
   },
 

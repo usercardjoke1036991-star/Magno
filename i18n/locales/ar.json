@@ -443,6 +443,7 @@
   "otpOptionalNote": "الرقم مطلوب للاقتراض، مثل KYC.",
   "otpPhone": "الرقم مع رمز الدولة",
   "otpSend": "إرسال الرمز",
+  "otpWait": "انتظر {seconds} ث",
   "otpResend": "إعادة إرسال الرمز",
   "otpCode": "الرمز",
   "otpConfirm": "تأكيد الرقم",

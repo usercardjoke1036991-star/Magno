@@ -443,6 +443,7 @@
   "otpOptionalNote": "대출하려면 KYC와 같이 번호가 필요합니다.",
   "otpPhone": "국가 번호가 있는 번호",
   "otpSend": "코드 보내기",
+  "otpWait": "{seconds}초 대기",
   "otpResend": "코드 다시 보내기",
   "otpCode": "코드",
   "otpConfirm": "번호 확인",

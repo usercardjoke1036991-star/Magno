@@ -16,6 +16,7 @@ import { isCreditReady } from '../constants/rpcConfig';
 import { humanizeTxError } from '../utils/txErrors';
 import { useVerificationFee } from '../hooks/useVerificationFee';
 import { AppText, AppTextInput } from './AppText';
+import { useSendCooldown } from '../hooks/useSendCooldown';
 import { isPhoneActive, loadVerifiedPhone, maskPhone, saveVerifiedPhone, setPhoneActive } from '../services/accountPhone';
 import { releaseAccountContact } from '../services/accountIdentity';
 
@@ -68,6 +69,7 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   const chainReady = isCreditReady();
   const blocked = isLoading || paused || !chainReady || !isRegistered || !walletAddress || busy;
   const apiReady = notifyApiConfigured();
+  const { left: codeWait, start: lockCode } = useSendCooldown(60);
   const phoneOk = isValidPhone(normalizePhone(phone)) && Boolean(normalizePhone(phone));
 
   const requestCode = async () => {
@@ -77,6 +79,7 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
     try {
       await requestPhoneOtp(walletAddress, phone);
       setSent(true);
+      lockCode();
     } catch (caught) {
       const reason = String((caught as Error)?.message || '');
       if (reason.includes('delivery')) setError(t('otpDeliveryFailed'));
@@ -204,18 +207,18 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
           />
           <TouchableOpacity
-            disabled={blocked || !phoneOk || !apiReady}
+            disabled={blocked || codeWait > 0 || !phoneOk || !apiReady}
             onPress={requestCode}
             style={[
               styles.button,
               { backgroundColor: colors.connect },
-              (blocked || !phoneOk || !apiReady) && { backgroundColor: colors.chip },
+              (blocked || codeWait > 0 || !phoneOk || !apiReady) && { backgroundColor: colors.chip },
             ]}
           >
             {busy && !sent ? (
               <ActivityIndicator color="#111" />
             ) : (
-              <AppText style={styles.buttonText}>{sent ? t('otpResend') : t('otpSend')}</AppText>
+              <AppText style={styles.buttonText}>{codeWait > 0 ? t('otpWait', { seconds: codeWait }) : sent ? t('otpResend') : t('otpSend')}</AppText>
             )}
           </TouchableOpacity>
           {sent ? (

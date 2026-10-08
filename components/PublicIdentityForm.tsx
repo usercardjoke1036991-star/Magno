@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
+import { setPickerActive } from '../utils/pickerHold';
 import {
   canSubmitPublicIdentity,
   EMPTY_PROFILE,
@@ -27,6 +28,7 @@ export const PublicIdentityForm: React.FC<PublicIdentityFormProps> = ({ walletAd
   const [error, setError] = useState('');
 
   const pickPhoto = async () => {
+    setPickerActive(true);
     try {
       const ImagePicker = await import('expo-image-picker');
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -36,7 +38,7 @@ export const PublicIdentityForm: React.FC<PublicIdentityFormProps> = ({ walletAd
       }
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
+        allowsEditing: false,
         aspect: [1, 1],
         quality: 0.2,
         base64: true,
@@ -51,6 +53,8 @@ export const PublicIdentityForm: React.FC<PublicIdentityFormProps> = ({ walletAd
       setError('');
     } catch {
       setError(t('profilePhotoUnavailable'));
+    } finally {
+      setPickerActive(false);
     }
   };
 

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
+import { BusyMark } from './BusyLogo';
 
 interface AppWindowProps {
   visible: boolean;
@@ -39,6 +40,7 @@ export const AppWindow: React.FC<AppWindowProps> = ({ visible, title, lead, onCl
         >
           {children}
         </ScrollView>
+        <BusyMark />
       </SafeAreaView>
     </Modal>
   );

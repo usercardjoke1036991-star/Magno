@@ -443,6 +443,7 @@
   "otpOptionalNote": "借款必须登记号码，与 KYC 一样。",
   "otpPhone": "带国家区号的号码",
   "otpSend": "发送验证码",
+  "otpWait": "请等待 {seconds} 秒",
   "otpResend": "重新发送验证码",
   "otpCode": "验证码",
   "otpConfirm": "确认号码",

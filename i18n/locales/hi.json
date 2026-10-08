@@ -443,6 +443,7 @@
   "otpOptionalNote": "उधार लेने के लिए नंबर आवश्यक है, KYC की तरह।",
   "otpPhone": "देश कोड के साथ नंबर",
   "otpSend": "कोड भेजें",
+  "otpWait": "{seconds} सेकंड रुकें",
   "otpResend": "कोड फिर भेजें",
   "otpCode": "कोड",
   "otpConfirm": "नंबर पुष्टि करें",

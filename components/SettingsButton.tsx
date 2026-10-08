@@ -30,6 +30,7 @@ import type { TranslationKey } from '../i18n/translations';
 import { AppText } from './AppText';
 import { LegalDocuments } from './LegalDocuments';
 import { HowTheAppWorks } from './HowTheAppWorks';
+import { isPickerHeld } from '../utils/pickerHold';
 
 type Panel = 'home' | 'security' | 'appearance' | 'language' | 'mode' | 'admin' | 'privacy' | 'terms' | 'guide';
 
@@ -68,6 +69,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
     const apply = (url?: string | null) => {
       const link = parseAppDeepLink(url);
       if (link?.kind === 'room') {
+        if (isPickerHeld()) return;
         setOpen(false);
         setPanel('home');
         return;
@@ -82,6 +84,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
   }, []);
 
   const close = () => {
+    if (isPickerHeld()) return;
     setOpen(false);
     setPanel('home');
   };

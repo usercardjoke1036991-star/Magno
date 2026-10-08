@@ -131,6 +131,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: BrandLogo
 - `components/BrandSplash.tsx` — módulo JS/TS
   - Funciones/clases: BRAND_SPLASH_BG, BrandWordmark, BrandSplash
+- `components/BusyLogo.tsx` — módulo JS/TS
+  - Funciones/clases: useBusy, BusyMark
 - `components/CreditAccessBanner.tsx` — módulo JS/TS
   - Funciones/clases: CreditAccessBanner
 - `components/CreditAccessGate.tsx` — módulo JS/TS
@@ -302,12 +304,14 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: usePendingInvite
 - `hooks/useReferralNetwork.ts` — módulo JS/TS
   - Funciones/clases: useReferralNetwork
+- `hooks/useSendCooldown.ts` — módulo JS/TS
+  - Funciones/clases: useSendCooldown
 - `hooks/useVerificationFee.ts` — módulo JS/TS
   - Funciones/clases: useVerificationFee
 - `hooks/useWalletLevel.ts` — módulo JS/TS
   - Funciones/clases: getWalletLevel, rememberWalletLevel, useWalletLevel
 - `hooks/useWeb3Balances.ts` — módulo JS/TS
-  - Funciones/clases: useWeb3Balances
+  - Funciones/clases: publishKycDeclared, useWeb3Balances
 - `hooks/useWeb3Transactions.ts` — módulo JS/TS
   - Funciones/clases: useWeb3Transactions
 - `i18n/LanguageContext.tsx` — módulo JS/TS
@@ -578,6 +582,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: PASSWORD_MIN, PASSWORD_MAX, PASSWORD_LENGTH, GENERATED_SECRET_CHARS, isPrivateKeyPassword, masterPasswordReject, isValidMasterPassword, passwordRuleFlags, masterPasswordFromRandomBytes
 - `utils/pendingDeepLink.ts` — módulo JS/TS
   - Funciones/clases: rememberAppUrl, takePendingAppUrl
+- `utils/pickerHold.ts` — módulo JS/TS
+  - Funciones/clases: setPickerActive, isPickerHeld
 - `utils/pinPolicy.ts` — módulo JS/TS
   - Funciones/clases: isWeakPin, lockoutMs, remainingLockMs
 - `utils/rankingDivisions.ts` — módulo JS/TS

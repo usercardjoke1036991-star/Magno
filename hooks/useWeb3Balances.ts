@@ -147,6 +147,19 @@ export interface UserInfo {
   };
 }
 
+const kycDeclaredListeners = new Set<() => void>();
+
+export function publishKycDeclared() {
+  kycDeclaredListeners.forEach((fn) => fn());
+}
+
+function subscribeKycDeclared(listener: () => void) {
+  kycDeclaredListeners.add(listener);
+  return () => {
+    kycDeclaredListeners.delete(listener);
+  };
+}
+
 const EMPTY_BALANCES: UserBalances = {
   bnbBalance: '0.00',
   tokenBalance: '0.00',
@@ -220,7 +233,8 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   const [balances, setBalances] = useState<UserBalances>(EMPTY_BALANCES);
   const [userInfo, setUserInfo] = useState<UserInfo>(EMPTY_USER_INFO);
   const [loanTiers, setLoanTiers] = useState<LoanTier[]>(() => visibleLoanTiers(MAX_LOAN_LEVEL));
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [gatesReady, setGatesReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
   const chainStatusReadyRef = useRef(false);
@@ -234,6 +248,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
     if (!opts?.silent) setIsLoading(true);
     setError(null);
+    let accountKnown = !walletAddress || !isAddress(walletAddress);
 
     try {
       const provider = await assertTrustedRpc();
@@ -337,7 +352,6 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         logErr('Error fetching token balances:', e);
         setBalances((prev) => ({
           ...prev,
-          tokenBalance: '0.00',
           poolBalance,
           poolOutstanding,
           poolCash,
@@ -347,6 +361,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       if (!live()) return;
 
       if (!isContractConfigured()) {
+        accountKnown = true;
         setUserInfo((prev) => {
           const keep =
             !prev.isRegistered &&
@@ -537,6 +552,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
         try {
           const altaHecha = Boolean(await QuatriviumCreditService.altaPagada(walletAddress));
+          accountKnown = true;
           if (live()) {
             setUserInfo((prev) => ({ ...prev, altaPagada: altaHecha }));
           }
@@ -561,7 +577,9 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
                 nextMilestone: Number(progress.nextMilestone || 0),
                 lastHito: Number(progress.lastHito || 0),
               },
-              donatedUsd: Number(formatUnits(BigInt(asWeiString(progress.donatedWei)), 18)),
+              ...(progress.donatedWei == null
+                ? {}
+                : { donatedUsd: Number(formatUnits(BigInt(asWeiString(progress.donatedWei)), 18)) }),
             }));
           }
         } catch (e) {
@@ -917,11 +935,23 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         setLoanTiers(visibleLoanTiers(MAX_LOAN_LEVEL));
       }
     } finally {
-      if (live()) setIsLoading(false);
+      if (live()) {
+        setIsLoading(false);
+        if (accountKnown) setGatesReady(true);
+      }
     }
   }, [walletAddress, tokenAddress, tokenDecimals]);
 
+  const markKycDeclared = useCallback(() => {
+    publishKycDeclared();
+  }, []);
+
+  useEffect(() => subscribeKycDeclared(() => {
+    setUserInfo((prev) => ({ ...prev, kycDeclarado: true }));
+  }), []);
+
   useEffect(() => {
+    setGatesReady(false);
     chainStatusReadyRef.current = false;
     onChainTiersReadyRef.current = false;
     if (!walletAddress || !isAddress(walletAddress)) return;
@@ -970,9 +1000,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   useEffect(() => subscribeRuntimeMode(() => {
     chainStatusReadyRef.current = false;
     onChainTiersReadyRef.current = false;
-    setUserInfo({ ...EMPTY_USER_INFO });
-    setBalances({ ...EMPTY_BALANCES });
-    setLoanTiers(visibleLoanTiers(MAX_LOAN_LEVEL));
+    setGatesReady(false);
     void fetchBalances();
   }), [fetchBalances]);
 
@@ -988,6 +1016,8 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     userInfo,
     loanTiers,
     isLoading,
+    gatesReady,
+    markKycDeclared,
     error,
     refetch: fetchBalances,
   };

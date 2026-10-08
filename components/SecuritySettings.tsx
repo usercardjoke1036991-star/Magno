@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   AppState,
   StyleSheet,
@@ -38,6 +39,7 @@ import { EmailOtpSection } from './EmailOtpSection';
 import { AppText } from './AppText';
 import { identityUnlocked } from '../utils/creditGates';
 import { isAccessPaymentEnabled } from '../constants/rpcConfig';
+import { setPickerActive } from '../utils/pickerHold';
 
 type RowStatus = 'done' | 'todo' | 'warn';
 type Panel = 'menu' | 'kyc' | 'email' | 'pin' | 'fingerprint' | 'phrase' | 'phone' | 'methods' | 'authenticator';
@@ -49,7 +51,7 @@ export const SecuritySettings: React.FC = () => {
   const demoAccount = mode === 'demo';
   const primaryToken = useMemo(() => getSupportedTokens()[0], [mode]);
   const { address } = useAppWallet();
-  const { userInfo, refetch } = useWeb3Balances(address, primaryToken);
+  const { userInfo, gatesReady, markKycDeclared, refetch } = useWeb3Balances(address, primaryToken);
   const { declararKyc, isLoading: kycBusy } = useWeb3Transactions();
 
   const [panel, setPanel] = useState<Panel>('menu');
@@ -187,7 +189,10 @@ export const SecuritySettings: React.FC = () => {
       return false;
     }
     const result = await declararKyc();
-    if (result.success) refetch();
+    if (result.success) {
+      markKycDeclared();
+      refetch();
+    }
     return result.success;
   };
 
@@ -263,14 +268,19 @@ export const SecuritySettings: React.FC = () => {
         </TouchableOpacity>
         <AppText style={[styles.section, { color: colors.text }]}>{t(panelTitle[panel])}</AppText>
         {panel === 'kyc' ? (
-          <KycSection
-            walletAddress={address}
-            isRegistered={userInfo.isRegistered}
-            kycDeclarado={userInfo.kycDeclarado}
-            isLoading={kycBusy}
-            paused={userInfo.paused}
-            onDeclare={declareKyc}
-          />
+          gatesReady ? (
+            <KycSection
+              walletAddress={address}
+              isRegistered={userInfo.isRegistered}
+              kycDeclarado={userInfo.kycDeclarado}
+              isLoading={kycBusy}
+              paused={userInfo.paused}
+              onPickerActive={setPickerActive}
+              onDeclare={declareKyc}
+            />
+          ) : (
+            <ActivityIndicator color={colors.primary} />
+          )
         ) : null}
         {panel === 'email' ? (
           <EmailOtpSection

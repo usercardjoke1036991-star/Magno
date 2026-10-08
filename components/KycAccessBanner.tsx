@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   AppState,
   Modal,
@@ -21,6 +22,10 @@ import { loadVerifiedEmail } from '../services/accountEmail';
 import { EmailOtpSection } from './EmailOtpSection';
 import { loanGateBannerRows } from '../utils/creditGates';
 import { subscribeScreenshot } from './ScreenGuard';
+import { BusyMark } from './BusyLogo';
+import { isPickerHeld, setPickerActive } from '../utils/pickerHold';
+
+const KYC_RESUME_KEY = 'qv.kyc.screen';
 
 interface KycAccessBannerProps {
   kycDone: boolean;
@@ -38,6 +43,7 @@ interface KycAccessBannerProps {
   identityBound: boolean;
   isLoading: boolean;
   paused?: boolean;
+  pending?: boolean;
   onDeclare: () => Promise<boolean>;
   onPhoneBound: () => void;
   onPhraseSaved?: () => void;
@@ -60,6 +66,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   identityBound,
   isLoading,
   paused,
+  pending = false,
   onDeclare,
   onPhoneBound,
   onPhraseSaved,
@@ -73,6 +80,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   const [phraseText, setPhraseText] = useState('');
   const [phraseError, setPhraseError] = useState('');
   const [phraseBusy, setPhraseBusy] = useState(false);
+  const pickerGuard = useRef(false);
 
   const hidePhrase = () => {
     setPhraseText('');
@@ -81,9 +89,34 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   };
 
   const closeModal = () => {
+    if (pickerGuard.current || isPickerHeld()) return;
     setOpen(null);
     hidePhrase();
+    void AsyncStorage.removeItem(KYC_RESUME_KEY);
   };
+
+  const openKyc = () => {
+    setOpen('kyc');
+    void AsyncStorage.setItem(KYC_RESUME_KEY, 'kyc');
+  };
+
+  const onPickerActive = (active: boolean) => {
+    pickerGuard.current = active;
+    setPickerActive(active);
+    if (active) void AsyncStorage.setItem(KYC_RESUME_KEY, 'kyc');
+  };
+
+  useEffect(() => {
+    let live = true;
+    void AsyncStorage.getItem(KYC_RESUME_KEY)
+      .then((saved) => {
+        if (live && saved === 'kyc') setOpen('kyc');
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!phraseText) return undefined;
@@ -146,7 +179,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   const onGreen = colors.onPrimary;
   const onGreenMuted = colors.onPrimary;
 
-  if (!rows.length) return null;
+  if (pending || !rows.length) return null;
 
   return (
     <View>
@@ -203,7 +236,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
             return (
               <TouchableOpacity
                 key={row}
-                onPress={() => setOpen('kyc')}
+                onPress={openKyc}
                 style={[styles.kycBtn, { backgroundColor: colors.primary, borderColor: colors.primary }, last && styles.lastBtn]}
                 accessibilityRole="button"
                 accessibilityLabel={t('kycBannerTitle')}
@@ -278,9 +311,13 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
                 kycDeclarado={kycDeclarado}
                 isLoading={isLoading}
                 paused={paused}
+                onPickerActive={onPickerActive}
                 onDeclare={async () => {
                   const ok = await onDeclare();
-                  if (ok) setOpen(null);
+                  if (ok) {
+                    setOpen(null);
+                    void AsyncStorage.removeItem(KYC_RESUME_KEY);
+                  }
                   return ok;
                 }}
               />
@@ -329,6 +366,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
               </View>
             ) : null}
           </ScrollView>
+          <BusyMark />
         </SafeAreaView>
       </Modal>
     </View>

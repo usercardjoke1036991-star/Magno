@@ -11,6 +11,7 @@ import { AppKit, useAccount, useAppKit, useProvider } from '@reown/appkit-react-
 import { parseUnits } from 'ethers';
 import { setWalletSigner } from '../services/quatriviumCreditService';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
+import { BusyMark, useBusy } from '../components/BusyLogo';
 import { useHomeHandlers } from '../hooks/useHomeHandlers';
 import { WalletSection } from '../components/WalletSection';
 import { TokenSelector } from '../components/TokenSelector';
@@ -152,7 +153,7 @@ function HomeScreenWithHooks() {
     };
   }, [walletAddress, room]);
 
-  const { balances, userInfo, loanTiers, isLoading: creditChecking, refetch } = useWeb3Balances(
+  const { balances, userInfo, loanTiers, isLoading: creditChecking, gatesReady, markKycDeclared, refetch } = useWeb3Balances(
     walletAddress,
     selectedToken
   );
@@ -287,9 +288,16 @@ function HomeScreenWithHooks() {
     }
   }, [room, mode]);
 
-  const needPay = altaVisible;
-  const needRegister = !userInfo.isRegistered;
-  const servicesOpen = !needPay && !needRegister;
+  const waitingChain = !gatesReady;
+  const needPay = !waitingChain && altaVisible;
+  const needRegister = !waitingChain && !userInfo.isRegistered;
+  const servicesOpen = !waitingChain && !needPay && !needRegister;
+  useBusy(txLoading || waitingChain);
+  const declareKyc = async () => {
+    const ok = await handleDeclararKyc();
+    if (ok) markKycDeclared();
+    return ok;
+  };
 
   const roomLocked = (id: HomeRoom) =>
     id !== 'wallet' && id !== 'alta' && id !== 'admin' && !servicesOpen;
@@ -320,7 +328,7 @@ function HomeScreenWithHooks() {
       canRegisterOnChain={Boolean(creditReady && !userInfo.paused)}
       onRegister={() => void handleRegistrarHumano()}
       onInviteLocked={() => { void clearPendingInvite(); }}
-      onDeclareKyc={handleDeclararKyc}
+      onDeclareKyc={declareKyc}
       onPhoneBound={refetch}
     >
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -404,7 +412,8 @@ function HomeScreenWithHooks() {
           identityBound={userInfo.identityBound}
           isLoading={txLoading}
           paused={userInfo.paused}
-          onDeclare={handleDeclararKyc}
+          pending={waitingChain}
+          onDeclare={declareKyc}
           onPhoneBound={() => {
             void isPhoneActive().then(setPhoneActive);
             refetch();
@@ -651,7 +660,8 @@ function HomeScreenWithHooks() {
           identityBound={userInfo.identityBound}
           isLoading={txLoading}
           paused={userInfo.paused}
-          onDeclare={handleDeclararKyc}
+          pending={waitingChain}
+          onDeclare={declareKyc}
           onPhoneBound={() => {
             void isPhoneActive().then(setPhoneActive);
             refetch();
@@ -1004,6 +1014,7 @@ function HomeScreenWithHooks() {
         />
       </AppWindow>
       <AppKit />
+      <BusyMark />
     </SafeAreaView>
     </AccountOnboarding>
   );
