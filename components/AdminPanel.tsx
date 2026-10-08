@@ -463,7 +463,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     Alert.alert(t('admin'), t('adminInvalidAddress'));
                     return;
                   }
-                  Alert.alert(t('reservaRetiroTitle'), t('reservaRetiroHint'), [
+                  Alert.alert(t('reservaRetiroTitle'), t('reservaRetiroConfirm', { amount, address: destino }), [
                     { text: t('cancel'), style: 'cancel' },
                     { text: t('ready'), onPress: () => onProponerRetiroReserva(amount, destino) },
                   ]);
@@ -476,10 +476,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <TouchableOpacity
                   disabled={isLoading}
                   onPress={() => {
-                    Alert.alert(t('reservaRetiroTitle'), t('reservaRetiroHint'), [
-                      { text: t('cancel'), style: 'cancel' },
-                      { text: t('ready'), onPress: () => onAplicarRetiroReserva() },
-                    ]);
+                    Alert.alert(
+                      t('reservaRetiroTitle'),
+                      t('reservaRetiroApplyConfirm', {
+                        amount: formatUnits(retiroPendiente.amountWei, 18),
+                        address: retiroPendiente.to,
+                      }),
+                      [
+                        { text: t('cancel'), style: 'cancel' },
+                        { text: t('ready'), onPress: () => onAplicarRetiroReserva() },
+                      ],
+                    );
                   }}
                   style={[styles.button, { backgroundColor: colors.primary }]}
                 >

@@ -265,6 +265,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-08 | Antes de firmar el retiro de la provision, el aviso muestra importe y billetera. Canje y la guia ya no prometen fama de red. Hindi y bengali corrigen el destino. | — |
 | 2026-10-08 | La app ya no promete fama de red por el alta ni racha por registrarse. El panel de admin puede proponer y confirmar el retiro del bote de reserva. El splash nativo es el fondo verde, y el logo grande sigue en la pantalla de carga. | — |
 | 2026-10-08 | Ajustes ya no publica el nombre de usuario como apodo. El apodo de la red se confirma con imagen y queda fijo. | — |
 | 2026-10-08 | Modales de identidad y de envio con altura real. La red ya no anida un scroll. El registro automatico espera una lectura correcta. Ajustes usa la misma regla de admin que la casa. | — |
