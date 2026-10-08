@@ -1,5 +1,5 @@
 {
-  "enfoque": "Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xiaomi tiene la app 1.0.2 codigo 10.",
+  "enfoque": "Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xiaomi tiene la app 1.0.2 codigo 11.",
   "decisiones": [
     "- [2026-10-03] En Demo el TOTP de admin no bloquea: 2-de-2 y WalletConnect bastan. El codigo de 6 digitos sale en ventana emergente, no en el panel. En Real sigue el TOTP si el worker HTTPS esta configurado.",
     "- [2026-10-03] Donar y aportar: 100 fama por cada USDT desde el primero. Si Ana no paga el primer L1 en 7 dias, el 1 de Pedro va al pool.",
@@ -33,6 +33,9 @@
     "- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool."
   ],
   "cambios": [
+    "- [2026-10-08] El Xiaomi tiene la version 1.0.2 codigo 11, instalada encima, con la frase conservada. Build 555e4223.",
+    "- [2026-10-08] Textos de fama de red y de racha dicen la regla real. El panel propone y confirma el retiro de la provision de reserva, con 72 horas. El arranque nativo ya no muestra el emblema cuadrado. Lo invito sigue igual.",
+    "- [2026-10-08] El apodo de la red ya no se copia del nombre de usuario. En Ajustes se confirma aparte, con imagen, una sola vez.",
     "- [2026-10-08] El Xiaomi tiene la version 1.0.2 codigo 10, instalada encima, con la frase conservada. Commit 1917ee0.",
     "- [2026-10-08] La copia ya no firma el registro si la lectura falla. KYC, correo, telefono, frase y el envio de fondos se desplazan con altura de pantalla. La tabla de la red baja con la ventana. Ajustes reconoce a la fundadora con la billetera de la app.",
     "- [2026-10-08] El candado de correo y telefono se renueva un mes en cada guardado. El logo grande tapa la casa hasta que el alta, el KYC y la identidad ya se leyeron. El arranque nativo usa el emblema cuadrado. La lista de hitos se desplaza en la ventana. La cuenta ya registrada no se vuelve a firmar sola.",
@@ -79,11 +82,8 @@
     "- [2026-10-03] ptsDonacion sin puerta de 2 USDT. Alta.vencerPadrinoAlPool manda el padrino vencido al pool. Credit no crecio (EIP-170).",
     "- [2026-10-03] Auditoria: candado Alta en la app, comisiones no pagan a baneados, deep links solo de Quatrivium. Credit no crece (EIP-170). Sin MagnoPay ni pausa automatica.",
     "- [2026-10-02] Auditoria: verificar correo/celular pide confirmacion de fondos y evita doble tap en alta. Sin MagnoPay ni pausa automatica.",
-    "- [2026-10-02] Mejoras sin deploy: app Alta 3+1, APY Reserva, attester 2-de-2, panel de caja, tests de padrino/cuotas/sello.",
-    "- [2026-10-02] Invariantes Foundry de NAV Credit y caja Reserva, mas centinela Python de solo lectura por Telegram.",
-    "- [2026-10-02] Contratos: alta 4 USDT, hitos proporcionales, Reserva 12% movil y retiro bote. Sin deploy testnet.",
-    "- [2026-10-02] El pool manda: 80 por ciento de uso, grandes al 70, sello de 7 dias en el USDT de verificar. Sin cupo diario de credito."
+    "- [2026-10-02] Mejoras sin deploy: app Alta 3+1, APY Reserva, attester 2-de-2, panel de caja, tests de padrino/cuotas/sello."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-08] Cambio: El Xiaomi tiene la version 1.0.2 codigo 10, instalada encima, con la frase conservada. Commit 1917ee0."
+  "ultima_sesion": "[2026-10-08] Enfoque del usuario actualizado"
 }

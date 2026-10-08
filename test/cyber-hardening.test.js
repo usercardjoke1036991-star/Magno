@@ -1797,24 +1797,46 @@ describe('account entry — password, email and session', () => {
       return name.length >= 2 && name.length <= 24;
     }
     function isPublicIdentityLocked(profile) {
-      return Boolean(profile && profile.publicFace && isValidDisplayName(profile.displayName));
+      const photo = String(profile && profile.publicPhoto || '');
+      return Boolean(
+        profile
+        && profile.publicFace
+        && isValidDisplayName(profile.displayName)
+        && photo.startsWith('data:image/')
+      );
     }
     function nextPublicFace(previous, incoming) {
-      if (previous.publicFace) {
+      if (isPublicIdentityLocked(previous)) {
         return {
           displayName: previous.displayName,
           publicPhoto: previous.publicPhoto,
           publicFace: true,
         };
       }
+      const confirming = Boolean(incoming.publicFace) && isValidDisplayName(incoming.displayName) && String(incoming.publicPhoto || '').startsWith('data:image/');
       return {
-        displayName: incoming.displayName,
-        publicPhoto: incoming.publicPhoto,
-        publicFace: Boolean(incoming.publicFace),
+        displayName: confirming ? incoming.displayName : '',
+        publicPhoto: confirming ? incoming.publicPhoto : '',
+        publicFace: confirming,
       };
     }
     expect(isPublicIdentityLocked({ publicFace: false, displayName: '' })).to.equal(false);
-    expect(isPublicIdentityLocked({ publicFace: true, displayName: 'lobo' })).to.equal(true);
+    expect(isPublicIdentityLocked({ publicFace: true, displayName: 'lobo' })).to.equal(false);
+    expect(isPublicIdentityLocked({
+      publicFace: true,
+      displayName: 'lobo',
+      publicPhoto: 'data:image/jpeg;base64,aa',
+    })).to.equal(true);
+    expect(
+      nextPublicFace(
+        { displayName: 'pedro', publicPhoto: '', publicFace: true },
+        { displayName: 'lobo', publicPhoto: 'data:image/jpeg;base64,aa', publicFace: true }
+      )
+    ).to.deep.equal({
+      displayName: 'lobo',
+      publicPhoto: 'data:image/jpeg;base64,aa',
+      publicFace: true,
+    });
     expect(
       nextPublicFace(
         { displayName: 'lobo', publicPhoto: 'data:image/jpeg;base64,aa', publicFace: true },
@@ -1826,6 +1848,14 @@ describe('account entry — password, email and session', () => {
       publicFace: true,
     });
     const names = fs.readFileSync(path.join(__dirname, '..', 'components', 'UsernameSection.tsx'), 'utf8');
+    const profileSettings = fs.readFileSync(path.join(__dirname, '..', 'components', 'ProfileSettings.tsx'), 'utf8');
+    expect(profileSettings).to.include('PublicIdentityForm');
+    expect(profileSettings).to.not.include('displayName: username');
+    expect(profileSettings).to.not.include('displayName: value');
+    const publicProfile = fs.readFileSync(path.join(__dirname, '..', 'services', 'userProfile.ts'), 'utf8');
+    expect(publicProfile).to.include('sanitizePublicPhoto(profile.publicPhoto || \'\')');
+    const worker = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'notify-worker.mjs'), 'utf8');
+    expect(worker).to.include('El usuario de entrada no es el apodo');
     expect(names).to.include('usernameLocked');
     expect(names).to.not.include('usernameChange');
     const lock = fs.readFileSync(path.join(__dirname, '..', 'components', 'LockSettings.tsx'), 'utf8');
@@ -2287,5 +2317,32 @@ describe('account entry — password, email and session', () => {
     expect(links[0].target.sha256_cert_fingerprints[0]).to.match(/^DF:EF:CC:D0/);
     const fr = JSON.parse(read('i18n', 'locales', 'fr.json'));
     expect(fr.liveCreditNotReady).to.not.include('est ouvert');
+  });
+
+  it('tells the truth about streak and network fame, and offers the reserve pot withdrawal', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const read = (...parts) => fs.readFileSync(path.join(__dirname, '..', ...parts), 'utf8');
+    const es = JSON.parse(read('i18n', 'locales', 'es.json'));
+    const en = JSON.parse(read('i18n', 'locales', 'en.json'));
+    expect(es.referralRepLead).to.include('1 USDT');
+    expect(es.referralRepLead).to.not.include('generación 2');
+    expect(es.rachaLead).to.include('invitado directo');
+    expect(es.rachaLead).to.not.include('registrarse, pedir');
+    expect(es.guideRachaBody).to.not.include('registrarse, solicitar');
+    expect(es.profileLead).to.include('apodo');
+    expect(en.profileLead).to.include('nickname');
+    expect(en.profileLead).to.not.equal(es.profileLead);
+    const panel = read('components', 'AdminPanel.tsx');
+    expect(panel).to.include('reservaRetiroPropose');
+    expect(panel).to.include('onAplicarRetiroReserva');
+    const abi = read('constants', 'reservaConfig.ts');
+    expect(abi).to.include('proponerRetiroBote');
+    expect(abi).to.include('applyRetiroBote');
+    const referral = read('components', 'ReferralSection.tsx');
+    expect(referral).to.include('hasPadre && !isFundador');
+    const appJson = JSON.parse(read('app.json'));
+    expect(appJson.expo.splash.image).to.equal('./assets/splash-blank.png');
+    expect(read('plugins', 'withQuatriviumAndroidSecurity.js')).to.include('hideNativeSplashMark');
   });
 });

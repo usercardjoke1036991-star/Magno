@@ -18,7 +18,7 @@
       "policy": "appVersion"
     },
     "splash": {
-      "image": "./assets/logo.png",
+      "image": "./assets/splash-blank.png",
       "resizeMode": "contain",
       "backgroundColor": "#07150F"
     },
@@ -111,8 +111,8 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#07150F",
-          "image": "./assets/logo.png",
-          "imageWidth": 240
+          "image": "./assets/splash-blank.png",
+          "imageWidth": 288
         }
       ],
       "expo-updates",

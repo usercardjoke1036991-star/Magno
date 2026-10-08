@@ -6,6 +6,75 @@ const { withAndroidManifest, withDangerousMod, withGradleProperties } =
   require('expo/config-plugins');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
+
+function pngCrc(buf) {
+  let c = ~0;
+  for (let i = 0; i < buf.length; i += 1) {
+    c ^= buf[i];
+    for (let k = 0; k < 8; k += 1) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+  }
+  return ~c >>> 0;
+}
+
+function pngChunk(type, data) {
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length);
+  const body = Buffer.concat([Buffer.from(type), data]);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(pngCrc(body));
+  return Buffer.concat([len, body, crc]);
+}
+
+/** Icono del arranque nativo del mismo verde que el fondo, para que Android 12 no dibuje un cuadrado. */
+function solidSplashPng(width, height) {
+  const raw = Buffer.alloc((width * 3 + 1) * height);
+  for (let y = 0; y < height; y += 1) {
+    const row = y * (width * 3 + 1);
+    raw[row] = 0;
+    for (let x = 0; x < width; x += 1) {
+      const i = row + 1 + x * 3;
+      raw[i] = 7;
+      raw[i + 1] = 21;
+      raw[i + 2] = 15;
+    }
+  }
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 2;
+  return Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    pngChunk('IHDR', ihdr),
+    pngChunk('IDAT', zlib.deflateSync(raw)),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ]);
+}
+
+function hideNativeSplashMark(androidRoot) {
+  const png = solidSplashPng(288, 288);
+  const res = path.join(androidRoot, 'app/src/main/res');
+  if (!fs.existsSync(res)) return;
+  const stack = [res];
+  while (stack.length) {
+    const dir = stack.pop();
+    for (const name of fs.readdirSync(dir)) {
+      const full = path.join(dir, name);
+      if (fs.statSync(full).isDirectory()) stack.push(full);
+      else if (name === 'splashscreen_logo.png') fs.writeFileSync(full, png);
+    }
+  }
+  const stylesPath = path.join(res, 'values/styles.xml');
+  if (!fs.existsSync(stylesPath)) return;
+  let styles = fs.readFileSync(stylesPath, 'utf8');
+  if (styles.includes('windowSplashScreenIconBackgroundColor')) return;
+  styles = styles.replace(
+    '<item name="windowSplashScreenAnimatedIcon">@drawable/splashscreen_logo</item>',
+    '<item name="windowSplashScreenAnimatedIcon">@drawable/splashscreen_logo</item>\n    <item name="windowSplashScreenIconBackgroundColor">@color/splashscreen_background</item>'
+  );
+  fs.writeFileSync(stylesPath, styles, 'utf8');
+}
 
 const BLOCKED_ALWAYS = [
   'android.permission.RECORD_AUDIO',
@@ -302,6 +371,7 @@ function withQuatriviumAndroidSecurity(config) {
         }
         fs.writeFileSync(proguardPath, rules, 'utf8');
       }
+      hideNativeSplashMark(androidRoot);
       return cfg;
     },
   ]);
@@ -324,3 +394,5 @@ function withQuatriviumAndroidSecurity(config) {
 module.exports = withQuatriviumAndroidSecurity;
 module.exports.stripExpPlusFromManifestXml = stripExpPlusFromManifestXml;
 module.exports.ensureHttpsDeepLinks = ensureHttpsDeepLinks;
+module.exports.solidSplashPng = solidSplashPng;
+module.exports.hideNativeSplashMark = hideNativeSplashMark;

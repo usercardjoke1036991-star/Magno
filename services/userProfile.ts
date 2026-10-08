@@ -48,7 +48,11 @@ export function clampAvatarId(value: unknown): number {
 }
 
 export function hasLockedPublicIdentity(profile?: UserProfile | null): boolean {
-  return Boolean(profile?.publicFace && isValidDisplayName(profile.displayName || ''));
+  return Boolean(
+    profile?.publicFace
+    && isValidDisplayName(profile.displayName || '')
+    && sanitizePublicPhoto(profile.publicPhoto || '')
+  );
 }
 
 export function isPublicIdentityLocked(profile?: UserProfile | null, _username = ''): boolean {
@@ -214,7 +218,7 @@ export async function loadOwnProfile(wallet?: string): Promise<UserProfile> {
 
 export async function saveOwnProfile(profile: UserProfile, wallet?: string): Promise<UserProfile> {
   const previous = await loadOwnProfile(wallet);
-  const locked = Boolean(previous.publicFace);
+  const locked = hasLockedPublicIdentity(previous);
   const next: UserProfile = {
     displayName: locked ? previous.displayName : normalizeDisplayName(profile.displayName),
     avatarId: locked ? previous.avatarId : clampAvatarId(profile.avatarId),
@@ -299,10 +303,10 @@ export async function publishOwnProfile(walletAddress: string, profile: UserProf
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...auth,
-        displayName: stripUnsafeText(profile.displayName, 24),
+        displayName: hasLockedPublicIdentity(profile) ? stripUnsafeText(profile.displayName, 24) : '',
         avatarId: clampAvatarId(profile.avatarId),
-        publicPhoto: sanitizePublicPhoto(profile.publicPhoto || ''),
-        publicFace: Boolean(profile.publicFace),
+        publicPhoto: hasLockedPublicIdentity(profile) ? sanitizePublicPhoto(profile.publicPhoto || '') : '',
+        publicFace: hasLockedPublicIdentity(profile),
       }),
     });
   } catch {

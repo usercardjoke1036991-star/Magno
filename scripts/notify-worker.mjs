@@ -1585,7 +1585,12 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       return;
     }
     const prev = store.profiles[wallet] || {};
-    const locked = Boolean(prev.publicFace || (prev.displayName && prev.publicPhoto));
+    const prevName = stripUnsafe(prev.displayName || '', 24);
+    const prevPhoto = sanitizePublicPhoto(prev.publicPhoto);
+    const locked = Boolean(prev.publicFace && prevName && prevPhoto);
+    const incomingName = stripUnsafe(body.displayName || '', 24);
+    const incomingPhoto = sanitizePublicPhoto(body.publicPhoto || '');
+    const confirming = !locked && Boolean(body.publicFace) && Boolean(incomingName) && Boolean(incomingPhoto);
     store.profiles[wallet] = {
       phone: stripUnsafe(body.contactPhone || prev.phone || '', 20),
       whatsapp: stripUnsafe(body.whatsapp || body.contactPhone || prev.whatsapp || '', 20),
@@ -1597,15 +1602,15 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
         signup: body.prefs?.signup === true,
         email: body.prefs?.email !== false,
       },
-      displayName: locked ? stripUnsafe(prev.displayName || '', 24) : stripUnsafe(body.displayName || prev.displayName || '', 24),
+      displayName: locked ? prevName : (confirming ? incomingName : ''),
       username: prev.username || '',
       avatarId: locked
         ? prev.avatarId || 0
         : Number.isFinite(Number(body.avatarId))
           ? Math.max(0, Math.min(7, Number(body.avatarId)))
           : prev.avatarId || 0,
-      publicPhoto: locked ? sanitizePublicPhoto(prev.publicPhoto) : sanitizePublicPhoto(body.publicPhoto || prev.publicPhoto),
-      publicFace: locked || Boolean(body.publicFace) || Boolean(body.displayName),
+      publicPhoto: locked ? prevPhoto : (confirming ? incomingPhoto : ''),
+      publicFace: locked || confirming,
     };
     await persist();
     json(res, 200, { ok: true });
@@ -2136,12 +2141,12 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       if (!item) continue;
       let displayName = stripUnsafe(item.displayName || '', 24);
       const sessionUser = String(item.username || '').trim();
-      // El usuario de sesión no es el nombre público. Si alguien lo copió al displayName, no se publica.
-      if (!item.publicFace && sessionUser && displayName.toLowerCase() === sessionUser.toLowerCase()) {
+      const publicPhoto = sanitizePublicPhoto(item.publicPhoto);
+      // El usuario de entrada no es el apodo. Sin imagen pública no se publica, aunque coincida el texto.
+      if (!publicPhoto && sessionUser && displayName.toLowerCase() === sessionUser.toLowerCase()) {
         displayName = '';
       }
-      const publicPhoto = sanitizePublicPhoto(item.publicPhoto);
-      if (!displayName && !publicPhoto && !item.publicFace) continue;
+      if (!displayName && !publicPhoto) continue;
       profiles[wallet] = {
         displayName,
         avatarId: item.avatarId || 0,

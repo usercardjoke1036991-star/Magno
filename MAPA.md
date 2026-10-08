@@ -327,7 +327,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `i18n/translations.ts` — módulo JS/TS
   - Funciones/clases: translations
 - `plugins/withQuatriviumAndroidSecurity.js` — módulo JS/TS
-  - Funciones/clases: stripExpPlusFromManifestXml, ensureHttpsDeepLinks
+  - Funciones/clases: stripExpPlusFromManifestXml, ensureHttpsDeepLinks, solidSplashPng, hideNativeSplashMark
 - `profile/ProfileContext.tsx` — módulo JS/TS
   - Funciones/clases: ProfileProvider, useUserProfile
 - `scripts/adminTotp.mjs` — módulo JS/TS
@@ -452,9 +452,9 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/referralNetwork.ts` — módulo JS/TS
   - Funciones/clases: peekReferralNetwork, clearReferralNetworkCache, clearReferralBranchCache, loadReferralChildren, fillReferralTimestamps, loadReferralNetwork
 - `services/reservaDemoStore.ts` — módulo JS/TS
-  - Funciones/clases: loadDemoPosicion, loadDemoBote, demoAportarBote, demoBloquear, demoDesbloquear, demoRenovar
+  - Funciones/clases: loadDemoPosicion, loadDemoBote, demoAportarBote, loadDemoRetiro, demoProponerRetiro, demoAplicarRetiro, demoBloquear, demoDesbloquear, demoRenovar
 - `services/reservaService.ts` — módulo JS/TS
-  - Funciones/clases: loadReservaPreview, bloquearReserva, desbloquearReserva, renovarReserva, aportarReservaBote, reservaErrorKey
+  - Funciones/clases: loadReservaPreview, bloquearReserva, desbloquearReserva, renovarReserva, aportarReservaBote, leerPendienteRetiroBote, proponerRetiroReserva, aplicarRetiroReserva, reservaErrorKey
 - `services/savedSession.ts` — módulo JS/TS
   - Funciones/clases: subscribeSessionCleared, isSessionSaved, purgePersistedWrap, markSessionSaved, restoreSavedSessionWrap, clearSavedSession, signOutSavedSession
 - `services/secureStorageService.ts` — módulo JS/TS

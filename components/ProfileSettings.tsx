@@ -9,6 +9,8 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useUserProfile } from '../profile/ProfileContext';
 import {
+  hasLockedPublicIdentity,
+  loadOwnProfile,
   persistPickedPhoto,
   type UserProfile,
 } from '../services/userProfile';
@@ -16,6 +18,7 @@ import { AppIcon } from './icons';
 import { setPickerActive } from '../utils/pickerHold';
 import { ProfileAvatar } from './ProfileAvatar';
 import { PublicFacePicker } from './PublicFacePicker';
+import { PublicIdentityForm } from './PublicIdentityForm';
 import { UsernameSection } from './UsernameSection';
 import { useWalletLevel } from '../hooks/useWalletLevel';
 import { getRankForLevel } from '../constants/ranks';
@@ -81,14 +84,17 @@ export const ProfileSettings: React.FC = () => {
     { photoUri: profile.photoUri, avatarId: profile.avatarId, displayName: profile.displayName }
   );
 
+  const publicChosen = hasLockedPublicIdentity(profile);
+
   const handleSave = async () => {
     if (saving || !dirty) return;
     setSaving(true);
     try {
       await saveProfile({
         ...draft,
-        displayName: username || draft.displayName,
-        publicFace: draft.publicFace || Boolean(username),
+        displayName: publicChosen ? profile.displayName : '',
+        publicPhoto: publicChosen ? profile.publicPhoto : '',
+        publicFace: publicChosen,
       });
       Alert.alert(t('ready'), t('profileSaved'));
     } catch {
@@ -115,6 +121,9 @@ export const ProfileSettings: React.FC = () => {
             {username ? `@${username}` : draft.displayName || t('profileNamePlaceholder')}
           </AppText>
           <AppText style={[styles.heroHint, { color: colors.textMuted }]}>{t('profileLead')}</AppText>
+          {publicChosen ? (
+            <AppText style={[styles.heroName, { color: colors.text, marginTop: 4 }]}>{profile.displayName}</AppText>
+          ) : null}
           {walletAddress ? (
             <AppText style={[styles.heroHint, { color: colors.textMuted }]}>
               {t('level')} {level}/{displayMaxLoanLevel(cachedProtocolCaps().maxLevel)} · {t(getRankForLevel(level).nameKey)}
@@ -125,20 +134,29 @@ export const ProfileSettings: React.FC = () => {
 
       <AppText style={[styles.section, { color: colors.text }]}>{t('publicFaceTitle')}</AppText>
       <AppText style={[styles.heroHint, { color: colors.textMuted, marginBottom: 8 }]}>
-        {draft.publicFace ? t('publicFaceLocked') : t('publicFaceLead')}
+        {publicChosen ? t('publicFaceLocked') : t('publicIdentityLead')}
       </AppText>
-      <PublicFacePicker
-        value={draft.avatarId}
-        locked={draft.publicFace}
-        onChange={(avatarId) => apply({ avatarId })}
-      />
+      {publicChosen ? (
+        <PublicFacePicker
+          value={draft.avatarId}
+          locked
+          onChange={(avatarId) => apply({ avatarId })}
+        />
+      ) : (
+        <PublicIdentityForm
+          walletAddress={walletAddress}
+          onSaved={async () => {
+            const stored = await loadOwnProfile(walletAddress || undefined);
+            if (hasLockedPublicIdentity(stored)) await saveProfile(stored);
+          }}
+        />
+      )}
 
       <UsernameSection
         walletAddress={walletAddress}
         claimedUsername={username}
-        onClaimed={async (value) => {
+        onClaimed={(value) => {
           setUsername(value);
-          await saveProfile({ ...draft, displayName: value });
         }}
       />
 

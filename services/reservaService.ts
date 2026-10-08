@@ -1,4 +1,4 @@
-import { Contract, formatUnits, parseUnits, type Signer } from 'ethers';
+import { Contract, formatUnits, isAddress, parseUnits, type Signer } from 'ethers';
 import { ERC20_ABI, getContractAddress, getUsdtAddress } from '../constants/contractConfig';
 import { assertTrustedRpc, getProviderWithFallback, isDemoAccount } from '../constants/rpcConfig';
 import { getReservaAddress, isReservaConfigured, reservaUsesPracticeLedger, RESERVA_ABI } from '../constants/reservaConfig';
@@ -13,11 +13,14 @@ import {
 } from '../constants/reserva';
 import {
   demoAportarBote,
+  demoAplicarRetiro,
   demoBloquear,
   demoDesbloquear,
+  demoProponerRetiro,
   demoRenovar,
   loadDemoBote,
   loadDemoPosicion,
+  loadDemoRetiro,
 } from './reservaDemoStore';
 import { waitMined } from '../utils/waitMined';
 
@@ -222,6 +225,54 @@ export async function aportarReservaBote(signer: Signer, amountUsd: string): Pro
   await waitMined(tx);
 }
 
+export type RetiroBotePendiente = { to: string; amountWei: bigint; desde: number };
+
+export async function leerPendienteRetiroBote(): Promise<RetiroBotePendiente | null> {
+  if (reservaUsesPracticeLedger()) {
+    const row = await loadDemoRetiro();
+    if (!row) return null;
+    return { to: row.to, amountWei: BigInt(row.amount), desde: row.desde };
+  }
+  if (!isReservaConfigured()) return null;
+  const provider = await assertTrustedRpc(getProviderWithFallback());
+  const reserva = new Contract(getReservaAddress(), RESERVA_ABI, provider);
+  const [to, amount, desde] = await Promise.all([
+    reserva.pendienteRetiroA(),
+    reserva.pendienteRetiroMonto(),
+    reserva.pendienteRetiroDesde(),
+  ]);
+  const destino = String(to || '');
+  const monto = BigInt(amount || 0);
+  const desdeN = Number(desde || 0);
+  if (!isAddress(destino) || /^0x0+$/i.test(destino) || monto <= 0n || desdeN <= 0) return null;
+  return { to: destino, amountWei: monto, desde: desdeN };
+}
+
+export async function proponerRetiroReserva(signer: Signer, destino: string, amountUsd: string): Promise<void> {
+  if (!isAddress(destino)) throw new Error('reservaMonto');
+  const amount = parseUnits(amountUsd, 18);
+  if (amount <= 0n) throw new Error('reservaMonto');
+  if (reservaUsesPracticeLedger()) {
+    await demoProponerRetiro(destino, amount);
+    return;
+  }
+  if (!isReservaConfigured()) throw new Error('reserva-not-ready');
+  const reserva = new Contract(getReservaAddress(), RESERVA_ABI, signer);
+  const tx = await reserva.proponerRetiroBote(destino, amount);
+  await waitMined(tx);
+}
+
+export async function aplicarRetiroReserva(signer: Signer): Promise<void> {
+  if (reservaUsesPracticeLedger()) {
+    await demoAplicarRetiro();
+    return;
+  }
+  if (!isReservaConfigured()) throw new Error('reserva-not-ready');
+  const reserva = new Contract(getReservaAddress(), RESERVA_ABI, signer);
+  const tx = await reserva.applyRetiroBote();
+  await waitMined(tx);
+}
+
 export type ReservaErrorKey =
   | 'reservaPeriodoActivo'
   | 'reservaAunBloqueado'
@@ -231,6 +282,8 @@ export type ReservaErrorKey =
   | 'reservaMonto'
   | 'reservaNeedLevel'
   | 'reservaAdminOnly'
+  | 'reservaRetiroWait'
+  | 'reservaRetiroSame'
   | 'securityPausedBanner'
   | 'errEmptyRevertDemo'
   | 'error';
@@ -252,6 +305,8 @@ export function reservaErrorKey(error: unknown): ReservaErrorKey {
   if (raw.includes('reservaDelinquent') || raw.includes('EnMora')) return 'reservaDelinquent';
   if (raw.includes('reservaNeedLevel') || raw.includes('NivelInsuficiente')) return 'reservaNeedLevel';
   if (raw.includes('reservaAdminOnly') || raw.includes('SoloAdmin')) return 'reservaAdminOnly';
+  if (raw.includes('reservaEspera') || raw.includes('EsperaTimelock')) return 'reservaRetiroWait';
+  if (raw.includes('reservaMisma') || raw.includes('MismaLlave')) return 'reservaRetiroSame';
   if (raw.includes('CreditoPausado') || raw.includes('EnforcedPause') || raw.includes('Pausable')) return 'securityPausedBanner';
   if (raw.includes('SoloEOA')) return 'error';
   if (raw.includes('insufficient') || raw.includes('ERC20InsufficientBalance')) return 'reservaMonto';
