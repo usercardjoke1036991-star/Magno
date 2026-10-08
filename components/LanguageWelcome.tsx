@@ -28,7 +28,7 @@ export const LanguageWelcome: React.FC<{ children: React.ReactNode }> = ({ child
 
   return (
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={styles.fill} contentContainerStyle={styles.content} nestedScrollEnabled showsVerticalScrollIndicator>
         <View style={styles.hero}>
           <BrandLogo size={96} />
           <BrandWordmark compact titleColor={colors.text} lineColor={colors.primary} />

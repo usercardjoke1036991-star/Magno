@@ -33,6 +33,9 @@
     "- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool."
   ],
   "cambios": [
+    "- [2026-10-08] Reinstalacion en el Xiaomi: version 1.0.2 codigo 7, instalacion encima de la anterior. La frase y la billetera de este telefono se conservaron. Build 5bdba8fb.",
+    "- [2026-10-07] La app sigue a los contratos: una lectura fallida de registroHecho ya no pinta el alta como impaga, y Reserva deja de mostrar el USDT de la billetera como si fuera el bote.",
+    "- [2026-10-07] Arreglos de app sin tocar contratos: huella se guarda sin requireAuthentication y se pide al abrir; scroll con altura real; si la billetera tarda mas de 8s no se borra la sesion; alta firma una vez si los 4 USDT ya estan en la billetera de la app; aviso de 0.001 BNB solo al firmar; PIN no remonta el campo; el guardado de huella muestra espera; sesion WalletConnect caida dice reconectar; traducciones del padrino.",
     "- [2026-10-07] Cierre de auditoria APK: alta = registroHecho (no donacion), Reserva sin 'Ahora 12%' sin lectura, KYC/identidad siguen el contrato en Real, updates OTA apagadas para el proximo APK, assetlinks.json listo en web/.well-known, frances corregido; security:check acepta las direcciones Demo vivas en eas.json",
     "- [2026-10-06] Foundry 44/44 en el codigo actual. Credit de mainnet cae a la direccion oficial si falta la variable. Los RPC de Real exigen HTTPS.",
     "- [2026-10-04] TruffleHog en GitHub ya no usa la imagen de Docker. Corre el programa directo, que es lo que fallo con el codigo 125.",
@@ -79,11 +82,8 @@
     "- [2026-10-01] Sin destruirCuenta en nucleo ABI y servicio. Identidad no se libera.",
     "- [2026-10-01] Foundry: puerta 2 USDT sin fama (ni con polvo), sin autoliquidar, execute admin solo si corre, Reserva reanuda boost 2-de-N",
     "- [2026-10-01] Blindaje: Reserva 2-de-N, tope diario 50 USDT y pausa de boost; Credit mora sin pull, peg en donar y bucle de bonos acotado; pinning GTS; destroy sin approve si hay shares del pool",
-    "- [2026-10-01] 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador.",
-    "- [2026-10-01] Sonar usa tsconfig propio y deja fuera JSON de i18n. Guardar no muestra listo si falta la billetera.",
-    "- [2026-10-01] Ajustes: Guardar queda desactivado tras guardar y se activa solo si hay cambios nuevos.",
-    "- [2026-10-01] Red: enlace de invitacion en tarjeta con copiar (HTTPS quatriviumcredit.app/invite). El codigo de referido acepta guiones, espacios o el enlace al crear la cuenta."
+    "- [2026-10-01] 17 idiomas: etiquetas que estaban en ingles, avisos sin variables internas y Reserva sin mencionar fundador."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-07] Cambio: Cierre de auditoria APK: alta = registroHecho (no donacion), Reserva sin 'Ahora 12%' sin lectura, KYC/identidad siguen el contrato en Real, updates OTA apagadas para el proximo APK, assetlinks.json listo en web/.well-known, frances corregido; security:check acepta las direcciones Demo vivas en eas.json"
+  "ultima_sesion": "[2026-10-08] Cambio: Reinstalacion en el Xiaomi: version 1.0.2 codigo 7, instalacion encima de la anterior. La frase y la billetera de este telefono se conservaron. Build 5bdba8fb."
 }

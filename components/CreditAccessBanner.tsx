@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-nat
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { isAltaConfigured } from '../constants/altaConfig';
-import { hasCreditAccess } from '../utils/creditGates';
+import { accessPayUsdt, hasCreditAccess } from '../utils/creditGates';
 import { AppText } from './AppText';
 import { useAppMode } from '../wallet/AppModeContext';
 
@@ -12,6 +12,7 @@ interface CreditAccessBannerProps {
   altaPaid?: boolean;
   canPay: boolean;
   isLoading?: boolean;
+  appWalletUsdt?: string;
   tokenSymbol?: string;
   needRegister?: boolean;
   canRegister?: boolean;
@@ -24,6 +25,7 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
   altaPaid = false,
   canPay,
   isLoading = false,
+  appWalletUsdt = '0',
   needRegister = false,
   canRegister = false,
   onPay,
@@ -35,6 +37,8 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
   const paid = hasCreditAccess(paidUsd, altaPaid);
   const showPay = !((mode === 'demo' && !isAltaConfigured()) || paid);
   const showRegister = Boolean(needRegister && !showPay);
+  const held = Number(appWalletUsdt);
+  const alreadyInWallet = isAltaConfigured() && Number.isFinite(held) && held + 1e-9 >= accessPayUsdt();
 
   if (!showPay && !showRegister) {
     return null;
@@ -47,11 +51,13 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
       </AppText>
       <AppText style={[styles.lead, { color: colors.text }]}>
         {showPay
-          ? isAltaConfigured()
-            ? t('creditAccessGateLead')
-            : mode === 'live'
-              ? t('liveCreditNotReady')
-              : t('creditAccessPending')
+          ? alreadyInWallet
+            ? t('creditAccessAlreadyInWallet')
+            : isAltaConfigured()
+              ? t('creditAccessGateLead')
+              : mode === 'live'
+                ? t('liveCreditNotReady')
+                : t('creditAccessPending')
           : t('creditAccessRegisterNeed')}
       </AppText>
       {showPay && canPay ? (
@@ -60,13 +66,13 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
           onPress={onPay}
           style={[styles.pay, { backgroundColor: colors.primary }]}
           accessibilityRole="button"
-          accessibilityLabel={t('creditAccessPay')}
+          accessibilityLabel={t(alreadyInWallet ? 'creditAccessSign' : 'creditAccessPay')}
         >
           {isLoading ? (
             <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <AppText style={[styles.payText, { color: colors.onPrimary }]}>
-              {t('creditAccessPay')}
+              {t(alreadyInWallet ? 'creditAccessSign' : 'creditAccessPay')}
             </AppText>
           )}
         </TouchableOpacity>

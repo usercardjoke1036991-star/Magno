@@ -259,7 +259,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
             </AppText>
             <View style={styles.headerSpacer} />
           </View>
-          <ScrollView keyboardShouldPersistTaps="always">
+          <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="always" nestedScrollEnabled>
             {open === 'email' ? (
               <EmailOtpSection
                 walletAddress={walletAddress}

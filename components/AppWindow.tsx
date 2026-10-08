@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 96,
     gap: 14,
   },
 });

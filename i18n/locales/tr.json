@@ -658,7 +658,7 @@
   "errRpcMismatch": "RPC ağı Quatrivium Finance ile eşleşmiyor.",
   "errRpcNoContract": "RPC düğümü sözleşmeyi tanımıyor. Tekrar deneyin.",
   "errWrongNetwork": "Cüzdanı Quatrivium Finance ağına geçirin.",
-  "errNeedGas": "İşlem gazı için yeterli BNB yok.",
+  "errNeedGas": "İmza için uygulama cüzdanında en az 0,001 BNB gerekir. Bağlı cüzdanın BNB tutarı bu imzayı ödemez.",
   "errNeedGasTestnet": "Bu test ağıdır. Devam etmek için ücretsiz test BNB gereklidir. BNB Al düğmesine dokunun.",
   "openFaucet": "Test BNB Al",
   "errInternalOnly": "Kredi yalnızca Quatrivium hesabınızdan talep edilir ve geri ödenir. MetaMask veya başka bir cüzdanı yalnızca para yatırmak veya çekmek için kullanın.",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "Gerçek hesapta BNB Smart Chain kullanın.",
   "errNeedGasAdmin": "Bu yönetici hesabında ücret için ağ bakiyesi yok. Deneme BNB isteyin ve yeniden deneyin.",
   "linkWalletBound": "Bağlandı",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "Doğrudan davet edilen kişi 7 gün içinde 1. seviyeyi ödemezse, o tutarı fona gönderebilirsiniz.",
+  "padrinoSettleButton": "Fona gönder",
+  "padrinoSettleNeedSeal": "Fona göndermeden önce kayıt ödemesi gerekir.",
+  "padrinoSettleWait": "7 gün henüz dolmadı.",
+  "padrinoSettleFailed": "Fona gönderilemedi. Yeniden deneyin.",
+  "errNeedGasExternal": "USDT göndermek için bağlı cüzdanda BNB gerekir. O BNB, uygulama cüzdanının işlemini imzalamaz.",
+  "creditAccessAlreadyInWallet": "4 USDT zaten uygulama cüzdanında. Bu düğme yalnızca ücreti imzalar ve yeniden çekmez.",
+  "creditAccessSign": "Ücreti imzala",
+  "linkWalletReconnect": "Oturumu yeniden bağla"
 }

@@ -253,7 +253,7 @@ async function activateSession(pin: string, record: PinRecord): Promise<string> 
 export async function persistWrapForBiometric(wrapKey = getWalletWrapKey()): Promise<boolean> {
   if (!wrapKey) return false;
   try {
-    await SecureStore.setItemAsync(WRAP_STORE, wrapKey, BIO_WRAP_OPTIONS);
+    await SecureStore.setItemAsync(WRAP_STORE, wrapKey, OPTIONS);
     return true;
   } catch {
     return false;
@@ -267,11 +267,13 @@ function applyWrap(value: string | null): string | null {
 }
 
 export async function loadWrapFromBiometric(): Promise<string | null> {
+  const ok = await authenticateBiometric();
+  if (!ok) return null;
   try {
-    const withAuth = await SecureStore.getItemAsync(WRAP_STORE, BIO_WRAP_OPTIONS);
-    if (withAuth) return applyWrap(withAuth);
+    const stored = await SecureStore.getItemAsync(WRAP_STORE, OPTIONS);
+    if (stored) return applyWrap(stored);
   } catch {
-    // MIUI u otro OEM: el cofre con huella no respondió. No abrir con wrap suelto.
+    return null;
   }
   return null;
 }

@@ -658,7 +658,7 @@
   "errRpcMismatch": "RPC ネットワークが Quatrivium Finance と一致しません。",
   "errRpcNoContract": "RPC ノードがコントラクトを認識しません。もう一度お試しください。",
   "errWrongNetwork": "ウォレットを Quatrivium Finance のネットワークに切り替えてください。",
-  "errNeedGas": "取引手数料に足りる BNB がありません。",
+  "errNeedGas": "署名にはアプリのウォレットに 0.001 BNB 以上が必要です。連携したウォレットの BNB ではこの署名を払えません。",
   "errNeedGasTestnet": "これはテストネットワークです。続けるには無料のテストBNBが必要です。BNBを取得をタップ。",
   "openFaucet": "テストBNBを取得",
   "errInternalOnly": "クレジットの申請と返済は Quatrivium 口座からのみです。MetaMask などのウォレットは資金の出し入れにだけ使ってください。",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "本番口座では BNB Smart Chain を使用します。",
   "errNeedGasAdmin": "この管理口座には手数料用のネットワーク残高がありません。試験用 BNB を入手して再試行してください。",
   "linkWalletBound": "連携済み",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "直接招待した人が7日以内にレベル1を支払わない場合、その金額を基金へ送れます。",
+  "padrinoSettleButton": "基金へ送る",
+  "padrinoSettleNeedSeal": "基金へ送る前に登録料の支払いが必要です。",
+  "padrinoSettleWait": "7日はまだ終わっていません。",
+  "padrinoSettleFailed": "基金へ送れませんでした。もう一度お試しください。",
+  "errNeedGasExternal": "USDT を送るには連携ウォレットに BNB が必要です。その BNB はアプリのウォレットの操作には署名しません。",
+  "creditAccessAlreadyInWallet": "4 USDT はすでにアプリのウォレットにあります。このボタンは手数料への署名だけで、再び引き落としません。",
+  "creditAccessSign": "手数料に署名",
+  "linkWalletReconnect": "セッションを再接続"
 }

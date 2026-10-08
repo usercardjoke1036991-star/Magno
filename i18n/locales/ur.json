@@ -658,7 +658,7 @@
   "errRpcMismatch": "RPC نیٹ ورک Quatrivium Finance سے میل نہیں کھاتا۔",
   "errRpcNoContract": "RPC نوڈ کانٹریکٹ نہیں پہچانتا۔ دوبارہ کوشش کریں۔",
   "errWrongNetwork": "والیٹ کو Quatrivium Finance نیٹ ورک پر سوئچ کریں۔",
-  "errNeedGas": "لین دین گیس کے لیے کافی BNB نہیں۔",
+  "errNeedGas": "دستخط کے لیے ایپ والیٹ میں کم از کم 0.001 BNB چاہیے۔ منسلک والیٹ کا BNB یہ دستخط ادا نہیں کرتا۔",
   "errNeedGasTestnet": "یہ ٹیسٹ نیٹ ورک ہے۔ جاری رکھنے کے لیے مفت ٹیسٹ BNB درکار ہے۔ BNB حاصل کریں دبائیں۔",
   "openFaucet": "ٹیسٹ BNB حاصل کریں",
   "errInternalOnly": "کریڈٹ صرف آپ کے Quatrivium اکاؤنٹ سے مانگی اور ادا کی جاتی ہے۔ پیسہ اندر یا باہر لے جانے کے لیے ہی MetaMask یا دوسرا والیٹ استعمال کریں۔",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "حقیقی اکاؤنٹ میں BNB Smart Chain استعمال کریں۔",
   "errNeedGasAdmin": "اس منتظم اکاؤنٹ میں فیس کے لیے نیٹ ورک بقایا نہیں۔ آزمائشی BNB مانگیں اور دوبارہ کوشش کریں۔",
   "linkWalletBound": "منسلک",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "اگر براہ راست مدعو 7 دن میں سطح 1 ادا نہ کرے تو آپ وہ رقم فنڈ میں بھیج سکتے ہیں۔",
+  "padrinoSettleButton": "فنڈ میں بھیجیں",
+  "padrinoSettleNeedSeal": "فنڈ میں بھیجنے سے پہلے رجسٹریشن ادا ہونی چاہیے۔",
+  "padrinoSettleWait": "7 دن ابھی پورے نہیں ہوئے۔",
+  "padrinoSettleFailed": "فنڈ میں بھیجا نہیں جا سکا۔ دوبارہ کوشش کریں۔",
+  "errNeedGasExternal": "منسلک والیٹ کو USDT بھیجنے کے لیے BNB چاہیے۔ وہ BNB ایپ والیٹ کے کام پر دستخط نہیں کرتا۔",
+  "creditAccessAlreadyInWallet": "4 USDT پہلے سے ایپ والیٹ میں ہیں۔ یہ بٹن صرف فیس پر دستخط کرتا ہے اور دوبارہ نہیں کاٹتا۔",
+  "creditAccessSign": "فیس پر دستخط",
+  "linkWalletReconnect": "سیشن دوبارہ جوڑیں"
 }

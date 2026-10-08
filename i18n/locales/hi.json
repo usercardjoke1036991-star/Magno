@@ -658,7 +658,7 @@
   "errRpcMismatch": "RPC नेटवर्क Quatrivium Finance से मेल नहीं खाता।",
   "errRpcNoContract": "RPC नोड कॉन्ट्रैक्ट नहीं पहचानता। फिर कोशिश करें।",
   "errWrongNetwork": "वॉलेट को Quatrivium Finance नेटवर्क पर स्विच करें।",
-  "errNeedGas": "लेन-देन गैस के लिए पर्याप्त BNB नहीं है।",
+  "errNeedGas": "ऐप वॉलेट को हस्ताक्षर के लिए कम से कम 0.001 BNB चाहिए। जुड़े वॉलेट का BNB इस हस्ताक्षर का भुगतान नहीं करता।",
   "errNeedGasTestnet": "यह परीक्षण नेटवर्क है। जारी रखने के लिए मुफ्त टेस्ट BNB चाहिए। BNB पाएं दबाएं।",
   "openFaucet": "टेस्ट BNB पाएं",
   "errInternalOnly": "क्रेडिट केवल आपके Quatrivium खाते से माँगा और चुकाया जाता है। धन अंदर या बाहर ले जाने के लिए ही MetaMask या दूसरा वॉलेट इस्तेमाल करें।",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "वास्तविक खाते में BNB Smart Chain उपयोग करें।",
   "errNeedGasAdmin": "इस व्यवस्थापक खाते में शुल्क के लिए नेटवर्क शेष नहीं। परीक्षण BNB माँगें और पुनः प्रयास करें।",
   "linkWalletBound": "संबद्ध",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "यदि सीधा आमंत्रित व्यक्ति 7 दिनों में स्तर 1 का भुगतान नहीं करता, तो आप वह राशि कोष में भेज सकते हैं।",
+  "padrinoSettleButton": "कोष में भेजें",
+  "padrinoSettleNeedSeal": "कोष में भेजने से पहले पंजीकरण का भुगतान होना चाहिए।",
+  "padrinoSettleWait": "7 दिन अभी पूरे नहीं हुए।",
+  "padrinoSettleFailed": "कोष में भेजा नहीं जा सका। फिर कोशिश करें।",
+  "errNeedGasExternal": "जुड़े वॉलेट को USDT भेजने के लिए BNB चाहिए। वह BNB ऐप वॉलेट के काम पर हस्ताक्षर नहीं करता।",
+  "creditAccessAlreadyInWallet": "4 USDT पहले से ऐप वॉलेट में हैं। यह बटन केवल शुल्क पर हस्ताक्षर करता है और दोबारा नहीं काटता।",
+  "creditAccessSign": "शुल्क पर हस्ताक्षर",
+  "linkWalletReconnect": "सत्र फिर जोड़ें"
 }

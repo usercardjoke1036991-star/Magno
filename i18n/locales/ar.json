@@ -658,7 +658,7 @@
   "errRpcMismatch": "شبكة RPC لا تطابق Quatrivium Finance.",
   "errRpcNoContract": "عقدة RPC لا تتعرّف على العقد. حاول مرة أخرى.",
   "errWrongNetwork": "حوّل المحفظة إلى شبكة Quatrivium Finance.",
-  "errNeedGas": "لا يوجد BNB كافٍ لرسوم المعاملة.",
+  "errNeedGas": "محفظة التطبيق تحتاج 0.001 BNB على الأقل للتوقيع. رصيد BNB في المحفظة المرتبطة لا يدفع هذا التوقيع.",
   "errNeedGasTestnet": "هذه شبكة اختبار. تحتاج BNB تجريبي مجاني للمتابعة. اضغط احصل على BNB.",
   "openFaucet": "احصل على BNB تجريبي",
   "errInternalOnly": "يُطلب الائتمان ويُسدد فقط من حساب Quatrivium الخاص بك. استخدم MetaMask أو محفظة أخرى فقط لنقل الأموال دخولاً أو خروجاً.",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "في الحساب الحقيقي استخدم BNB Smart Chain.",
   "errNeedGasAdmin": "حساب الإدارة هذا بلا رصيد شبكة للرسوم. اطلب BNB تجريبياً وأعد المحاولة.",
   "linkWalletBound": "مرتبط",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "إذا لم يدفع المدعو المباشر المستوى 1 خلال 7 أيام، يمكنك إرسال ذلك المبلغ إلى الصندوق.",
+  "padrinoSettleButton": "إرسال إلى الصندوق",
+  "padrinoSettleNeedSeal": "يجب دفع التسجيل قبل إرساله إلى الصندوق.",
+  "padrinoSettleWait": "لم تنتهِ الأيام السبعة بعد.",
+  "padrinoSettleFailed": "تعذر إرساله إلى الصندوق. أعد المحاولة.",
+  "errNeedGasExternal": "المحفظة المرتبطة تحتاج BNB لإرسال USDT. ذلك الرصيد لا يوقّع عمليات محفظة التطبيق.",
+  "creditAccessAlreadyInWallet": "مبلغ 4 USDT موجود بالفعل في محفظة التطبيق. هذا الزر يوقّع الرسوم فقط ولا يخصم مرة أخرى.",
+  "creditAccessSign": "توقيع الرسوم",
+  "linkWalletReconnect": "إعادة ربط الجلسة"
 }

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   AppState,
   Linking,
@@ -162,7 +163,11 @@ export const BiometricLockSection: React.FC<{
             accessibilityState={{ disabled: busy || !dirty }}
             accessibilityLabel={t('settingsSave')}
           >
-            <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>
+            {busy ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <AppText style={styles.buttonText}>{t('settingsSave')}</AppText>
+            )}
           </TouchableOpacity>
         </>
       ) : reason === 'not-enrolled' ? (

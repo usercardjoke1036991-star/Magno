@@ -85,9 +85,6 @@ export const WalletSection: React.FC<WalletSectionProps> = ({
         </View>
       </View>
       <LinkedWalletCard internalWallet={walletAddress} />
-      {!isDemo && Number(bnbBalance) <= 0 ? (
-        <AppText style={[styles.warn, { color: colors.warnText }]}>{t('appWalletNeedGas')}</AppText>
-      ) : null}
       <View style={styles.row}>
         <TouchableOpacity
           style={[styles.modeButton, { backgroundColor: colors.connect }]}

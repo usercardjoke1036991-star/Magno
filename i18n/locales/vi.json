@@ -658,7 +658,7 @@
   "errRpcMismatch": "Mạng RPC không khớp Quatrivium Finance.",
   "errRpcNoContract": "Nút RPC không nhận hợp đồng. Thử lại.",
   "errWrongNetwork": "Chuyển ví sang mạng Quatrivium Finance.",
-  "errNeedGas": "Không đủ BNB cho gas giao dịch.",
+  "errNeedGas": "Ví của ứng dụng cần ít nhất 0,001 BNB để ký. BNB trong ví đã liên kết không trả cho chữ ký này.",
   "errNeedGasTestnet": "Đây là mạng thử nghiệm. Bạn cần BNB thử nghiệm miễn phí để tiếp tục. Nhấn Lấy BNB.",
   "openFaucet": "Lấy BNB thử nghiệm",
   "errInternalOnly": "Tín dụng chỉ được yêu cầu và trả từ tài khoản Quatrivium của bạn. Dùng MetaMask hoặc ví khác chỉ để chuyển tiền vào hoặc ra.",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "Ở tài khoản thật hãy dùng BNB Smart Chain.",
   "errNeedGasAdmin": "Tài khoản quản trị này không có số dư mạng cho phí. Hãy xin BNB thử và thử lại.",
   "linkWalletBound": "Đã liên kết",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "Nếu người được mời trực tiếp không trả cấp 1 trong 7 ngày, bạn có thể chuyển số tiền đó vào quỹ.",
+  "padrinoSettleButton": "Chuyển vào quỹ",
+  "padrinoSettleNeedSeal": "Phải thanh toán đăng ký trước khi chuyển vào quỹ.",
+  "padrinoSettleWait": "7 ngày vẫn chưa hết.",
+  "padrinoSettleFailed": "Không chuyển được vào quỹ. Hãy thử lại.",
+  "errNeedGasExternal": "Ví đã liên kết cần BNB để gửi USDT. Số BNB đó không ký thao tác của ví ứng dụng.",
+  "creditAccessAlreadyInWallet": "4 USDT đã nằm trong ví của ứng dụng. Nút này chỉ ký phí và không thu lần nữa.",
+  "creditAccessSign": "Ký phí",
+  "linkWalletReconnect": "Kết nối lại phiên"
 }

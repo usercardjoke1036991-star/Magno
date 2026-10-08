@@ -658,7 +658,7 @@
   "errRpcMismatch": "Сеть RPC не совпадает с Quatrivium Finance.",
   "errRpcNoContract": "Узел RPC не распознаёт контракт. Попробуйте снова.",
   "errWrongNetwork": "Переключите кошелёк на сеть Quatrivium Finance.",
-  "errNeedGas": "Недостаточно BNB для газа транзакции.",
+  "errNeedGas": "Кошельку приложения нужно не меньше 0.001 BNB для подписи. BNB связанного кошелька эту подпись не оплачивает.",
   "errNeedGasTestnet": "Это тестовая сеть. Для продолжения нужны бесплатные тестовые BNB. Нажмите Получить BNB.",
   "openFaucet": "Получить тестовые BNB",
   "errInternalOnly": "Кредит запрашивается и погашается только с вашего счёта Quatrivium. MetaMask или другой кошелёк — только чтобы вводить или выводить средства.",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "В реальном счёте используйте BNB Smart Chain.",
   "errNeedGasAdmin": "У этой учётной записи администратора нет сетевого остатка на комиссии. Запросите тестовый BNB и повторите.",
   "linkWalletBound": "Привязано",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "Если прямой приглашённый не оплатит уровень 1 за 7 дней, эту сумму можно отправить в фонд.",
+  "padrinoSettleButton": "Отправить в фонд",
+  "padrinoSettleNeedSeal": "Перед отправкой в фонд нужно оплатить регистрацию.",
+  "padrinoSettleWait": "7 дней ещё не прошли.",
+  "padrinoSettleFailed": "Не удалось отправить в фонд. Повторите попытку.",
+  "errNeedGasExternal": "Связанному кошельку нужен BNB, чтобы отправить USDT. Этот BNB не подписывает действия кошелька приложения.",
+  "creditAccessAlreadyInWallet": "4 USDT уже в кошельке приложения. Эта кнопка только подписывает взнос и не списывает снова.",
+  "creditAccessSign": "Подписать взнос",
+  "linkWalletReconnect": "Переподключить сеанс"
 }

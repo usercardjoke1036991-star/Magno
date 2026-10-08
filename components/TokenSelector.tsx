@@ -30,7 +30,7 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
       <AppText style={[styles.lead, { color: colors.textMuted }]}>
         {mode === 'demo' ? t('tokenUniverseDemo') : t('tokenUniverseLive')}
       </AppText>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView horizontal directionalLockEnabled showsHorizontalScrollIndicator={false}>
         {tokens.map((token) => (
           <TouchableOpacity
             key={token.address}

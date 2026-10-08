@@ -536,11 +536,19 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }
 
         try {
+          const altaHecha = Boolean(await QuatriviumCreditService.altaPagada(walletAddress));
+          if (live()) {
+            setUserInfo((prev) => ({ ...prev, altaPagada: altaHecha }));
+          }
+        } catch (e) {
+          logErr('Error fetching alta status:', e);
+        }
+
+        try {
           const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
           const lastTs = Number(progress.ultimoPrestamoTimestamp);
           const cooldown = cooldownRestanteDesdeTimestamp(lastTs);
           const currentLevel = Number(progress.nivelActual) > 0 ? Number(progress.nivelActual) : 1;
-          const altaHecha = Boolean(await QuatriviumCreditService.altaPagada(walletAddress));
           if (live()) {
             setUserInfo((prev) => ({
               ...prev,
@@ -554,7 +562,6 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
                 lastHito: Number(progress.lastHito || 0),
               },
               donatedUsd: Number(formatUnits(BigInt(asWeiString(progress.donatedWei)), 18)),
-              altaPagada: altaHecha,
             }));
           }
         } catch (e) {
@@ -620,12 +627,18 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         try {
           const supported = Boolean(await creditContract.supportedToken(tokenAddress));
           let nextCurve = 0;
+          let curveRead = false;
           try {
             nextCurve = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
+            curveRead = true;
           } catch {
-            nextCurve = 0;
+            curveRead = false;
           }
-          setUserInfo((prev) => ({ ...prev, isTokenSupported: supported, curveRateBps: nextCurve }));
+          setUserInfo((prev) => ({
+            ...prev,
+            isTokenSupported: supported,
+            curveRateBps: curveRead ? nextCurve : prev.curveRateBps,
+          }));
         } catch (e) {
           logWarn('supportedToken failed:', e);
           setUserInfo((prev) => ({
@@ -642,7 +655,6 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }));
         } catch (e) {
           logWarn('valorLp failed:', e);
-          setBalances((prev) => ({ ...prev, lpBalance: '0.00' }));
         }
 
         try {
@@ -664,7 +676,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         }
 
         try {
-          let declared = false;
+          let declared: boolean | undefined;
           let required = !isDemoAccount();
           try {
             required = Boolean(await creditContract.kycExigido());
@@ -674,15 +686,15 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           try {
             declared = Boolean(await creditContract.kycDeclarado(walletAddress));
           } catch {
-            declared = false;
+            declared = undefined;
           }
           setUserInfo((prev) => ({
             ...prev,
-            kycDeclarado: declared,
+            kycDeclarado: declared === undefined ? prev.kycDeclarado : declared,
             kycExigido: required,
           }));
         } catch {
-          setUserInfo((prev) => ({ ...prev, kycDeclarado: false, kycExigido: !isDemoAccount() }));
+          setUserInfo((prev) => ({ ...prev, kycExigido: prev.kycExigido || !isDemoAccount() }));
         }
 
         try {
@@ -711,22 +723,15 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
               deviceMatches: walletRunsOnThisDevice(deviceHash, localHash),
             }));
           } catch {
-            bound = false;
             setUserInfo((prev) => ({
               ...prev,
               identidadExigida: requiredIdentity,
-              identityBound: false,
-              deviceHash: '',
-              deviceMatches: isDemoAccount(),
             }));
           }
         } catch {
           setUserInfo((prev) => ({
             ...prev,
-            identidadExigida: !isDemoAccount(),
-            identityBound: false,
-            deviceHash: '',
-            deviceMatches: isDemoAccount(),
+            identidadExigida: prev.identidadExigida || !isDemoAccount(),
           }));
         }
 

@@ -29,7 +29,6 @@ interface ReservaSectionProps {
   walletAddress: string;
   signer: Signer | null;
   tokenSymbol: string;
-  tokenBalance?: string;
   identityBlocked: boolean;
   delinquent: boolean;
   paused: boolean;
@@ -42,7 +41,6 @@ export function ReservaSection({
   walletAddress,
   signer,
   tokenSymbol,
-  tokenBalance = '',
   identityBlocked,
   delinquent,
   paused,
@@ -234,8 +232,7 @@ export function ReservaSection({
               ))}
             </View>
             <AppText style={[styles.label, { color: colors.primary }]}>
-              {t('reservaAmount')} ({tokenSymbol}
-              {tokenBalance ? ` · ${tokenBalance}` : ''})
+              {t('reservaAmount')} ({tokenSymbol})
             </AppText>
             <AppTextInput
               value={amount}

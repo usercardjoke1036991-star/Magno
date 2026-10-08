@@ -181,7 +181,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
           <AppText style={[styles.title, { color: colors.text }]}>{title}</AppText>
           <View style={styles.spacer} />
         </View>
-        <ScrollView keyboardShouldPersistTaps="always" contentContainerStyle={styles.body}>
+        <ScrollView style={styles.screen} keyboardShouldPersistTaps="always" contentContainerStyle={styles.body} nestedScrollEnabled>
           {!linked ? (
             <>
               <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('linkWalletNeedFunds')}</AppText>

@@ -659,7 +659,7 @@
   "errRpcMismatch": "La red no corresponde a Quatrivium Finance.",
   "errRpcNoContract": "La red no reconoce el contrato. Intente de nuevo.",
   "errWrongNetwork": "Cambie la billetera a la red de Quatrivium Finance.",
-  "errNeedGas": "BNB insuficiente para la comisión de red.",
+  "errNeedGas": "La billetera de la app necesita al menos 0.001 BNB para firmar. El BNB de la billetera vinculada no sirve para esta firma.",
   "errNeedGasTestnet": "Necesita BNB de prueba. Pulse Obtener BNB.",
   "openFaucet": "Obtener BNB de prueba",
   "errInternalOnly": "Los préstamos solo se piden y pagan desde esta app.",
@@ -1209,5 +1209,9 @@
   "padrinoSettleButton": "Pasar al fondo",
   "padrinoSettleNeedSeal": "Para pasarlo al fondo hace falta haber pagado el alta.",
   "padrinoSettleWait": "Aún no se cumplen los 7 días.",
-  "padrinoSettleFailed": "No se pudo pasar al fondo. Inténtelo de nuevo."
+  "padrinoSettleFailed": "No se pudo pasar al fondo. Inténtelo de nuevo.",
+  "errNeedGasExternal": "La billetera vinculada necesita BNB para enviar los USDT. Ese BNB no firma lo que hace la billetera de la app.",
+  "creditAccessAlreadyInWallet": "Los 4 USDT ya están en la billetera de la app. Este botón solo firma el alta y no vuelve a cobrar.",
+  "creditAccessSign": "Firmar alta",
+  "linkWalletReconnect": "Reconectar sesión"
 }

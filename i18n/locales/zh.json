@@ -658,7 +658,7 @@
   "errRpcMismatch": "RPC 网络与 Quatrivium Finance 不匹配。",
   "errRpcNoContract": "RPC 节点无法识别该合约。请再试一次。",
   "errWrongNetwork": "请将钱包切换到 Quatrivium Finance 网络。",
-  "errNeedGas": "BNB 不足以支付交易手续费。",
+  "errNeedGas": "应用钱包至少需要 0.001 BNB 才能签名。已绑定钱包里的 BNB 不能支付这次签名。",
   "errNeedGasTestnet": "这是测试网络。您需要免费测试BNB才能继续。点击「获取BNB」。",
   "openFaucet": "获取测试BNB",
   "errInternalOnly": "信贷只能从您的 Quatrivium 账户申请和偿还。请仅使用 MetaMask 或其他钱包转入或转出资金。",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "真实账户请使用 BNB Smart Chain。",
   "errNeedGasAdmin": "此管理账户没有支付网络手续费的余额。请申请测试 BNB 后重试。",
   "linkWalletBound": "已关联",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "若直接邀请的人在 7 天内未支付第 1 级，您可以将该金额转入资金池。",
+  "padrinoSettleButton": "转入资金池",
+  "padrinoSettleNeedSeal": "转入资金池之前必须先完成注册缴费。",
+  "padrinoSettleWait": "7 天尚未结束。",
+  "padrinoSettleFailed": "未能转入资金池。请重试。",
+  "errNeedGasExternal": "绑定的钱包需要 BNB 才能发送 USDT。那些 BNB 不能为应用钱包的操作签名。",
+  "creditAccessAlreadyInWallet": "4 USDT 已在应用钱包中。此按钮只签名注册费，不会再次扣款。",
+  "creditAccessSign": "签署注册费",
+  "linkWalletReconnect": "重新连接会话"
 }

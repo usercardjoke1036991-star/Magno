@@ -22,6 +22,7 @@ interface SecretInputProps {
   maxLength?: number;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   editable?: boolean;
+  startVisible?: boolean;
   style?: StyleProp<TextStyle>;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -35,17 +36,17 @@ export const SecretInput: React.FC<SecretInputProps> = ({
   maxLength,
   autoCapitalize = 'none',
   editable = true,
+  startVisible = false,
   style,
   containerStyle,
 }) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(startVisible);
   const { t } = useI18n();
   const { colors } = useTheme();
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder }, containerStyle]}>
       <AppTextInput
-        key={visible ? 'visible' : 'hidden'}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}

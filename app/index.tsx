@@ -328,6 +328,9 @@ function HomeScreenWithHooks() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled
+        showsVerticalScrollIndicator
       >
         <View style={styles.topBar}>
           <BrandLogo size={44} />
@@ -370,6 +373,7 @@ function HomeScreenWithHooks() {
             altaPaid={Boolean(userInfo.altaPagada)}
             canPay={canPayAlta}
             isLoading={txLoading}
+            appWalletUsdt={balances.tokenBalance}
             needRegister={needRegister}
             canRegister={Boolean(creditReady && !userInfo.paused)}
             onPay={() => void handlePagarAcceso()}
@@ -530,6 +534,7 @@ function HomeScreenWithHooks() {
           canPay={canPayAlta}
           isLoading={txLoading}
           walletAddress={walletAddress || ''}
+          appWalletUsdt={balances.tokenBalance}
           onPay={() => void handlePagarAcceso()}
         />
       </AppWindow>
@@ -547,6 +552,7 @@ function HomeScreenWithHooks() {
               altaPaid={Boolean(userInfo.altaPagada)}
               canPay={canPayAlta}
               isLoading={txLoading}
+              appWalletUsdt={balances.tokenBalance}
               tokenSymbol={selectedToken.symbol}
               onPay={() => void handlePagarAcceso()}
             />
@@ -568,6 +574,7 @@ function HomeScreenWithHooks() {
               altaPaid={Boolean(userInfo.altaPagada)}
               canPay={canPayAlta}
               isLoading={txLoading}
+              appWalletUsdt={balances.tokenBalance}
               tokenSymbol={selectedToken.symbol}
               onPay={() => void handlePagarAcceso()}
             />
@@ -624,6 +631,7 @@ function HomeScreenWithHooks() {
           altaPaid={Boolean(userInfo.altaPagada)}
           canPay={canPayAlta}
           isLoading={txLoading}
+          appWalletUsdt={balances.tokenBalance}
           tokenSymbol={selectedToken.symbol}
           onPay={() => void handlePagarAcceso()}
         />
@@ -893,7 +901,6 @@ function HomeScreenWithHooks() {
           walletAddress={walletAddress || ''}
           signer={appSigner}
           tokenSymbol={selectedToken.symbol}
-          tokenBalance={balances.tokenBalance}
           identityBlocked={mode !== 'demo' && identityBlocked}
           delinquent={userInfo.isDelinquent}
           paused={creditPaused || !servicesOpen}
@@ -1012,7 +1019,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   topBar: {
     flexDirection: 'row',

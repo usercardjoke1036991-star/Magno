@@ -659,7 +659,7 @@
   "errRpcMismatch": "This network is not Quatrivium Finance.",
   "errRpcNoContract": "The network does not recognize the contract. Try again.",
   "errWrongNetwork": "Switch the wallet to the Quatrivium Finance network.",
-  "errNeedGas": "Insufficient BNB for the network fee.",
+  "errNeedGas": "The app wallet needs at least 0.001 BNB to sign. BNB in the linked wallet does not pay this signature.",
   "errNeedGasTestnet": "You need test BNB. Tap Get BNB.",
   "openFaucet": "Get test BNB",
   "errInternalOnly": "Loans can only be requested and repaid from this app.",
@@ -1209,5 +1209,9 @@
   "padrinoSettleButton": "Send to the pool",
   "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
   "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleFailed": "It could not be sent to the pool. Try again.",
+  "errNeedGasExternal": "The linked wallet needs BNB to send the USDT. That BNB does not sign what the app wallet does.",
+  "creditAccessAlreadyInWallet": "The 4 USDT are already in the app wallet. This button only signs the fee and does not charge again.",
+  "creditAccessSign": "Sign the fee",
+  "linkWalletReconnect": "Reconnect session"
 }

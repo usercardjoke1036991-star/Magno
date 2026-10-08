@@ -658,7 +658,7 @@
   "errRpcMismatch": "RPC নেটওয়ার্ক Quatrivium Finance-এর সাথে মেলে না।",
   "errRpcNoContract": "RPC নোড কন্ট্রাক্ট চেনে না। আবার চেষ্টা করুন।",
   "errWrongNetwork": "ওয়ালেট Quatrivium Finance নেটওয়ার্কে স্যুইচ করুন।",
-  "errNeedGas": "লেনদেনের গ্যাসের জন্য যথেষ্ট BNB নেই।",
+  "errNeedGas": "স্বাক্ষরের জন্য অ্যাপ ওয়ালেটে কমপক্ষে 0.001 BNB লাগে। যুক্ত ওয়ালেটের BNB এই স্বাক্ষরের খরচ দেয় না।",
   "errNeedGasTestnet": "এটি পরীক্ষার নেটওয়ার্ক। চালিয়ে যেতে বিনামূল্যে টেস্ট BNB দরকার। BNB পান ট্যাপ করুন।",
   "openFaucet": "টেস্ট BNB পান",
   "errInternalOnly": "ক্রেডিট শুধু আপনার Quatrivium অ্যাকাউন্ট থেকে চাওয়া ও পরিশোধ হয়। টাকা ভিতরে বা বাইরে সরাতেই MetaMask বা অন্য ওয়ালেট ব্যবহার করুন।",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "আসল অ্যাকাউন্টে BNB Smart Chain ব্যবহার করুন।",
   "errNeedGasAdmin": "এই প্রশাসক অ্যাকাউন্টে ফির জন্য নেটওয়ার্ক স্থিতি নেই। পরীক্ষা BNB চান এবং আবার চেষ্টা করুন।",
   "linkWalletBound": "সংযুক্ত",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "সরাসরি আমন্ত্রিত ব্যক্তি ৭ দিনের মধ্যে স্তর ১ পরিশোধ না করলে, আপনি সেই অর্থ তহবিলে পাঠাতে পারেন।",
+  "padrinoSettleButton": "তহবিলে পাঠান",
+  "padrinoSettleNeedSeal": "তহবিলে পাঠানোর আগে নিবন্ধন পরিশোধ করতে হবে।",
+  "padrinoSettleWait": "৭ দিন এখনও শেষ হয়নি।",
+  "padrinoSettleFailed": "তহবিলে পাঠানো যায়নি। আবার চেষ্টা করুন।",
+  "errNeedGasExternal": "যুক্ত ওয়ালেটে USDT পাঠাতে BNB লাগে। সেই BNB অ্যাপ ওয়ালেটের কাজে স্বাক্ষর করে না।",
+  "creditAccessAlreadyInWallet": "4 USDT ইতিমধ্যে অ্যাপ ওয়ালেটে আছে। এই বোতাম শুধু ফি স্বাক্ষর করে, আবার কাটে না।",
+  "creditAccessSign": "ফি স্বাক্ষর",
+  "linkWalletReconnect": "সেশন আবার যুক্ত করুন"
 }

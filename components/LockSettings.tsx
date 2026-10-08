@@ -208,6 +208,7 @@ export const LockSettings: React.FC<{
         onChangeText={(value) => setNext(value.replace(/\D/g, '').slice(0, 6))}
         keyboardType="number-pad"
         maxLength={6}
+        startVisible
         placeholder="••••••"
       />
       <AppText style={[styles.label, { color: colors.text }]}>{t('lockConfirmPin')}</AppText>
@@ -216,6 +217,7 @@ export const LockSettings: React.FC<{
         onChangeText={(value) => setConfirm(value.replace(/\D/g, '').slice(0, 6))}
         keyboardType="number-pad"
         maxLength={6}
+        startVisible
         placeholder="••••••"
       />
       <TouchableOpacity

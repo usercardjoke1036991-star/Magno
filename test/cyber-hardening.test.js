@@ -150,9 +150,10 @@ describe('cyber hardening — PIN and secret box', function () {
       lock.indexOf('export async function loadWrapFromBiometric'),
       lock.indexOf('export async function clearBiometricWrap')
     );
-    expect(bio).to.include('BIO_WRAP_OPTIONS');
-    expect(bio).to.not.include('authenticateBiometric');
-    expect(bio).to.not.include('WRAP_STORE, OPTIONS');
+    expect(bio).to.include('authenticateBiometric');
+    expect(bio).to.include('if (!ok) return null');
+    expect(bio).to.include('WRAP_STORE, OPTIONS');
+    expect(bio).to.not.include('BIO_WRAP_OPTIONS');
     const entry = fs.readFileSync(path.join(__dirname, '..', 'utils', 'accountEntry.ts'), 'utf8');
     expect(entry).to.include('nextUnlockAfterBiometricFail');
     expect(entry).to.include("if (flags.pinSet) return 'pin'");
@@ -2112,7 +2113,9 @@ describe('account entry — password, email and session', () => {
       lock.indexOf('export async function loadWrapFromBiometric'),
       lock.indexOf('export async function clearBiometricWrap')
     );
-    expect(bio).to.not.include('authenticateBiometric');
+    expect(bio).to.include('authenticateBiometric');
+    expect(bio).to.include('if (!ok) return null');
+    expect(bio).to.not.include('BIO_WRAP_OPTIONS');
   });
 
   it('keeps email and phone on the account until deleted, then blocks credit', function () {
@@ -2262,6 +2265,9 @@ describe('account entry — password, email and session', () => {
     expect(gates).to.include('liveNeedsKyc(demo, flags.kycDeclarado, kycRequired)');
     const service = read('services', 'quatriviumCreditService.ts');
     expect(service).to.not.include('const floor = 4n * 10n ** 18n');
+    const altaRead = service.slice(service.indexOf('altaPagada:'), service.indexOf('obtenerSaludAdmin'));
+    expect(altaRead).to.include('registroHecho');
+    expect(altaRead).to.not.match(/catch[\s\S]{0,80}return false/);
     expect(service).to.match(/kycExigido = Boolean\(await credit\.kycExigido\(\)\);\s*\} catch \{\s*kycExigido = true;/);
     const home = read('app', 'index.tsx');
     expect(home).to.include('hasCreditAccess(userInfo.donatedUsd || 0, Boolean(userInfo.altaPagada))');

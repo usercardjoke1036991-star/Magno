@@ -3,7 +3,7 @@
  * Extraído de app/index.tsx para reducir complejidad del componente raíz.
  * Cada handler valida precondiciones y delega al hook useWeb3Transactions.
  */
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Contract, formatUnits, parseEther, parseUnits, type Eip1193Provider, type Signer } from 'ethers';
 import { Alert, Linking } from 'react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
@@ -145,6 +145,8 @@ export const useHomeHandlers = ({
 }: HomeHandlersParams) => {
   const { t } = useI18n();
   const accesoBusy = useRef(false);
+  const busyDepth = useRef(0);
+  const [actionBusy, setActionBusy] = useState(false);
   const { confirmAdminStep } = useAdminTotp();
 
   const {
@@ -328,7 +330,7 @@ export const useHomeHandlers = ({
     }
     const extBnb = await readOnChainBnb(linked);
     if (extBnb !== null && extBnb < MIN_GAS_WEI) {
-      showNotice(t('errNeedGas'), t('errNeedGas'));
+      showNotice(t('errNeedGasExternal'), t('errNeedGasExternal'));
       return false;
     }
     try {
@@ -789,7 +791,13 @@ export const useHomeHandlers = ({
     }
     if (!ensureCreditReady()) return;
     if (hasCreditAccess(Number(userInfo.donatedUsd || 0), Boolean(userInfo.altaPagada))) return;
-    if (walletAddress && (await QuatriviumCreditService.altaPagada(walletAddress))) return;
+    if (walletAddress) {
+      try {
+        if (await QuatriviumCreditService.altaPagada(walletAddress)) return;
+      } catch {
+        // La lectura no llegó. pagarRegistro vuelve a consultar el contrato antes de firmar.
+      }
+    }
     if (!isAltaConfigured() && !userInfo.canDonate) {
       Alert.alert(t('creditAccessTitle'), t(isDemoAccount() ? 'creditAccessPending' : 'liveCreditNotReady'));
       return;
@@ -1037,22 +1045,35 @@ export const useHomeHandlers = ({
     });
   };
 
+  const track = <T extends (...args: never[]) => Promise<unknown>>(fn: T): T => (
+    (async (...args: never[]) => {
+      busyDepth.current += 1;
+      setActionBusy(true);
+      try {
+        return await fn(...args);
+      } finally {
+        busyDepth.current = Math.max(0, busyDepth.current - 1);
+        if (busyDepth.current === 0) setActionBusy(false);
+      }
+    }) as T
+  );
+
   return {
-    txLoading,
-    handleRegistrarHumano,
-    handleSolicitarCredito,
-    handleCobrarBonoHito,
-    handleCanjearFama,
-    handleCanjearFamaRed,
-    handleCobrarBonoRacha,
-    handlePagar,
-    handleDepositarPool,
-    handlePagarAcceso,
-    handleDonar,
-    handleAportarReserva,
-    handleRetirarComisiones,
-    handleRetirarComisionesToken,
-    handleDeclararKyc,
+    txLoading: txLoading || actionBusy,
+    handleRegistrarHumano: track(handleRegistrarHumano),
+    handleSolicitarCredito: track(handleSolicitarCredito),
+    handleCobrarBonoHito: track(handleCobrarBonoHito),
+    handleCanjearFama: track(handleCanjearFama),
+    handleCanjearFamaRed: track(handleCanjearFamaRed),
+    handleCobrarBonoRacha: track(handleCobrarBonoRacha),
+    handlePagar: track(handlePagar),
+    handleDepositarPool: track(handleDepositarPool),
+    handlePagarAcceso: track(handlePagarAcceso),
+    handleDonar: track(handleDonar),
+    handleAportarReserva: track(handleAportarReserva),
+    handleRetirarComisiones: track(handleRetirarComisiones),
+    handleRetirarComisionesToken: track(handleRetirarComisionesToken),
+    handleDeclararKyc: track(handleDeclararKyc),
     handleExecuteProposal,
     handleConfirmProposal,
     handleProposeAddAdmin,

@@ -658,7 +658,7 @@
   "errRpcMismatch": "A rede do RPC não corresponde ao Quatrivium Finance.",
   "errRpcNoContract": "O nó RPC não reconhece o contrato. Tente de novo.",
   "errWrongNetwork": "Mude a carteira para a rede do Quatrivium Finance.",
-  "errNeedGas": "Não há BNB suficiente para o gás da transação.",
+  "errNeedGas": "A carteira do aplicativo precisa de pelo menos 0,001 BNB para assinar. O BNB da carteira vinculada não paga esta assinatura.",
   "errNeedGasTestnet": "Esta é a rede de teste. Para continuar precisa de BNB de teste gratuito. Toque em Obter BNB.",
   "openFaucet": "Obter BNB de teste",
   "errInternalOnly": "O crédito é pedido e pago só na sua conta Quatrivium. Use MetaMask ou outra carteira apenas para entrar ou sair com fundos.",
@@ -1209,5 +1209,9 @@
   "padrinoSettleButton": "Passar ao fundo",
   "padrinoSettleNeedSeal": "É preciso ter pago o registo para o passar ao fundo.",
   "padrinoSettleWait": "Ainda não se cumpriram os 7 dias.",
-  "padrinoSettleFailed": "Não foi possível passar ao fundo. Tente de novo."
+  "padrinoSettleFailed": "Não foi possível passar ao fundo. Tente de novo.",
+  "errNeedGasExternal": "A carteira vinculada precisa de BNB para enviar os USDT. Esse BNB não assina o que a carteira do aplicativo faz.",
+  "creditAccessAlreadyInWallet": "Os 4 USDT já estão na carteira do aplicativo. Este botão só assina a taxa e não cobra de novo.",
+  "creditAccessSign": "Assinar a taxa",
+  "linkWalletReconnect": "Reconectar sessão"
 }

@@ -172,7 +172,7 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   if (username && hasFace && !hasCompletedWalletLink(linkedWallet)) {
     return (
       <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.fill} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
           <BrandLogo size={64} style={styles.logo} />
           <AppText style={[styles.title, { color: colors.text }]}>{t('linkWalletTitle')}</AppText>
           <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('linkWalletLead')}</AppText>
@@ -190,7 +190,7 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   if (username && !hasFace) {
     return (
       <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.fill} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
           <BrandLogo size={64} style={styles.logo} />
           <AppText style={[styles.title, { color: colors.text }]}>{t('publicIdentityTitle')}</AppText>
           <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('publicIdentityLead')}</AppText>
@@ -207,7 +207,7 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
 
   return (
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView style={styles.fill} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
         <BrandLogo size={64} style={styles.logo} />
         <AppText style={[styles.title, { color: colors.text }]}>{t('createCredentialsTitle')}</AppText>
         <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('createCredentialsLead')}</AppText>

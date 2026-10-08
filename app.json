@@ -35,6 +35,7 @@
         "backgroundColor": "#07150F"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "package": "com.quatrivium.credit",
       "versionCode": 4,
       "allowBackup": false,

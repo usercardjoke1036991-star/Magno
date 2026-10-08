@@ -512,8 +512,8 @@ export const QuatriviumCreditService = {
       const { provider } = await getProviderAndSigner();
       const alta = new Contract(getAltaAddress(), ALTA_ABI, provider);
       return Boolean(await alta.registroHecho(userAddress));
-    } catch {
-      return false;
+    } catch (error) {
+      throw error;
     }
   },
 

@@ -658,7 +658,7 @@
   "errRpcMismatch": "Das RPC-Netzwerk stimmt nicht mit Quatrivium Finance überein.",
   "errRpcNoContract": "Der RPC-Knoten erkennt den Vertrag nicht. Erneut versuchen.",
   "errWrongNetwork": "Wechseln Sie das Wallet auf das Quatrivium-Credit-Netzwerk.",
-  "errNeedGas": "Es ist nicht genug BNB für Transaktionsgas vorhanden.",
+  "errNeedGas": "Die App-Wallet braucht mindestens 0,001 BNB zum Signieren. BNB in der verknüpften Wallet zahlt diese Signatur nicht.",
   "errNeedGasTestnet": "Dies ist das Testnetzwerk. Sie brauchen kostenlose Test-BNB um fortzufahren. Tippen Sie auf BNB holen.",
   "openFaucet": "Test-BNB holen",
   "errInternalOnly": "Kredit wird nur von Ihrem Quatrivium-Konto beantragt und zurückgezahlt. Nutzen Sie MetaMask oder ein anderes Wallet nur, um Mittel hinein- oder herauszuschieben.",
@@ -1209,5 +1209,9 @@
   "padrinoSettleButton": "An den Fonds geben",
   "padrinoSettleNeedSeal": "Die Anmeldung muss bezahlt sein, bevor der Betrag an den Fonds geht.",
   "padrinoSettleWait": "Die 7 Tage sind noch nicht um.",
-  "padrinoSettleFailed": "Übergabe an den Fonds fehlgeschlagen. Bitte erneut versuchen."
+  "padrinoSettleFailed": "Übergabe an den Fonds fehlgeschlagen. Bitte erneut versuchen.",
+  "errNeedGasExternal": "Die verknüpfte Wallet braucht BNB, um die USDT zu senden. Dieses BNB signiert nicht, was die App-Wallet tut.",
+  "creditAccessAlreadyInWallet": "Die 4 USDT liegen schon in der App-Wallet. Diese Schaltfläche signiert nur die Gebühr und bucht nicht erneut ab.",
+  "creditAccessSign": "Gebühr signieren",
+  "linkWalletReconnect": "Sitzung erneut verbinden"
 }

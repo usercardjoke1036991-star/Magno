@@ -227,7 +227,7 @@ async function fundInternalFromExternal(
   }
   const extBnb = await readOnChainBnb(linked);
   if (extBnb !== null && extBnb < MIN_GAS_WEI) {
-    if (!ctx.silent) showNotice(ctx.t('errNeedGas'), ctx.t('errNeedGas'));
+    if (!ctx.silent) showNotice(ctx.t('errNeedGasExternal'), ctx.t('errNeedGasExternal'));
     return false;
   }
   try {

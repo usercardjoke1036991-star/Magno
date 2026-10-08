@@ -76,7 +76,7 @@ export function LinkedWalletCard({ internalWallet, compact = false }: LinkedWall
   const sessionLive = Boolean(isConnected && connectedReady);
   const mismatch = Boolean(linked && sessionLive && String(address).toLowerCase() !== linked.toLowerCase());
   const looksBound = Boolean(linked && sessionLive && !mismatch);
-  const boundLabel = looksBound ? 'linkWalletBound' : linked ? 'connectWallet' : 'linkWalletBind';
+  const boundLabel = looksBound ? 'linkWalletBound' : linked ? 'linkWalletReconnect' : 'linkWalletBind';
 
   return (
     <View

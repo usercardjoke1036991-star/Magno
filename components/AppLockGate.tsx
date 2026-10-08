@@ -138,8 +138,6 @@ async function resolveSessionWrap(): Promise<{ wrapReady: boolean; address: stri
     await raceMs(restoreIdentityLocal(address), 8000, null);
     return { wrapReady: wrapReadyForApp(true, true), address };
   }
-  clearWalletSession();
-  await purgePersistedWrap();
   return { wrapReady: false, address: '' };
 }
 
@@ -305,19 +303,15 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
         setRecovering(false);
         setSessionTaken(false);
       } else {
-        const wallet = await raceMs(ensureAppWallet(), 8000, null);
+        let wallet: { address?: string } | null = null;
+        try {
+          wallet = await ensureAppWallet();
+        } catch {
+          wallet = null;
+        }
         if (!wallet?.address) {
-          clearWalletSession();
-          await purgePersistedWrap();
           setError(t('appWalletFailed'));
-          setNeedsSetup(true);
-          setSetupStage('restore');
-          setLocked(false);
-          setRestorePhrase('');
-          setPasswordInput('');
-          setAccountUsername('');
-          setPinDigits('');
-          setAuthCode('');
+          setLocked(true);
           return;
         }
         await raceMs(markSessionSaved(), 2500, undefined);
@@ -686,25 +680,21 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const submitUnlockPassword = async () => {
     if (busy || lockMs > 0 || !passwordInput) return;
     setBusy(true);
-    const result = await raceMs(checkPassword(passwordInput), 12000, {
-      ok: false,
-      remainingMs: -1,
-      locked: false,
-    });
-    setBusy(false);
-    if (result.ok) {
-      await passQueuedMethod(askingSignIn);
-      return;
+    setError('');
+    try {
+      const result = await checkPassword(passwordInput);
+      if (result.ok) {
+        await passQueuedMethod(askingSignIn);
+        return;
+      }
+      setLockMs(result.remainingMs);
+      setError(
+        result.locked ? t('lockCooldown', { seconds: Math.ceil(result.remainingMs / 1000) }) : t('lockPasswordWrong')
+      );
+      setPasswordInput('');
+    } finally {
+      setBusy(false);
     }
-    if (result.remainingMs === -1) {
-      setError(t('appWalletFailed'));
-      return;
-    }
-    setLockMs(result.remainingMs);
-    setError(
-      result.locked ? t('lockCooldown', { seconds: Math.ceil(result.remainingMs / 1000) }) : t('lockPasswordWrong')
-    );
-    setPasswordInput('');
   };
 
   const beginCreatePhrase = () => {
@@ -898,13 +888,8 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     if (busy || lockMs > 0) return;
     setBusy(true);
     setError('');
-    const release = setTimeout(() => setBusy(false), 14000);
     try {
-      const checked = await raceMs(checkPassword(passwordInput), 12000, {
-        ok: false,
-        remainingMs: -1,
-        locked: false,
-      });
+      const checked = await checkPassword(passwordInput);
       if (checked.ok) {
         const saved = await loadClaimedUsername();
         const typed = normalizeUsername(accountUsername);
@@ -917,10 +902,6 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
         }
         setHasPassword(true);
         await finishAuthenticated(keepOnPhone);
-        return;
-      }
-      if (checked.remainingMs === -1) {
-        setError(t('appWalletFailed'));
         return;
       }
       {
@@ -941,7 +922,6 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       else if (reason.includes('expired')) setError(t('emailExpired'));
       else setError(t('otpRequestFailed'));
     } finally {
-      clearTimeout(release);
       setBusy(false);
     }
   };
@@ -1020,9 +1000,15 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView
         style={styles.fill}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={styles.fill}
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+          showsVerticalScrollIndicator
+        >
           <View style={styles.hero}>
             {welcomeStage ? (
               <BrandWordmark compact titleColor={colors.text} lineColor={colors.primary} />
@@ -1694,7 +1680,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scroll: {
-    paddingBottom: 32,
+    flexGrow: 1,
+    paddingBottom: 48,
   },
   hero: {
     paddingHorizontal: 28,

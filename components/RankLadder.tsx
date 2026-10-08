@@ -40,7 +40,7 @@ export const RankLadder: React.FC<RankLadderProps> = ({
       {isFounder ? (
         <AppText style={[styles.founderHint, { color: colors.textMuted }]}>{t('founderFramesHint')}</AppText>
       ) : null}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      <ScrollView horizontal directionalLockEnabled showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
         {FAMILY_BANDS.map((band) => {
           const sample = getRankForLevel(band.from);
           const active = band.family === family;

@@ -658,7 +658,7 @@
   "errRpcMismatch": "Jaringan RPC tidak cocok dengan Quatrivium Finance.",
   "errRpcNoContract": "Node RPC tidak mengenali kontrak. Coba lagi.",
   "errWrongNetwork": "Alihkan dompet ke jaringan Quatrivium Finance.",
-  "errNeedGas": "BNB tidak cukup untuk gas transaksi.",
+  "errNeedGas": "Dompet aplikasi butuh sedikitnya 0,001 BNB untuk menandatangani. BNB di dompet tertaut tidak membayar tanda tangan ini.",
   "errNeedGasTestnet": "Ini adalah jaringan uji coba. Anda memerlukan BNB uji coba gratis untuk melanjutkan. Ketuk Dapatkan BNB.",
   "openFaucet": "Dapatkan BNB uji coba",
   "errInternalOnly": "Kredit diajukan dan dilunasi hanya dari akun Quatrivium Anda. Pakai MetaMask atau dompet lain hanya untuk memindahkan dana masuk atau keluar.",
@@ -1205,9 +1205,13 @@
   "linkWalletNetworkLive": "Di Akun Nyata gunakan BNB Smart Chain.",
   "errNeedGasAdmin": "Akun administrator ini tidak punya saldo jaringan untuk biaya. Minta BNB uji dan coba lagi.",
   "linkWalletBound": "Terhubung",
-  "padrinoSettleLead": "If a direct invite does not pay level 1 within 7 days, you can send that amount to the pool.",
-  "padrinoSettleButton": "Send to the pool",
-  "padrinoSettleNeedSeal": "Registration must be paid before sending it to the pool.",
-  "padrinoSettleWait": "The 7 days are not over yet.",
-  "padrinoSettleFailed": "It could not be sent to the pool. Try again."
+  "padrinoSettleLead": "Jika undangan langsung tidak membayar tingkat 1 dalam 7 hari, jumlah itu dapat dikirim ke dana.",
+  "padrinoSettleButton": "Kirim ke dana",
+  "padrinoSettleNeedSeal": "Pendaftaran harus dibayar sebelum mengirimnya ke dana.",
+  "padrinoSettleWait": "7 hari belum selesai.",
+  "padrinoSettleFailed": "Tidak dapat dikirim ke dana. Coba lagi.",
+  "errNeedGasExternal": "Dompet tertaut butuh BNB untuk mengirim USDT. BNB itu tidak menandatangani tindakan dompet aplikasi.",
+  "creditAccessAlreadyInWallet": "4 USDT sudah ada di dompet aplikasi. Tombol ini hanya menandatangani biaya dan tidak menagih lagi.",
+  "creditAccessSign": "Tanda tangani biaya",
+  "linkWalletReconnect": "Sambungkan ulang sesi"
 }

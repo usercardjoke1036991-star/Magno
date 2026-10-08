@@ -265,6 +265,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-07 | Sincronizacion app-contratos: registroHecho fallido no se guarda como alta impaga; Reserva muestra el bote del contrato, no el saldo de la billetera. | — |
+| 2026-10-07 | App: huella sin requireAuthentication al guardar y prompt al usar; scroll con flex en ventanas congeladas; timeout de 8s ya no borra la sesion; alta muestra Firmar si el USDT ya esta en la billetera interna; BNB 0.001 solo al firmar y sin grifo en Real; PIN sin remount; espera en huella; reconectar sesion; i18n padrino. Contratos sin cambios. | — |
 | 2026-10-07 | Cierre de auditoria APK: alta = registroHecho (no donacion), Reserva sin 'Ahora 12%' sin lectura, KYC/identidad siguen el contrato en Real, updates OTA apagadas para el proximo APK, assetlinks.json listo en web/.well-known, frances corregido; security:check acepta las direcciones Demo vivas en eas.json | — |
 | 2026-10-06 | Mainnet chain 56 desplegado: Credit 0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6. Foundry 44/44. La app usa esa direccion si falta la variable de entorno. No redesplegar. | — |
 | 2026-10-04 | Acciones de GitHub: Gitleaks y TruffleHog en cada push y pull request. Repositorio privado, Gitleaks usa el binario abierto. | — |

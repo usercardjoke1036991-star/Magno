@@ -167,7 +167,13 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
                 <AppText style={[styles.closeText, { color: colors.textMuted }]}>×</AppText>
               </TouchableOpacity>
             </View>
-            <ScrollView keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
+            <ScrollView
+              style={styles.sheetScroll}
+              contentContainerStyle={styles.sheetBody}
+              keyboardShouldPersistTaps="always"
+              nestedScrollEnabled
+              showsVerticalScrollIndicator
+            >
               {panel === 'home' ? (
                 <View>
                   <MenuRow icon="shield" label={t('securityTitle')} onPress={() => setPanel('security')} />
@@ -214,11 +220,18 @@ const styles = StyleSheet.create({
   sheet: {
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+    height: '88%',
     maxHeight: '88%',
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 28,
     zIndex: 2,
+  },
+  sheetScroll: {
+    flex: 1,
+  },
+  sheetBody: {
+    paddingBottom: 32,
   },
   handle: {
     alignSelf: 'center',

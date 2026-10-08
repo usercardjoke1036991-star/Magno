@@ -4,6 +4,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { isAltaConfigured } from '../constants/altaConfig';
 import { isDemoAccount } from '../constants/rpcConfig';
+import { accessPayUsdt } from '../utils/creditGates';
 import { BrandLogo } from './BrandLogo';
 import { AppText } from './AppText';
 import { LinkedWalletCard } from './LinkedWalletCard';
@@ -12,6 +13,7 @@ interface CreditAccessGateProps {
   canPay: boolean;
   isLoading?: boolean;
   walletAddress?: string;
+  appWalletUsdt?: string;
   onPay: () => void;
 }
 
@@ -19,16 +21,21 @@ export function CreditAccessGate({
   canPay,
   isLoading = false,
   walletAddress = '',
+  appWalletUsdt = '0',
   onPay,
 }: CreditAccessGateProps) {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const held = Number(appWalletUsdt);
+  const alreadyInWallet = isAltaConfigured() && Number.isFinite(held) && held + 1e-9 >= accessPayUsdt();
 
   return (
     <View style={styles.body}>
       <BrandLogo size={64} style={styles.logo} />
       <AppText style={[styles.title, { color: colors.text }]}>{t('creditAccessTitle')}</AppText>
-      <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('creditAccessGateLead')}</AppText>
+      <AppText style={[styles.lead, { color: colors.textMuted }]}>
+        {t(alreadyInWallet ? 'creditAccessAlreadyInWallet' : 'creditAccessGateLead')}
+      </AppText>
       <AppText style={[styles.meta, { color: colors.textMuted }]}>{t('creditAccessLead')}</AppText>
       {walletAddress ? <LinkedWalletCard internalWallet={walletAddress} compact /> : null}
       {!canPay ? (
@@ -44,13 +51,13 @@ export function CreditAccessGate({
           { backgroundColor: canPay ? colors.primary : colors.chip },
         ]}
         accessibilityRole="button"
-        accessibilityLabel={t('creditAccessPay')}
+        accessibilityLabel={t(alreadyInWallet ? 'creditAccessSign' : 'creditAccessPay')}
       >
         {isLoading ? (
           <ActivityIndicator color={canPay ? colors.onPrimary : colors.textMuted} />
         ) : (
           <AppText style={[styles.payText, { color: canPay ? colors.onPrimary : colors.textMuted }]}>
-            {t('creditAccessPay')}
+            {t(alreadyInWallet ? 'creditAccessSign' : 'creditAccessPay')}
           </AppText>
         )}
       </TouchableOpacity>
