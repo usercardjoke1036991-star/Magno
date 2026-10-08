@@ -36,6 +36,7 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El APK
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-08] Instalacion encima en el Xiaomi: version 1.0.2 codigo 8, frase conservada. Build 65dd43f9, commit 32d63a5.
 - [2026-10-08] Arreglos de la auditoria en la app: al cambiar Demo/Real se espera la cadena, el KYC firmado se comparte entre inicio y Ajustes, la camara no cierra Ajustes, un fallo de donado no pone el apoyo en 0, Division queda en aleman y frances, y los enlaces solo aceptan https del dominio principal.
 - [2026-10-08] La foto del KYC ya no cierra la pantalla al volver de la camara. La app no muestra sin alta ni verificar KYC hasta que la cadena responde, y el KYC firmado se marca al momento. El boton de codigo de correo y telefono queda bloqueado 60 segundos. Hay una marca transparente del logo mientras carga. Lectura BSC: fondo de credito 1.85 USDT, reserva 1 USDT, comisiones USDT en el contrato 0, feeCollector y fundador son 0x5023.
 - [2026-10-08] Reinstalacion en el Xiaomi: version 1.0.2 codigo 7, instalacion encima de la anterior. La frase y la billetera de este telefono se conservaron. Build 5bdba8fb.
@@ -85,11 +86,10 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El APK
 - [2026-10-02] Imagen del worker: ws 8.21.0 y sin npm de Node. Trivy image HIGH MEDIUM 0. DB actualizada 2026-10-02.
 - [2026-10-02] Examen Trivy: parcheados adm-zip serialize-javascript undici y bn.js. Queda tmp de solc. Docker y lock de produccion en cero.
 - [2026-10-01] Sin destruirCuenta en nucleo ABI y servicio. Identidad no se libera.
-- [2026-10-01] Foundry: puerta 2 USDT sin fama (ni con polvo), sin autoliquidar, execute admin solo si corre, Reserva reanuda boost 2-de-N
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-08] Cambio: Arreglos de la auditoria en la app: al cambiar Demo/Real se espera la cadena, el KYC firmado se comparte entre inicio y Ajustes, la camara no cierra Ajustes, un fallo de donado no pone el apoyo en 0, Division queda en aleman y frances, y los enlaces solo aceptan https del dominio principal.
+[2026-10-08] Cambio: Instalacion encima en el Xiaomi: version 1.0.2 codigo 8, frase conservada. Build 65dd43f9, commit 32d63a5.
