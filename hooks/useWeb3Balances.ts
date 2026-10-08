@@ -235,6 +235,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   const [loanTiers, setLoanTiers] = useState<LoanTier[]>(() => visibleLoanTiers(MAX_LOAN_LEVEL));
   const [isLoading, setIsLoading] = useState(true);
   const [gatesReady, setGatesReady] = useState(false);
+  const [loanReadsReady, setLoanReadsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
   const chainStatusReadyRef = useRef(false);
@@ -246,9 +247,13 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     const gen = ++fetchGen.current;
     const live = () => gen === fetchGen.current;
 
-    if (!opts?.silent) setIsLoading(true);
+    if (!opts?.silent) {
+      setIsLoading(true);
+      setLoanReadsReady(false);
+    }
     setError(null);
     let accountKnown = !walletAddress || !isAddress(walletAddress);
+    let loanReadsSettled = false;
 
     try {
       const provider = await assertTrustedRpc();
@@ -261,9 +266,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         // usar decimales configurados
       }
 
-      let poolBalance = '0.00';
-      let poolOutstanding = '0.00';
-      let poolCash = '0.00';
+      let poolRead: { poolBalance: string; poolOutstanding: string; poolCash: string } | null = null;
       let isTokenSupported = false;
       let curveRateBps = 0;
       let kycExigido = !isDemoAccount();
@@ -293,13 +296,19 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             } catch {
               outstanding = 0n;
             }
-            poolBalance = Number(formatUnits(nav, decimals)).toFixed(2);
-            poolOutstanding = Number(formatUnits(outstanding, decimals)).toFixed(2);
-            poolCash = Number(formatUnits(nav > outstanding ? nav - outstanding : 0n, decimals)).toFixed(2);
+            poolRead = {
+              poolBalance: Number(formatUnits(nav, decimals)).toFixed(2),
+              poolOutstanding: Number(formatUnits(outstanding, decimals)).toFixed(2),
+              poolCash: Number(formatUnits(nav > outstanding ? nav - outstanding : 0n, decimals)).toFixed(2),
+            };
           } catch {
-            const poolHeld = (await tokenContract.balanceOf(getContractAddress())) as bigint;
-            poolBalance = Number(formatUnits(poolHeld, decimals)).toFixed(2);
-            poolCash = poolBalance;
+            try {
+              const poolHeld = (await tokenContract.balanceOf(getContractAddress())) as bigint;
+              const cash = Number(formatUnits(poolHeld, decimals)).toFixed(2);
+              poolRead = { poolBalance: cash, poolOutstanding: '0.00', poolCash: cash };
+            } catch {
+              poolRead = null;
+            }
           }
         } catch {
           // contrato no disponible
@@ -320,7 +329,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           canPagarVerificacion: false,
           founderAddress: getRealDonationWallet(),
         });
-        setBalances({ ...EMPTY_BALANCES, poolBalance, poolOutstanding, poolCash });
+        setBalances({ ...EMPTY_BALANCES, ...(poolRead ?? {}) });
         return;
       }
 
@@ -330,13 +339,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         setBalances((prev) => ({
           ...prev,
           bnbBalance: Number(formatEther(bnb)).toFixed(4),
-          poolBalance,
-          poolOutstanding,
-          poolCash,
+          ...(poolRead ?? {}),
         }));
       } catch (e) {
         logErr('Error fetching BNB balance:', e);
-        setBalances((prev) => ({ ...prev, poolBalance, poolOutstanding, poolCash }));
+        if (poolRead) setBalances((prev) => ({ ...prev, ...poolRead }));
       }
 
       try {
@@ -344,18 +351,11 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         setBalances((prev) => ({
           ...prev,
           tokenBalance: Number(formatUnits(bal, decimals)).toFixed(4),
-          poolBalance,
-          poolOutstanding,
-          poolCash,
+          ...(poolRead ?? {}),
         }));
       } catch (e) {
         logErr('Error fetching token balances:', e);
-        setBalances((prev) => ({
-          ...prev,
-          poolBalance,
-          poolOutstanding,
-          poolCash,
-        }));
+        if (poolRead) setBalances((prev) => ({ ...prev, ...poolRead }));
       }
 
       if (!live()) return;
@@ -560,6 +560,8 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           logErr('Error fetching alta status:', e);
         }
 
+        if (live() && accountKnown) setGatesReady(true);
+
         try {
           const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
           const lastTs = Number(progress.ultimoPrestamoTimestamp);
@@ -690,7 +692,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             poolCash: Number(formatUnits(nav > outstanding ? nav - outstanding : 0n, decimals)).toFixed(2),
           }));
         } catch {
-          // keep ERC20 cash fallback already set
+          // La lectura no llegó: se conserva la cifra anterior, no se pinta 0.
         }
 
         try {
@@ -752,6 +754,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             identidadExigida: prev.identidadExigida || !isDemoAccount(),
           }));
         }
+        loanReadsSettled = true;
 
         try {
           const history = await creditContract.obtenerHistorialUsuario(walletAddress);
@@ -900,6 +903,9 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             ...prev,
             founderAddress: fundador || getRealDonationWallet(),
             attesterAddress: attester,
+            isRegistered:
+              prev.isRegistered ||
+              (Boolean(fundador) && walletAddress.toLowerCase() === fundador.toLowerCase()),
             referral: {
               padre,
               fundador,
@@ -938,6 +944,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
       if (live()) {
         setIsLoading(false);
         if (accountKnown) setGatesReady(true);
+        if (loanReadsSettled) setLoanReadsReady(true);
       }
     }
   }, [walletAddress, tokenAddress, tokenDecimals]);
@@ -1001,6 +1008,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     chainStatusReadyRef.current = false;
     onChainTiersReadyRef.current = false;
     setGatesReady(false);
+    setLoanReadsReady(false);
     void fetchBalances();
   }), [fetchBalances]);
 
@@ -1017,6 +1025,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     loanTiers,
     isLoading,
     gatesReady,
+    loanReadsReady,
     markKycDeclared,
     error,
     refetch: fetchBalances,

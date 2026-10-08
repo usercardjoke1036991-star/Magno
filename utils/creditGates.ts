@@ -259,7 +259,7 @@ export function canHydrateCreditStatus(input: {
   return true;
 }
 
-/** Baldosa Admin: sesión externa + rol, o la dirección está en el roster ya leído. */
+/** Baldosa Admin: fundadora o admin en Real y en Demo. En Demo basta la sesión externa. */
 export function adminSeatOpen(input: {
   demo: boolean;
   connected: boolean;
@@ -267,12 +267,14 @@ export function adminSeatOpen(input: {
   isAdmin?: boolean;
   isOwner?: boolean;
   roster?: string[];
+  founder?: boolean;
 }): boolean {
-  if (!input.demo || !input.connected) return false;
-  if (input.isAdmin || input.isOwner) return true;
+  const privileged = Boolean(input.isAdmin || input.isOwner || input.founder);
   const wallet = String(input.address || '').trim().toLowerCase();
-  if (!wallet) return false;
-  return (input.roster || []).some((item) => String(item || '').toLowerCase() === wallet);
+  const onRoster = Boolean(wallet) && (input.roster || []).some((item) => String(item || '').toLowerCase() === wallet);
+  if (!privileged && !onRoster) return false;
+  if (input.demo && !input.connected && !privileged) return false;
+  return true;
 }
 
 export function identityHashBound(value: string | null | undefined): boolean {

@@ -130,6 +130,7 @@ export const SecuritySettings: React.FC = () => {
 
   const identityHint = (done: boolean, doneText: string, todoKey: TranslationKey) => {
     if (done) return doneText;
+    if (!gatesReady) return t('identityChecking');
     if (!accessOpen) return t('liveCreditNotReady');
     if (!accessPaid) return t('identityNeedAccess');
     return t(todoKey);

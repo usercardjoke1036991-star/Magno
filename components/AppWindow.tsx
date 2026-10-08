@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Keyboard, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -14,9 +14,62 @@ interface AppWindowProps {
   children: React.ReactNode;
 }
 
+/** Hueco bajo el campo para que el botón que va justo debajo (Aportar) quede sobre el teclado. */
+const FIELD_CLEARANCE = 96;
+
+type Measurable = {
+  measureInWindow?: (callback: (x: number, y: number, width: number, height: number) => void) => void;
+};
+
+function asMeasurable(value: unknown): Measurable | null {
+  if (!value || typeof value !== 'object' || !('measureInWindow' in value)) return null;
+  const measure = (value as Measurable).measureInWindow;
+  return typeof measure === 'function' ? (value as Measurable) : null;
+}
+
 export const AppWindow: React.FC<AppWindowProps> = ({ visible, title, lead, onClose, children }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const scrollRef = useRef<ScrollView>(null);
+  const frameRef = useRef<View>(null);
+  const scrollY = useRef(0);
+  const [viewport, setViewport] = useState(0);
+  const [keyboardPad, setKeyboardPad] = useState(0);
+
+  useEffect(() => {
+    if (!visible) {
+      setKeyboardPad(0);
+      return undefined;
+    }
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const revealFocused = (keyboardHeight: number) => {
+      const focused = asMeasurable(TextInput.State.currentlyFocusedInput());
+      const frame = frameRef.current;
+      if (!focused?.measureInWindow || !frame) return;
+      frame.measureInWindow((_frameX, frameY, _frameW, frameH) => {
+        focused.measureInWindow?.((_inputX, inputY, _inputW, inputH) => {
+          const visibleBottom = frameY + frameH - keyboardHeight;
+          const delta = inputY + inputH + FIELD_CLEARANCE - visibleBottom;
+          if (delta <= 8) return;
+          scrollRef.current?.scrollTo({
+            y: Math.max(0, scrollY.current + delta),
+            animated: true,
+          });
+        });
+      });
+    };
+    const show = Keyboard.addListener(showEvent, (event) => {
+      const height = event.endCoordinates?.height || 0;
+      setKeyboardPad(height);
+      setTimeout(() => revealFocused(height), 80);
+    });
+    const hide = Keyboard.addListener(hideEvent, () => setKeyboardPad(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, [visible]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -31,15 +84,27 @@ export const AppWindow: React.FC<AppWindowProps> = ({ visible, title, lead, onCl
           <View style={styles.spacer} />
         </View>
         {lead ? <AppText style={[styles.lead, { color: colors.textMuted }]}>{lead}</AppText> : null}
-        <ScrollView
+        <View
+          ref={frameRef}
           style={styles.scroll}
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={styles.body}
-          showsVerticalScrollIndicator
-          nestedScrollEnabled
+          onLayout={(event) => setViewport(event.nativeEvent.layout.height)}
         >
-          {children}
-        </ScrollView>
+          <ScrollView
+            ref={scrollRef}
+            style={viewport > 0 ? { height: viewport } : styles.scroll}
+            keyboardShouldPersistTaps="always"
+            automaticallyAdjustKeyboardInsets
+            contentContainerStyle={[styles.body, keyboardPad > 0 ? { paddingBottom: 24 + keyboardPad } : null]}
+            showsVerticalScrollIndicator
+            nestedScrollEnabled
+            scrollEventThrottle={16}
+            onScroll={(event) => {
+              scrollY.current = event.nativeEvent.contentOffset.y;
+            }}
+          >
+            {children}
+          </ScrollView>
+        </View>
         <BusyMark />
       </SafeAreaView>
     </Modal>

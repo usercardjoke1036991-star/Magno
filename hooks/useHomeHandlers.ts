@@ -127,6 +127,8 @@ export interface HomeHandlersParams {
   confirmFunds: (purpose?: FundsConfirmPurpose) => Promise<boolean>;
   refetch: () => void;
   clearPendingInvite: () => Promise<void>;
+  /** False hasta leer KYC declarado e identidad. El logo no espera esta lectura. */
+  loanReadsReady?: boolean;
 }
 
 export const useHomeHandlers = ({
@@ -142,6 +144,7 @@ export const useHomeHandlers = ({
   confirmFunds,
   refetch,
   clearPendingInvite,
+  loanReadsReady = false,
 }: HomeHandlersParams) => {
   const { t } = useI18n();
   const accesoBusy = useRef(false);
@@ -183,31 +186,44 @@ export const useHomeHandlers = ({
 
   /** Ejecuta una acción admin cambiando temporalmente el signer al de MetaMask/WalletConnect. */
   const runAsAdmin = async (fn: () => Promise<void>) => {
-    if (!adminConnected || !adminProvider) {
+    const appIsSeat = Boolean(
+      userInfo.isAdmin || userInfo.isOwner || userInfo.referral?.isFundador
+    );
+    const useAppSigner = appIsSeat && Boolean(appSigner && walletAddress) && (!adminConnected || !adminProvider);
+    if (!useAppSigner && (!adminConnected || !adminProvider)) {
       Alert.alert(t('admin'), t('appWalletAdminConnect'));
       return;
     }
     try {
-      try {
-        await Promise.race([
-          ensureExternalWalletOnAppChain(adminProvider as Eip1193Provider),
-          new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('wrong-network')), 25_000);
-          }),
-        ]);
-      } catch (error) {
-        Alert.alert(t('connect'), humanizeTxError(error));
-        return;
+      let signer = appSigner;
+      let adminWallet = String(walletAddress || '');
+      if (!useAppSigner) {
+        try {
+          await Promise.race([
+            ensureExternalWalletOnAppChain(adminProvider as Eip1193Provider),
+            new Promise<never>((_, reject) => {
+              setTimeout(() => reject(new Error('wrong-network')), 25_000);
+            }),
+          ]);
+        } catch (error) {
+          Alert.alert(t('connect'), humanizeTxError(error));
+          return;
+        }
+        signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
+        if (!signer) throw new Error('admin');
+        adminWallet = await signer.getAddress();
       }
-      const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
-      if (!signer) throw new Error('admin');
-      const adminWallet = await signer.getAddress();
+      if (!signer || !adminWallet) throw new Error('admin');
       const adminBnb = await readOnChainBnb(adminWallet);
       if (adminBnb === null || adminBnb < MIN_GAS_WEI) {
-        Alert.alert(t('errNeedGas'), t('errNeedGasAdmin'), [
-          { text: t('cancel'), style: 'cancel' },
-          { text: t('ready'), onPress: () => void Linking.openURL(BSC_TESTNET_FAUCET) },
-        ]);
+        if (isDemoAccount() || isDemoMode()) {
+          Alert.alert(t('errNeedGas'), t('errNeedGasAdmin'), [
+            { text: t('cancel'), style: 'cancel' },
+            { text: t('ready'), onPress: () => void Linking.openURL(BSC_TESTNET_FAUCET) },
+          ]);
+        } else {
+          Alert.alert(t('errNeedGas'), t('errNeedGas'));
+        }
         return;
       }
       if (!(await confirmAdminStep(signer, adminWallet))) {
@@ -381,6 +397,10 @@ export const useHomeHandlers = ({
       return;
     }
     if (!ensureCreditReady()) return;
+    if (!loanReadsReady) {
+      Alert.alert(t('register'), t('identityChecking'));
+      return;
+    }
     if (!userInfo.isRegistered) {
       Alert.alert(t('register'), t('activateBeforeLoan'));
       return;

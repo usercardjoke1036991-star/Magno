@@ -25,6 +25,7 @@ export type KycIdentitySnapshot = Pick<KycDeclaration, 'legalName' | 'country' |
 
 const PREFIX = `${storeSlot(['quatrivium', 'kyc'])}.`;
 const PHOTO_KEY = `${storeSlot(['quatrivium', 'kyc', 'photo', 'v1'])}:`;
+const PHOTO_LOCK_KEY = `${storeSlot(['quatrivium', 'kyc', 'photo', 'lock'])}:`;
 const OPTIONS = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
 
 function walletKey(wallet: string): string {
@@ -179,11 +180,33 @@ export async function loadKycDocPhoto(wallet: string): Promise<string> {
   }
 }
 
+export async function isKycPhotoLocked(wallet: string): Promise<boolean> {
+  if (!wallet) return false;
+  try {
+    return (await AsyncStorage.getItem(PHOTO_LOCK_KEY + walletKey(wallet))) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export async function lockKycDocPhoto(wallet: string): Promise<void> {
+  if (!wallet) return;
+  try {
+    await AsyncStorage.setItem(PHOTO_LOCK_KEY + walletKey(wallet), '1');
+  } catch {
+    // La pantalla también oculta el escáner cuando la declaración ya está en la red.
+  }
+}
+
 export async function persistKycDocPhoto(
   wallet: string,
-  asset: { uri?: string; mimeType?: string | null; base64?: string | null }
+  asset: { uri?: string; mimeType?: string | null; base64?: string | null },
+  opts?: { replace?: boolean }
 ): Promise<string> {
   if (!wallet) return '';
+  if (await isKycPhotoLocked(wallet)) return loadKycDocPhoto(wallet);
+  const already = await loadKycDocPhoto(wallet);
+  if (already && !opts?.replace) return already;
   const mime = asset.mimeType && /^image\/(jpeg|jpg|png|webp)$/i.test(asset.mimeType)
     ? asset.mimeType
     : 'image/jpeg';

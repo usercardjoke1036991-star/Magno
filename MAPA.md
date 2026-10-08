@@ -407,6 +407,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: isAuthenticatorEnabled, loadAuthenticatorSecret, createAuthenticatorSecret, authenticatorUri, persistAuthenticatorWrap, confirmAuthenticator, verifyAuthenticator, unlockWithAuthenticator, clearAuthenticator
 - `services/authPrefs.ts` — módulo JS/TS
   - Funciones/clases: AUTH_PURPOSES, AUTH_METHODS, ACTION_AUTH_METHODS, methodsForPurpose, getAvailableMethods, isMethodReady, loadAuthPrefs, saveAuthPrefs, getAuthMethods, getAuthMethod, isAuthEnabled, ensureUnlockEnabled, setAuthMethod, setAuthMethods, fallbackAuthIfNeeded
+- `services/contactLock.ts` — módulo JS/TS
+  - Funciones/clases: contactStillLocked, readContactLock, stampContactLock, ensureContactLock
 - `services/demoIdentity.ts` — módulo JS/TS
   - Funciones/clases: requestDemoIdentity
 - `services/deviceBinding.ts` — módulo JS/TS
@@ -426,7 +428,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/fundsConfirm.ts` — módulo JS/TS
   - Funciones/clases: listSecurityConfirmMethods, hasSecurityConfirmMethod, isFundsConfirmEnabled, isLoanConfirmEnabled, setFundsConfirmEnabled, setLoanConfirmEnabled
 - `services/kycDeclaration.ts` — módulo JS/TS
-  - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration, loadKycDocPhoto, persistKycDocPhoto
+  - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration, loadKycDocPhoto, isKycPhotoLocked, lockKycDocPhoto, persistKycDocPhoto
 - `services/kycProvider.ts` — módulo JS/TS
   - Funciones/clases: notifyKycProviderReady, openKycProvider
 - `services/linkedWallet.ts` — módulo JS/TS

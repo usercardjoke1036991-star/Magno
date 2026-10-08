@@ -8,6 +8,7 @@ import {
   isValidKyc,
   loadKycDeclaration,
   loadKycDocPhoto,
+  lockKycDocPhoto,
   persistKycDocPhoto,
   saveKycDeclaration,
   type KycDocType,
@@ -45,6 +46,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
   const [docType, setDocType] = useState<KycDocType>('nationalId');
   const [accepted, setAccepted] = useState(false);
   const [docPhoto, setDocPhoto] = useState('');
+  const [photoLocked, setPhotoLocked] = useState(false);
   const [editing, setEditing] = useState(false);
   const [nameLocked, setNameLocked] = useState(false);
   const [docLocked, setDocLocked] = useState(false);
@@ -58,6 +60,12 @@ export const KycSection: React.FC<KycSectionProps> = ({
     }
     notifyKycProviderReady().then(setProviderReady).catch(() => setProviderReady(false));
   }, []);
+
+  useEffect(() => {
+    if (!walletAddress || !kycDeclarado) return;
+    setPhotoLocked(true);
+    void lockKycDocPhoto(walletAddress);
+  }, [walletAddress, kycDeclarado]);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -96,6 +104,8 @@ export const KycSection: React.FC<KycSectionProps> = ({
       const ok = await onDeclare();
       if (!ok) return;
     }
+    await lockKycDocPhoto(walletAddress);
+    setPhotoLocked(true);
     setEditing(false);
   };
 
@@ -111,8 +121,9 @@ export const KycSection: React.FC<KycSectionProps> = ({
     }
   };
 
+  const photoFrozen = photoLocked || kycDeclarado;
   const scanDoc = async () => {
-    if (!walletAddress) return;
+    if (!walletAddress || photoFrozen) return;
     onPickerActive?.(true);
     try {
       const ImagePicker = await import('expo-image-picker');
@@ -124,7 +135,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
           quality: 0.7,
         });
         if (shot.canceled || !shot.assets?.[0]) return;
-        const uri = await persistKycDocPhoto(walletAddress, shot.assets[0]);
+        const uri = await persistKycDocPhoto(walletAddress, shot.assets[0], { replace: true });
         if (uri) setDocPhoto(uri);
         return;
       }
@@ -139,7 +150,7 @@ export const KycSection: React.FC<KycSectionProps> = ({
         quality: 0.7,
       });
       if (picked.canceled || !picked.assets?.[0]) return;
-      const uri = await persistKycDocPhoto(walletAddress, picked.assets[0]);
+      const uri = await persistKycDocPhoto(walletAddress, picked.assets[0], { replace: true });
       if (uri) setDocPhoto(uri);
     } catch {
       Alert.alert(t('kycScreenTitle'), t('kycScanNeed'));
@@ -154,16 +165,19 @@ export const KycSection: React.FC<KycSectionProps> = ({
     return t('kycDocNationalId');
   };
 
-  const scanButton = (
+  const scanButton = photoFrozen ? (
+    <View style={[styles.frozenField, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <AppText style={[styles.frozenText, { color: colors.text }]}>{t('kycScan')}</AppText>
+      <AppText style={[styles.frozenBadge, { color: colors.textMuted }]}>{t('kycPhotoLocked')}</AppText>
+    </View>
+  ) : (
     <TouchableOpacity
       onPress={() => void scanDoc()}
       disabled={!walletAddress}
       style={[styles.scanBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
     >
       <AppIcon name="id" size={16} color={colors.primary} />
-      <AppText style={[styles.scanBtnText, { color: colors.text }]}>
-        {docPhoto ? t('kycScanRetake') : t('kycScan')}
-      </AppText>
+      <AppText style={[styles.scanBtnText, { color: colors.text }]}>{t('kycScan')}</AppText>
     </TouchableOpacity>
   );
 
@@ -175,6 +189,9 @@ export const KycSection: React.FC<KycSectionProps> = ({
         <View>
           {docPhoto ? (
             <Image source={{ uri: docPhoto }} style={[styles.scanPreview, { borderColor: colors.border }]} />
+          ) : null}
+          {photoFrozen ? (
+            <AppText style={[styles.frozenBadge, { color: colors.textMuted, marginBottom: 8 }]}>{t('kycPhotoLocked')}</AppText>
           ) : null}
           <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <AppIcon name="check" size={16} color={colors.success} />

@@ -153,7 +153,7 @@ function HomeScreenWithHooks() {
     };
   }, [walletAddress, room]);
 
-  const { balances, userInfo, loanTiers, isLoading: creditChecking, gatesReady, markKycDeclared, refetch } = useWeb3Balances(
+  const { balances, userInfo, loanTiers, isLoading: creditChecking, gatesReady, loanReadsReady, markKycDeclared, refetch } = useWeb3Balances(
     walletAddress,
     selectedToken
   );
@@ -161,19 +161,20 @@ function HomeScreenWithHooks() {
     adminConnected && adminAddress ? adminAddress.toLowerCase() : '',
     selectedToken
   );
-  const adminSeat = adminSeatOpen({
-    demo: isDemoAccount(),
-    connected: Boolean(adminConnected && adminAddress),
-    address: adminAddress,
-    isAdmin: adminInfo.isAdmin,
-    isOwner: adminInfo.isOwner,
-    roster: adminInfo.adminRoster,
-  });
-  const debtReminder = useLoanPaymentReminders(userInfo);
-  const creditReady = isCreditReady();
   const founderHere =
     Boolean(userInfo.referral.isFundador) ||
     isFounderWallet(walletAddress, userInfo.founderAddress);
+  const adminSeat = adminSeatOpen({
+    demo: isDemoAccount(),
+    connected: Boolean(adminConnected && adminAddress),
+    address: adminAddress || walletAddress,
+    isAdmin: Boolean(adminInfo.isAdmin || userInfo.isAdmin),
+    isOwner: Boolean(adminInfo.isOwner || userInfo.isOwner),
+    roster: adminInfo.adminRoster.length ? adminInfo.adminRoster : userInfo.adminRoster,
+    founder: founderHere,
+  });
+  const debtReminder = useLoanPaymentReminders(userInfo);
+  const creditReady = isCreditReady();
   const { displayLevel, equippedLevel, wearFrame } = useEquippedFrame(
     walletAddress || '',
     founderHere,
@@ -270,6 +271,7 @@ function HomeScreenWithHooks() {
     confirmFunds,
     refetch,
     clearPendingInvite,
+    loanReadsReady,
   });
 
   useEffect(() => {
@@ -290,7 +292,7 @@ function HomeScreenWithHooks() {
 
   const waitingChain = !gatesReady;
   const needPay = !waitingChain && altaVisible;
-  const needRegister = !waitingChain && !userInfo.isRegistered;
+  const needRegister = !waitingChain && !userInfo.isRegistered && !founderHere;
   const servicesOpen = !waitingChain && !needPay && !needRegister;
   useBusy(txLoading || waitingChain);
   const declareKyc = async () => {

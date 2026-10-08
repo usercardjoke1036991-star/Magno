@@ -58,7 +58,9 @@ export const CreditAccessBanner: React.FC<CreditAccessBannerProps> = ({
               : mode === 'live'
                 ? t('liveCreditNotReady')
                 : t('creditAccessPending')
-          : t('creditAccessRegisterNeed')}
+          : altaPaid
+            ? t('creditAccessRegisterLeft')
+            : t('creditAccessRegisterNeed')}
       </AppText>
       {showPay && canPay ? (
         <TouchableOpacity

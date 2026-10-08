@@ -265,6 +265,9 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-08 | App: teclado al campo activo, prestamo tras lectura de KYC e identidad, foto KYC reemplazable hasta la declaracion, fondo conserva la cifra si la red falla, textos de/fr. | — |
+| 2026-10-08 | La foto del KYC, una vez aceptada, ya no se reemplaza al cambiar los demas datos en Ajustes. | — |
+| 2026-10-08 | La pantalla suelta el logo al conocer el alta, la fundadora ve el panel en Real, el teclado no tapa el aporte, y correo y numero quedan fijos un mes. | — |
 | 2026-10-08 | App: cambio Demo/Real espera la cadena, KYC declarado se comparte, la camara no cierra Ajustes, donado fallido conserva el apoyo, enlaces solo https de quatriviumcredit.app. Contratos sin cambios. | — |
 | 2026-10-08 | App: la camara de KYC no cierra el modal, las pantallas esperan la lectura de cadena antes de decir sin alta, el codigo de correo y telefono espera 60s, y hay logo transparente al cargar. Contratos sin cambios. Fondo de credito en BSC 1.85 USDT, reserva 1, comisiones pendientes 0. | — |
 | 2026-10-07 | Sincronizacion app-contratos: registroHecho fallido no se guarda como alta impaga; Reserva muestra el bote del contrato, no el saldo de la billetera. | — |

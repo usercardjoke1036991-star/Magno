@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -19,6 +19,7 @@ import { isAllowedEmailProvider, isValidEmail, normalizeEmail } from '../utils/e
 import { useVerificationFee } from '../hooks/useVerificationFee';
 import { AppText, AppTextInput } from './AppText';
 import { useSendCooldown } from '../hooks/useSendCooldown';
+import { contactStillLocked, ensureContactLock, stampContactLock } from '../services/contactLock';
 
 interface EmailOtpSectionProps {
   walletAddress: string;
@@ -43,10 +44,26 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(!verifiedEmail);
   const { left: codeWait, start: lockCode } = useSendCooldown(60);
+  const [lockedUntil, setLockedUntil] = useState(0);
+  const emailLocked = contactStillLocked(lockedUntil);
   const apiReady = notifyApiConfigured();
   const emailOk = isValidEmail(email);
   const allowed = isAllowedEmailProvider(email);
   const done = Boolean(verifiedEmail) && !editing;
+
+  useEffect(() => {
+    let live = true;
+    ensureContactLock(walletAddress, 'email', Boolean(verifiedEmail))
+      .then((until) => {
+        if (live) setLockedUntil(until);
+      })
+      .catch(() => {
+        if (live) setLockedUntil(0);
+      });
+    return () => {
+      live = false;
+    };
+  }, [walletAddress, verifiedEmail]);
 
   const requestCode = async () => {
     if (!emailOk || !walletAddress) return;
@@ -82,6 +99,8 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
         return;
       }
       const saved = await saveVerifiedEmail(confirmed);
+      const until = await stampContactLock(walletAddress, 'email');
+      setLockedUntil(until);
       await storePasswordRecovery(walletAddress);
       onVerified(saved);
       setEditing(false);
@@ -100,6 +119,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
   };
 
   const removeEmail = () => {
+    if (emailLocked) return;
     Alert.alert(t('emailRemove'), t('emailRemoveConfirm'), [
       { text: t('fundsConfirmCancel'), style: 'cancel' },
       {
@@ -135,12 +155,20 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
         <View style={[styles.done, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <AppIcon name="check" size={16} color={colors.success} />
           <AppText style={[styles.doneText, { color: colors.text }]}>{verifiedEmail}</AppText>
-          <TouchableOpacity onPress={() => setEditing(true)}>
-            <AppText style={[styles.change, { color: colors.primary }]}>{changeLabel || t('emailChange')}</AppText>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={removeEmail} disabled={busy}>
-            <AppText style={[styles.change, { color: colors.danger }]}>{t('emailRemove')}</AppText>
-          </TouchableOpacity>
+          {emailLocked ? (
+            <AppText style={[styles.change, { color: colors.textMuted }]}>
+              {t('contactLockedUntil', { date: new Date(lockedUntil).toLocaleDateString() })}
+            </AppText>
+          ) : (
+            <>
+              <TouchableOpacity onPress={() => setEditing(true)}>
+                <AppText style={[styles.change, { color: colors.primary }]}>{changeLabel || t('emailChange')}</AppText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={removeEmail} disabled={busy}>
+                <AppText style={[styles.change, { color: colors.danger }]}>{t('emailRemove')}</AppText>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       ) : (
         <View>

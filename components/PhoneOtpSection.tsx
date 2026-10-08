@@ -19,6 +19,7 @@ import { AppText, AppTextInput } from './AppText';
 import { useSendCooldown } from '../hooks/useSendCooldown';
 import { isPhoneActive, loadVerifiedPhone, maskPhone, saveVerifiedPhone, setPhoneActive } from '../services/accountPhone';
 import { releaseAccountContact } from '../services/accountIdentity';
+import { contactStillLocked, ensureContactLock, stampContactLock } from '../services/contactLock';
 
 interface PhoneOtpSectionProps {
   walletAddress: string;
@@ -49,6 +50,8 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   const [editing, setEditing] = useState(false);
   const [phoneActive, setPhoneActiveState] = useState(false);
   const [savedPhone, setSavedPhone] = useState('');
+  const [lockedUntil, setLockedUntil] = useState(0);
+  const phoneLocked = contactStillLocked(lockedUntil);
 
   useEffect(() => {
     let live = true;
@@ -64,6 +67,20 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
       live = false;
     };
   }, [identityBound, walletAddress]);
+
+  useEffect(() => {
+    let live = true;
+    ensureContactLock(walletAddress, 'phone', Boolean(savedPhone && phoneActive))
+      .then((until) => {
+        if (live) setLockedUntil(until);
+      })
+      .catch(() => {
+        if (live) setLockedUntil(0);
+      });
+    return () => {
+      live = false;
+    };
+  }, [walletAddress, savedPhone, phoneActive]);
 
   const done = phoneActive && !editing;
   const chainReady = isCreditReady();
@@ -120,6 +137,8 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
         attestation.s
       );
       const stored = await saveVerifiedPhone(normalizePhone(phone));
+      const until = await stampContactLock(walletAddress, 'phone');
+      setLockedUntil(until);
       setSavedPhone(stored);
       setPhoneActiveState(true);
       Alert.alert(t('ready'), t('otpDone'));
@@ -140,6 +159,7 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
   };
 
   const removePhone = () => {
+    if (phoneLocked) return;
     Alert.alert(t('otpRemove'), t('otpRemoveConfirm'), [
       { text: t('fundsConfirmCancel'), style: 'cancel' },
       {
@@ -179,12 +199,20 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
           <AppText style={[styles.doneText, { color: colors.text }]}>
             {maskPhone(savedPhone) || t('otpDone')}
           </AppText>
-          <TouchableOpacity onPress={() => setEditing(true)}>
-            <AppText style={[styles.change, { color: colors.primary }]}>{t('otpChange')}</AppText>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={removePhone} disabled={busy}>
-            <AppText style={[styles.change, { color: colors.danger }]}>{t('otpRemove')}</AppText>
-          </TouchableOpacity>
+          {phoneLocked ? (
+            <AppText style={[styles.change, { color: colors.textMuted }]}>
+              {t('contactLockedUntil', { date: new Date(lockedUntil).toLocaleDateString() })}
+            </AppText>
+          ) : (
+            <>
+              <TouchableOpacity onPress={() => setEditing(true)}>
+                <AppText style={[styles.change, { color: colors.primary }]}>{t('otpChange')}</AppText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={removePhone} disabled={busy}>
+                <AppText style={[styles.change, { color: colors.danger }]}>{t('otpRemove')}</AppText>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       ) : (
         <View>
