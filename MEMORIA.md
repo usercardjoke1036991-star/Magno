@@ -36,6 +36,7 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-08] Si falla la lectura del credito pendiente o del bote, la app conserva la cifra anterior. El frances de la racha dice que el mismo dia no suma otra vez.
 - [2026-10-08] El aviso del retiro de la provision muestra importe y billetera. Los textos dejan de prometer fama de red en Canje. Hindi y bengali apuntan el dinero hacia la billetera.
 - [2026-10-08] El codigo del Xiaomi 1.0.2 codigo 11 quedo en GitHub main, commit 0e3469c.
 - [2026-10-08] El Xiaomi tiene la version 1.0.2 codigo 11, instalada encima, con la frase conservada. Build 555e4223.
@@ -85,11 +86,10 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-10-03] Desplegado protocolo nuevo en BSC testnet: Credit 0xdF21, Fama 0x7491, Reserva 0x9058, Alta 0xa590. Pool 500 USDT. 2-de-2. 0xD2d2 no se toco. Mainnet vacio.
 - [2026-10-03] App: Alta se puede pagar aunque sea Demo si hay contrato Alta. El Xiaomi sigue con APK del 13-sep y Demo 0xD2d2 sin Alta; por eso no se ve el protocolo nuevo.
 - [2026-10-03] ptsDonacion sin puerta de 2 USDT. Alta.vencerPadrinoAlPool manda el padrino vencido al pool. Credit no crecio (EIP-170).
-- [2026-10-03] Auditoria: candado Alta en la app, comisiones no pagan a baneados, deep links solo de Quatrivium. Credit no crece (EIP-170). Sin MagnoPay ni pausa automatica.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-08] Cambio: El aviso del retiro de la provision muestra importe y billetera. Los textos dejan de prometer fama de red en Canje. Hindi y bengali apuntan el dinero hacia la billetera.
+[2026-10-08] Cambio: Si falla la lectura del credito pendiente o del bote, la app conserva la cifra anterior. El frances de la racha dice que el mismo dia no suma otra vez.

@@ -1106,7 +1106,7 @@
   "hubRachaLead": "Un invité direct qui solde le crédit ajoute le jour. La renommée reste; les jours du classement peuvent baisser.",
   "sectionRacha": "Série quotidienne",
   "sectionRachaLead": "Un invité direct, en soldant le crédit, ajoute un jour de série.",
-  "rachaLead": "Le jour s'ajoute quand un invité direct solde un crédit en entier. L'inscription ne compte pas. Le réseau de cet invité ne compte pas. Le même jour du calendrier ne s'ajoute pas encore.",
+  "rachaLead": "Le jour s'ajoute quand un invité direct solde un crédit en entier. L'inscription ne compte pas. Le réseau de cet invité ne compte pas. Le même jour du calendrier ne s'ajoute pas une seconde fois.",
   "rachaHow": "{fame} de notoriété par jour de Racha. En cas de retard, les jours de classement baissent ; pas la notoriété. Chaque palier a son bouton : 7, 30, 100 et 365 jours.",
   "rachaDays": "{count} jours de série",
   "rachaPeak": "Meilleure Racha : {count} jours",

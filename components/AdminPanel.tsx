@@ -94,12 +94,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [retiroMonto, setRetiroMonto] = useState('');
   const [retiroDestino, setRetiroDestino] = useState('');
   const [retiroPendiente, setRetiroPendiente] = useState<RetiroBotePendiente | null>(null);
-  const [salud, setSalud] = useState<{ cash: bigint; outstanding: bigint; reservaBote: bigint; reservaLocked: bigint; reservaApyBps: number } | null>(null);
+  const [salud, setSalud] = useState<{
+    cash: bigint;
+    outstanding: bigint;
+    reservaBote: bigint | null;
+    reservaLocked: bigint | null;
+    reservaApyBps: number | null;
+  } | null>(null);
   useEffect(() => {
     if ((!isOwner && !isAdmin) || !tokenAddress) return;
     void QuatriviumCreditService.obtenerSaludAdmin(tokenAddress)
-      .then((row) => setSalud(row))
-      .catch(() => setSalud(null));
+      .then((row) => {
+        if (!row) return;
+        setSalud((prev) => ({
+          cash: row.cash,
+          outstanding: row.outstanding,
+          reservaBote: row.reservaBote ?? prev?.reservaBote ?? null,
+          reservaLocked: row.reservaLocked ?? prev?.reservaLocked ?? null,
+          reservaApyBps: row.reservaApyBps ?? prev?.reservaApyBps ?? null,
+        }));
+      })
+      .catch(() => {});
     void leerPendienteRetiroBote()
       .then((row) => setRetiroPendiente(row))
       .catch(() => setRetiroPendiente(null));
@@ -190,13 +205,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               out: formatUnits(salud.outstanding, 18),
             })}
           </AppText>
-          <AppText style={[styles.meta, { color: colors.text }]}>
-            {t('adminReservaHealth', {
-              bote: formatUnits(salud.reservaBote, 18),
-              locked: formatUnits(salud.reservaLocked, 18),
-              apy: ((salud.reservaApyBps || 0) / 100).toFixed(2),
-            })}
-          </AppText>
+          {salud.reservaBote !== null && salud.reservaLocked !== null && salud.reservaApyBps !== null ? (
+            <AppText style={[styles.meta, { color: colors.text }]}>
+              {t('adminReservaHealth', {
+                bote: formatUnits(salud.reservaBote, 18),
+                locked: formatUnits(salud.reservaLocked, 18),
+                apy: (salud.reservaApyBps / 100).toFixed(2),
+              })}
+            </AppText>
+          ) : null}
         </>
       ) : null}
       {paused ? <AppText style={[styles.paused, { color: colors.danger }]}>{t('protocolPaused')}</AppText> : null}

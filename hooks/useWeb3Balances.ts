@@ -29,6 +29,22 @@ import { cooldownRestanteDesdeTimestamp } from '../utils/creditCooldown';
 const logErr = __DEV__ ? console.log.bind(console) : () => {};
 const logWarn = __DEV__ ? console.warn.bind(console) : () => {};
 
+/** Si el crédito pendiente no se lee, solo se actualiza el NAV. El efectivo anterior se queda. */
+function poolFigures(
+  nav: bigint,
+  outstanding: bigint | null,
+  decimals: number
+): { poolBalance: string; poolOutstanding?: string; poolCash?: string } {
+  const poolBalance = Number(formatUnits(nav, decimals)).toFixed(2);
+  if (outstanding === null) return { poolBalance };
+  const cash = nav > outstanding ? nav - outstanding : 0n;
+  return {
+    poolBalance,
+    poolOutstanding: Number(formatUnits(outstanding, decimals)).toFixed(2),
+    poolCash: Number(formatUnits(cash, decimals)).toFixed(2),
+  };
+}
+
 function creditStatusKey(wallet: string): string {
   return `quatrivium.creditStatus.${NETWORK_CONFIG.chainId}.${getContractAddress().toLowerCase()}.${wallet.toLowerCase()}`;
 }
@@ -267,7 +283,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         // usar decimales configurados
       }
 
-      let poolRead: { poolBalance: string; poolOutstanding: string; poolCash: string } | null = null;
+      let poolRead: { poolBalance: string; poolOutstanding?: string; poolCash?: string } | null = null;
       let isTokenSupported = false;
       let curveRateBps = 0;
       let kycExigido = !isDemoAccount();
@@ -291,25 +307,15 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           }
           try {
             const nav = (await creditContract.totalLiquidity(tokenAddress)) as bigint;
-            let outstanding = 0n;
+            let outstanding: bigint | null = null;
             try {
               outstanding = (await creditContract.outstandingLoans(tokenAddress)) as bigint;
             } catch {
-              outstanding = 0n;
+              outstanding = null;
             }
-            poolRead = {
-              poolBalance: Number(formatUnits(nav, decimals)).toFixed(2),
-              poolOutstanding: Number(formatUnits(outstanding, decimals)).toFixed(2),
-              poolCash: Number(formatUnits(nav > outstanding ? nav - outstanding : 0n, decimals)).toFixed(2),
-            };
+            poolRead = poolFigures(nav, outstanding, decimals);
           } catch {
-            try {
-              const poolHeld = (await tokenContract.balanceOf(getContractAddress())) as bigint;
-              const cash = Number(formatUnits(poolHeld, decimals)).toFixed(2);
-              poolRead = { poolBalance: cash, poolOutstanding: '0.00', poolCash: cash };
-            } catch {
-              poolRead = null;
-            }
+            poolRead = null;
           }
         } catch {
           // contrato no disponible
@@ -742,18 +748,14 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
         try {
           const nav = (await creditContract.totalLiquidity(tokenAddress)) as bigint;
-          let outstanding = 0n;
+          let outstanding: bigint | null = null;
           try {
             outstanding = (await creditContract.outstandingLoans(tokenAddress)) as bigint;
           } catch {
-            outstanding = 0n;
+            outstanding = null;
           }
-          setBalances((prev) => ({
-            ...prev,
-            poolBalance: Number(formatUnits(nav, decimals)).toFixed(2),
-            poolOutstanding: Number(formatUnits(outstanding, decimals)).toFixed(2),
-            poolCash: Number(formatUnits(nav > outstanding ? nav - outstanding : 0n, decimals)).toFixed(2),
-          }));
+          const figures = poolFigures(nav, outstanding, decimals);
+          setBalances((prev) => ({ ...prev, ...figures }));
         } catch {
           // La lectura no llegó: se conserva la cifra anterior, no se pinta 0.
         }

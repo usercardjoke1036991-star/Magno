@@ -2344,6 +2344,17 @@ describe('account entry — password, email and session', () => {
     expect(en.profileLead).to.include('nickname');
     expect(en.profileLead).to.not.equal(es.profileLead);
     const panel = read('components', 'AdminPanel.tsx');
+    const frStreak = JSON.parse(read('i18n', 'locales', 'fr.json'));
+    expect(frStreak.rachaLead).to.include('une seconde fois');
+    expect(frStreak.rachaLead).to.not.include('pas encore');
+    const balances = read('hooks', 'useWeb3Balances.ts');
+    expect(balances).to.include('if (outstanding === null) return { poolBalance }');
+    expect(balances).to.not.include('outstanding = 0n');
+    const saludFn = read('services', 'quatriviumCreditService.ts');
+    const salud = saludFn.slice(saludFn.indexOf('obtenerSaludAdmin:'), saludFn.indexOf('obtenerFama:'));
+    expect(salud).to.include('return null');
+    expect(salud).to.include('reservaBote = null');
+    expect(panel).to.include('row.reservaBote ?? prev?.reservaBote ?? null');
     expect(panel).to.include('reservaRetiroConfirm');
     expect(panel).to.include('reservaRetiroApplyConfirm');
     expect(panel).to.include('reservaRetiroPropose');

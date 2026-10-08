@@ -518,8 +518,7 @@ export const QuatriviumCreditService = {
   },
 
   obtenerSaludAdmin: async (tokenAddress: string) => {
-    const empty = { cash: 0n, outstanding: 0n, liquidity: 0n, fees: 0n, reservaBote: 0n, reservaLocked: 0n, reservaApyBps: 0 };
-    if (!isContractConfigured() || !isAddress(tokenAddress)) return empty;
+    if (!isContractConfigured() || !isAddress(tokenAddress)) return null;
     try {
       const { provider } = await getProviderAndSigner();
       const credit = contractWith(provider);
@@ -530,12 +529,16 @@ export const QuatriviumCreditService = {
         credit.totalLiquidity(tokenAddress),
         credit.collectedFees(tokenAddress),
       ]);
-      let reservaBote = 0n;
-      let reservaLocked = 0n;
-      let reservaApyBps = 0;
+      let reservaBote: bigint | null = null;
+      let reservaLocked: bigint | null = null;
+      let reservaApyBps: number | null = null;
       try {
         const { getReservaAddress, isReservaConfigured, RESERVA_ABI } = await import('../constants/reservaConfig');
-        if (isReservaConfigured()) {
+        if (!isReservaConfigured()) {
+          reservaBote = 0n;
+          reservaLocked = 0n;
+          reservaApyBps = 0;
+        } else {
           const reserva = new Contract(getReservaAddress(), RESERVA_ABI, provider);
           const salud = await reserva.saludReserva();
           reservaBote = BigInt(salud.bote_ ?? salud[0] ?? 0n);
@@ -543,7 +546,9 @@ export const QuatriviumCreditService = {
           reservaApyBps = Number(salud.apyBps ?? salud[2] ?? 0);
         }
       } catch {
-        reservaBote = 0n;
+        reservaBote = null;
+        reservaLocked = null;
+        reservaApyBps = null;
       }
       return {
         cash: BigInt(cash),
@@ -555,7 +560,7 @@ export const QuatriviumCreditService = {
         reservaApyBps,
       };
     } catch {
-      return empty;
+      return null;
     }
   },
 
