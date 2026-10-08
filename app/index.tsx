@@ -11,6 +11,7 @@ import { AppKit, useAccount, useAppKit, useProvider } from '@reown/appkit-react-
 import { parseUnits } from 'ethers';
 import { setWalletSigner } from '../services/quatriviumCreditService';
 import { useWeb3Balances } from '../hooks/useWeb3Balances';
+import { BrandSplash } from '../components/BrandSplash';
 import { BusyMark, useBusy } from '../components/BusyLogo';
 import { useHomeHandlers } from '../hooks/useHomeHandlers';
 import { WalletSection } from '../components/WalletSection';
@@ -153,7 +154,7 @@ function HomeScreenWithHooks() {
     };
   }, [walletAddress, room]);
 
-  const { balances, userInfo, loanTiers, isLoading: creditChecking, gatesReady, loanReadsReady, markKycDeclared, refetch } = useWeb3Balances(
+  const { balances, userInfo, loanTiers, isLoading: creditChecking, gatesReady, registrationKnown, loanReadsReady, markKycDeclared, refetch } = useWeb3Balances(
     walletAddress,
     selectedToken
   );
@@ -294,7 +295,7 @@ function HomeScreenWithHooks() {
   const needPay = !waitingChain && altaVisible;
   const needRegister = !waitingChain && !userInfo.isRegistered && !founderHere;
   const servicesOpen = !waitingChain && !needPay && !needRegister;
-  useBusy(txLoading || waitingChain);
+  useBusy(txLoading);
   const declareKyc = async () => {
     const ok = await handleDeclararKyc();
     if (ok) markKycDeclared();
@@ -328,6 +329,8 @@ function HomeScreenWithHooks() {
       paused={userInfo.paused}
       inviteCode={pendingInviteCode}
       canRegisterOnChain={Boolean(creditReady && !userInfo.paused)}
+      registrationKnown={registrationKnown}
+      skipAutoRegister={founderHere}
       onRegister={() => void handleRegistrarHumano()}
       onInviteLocked={() => { void clearPendingInvite(); }}
       onDeclareKyc={declareKyc}
@@ -1017,12 +1020,21 @@ function HomeScreenWithHooks() {
       </AppWindow>
       <AppKit />
       <BusyMark />
+      {waitingChain ? (
+        <View style={styles.bootCover}>
+          <BrandSplash />
+        </View>
+      ) : null}
     </SafeAreaView>
     </AccountOnboarding>
   );
 }
 
 const styles = StyleSheet.create({
+  bootCover: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 30,
+  },
   container: {
     flex: 1,
   },

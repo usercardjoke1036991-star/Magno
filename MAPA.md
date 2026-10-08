@@ -304,6 +304,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
   - Funciones/clases: usePendingInvite
 - `hooks/useReferralNetwork.ts` — módulo JS/TS
   - Funciones/clases: useReferralNetwork
+- `hooks/useScreenScroll.ts` — módulo JS/TS
+  - Funciones/clases: useScreenScroll
 - `hooks/useSendCooldown.ts` — módulo JS/TS
   - Funciones/clases: useSendCooldown
 - `hooks/useVerificationFee.ts` — módulo JS/TS
@@ -646,7 +648,7 @@ Sin desfases detectados entre docs y código.
 
 ## Conexión
 - verificar_conectores: 0 crítico(s), 0 aviso(s)
-- detectar_logica: 0 crítico(s), 5 aviso(s)
+- detectar_logica: 0 crítico(s), 4 aviso(s)
 - verificar_modulos: 0 crítico(s), 15 aviso(s)
 
 ## Estado

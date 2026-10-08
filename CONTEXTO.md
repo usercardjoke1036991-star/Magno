@@ -265,6 +265,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-08 | Modales de identidad y de envio con altura real. La red ya no anida un scroll. El registro automatico espera una lectura correcta. Ajustes usa la misma regla de admin que la casa. | — |
+| 2026-10-08 | Logo de carga tapa la casa hasta alta, KYC e identidad. Splash nativo con emblema cuadrado. Hitos se desplazan en la ventana. No se reintenta el registro solo. Candado de contacto renovable cada mes. | — |
 | 2026-10-08 | App: teclado al campo activo, prestamo tras lectura de KYC e identidad, foto KYC reemplazable hasta la declaracion, fondo conserva la cifra si la red falla, textos de/fr. | — |
 | 2026-10-08 | La foto del KYC, una vez aceptada, ya no se reemplaza al cambiar los demas datos en Ajustes. | — |
 | 2026-10-08 | La pantalla suelta el logo al conocer el alta, la fundadora ve el panel en Real, el teclado no tapa el aporte, y correo y numero quedan fijos un mes. | — |

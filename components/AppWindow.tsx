@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Keyboard, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Keyboard, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
@@ -30,10 +30,12 @@ function asMeasurable(value: unknown): Measurable | null {
 export const AppWindow: React.FC<AppWindowProps> = ({ visible, title, lead, onClose, children }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const scrollHeight = Math.max(240, windowHeight - insets.top - insets.bottom - (lead ? 132 : 96));
   const scrollRef = useRef<ScrollView>(null);
   const frameRef = useRef<View>(null);
   const scrollY = useRef(0);
-  const [viewport, setViewport] = useState(0);
   const [keyboardPad, setKeyboardPad] = useState(0);
 
   useEffect(() => {
@@ -84,14 +86,12 @@ export const AppWindow: React.FC<AppWindowProps> = ({ visible, title, lead, onCl
           <View style={styles.spacer} />
         </View>
         {lead ? <AppText style={[styles.lead, { color: colors.textMuted }]}>{lead}</AppText> : null}
-        <View
-          ref={frameRef}
-          style={styles.scroll}
-          onLayout={(event) => setViewport(event.nativeEvent.layout.height)}
-        >
+        <View ref={frameRef} style={[styles.scroll, { height: scrollHeight }]}>
           <ScrollView
             ref={scrollRef}
-            style={viewport > 0 ? { height: viewport } : styles.scroll}
+            style={[styles.scroll, { height: scrollHeight }]}
+            scrollEnabled
+            persistentScrollbar
             keyboardShouldPersistTaps="always"
             automaticallyAdjustKeyboardInsets
             contentContainerStyle={[styles.body, keyboardPad > 0 ? { paddingBottom: 24 + keyboardPad } : null]}
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flex: 1,
+    minHeight: 0,
   },
   body: {
     paddingHorizontal: 20,

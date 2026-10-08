@@ -23,6 +23,7 @@ import { EmailOtpSection } from './EmailOtpSection';
 import { loanGateBannerRows } from '../utils/creditGates';
 import { subscribeScreenshot } from './ScreenGuard';
 import { BusyMark } from './BusyLogo';
+import { useScreenScroll } from '../hooks/useScreenScroll';
 import { isPickerHeld, setPickerActive } from '../utils/pickerHold';
 
 const KYC_RESUME_KEY = 'qv.kyc.screen';
@@ -75,6 +76,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
   const { t } = useI18n();
   const { colors } = useTheme();
   const [open, setOpen] = useState<'kyc' | 'phone' | 'phrase' | 'email' | null>(null);
+  const { scrollHeight, scrollRef, frameRef, scrollY, keyboardPad } = useScreenScroll(open !== null);
   const [verifiedEmail, setVerifiedEmail] = useState('');
   const [phrasePassword, setPhrasePassword] = useState('');
   const [phraseText, setPhraseText] = useState('');
@@ -292,7 +294,17 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
             </AppText>
             <View style={styles.headerSpacer} />
           </View>
-          <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="always" nestedScrollEnabled>
+          <View ref={frameRef} style={{ height: scrollHeight }}>
+          <ScrollView
+            ref={scrollRef}
+            style={{ height: scrollHeight }}
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={keyboardPad > 0 ? { paddingBottom: 24 + keyboardPad } : undefined}
+            onScroll={(event) => {
+              scrollY.current = event.nativeEvent.contentOffset.y;
+            }}
+            scrollEventThrottle={16}
+          >
             {open === 'email' ? (
               <EmailOtpSection
                 walletAddress={walletAddress}
@@ -366,6 +378,7 @@ export const KycAccessBanner: React.FC<KycAccessBannerProps> = ({
               </View>
             ) : null}
           </ScrollView>
+          </View>
           <BusyMark />
         </SafeAreaView>
       </Modal>

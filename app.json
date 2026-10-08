@@ -18,7 +18,7 @@
       "policy": "appVersion"
     },
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#07150F"
     },
@@ -105,6 +105,14 @@
         "expo-local-authentication",
         {
           "faceIDPermission": "Quatrivium Finance usa Face ID o la huella para desbloquear la aplicación."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#07150F",
+          "image": "./assets/logo.png",
+          "imageWidth": 240
         }
       ],
       "expo-updates",

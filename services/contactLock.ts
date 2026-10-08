@@ -23,9 +23,10 @@ export async function readContactLock(wallet: string, kind: ContactKind): Promis
   }
 }
 
+/** Cada guardado correcto empieza un mes nuevo. Sin billetera no hay candado. */
 export async function stampContactLock(wallet: string, kind: ContactKind, at = Date.now()): Promise<number> {
+  if (!wallet) return 0;
   const until = at + MONTH_MS;
-  if (!wallet) return until;
   try {
     await AsyncStorage.setItem(storageKey(wallet, kind), String(until));
   } catch {

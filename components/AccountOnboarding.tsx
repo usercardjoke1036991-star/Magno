@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
 import { BrandLogo } from './BrandLogo';
+import { BrandSplash } from './BrandSplash';
 import { UsernameSection } from './UsernameSection';
 import { PublicIdentityForm } from './PublicIdentityForm';
 import { LinkWalletForm } from './LinkWalletForm';
@@ -28,6 +29,10 @@ interface AccountOnboardingProps {
   paused?: boolean;
   inviteCode?: string;
   canRegisterOnChain?: boolean;
+  /** La cadena ya dijo si esta cuenta está registrada. */
+  registrationKnown?: boolean;
+  /** La fundadora ya nace registrada: no se vuelve a firmar sola. */
+  skipAutoRegister?: boolean;
   onRegister: (padre?: string) => void;
   onInviteLocked?: () => void;
   onDeclareKyc: () => Promise<boolean>;
@@ -45,6 +50,8 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   paused,
   inviteCode = '',
   canRegisterOnChain = false,
+  registrationKnown = false,
+  skipAutoRegister = false,
   onRegister,
   onInviteLocked,
   children,
@@ -142,11 +149,11 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   const onboardingDone = Boolean(username && hasFace && hasCompletedWalletLink(linkedWallet));
 
   useEffect(() => {
-    if (triedRegister.current) return;
+    if (triedRegister.current || skipAutoRegister || !registrationKnown) return;
     if (!onboardingDone || isRegistered || !canRegisterOnChain || paused || isLoading) return;
     triedRegister.current = true;
     onRegister();
-  }, [onboardingDone, isRegistered, canRegisterOnChain, paused, isLoading, onRegister]);
+  }, [onboardingDone, isRegistered, canRegisterOnChain, paused, isLoading, onRegister, registrationKnown, skipAutoRegister]);
 
   if (walletFailed || (walletReady && !walletAddress)) {
     return (
@@ -158,11 +165,7 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   }
 
   if (!walletReady || !usernameReady || !faceReady || !linkedReady) {
-    return (
-      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg, justifyContent: 'center' }]}>
-        <ActivityIndicator color={colors.primary} />
-      </SafeAreaView>
-    );
+    return <BrandSplash />;
   }
 
   if (username && hasFace && hasCompletedWalletLink(linkedWallet)) {

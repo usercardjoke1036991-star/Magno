@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useScreenScroll } from '../hooks/useScreenScroll';
 import { parseUnits, type Eip1193Provider } from 'ethers';
 import { useAccount, useAppKit, useProvider } from '@reown/appkit-react-native';
 import { getEthersSignerFromProvider } from '../web3Config';
@@ -57,6 +58,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
+  const { scrollHeight, scrollRef, frameRef, scrollY, keyboardPad } = useScreenScroll(visible);
   const { confirmFunds } = useFundsConfirm();
   const { open } = useAppKit();
   const { address, isConnected } = useAccount();
@@ -181,7 +183,17 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
           <AppText style={[styles.title, { color: colors.text }]}>{title}</AppText>
           <View style={styles.spacer} />
         </View>
-        <ScrollView style={styles.screen} keyboardShouldPersistTaps="always" contentContainerStyle={styles.body} nestedScrollEnabled>
+        <View ref={frameRef} style={{ height: scrollHeight }}>
+        <ScrollView
+          ref={scrollRef}
+          style={{ height: scrollHeight }}
+          keyboardShouldPersistTaps="always"
+          contentContainerStyle={[styles.body, keyboardPad > 0 ? { paddingBottom: 24 + keyboardPad } : null]}
+          onScroll={(event) => {
+            scrollY.current = event.nativeEvent.contentOffset.y;
+          }}
+          scrollEventThrottle={16}
+        >
           {!linked ? (
             <>
               <AppText style={[styles.lead, { color: colors.textMuted }]}>{t('linkWalletNeedFunds')}</AppText>
@@ -284,6 +296,7 @@ export const TransferWalletsModal: React.FC<TransferWalletsModalProps> = ({
             </View>
           )}
         </ScrollView>
+        </View>
       </SafeAreaView>
     </Modal>
   );

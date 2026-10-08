@@ -359,6 +359,7 @@ export const useHomeHandlers = ({
   };
 
   const handleRegistrarHumano = async () => {
+    if (userInfo.isRegistered || userInfo.referral?.isFundador) return;
     if (!ensureCreditReady()) return;
     if (!walletAddress) {
       showNotice(t('connect'), t('appWalletNotReady'));

@@ -235,6 +235,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
   const [loanTiers, setLoanTiers] = useState<LoanTier[]>(() => visibleLoanTiers(MAX_LOAN_LEVEL));
   const [isLoading, setIsLoading] = useState(true);
   const [gatesReady, setGatesReady] = useState(false);
+  const [registrationKnown, setRegistrationKnown] = useState(false);
   const [loanReadsReady, setLoanReadsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchGen = useRef(0);
@@ -541,6 +542,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
                 ? registered
                 : (hasLoan || prev.isRegistered),
             }));
+            if (registeredReadOk) setRegistrationKnown(true);
             if (loanReadOk && registeredReadOk) {
               chainStatusReadyRef.current = true;
               persistCreditStatus(walletAddress, registered, hasLoan);
@@ -560,7 +562,68 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           logErr('Error fetching alta status:', e);
         }
 
-        if (live() && accountKnown) setGatesReady(true);
+        try {
+          let declared: boolean | undefined;
+          let required = !isDemoAccount();
+          try {
+            required = Boolean(await creditContract.kycExigido());
+          } catch {
+            required = !isDemoAccount();
+          }
+          try {
+            declared = Boolean(await creditContract.kycDeclarado(walletAddress));
+          } catch {
+            declared = undefined;
+          }
+          setUserInfo((prev) => ({
+            ...prev,
+            kycDeclarado: declared === undefined ? prev.kycDeclarado : declared,
+            kycExigido: required,
+          }));
+        } catch {
+          setUserInfo((prev) => ({ ...prev, kycExigido: prev.kycExigido || !isDemoAccount() }));
+        }
+
+        try {
+          let requiredIdentity = !isDemoAccount();
+          let bound = false;
+          try {
+            requiredIdentity = Boolean(await creditContract.identidadExigida());
+          } catch {
+            requiredIdentity = !isDemoAccount();
+          }
+          try {
+            const phoneHash = String((await creditContract.phoneHashOf(walletAddress)) || '');
+            const deviceHash = String((await creditContract.deviceHashOf(walletAddress)) || '');
+            bound = identityHashBound(phoneHash) && identityHashBound(deviceHash);
+            let localHash = '';
+            try {
+              localHash = await getDeviceHash();
+            } catch {
+              localHash = '';
+            }
+            setUserInfo((prev) => ({
+              ...prev,
+              identidadExigida: requiredIdentity,
+              identityBound: bound,
+              deviceHash,
+              deviceMatches: walletRunsOnThisDevice(deviceHash, localHash),
+            }));
+          } catch {
+            setUserInfo((prev) => ({
+              ...prev,
+              identidadExigida: requiredIdentity,
+            }));
+          }
+        } catch {
+          setUserInfo((prev) => ({
+            ...prev,
+            identidadExigida: prev.identidadExigida || !isDemoAccount(),
+          }));
+        }
+        loanReadsSettled = true;
+        accountKnown = true;
+        if (live()) setGatesReady(true);
 
         try {
           const progress = await QuatriviumCreditService.obtenerProgresoUsuario(walletAddress);
@@ -694,67 +757,6 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         } catch {
           // La lectura no llegó: se conserva la cifra anterior, no se pinta 0.
         }
-
-        try {
-          let declared: boolean | undefined;
-          let required = !isDemoAccount();
-          try {
-            required = Boolean(await creditContract.kycExigido());
-          } catch {
-            required = !isDemoAccount();
-          }
-          try {
-            declared = Boolean(await creditContract.kycDeclarado(walletAddress));
-          } catch {
-            declared = undefined;
-          }
-          setUserInfo((prev) => ({
-            ...prev,
-            kycDeclarado: declared === undefined ? prev.kycDeclarado : declared,
-            kycExigido: required,
-          }));
-        } catch {
-          setUserInfo((prev) => ({ ...prev, kycExigido: prev.kycExigido || !isDemoAccount() }));
-        }
-
-        try {
-          let requiredIdentity = !isDemoAccount();
-          let bound = false;
-          try {
-            requiredIdentity = Boolean(await creditContract.identidadExigida());
-          } catch {
-            requiredIdentity = !isDemoAccount();
-          }
-          try {
-            const phoneHash = String((await creditContract.phoneHashOf(walletAddress)) || '');
-            const deviceHash = String((await creditContract.deviceHashOf(walletAddress)) || '');
-            bound = identityHashBound(phoneHash) && identityHashBound(deviceHash);
-            let localHash = '';
-            try {
-              localHash = await getDeviceHash();
-            } catch {
-              localHash = '';
-            }
-            setUserInfo((prev) => ({
-              ...prev,
-              identidadExigida: requiredIdentity,
-              identityBound: bound,
-              deviceHash,
-              deviceMatches: walletRunsOnThisDevice(deviceHash, localHash),
-            }));
-          } catch {
-            setUserInfo((prev) => ({
-              ...prev,
-              identidadExigida: requiredIdentity,
-            }));
-          }
-        } catch {
-          setUserInfo((prev) => ({
-            ...prev,
-            identidadExigida: prev.identidadExigida || !isDemoAccount(),
-          }));
-        }
-        loanReadsSettled = true;
 
         try {
           const history = await creditContract.obtenerHistorialUsuario(walletAddress);
@@ -922,6 +924,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         logErr('Error fetching protocol info:', e);
       }
     } catch (fetchError) {
+      accountKnown = true;
       if (!live()) return;
       const errorMessage = fetchError instanceof Error ? fetchError.message : 'Failed to fetch balances';
       setError(errorMessage);
@@ -959,6 +962,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
   useEffect(() => {
     setGatesReady(false);
+    setRegistrationKnown(false);
     chainStatusReadyRef.current = false;
     onChainTiersReadyRef.current = false;
     if (!walletAddress || !isAddress(walletAddress)) return;
@@ -1008,6 +1012,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     chainStatusReadyRef.current = false;
     onChainTiersReadyRef.current = false;
     setGatesReady(false);
+    setRegistrationKnown(false);
     setLoanReadsReady(false);
     void fetchBalances();
   }), [fetchBalances]);
@@ -1025,6 +1030,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
     loanTiers,
     isLoading,
     gatesReady,
+    registrationKnown,
     loanReadsReady,
     markKycDeclared,
     error,
