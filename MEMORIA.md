@@ -1,7 +1,7 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xiaomi tiene la app 1.0.2 codigo 9.
+Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xiaomi tiene la app 1.0.2 codigo 10.
 
 ## Decisiones
 - [2026-10-03] En Demo el TOTP de admin no bloquea: 2-de-2 y WalletConnect bastan. El codigo de 6 digitos sale en ventana emergente, no en el panel. En Real sigue el TOTP si el worker HTTPS esta configurado.
@@ -36,6 +36,7 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-08] El Xiaomi tiene la version 1.0.2 codigo 10, instalada encima, con la frase conservada. Commit 1917ee0.
 - [2026-10-08] La copia ya no firma el registro si la lectura falla. KYC, correo, telefono, frase y el envio de fondos se desplazan con altura de pantalla. La tabla de la red baja con la ventana. Ajustes reconoce a la fundadora con la billetera de la app.
 - [2026-10-08] El candado de correo y telefono se renueva un mes en cada guardado. El logo grande tapa la casa hasta que el alta, el KYC y la identidad ya se leyeron. El arranque nativo usa el emblema cuadrado. La lista de hitos se desplaza en la ventana. La cuenta ya registrada no se vuelve a firmar sola.
 - [2026-10-08] El Xiaomi tiene la version 1.0.2 codigo 9, instalada encima, con la frase conservada. Commit 169c05d.
@@ -85,11 +86,10 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-10-02] Invariantes Foundry de NAV Credit y caja Reserva, mas centinela Python de solo lectura por Telegram.
 - [2026-10-02] Contratos: alta 4 USDT, hitos proporcionales, Reserva 12% movil y retiro bote. Sin deploy testnet.
 - [2026-10-02] El pool manda: 80 por ciento de uso, grandes al 70, sello de 7 dias en el USDT de verificar. Sin cupo diario de credito.
-- [2026-10-02] Formula B en el contrato: umbral max(50, 0.5% caja), potometros 10% chico y 10% grande. Hardhat cupo 8/8 Foundry 38/38.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-08] Cambio: La copia ya no firma el registro si la lectura falla. KYC, correo, telefono, frase y el envio de fondos se desplazan con altura de pantalla. La tabla de la red baja con la ventana. Ajustes reconoce a la fundadora con la billetera de la app.
+[2026-10-08] Cambio: El Xiaomi tiene la version 1.0.2 codigo 10, instalada encima, con la frase conservada. Commit 1917ee0.
