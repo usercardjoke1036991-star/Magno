@@ -33,6 +33,7 @@
     "- [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool."
   ],
   "cambios": [
+    "- [2026-10-08] Si falla la lectura de la tasa, la ficha conserva la tasa anterior. Luego se reinstala en el Xiaomi.",
     "- [2026-10-08] Si falla la lectura del credito pendiente o del bote, la app conserva la cifra anterior. El frances de la racha dice que el mismo dia no suma otra vez.",
     "- [2026-10-08] El aviso del retiro de la provision muestra importe y billetera. Los textos dejan de prometer fama de red en Canje. Hindi y bengali apuntan el dinero hacia la billetera.",
     "- [2026-10-08] El codigo del Xiaomi 1.0.2 codigo 11 quedo en GitHub main, commit 0e3469c.",
@@ -81,9 +82,8 @@
     "- [2026-10-03] Sonar S2699 en alta-registro: expect de registroHecho y expectAmt como asercion reconocida",
     "- [2026-10-03] App Demo+Alta: candado 4 USDT, banner Pagar 4, textos legales. Xiaomi con Metro ya muestra el alta. Credit no crecio.",
     "- [2026-10-03] Desplegado protocolo nuevo en BSC testnet: Credit 0xdF21, Fama 0x7491, Reserva 0x9058, Alta 0xa590. Pool 500 USDT. 2-de-2. 0xD2d2 no se toco. Mainnet vacio.",
-    "- [2026-10-03] App: Alta se puede pagar aunque sea Demo si hay contrato Alta. El Xiaomi sigue con APK del 13-sep y Demo 0xD2d2 sin Alta; por eso no se ve el protocolo nuevo.",
-    "- [2026-10-03] ptsDonacion sin puerta de 2 USDT. Alta.vencerPadrinoAlPool manda el padrino vencido al pool. Credit no crecio (EIP-170)."
+    "- [2026-10-03] App: Alta se puede pagar aunque sea Demo si hay contrato Alta. El Xiaomi sigue con APK del 13-sep y Demo 0xD2d2 sin Alta; por eso no se ve el protocolo nuevo."
   ],
   "no_olvidar": "- Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.\n- Pausa de emergencia sigue inmediata.",
-  "ultima_sesion": "[2026-10-08] Cambio: Si falla la lectura del credito pendiente o del bote, la app conserva la cifra anterior. El frances de la racha dice que el mismo dia no suma otra vez."
+  "ultima_sesion": "[2026-10-08] Cambio: Si falla la lectura de la tasa, la ficha conserva la tasa anterior. Luego se reinstala en el Xiaomi."
 }

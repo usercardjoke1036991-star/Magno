@@ -2350,6 +2350,8 @@ describe('account entry — password, email and session', () => {
     const balances = read('hooks', 'useWeb3Balances.ts');
     expect(balances).to.include('if (outstanding === null) return { poolBalance }');
     expect(balances).to.not.include('outstanding = 0n');
+    expect(balances).to.include('curveRateBps: curveRateRead ?? prev.curveRateBps');
+    expect(balances).to.not.include('curveRateBps = 0');
     const saludFn = read('services', 'quatriviumCreditService.ts');
     const salud = saludFn.slice(saludFn.indexOf('obtenerSaludAdmin:'), saludFn.indexOf('obtenerFama:'));
     expect(salud).to.include('return null');

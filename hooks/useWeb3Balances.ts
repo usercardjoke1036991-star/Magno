@@ -285,7 +285,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
 
       let poolRead: { poolBalance: string; poolOutstanding?: string; poolCash?: string } | null = null;
       let isTokenSupported = false;
-      let curveRateBps = 0;
+      let curveRateRead: number | null = null;
       let kycExigido = !isDemoAccount();
       if (isContractConfigured()) {
         try {
@@ -296,9 +296,9 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
             isTokenSupported = isOfficialWorldToken(tokenAddress);
           }
           try {
-            curveRateBps = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
+            curveRateRead = Number(await creditContract.obtenerTasaInteresActual(tokenAddress));
           } catch {
-            curveRateBps = 0;
+            curveRateRead = null;
           }
           try {
             kycExigido = Boolean(await creditContract.kycExigido());
@@ -327,7 +327,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         setUserInfo({
           ...EMPTY_USER_INFO,
           isTokenSupported,
-          curveRateBps,
+          curveRateBps: curveRateRead ?? 0,
           kycExigido,
           identidadExigida: !isDemoAccount(),
           canDonate: false,
@@ -379,7 +379,7 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
           const base = keep ? prev : { ...EMPTY_USER_INFO };
           return {
             ...base,
-            curveRateBps,
+            curveRateBps: curveRateRead ?? 0,
             canDonate: false,
             canCanjearFama: false,
             canRacha: false,
@@ -421,7 +421,12 @@ export const useWeb3Balances = (walletAddress: string, selectedToken: Token) => 
         return;
       }
 
-      setUserInfo((prev) => ({ ...prev, isTokenSupported, curveRateBps, kycExigido }));
+      setUserInfo((prev) => ({
+        ...prev,
+        isTokenSupported,
+        curveRateBps: curveRateRead ?? prev.curveRateBps,
+        kycExigido,
+      }));
 
       try {
         const creditContract = new Contract(getContractAddress(), CONTRACT_ABI, provider);
