@@ -9,7 +9,7 @@ y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda blo
 ## Tipo de proyecto
 - **Stack:** React Native 0.81 · Expo 54 · React 19 · TypeScript · Solidity 0.8.24 · ethers v6
 - **Tipo:** Mobile DeFi App + Smart Contracts (EVM)
-- **Estado actual:** Testnet (chain 97) y mainnet (chain 56) desplegados y separados. El APK de producción y el worker público todavía no usan el contrato nuevo de mainnet.
+- **Estado actual:** Mainnet BSC (chain 56) desplegado y en el APK de producción 1.0.2, código 12, paquete `com.quatrivium.credit`. Demo es BSC testnet (chain 97). No redesplegar.
 
 ---
 
@@ -63,7 +63,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Textbelt SMS (OTP) / Twilio y WhatsApp Cloud de respaldo / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 1040 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 1233 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -85,12 +85,12 @@ Magno/
 - **Device binding es LOCAL** (SecureStore): la identidad on-chain es la dirección de la wallet + teléfono OTP, no el IMEI
 - **Worker 24/7:** el camino elegido es **Render** (Web Service + `Dockerfile.notify`, `render.yaml`, disco `/data`, health `/health`). OTP SMS = Textbelt (`TEXTBELT_API_KEY`). Correo = Resend. Firma OTP = `ATTESTER_PRIVATE_KEY` (nunca la llave de owner). El proceso no debe dormirse. El fundador no sube la llave de despliegue a Render.
 - **Referido solo al alta:** el código opcional se pide al crear la cuenta. Vacío = el usuario inicia su cadena colgada del fundador. Tras continuar, el padrino queda bloqueado en el teléfono y on-chain (`already registered`). Activar la línea ya no pide código.
-- **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. **Demo no pide correo, número, KYC ni el 2 USDT.** En Real sí: primero el **2 USDT** (a la fundadora, sin fama) y luego correo y teléfono (**0,50 + 0,50 al pool**, sin fama), KYC y que este dispositivo coincida con el hash on-chain; al completarlos quedan en esa cuenta Real.
+- **Alta de cuenta**: si este teléfono no tiene cuenta, el inicio muestra **Crear frase secreta** y **Recuperar cuenta**. La app **no destruye ni genera otra cuenta**. Formatear o cambiar de VPN/red no abre una segunda línea: se recupera con las 24 palabras (o 12 si la cuenta es antigua). En Real, el mismo teléfono o dispositivo on-chain no puede atarse a otra billetera. Recuperar pide la frase y luego usuario+contraseña de este aparato. Si el dispositivo ya tiene dueño on-chain, Crear desaparece. **Guardar sesión** abre el bloqueo. Contraseña es el método principal: 8 a 66 caracteres, con mayúscula, número y símbolo. Antes de pedir crédito hay que anotar las 24 palabras. **Demo no pide correo, número, KYC ni el alta de 4 USDT.** En Real, con el alta conectada, hay un solo pago de 4 USDT (`pagarRegistro`); correo y teléfono no cobran aparte. Siguen el KYC y que este dispositivo coincida con el hash on-chain.
 - **Frase secreta BIP-39**: alta y respaldo. No cierra la cuenta. No hay destruir ni generar otra cuenta en la app.
 - **Usuario y contraseña son el candado de este teléfono.** El correo y el número siguen para crédito Real, avisos y recuperar contraseña. No se usan para desbloquear, pedir, pagar ni transferir.
 - **Métodos de seguridad**: desbloquear, pedir, pagar y transferir son opcionales (interruptor + método ya registrado: PIN, autenticador, huella o contraseña). Huella y llave son el mismo sensor. Los cambios se confirman con Guardar. El autenticador es TOTP real: al activarlo muestra un QR `otpauth://` escaneable y la clave por si la cámara no enfoca.
 - **Historial**: Demo y Real tienen diarios distintos (modo + chain + contrato + billetera). Dos ventanas (transferencias y préstamos) y mora. En el hub, al vencer empieza un reloj rojo: 30 días de gracia en cuenta atrás; al acabarse, cuenta hacia adelante hasta que pague. El fundador entra en mora como el resto.
-- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). Real usa el crédito de chain 56; si el APK no trae esas direcciones, la sala sigue en preparación. El **2 USDT** de acceso, el **1 USDT** de correo/teléfono al pool, el KYC son de Real; Demo opera sin esos candados (sí pide anotar las 24 palabras).
+- **Demo y Real son mundos distintos**: Demo = BSC testnet (chain 97). Real = BSC mainnet (chain 56). El préstamo, el saldo y el registro de uno **no se copian** al otro. **Primera apertura = Real.** Después la app recuerda el último modo abierto (`quatrivium.appMode.v2`). El APK 1.0.2 código 12 ya trae las direcciones de chain 56. Con el alta conectada, Real cobra un solo pago de 4 USDT; correo y teléfono no cobran aparte. El KYC es de Real. Demo opera sin esos candados (sí pide anotar las 24 palabras).
 - **Admin/fundadoras**: el panel no aparece hasta conectar una billetera fundadora (WalletConnect).
 - **Crecer sin recortar el núcleo**: EIP-170 limita a 24 KB *cada* contrato, no el protocolo. Funciones nuevas (escalera de solicitudes, bono del 100, identidad, red, Reserva) van a **contratos hermanos**. No se borran vistas ni pagos del núcleo para “hacer hueco”.
 - **Reserva no es el pool**: el pool de préstamos no se retira. Reserva es un hermano: se ve desde el inicio y se usa desde el **nivel 10**. Bloqueo 30 días, principal de vuelta. Techo **hasta 12 %** anual: el % **baja si lo bloqueado es grande frente al bote** (`apyHoyBps` / `saludReserva`). Cada alta mete 1 USDT al bote. Admins también aportan; **retirar** el bote exige guardianes de acuerdo y 72 h. Extra de comisiones de red sigue del pool (tramo 2/3). Credit no se recorta. No se llama “producto de inversión” ni banco.
@@ -134,20 +134,30 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 ---
 
 ## Lo que está funcionando ✅
-- Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- Sala **Reserva**: hermano `QuatriviumReserva.sol` (Hardhat 12/12). Visible desde el inicio, usable en nivel 10. Bote solo admin (no Donar ni pool). Extra de comisiones con corte del fundador. Demo práctica local; Real exige identidad. Sin contrato mainnet.
-- Hermano **FamaCaja**: `canjearFama` usa el mismo criterio que Credit `_estaVencido` (cuota o vencimiento final) leyendo `planPago`; no se añade wrapper al núcleo.
-- 17 suites Hardhat (210 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings, lock de referido y canje de fama (incluye cuota vencida antes del plazo final)…
-- Foundry 1.8.3 en WSL (`npm run test:forge`): despliega FamaCaja + Credit (7 args). EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24536 B (margen 40). Live Demo sigue 24457 B hasta el redespliegue.
-- Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** (examen 2026-10-01): lockfile de producción HIGH/MEDIUM 0; Dockerfile.notify 0; secretos 0 en app/services/scripts/contracts. Dev: se parchearon adm-zip 0.6.1, serialize-javascript 7.1.2, undici 6.28.1 y bn.js 4.12.5. Queda `tmp@0.0.33` de solc (sin parche 0.0.x). `.trivyignore` + `trivy.yaml`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
+- Mainnet BSC (chain 56), ya en el APK 1.0.2 código 12: Credit `0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6`, FamaCaja `0xa590f241868560AF3f9E2017c7d629FFDEA27e2B`, Reserva `0xa81857F71A11a21d59F59C2190638793266233fB`, Alta `0x50146aDB887dB13Ee7Ffa66792d656127BCB96A4`, biblioteca de fama `0x9058C95bBdde3B215f86908aE66F1B2C03180420`, USDT `0x55d398326f99059ff775485246999027b3197955`
+- Demo, BSC testnet (chain 97): Credit `0xD318f39834A5e798a11D2535c6c9D1E1270e6778`, Alta `0xE890627734D7350132988561247945624991f063`. El contrato viejo `0xD2d2` no lo usa la app
+- Alta: un solo pago de 4 USDT (`pagarRegistro`). Con el alta conectada, correo y teléfono no cobran aparte. Quien entra sin código queda anclado al fundador
+- Fama: 100 por cada USDT desde el primero al donar o aportar. El alta no acredita fama de red. El interés por generaciones (15 %, 8 %, 6 %, 4 %, 2 %, 0,8 % y 0,4 %) sí se reparte. La fama de racha no baja
+- Racha: el día lo suma un invitado directo al liquidar un crédito. Registrarse no cuenta. La red de ese invitado no cuenta. El mismo día UTC no suma dos veces
+- Reserva: el usuario bloquea su principal desde el nivel 10, mínimo 1 USDT, 30 días, techo del 12 %. El panel propone y confirma el retiro del bote a las 72 horas. Hoy hay un solo guardián, la billetera fundadora. Ese retiro no toca el principal bloqueado
+- App Expo 54, React Native 0.81.5 y TypeScript. 17 idiomas, 1233 claves. El apodo público se confirma aparte del usuario del teléfono, una sola vez, y no va a la cadena. El ranking, desde el nivel 15, muestra el apodo o el código de invitación
+- Si falla la lectura del fondo, del bote o de la tasa, la pantalla conserva la cifra anterior
+- Arranque nativo en verde liso (`assets/splash-blank.png`). La pantalla grande del logo sigue usando `assets/logo.png`
+- Avisos en `https://notify.quatriviumcredit.app`. El worker del repositorio ya separa el apodo del usuario del teléfono
+- Demo y Real cambian juntos. El grifo de BNB de prueba no se abre con Real seleccionado. Las actualizaciones OTA están apagadas: un cambio de app pide un APK nuevo
+- Paquete Android `com.quatrivium.credit`. El Xiaomi de trabajo tiene la versión 1.0.2, código 12, instalada encima de la anterior
+- Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT). Histórico: la app ya no apunta ahí
+- Sala **Reserva**: hermano `QuatriviumReserva.sol`. Visible desde el inicio, usable en nivel 10. El bote de mainnet ya está desplegado
+- Hermano **FamaCaja**: `canjearFama` usa el mismo criterio que Credit `_estaVencido` (cuota o vencimiento final) leyendo `planPago`; no se añade wrapper al núcleo
+- Suites Hardhat con `npx hardhat --config hardhat.config.cjs test`
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
-- i18n: 17 idiomas, 1040 claves
+- i18n: 17 idiomas, 1233 claves
 - Rankings: 7 tableros (incluye racha), divisiones de 100, premio mensual estimado, nombres y fotos públicas, visibles desde el nivel 15
 - Referidos Unilevel en contrato y UI
-- Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
+- Notify-worker: Telegram, SMS, email y auto-fondeo BNB solo en Demo (`/auto-fund`)
 - KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
 - App lock: la contraseña se pide al desbloquear y para ver la frase; ya no hay fila de contraseña en Ajustes. PIN y huella se pueden cambiar o quitar. Huella y llave de acceso son el mismo sensor (una sola fila: Huella).
-- Fondos: depositar, retirar, donar, aportar al pool y pagar el **2 USDT** de acceso (solo Real) salen de una billetera externa vinculada. Correo y número cobran **0,50 cada uno al pool** (`pagarVerificacion`), sin fama. El USDT pasa a la cuenta interna; desde ahí se piden y pagan préstamos o se guarda el saldo. Saltarse el vínculo en el alta no basta para mover dinero. Demo no cobra la puerta ni pide identidad.
+- Fondos: depositar, retirar, donar y aportar al pool salen de la billetera vinculada. En Real, con el alta conectada, el acceso es un solo pago de 4 USDT (`pagarRegistro`); correo y teléfono no cobran aparte. El USDT del saldo vive en la cuenta interna; desde ahí se piden y pagan préstamos. Demo no cobra esa puerta ni pide identidad.
 - Frase secreta BIP-39: ver/anotar. No se sustituye: cambiarla sería otra cuenta. Recuperar en otro teléfono usa las mismas 24 palabras.
 - Device binding local + frase para recuperar en otro teléfono
 - Liquidación de deudores desde AdminPanel (approve automático)
@@ -155,10 +165,10 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Primera apertura en Cuenta Real; al cambiar a Demo o Real se restaura ese modo al reabrir (`wallet/AppModeContext.tsx`)
 
 ## Lo que está en progreso 🔄 (solo el fundador puede completar)
-- El APK de producción todavía no incluye las direcciones nuevas de chain 56
-- El worker público de avisos todavía no tiene el contrato de mainnet
-- Credenciales Textbelt (`TEXTBELT_API_KEY`) en `.env.worker` y en Render; Resend para correo
-- Publicación en Google Play Store (`eas build --platform android --profile production`)
+- Publicar en Google Play Store. Hoy el APK se instala aparte; las actualizaciones OTA siguen apagadas
+- Añadir un segundo guardián de la reserva. Hoy la misma billetera fundadora propone el retiro del bote y, pasadas 72 horas, lo confirma
+- Tener un servidor de avisos de respaldo antes del mantenimiento del 13 de octubre de 2026. El aviso vivo sigue en `https://notify.quatriviumcredit.app`
+- Republicar ese worker para que el apodo público coincida con el código del repositorio
 
 ## Lo que NO es un bug (deuda de diseño, no hay que “arreglarlo”)
 - **Lint Foundry (`tx.origin`, `block.timestamp`, `ecrecover` maleable, `feeCollector.call`)**: diseño conocido, igual que Slither. No son pérdida de fondos. `pagarPrestamo` cobra a `msg.sender`, no a un `from` arbitrario.
@@ -166,7 +176,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - **Mythril SWC-101 / Semgrep INFO / Trivy lockfile**: Solidity 0.8.24 no envuelve enteros; Semgrep INFO es gas (EIP-170); las CVE del lockfile viven en Metro/snarkjs/xcode, no en el worker ni en el crédito. `npm audit --force` instalaría Expo 57. Docker declara `USER node` (Sonar docker:S6471). Si el host arranca como root, el entrypoint hace chown de `/data` y `su-exec node`; si `/data` no es escribible el worker usa `/app/data`.
 - **ZK real en React Native**: `snarkjs` no es bundleable; el registro es `registrarHumanoConPadre()`. Decisión consciente.
 - **Pool no se retira**: no hay circuit breaker de retiros al 50% — el pool está cerrado a propósito (`revert("pool locked")`). La pausa de emergencia es el freno.
-- **`eas.json` production ya lleva las direcciones de chain 56.** No hace falta otro deploy para que el código las conozca. El APK instalado no cambia hasta un build nuevo.
+- **`eas.json` production ya lleva las direcciones de chain 56.** El APK 1.0.2 código 12 del Xiaomi ya las usa. No redesplegar. Un cambio nuevo de app pide otro build: las actualizaciones OTA están apagadas.
 - **Premio mensual de rankings**: la UI muestra la estimación; el núcleo Credit no lo paga. Haría falta un contrato hermano fondeado o un redespliegue.
 - **Java 25 en la máquina local**: puede romper `expo run:android` local. Los builds EAS usan imagen `sdk-54` (JDK correcto). En local: usar JDK 17.
 
@@ -265,6 +275,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-08 | README de GitHub alineado a mainnet chain 56, APK 1.0.2 codigo 12, alta de 4 USDT y 1233 claves. Sin redespliegue. | — |
 | 2026-10-08 | Si falla obtenerTasaInteresActual, la app conserva la tasa anterior en lugar de pintar 0. | — |
 | 2026-10-08 | Lectura fallida del credito pendiente o del bote conserva la cifra anterior. Frances rachaLead: el mismo dia no suma otra vez. | — |
 | 2026-10-08 | Antes de firmar el retiro de la provision, el aviso muestra importe y billetera. Canje y la guia ya no prometen fama de red. Hindi y bengali corrigen el destino. | — |

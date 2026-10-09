@@ -8,28 +8,28 @@
 **Quatrivium Finance** es una app móvil de microcrédito on-chain sin colateral sobre BNB Smart Chain (BSC). El usuario activa una wallet interna, pide un préstamo en USDT del pool de liquidez, lo paga antes del vencimiento y sube de nivel para pedir montos mayores. Si no paga, entra en mora y queda bloqueado hasta regularizar. **No puede cerrar la cuenta mientras tenga deuda o esté en mora.**
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
-- **Estado:** Testnet (chain 97) y mainnet (chain 56) desplegados y separados. El APK de producción y el worker público todavía no usan el contrato nuevo de mainnet.
+- **Estado:** Mainnet BSC (chain 56) desplegado y en el APK de producción 1.0.2, código 12, paquete `com.quatrivium.credit`. Demo es BSC testnet (chain 97). No redesplegar.
 - **Tests detectados:** 45 archivo(s)
 
 ### Qué funciona
-- Contrato `QuatriviumCredit.sol` — Demo live `0xD2d2A9eF0D1e4f253abc90Dd4ACb0E6C50B2de9f` (1000 niveles, FamaLib `0x6B98072a087B3fd856c24249232EE3fb40cB5003`, pool 2000 USDT)
-- Sala **Reserva**: hermano `QuatriviumReserva.sol` (Hardhat 12/12). Visible desde el inicio, usable en nivel 10. Bote solo admin (no Donar ni pool). Extra de comisiones con corte del fundador. Demo práctica local; Real exige identidad. Sin contrato mainnet.
-- Hermano **FamaCaja**: `canjearFama` usa el mismo criterio que Credit `_estaVencido` (cuota o vencimiento final) leyendo `planPago`; no se añade wrapper al núcleo.
-- 17 suites Hardhat (210 tests): accounting, circuitBreaker, cuotas, destroy, identity, kyc, liquidation, mlm, morosity, peg, security, demo-identity, accountWorld, 1000 niveles, hitos, donación, endurecimiento, rankings, lock de referido y canje de fama (incluye cuota vencida antes del plazo final)…
-- Foundry 1.8.3 en WSL (`npm run test:forge`): despliega FamaCaja + Credit (7 args). EIP-170, NAV préstamo/pago, pool locked, anti-contrato, extraño no paga deuda ajena, fuzz depósito 256 runs. Runtime compilado del núcleo 24536 B (margen 40). Live Demo sigue 24457 B hasta el redespliegue.
-- Ciber WSL (producto, local, 2026-09-17 en vivo): Aderyn **0.6.8** High 1 CEI / Low 13 (se mantiene, `nonReentrant`). **Trivy 0.74.0** (examen 2026-10-01): lockfile de producción HIGH/MEDIUM 0; Dockerfile.notify 0; secretos 0 en app/services/scripts/contracts. Dev: se parchearon adm-zip 0.6.1, serialize-javascript 7.1.2, undici 6.28.1 y bn.js 4.12.5. Queda `tmp@0.0.33` de solc (sin parche 0.0.x). `.trivyignore` + `trivy.yaml`. **Semgrep 1.177.0** `p/smart-contracts` 202 INFO de gas (custom error / `++i`); worker JS 0 hallazgos; GCM sigue con `authTagLength: 16`. **Mythril 0.24.8** SWC-101 High en getters `BONO_HITOS_TOTAL`/`MAX_NIVEL`/`DIVISION_SIZE`, vista `calcularTasaUtilizacion` y `proposals(uint256)` — overflow de 0.8.24 que revierte, no envuelve. ZAP 2.17 baseline `/health` 0 alertas. Informes en `/root/cyber-scans` (fuera de git).
-- App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
-- i18n: 17 idiomas, 1040 claves
-- Rankings: 7 tableros (incluye racha), divisiones de 100, premio mensual estimado, nombres y fotos públicas, visibles desde el nivel 15
-- Referidos Unilevel en contrato y UI
-- Notify-worker: WhatsApp, Telegram, SMS, email, auto-fondeo BNB testnet (`/auto-fund`) e identidad demo (`/demo-identity`, solo chain 97)
-- KYC on-chain + OTP de teléfono; nombre y documento congelados; foto del documento en el teléfono
+- Mainnet BSC (chain 56), ya en el APK 1.0.2 código 12: Credit `0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6`, FamaCaja `0xa590f241868560AF3f9E2017c7d629FFDEA27e2B`, Reserva `0xa81857F71A11a21d59F59C2190638793266233fB`, Alta `0x50146aDB887dB13Ee7Ffa66792d656127BCB96A4`, biblioteca de fama `0x9058C95bBdde3B215f86908aE66F1B2C03180420`, USDT `0x55d398326f99059ff775485246999027b3197955`
+- Demo, BSC testnet (chain 97): Credit `0xD318f39834A5e798a11D2535c6c9D1E1270e6778`, Alta `0xE890627734D7350132988561247945624991f063`. El contrato viejo `0xD2d2` no lo usa la app
+- Alta: un solo pago de 4 USDT (`pagarRegistro`). Con el alta conectada, correo y teléfono no cobran aparte. Quien entra sin código queda anclado al fundador
+- Fama: 100 por cada USDT desde el primero al donar o aportar. El alta no acredita fama de red. El interés por generaciones (15 %, 8 %, 6 %, 4 %, 2 %, 0,8 % y 0,4 %) sí se reparte. La fama de racha no baja
+- Racha: el día lo suma un invitado directo al liquidar un crédito. Registrarse no cuenta. La red de ese invitado no cuenta. El mismo día UTC no suma dos veces
+- Reserva: el usuario bloquea su principal desde el nivel 10, mínimo 1 USDT, 30 días, techo del 12 %. El panel propone y confirma el retiro del bote a las 72 horas. Hoy hay un solo guardián, la billetera fundadora. Ese retiro no toca el principal bloqueado
+- App Expo 54, React Native 0.81.5 y TypeScript. 17 idiomas, 1233 claves. El apodo público se confirma aparte del usuario del teléfono, una sola vez, y no va a la cadena. El ranking, desde el nivel 15, muestra el apodo o el código de invitación
+- Si falla la lectura del fondo, del bote o de la tasa, la pantalla conserva la cifra anterior
+- Arranque nativo en verde liso (`assets/splash-blank.png`). La pantalla grande del logo sigue usando `assets/logo.png`
+- Avisos en `https://notify.quatriviumcredit.app`. El worker del repositorio ya separa el apodo del usuario del teléfono
+- Demo y Real cambian juntos. El grifo de BNB de prueba no se abre con Real seleccionado. Las actualizaciones OTA están apagadas: un cambio de app pide un APK nuevo
+- Paquete Android `com.quatrivium.credit`. El Xiaomi de trabajo tiene la versión 1.0.2, código 12, instalada encima de la anterior
 
 ### En progreso
-- El APK de producción todavía no incluye las direcciones nuevas de chain 56
-- El worker público de avisos todavía no tiene el contrato de mainnet
-- Credenciales Textbelt (`TEXTBELT_API_KEY`) en `.env.worker` y en Render; Resend para correo
-- Publicación en Google Play Store (`eas build --platform android --profile production`)
+- Publicar en Google Play Store. Hoy el APK se instala aparte; las actualizaciones OTA siguen apagadas
+- Añadir un segundo guardián de la reserva. Hoy la misma billetera fundadora propone el retiro del bote y, pasadas 72 horas, lo confirma
+- Tener un servidor de avisos de respaldo antes del mantenimiento del 13 de octubre de 2026. El aviso vivo sigue en `https://notify.quatriviumcredit.app`
+- Republicar ese worker para que el apodo público coincida con el código del repositorio
 
 ### Módulos
 - Pantalla home — `app/index.tsx`
@@ -300,27 +300,47 @@ python actualizar_readme.py
 _Actualizado automáticamente el 2026-10-08 por `actualizar_readme.py`. El texto fuera de estos marcadores no se toca._
 
 <!-- AUTO-README:END -->
-Quatrivium Finance es crédito on-chain **sin colateral**: pides un préstamo, lo pagas dentro del plazo y subes de nivel para pedir más.
 
-## Qué lo hace distinto
+Quatrivium Finance es crédito on-chain **sin colateral** en BNB Smart Chain. Pides un préstamo en USDT, lo pagas dentro del plazo y subes de nivel para pedir más.
 
-- No bloqueas tokens para pedir.
-- Un préstamo activo a la vez.
-- Si pagas a tiempo, subes de nivel (más monto, más plazo).
-- Si no pagas, quedas en mora y no puedes pedir otro hasta regularizar.
+## Hoy
+
+- **Real** es BSC mainnet (chain 56). El APK de producción 1.0.2, código 12, ya usa esos contratos. Paquete `com.quatrivium.credit`.
+- **Demo** es BSC testnet (chain 97). Demo y Real cambian juntos.
+- El alta es un solo pago de **4 USDT**. Correo y teléfono no cobran aparte cuando el alta está conectada.
+- La fama de red no se acredita con el alta. Donar o aportar suma 100 de fama por USDT desde el primero. La racha la suma un invitado directo al liquidar un crédito.
+- Reserva: desde el nivel 10 se bloquea el propio principal, 30 días, techo del 12 %. El retiro del bote lo propone y confirma el panel, con 72 horas, y no toca ese principal.
+- 17 idiomas. El apodo de la red se confirma aparte, una sola vez, y no va a la cadena.
+- Los contratos de mainnet ya están desplegados. No hace falta volver a desplegarlos.
 
 ## App
 
-React Native (Expo) + WalletConnect/Reown en BNB Smart Chain.
+React Native 0.81.5, Expo 54 y TypeScript. La billetera del teléfono sale de la frase de 24 palabras.
 
 ```bash
 npm install
-npx expo run:android
+npm run start
 ```
+
+El APK de producción se construye en la nube con el perfil `production` de `eas.json` (chain 56). Las actualizaciones OTA están apagadas.
 
 ## Contratos
 
+Las pruebas locales usan el archivo de configuración de este repositorio:
+
 ```bash
-npx hardhat test
-npx hardhat run scripts/deploy.cjs --network bscMainnet
+npx hardhat --config hardhat.config.cjs test
+npx tsc --noEmit
 ```
+
+Mainnet, chain 56:
+
+| Contrato | Dirección |
+|---|---|
+| Crédito | `0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6` |
+| Fama | `0xa590f241868560AF3f9E2017c7d629FFDEA27e2B` |
+| Reserva | `0xa81857F71A11a21d59F59C2190638793266233fB` |
+| Alta | `0x50146aDB887dB13Ee7Ffa66792d656127BCB96A4` |
+| USDT | `0x55d398326f99059ff775485246999027b3197955` |
+
+Avisos: `https://notify.quatriviumcredit.app`. Sitio: `https://quatriviumcredit.app`.
