@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "नया पासवर्ड सहेजें",
   "lockRecoverBack": "वापस",
   "lockRecoverFail": "पासवर्ड पुनर्स्थापित नहीं हो सका। ईमेल और कोड जाँचें।",
+  "lockRecoverDay": "पासवर्ड रीसेट के दिन में केवल 3 प्रयास हैं। कल फिर कोशिश करें।",
   "lockRecoverNeedDevice": "ईमेल केवल इसी फ़ोन पर पासवर्ड बदलता है। नए फ़ोन पर 24 शब्दों का वाक्यांश उपयोग करें।",
   "kycFingerprint": "पहचान छाप: {fingerprint}",
   "referralRepTitle": "प्रतिष्ठा अंक",

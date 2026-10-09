@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "새 비밀번호 저장",
   "lockRecoverBack": "뒤로",
   "lockRecoverFail": "비밀번호를 복구할 수 없습니다. 이메일과 코드를 확인하십시오.",
+  "lockRecoverDay": "비밀번호 재설정은 하루에 3번입니다. 내일 다시 시도하세요.",
   "lockRecoverNeedDevice": "이메일은 이 휴대폰에서만 비밀번호를 바꿉니다. 새 휴대폰에서는 24단어 문구를 사용하세요.",
   "kycFingerprint": "신원 지문: {fingerprint}",
   "referralRepTitle": "평판 포인트",

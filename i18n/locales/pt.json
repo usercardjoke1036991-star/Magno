@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "Guardar senha nova",
   "lockRecoverBack": "Voltar",
   "lockRecoverFail": "Não foi possível restabelecer a senha. Verifique o e-mail e o código.",
+  "lockRecoverDay": "Só há 3 tentativas por dia para repor a palavra-passe. Pode tentar amanhã.",
   "lockRecoverNeedDevice": "O e-mail só redefine a senha neste telefone. Num novo use a frase de 24 palavras.",
   "kycFingerprint": "Impressão de identidade: {fingerprint}",
   "referralRepTitle": "Pontos de reputação",

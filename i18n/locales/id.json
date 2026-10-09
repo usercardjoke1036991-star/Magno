@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "Simpan kata sandi baru",
   "lockRecoverBack": "Kembali",
   "lockRecoverFail": "Kata sandi tidak dapat dipulihkan. Periksa email dan kode.",
+  "lockRecoverDay": "Hanya 3 percobaan per hari untuk mengatur ulang kata sandi. Coba lagi besok.",
   "lockRecoverNeedDevice": "Email hanya mereset sandi di ponsel ini. Di ponsel baru gunakan frasa 24 kata.",
   "kycFingerprint": "Jejak identitas: {fingerprint}",
   "referralRepTitle": "Poin reputasi",

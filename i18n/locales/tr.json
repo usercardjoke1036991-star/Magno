@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "Yeni parolayı kaydet",
   "lockRecoverBack": "Geri",
   "lockRecoverFail": "Parola geri yüklenemedi. E-postayı ve kodu kontrol edin.",
+  "lockRecoverDay": "Parola sıfırlama günde yalnızca 3 denemedir. Yarın yeniden deneyin.",
   "lockRecoverNeedDevice": "E-posta parolayı yalnızca bu telefonda sıfırlar. Yeni telefonda 24 kelimelik ifadeyi kullanın.",
   "kycFingerprint": "Kimlik parmak izi: {fingerprint}",
   "referralRepTitle": "İtibar puanları",

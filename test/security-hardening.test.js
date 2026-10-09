@@ -15,6 +15,15 @@ describe('defensive security hardening', function () {
     expect(recovery).to.not.include('wrap,');
     expect(recovery).to.include("throw new Error('device')");
     expect(recovery).to.include('loadLocalRecoveryWrap');
+    expect(recovery).to.include('RECOVER_ATTEMPTS = 3');
+    expect(recovery).to.include('RECOVER_WAIT_MS = 60_000');
+    expect(recovery).to.include("throw new Error('day')");
+    expect(recovery).to.include("throw new Error('cooldown')");
+    expect(worker).to.include('RECOVER_DAY_ATTEMPTS = 3');
+    expect(worker).to.include('RECOVER_SEND_WAIT_MS = 60 * 1000');
+    expect(worker).to.include("error: 'day'");
+    expect(worker).to.include("error: 'cooldown'");
+    expect(worker).to.not.include('pwrecover-addr:');
     expect(recovery).to.include('persistLocalRecoveryWrap');
     expect(recovery).to.include("if (body.wrap)");
   });

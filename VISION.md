@@ -170,6 +170,7 @@
 - Textos institucionales: Vincular/Vinculado, guia y politicas listas para revision de tienda
 - Servicios visibles al entrar; no se abren hasta pagar el alta y registrarse
 - Correo y numero quedan bloqueados un mes despues de registrarse, y la fundadora abre el panel en Cuenta Real.
+- Restablecer la contraseña solo permite 3 intentos al día y el reenvío del código espera 1 minuto.
 
 ## 📈 Historial de Evolución
 - [2026-09-11 02:27] VISION.md inicializado para proyecto 'Magno' (tipo: react-native)
@@ -316,3 +317,4 @@
 - [2026-10-03 11:18] Idea añadida al backlog: "Textos institucionales: Vincular/Vinculado, guia y politicas listas para revisio"
 - [2026-10-03 12:31] Idea añadida al backlog: "Servicios visibles al entrar; no se abren hasta pagar el alta y registrarse"
 - [2026-10-08 03:51] Idea añadida al backlog: "Correo y numero quedan bloqueados un mes despues de registrarse, y la fundadora "
+- [2026-10-08 23:54] Idea añadida al backlog: "Restablecer la contraseña solo permite 3 intentos al día y el reenvío del código"

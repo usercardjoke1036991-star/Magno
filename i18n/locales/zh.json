@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "保存新密码",
   "lockRecoverBack": "返回",
   "lockRecoverFail": "无法恢复密码。请核对邮箱与验证码。",
+  "lockRecoverDay": "每天只能尝试 3 次重置密码。请明天再试。",
   "lockRecoverNeedDevice": "邮件只能在本机重置密码。换手机请使用24个单词的助记词。",
   "kycFingerprint": "身份指纹：{fingerprint}",
   "referralRepTitle": "声誉积分",

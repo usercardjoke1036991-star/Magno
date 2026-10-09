@@ -693,6 +693,7 @@
   "lockRecoverSubmit": "Save new password",
   "lockRecoverBack": "Back",
   "lockRecoverFail": "Could not restore the password. Check the email and the code.",
+  "lockRecoverDay": "There are only 3 password reset attempts per day. You can try again tomorrow.",
   "lockRecoverNeedDevice": "Email only changes the password on this phone. On a new phone use the 24-word phrase.",
   "kycFingerprint": "Identity fingerprint: {fingerprint}",
   "referralRepTitle": "Reputation points",

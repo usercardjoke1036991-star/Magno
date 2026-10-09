@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "نیا پاس ورڈ محفوظ کریں",
   "lockRecoverBack": "واپس",
   "lockRecoverFail": "پاس ورڈ بحال نہیں ہو سکا۔ ای میل اور کوڈ چیک کریں۔",
+  "lockRecoverDay": "پاس ورڈ ری سیٹ دن میں صرف 3 کوششیں ہیں۔ کل دوبارہ کوشش کریں۔",
   "lockRecoverNeedDevice": "ای میل صرف اسی فون پر پاس ورڈ بدلتا ہے۔ نئے فون پر 24 الفاظ کا جملہ استعمال کریں۔",
   "kycFingerprint": "شناختی نقوش: {fingerprint}",
   "referralRepTitle": "شہرت کے پوائنٹس",

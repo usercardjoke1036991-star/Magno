@@ -36,6 +36,7 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-08] Restablecer contraseña queda en 3 intentos al día y 1 minuto entre códigos. El APK del teléfono aún no lo tiene.
 - [2026-10-08] README de GitHub actualizado: mainnet ya esta en el APK 1.0.2 codigo 12. Alta de 4 USDT. 17 idiomas y 1233 claves.
 - [2026-10-08] Si falla la lectura de la tasa, la ficha conserva la tasa anterior. Luego se reinstala en el Xiaomi.
 - [2026-10-08] Si falla la lectura del credito pendiente o del bote, la app conserva la cifra anterior. El frances de la racha dice que el mismo dia no suma otra vez.
@@ -85,11 +86,10 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-10-03] Textos de app alineados al protocolo: alta 4 USDT 1+1+1+1, fama 100 desde el primero, padrino del alta, hitos 400-20000. Limpiados temp y residuos.
 - [2026-10-03] Sonar S2699 en alta-registro: expect de registroHecho y expectAmt como asercion reconocida
 - [2026-10-03] App Demo+Alta: candado 4 USDT, banner Pagar 4, textos legales. Xiaomi con Metro ya muestra el alta. Credit no crecio.
-- [2026-10-03] Desplegado protocolo nuevo en BSC testnet: Credit 0xdF21, Fama 0x7491, Reserva 0x9058, Alta 0xa590. Pool 500 USDT. 2-de-2. 0xD2d2 no se toco. Mainnet vacio.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-08] Cambio: README de GitHub actualizado: mainnet ya esta en el APK 1.0.2 codigo 12. Alta de 4 USDT. 17 idiomas y 1233 claves.
+[2026-10-08] Cambio: Restablecer contraseña queda en 3 intentos al día y 1 minuto entre códigos. El APK del teléfono aún no lo tiene.

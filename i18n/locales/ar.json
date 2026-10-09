@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "حفظ كلمة المرور الجديدة",
   "lockRecoverBack": "رجوع",
   "lockRecoverFail": "تعذّر استعادة كلمة المرور. راجعوا البريد والرمز.",
+  "lockRecoverDay": "ثلاث محاولات فقط في اليوم لإعادة تعيين كلمة المرور. يمكنكم المحاولة غداً.",
   "lockRecoverNeedDevice": "البريد يعيد كلمة المرور على هذا الهاتف فقط. على هاتف جديد استخدم عبارة الـ 24 كلمة.",
   "kycFingerprint": "بصمة الهوية: {fingerprint}",
   "referralRepTitle": "نقاط السمعة",

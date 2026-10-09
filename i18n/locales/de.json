@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "Neues Passwort speichern",
   "lockRecoverBack": "Zurück",
   "lockRecoverFail": "Das Passwort konnte nicht wiederhergestellt werden. Prüfen Sie E-Mail und Code.",
+  "lockRecoverDay": "Nur 3 Versuche pro Tag, das Passwort zurückzusetzen. Morgen wieder.",
   "lockRecoverNeedDevice": "E-Mail setzt das Passwort nur auf diesem Telefon zurück. Auf einem neuen Telefon die 24-Wort-Phrase nutzen.",
   "kycFingerprint": "Identitätsmerkmal: {fingerprint}",
   "referralRepTitle": "Reputationspunkte",

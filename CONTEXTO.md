@@ -63,7 +63,7 @@ Magno/
 - **Red blockchain:** BSC Testnet (chain 97) en dev · BSC Mainnet (chain 56) en prod
 - **Seguridad mobile:** expo-secure-store / device binding local / biometría / PIN 6 dígitos / frase BIP-39
 - **Notificaciones:** Textbelt SMS (OTP) / Twilio y WhatsApp Cloud de respaldo / Telegram Bot / Resend / notify-worker
-- **i18n:** 17 idiomas, 1233 claves, soporte RTL (árabe, urdu)
+- **i18n:** 17 idiomas, 1234 claves, soporte RTL (árabe, urdu)
 
 ---
 
@@ -140,7 +140,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Fama: 100 por cada USDT desde el primero al donar o aportar. El alta no acredita fama de red. El interés por generaciones (15 %, 8 %, 6 %, 4 %, 2 %, 0,8 % y 0,4 %) sí se reparte. La fama de racha no baja
 - Racha: el día lo suma un invitado directo al liquidar un crédito. Registrarse no cuenta. La red de ese invitado no cuenta. El mismo día UTC no suma dos veces
 - Reserva: el usuario bloquea su principal desde el nivel 10, mínimo 1 USDT, 30 días, techo del 12 %. El panel propone y confirma el retiro del bote a las 72 horas. Hoy hay un solo guardián, la billetera fundadora. Ese retiro no toca el principal bloqueado
-- App Expo 54, React Native 0.81.5 y TypeScript. 17 idiomas, 1233 claves. El apodo público se confirma aparte del usuario del teléfono, una sola vez, y no va a la cadena. El ranking, desde el nivel 15, muestra el apodo o el código de invitación
+- App Expo 54, React Native 0.81.5 y TypeScript. 17 idiomas, 1234 claves. El apodo público se confirma aparte del usuario del teléfono, una sola vez, y no va a la cadena. El ranking, desde el nivel 15, muestra el apodo o el código de invitación
 - Si falla la lectura del fondo, del bote o de la tasa, la pantalla conserva la cifra anterior
 - Arranque nativo en verde liso (`assets/splash-blank.png`). La pantalla grande del logo sigue usando `assets/logo.png`
 - Avisos en `https://notify.quatriviumcredit.app`. El worker del repositorio ya separa el apodo del usuario del teléfono
@@ -151,7 +151,7 @@ Rangos: 12 gemas del catálogo (granate, aguamarina, citrino, topacio, turmalina
 - Hermano **FamaCaja**: `canjearFama` usa el mismo criterio que Credit `_estaVencido` (cuota o vencimiento final) leyendo `planPago`; no se añade wrapper al núcleo
 - Suites Hardhat con `npx hardhat --config hardhat.config.cjs test`
 - App móvil con componentes React Native (seguridad a elección, autenticador, historial, sala Bonos, sala Reserva)
-- i18n: 17 idiomas, 1233 claves
+- i18n: 17 idiomas, 1234 claves
 - Rankings: 7 tableros (incluye racha), divisiones de 100, premio mensual estimado, nombres y fotos públicas, visibles desde el nivel 15
 - Referidos Unilevel en contrato y UI
 - Notify-worker: Telegram, SMS, email y auto-fondeo BNB solo en Demo (`/auto-fund`)
@@ -275,6 +275,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-08 | Restablecer contraseña: 3 intentos y 3 envíos al día por correo, y 1 minuto de espera entre envíos. | — |
 | 2026-10-08 | README de GitHub alineado a mainnet chain 56, APK 1.0.2 codigo 12, alta de 4 USDT y 1233 claves. Sin redespliegue. | — |
 | 2026-10-08 | Si falla obtenerTasaInteresActual, la app conserva la tasa anterior en lugar de pintar 0. | — |
 | 2026-10-08 | Lectura fallida del credito pendiente o del bote conserva la cifra anterior. Frances rachaLead: el mismo dia no suma otra vez. | — |

@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "新しいパスワードを保存",
   "lockRecoverBack": "戻る",
   "lockRecoverFail": "パスワードを復元できませんでした。メールとコードをご確認ください。",
+  "lockRecoverDay": "パスワードの再設定は1日3回までです。明日もう一度お試しください。",
   "lockRecoverNeedDevice": "メールではこの端末のパスワードだけをリセットできます。新しい端末では24語のフレーズを使ってください。",
   "kycFingerprint": "身元フィンガープリント: {fingerprint}",
   "referralRepTitle": "評判ポイント",

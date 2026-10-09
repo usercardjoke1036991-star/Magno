@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "নতুন পাসওয়ার্ড সংরক্ষণ",
   "lockRecoverBack": "ফিরুন",
   "lockRecoverFail": "পাসওয়ার্ড পুনরুদ্ধার যায়নি। ইমেইল ও কোড পরীক্ষা করুন।",
+  "lockRecoverDay": "পাসওয়ার্ড রিসেট দিনে মাত্র ৩ বার। আগামীকাল আবার চেষ্টা করুন।",
   "lockRecoverNeedDevice": "ইমেইল শুধু এই ফোনে পাসওয়ার্ড বদলায়। নতুন ফোনে ২৪ শব্দের বাক্যাংশ ব্যবহার করুন।",
   "kycFingerprint": "পরিচয়ের ছাপ: {fingerprint}",
   "referralRepTitle": "খ্যাতির পয়েন্ট",

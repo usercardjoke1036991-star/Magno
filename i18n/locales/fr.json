@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "Enregistrer le nouveau mot de passe",
   "lockRecoverBack": "Retour",
   "lockRecoverFail": "Le mot de passe n’a pas pu être rétabli. Vérifiez l’e-mail et le code.",
+  "lockRecoverDay": "Seulement 3 essais par jour pour réinitialiser le mot de passe. Réessayez demain.",
   "lockRecoverNeedDevice": "L’e-mail ne change le mot de passe que sur ce téléphone. Sur un autre, utilisez la phrase de 24 mots.",
   "kycFingerprint": "Empreinte d’identité : {fingerprint}",
   "referralRepTitle": "Points de réputation",

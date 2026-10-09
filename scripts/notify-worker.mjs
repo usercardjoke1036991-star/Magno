@@ -373,6 +373,7 @@ const emptyStore = () => ({
   rateHits: {},
   recoveryWraps: {},
   recoverOtps: {},
+  recoverQuota: {},
   reservaGuard: { creditPaused: null, reservaPaused: null },
   adminTotp: {},
 });
@@ -534,6 +535,27 @@ const rateLimit = (key, max = 20, windowMs = 60_000) => {
   next.push(now);
   store.rateHits[key] = next;
   return true;
+};
+
+const RECOVER_DAY_ATTEMPTS = 3;
+const RECOVER_SEND_WAIT_MS = 60 * 1000;
+
+const utcDay = (now = Date.now()) => new Date(now).toISOString().slice(0, 10);
+
+const recoverQuotaFor = (emailHash, now = Date.now()) => {
+  store.recoverQuota = store.recoverQuota || {};
+  const day = utcDay(now);
+  const keys = Object.keys(store.recoverQuota);
+  if (keys.length > 4000) {
+    for (const key of keys) {
+      if (store.recoverQuota[key]?.day !== day) delete store.recoverQuota[key];
+    }
+  }
+  const row = store.recoverQuota[emailHash];
+  if (!row || row.day !== day) {
+    store.recoverQuota[emailHash] = { day, attempts: 0, sends: 0, lastSent: 0 };
+  }
+  return store.recoverQuota[emailHash];
 };
 
 const refundRate = (key) => {
@@ -2207,14 +2229,30 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       return;
     }
     const emailHash = hashEmail(parsed.canonical);
-    if (!rateLimit(`pwrecover-addr:${emailHash}`, 3, 15 * 60 * 1000)) {
-      json(res, 429, { error: 'rate' });
+    const now = Date.now();
+    const quota = recoverQuotaFor(emailHash, now);
+    if (Number(quota.attempts) >= RECOVER_DAY_ATTEMPTS || Number(quota.sends) >= RECOVER_DAY_ATTEMPTS) {
+      json(res, 429, { error: 'day' });
+      return;
+    }
+    const sinceSent = now - Number(quota.lastSent || 0);
+    if (Number(quota.lastSent) > 0 && sinceSent < RECOVER_SEND_WAIT_MS) {
+      json(res, 429, { error: 'cooldown', retry: Math.ceil((RECOVER_SEND_WAIT_MS - sinceSent) / 1000) });
+      return;
+    }
+    quota.sends = Number(quota.sends || 0) + 1;
+    quota.lastSent = now;
+    try {
+      await persist();
+    } catch {
+      quota.sends = Math.max(0, Number(quota.sends || 0) - 1);
+      quota.lastSent = 0;
+      json(res, 500, { error: 'store' });
       return;
     }
     store.emailClaims = store.emailClaims || {};
     store.recoverOtps = store.recoverOtps || {};
     const claimed = store.emailClaims[emailHash];
-    const now = Date.now();
     for (const [key, item] of Object.entries(store.recoverOtps)) {
       if (Number(item?.exp) < now) delete store.recoverOtps[key];
     }
@@ -2267,9 +2305,15 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       return;
     }
     const emailHash = hashEmail(parsed.canonical);
+    const now = Date.now();
+    const quota = recoverQuotaFor(emailHash, now);
+    if (Number(quota.attempts) >= RECOVER_DAY_ATTEMPTS) {
+      json(res, 429, { error: 'day' });
+      return;
+    }
+    quota.attempts = Number(quota.attempts || 0) + 1;
     store.recoverOtps = store.recoverOtps || {};
     const pending = store.recoverOtps[emailHash];
-    const now = Date.now();
     if (!pending || Number(pending.exp) < now) {
       if (pending) delete store.recoverOtps[emailHash];
       await persist();
@@ -2277,12 +2321,6 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       return;
     }
     pending.attempts = Number(pending.attempts || 0) + 1;
-    if (pending.attempts > 5) {
-      delete store.recoverOtps[emailHash];
-      await persist();
-      json(res, 429, { error: 'rate' });
-      return;
-    }
     if (!sameHash(pending.codeHash, hashRecoverOtp(code, emailHash))) {
       await persist();
       json(res, 401, { error: 'code' });

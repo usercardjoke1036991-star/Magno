@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "Salva la nuova password",
   "lockRecoverBack": "Indietro",
   "lockRecoverFail": "Impossibile ripristinare la password. Controlli e-mail e codice.",
+  "lockRecoverDay": "Solo 3 tentativi al giorno per reimpostare la password. Riprovate domani.",
   "lockRecoverNeedDevice": "L’e-mail reimposta la password solo su questo telefono. Su uno nuovo usi la frase di 24 parole.",
   "kycFingerprint": "Impronta di identità: {fingerprint}",
   "referralRepTitle": "Punti reputazione",

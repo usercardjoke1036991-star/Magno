@@ -692,6 +692,7 @@
   "lockRecoverSubmit": "Lưu mật khẩu mới",
   "lockRecoverBack": "Quay lại",
   "lockRecoverFail": "Không khôi phục được mật khẩu. Kiểm tra email và mã.",
+  "lockRecoverDay": "Chỉ 3 lần mỗi ngày để đặt lại mật khẩu. Mai hãy thử lại.",
   "lockRecoverNeedDevice": "Email chỉ đặt lại mật khẩu trên điện thoại này. Máy mới hãy dùng cụm 24 từ.",
   "kycFingerprint": "Dấu vân danh tính: {fingerprint}",
   "referralRepTitle": "Điểm uy tín",

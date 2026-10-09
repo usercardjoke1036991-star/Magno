@@ -693,6 +693,7 @@
   "lockRecoverSubmit": "Guardar contraseña nueva",
   "lockRecoverBack": "Volver",
   "lockRecoverFail": "No se pudo restablecer la contraseña. Revise el correo y el código.",
+  "lockRecoverDay": "Solo hay 3 intentos al día para restablecer la contraseña. Mañana puede volver a intentarlo.",
   "lockRecoverNeedDevice": "El correo solo cambia la contraseña en este teléfono. En un teléfono nuevo use la frase de 24 palabras.",
   "kycFingerprint": "Huella de identidad: {fingerprint}",
   "referralRepTitle": "Puntos de reputación",

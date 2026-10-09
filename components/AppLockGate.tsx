@@ -37,7 +37,8 @@ import {
   shouldRelockAfterBackground,
 } from '../services/appLock';
 import { isValidMasterPassword } from '../utils/passwordPolicy';
-import { requestPasswordRecovery, resetPasswordWithEmail, storePasswordRecovery } from '../services/passwordRecovery';
+import { readRecoverQuota, recoverSendWaitSeconds, requestPasswordRecovery, resetPasswordWithEmail, storePasswordRecovery } from '../services/passwordRecovery';
+import { useSendCooldown } from '../hooks/useSendCooldown';
 import {
   addressFromPhrase,
   ensureAppWallet,
@@ -173,6 +174,8 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const [recoverEmail, setRecoverEmail] = useState('');
   const [recoverCode, setRecoverCode] = useState('');
   const [recoverSent, setRecoverSent] = useState(false);
+  const [recoverDayLocked, setRecoverDayLocked] = useState(false);
+  const { left: recoverWait, start: startRecoverWait } = useSendCooldown(60);
   const [sessionReady, setSessionReady] = useState(false);
   const [askingSignIn, setAskingSignIn] = useState(false);
   const [signInExtra, setSignInExtra] = useState(false);
@@ -781,14 +784,21 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   };
 
   const sendRecover = async () => {
+    if (busy || recoverWait > 0 || recoverDayLocked) return;
     setBusy(true);
     setError('');
     try {
       await requestPasswordRecovery(recoverEmail);
       setRecoverSent(true);
+      startRecoverWait(60);
     } catch (caught) {
       const reason = String((caught as Error)?.message || '');
-      if (reason.includes('rate')) setError(t('otpRate'));
+      const quota = await readRecoverQuota(recoverEmail).catch(() => null);
+      const wait = quota ? recoverSendWaitSeconds(quota) : 0;
+      if (quota && (quota.attempts >= 3 || quota.sends >= 3)) setRecoverDayLocked(true);
+      if (wait > 0) startRecoverWait(wait);
+      if (reason.includes('day') || (quota && (quota.attempts >= 3 || quota.sends >= 3))) setError(t('lockRecoverDay'));
+      else if (reason.includes('cooldown') || reason.includes('rate')) setError(t('otpWait', { seconds: wait || 60 }));
       else if (reason.includes('email')) setError(t('emailNotAllowed'));
       else if (reason.includes('notify')) setError(t('emailNeedApi'));
       else setError(t('lockRecoverFail'));
@@ -815,8 +825,16 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       await finishAuthenticated(true);
     } catch (caught) {
       const reason = String((caught as Error)?.message || '');
-      if (reason.includes('code')) setError(t('emailCodeWrong'));
-      else if (reason.includes('expired')) setError(t('emailExpired'));
+      if (reason.includes('day')) {
+        setRecoverDayLocked(true);
+        setError(t('lockRecoverDay'));
+      } else if (reason.includes('code')) {
+        const quota = await readRecoverQuota(recoverEmail).catch(() => null);
+        if (quota && quota.attempts >= 3) {
+          setRecoverDayLocked(true);
+          setError(t('lockRecoverDay'));
+        } else setError(t('emailCodeWrong'));
+      } else if (reason.includes('expired')) setError(t('emailExpired'));
       else if (reason.includes('device') || reason.includes('wrap')) setError(t('lockRecoverNeedDevice'));
       else setError(t('lockRecoverFail'));
     } finally {
@@ -938,6 +956,23 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       })
       .catch(() => {});
   }, [recovering]);
+
+  useEffect(() => {
+    if (!recovering || !recoverEmail) return;
+    let cancelled = false;
+    void readRecoverQuota(recoverEmail)
+      .then((quota) => {
+        if (cancelled) return;
+        const locked = quota.attempts >= 3 || quota.sends >= 3;
+        setRecoverDayLocked(locked);
+        if (locked) setError(t('lockRecoverDay'));
+        startRecoverWait(recoverSendWaitSeconds(quota));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [recovering, recoverEmail, startRecoverWait, t]);
 
   useEffect(() => {
     const onChange = (next: AppStateStatus) => {
@@ -1457,14 +1492,20 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                 ]}
               />
               <TouchableOpacity
-                disabled={busy || !recoverEmail}
+                disabled={busy || !recoverEmail || recoverWait > 0 || recoverDayLocked}
                 onPress={() => void sendRecover()}
-                style={[styles.primary, { backgroundColor: colors.connect }]}
+                style={[
+                  styles.primary,
+                  { backgroundColor: colors.connect },
+                  (busy || !recoverEmail || recoverWait > 0 || recoverDayLocked) && { backgroundColor: colors.chip },
+                ]}
               >
                 {busy && !recoverSent ? (
                   <ActivityIndicator color="#111" />
                 ) : (
-                  <AppText style={styles.primaryText}>{t('lockRecoverSend')}</AppText>
+                  <AppText style={styles.primaryText}>
+                    {recoverWait > 0 ? t('otpWait', { seconds: recoverWait }) : t('lockRecoverSend')}
+                  </AppText>
                 )}
               </TouchableOpacity>
               {recoverSent ? (
@@ -1495,9 +1536,13 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
                   />
                   <PasswordRulesHint value={passwordInput} />
                   <TouchableOpacity
-                    disabled={busy || recoverCode.length !== 6 || !passwordOk}
+                    disabled={busy || recoverDayLocked || recoverCode.length !== 6 || !passwordOk}
                     onPress={() => void submitRecover()}
-                    style={[styles.primary, { backgroundColor: colors.connect }]}
+                    style={[
+                      styles.primary,
+                      { backgroundColor: colors.connect },
+                      (busy || recoverDayLocked || recoverCode.length !== 6 || !passwordOk) && { backgroundColor: colors.chip },
+                    ]}
                   >
                     {busy ? <ActivityIndicator color="#111" /> : <AppText style={styles.primaryText}>{t('saveSession')}</AppText>}
                   </TouchableOpacity>
