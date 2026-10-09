@@ -86,6 +86,8 @@ import {
 import { fetchPublicProfiles, hasLockedPublicIdentity, saveOwnProfile, type UserProfile } from '../services/userProfile';
 import { PublicIdentityForm } from './PublicIdentityForm';
 import { isValidUsername, normalizeUsername } from '../utils/usernamePolicy';
+import { lockSponsorOnce } from '../services/sponsorLock';
+import { resolveSponsorInput } from '../utils/sponsorLock';
 import type { BiometricKind } from '../utils/biometricStatus';
 
 type UnlockMode = 'pin' | 'password' | 'authenticator' | 'biometric';
@@ -186,6 +188,8 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
   const [pendingPhrase, setPendingPhrase] = useState('');
   const [phraseAcked, setPhraseAcked] = useState(false);
   const [accountUsername, setAccountUsername] = useState('');
+  const [inviteDraft, setInviteDraft] = useState('');
+  const [inviteError, setInviteError] = useState('');
   const [setupWallet, setSetupWallet] = useState('');
   const [sessionTaken, setSessionTaken] = useState(false);
   const [methodQueue, setMethodQueue] = useState<AuthMethod[]>([]);
@@ -704,6 +708,8 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
     setPendingPhrase('');
     setPhraseAcked(false);
     setAccountUsername('');
+    setInviteDraft('');
+    setInviteError('');
     setPasswordInput('');
     setKeepOnPhone(true);
     passwordCommittedRef.current = false;
@@ -727,6 +733,12 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       setError(isValidUsername(username) ? t('lockPasswordWeak') : t('usernameInvalid'));
       return;
     }
+    const sponsor = resolveSponsorInput(inviteDraft, '');
+    if (!sponsor.ok) {
+      setInviteError(t('invalidSponsor'));
+      return;
+    }
+    setInviteError('');
     setBusy(true);
     setError('');
     try {
@@ -738,6 +750,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       passwordCommittedRef.current = true;
       const wallet = await importFromPhrase(created.phrase, { markBackedUp: false });
       if (!wallet) throw new Error('appWallet');
+      await lockSponsorOnce(wallet.address, inviteDraft, true);
       await rememberUsername(wallet.address, username);
       setHasPassword(true);
       setSetupWallet(wallet.address);
@@ -1403,6 +1416,25 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
 
           {credentialsStage ? (
             <View style={styles.passwordBlock}>
+              <AppText style={[styles.switchText, { color: colors.text }]}>{t('signupInviteLabel')}</AppText>
+              <AppText style={[styles.switchText, { color: colors.textMuted }]}>{t('signupInviteLead')}</AppText>
+              <AppTextInput
+                value={inviteDraft}
+                onChangeText={(value) => {
+                  setInviteDraft(value);
+                  setInviteError('');
+                }}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                autoComplete="off"
+                placeholder={t('invitePlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                style={[
+                  styles.passwordInput,
+                  { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
+                ]}
+              />
+              {inviteError ? <AppText style={[styles.error, { color: colors.danger }]}>{inviteError}</AppText> : null}
               <AppTextInput
                 value={accountUsername}
                 onChangeText={(value) => setAccountUsername(normalizeUsername(value))}

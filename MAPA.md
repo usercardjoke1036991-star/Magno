@@ -444,7 +444,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/padrinoSettle.ts` — módulo JS/TS
   - Funciones/clases: expiredSponsorDebtors, settleExpiredSponsor
 - `services/passwordRecovery.ts` — módulo JS/TS
-  - Funciones/clases: storePasswordRecovery, requestPasswordRecovery, resetPasswordWithEmail
+  - Funciones/clases: readRecoverQuota, recoverSendWaitSeconds, storePasswordRecovery, requestPasswordRecovery, resetPasswordWithEmail
 - `services/phoneOtp.ts` — módulo JS/TS
   - Funciones/clases: requestPhoneOtp, verifyPhoneOtp
 - `services/quatriviumCreditService.ts` — módulo JS/TS

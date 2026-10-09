@@ -6,6 +6,7 @@ export type LockedSponsor = {
   at: string;
   code: string;
   padre: string;
+  chosen?: boolean;
 };
 
 export type SponsorResolve =
@@ -46,6 +47,7 @@ export function parseLockedSponsor(raw: string | null | undefined): LockedSponso
       at: data.at,
       code: resolved.code,
       padre: resolved.padre,
+      chosen: data.chosen === true,
     };
   } catch {
     return null;

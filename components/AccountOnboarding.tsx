@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n/LanguageContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -11,7 +11,7 @@ import { LinkWalletForm } from './LinkWalletForm';
 import { loadClaimedUsername } from '../services/accountUsername';
 import { hasLockedPublicIdentity, loadOwnProfile } from '../services/userProfile';
 import { hasCompletedWalletLink, loadLinkedExternalWallet } from '../services/linkedWallet';
-import { lockSponsorOnce } from '../services/sponsorLock';
+import { loadLockedSponsor, lockSponsorOnce } from '../services/sponsorLock';
 import { resolveSponsorInput } from '../utils/sponsorLock';
 import { useUserProfile } from '../profile/ProfileContext';
 import { AppText, AppTextInput } from './AppText';
@@ -67,6 +67,8 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   const [linkedReady, setLinkedReady] = useState(false);
   const [inviteDraft, setInviteDraft] = useState(inviteCode);
   const [inviteError, setInviteError] = useState('');
+  const [sponsorChecked, setSponsorChecked] = useState(false);
+  const [sponsorLocked, setSponsorLocked] = useState(false);
   const triedRegister = useRef(false);
 
   useEffect(() => {
@@ -100,6 +102,30 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   useEffect(() => {
     if (inviteCode) setInviteDraft(inviteCode);
   }, [inviteCode]);
+
+  useEffect(() => {
+    let done = false;
+    if (!walletAddress) {
+      setSponsorLocked(false);
+      setSponsorChecked(true);
+      return undefined;
+    }
+    setSponsorChecked(false);
+    loadLockedSponsor(walletAddress)
+      .then((lock) => {
+        if (done) return;
+        setSponsorLocked(Boolean(lock?.padre || lock?.chosen));
+        setSponsorChecked(true);
+      })
+      .catch(() => {
+        if (done) return;
+        setSponsorLocked(false);
+        setSponsorChecked(true);
+      });
+    return () => {
+      done = true;
+    };
+  }, [walletAddress]);
 
   useEffect(() => {
     let done = false;
@@ -149,11 +175,11 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
   const onboardingDone = Boolean(username && hasFace && hasCompletedWalletLink(linkedWallet));
 
   useEffect(() => {
-    if (triedRegister.current || skipAutoRegister || !registrationKnown) return;
+    if (!sponsorLocked || triedRegister.current || skipAutoRegister || !registrationKnown) return;
     if (!onboardingDone || isRegistered || !canRegisterOnChain || paused || isLoading) return;
     triedRegister.current = true;
     onRegister();
-  }, [onboardingDone, isRegistered, canRegisterOnChain, paused, isLoading, onRegister, registrationKnown, skipAutoRegister]);
+  }, [onboardingDone, isRegistered, canRegisterOnChain, paused, isLoading, onRegister, registrationKnown, skipAutoRegister, sponsorLocked]);
 
   if (walletFailed || (walletReady && !walletAddress)) {
     return (
@@ -164,8 +190,86 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
     );
   }
 
-  if (!walletReady || !usernameReady || !faceReady || !linkedReady) {
+  const askSponsor = !isRegistered && !sponsorLocked && registrationKnown;
+
+  if (
+    !walletReady
+    || !usernameReady
+    || !faceReady
+    || !linkedReady
+    || (!isRegistered && !sponsorChecked)
+    || (!isRegistered && !sponsorLocked && !registrationKnown)
+  ) {
     return <BrandSplash />;
+  }
+
+  const confirmSponsor = async () => {
+    try {
+      const resolved = resolveSponsorInput(inviteDraft, walletAddress);
+      if (!resolved.ok) {
+        setInviteError(resolved.reason === 'self' ? t('cannotSelfInvite') : t('invalidSponsor'));
+        return;
+      }
+      await lockSponsorOnce(walletAddress, inviteDraft, true);
+      onInviteLocked?.();
+      setSponsorLocked(true);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : '';
+      setInviteError(reason === 'self' ? t('cannotSelfInvite') : t('invalidSponsor'));
+    }
+  };
+
+  if (askSponsor) {
+    return (
+      <SafeAreaView style={[styles.fill, { backgroundColor: colors.bg }]}>
+        <ScrollView style={styles.fill} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
+          <BrandLogo size={64} style={styles.logo} />
+          <AppText style={[styles.title, { color: colors.text }]}>{t('signupInviteLabel')}</AppText>
+          <AppText style={[styles.inviteLead, { color: colors.textMuted }]}>{t('signupInviteLead')}</AppText>
+          <AppTextInput
+            value={inviteDraft}
+            onChangeText={(value) => {
+              setInviteDraft(value);
+              setInviteError('');
+            }}
+            placeholder={t('invitePlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            style={[
+              styles.inviteInput,
+              { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text },
+            ]}
+          />
+          {inviteError ? <AppText style={[styles.inviteError, { color: colors.danger }]}>{inviteError}</AppText> : null}
+          {username ? (
+            <TouchableOpacity style={[styles.continue, { backgroundColor: colors.primary }]} onPress={() => { void confirmSponsor(); }}>
+              <AppText style={[styles.continueText, { color: colors.onPrimary }]}>{t('createContinue')}</AppText>
+            </TouchableOpacity>
+          ) : (
+            <UsernameSection
+              walletAddress={walletAddress}
+              claimedUsername={username}
+              beforeClaim={async () => {
+                const resolved = resolveSponsorInput(inviteDraft, walletAddress);
+                if (!resolved.ok) {
+                  setInviteError(resolved.reason === 'self' ? t('cannotSelfInvite') : t('invalidSponsor'));
+                  throw new Error('invite');
+                }
+                await lockSponsorOnce(walletAddress, inviteDraft, true);
+                onInviteLocked?.();
+              }}
+              onClaimed={async (value) => {
+                await lockSponsorOnce(walletAddress, inviteDraft, true);
+                onInviteLocked?.();
+                setSponsorLocked(true);
+                setUsername(value);
+              }}
+            />
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    );
   }
 
   if (username && hasFace && hasCompletedWalletLink(linkedWallet)) {
@@ -255,11 +359,11 @@ export const AccountOnboarding: React.FC<AccountOnboardingProps> = ({
               setInviteError(resolved.reason === 'self' ? t('cannotSelfInvite') : t('invalidSponsor'));
               throw new Error('invite');
             }
-            await lockSponsorOnce(walletAddress, inviteDraft);
+            await lockSponsorOnce(walletAddress, inviteDraft, true);
             onInviteLocked?.();
           }}
           onClaimed={async (value) => {
-            await lockSponsorOnce(walletAddress, inviteDraft);
+            await lockSponsorOnce(walletAddress, inviteDraft, true);
             onInviteLocked?.();
             setUsername(value);
           }}
@@ -316,5 +420,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 10,
+  },
+  continue: {
+    marginTop: 12,
+    borderRadius: 12,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continueText: {
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

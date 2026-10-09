@@ -76,9 +76,13 @@ describe('sponsor lock at signup', function () {
     const activate = fs.readFileSync(path.join(__dirname, '..', 'components', 'ActivateCreditSection.tsx'), 'utf8');
     const handlers = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'useHomeHandlers.ts'), 'utf8');
     const lock = fs.readFileSync(path.join(__dirname, '..', 'utils', 'sponsorLock.ts'), 'utf8');
+    expect(onboarding).to.include('const askSponsor = !isRegistered && !sponsorLocked && registrationKnown');
     expect(onboarding).to.include('signupInviteLead');
     expect(onboarding).to.include('lockSponsorOnce');
-    expect(onboarding).to.match(/beforeClaim=\{async \(\) => \{[\s\S]*lockSponsorOnce\(walletAddress, inviteDraft\)/);
+    expect(onboarding).to.match(/beforeClaim=\{async \(\) => \{[\s\S]*lockSponsorOnce\(walletAddress, inviteDraft, true\)/);
+    const gate = fs.readFileSync(path.join(__dirname, '..', 'components', 'AppLockGate.tsx'), 'utf8');
+    expect(gate).to.include('signupInviteLabel');
+    expect(gate).to.include('lockSponsorOnce(wallet.address, inviteDraft, true)');
     expect(onboarding).to.not.include("lockSponsorOnce(walletAddress, '')");
     expect(activate).to.not.include('invitePlaceholder');
     expect(activate).to.not.include('initialInviteCode');
