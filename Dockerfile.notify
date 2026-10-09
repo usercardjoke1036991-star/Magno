@@ -1,10 +1,12 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY scripts/notify-worker.mjs scripts/bscNetworks.cjs scripts/textbeltSms.cjs scripts/telegramBotName.cjs scripts/notify-entrypoint.sh scripts/attest2of2.mjs scripts/adminTotp.mjs ./scripts/
+# node:20-alpine quedó en abril de 2026 con zlib 1.3.2-r0. El parche es 1.3.2-r1.
 RUN npm init -y \
   && npm pkg set overrides.ws=8.21.0 \
   && npm install ethers@6.15.0 dotenv@16.3.1 --omit=dev --ignore-scripts \
-  && apk add --no-cache su-exec \
+  && apk add --no-cache --upgrade su-exec zlib \
+  && if apk list -I zlib | grep -q 'zlib-1.3.2-r0'; then echo "zlib sigue en 1.3.2-r0" >&2; exit 1; fi \
   && mkdir -p /data \
   && chmod +x /app/scripts/notify-entrypoint.sh \
   && chown -R node:node /app /data \

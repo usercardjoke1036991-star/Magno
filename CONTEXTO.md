@@ -275,6 +275,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-09 | Dockerfile.notify actualiza zlib de 1.3.2-r0 a 1.3.2-r1 al construir la imagen del notificador. La imagen local quatrivium-notify:zlib-r1 ya lo trae. El servidor publicado no se republicó. | — |
 | 2026-10-08 | Restablecer contraseña: 3 intentos y 3 envíos al día por correo, y 1 minuto de espera entre envíos. | — |
 | 2026-10-08 | README de GitHub alineado a mainnet chain 56, APK 1.0.2 codigo 12, alta de 4 USDT y 1233 claves. Sin redespliegue. | — |
 | 2026-10-08 | Si falla obtenerTasaInteresActual, la app conserva la tasa anterior en lugar de pintar 0. | — |
