@@ -66,7 +66,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 }) => {
   const { t } = useI18n();
   const { colors } = useTheme();
-  const { profile, lookup } = useUserProfile();
+  const { profile, lookup, refreshDirectory } = useUserProfile();
   const [lockedSponsor, setLockedSponsor] = useState<LockedSponsor | null>(null);
   const [levelCommsOpen, setLevelCommsOpen] = useState(false);
   const padre = referral?.padre || '';
@@ -81,6 +81,11 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   const padreProfile = hasPadre ? lookup(padre) : undefined;
   const padreLabel = hasPadre ? labelForProfile(padreProfile, padreCode) : '';
   const padreLevel = useWalletLevel(hasPadre ? padre : '');
+
+  useEffect(() => {
+    if (!hasPadre) return;
+    refreshDirectory([padre]).catch(() => {});
+  }, [hasPadre, padre, refreshDirectory]);
 
   const shareName = profile.displayName || t('profileSomeone');
   const shareText = t('shareMessage', { code: myCode, link: inviteLink, name: shareName });

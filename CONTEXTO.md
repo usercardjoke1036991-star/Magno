@@ -275,6 +275,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-09 | La fila Lo invito descarga la imagen publica del padrino y la muestra dentro del marco. | — |
+| 2026-10-09 | El historial de referidos cuenta el 1 USDT del padrino aunque falle el registro del alta, y lee primero los bloques recientes. | — |
 | 2026-10-09 | La pantalla del codigo de referido espera a saber si la cuenta ya esta en la red. Solo aparece si todavia no lo esta. | — |
 | 2026-10-09 | Crear cuenta pide el codigo de referido opcional antes de fijar el padrino. Una cuenta que ya existe y todavia no esta en la red tambien puede escribirlo. Un codigo ya confirmado no se cambia. | — |
 | 2026-10-09 | Dockerfile.notify actualiza zlib de 1.3.2-r0 a 1.3.2-r1 al construir la imagen del notificador. La imagen local quatrivium-notify:zlib-r1 ya lo trae. El servidor publicado no se republicó. | — |

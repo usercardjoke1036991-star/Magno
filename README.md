@@ -9,7 +9,7 @@
 
 - **Tipo de proyecto:** `node` (detectado automáticamente)
 - **Estado:** Mainnet BSC (chain 56) desplegado y en el APK de producción 1.0.2, código 12, paquete `com.quatrivium.credit`. Demo es BSC testnet (chain 97). No redesplegar.
-- **Tests detectados:** 45 archivo(s)
+- **Tests detectados:** 46 archivo(s)
 
 ### Qué funciona
 - Mainnet BSC (chain 56), ya en el APK 1.0.2 código 12: Credit `0xade65b4224B4C6b2f1CCAb9D58c810EE15ac71D6`, FamaCaja `0xa590f241868560AF3f9E2017c7d629FFDEA27e2B`, Reserva `0xa81857F71A11a21d59F59C2190638793266233fB`, Alta `0x50146aDB887dB13Ee7Ffa66792d656127BCB96A4`, biblioteca de fama `0x9058C95bBdde3B215f86908aE66F1B2C03180420`, USDT `0x55d398326f99059ff775485246999027b3197955`

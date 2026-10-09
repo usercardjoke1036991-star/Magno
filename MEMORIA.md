@@ -36,6 +36,8 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-09] El marco de quien invita muestra su imagen publica al abrir Red de referidos.
+- [2026-10-09] Historial de referidos: el bono de 1 USDT entra en el total aunque el nodo no devuelva el alta.
 - [2026-10-09] La pantalla del codigo de referido espera la lectura de la red y solo sale si la cuenta no esta registrada.
 - [2026-10-09] Crear cuenta muestra el codigo de referido opcional y lo fija antes del registro en la red. Una cuenta ya creada que no este registrada tambien puede escribirlo.
 - [2026-10-09] Dockerfile.notify sube zlib a 1.3.2-r1 al construir. Imagen local quatrivium-notify:zlib-r1 verificada. El notificador publicado no se republicó.
@@ -84,12 +86,10 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-10-03] Hub siempre visible: candado en servicios hasta alta pagada y registro. Banner de Pagar alta al entrar.
 - [2026-10-03] Alta visible en Servicios: baldosa Pagar alta y recuadro encima del hub.
 - [2026-10-03] Boton de alta: Pagar alta, al completar Alta pagada. Sin desglose del cobro.
-- [2026-10-03] Sin desglose de 4 USDT en la app. Aparato pasa a telefono. Frase de 24 palabras como llave local, no en la red.
-- [2026-10-03] Textos institucionales en 17 idiomas: Vincular/Vinculado, guia sin jerga interna, privacidad y terminos estilo auditoria Play.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-09] Cambio: La pantalla del codigo de referido espera la lectura de la red y solo sale si la cuenta no esta registrada.
+[2026-10-09] Cambio: El marco de quien invita muestra su imagen publica al abrir Red de referidos.

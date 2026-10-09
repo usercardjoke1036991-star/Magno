@@ -125,6 +125,8 @@ describe('invite code and link', function () {
     expect(codec).to.include('parseInviteInput');
     expect(codec).to.include('extractInviteFromUrl');
     expect(codec).to.include('extractInviteFromText');
+    expect(ui).to.include('refreshDirectory([padre])');
+    expect(ui).to.include('publicView');
     expect(ui).to.include('inviteLinkLabel');
     expect(ui).to.include('copyInviteLink');
     expect(ui).to.include('inviteLinkPreview');

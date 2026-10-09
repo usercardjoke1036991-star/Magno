@@ -4,11 +4,12 @@ import { DEPLOYED_TESTNET, getKnownStartBlock } from '../constants/deployedAddre
 import { assertTrustedRpc, getProviderWithFallback, isContractConfigured, NETWORK_CONFIG } from '../constants/rpcConfig';
 import { getTokenMeta } from '../constants/tokens';
 import { addressToInviteCode } from '../utils/inviteCode';
-import { sumReferralEarnings } from '../utils/referralEarnings';
+import { creditDirectWei, sumReferralEarnings } from '../utils/referralEarnings';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
-const CHUNK = 4000;
-const CHUNK_CONCURRENCY = 3;
+const CHUNK = 2_000;
+const RECENT_SPAN = 30_000;
+const CHUNK_ATTEMPTS = 4;
 const DEFAULT_LOOKBACK = 80_000;
 const MAX_SCAN_SPAN = 120_000; // RPC públicos no aguantan el rango completo desde el deploy.
 
@@ -112,13 +113,19 @@ function eventFilter(contract: Contract, name: string, ...params: unknown[]) {
   return (factory as (...args: unknown[]) => unknown)(...params);
 }
 
+function pause(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+type LogPack = { events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number };
+
 async function queryFilterChunked(
   contract: Contract,
   filter: unknown,
   fromBlock: number,
   toBlock: number
-): Promise<{ events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number }> {
-  if (!filter) return { events: [], failed: 0 };
+): Promise<LogPack> {
+  if (!filter || fromBlock > toBlock) return { events: [], failed: 0 };
   const ranges: Array<[number, number]> = [];
   for (let start = fromBlock; start <= toBlock; start += CHUNK) {
     ranges.push([start, Math.min(start + CHUNK - 1, toBlock)]);
@@ -126,28 +133,52 @@ async function queryFilterChunked(
 
   const events: Awaited<ReturnType<Contract['queryFilter']>> = [];
   let failed = 0;
-  for (let i = 0; i < ranges.length; i += CHUNK_CONCURRENCY) {
-    const batch = ranges.slice(i, i + CHUNK_CONCURRENCY);
-    const results = await Promise.all(
-      batch.map(async ([start, end]) => {
-        for (let attempt = 0; attempt < 2; attempt += 1) {
-          try {
-            return await contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end);
-          } catch {
-            if (attempt === 0) {
-              await new Promise((resolve) => setTimeout(resolve, 250));
-              continue;
-            }
-            failed += 1;
-            return [];
-          }
-        }
-        return [];
-      })
-    );
-    for (const chunk of results) events.push(...chunk);
+  for (let index = 0; index < ranges.length; index += 1) {
+    const [start, end] = ranges[index];
+    let got = false;
+    for (let attempt = 0; attempt < CHUNK_ATTEMPTS; attempt += 1) {
+      try {
+        events.push(...await contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end));
+        got = true;
+        break;
+      } catch {
+        if (attempt < CHUNK_ATTEMPTS - 1) await pause(400 * (attempt + 1));
+      }
+    }
+    if (!got) failed += 1;
+    else if (index < ranges.length - 1) await pause(120);
   }
   return { events, failed };
+}
+
+function mergeLogPacks(packs: LogPack[]): LogPack {
+  const seen = new Set<string>();
+  const events: LogPack['events'] = [];
+  let failed = 0;
+  for (const pack of packs) {
+    failed += pack.failed;
+    for (const event of pack.events) {
+      const id = `${event.transactionHash || ''}:${event.index ?? ''}:${event.blockNumber || 0}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      events.push(event);
+    }
+  }
+  return { events, failed };
+}
+
+/** Los bloques de hoy van primero. Si el tramo viejo falla, el pago reciente se conserva. */
+async function queryFilterReliable(
+  contract: Contract,
+  filter: unknown,
+  fromBlock: number,
+  toBlock: number
+): Promise<LogPack> {
+  const recentFrom = Math.max(fromBlock, toBlock - RECENT_SPAN);
+  const recent = await queryFilterChunked(contract, filter, recentFrom, toBlock);
+  if (fromBlock >= recentFrom) return recent;
+  const older = await queryFilterChunked(contract, filter, fromBlock, recentFrom - 1);
+  return mergeLogPacks([recent, older]);
 }
 
 async function resolveStartBlock(provider: AbstractProvider, contractAddress: string): Promise<{
@@ -355,11 +386,9 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const bonusFilter = eventFilter(contract, 'BonoActivacionPagado', self);
   const commissionFilter = eventFilter(contract, 'ComisionGeneracional', self);
 
-  const [signupPack, bonusPack, commissionPack] = await Promise.all([
-    queryFilterChunked(contract, signupFilter, fromBlock, toBlock),
-    queryFilterChunked(contract, bonusFilter, fromBlock, toBlock),
-    queryFilterChunked(contract, commissionFilter, fromBlock, toBlock),
-  ]);
+  const signupPack = await queryFilterReliable(contract, signupFilter, fromBlock, toBlock);
+  const bonusPack = await queryFilterReliable(contract, bonusFilter, fromBlock, toBlock);
+  const commissionPack = await queryFilterReliable(contract, commissionFilter, fromBlock, toBlock);
   const signups = signupPack.events;
   const bonuses = bonusPack.events;
   const commissions = commissionPack.events;
@@ -367,36 +396,43 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const directSet = new Set<string>();
   const nodes = new Map<string, ReferralNode>();
 
-  for (const event of signups) {
-    const args = eventArgs(event);
-    const usuario = normalizeAddress(asText(argValue(args, 'usuario', 0)));
-    if (!usuario || usuario.toLowerCase() === self.toLowerCase()) continue;
+  const blankDirect = (usuario: string, registeredBlock: number): ReferralNode => ({
+    address: usuario,
+    code: addressToInviteCode(usuario),
+    earnedWei: '0',
+    earnedLabel: formatToken(0n),
+    bonusWei: '0',
+    bonusLabel: formatToken(0n),
+    commissionWei: '0',
+    commissionLabel: formatToken(0n),
+    level: 1,
+    registeredBlock,
+    registeredAt: 0,
+    lastEarnBlock: 0,
+    lastEarnAt: 0,
+    children: [],
+  });
+
+  const ensureDirect = (address: string, registeredBlock: number): ReferralNode | null => {
+    const usuario = normalizeAddress(address);
+    if (!usuario || usuario.toLowerCase() === self.toLowerCase()) return null;
     const key = usuario.toLowerCase();
     directSet.add(key);
-    if (!nodes.has(key)) {
-      nodes.set(key, {
-        address: usuario,
-        code: addressToInviteCode(usuario),
-        earnedWei: '0',
-        earnedLabel: formatToken(0n),
-        bonusWei: '0',
-        bonusLabel: formatToken(0n),
-        commissionWei: '0',
-        commissionLabel: formatToken(0n),
-        level: 1,
-        registeredBlock: event.blockNumber || 0,
-        registeredAt: 0,
-        lastEarnBlock: 0,
-        lastEarnAt: 0,
-        children: [],
-      });
-    } else {
-      const existing = nodes.get(key);
-      const block = event.blockNumber || 0;
-      if (existing && block > 0 && (!existing.registeredBlock || block < existing.registeredBlock)) {
-        existing.registeredBlock = block;
+    const existing = nodes.get(key);
+    if (existing) {
+      if (registeredBlock > 0 && (!existing.registeredBlock || registeredBlock < existing.registeredBlock)) {
+        existing.registeredBlock = registeredBlock;
       }
+      return existing;
     }
+    const created = blankDirect(usuario, registeredBlock);
+    nodes.set(key, created);
+    return created;
+  };
+
+  for (const event of signups) {
+    const args = eventArgs(event);
+    ensureDirect(asText(argValue(args, 'usuario', 0)), event.blockNumber || 0);
   }
 
   const failed = signupPack.failed + bonusPack.failed + commissionPack.failed;
@@ -404,23 +440,25 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const parentCache = new Map<string, string>();
   parentCache.set(self.toLowerCase(), ZERO);
 
-  const addEarned = (address: string, amount: bigint, kind: 'bonus' | 'commission', blockNumber: number) => {
-    const key = address.toLowerCase();
-    const node = nodes.get(key);
-    if (!node) return;
-    const next = BigInt(node.earnedWei) + amount;
-    node.earnedWei = next.toString();
-    node.earnedLabel = formatToken(next);
+  const addEarned = (
+    address: string,
+    amount: bigint,
+    kind: 'bonus' | 'commission',
+    blockNumber: number,
+    createIfMissing = false,
+  ) => {
+    const node = createIfMissing
+      ? ensureDirect(address, 0)
+      : nodes.get(address.toLowerCase());
+    if (!node || amount <= 0n) return;
+    const next = creditDirectWei(node.earnedWei, node.bonusWei, node.commissionWei, amount, kind);
+    node.earnedWei = next.earnedWei;
+    node.earnedLabel = formatToken(BigInt(next.earnedWei));
+    node.bonusWei = next.bonusWei;
+    node.bonusLabel = formatToken(BigInt(next.bonusWei));
+    node.commissionWei = next.commissionWei;
+    node.commissionLabel = formatToken(BigInt(next.commissionWei));
     if (blockNumber > node.lastEarnBlock) node.lastEarnBlock = blockNumber;
-    if (kind === 'bonus') {
-      const nextBonus = BigInt(node.bonusWei) + amount;
-      node.bonusWei = nextBonus.toString();
-      node.bonusLabel = formatToken(nextBonus);
-    } else {
-      const nextCommission = BigInt(node.commissionWei) + amount;
-      node.commissionWei = nextCommission.toString();
-      node.commissionLabel = formatToken(nextCommission);
-    }
   };
 
   const drafts: Array<ReferralActivity & { blockNumber: number }> = [];
@@ -444,7 +482,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     const referido = normalizeAddress(asText(argValue(args, 'referido', 1)));
     const amount = asBigInt(argValue(args, 'monto', 2));
     const token = asText(argValue(args, 'token', 3));
-    if (referido) addEarned(referido, amount, 'bonus', event.blockNumber || 0);
+    if (referido) addEarned(referido, amount, 'bonus', event.blockNumber || 0, true);
     drafts.push({
       id: `${event.transactionHash}-bonus`,
       type: 'bonus',
@@ -527,6 +565,12 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     activity,
     partial: lookbackPartial || failed > 0,
   };
-  snapshotCache.set(snapshotCacheKey(self), snapshot);
+  const cacheKey = snapshotCacheKey(self);
+  const previous = snapshotCache.get(cacheKey);
+  const emptyFail = failed > 0 && directs.length === 0;
+  if (emptyFail && previous && previous.directs.length > 0) {
+    return { ...previous, partial: true };
+  }
+  if (!emptyFail) snapshotCache.set(cacheKey, snapshot);
   return snapshot;
 }

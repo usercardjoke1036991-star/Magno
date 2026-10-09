@@ -514,6 +514,8 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/origination-cupo.test.js` — módulo JS/TS
 - `test/peg.test.js` — módulo JS/TS
 - `test/racha.test.js` — módulo JS/TS
+- `test/referral-earnings.test.js` — módulo JS/TS
+  - Funciones/clases: creditDirectWei
 - `test/render-notify.test.js` — módulo JS/TS
 - `test/reserva.test.js` — módulo JS/TS
 - `test/save-changes.test.js` — módulo JS/TS
@@ -593,7 +595,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `utils/rankingDivisions.ts` — módulo JS/TS
   - Funciones/clases: RANKING_DIVISION_SIZE, RANKING_PRIZE_BUDGET_BP, RANKING_PRIZE_FLOOR_BP, monthlyPrizeBudgetUsd, divisionCountFor, divisionWeight, seatPlaceWeight, assignDivisions, attachDivisionPrizes, seatsForDivision
 - `utils/referralEarnings.ts` — módulo JS/TS
-  - Funciones/clases: asWei, sumReferralEarnings
+  - Funciones/clases: asWei, sumReferralEarnings, creditDirectWei
 - `utils/referralPages.ts` — módulo JS/TS
   - Funciones/clases: REFERRAL_PAGE_SIZE, referralPageCount, clampReferralPage, sliceReferralPage, visibleReferralPages
 - `utils/referralSearch.ts` — módulo JS/TS
