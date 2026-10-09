@@ -1,7 +1,7 @@
 # Memoria del proyecto
 
 ## Enfoque del usuario
-Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xiaomi tiene la app 1.0.2 codigo 11.
+Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xiaomi tiene la app 1.0.2 codigo 12.
 
 ## Decisiones
 - [2026-10-03] En Demo el TOTP de admin no bloquea: 2-de-2 y WalletConnect bastan. El codigo de 6 digitos sale en ventana emergente, no en el panel. En Real sigue el TOTP si el worker HTTPS esta configurado.
@@ -92,4 +92,4 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-08] Cambio: Si falla la lectura de la tasa, la ficha conserva la tasa anterior. Luego se reinstala en el Xiaomi.
+[2026-10-08] Enfoque del usuario actualizado
