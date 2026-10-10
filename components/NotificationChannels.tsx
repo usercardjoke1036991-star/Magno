@@ -190,14 +190,28 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
     }
     setBusy(true);
     try {
-      if (!replace && (await readLinked())) return;
+      const confirmOffer = async (name: string) => {
+        const accepted = await decideTelegramOffer(name);
+        const saved = await postTelegramDecision(accepted);
+        if (!accepted) return;
+        if (!saved) throw new Error('accept');
+        setLinked(true);
+      };
+      if (!replace) {
+        const waiting = await readTelegram();
+        if (waiting.linked) return;
+        if (waiting.offer) {
+          await confirmOffer(waiting.offer);
+          return;
+        }
+      }
       const signer = await loadAppWallet();
       if (!signer) {
         Alert.alert(t('connect'), t('appWalletNotReady'));
         return;
       }
       const auth = await signedAuthBody(signer, walletAddress, 'vincular-avisos');
-      const { response, body } = await notifyJsonBody<{ code?: string; linked?: boolean }>('/telegram/prepare', {
+      const { response, body } = await notifyJsonBody<{ code?: string; linked?: boolean; offer?: string }>('/telegram/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...auth, replace: Boolean(replace) }),
@@ -209,11 +223,15 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
         setLinked(true);
         return;
       }
+      if (body.offer && !replace) {
+        await confirmOffer(body.offer);
+        return;
+      }
       if (!body.code || !/^[a-z0-9]{8,16}$/.test(body.code)) throw new Error('code');
       const opened = await openSafeUrl(`https://t.me/${bot}?start=${body.code}`);
       if (!opened) throw new Error('open');
       let offer = '';
-      for (let i = 0; i < 8; i += 1) {
+      for (let i = 0; i < 30; i += 1) {
         await wait(2000);
         const status = await readTelegram();
         if (status.linked) return;
@@ -222,12 +240,11 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
           break;
         }
       }
-      if (!offer) throw new Error('offer');
-      const accepted = await decideTelegramOffer(offer);
-      const saved = await postTelegramDecision(accepted);
-      if (!accepted) return;
-      if (!saved) throw new Error('accept');
-      setLinked(true);
+      if (!offer) {
+        Alert.alert(t('notificationTelegram'), t('telegramOfferPending'));
+        return;
+      }
+      await confirmOffer(offer);
     } catch {
       Alert.alert(t('error'), t('telegramNeedApi'));
     } finally {

@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Telegram की पुष्टि",
   "telegramConfirmBody": "{name} इस खाते की सूचनाएँ माँग रहा है। केवल तभी पुष्टि करें जब यह आपका हो।",
   "telegramConfirmAccept": "यह मेरा है",
-  "telegramConfirmReject": "न जोड़ें"
+  "telegramConfirmReject": "न जोड़ें",
+  "telegramOfferPending": "अभी यह चैट नहीं दिखी। Telegram खोलें, शुरू दबाएँ और वापस आएँ। कोड कुछ देर तक मान्य है।"
 }

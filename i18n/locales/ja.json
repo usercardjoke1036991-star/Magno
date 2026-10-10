@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Telegramを確認",
   "telegramConfirmBody": "{name} がこの口座の通知を求めています。ご本人のときだけ確認してください。",
   "telegramConfirmAccept": "自分のものです",
-  "telegramConfirmReject": "連携しない"
+  "telegramConfirmReject": "連携しない",
+  "telegramOfferPending": "まだこのチャットは見えていません。Telegramを開き、スタートを押して戻ってください。コードはしばらく有効です。"
 }

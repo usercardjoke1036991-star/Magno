@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Telegram کی تصدیق",
   "telegramConfirmBody": "{name} اس اکاؤنٹ کی اطلاعیں مانگ رہا ہے۔ صرف اپنے ہونے پر تصدیق کریں۔",
   "telegramConfirmAccept": "یہ میرا ہے",
-  "telegramConfirmReject": "نہ جوڑیں"
+  "telegramConfirmReject": "نہ جوڑیں",
+  "telegramOfferPending": "یہ چیٹ ابھی نہیں دکھی۔ Telegram کھولیں، شروع دبائیں اور واپس آئیں۔ کوڈ کچھ دیر تک درست ہے۔"
 }

@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Confermare Telegram",
   "telegramConfirmBody": "{name} chiede gli avvisi di questo conto. Confermi solo se è il suo.",
   "telegramConfirmAccept": "È il mio",
-  "telegramConfirmReject": "Non collegare"
+  "telegramConfirmReject": "Non collegare",
+  "telegramOfferPending": "Questa chat non si vede ancora. Apra Telegram, prema Avvia e torni. Il codice resta valido per un po’."
 }

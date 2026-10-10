@@ -275,6 +275,7 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-10 | Si Telegram tarda, la app avisa que el chat aun no llega y conserva la oferta. En ingles, el admin dice que tambien entra un cofundador ya autorizado. El tablero de fama ya no fija el texto a la izquierda. | — |
 | 2026-10-10 | La app ya no dice que el 1 USDT del primer Nivel 1 sale del fondo: sale del USDT apartado en el alta. El codigo de correo o telefono sigue valido si el cobro se cancela. Telegram no vincula el chat hasta que la cartera lo confirma. KYC solo abre hosts de Sumsub. La liquidacion dice 5% del principal restante. El candado de fondos distingue un envio entre billeteras de otros movimientos. Contratos sin cambios. | — |
 | 2026-10-09 | Si el correo de recuperacion no sale, se devuelve el envio del dia y la app lo dice. Fama y movimientos cortan la lectura a 18 segundos. Reserva no bloquea si el nivel no se lee. | — |
 | 2026-10-09 | El historial de referidos corta tambien la lectura de nivel, fecha, bloque actual y padrino. Si no contestan, la lista sale con nivel 1 y sin fecha. | — |

@@ -590,7 +590,7 @@
   "adminEnableToken": "Propose enabling {symbol}",
   "adminEnableTokenLead": "USDT is active. USDC and FDUSD are enabled here with a 72h wait.",
   "settingsAdminTitle": "Founders",
-  "settingsAdminLead": "Only the founding wallet administers the protocol.",
+  "settingsAdminLead": "In-app credit accounts do not administer the protocol. Connect only the founding wallet or a cofounder who is already authorized.",
   "settingsAdminOk": "Founding wallet recognized. Admin appears on home.",
   "settingsAdminNot": "This wallet does not have admin permissions.",
   "settingsAdminConnect": "Connect admin wallet",
@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Confirm Telegram",
   "telegramConfirmBody": "{name} is asking for this account’s alerts. Confirm only if it is yours.",
   "telegramConfirmAccept": "It is mine",
-  "telegramConfirmReject": "Do not link"
+  "telegramConfirmReject": "Do not link",
+  "telegramOfferPending": "The chat is not here yet. Open Telegram, tap Start, and come back. The code stays valid for a while."
 }

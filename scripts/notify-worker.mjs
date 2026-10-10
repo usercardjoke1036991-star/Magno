@@ -1786,8 +1786,14 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       json(res, 429, { error: 'rate' });
       return;
     }
-    const code = randomBytes(6).toString('hex');
     store.telegramOffers = store.telegramOffers || {};
+    const pendingOffer = liveTelegramOffer(walletKey);
+    if (pendingOffer && body.replace !== true) {
+      await persist();
+      json(res, 200, { offer: String(pendingOffer.label || 'Telegram') });
+      return;
+    }
+    const code = randomBytes(6).toString('hex');
     delete store.telegramOffers[walletKey];
     store.pendingBinds[code] = { wallet, exp: now + 10 * 60 * 1000 };
     await persist();

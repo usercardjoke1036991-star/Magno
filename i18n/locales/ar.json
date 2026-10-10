@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "تأكيد Telegram",
   "telegramConfirmBody": "{name} يطلب تنبيهات هذه المحفظة. أكّدوا فقط إذا كان لكم.",
   "telegramConfirmAccept": "هذا حسابي",
-  "telegramConfirmReject": "عدم الربط"
+  "telegramConfirmReject": "عدم الربط",
+  "telegramOfferPending": "لم نرَ هذه الدردشة بعد. افتحوا Telegram واضغطوا بدء ثم عودوا. الرمز يبقى صالحاً قليلاً."
 }

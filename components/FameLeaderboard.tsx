@@ -509,13 +509,11 @@ const styles = StyleSheet.create({
   },
   rowMeta: {
     fontSize: 11,
-    textAlign: 'left',
     marginTop: 2,
   },
   rowMetric: {
     fontSize: 12,
     fontWeight: '700',
-    textAlign: 'left',
     marginTop: 2,
   },
   pager: {

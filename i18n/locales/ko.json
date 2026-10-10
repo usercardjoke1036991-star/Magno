@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Telegram 확인",
   "telegramConfirmBody": "{name} 이(가) 이 계정의 알림을 요청합니다. 본인일 때만 확인하세요.",
   "telegramConfirmAccept": "내 계정입니다",
-  "telegramConfirmReject": "연결하지 않음"
+  "telegramConfirmReject": "연결하지 않음",
+  "telegramOfferPending": "아직 이 채팅이 보이지 않습니다. Telegram을 열고 시작을 누른 뒤 돌아오세요. 코드는 잠시 더 유효합니다."
 }

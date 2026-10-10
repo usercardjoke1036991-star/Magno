@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Telegram bestätigen",
   "telegramConfirmBody": "{name} möchte die Hinweise dieses Kontos. Bestätigen Sie nur, wenn es Ihres ist.",
   "telegramConfirmAccept": "Das ist meins",
-  "telegramConfirmReject": "Nicht verknüpfen"
+  "telegramConfirmReject": "Nicht verknüpfen",
+  "telegramOfferPending": "Dieser Chat ist noch nicht da. Öffnen Sie Telegram, tippen Sie auf Start und kommen Sie zurück. Der Code gilt noch eine Weile."
 }

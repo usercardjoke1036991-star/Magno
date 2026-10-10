@@ -98,6 +98,14 @@ describe('audit fixes', function () {
     expect(es.liquidarLead).to.match(/5% del principal/i);
     expect(es.liquidarConfirm).to.match(/5% del principal/i);
     expect(es.settingsAdminLead).to.match(/cofundador/i);
+    const en = JSON.parse(read('i18n/locales/en.json'));
+    expect(en.settingsAdminLead).to.match(/cofounder/i);
+    expect(en.settingsAdminLead).to.not.match(/Only the founding wallet administers/);
     expect(es.invitedBy).to.equal('Lo invitó');
+    const ui = read('components/NotificationChannels.tsx');
+    expect(ui).to.include("t('telegramOfferPending')");
+    expect(ui).to.not.include("throw new Error('offer')");
+    const worker = read('scripts/notify-worker.mjs');
+    expect(worker).to.include('pendingOffer && body.replace !== true');
   });
 });

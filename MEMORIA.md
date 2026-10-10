@@ -36,6 +36,7 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-10] Telegram: espera mas y no dice que el servicio cayo si el chat no llega. Ingles de admin incluye cofundador. Fama sin textAlign left. Sin APK ni contratos.
 - [2026-10-10] App: OTP no se quema si el cobro falla; Telegram exige confirmacion en la app; KYC solo Sumsub; textos de alta, liquidacion y admin en es alineados. Contratos intactos. Sin APK.
 - [2026-10-09] Recuperacion devuelve el envio si el correo falla. Fama y movimientos tienen tope de lectura. Reserva se detiene si el nivel no responde.
 - [2026-10-09] El historial de referidos ya no espera sin limite el nivel, la fecha, el bloque actual ni la cadena de padrinos.
@@ -85,11 +86,10 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-10-03] Conectar abre la billetera externa. Vincular es la firma. Si WalletConnect caduca, el boton deja de girar.
 - [2026-10-03] En Real, Vincular solo pasa a Vinculado despues de firmar la billetera externa. Conectarla ya no marca el vinculo.
 - [2026-10-03] Servicios se abren para verlos. El candado solo impide usarlos hasta pagar el alta y registrarse.
-- [2026-10-03] Iconos de Servicios siempre en verde. En Alta ya no se dice que correo y telefono van sin cargo.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-10] Cambio: App: OTP no se quema si el cobro falla; Telegram exige confirmacion en la app; KYC solo Sumsub; textos de alta, liquidacion y admin en es alineados. Contratos intactos. Sin APK.
+[2026-10-10] Cambio: Telegram: espera mas y no dice que el servicio cayo si el chat no llega. Ingles de admin incluye cofundador. Fama sin textAlign left. Sin APK ni contratos.

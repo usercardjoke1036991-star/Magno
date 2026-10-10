@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Telegram নিশ্চিত করুন",
   "telegramConfirmBody": "{name} এই হিসাবের বিজ্ঞপ্তি চায়। শুধু নিজের হলে নিশ্চিত করুন।",
   "telegramConfirmAccept": "এটি আমার",
-  "telegramConfirmReject": "যুক্ত করবেন না"
+  "telegramConfirmReject": "যুক্ত করবেন না",
+  "telegramOfferPending": "এখনও এই চ্যাট দেখা যায়নি। Telegram খুলে শুরু চাপুন এবং ফিরে আসুন। কোড আরও কিছুক্ষণ বৈধ।"
 }

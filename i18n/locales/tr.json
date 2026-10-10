@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Telegram’ı onayla",
   "telegramConfirmBody": "{name} bu hesabın bildirimlerini istiyor. Yalnızca sizseniz onaylayın.",
   "telegramConfirmAccept": "Bu benim",
-  "telegramConfirmReject": "Bağlama"
+  "telegramConfirmReject": "Bağlama",
+  "telegramOfferPending": "Bu sohbet henüz görünmüyor. Telegram’ı açın, Başlat’a basın ve dönün. Kod bir süre daha geçerlidir."
 }

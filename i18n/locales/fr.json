@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Confirmer Telegram",
   "telegramConfirmBody": "{name} demande les alertes de ce compte. Confirmez seulement si c’est le vôtre.",
   "telegramConfirmAccept": "C’est le mien",
-  "telegramConfirmReject": "Ne pas lier"
+  "telegramConfirmReject": "Ne pas lier",
+  "telegramOfferPending": "Ce salon n’est pas encore vu. Ouvrez Telegram, touchez Démarrer, puis revenez. Le code reste valable un moment."
 }

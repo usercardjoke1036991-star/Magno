@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Подтвердить Telegram",
   "telegramConfirmBody": "{name} запрашивает уведомления этого счёта. Подтверждайте, только если это вы.",
   "telegramConfirmAccept": "Это мой",
-  "telegramConfirmReject": "Не привязывать"
+  "telegramConfirmReject": "Не привязывать",
+  "telegramOfferPending": "Чат ещё не виден. Откройте Telegram, нажмите «Старт» и вернитесь. Код ещё действует некоторое время."
 }

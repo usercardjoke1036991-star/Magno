@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "确认 Telegram",
   "telegramConfirmBody": "{name} 请求接收此账户的通知。仅在这是您本人时确认。",
   "telegramConfirmAccept": "是我的",
-  "telegramConfirmReject": "不绑定"
+  "telegramConfirmReject": "不绑定",
+  "telegramOfferPending": "还没看到这个聊天。请打开 Telegram，点开始，再回到应用。验证码还会有效一会儿。"
 }

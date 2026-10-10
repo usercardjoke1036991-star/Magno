@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Xác nhận Telegram",
   "telegramConfirmBody": "{name} xin thông báo của tài khoản này. Chỉ xác nhận nếu đó là của quý khách.",
   "telegramConfirmAccept": "Đó là của tôi",
-  "telegramConfirmReject": "Không liên kết"
+  "telegramConfirmReject": "Không liên kết",
+  "telegramOfferPending": "Chưa thấy cuộc trò chuyện này. Mở Telegram, nhấn Bắt đầu rồi quay lại. Mã còn hiệu lực một lúc."
 }

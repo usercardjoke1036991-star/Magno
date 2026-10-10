@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Konfirmasi Telegram",
   "telegramConfirmBody": "{name} meminta pemberitahuan akun ini. Konfirmasi hanya jika itu milik Anda.",
   "telegramConfirmAccept": "Ini milik saya",
-  "telegramConfirmReject": "Jangan tautkan"
+  "telegramConfirmReject": "Jangan tautkan",
+  "telegramOfferPending": "Obrolan ini belum terlihat. Buka Telegram, ketuk Mulai, lalu kembali. Kode masih berlaku sebentar."
 }

@@ -1241,5 +1241,6 @@
   "telegramConfirmTitle": "Confirmar Telegram",
   "telegramConfirmBody": "{name} pide los avisos de esta cartera. Confirme solo si es el suyo.",
   "telegramConfirmAccept": "Es el mío",
-  "telegramConfirmReject": "No vincular"
+  "telegramConfirmReject": "No vincular",
+  "telegramOfferPending": "Aún no vemos el chat. Abra Telegram, pulse Iniciar y vuelva. El código sigue un rato."
 }
