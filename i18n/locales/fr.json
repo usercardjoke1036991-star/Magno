@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "Une part de l’extra est affectée au fonctionnement de la plateforme, selon le palier.",
   "hubReservaLeadLocked": "Opérationnel à partir du niveau 10.",
   "reservaNeedLevel": "Verrouillage a partir du niveau 10.",
+  "reservaReadFailed": "Le niveau n'a pas pu être lu. Réessayez.",
   "reservaBoteLabel": "Provision de la Réserve",
   "reservaAdminPotTitle": "Provision de la Réserve",
   "reservaAdminPotHint": "Admins seulement. Cet USDT paie le rendement. Ce n’est ni Don ni le pool.",

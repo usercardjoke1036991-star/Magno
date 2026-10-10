@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "추가분의 일부는 구간에 따라 플랫폼 운영에 쓰입니다.",
   "hubReservaLeadLocked": "레벨 10부터 운영됩니다.",
   "reservaNeedLevel": "레벨 10부터 잠글 수 있습니다.",
+  "reservaReadFailed": "레벨을 읽지 못했습니다. 다시 시도하세요.",
   "reservaBoteLabel": "리저브 충당금",
   "reservaAdminPotTitle": "리저브 충당금",
   "reservaAdminPotHint": "관리자만. 이 USDT가 수익을 지급합니다. 기부도 풀도 아닙니다.",

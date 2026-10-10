@@ -7,6 +7,8 @@ import { attachCombinedScores, type FamePlayer } from '../utils/fameRankings';
 
 const CHUNK = 4000;
 const CHUNK_CONCURRENCY = 3;
+const CHUNK_TIMEOUT_MS = 6_000;
+const SCAN_BUDGET_MS = 18_000;
 const DEFAULT_LOOKBACK = 80_000;
 const MAX_SCAN_SPAN = 120_000;
 /** Con bloque de deploy conocido se recorre más historia; el RPC sigue yendo a trozos. */
@@ -54,6 +56,22 @@ function asText(value: unknown): string {
   return value === undefined || value === null ? '' : String(value);
 }
 
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 function eventFilter(contract: Contract, name: string, ...params: unknown[]) {
   const factory = (contract.filters as Record<string, unknown>)[name];
   if (typeof factory !== 'function') return null;
@@ -64,22 +82,31 @@ async function queryFilterChunked(
   contract: Contract,
   filter: unknown,
   fromBlock: number,
-  toBlock: number
-): Promise<{ events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number }> {
-  if (!filter) return { events: [], failed: 0 };
+  toBlock: number,
+  deadline = 0
+): Promise<{ events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number; cut: boolean }> {
+  if (!filter) return { events: [], failed: 0, cut: false };
   const ranges: Array<[number, number]> = [];
   for (let start = fromBlock; start <= toBlock; start += CHUNK) {
     ranges.push([start, Math.min(start + CHUNK - 1, toBlock)]);
   }
   const events: Awaited<ReturnType<Contract['queryFilter']>> = [];
   let failed = 0;
+  let cut = false;
   for (let i = 0; i < ranges.length; i += CHUNK_CONCURRENCY) {
+    if (deadline > 0 && Date.now() > deadline) {
+      cut = true;
+      break;
+    }
     const batch = ranges.slice(i, i + CHUNK_CONCURRENCY);
     const results = await Promise.all(
       batch.map(async ([start, end]) => {
         for (let attempt = 0; attempt < 2; attempt += 1) {
           try {
-            return await contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end);
+            return await withTimeout(
+              contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end),
+              CHUNK_TIMEOUT_MS
+            );
           } catch {
             if (attempt === 0) {
               await new Promise((resolve) => setTimeout(resolve, 250));
@@ -94,7 +121,7 @@ async function queryFilterChunked(
     );
     for (const chunk of results) events.push(...chunk);
   }
-  return { events, failed };
+  return { events, failed, cut };
 }
 
 async function resolveStartBlock(provider: AbstractProvider, contractAddress: string): Promise<{
@@ -102,7 +129,7 @@ async function resolveStartBlock(provider: AbstractProvider, contractAddress: st
   toBlock: number;
   partial: boolean;
 }> {
-  const latest = await provider.getBlockNumber();
+  const latest = await withTimeout(provider.getBlockNumber(), CHUNK_TIMEOUT_MS);
   const fromKnown = getKnownStartBlock(contractAddress);
   const fromLookback = Math.max(0, latest - DEFAULT_LOOKBACK);
   let fromBlock = fromKnown > 0 ? fromKnown : fromLookback;
@@ -146,14 +173,22 @@ export async function loadFameLeaderboard(viewerAddress = ''): Promise<FameLeade
   const provider = await assertTrustedRpc(getProviderWithFallback());
   const contractAddress = getContractAddress();
   const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
-  const range = await resolveStartBlock(provider, contractAddress);
+  let range: { fromBlock: number; toBlock: number; partial: boolean };
+  try {
+    range = await resolveStartBlock(provider, contractAddress);
+  } catch {
+    const previous = cache.get(key);
+    if (previous && previous.players.length > 0) return { ...previous, partial: true };
+    return { ...EMPTY, partial: true };
+  }
   const viewer = normalizeAddress(viewerAddress);
+  const deadline = Date.now() + SCAN_BUDGET_MS;
 
   const [signups, issued, paid, bonuses] = await Promise.all([
-    queryFilterChunked(contract, eventFilter(contract, 'AfiliadoRegistrado'), range.fromBlock, range.toBlock),
-    queryFilterChunked(contract, eventFilter(contract, 'PrestamoEmitido'), range.fromBlock, range.toBlock),
-    queryFilterChunked(contract, eventFilter(contract, 'PrestamoPagado'), range.fromBlock, range.toBlock),
-    queryFilterChunked(contract, eventFilter(contract, 'BonoHitoPagado'), range.fromBlock, range.toBlock),
+    queryFilterChunked(contract, eventFilter(contract, 'AfiliadoRegistrado'), range.fromBlock, range.toBlock, deadline),
+    queryFilterChunked(contract, eventFilter(contract, 'PrestamoEmitido'), range.fromBlock, range.toBlock, deadline),
+    queryFilterChunked(contract, eventFilter(contract, 'PrestamoPagado'), range.fromBlock, range.toBlock, deadline),
+    queryFilterChunked(contract, eventFilter(contract, 'BonoHitoPagado'), range.fromBlock, range.toBlock, deadline),
   ]);
 
   const order: string[] = [];
@@ -224,26 +259,32 @@ export async function loadFameLeaderboard(viewerAddress = ''): Promise<FameLeade
   const mora = new Map<string, boolean>();
   let rachaCaja: Contract | null = null;
   try {
-    const hermano = String(await contract.famaHermano());
+    const hermano = String(await withTimeout(contract.famaHermano(), CHUNK_TIMEOUT_MS));
     if (hermano && hermano !== ZERO) {
       const caja = new Contract(hermano, FAMA_ABI, provider);
-      await caja.FAMA_POR_DIA_RACHA();
+      await withTimeout(caja.FAMA_POR_DIA_RACHA(), CHUNK_TIMEOUT_MS);
       rachaCaja = caja;
     }
   } catch {
     rachaCaja = null;
   }
+  let viewsCut = false;
+  const enrichDeadline = Date.now() + CHUNK_TIMEOUT_MS;
   for (let i = 0; i < roster.length; i += VIEW_BATCH) {
+    if (Date.now() > enrichDeadline) {
+      viewsCut = true;
+      break;
+    }
     const batch = roster.slice(i, i + VIEW_BATCH);
     const rows = await Promise.all(
       batch.map(async (address) => {
         try {
           const [history, closedLoans, progress, delinquent, streakDays] = await Promise.all([
-            contract.obtenerHistorialUsuario(address),
-            contract.prestamosCerrados(address),
-            contract.obtenerProgresoUsuario(address),
-            contract.esMoroso(address).catch(() => false),
-            rachaCaja ? rachaCaja.diasRacha(address).catch(() => 0) : Promise.resolve(0),
+            withTimeout(contract.obtenerHistorialUsuario(address), CHUNK_TIMEOUT_MS),
+            withTimeout(contract.prestamosCerrados(address), CHUNK_TIMEOUT_MS),
+            withTimeout(contract.obtenerProgresoUsuario(address), CHUNK_TIMEOUT_MS),
+            withTimeout(contract.esMoroso(address), CHUNK_TIMEOUT_MS).catch(() => false),
+            rachaCaja ? withTimeout(rachaCaja.diasRacha(address), CHUNK_TIMEOUT_MS).catch(() => 0) : Promise.resolve(0),
           ]);
           return {
             address,
@@ -294,6 +335,11 @@ export async function loadFameLeaderboard(viewerAddress = ''): Promise<FameLeade
     partial:
       range.partial ||
       rosterTruncated ||
+      viewsCut ||
+      signups.cut ||
+      issued.cut ||
+      paid.cut ||
+      bonuses.cut ||
       signups.failed > 0 ||
       issued.failed > 0 ||
       paid.failed > 0 ||

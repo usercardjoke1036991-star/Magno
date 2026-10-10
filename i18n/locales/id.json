@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "Sebagian tambahan dialokasikan untuk operasi platform, sesuai tingkatan.",
   "hubReservaLeadLocked": "Operasional dari level 10.",
   "reservaNeedLevel": "Dapat mengunci dari tingkat 10.",
+  "reservaReadFailed": "Tingkat belum terbaca. Coba lagi.",
   "reservaBoteLabel": "Provisi Cadangan",
   "reservaAdminPotTitle": "Provisi Cadangan",
   "reservaAdminPotHint": "Hanya admin. USDT ini membayar imbal hasil. Bukan Donasi dan bukan pool.",

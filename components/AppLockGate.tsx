@@ -812,6 +812,7 @@ export const AppLockGate: React.FC<AppLockGateProps> = ({ children }) => {
       if (wait > 0) startRecoverWait(wait);
       if (reason.includes('day') || (quota && (quota.attempts >= 3 || quota.sends >= 3))) setError(t('lockRecoverDay'));
       else if (reason.includes('cooldown') || reason.includes('rate')) setError(t('otpWait', { seconds: wait || 60 }));
+      else if (reason.includes('delivery')) setError(t('emailDeliveryFailed'));
       else if (reason.includes('email')) setError(t('emailNotAllowed'));
       else if (reason.includes('notify')) setError(t('emailNeedApi'));
       else setError(t('lockRecoverFail'));

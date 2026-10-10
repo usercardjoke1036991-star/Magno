@@ -17,6 +17,8 @@ import { addPoolToSpells, buildMoraSpells, type MoraSpell } from '../utils/moraH
 
 const CHUNK = 4000;
 const CHUNK_CONCURRENCY = 3;
+const CHUNK_TIMEOUT_MS = 6_000;
+const SCAN_BUDGET_MS = 18_000;
 const DEFAULT_LOOKBACK = 80_000;
 const MAX_SCAN_SPAN = 120_000;
 const JOURNAL_PREFIX = 'qc_movements_v1_';
@@ -154,6 +156,22 @@ function formatToken(amount: bigint, token?: string): { label: string; symbol: s
   };
 }
 
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 function eventFilter(contract: Contract, name: string, ...params: unknown[]) {
   const factory = (contract.filters as Record<string, unknown>)[name];
   if (typeof factory !== 'function') return null;
@@ -164,22 +182,31 @@ async function queryFilterChunked(
   contract: Contract,
   filter: unknown,
   fromBlock: number,
-  toBlock: number
-): Promise<{ events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number }> {
-  if (!filter) return { events: [], failed: 0 };
+  toBlock: number,
+  deadline = 0
+): Promise<{ events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number; cut: boolean }> {
+  if (!filter) return { events: [], failed: 0, cut: false };
   const ranges: Array<[number, number]> = [];
   for (let start = fromBlock; start <= toBlock; start += CHUNK) {
     ranges.push([start, Math.min(start + CHUNK - 1, toBlock)]);
   }
   const events: Awaited<ReturnType<Contract['queryFilter']>> = [];
   let failed = 0;
+  let cut = false;
   for (let i = 0; i < ranges.length; i += CHUNK_CONCURRENCY) {
+    if (deadline > 0 && Date.now() > deadline) {
+      cut = true;
+      break;
+    }
     const batch = ranges.slice(i, i + CHUNK_CONCURRENCY);
     const results = await Promise.all(
       batch.map(async ([start, end]) => {
         for (let attempt = 0; attempt < 2; attempt += 1) {
           try {
-            return await contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end);
+            return await withTimeout(
+              contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end),
+              CHUNK_TIMEOUT_MS
+            );
           } catch {
             if (attempt === 0) {
               await new Promise((resolve) => setTimeout(resolve, 250));
@@ -194,7 +221,7 @@ async function queryFilterChunked(
     );
     for (const chunk of results) events.push(...chunk);
   }
-  return { events, failed };
+  return { events, failed, cut };
 }
 
 async function resolveStartBlock(provider: AbstractProvider, contractAddress: string): Promise<{
@@ -202,7 +229,7 @@ async function resolveStartBlock(provider: AbstractProvider, contractAddress: st
   toBlock: number;
   partial: boolean;
 }> {
-  const latest = await provider.getBlockNumber();
+  const latest = await withTimeout(provider.getBlockNumber(), CHUNK_TIMEOUT_MS);
   const configured = Number(process.env.EXPO_PUBLIC_CONTRACT_START_BLOCK || 0);
   const fromEnv = Number.isFinite(configured) && configured > 0 ? configured : 0;
   const fromKnown = getKnownStartBlock(contractAddress);
@@ -223,15 +250,20 @@ async function resolveStartBlock(provider: AbstractProvider, contractAddress: st
   return { fromBlock, toBlock: latest, partial: truncated };
 }
 
-async function resolveTimestamps(provider: AbstractProvider, blockNumbers: number[]): Promise<Map<number, number>> {
+async function resolveTimestamps(
+  provider: AbstractProvider,
+  blockNumbers: number[],
+  deadline = 0
+): Promise<Map<number, number>> {
   const unique = [...new Set(blockNumbers.filter((block) => Number.isFinite(block) && block > 0))];
   const stamps = new Map<number, number>();
   for (let i = 0; i < unique.length; i += 6) {
+    if (deadline > 0 && Date.now() > deadline) break;
     const batch = unique.slice(i, i + 6);
     const blocks = await Promise.all(
       batch.map(async (blockNumber) => {
         try {
-          const block = await provider.getBlock(blockNumber);
+          const block = await withTimeout(provider.getBlock(blockNumber), CHUNK_TIMEOUT_MS);
           return [blockNumber, Number(block?.timestamp || 0)] as const;
         } catch {
           return [blockNumber, 0] as const;
@@ -289,6 +321,7 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
     const tokenAddress = getUsdtAddress();
     const token = new Contract(tokenAddress, TRANSFER_ABI, provider);
     const { fromBlock, toBlock, partial } = await resolveStartBlock(provider, contractAddress);
+    const deadline = Date.now() + SCAN_BUDGET_MS;
     const world = currentWorld();
 
     const loanFilter = eventFilter(contract, 'PrestamoEmitido', self);
@@ -299,12 +332,12 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
     const inFilter = eventFilter(token, 'Transfer', null, self);
 
     const [loanPack, payPack, donatePack, bonusPack, outPack, inPack] = await Promise.all([
-      queryFilterChunked(contract, loanFilter, fromBlock, toBlock),
-      queryFilterChunked(contract, payFilter, fromBlock, toBlock),
-      queryFilterChunked(contract, donateFilter, fromBlock, toBlock),
-      queryFilterChunked(contract, bonusFilter, fromBlock, toBlock),
-      queryFilterChunked(token, outFilter, fromBlock, toBlock),
-      queryFilterChunked(token, inFilter, fromBlock, toBlock),
+      queryFilterChunked(contract, loanFilter, fromBlock, toBlock, deadline),
+      queryFilterChunked(contract, payFilter, fromBlock, toBlock, deadline),
+      queryFilterChunked(contract, donateFilter, fromBlock, toBlock, deadline),
+      queryFilterChunked(contract, bonusFilter, fromBlock, toBlock, deadline),
+      queryFilterChunked(token, outFilter, fromBlock, toBlock, deadline),
+      queryFilterChunked(token, inFilter, fromBlock, toBlock, deadline),
     ]);
 
     const logs = [
@@ -317,7 +350,8 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
     ];
     const stamps = await resolveTimestamps(
       provider,
-      logs.map((event) => event.blockNumber)
+      logs.map((event) => event.blockNumber),
+      Date.now() + CHUNK_TIMEOUT_MS
     );
     const chain: Movement[] = [];
 
@@ -458,6 +492,7 @@ export async function loadMovementHistory(walletAddress: string): Promise<Moveme
       items: onlyThisWorld(mergeMovements(local, chain)),
       partial:
         partial ||
+        loanPack.cut || payPack.cut || donatePack.cut || bonusPack.cut || outPack.cut || inPack.cut ||
         loanPack.failed + payPack.failed + donatePack.failed + bonusPack.failed + outPack.failed + inPack.failed > 0,
     };
   } catch {
@@ -476,11 +511,12 @@ export async function loadMoraHistory(walletAddress: string, level: number): Pro
     const contractAddress = getContractAddress();
     const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
     const { fromBlock, toBlock, partial } = await resolveStartBlock(provider, contractAddress);
+    const deadline = Date.now() + SCAN_BUDGET_MS;
     const moraFilter = eventFilter(contract, 'MorosityUpdated', self);
     const childFilter = eventFilter(contract, 'AfiliadoRegistrado', null, self);
     const [moraPack, childPack] = await Promise.all([
-      queryFilterChunked(contract, moraFilter, fromBlock, toBlock),
-      queryFilterChunked(contract, childFilter, fromBlock, toBlock),
+      queryFilterChunked(contract, moraFilter, fromBlock, toBlock, deadline),
+      queryFilterChunked(contract, childFilter, fromBlock, toBlock, deadline),
     ]);
     const moraLogs = moraPack.events;
     const childLogs = childPack.events;
@@ -491,14 +527,14 @@ export async function loadMoraHistory(walletAddress: string, level: number): Pro
     ].filter(Boolean);
     const interestPacks = await Promise.all(
       directs.slice(0, 12).map((direct) =>
-        queryFilterChunked(contract, eventFilter(contract, 'InteresDistribuido', direct), fromBlock, toBlock)
+        queryFilterChunked(contract, eventFilter(contract, 'InteresDistribuido', direct), fromBlock, toBlock, deadline)
       )
     );
     const interestLogs = interestPacks.flatMap((pack) => pack.events);
     const stamps = await resolveTimestamps(provider, [
       ...moraLogs.map((event) => event.blockNumber),
       ...interestLogs.map((event) => event.blockNumber),
-    ]);
+    ], Date.now() + CHUNK_TIMEOUT_MS);
     const toggles = moraLogs.map((event) => ({
       at: (stamps.get(event.blockNumber) || 0) * 1000,
       on: Boolean(argValue(eventArgs(event), 'esMoroso', 1)),
@@ -511,7 +547,12 @@ export async function loadMoraHistory(walletAddress: string, level: number): Pro
     }
     return {
       items: spells,
-      partial: partial || moraPack.failed + childPack.failed + interestPacks.reduce((sum, pack) => sum + pack.failed, 0) > 0,
+      partial:
+        partial ||
+        moraPack.cut ||
+        childPack.cut ||
+        interestPacks.some((pack) => pack.cut) ||
+        moraPack.failed + childPack.failed + interestPacks.reduce((sum, pack) => sum + pack.failed, 0) > 0,
     };
   } catch {
     return { items: [], partial: true };

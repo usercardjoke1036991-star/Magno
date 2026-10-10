@@ -49,8 +49,12 @@ describe('referral earnings', function () {
     expect(earnings).to.include('export function creditDirectWei');
     expect(network).to.include('creditDirectWei');
     expect(network).to.include("addEarned(referido, amount, 'bonus', event.blockNumber || 0, true)");
-    expect(network).to.include('const RECENT_SPAN = 30_000');
+    expect(network).to.include('const RECENT_SPAN = 50_000');
+    expect(network).to.include('const SCAN_BUDGET_MS = 18_000');
     expect(network).to.include('queryFilterReliable');
     expect(network).to.not.include('CHUNK_CONCURRENCY');
+    expect(network).to.include('withTimeout(provider.getBlock(blockNumber), CHUNK_TIMEOUT_MS)');
+    expect(network).to.include('withTimeout(provider.getBlockNumber(), CHUNK_TIMEOUT_MS)');
+    expect(network).to.include('withTimeout(contract.obtenerProgresoUsuario(address), CHUNK_TIMEOUT_MS)');
   });
 });

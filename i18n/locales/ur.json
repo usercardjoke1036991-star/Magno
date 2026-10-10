@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "اضافی کا ایک حصہ درجے کے مطابق پلیٹ فارم کے عمل میں جاتا ہے۔",
   "hubReservaLeadLocked": "سطح 10 سے چلتا ہے۔",
   "reservaNeedLevel": "سطح 10 سے لاک کر سکتے ہیں۔",
+  "reservaReadFailed": "سطح ابھی نہیں پڑھا جا سکا۔ دوبارہ کوشش کریں۔",
   "reservaBoteLabel": "ریزرو ذخیرہ",
   "reservaAdminPotTitle": "ریزرو ذخیرہ",
   "reservaAdminPotHint": "صرف ایڈمن۔ یہ USDT منافع دیتا ہے۔ عطیہ یا پول نہیں۔",

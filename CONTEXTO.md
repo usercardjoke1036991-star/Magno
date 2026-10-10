@@ -275,6 +275,8 @@ contracts/QuatriviumCredit.sol → OpenZeppelin v5 (Pausable, ReentrancyGuard, S
 ## Historial de cambios importantes
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
+| 2026-10-09 | Si el correo de recuperacion no sale, se devuelve el envio del dia y la app lo dice. Fama y movimientos cortan la lectura a 18 segundos. Reserva no bloquea si el nivel no se lee. | — |
+| 2026-10-09 | El historial de referidos corta tambien la lectura de nivel, fecha, bloque actual y padrino. Si no contestan, la lista sale con nivel 1 y sin fecha. | — |
 | 2026-10-09 | La fila Lo invito descarga la imagen publica del padrino y la muestra dentro del marco. | — |
 | 2026-10-09 | El historial de referidos cuenta el 1 USDT del padrino aunque falle el registro del alta, y lee primero los bloques recientes. | — |
 | 2026-10-09 | La pantalla del codigo de referido espera a saber si la cuenta ya esta en la red. Solo aparece si todavia no lo esta. | — |

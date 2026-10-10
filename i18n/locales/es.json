@@ -1073,6 +1073,7 @@
   "reservaFounderNote": "Una porción del extra se destina a la operación de la plataforma, según el tramo.",
   "hubReservaLeadLocked": "Operativa a partir del nivel 10.",
   "reservaNeedLevel": "La inmovilización está disponible a partir del nivel 10.",
+  "reservaReadFailed": "No se pudo leer el nivel. Inténtelo de nuevo.",
   "reservaBoteLabel": "Provisión de Reserva",
   "reservaAdminPotTitle": "Provisión de Reserva",
   "reservaAdminPotHint": "Solo administración. Este USDT paga rendimientos. No es una donación ni el fondo común.",

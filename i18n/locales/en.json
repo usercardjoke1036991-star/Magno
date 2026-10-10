@@ -1073,6 +1073,7 @@
   "reservaFounderNote": "A portion of the extra is allocated to platform operations, according to tier.",
   "hubReservaLeadLocked": "Operational from level 10.",
   "reservaNeedLevel": "Locking is available from level 10.",
+  "reservaReadFailed": "The level could not be read. Try again.",
   "reservaBoteLabel": "Reserve provision",
   "reservaAdminPotTitle": "Reserve provision",
   "reservaAdminPotHint": "Administration only. This USDT pays yield. It is not a donation and not the common fund.",

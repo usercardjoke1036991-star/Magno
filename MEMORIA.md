@@ -36,6 +36,8 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-09-29] El bote de Reserva solo lo llenan owner/admins. Bloquear y renovar exigen nivel 10. Desbloquear principal no. No es Donar ni el pool.
 
 ## Cambios realizados
+- [2026-10-09] Recuperacion devuelve el envio si el correo falla. Fama y movimientos tienen tope de lectura. Reserva se detiene si el nivel no responde.
+- [2026-10-09] El historial de referidos ya no espera sin limite el nivel, la fecha, el bloque actual ni la cadena de padrinos.
 - [2026-10-09] El marco de quien invita muestra su imagen publica al abrir Red de referidos.
 - [2026-10-09] Historial de referidos: el bono de 1 USDT entra en el total aunque el nodo no devuelva el alta.
 - [2026-10-09] La pantalla del codigo de referido espera la lectura de la red y solo sale si la cuenta no esta registrada.
@@ -84,12 +86,10 @@ Mainnet chain 56 ya desplegado. No redesplegar. No poner CONFIRM_MAINNET. El Xia
 - [2026-10-03] Servicios se abren para verlos. El candado solo impide usarlos hasta pagar el alta y registrarse.
 - [2026-10-03] Iconos de Servicios siempre en verde. En Alta ya no se dice que correo y telefono van sin cargo.
 - [2026-10-03] Hub siempre visible: candado en servicios hasta alta pagada y registro. Banner de Pagar alta al entrar.
-- [2026-10-03] Alta visible en Servicios: baldosa Pagar alta y recuadro encima del hub.
-- [2026-10-03] Boton de alta: Pagar alta, al completar Alta pagada. Sin desglose del cobro.
 
 ## No olvidar / no romper
 - Con 3 fundadoras el contrato exige 2 firmas. Si una se pierde o la hackean, las otras 2 la echan. Una sola no gobierna.
 - Pausa de emergencia sigue inmediata.
 
 ## Última sesión
-[2026-10-09] Cambio: El marco de quien invita muestra su imagen publica al abrir Red de referidos.
+[2026-10-09] Cambio: Recuperacion devuelve el envio si el correo falla. Fama y movimientos tienen tope de lectura. Reserva se detiene si el nivel no responde.

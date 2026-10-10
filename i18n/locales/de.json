@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "Ein Teil des Extras fließt in den Betrieb der Plattform, je nach Tranche.",
   "hubReservaLeadLocked": "Betriebsbereit ab Stufe 10.",
   "reservaNeedLevel": "Sperren ab Stufe 10.",
+  "reservaReadFailed": "Die Stufe konnte nicht gelesen werden. Erneut versuchen.",
   "reservaBoteLabel": "Rückstellung der Reserve",
   "reservaAdminPotTitle": "Rückstellung der Reserve",
   "reservaAdminPotHint": "Nur Admins. Dieses USDT zahlt die Rendite. Weder Spende noch Pool.",

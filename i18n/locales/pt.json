@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "Uma parte do extra destina-se à operação da plataforma, conforme o tramo.",
   "hubReservaLeadLocked": "Operacional a partir do nível 10.",
   "reservaNeedLevel": "Pode bloquear a partir do nivel 10.",
+  "reservaReadFailed": "Não foi possível ler o nível. Tente de novo.",
   "reservaBoteLabel": "Provisão da Reserva",
   "reservaAdminPotTitle": "Provisão da Reserva",
   "reservaAdminPotHint": "Só admins. Este USDT paga o rendimento. Não é Doar nem o pool.",

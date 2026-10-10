@@ -484,6 +484,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/admin-totp.test.js` — módulo JS/TS
 - `test/alta-registro.test.js` — módulo JS/TS
 - `test/attest2of2.test.js` — módulo JS/TS
+- `test/audit-fixes.test.js` — módulo JS/TS
 - `test/brand-splash.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
 - `test/commission-levels.test.js` — módulo JS/TS

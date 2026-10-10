@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "额外收益的一部分用于平台运营，按档位计算。",
   "hubReservaLeadLocked": "自 10 级起可操作。",
   "reservaNeedLevel": "10 级起可锁定。",
+  "reservaReadFailed": "暂时读不到等级。请再试一次。",
   "reservaBoteLabel": "储备金",
   "reservaAdminPotTitle": "储备金",
   "reservaAdminPotHint": "仅管理员。此 USDT 用于支付收益。不是捐赠，也不是贷款池。",

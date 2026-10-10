@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "يُخصص جزء من الزيادة لتشغيل المنصة بحسب الشريحة.",
   "hubReservaLeadLocked": "تشغيلي من المستوى 10.",
   "reservaNeedLevel": "يمكن القفل من المستوى 10.",
+  "reservaReadFailed": "تعذر قراءة المستوى. أعد المحاولة.",
   "reservaBoteLabel": "مخصص الاحتياطي",
   "reservaAdminPotTitle": "مخصص الاحتياطي",
   "reservaAdminPotHint": "للمشرفين فقط. هذا الـ USDT يدفع العائد. ليس تبرعًا ولا مجمع القروض.",

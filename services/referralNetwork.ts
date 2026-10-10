@@ -7,9 +7,11 @@ import { addressToInviteCode } from '../utils/inviteCode';
 import { creditDirectWei, sumReferralEarnings } from '../utils/referralEarnings';
 
 const ZERO = '0x0000000000000000000000000000000000000000';
-const CHUNK = 2_000;
-const RECENT_SPAN = 30_000;
-const CHUNK_ATTEMPTS = 4;
+const CHUNK = 4_000;
+const RECENT_SPAN = 50_000;
+const CHUNK_ATTEMPTS = 2;
+const CHUNK_TIMEOUT_MS = 6_000;
+const SCAN_BUDGET_MS = 18_000;
 const DEFAULT_LOOKBACK = 80_000;
 const MAX_SCAN_SPAN = 120_000; // RPC públicos no aguantan el rango completo desde el deploy.
 
@@ -117,46 +119,73 @@ function pause(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-type LogPack = { events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number };
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
+type LogPack = { events: Awaited<ReturnType<Contract['queryFilter']>>; failed: number; cut: boolean };
 
 async function queryFilterChunked(
   contract: Contract,
   filter: unknown,
   fromBlock: number,
-  toBlock: number
+  toBlock: number,
+  deadline = 0
 ): Promise<LogPack> {
-  if (!filter || fromBlock > toBlock) return { events: [], failed: 0 };
+  if (!filter || fromBlock > toBlock) return { events: [], failed: 0, cut: false };
   const ranges: Array<[number, number]> = [];
-  for (let start = fromBlock; start <= toBlock; start += CHUNK) {
-    ranges.push([start, Math.min(start + CHUNK - 1, toBlock)]);
+  for (let end = toBlock; end >= fromBlock; end -= CHUNK) {
+    ranges.push([Math.max(fromBlock, end - CHUNK + 1), end]);
   }
 
   const events: Awaited<ReturnType<Contract['queryFilter']>> = [];
   let failed = 0;
+  let cut = false;
   for (let index = 0; index < ranges.length; index += 1) {
+    if (deadline > 0 && Date.now() > deadline) {
+      cut = true;
+      break;
+    }
     const [start, end] = ranges[index];
     let got = false;
     for (let attempt = 0; attempt < CHUNK_ATTEMPTS; attempt += 1) {
       try {
-        events.push(...await contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end));
+        const page = await withTimeout(
+          contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end),
+          CHUNK_TIMEOUT_MS
+        );
+        events.push(...page);
         got = true;
         break;
       } catch {
-        if (attempt < CHUNK_ATTEMPTS - 1) await pause(400 * (attempt + 1));
+        if (attempt < CHUNK_ATTEMPTS - 1) await pause(200);
       }
     }
     if (!got) failed += 1;
-    else if (index < ranges.length - 1) await pause(120);
   }
-  return { events, failed };
+  return { events, failed, cut };
 }
 
 function mergeLogPacks(packs: LogPack[]): LogPack {
   const seen = new Set<string>();
   const events: LogPack['events'] = [];
   let failed = 0;
+  let cut = false;
   for (const pack of packs) {
     failed += pack.failed;
+    cut = cut || pack.cut;
     for (const event of pack.events) {
       const id = `${event.transactionHash || ''}:${event.index ?? ''}:${event.blockNumber || 0}`;
       if (seen.has(id)) continue;
@@ -164,7 +193,7 @@ function mergeLogPacks(packs: LogPack[]): LogPack {
       events.push(event);
     }
   }
-  return { events, failed };
+  return { events, failed, cut };
 }
 
 /** Los bloques de hoy van primero. Si el tramo viejo falla, el pago reciente se conserva. */
@@ -172,12 +201,13 @@ async function queryFilterReliable(
   contract: Contract,
   filter: unknown,
   fromBlock: number,
-  toBlock: number
+  toBlock: number,
+  deadline = 0
 ): Promise<LogPack> {
   const recentFrom = Math.max(fromBlock, toBlock - RECENT_SPAN);
-  const recent = await queryFilterChunked(contract, filter, recentFrom, toBlock);
-  if (fromBlock >= recentFrom) return recent;
-  const older = await queryFilterChunked(contract, filter, fromBlock, recentFrom - 1);
+  const recent = await queryFilterChunked(contract, filter, recentFrom, toBlock, deadline);
+  if (fromBlock >= recentFrom || (deadline > 0 && Date.now() > deadline)) return recent;
+  const older = await queryFilterChunked(contract, filter, fromBlock, recentFrom - 1, deadline);
   return mergeLogPacks([recent, older]);
 }
 
@@ -186,7 +216,7 @@ async function resolveStartBlock(provider: AbstractProvider, contractAddress: st
   toBlock: number;
   partial: boolean;
 }> {
-  const latest = await provider.getBlockNumber();
+  const latest = await withTimeout(provider.getBlockNumber(), CHUNK_TIMEOUT_MS);
   const configured = Number(process.env.EXPO_PUBLIC_CONTRACT_START_BLOCK || 0);
   const fromEnv = Number.isFinite(configured) && configured > 0 ? configured : 0;
   const fromKnown = getKnownStartBlock(contractAddress);
@@ -213,17 +243,19 @@ async function resolveStartBlock(provider: AbstractProvider, contractAddress: st
 
 async function resolveTimestamps(
   provider: AbstractProvider,
-  blockNumbers: number[]
+  blockNumbers: number[],
+  deadline = 0
 ): Promise<Map<number, number>> {
   const unique = [...new Set(blockNumbers.filter((block) => Number.isFinite(block) && block > 0))];
   const stamps = new Map<number, number>();
   const CONCURRENCY = 6;
   for (let i = 0; i < unique.length; i += CONCURRENCY) {
+    if (deadline > 0 && Date.now() > deadline) break;
     const batch = unique.slice(i, i + CONCURRENCY);
     const blocks = await Promise.all(
       batch.map(async (blockNumber) => {
         try {
-          const block = await provider.getBlock(blockNumber);
+          const block = await withTimeout(provider.getBlock(blockNumber), CHUNK_TIMEOUT_MS);
           return [blockNumber, Number(block?.timestamp || 0)] as const;
         } catch {
           return [blockNumber, 0] as const;
@@ -235,20 +267,31 @@ async function resolveTimestamps(
   return stamps;
 }
 
+async function readLevel(contract: Contract, address: string, deadline: number): Promise<number> {
+  if (deadline > 0 && Date.now() > deadline) return 1;
+  try {
+    const progress = await withTimeout(contract.obtenerProgresoUsuario(address), CHUNK_TIMEOUT_MS);
+    return Math.min(100, Math.max(1, Number(progress.nivelActual ?? progress[0] ?? 1) || 1));
+  } catch {
+    return 1;
+  }
+}
+
 async function parentOf(
   contract: Contract,
   wallet: string,
-  cache: Map<string, string>
+  cache: Map<string, string>,
+  deadline = 0
 ): Promise<string> {
   const key = wallet.toLowerCase();
   if (cache.has(key)) return cache.get(key) || '';
+  if (deadline > 0 && Date.now() > deadline) return '';
   try {
-    const node = await contract.redGenealogica(wallet);
+    const node = await withTimeout(contract.redGenealogica(wallet), CHUNK_TIMEOUT_MS);
     const padre = normalizeAddress(String(node.padre ?? node[0] ?? ''));
     cache.set(key, padre);
     return padre;
   } catch {
-    cache.set(key, '');
     return '';
   }
 }
@@ -258,14 +301,16 @@ async function nearestDirect(
   source: string,
   self: string,
   directs: Set<string>,
-  cache: Map<string, string>
+  cache: Map<string, string>,
+  deadline = 0
 ): Promise<string> {
   let cursor = normalizeAddress(source);
   const seen = new Set<string>();
   for (let i = 0; i < 8 && cursor && !seen.has(cursor.toLowerCase()); i += 1) {
+    if (deadline > 0 && Date.now() > deadline) return '';
     if (directs.has(cursor.toLowerCase())) return cursor;
     seen.add(cursor.toLowerCase());
-    const next = await parentOf(contract, cursor, cache);
+    const next = await parentOf(contract, cursor, cache, deadline);
     if (!next || next.toLowerCase() === self.toLowerCase() || next === ZERO) break;
     cursor = next;
   }
@@ -303,12 +348,21 @@ export async function loadReferralChildren(parentAddress: string): Promise<Refer
   const provider = await assertTrustedRpc(getProviderWithFallback());
   const contractAddress = getContractAddress();
   const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
-  const { fromBlock, toBlock } = await resolveStartBlock(provider, contractAddress);
+  let fromBlock = 0;
+  let toBlock = 0;
+  try {
+    const range = await resolveStartBlock(provider, contractAddress);
+    fromBlock = range.fromBlock;
+    toBlock = range.toBlock;
+  } catch {
+    return [];
+  }
   const pack = await queryFilterChunked(
     contract,
     eventFilter(contract, 'AfiliadoRegistrado', null, parent),
     fromBlock,
-    toBlock
+    toBlock,
+    Date.now() + SCAN_BUDGET_MS
   );
   const seen = new Set<string>();
   const people: ReferralChild[] = [];
@@ -320,16 +374,8 @@ export async function loadReferralChildren(parentAddress: string): Promise<Refer
     seen.add(key);
     people.push({ address: usuario, code: addressToInviteCode(usuario), level: 1 });
   }
-  const levels = await Promise.all(
-    people.map(async (person) => {
-      try {
-        const progress = await contract.obtenerProgresoUsuario(person.address);
-        return Math.min(100, Math.max(1, Number(progress.nivelActual ?? progress[0] ?? 1) || 1));
-      } catch {
-        return 1;
-      }
-    })
-  );
+  const levelDeadline = Date.now() + CHUNK_TIMEOUT_MS;
+  const levels = await Promise.all(people.map((person) => readLevel(contract, person.address, levelDeadline)));
   const next = people.map((person, index) => ({ ...person, level: levels[index] || 1 }));
   if (pack.failed === 0 || next.length > 0) {
     branchCache.set(parent.toLowerCase(), next);
@@ -354,7 +400,7 @@ export async function fillReferralTimestamps(
   }
   try {
     const provider = await assertTrustedRpc(getProviderWithFallback());
-    const stamps = await resolveTimestamps(provider, blocks);
+    const stamps = await resolveTimestamps(provider, blocks, Date.now() + CHUNK_TIMEOUT_MS);
     for (const node of list) {
       out.set(node.address.toLowerCase(), {
         registeredAt: stamps.get(node.registeredBlock) || node.registeredAt || 0,
@@ -379,16 +425,30 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const provider = await assertTrustedRpc(getProviderWithFallback());
   const contractAddress = getContractAddress();
   const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
-  const { fromBlock, toBlock, partial: lookbackPartial } = await resolveStartBlock(provider, contractAddress);
+  const cacheKey = snapshotCacheKey(self);
+  const previous = snapshotCache.get(cacheKey);
+  let fromBlock = 0;
+  let toBlock = 0;
+  let lookbackPartial = false;
+  try {
+    const range = await resolveStartBlock(provider, contractAddress);
+    fromBlock = range.fromBlock;
+    toBlock = range.toBlock;
+    lookbackPartial = range.partial;
+  } catch {
+    if (previous && previous.directs.length > 0) return { ...previous, partial: true };
+    return { ...EMPTY, partial: true };
+  }
   clearReferralBranchCache();
 
   const signupFilter = eventFilter(contract, 'AfiliadoRegistrado', null, self);
   const bonusFilter = eventFilter(contract, 'BonoActivacionPagado', self);
   const commissionFilter = eventFilter(contract, 'ComisionGeneracional', self);
 
-  const signupPack = await queryFilterReliable(contract, signupFilter, fromBlock, toBlock);
-  const bonusPack = await queryFilterReliable(contract, bonusFilter, fromBlock, toBlock);
-  const commissionPack = await queryFilterReliable(contract, commissionFilter, fromBlock, toBlock);
+  const deadline = Date.now() + SCAN_BUDGET_MS;
+  const bonusPack = await queryFilterReliable(contract, bonusFilter, fromBlock, toBlock, deadline);
+  const signupPack = await queryFilterReliable(contract, signupFilter, fromBlock, toBlock, deadline);
+  const commissionPack = await queryFilterReliable(contract, commissionFilter, fromBlock, toBlock, deadline);
   const signups = signupPack.events;
   const bonuses = bonusPack.events;
   const commissions = commissionPack.events;
@@ -494,6 +554,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     });
   }
 
+  const walkDeadline = Date.now() + CHUNK_TIMEOUT_MS;
   for (const event of commissions) {
     const args = eventArgs(event);
     const deudor = normalizeAddress(asText(argValue(args, 'deudor', 1)));
@@ -503,7 +564,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     if (deudor) {
       const owner = directSet.has(deudor.toLowerCase())
         ? deudor
-        : await nearestDirect(contract, deudor, self, directSet, parentCache);
+        : await nearestDirect(contract, deudor, self, directSet, parentCache, walkDeadline);
       if (owner) addEarned(owner, amount, 'commission', event.blockNumber || 0);
     }
     drafts.push({
@@ -520,12 +581,6 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
 
   drafts.sort((a, b) => (b.blockNumber || 0) - (a.blockNumber || 0));
   const recent = drafts.slice(0, 30);
-  const stamps = await resolveTimestamps(provider, recent.map((item) => item.blockNumber));
-  const activity: ReferralActivity[] = recent.map(({ blockNumber, ...item }) => ({
-    ...item,
-    timestamp: stamps.get(blockNumber) || 0,
-  }));
-
   const directs = [...nodes.values()].sort((a, b) => {
     const byBlock = (b.registeredBlock || 0) - (a.registeredBlock || 0);
     if (byBlock) return byBlock;
@@ -535,20 +590,16 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     return 0;
   });
   const totals = sumReferralEarnings(directs);
-
-  const levelTargets = directs.map((node) => node.address);
-  const uniqueLevels = [...new Set(levelTargets.map((item) => item.toLowerCase()))];
-  const levelEntries = await Promise.all(
-    uniqueLevels.map(async (address) => {
-      try {
-        const progress = await contract.obtenerProgresoUsuario(address);
-        const level = Math.min(100, Math.max(1, Number(progress.nivelActual ?? progress[0] ?? 1) || 1));
-        return [address, level] as const;
-      } catch {
-        return [address, 1] as const;
-      }
-    })
-  );
+  const uniqueLevels = [...new Set(directs.map((node) => node.address.toLowerCase()))];
+  const enrichDeadline = Date.now() + CHUNK_TIMEOUT_MS;
+  const [stamps, levelEntries] = await Promise.all([
+    resolveTimestamps(provider, recent.map((item) => item.blockNumber), enrichDeadline),
+    Promise.all(uniqueLevels.map(async (address) => [address, await readLevel(contract, address, enrichDeadline)] as const)),
+  ]);
+  const activity: ReferralActivity[] = recent.map(({ blockNumber, ...item }) => ({
+    ...item,
+    timestamp: stamps.get(blockNumber) || 0,
+  }));
   const levels = new Map(levelEntries);
   for (const node of directs) {
     node.level = levels.get(node.address.toLowerCase()) || 1;
@@ -563,10 +614,8 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     bonusTotalWei: totals.bonusWei.toString(),
     bonusTotalLabel: formatToken(totals.bonusWei),
     activity,
-    partial: lookbackPartial || failed > 0,
+    partial: lookbackPartial || failed > 0 || signupPack.cut || bonusPack.cut || commissionPack.cut,
   };
-  const cacheKey = snapshotCacheKey(self);
-  const previous = snapshotCache.get(cacheKey);
   const emptyFail = failed > 0 && directs.length === 0;
   if (emptyFail && previous && previous.directs.length > 0) {
     return { ...previous, partial: true };

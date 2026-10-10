@@ -58,6 +58,7 @@ async function assertNivelReserva(wallet: string): Promise<void> {
     if (nivel < RESERVA_MIN_LEVEL) throw new Error('reservaNeedLevel');
   } catch (error) {
     if (String((error as Error).message || '').includes('reservaNeedLevel')) throw error;
+    throw new Error('reserva-read');
   }
 }
 
@@ -281,6 +282,7 @@ export type ReservaErrorKey =
   | 'reservaNoContract'
   | 'reservaMonto'
   | 'reservaNeedLevel'
+  | 'reservaReadFailed'
   | 'reservaAdminOnly'
   | 'reservaRetiroWait'
   | 'reservaRetiroSame'
@@ -303,6 +305,7 @@ export function reservaErrorKey(error: unknown): ReservaErrorKey {
   if (raw.includes('reservaNada') || raw.includes('NadaQueMover')) return 'reservaNada';
   if (raw.includes('reservaMonto') || raw.includes('MontoCero')) return 'reservaMonto';
   if (raw.includes('reservaDelinquent') || raw.includes('EnMora')) return 'reservaDelinquent';
+  if (raw.includes('reserva-read')) return 'reservaReadFailed';
   if (raw.includes('reservaNeedLevel') || raw.includes('NivelInsuficiente')) return 'reservaNeedLevel';
   if (raw.includes('reservaAdminOnly') || raw.includes('SoloAdmin')) return 'reservaAdminOnly';
   if (raw.includes('reservaEspera') || raw.includes('EsperaTimelock')) return 'reservaRetiroWait';

@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "Một phần khoản cộng thêm được dành cho vận hành nền tảng, theo bậc.",
   "hubReservaLeadLocked": "Vận hành từ cấp 10.",
   "reservaNeedLevel": "Khoa tu cap 10.",
+  "reservaReadFailed": "Chưa đọc được cấp. Thử lại.",
   "reservaBoteLabel": "Dự phòng Dự trữ",
   "reservaAdminPotTitle": "Dự phòng Dự trữ",
   "reservaAdminPotHint": "Chỉ admin. USDT này trả lợi suất. Không phải Quyên góp hay pool.",

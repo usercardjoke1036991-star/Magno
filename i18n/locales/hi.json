@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "अतिरिक्त का एक भाग स्तर के अनुसार प्लेटफ़ॉर्म संचालन में जाता है।",
   "hubReservaLeadLocked": "स्तर 10 से परिचालन।",
   "reservaNeedLevel": "स्तर 10 से लॉक कर सकते हैं।",
+  "reservaReadFailed": "स्तर अभी नहीं पढ़ा जा सका। फिर कोशिश करें।",
   "reservaBoteLabel": "रिज़र्व प्रावधान",
   "reservaAdminPotTitle": "रिज़र्व प्रावधान",
   "reservaAdminPotHint": "केवल एडमिन। यह USDT रिटर्न देता है। दान या पूल नहीं है।",

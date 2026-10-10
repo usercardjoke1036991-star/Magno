@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "অতিরিক্তের একটি অংশ স্তর অনুযায়ী প্ল্যাটফর্ম পরিচালনায় যায়।",
   "hubReservaLeadLocked": "স্তর ১০ থেকে কার্যকর।",
   "reservaNeedLevel": "লেভেল 10 থেকে লক করা যায়।",
+  "reservaReadFailed": "স্তরটি এখন পড়া যায়নি। আবার চেষ্টা করুন।",
   "reservaBoteLabel": "রিজার্ভ সংস্থান",
   "reservaAdminPotTitle": "রিজার্ভ সংস্থান",
   "reservaAdminPotHint": "শুধু অ্যাডমিন। এই USDT রিটার্ন দেয়। দান বা পুল নয়।",

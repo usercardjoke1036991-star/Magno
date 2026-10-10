@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "Ekstra tutarın bir kısmı kademeye göre platformun işleyişine ayrılır.",
   "hubReservaLeadLocked": "10. seviyeden itibaren işler.",
   "reservaNeedLevel": "10. duzeyden kilitleyebilirsiniz.",
+  "reservaReadFailed": "Seviye okunamadı. Yeniden deneyin.",
   "reservaBoteLabel": "Rezerv karşılığı",
   "reservaAdminPotTitle": "Rezerv karşılığı",
   "reservaAdminPotHint": "Yalnızca yöneticiler. Bu USDT getiriyi öder. Bağış veya havuz değil.",

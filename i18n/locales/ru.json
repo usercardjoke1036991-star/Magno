@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "Часть надбавки направляется на работу платформы в соответствии с уровнем.",
   "hubReservaLeadLocked": "Доступно с 10-го уровня.",
   "reservaNeedLevel": "Блокировка с 10-го уровня.",
+  "reservaReadFailed": "Уровень сейчас не читается. Повторите попытку.",
   "reservaBoteLabel": "Резервное обеспечение",
   "reservaAdminPotTitle": "Резервное обеспечение",
   "reservaAdminPotHint": "Только админы. Этот USDT платит доход. Это не Донат и не пул.",

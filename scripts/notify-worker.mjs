@@ -2240,6 +2240,7 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       json(res, 429, { error: 'cooldown', retry: Math.ceil((RECOVER_SEND_WAIT_MS - sinceSent) / 1000) });
       return;
     }
+    const previousSent = Number(quota.lastSent || 0);
     quota.sends = Number(quota.sends || 0) + 1;
     quota.lastSent = now;
     try {
@@ -2278,8 +2279,14 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       );
       if (!channel) {
         delete store.recoverOtps[emailHash];
-        await persist();
-        json(res, 200, { ok: true });
+        quota.sends = Math.max(0, Number(quota.sends || 0) - 1);
+        quota.lastSent = previousSent;
+        try {
+          await persist();
+        } catch {
+          console.error('OTP recuperación: no se pudo guardar la devolución del envío');
+        }
+        json(res, 503, { error: 'delivery' });
         return;
       }
     }

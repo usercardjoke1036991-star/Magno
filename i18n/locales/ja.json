@@ -1062,6 +1062,7 @@
   "reservaFounderNote": "上乗せ分の一部は段階に応じてプラットフォーム運営に充てられます。",
   "hubReservaLeadLocked": "レベル 10 から運用できます。",
   "reservaNeedLevel": "レベル10からロックできます。",
+  "reservaReadFailed": "レベルを読み取れませんでした。もう一度試してください。",
   "reservaBoteLabel": "リザーブ引当金",
   "reservaAdminPotTitle": "リザーブ引当金",
   "reservaAdminPotHint": "管理者のみ。このUSDTが利回りを支払います。寄付でもプールでもありません。",
