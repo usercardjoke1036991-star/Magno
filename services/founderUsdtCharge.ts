@@ -38,7 +38,7 @@ export type FounderChargeContext = {
   adminProvider: unknown;
   adminAddress?: string;
   openExternalWallet?: () => void;
-  confirmFunds: () => Promise<boolean>;
+  confirmFunds: (purpose?: 'movement' | 'transfer') => Promise<boolean>;
   t: Translate;
   refetch?: () => void;
   silent?: boolean;
@@ -278,7 +278,7 @@ export async function chargeFounderUsdt(
     alertUser(ctx, ctx.t('amount'), ctx.t('invalidAmount'));
     return 'failed';
   }
-  if (!ctx.silent && !(await ctx.confirmFunds())) return 'cancelled';
+  if (!ctx.silent && !(await ctx.confirmFunds('movement'))) return 'cancelled';
   if (!(await fundInternalFromExternal(ctx, amountWei, ctx.token.address))) return 'failed';
   if (!(await ensureGasForTx(ctx))) return 'failed';
   try {
@@ -337,7 +337,7 @@ export async function chargePoolUsdt(
     alertUser(ctx, ctx.t('amount'), ctx.t('invalidAmount'));
     return 'failed';
   }
-  if (!ctx.silent && !(await ctx.confirmFunds())) return 'cancelled';
+  if (!ctx.silent && !(await ctx.confirmFunds('movement'))) return 'cancelled';
   if (!(await fundInternalFromExternal(ctx, amountWei, ctx.token.address))) return 'failed';
   if (!(await ensureGasForTx(ctx))) return 'failed';
   try {

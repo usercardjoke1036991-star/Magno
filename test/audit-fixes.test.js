@@ -35,4 +35,69 @@ describe('audit fixes', function () {
     expect(reserva).to.include("throw new Error('reserva-read')");
     expect(reserva).to.include("if (raw.includes('reserva-read')) return 'reservaReadFailed'");
   });
+
+  it('keeps a verified code until it expires if the charge does not finish', function () {
+    const worker = read('scripts/notify-worker.mjs');
+    const email = read('components/EmailOtpSection.tsx');
+    const phone = read('components/PhoneOtpSection.tsx');
+    expect(worker).to.include('pending.verified = true');
+    expect(worker).to.include('const alreadyVerified = pending.verified === true');
+    expect(worker).to.not.include('delete store.otps[wallet];\n      await persist();\n      json(res, 200, attestation)');
+    expect(worker).to.not.include('delete store.emailOtps[wallet];\n    await persist();\n    json(res, 200, { ok: true })');
+    expect(email).to.include("t('otpPayCancelled')");
+    expect(email).to.include("t('otpPayFailed')");
+    expect(email).to.include("t('emailRemoveFailed')");
+    expect(phone).to.include("t('otpPayCancelled')");
+    expect(phone).to.include("t('otpPayFailed')");
+  });
+
+  it('asks the wallet to confirm a Telegram chat before binding it', function () {
+    const worker = read('scripts/notify-worker.mjs');
+    const ui = read('components/NotificationChannels.tsx');
+    const start = worker.slice(worker.indexOf('const pollTelegram'), worker.indexOf('const DAY'));
+    expect(worker).to.include('telegramOffers: {}');
+    expect(worker).to.include('const holdTelegramOffer');
+    expect(start).to.include('holdTelegramOffer');
+    expect(start).to.not.include('bindTelegram');
+    expect(worker).to.include("path === '/telegram/accept' || path === '/telegram/reject'");
+    expect(ui).to.include("'/telegram/accept'");
+    expect(ui).to.include("'/telegram/reject'");
+    expect(ui).to.include("t('telegramConfirmTitle')");
+  });
+
+  it('opens a KYC link only when the host is Sumsub', function () {
+    const worker = read('scripts/notify-worker.mjs');
+    const kyc = read('services/kycProvider.ts');
+    expect(worker).to.include('const isSumsubHttps');
+    expect(worker).to.include('!isSumsubHttps(url)');
+    expect(kyc).to.include('export function isSumsubHttps');
+    expect(kyc).to.include("host === 'sumsub.com' || host.endsWith('.sumsub.com')");
+    expect(kyc).to.not.include('isHttpsUrl');
+  });
+
+  it('uses a movement title when the funds lock is not a wallet transfer', function () {
+    const purpose = read('services/fundsConfirm.ts');
+    const host = read('components/FundsConfirmHost.tsx');
+    const home = read('hooks/useHomeHandlers.ts');
+    const charge = read('services/founderUsdtCharge.ts');
+    expect(purpose).to.include("'movement'");
+    expect(host).to.include("purpose === 'movement'");
+    expect(host).to.include("'fundsConfirmMovement'");
+    expect(home.match(/confirmFunds\('movement'\)/g) || []).to.have.length(9);
+    expect(charge.match(/confirmFunds\('movement'\)/g) || []).to.have.length(2);
+    expect(home).to.include("confirmFunds('loanRequest')");
+    expect(home).to.include("confirmFunds('loanPay')");
+  });
+
+  it('says the parked signup USDT and the liquidate reward match the contract', function () {
+    const es = JSON.parse(read('i18n/locales/es.json'));
+    expect(es.bonusPending).to.match(/apartado en el alta/i);
+    expect(es.bonusPending).to.not.match(/pool|fondo|bolsa/i);
+    expect(es.referralEarnFirst).to.include('{bonus}');
+    expect(es.referralEarnFirst).to.match(/apartado en el alta/i);
+    expect(es.liquidarLead).to.match(/5% del principal/i);
+    expect(es.liquidarConfirm).to.match(/5% del principal/i);
+    expect(es.settingsAdminLead).to.match(/cofundador/i);
+    expect(es.invitedBy).to.equal('Lo invitó');
+  });
 });

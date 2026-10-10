@@ -432,7 +432,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `services/kycDeclaration.ts` — módulo JS/TS
   - Funciones/clases: normalizeLegalName, normalizeCountry, normalizeCity, isValidLegalName, isValidKyc, kycIdentitySource, kycIdentityFingerprint, formatKycFingerprint, loadKycDeclaration, loadBoundLegalName, saveKycDeclaration, bindLegalIdentity, clearKycDeclaration, loadKycDocPhoto, isKycPhotoLocked, lockKycDocPhoto, persistKycDocPhoto
 - `services/kycProvider.ts` — módulo JS/TS
-  - Funciones/clases: notifyKycProviderReady, openKycProvider
+  - Funciones/clases: isSumsubHttps, notifyKycProviderReady, openKycProvider
 - `services/linkedWallet.ts` — módulo JS/TS
   - Funciones/clases: WALLET_LINK_SKIPPED, linkedWalletStorageKey, hasLinkedExternalWallet, hasCompletedWalletLink, loadLinkedExternalWallet, saveLinkedExternalWallet, proveAndSaveLinkedWallet, skipLinkedExternalWallet, loadRequiredExternalWallet
 - `services/movementHistory.ts` — módulo JS/TS
@@ -485,6 +485,7 @@ Conexión = análisis estático. No afirma ejecución 100% en runtime.
 - `test/alta-registro.test.js` — módulo JS/TS
 - `test/attest2of2.test.js` — módulo JS/TS
 - `test/audit-fixes.test.js` — módulo JS/TS
+  - Funciones/clases: isSumsubHttps
 - `test/brand-splash.test.js` — módulo JS/TS
 - `test/circuitBreaker.test.js` — módulo JS/TS
 - `test/commission-levels.test.js` — módulo JS/TS

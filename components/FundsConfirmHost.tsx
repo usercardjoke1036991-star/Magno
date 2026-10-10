@@ -70,7 +70,7 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
         }
         return false;
       }
-      const slot: AuthPurpose = nextPurpose === 'transfer' ? 'funds' : nextPurpose;
+      const slot: AuthPurpose = nextPurpose === 'transfer' || nextPurpose === 'movement' ? 'funds' : nextPurpose;
       if (!(await isAuthEnabled(slot))) return true;
       setPurpose(nextPurpose);
       const preferred = await getAuthMethods(slot);
@@ -154,7 +154,9 @@ export const FundsConfirmHost: React.FC<{ children: React.ReactNode }> = ({ chil
         ? 'loanConfirmPayTitle'
         : purpose === 'security'
           ? 'securityConfirmTitle'
-          : 'fundsConfirmTitle';
+          : purpose === 'movement'
+            ? 'fundsConfirmMovement'
+            : 'fundsConfirmTitle';
   const prompt =
     method === 'pin'
       ? t('fundsConfirmPrompt')

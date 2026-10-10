@@ -94,8 +94,12 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
     try {
       const confirmed = await confirmEmailOtp(walletAddress, email, code);
       const charged = await chargeVerificationFee(confirmed);
+      if (charged === 'cancelled') {
+        setError(t('otpPayCancelled'));
+        return;
+      }
       if (charged !== 'paid') {
-        setError(t('otpVerifyFailed'));
+        setError(t('otpPayFailed'));
         return;
       }
       const saved = await saveVerifiedEmail(confirmed);
@@ -139,7 +143,7 @@ export const EmailOtpSection: React.FC<EmailOtpSectionProps> = ({
               setSent(false);
               setCode('');
             } catch {
-              setError(t('otpVerifyFailed'));
+              setError(t('emailRemoveFailed'));
             } finally {
               setBusy(false);
             }

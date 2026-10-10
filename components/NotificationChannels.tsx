@@ -75,24 +75,53 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
     };
   }, []);
 
-  const readLinked = useCallback(async (): Promise<boolean> => {
-    if (!walletAddress || !notifyApiConfigured()) return false;
+  const readTelegram = useCallback(async (): Promise<{ linked: boolean; offer: string }> => {
+    if (!walletAddress || !notifyApiConfigured()) return { linked: false, offer: '' };
     try {
       const signer = await loadAppWallet();
-      if (!signer) return false;
+      if (!signer) return { linked: false, offer: '' };
       const auth = await signedAuthBody(signer, walletAddress, 'vincular-avisos');
-      const { response, body } = await notifyJsonBody<{ linked?: boolean }>('/telegram/status', {
+      const { response, body } = await notifyJsonBody<{ linked?: boolean; offer?: string }>('/telegram/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(auth),
       });
-      const ok = Boolean(response.ok && body.linked);
-      if (ok) setLinked(true);
-      return ok;
+      const linkedNow = Boolean(response.ok && body.linked);
+      if (linkedNow) setLinked(true);
+      const offer = linkedNow ? '' : String(body.offer || '').slice(0, 40);
+      return { linked: linkedNow, offer };
     } catch {
-      return false;
+      return { linked: false, offer: '' };
     }
   }, [walletAddress]);
+
+  const readLinked = useCallback(async (): Promise<boolean> => {
+    const status = await readTelegram();
+    return status.linked;
+  }, [readTelegram]);
+
+  const decideTelegramOffer = (name: string) =>
+    new Promise<boolean>((resolve) => {
+      Alert.alert(t('telegramConfirmTitle'), t('telegramConfirmBody', { name }), [
+        { text: t('telegramConfirmReject'), style: 'cancel', onPress: () => resolve(false) },
+        { text: t('telegramConfirmAccept'), onPress: () => resolve(true) },
+      ]);
+    });
+
+  const postTelegramDecision = async (accept: boolean): Promise<boolean> => {
+    const signer = await loadAppWallet();
+    if (!signer) return false;
+    const auth = await signedAuthBody(signer, walletAddress, 'vincular-avisos');
+    const { response, body } = await notifyJsonBody<{ linked?: boolean }>(
+      accept ? '/telegram/accept' : '/telegram/reject',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(auth),
+      }
+    );
+    return Boolean(response.ok && (accept ? body.linked : true));
+  };
 
   React.useEffect(() => {
     let live = true;
@@ -183,10 +212,22 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
       if (!body.code || !/^[a-z0-9]{8,16}$/.test(body.code)) throw new Error('code');
       const opened = await openSafeUrl(`https://t.me/${bot}?start=${body.code}`);
       if (!opened) throw new Error('open');
+      let offer = '';
       for (let i = 0; i < 8; i += 1) {
         await wait(2000);
-        if (await readLinked()) return;
+        const status = await readTelegram();
+        if (status.linked) return;
+        if (status.offer) {
+          offer = status.offer;
+          break;
+        }
       }
+      if (!offer) throw new Error('offer');
+      const accepted = await decideTelegramOffer(offer);
+      const saved = await postTelegramDecision(accepted);
+      if (!accepted) return;
+      if (!saved) throw new Error('accept');
+      setLinked(true);
     } catch {
       Alert.alert(t('error'), t('telegramNeedApi'));
     } finally {

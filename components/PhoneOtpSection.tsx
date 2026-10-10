@@ -124,8 +124,12 @@ export const PhoneOtpSection: React.FC<PhoneOtpSectionProps> = ({
         attestation.s
       );
       const charged = await chargeVerificationFee(attestation.phoneHash || normalizePhone(phone));
+      if (charged === 'cancelled') {
+        setError(t('otpPayCancelled'));
+        return;
+      }
       if (charged !== 'paid') {
-        setError(t('otpVerifyFailed'));
+        setError(t('otpPayFailed'));
         return;
       }
       await QuatriviumCreditService.vincularIdentidad(

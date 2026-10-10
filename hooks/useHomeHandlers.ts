@@ -571,7 +571,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('hubCanje'), t('canjeNeed', { points: String(fama - userInfo.famaDisponible) }));
       return;
     }
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     if (!(await ensureGasForTx())) return;
     const result = await canjearFama(fama);
     if (result.success) {
@@ -618,7 +618,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('hubCanje'), t('canjeNeed', { points: String(fama - (userInfo.famaRedDisponible || 0)) }));
       return;
     }
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     if (!(await ensureGasForTx())) return;
     const result = await canjearFamaRed(fama);
     if (result.success) {
@@ -661,7 +661,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('rachaTitle'), t('rachaNothing'));
       return;
     }
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     if (!(await ensureGasForTx())) return;
     const result = await cobrarBonoRacha();
     if (result.success) {
@@ -786,7 +786,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('amount'), t('amountGreaterZero'));
       return;
     }
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     try {
       const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
       if (!(await fundInternalFromExternal(amountWei, selectedToken.address))) return;
@@ -834,7 +834,7 @@ export const useHomeHandlers = ({
     }
     const amount = String(accessPayUsdt());
     const amountWei = parseUnits(amount, selectedToken.decimals).toString();
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     if (!(await fundInternalFromExternal(amountWei, selectedToken.address))) return;
     if (!(await ensureGasForTx())) return;
     try {
@@ -868,7 +868,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('amount'), t('amountGreaterZero'));
       return;
     }
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     try {
       await runAsAdmin(async () => {
         const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
@@ -888,7 +888,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('amount'), t('amountGreaterZero'));
       return;
     }
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     try {
       await runAsAdmin(async () => {
         const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
@@ -903,7 +903,7 @@ export const useHomeHandlers = ({
   };
 
   const handleAplicarRetiroReserva = async () => {
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     try {
       await runAsAdmin(async () => {
         const signer = await getEthersSignerFromProvider(adminProvider as Eip1193Provider);
@@ -948,7 +948,7 @@ export const useHomeHandlers = ({
       Alert.alert(t('amount'), t('amountGreaterZero'));
       return;
     }
-    if (!(await confirmFunds())) return;
+    if (!(await confirmFunds('movement'))) return;
     try {
       const amountWei = parseUnits(parsed, selectedToken.decimals).toString();
       if (!(await fundInternalFromExternal(amountWei, selectedToken.address))) return;

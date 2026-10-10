@@ -364,6 +364,7 @@ const emptyStore = () => ({
   reminded: {},
   usedAuth: {},
   pendingBinds: {},
+  telegramOffers: {},
   otps: {},
   emailOtps: {},
   phoneClaims: {},
@@ -1061,6 +1062,18 @@ const sumsubHeaders = (method, pathWithQuery, body = '') => {
   };
 };
 
+const isSumsubHttps = (value) => {
+  try {
+    const url = new URL(String(value || ''));
+    if (url.protocol !== 'https:') return false;
+    if (url.username || url.password) return false;
+    const host = url.hostname.toLowerCase();
+    return host === 'sumsub.com' || host.endsWith('.sumsub.com');
+  } catch {
+    return false;
+  }
+};
+
 const sumsubProviderLink = async (wallet) => {
   if (!hasKycProvider) {
     const error = new Error('not configured');
@@ -1076,7 +1089,7 @@ const sumsubProviderLink = async (wallet) => {
   });
   const payload = await response.json().catch(() => ({}));
   const url = String(payload.url || payload.websdkLink || '');
-  if (!response.ok || !/^https:\/\//i.test(url)) {
+  if (!response.ok || !isSumsubHttps(url)) {
     const error = new Error('provider');
     error.status = 503;
     throw error;
@@ -1142,17 +1155,54 @@ const bindTelegram = (wallet, chatId) => {
   return { same, replaced: Boolean(prevChat) && !same };
 };
 
-const consumeBindCode = (payload) => {
+const telegramLabel = (message) => {
+  const from = message?.from || {};
+  const chat = message?.chat || {};
+  const username = String(from.username || chat.username || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
+  const name = String(from.first_name || chat.first_name || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 40);
+  if (username) return `@${username}`;
+  return name || 'Telegram';
+};
+
+/** El /start no vincula. Deja la oferta para que la cartera la confirme en la app. */
+const holdTelegramOffer = (payload, chatId, message) => {
   const code = String(payload || '').trim().toLowerCase();
   if (!/^[a-z0-9]{8,16}$/.test(code)) return null;
-  const pending = store.pendingBinds?.[code];
+  const chatKey = String(chatId || '');
+  if (!/^\d{1,20}$/.test(chatKey)) return null;
+  store.pendingBinds = store.pendingBinds || {};
+  const pending = store.pendingBinds[code];
   if (!pending) return null;
   delete store.pendingBinds[code];
   if (Number(pending.exp) < Date.now()) {
     saveStore(store);
     return null;
   }
-  return String(pending.wallet || '').toLowerCase();
+  const wallet = String(pending.wallet || '').toLowerCase();
+  if (!/^0x[a-f0-9]{40}$/.test(wallet)) {
+    saveStore(store);
+    return null;
+  }
+  store.telegramOffers = store.telegramOffers || {};
+  store.telegramOffers[wallet] = {
+    chatId: chatKey,
+    label: telegramLabel(message),
+    exp: Date.now() + 10 * 60 * 1000,
+  };
+  saveStore(store);
+  return store.telegramOffers[wallet];
+};
+
+const liveTelegramOffer = (wallet) => {
+  const key = String(wallet || '').toLowerCase();
+  store.telegramOffers = store.telegramOffers || {};
+  const offer = store.telegramOffers[key];
+  if (!offer) return null;
+  if (Number(offer.exp) < Date.now() || !/^\d{1,20}$/.test(String(offer.chatId || ''))) {
+    delete store.telegramOffers[key];
+    return null;
+  }
+  return offer;
 };
 
 const pollTelegram = async () => {
@@ -1176,15 +1226,9 @@ const pollTelegram = async () => {
         const chatId = message?.chat?.id;
         if (!chatId || !text.startsWith('/start')) continue;
         const payload = text.replace('/start', '').trim();
-        const wallet = consumeBindCode(payload);
-        if (wallet) {
-          const bound = bindTelegram(wallet, chatId);
-          const text = bound.same
-            ? 'Quatrivium Finance: esta cuenta ya estaba vinculada. Recibirá los avisos aquí.'
-            : bound.replaced
-              ? 'Quatrivium Finance: Telegram se actualizó. Los avisos llegarán a este chat.'
-              : 'Quatrivium Finance: Telegram quedó vinculado. Recibirá los dos avisos de pago (mitad de plazo y antes del corte). El resto de avisos es opcional.';
-          await sendTelegram(chatId, text);
+        const offer = holdTelegramOffer(payload, chatId, message);
+        if (offer) {
+          await sendTelegram(chatId, 'Quatrivium Finance: vuelva a la app y confirme que este chat es el suyo. Hasta entonces los avisos no se vinculan.');
         } else {
           await sendTelegram(chatId, 'Abra el vínculo desde Quatrivium Finance para vincular esta cuenta. No envíe una dirección a mano.');
         }
@@ -1657,7 +1701,49 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
       return;
     }
-    json(res, 200, { linked: telegramLinked(statusWallet) });
+    const offer = liveTelegramOffer(statusWallet);
+    json(res, 200, { linked: telegramLinked(statusWallet), offer: offer ? String(offer.label || '') : '' });
+    return;
+  }
+  if (path === '/telegram/accept' || path === '/telegram/reject') {
+    if (!rateLimit(ip, 20)) {
+      json(res, 429, { error: 'rate' });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch (error) {
+      bodyError(res, error);
+      return;
+    }
+    let wallet;
+    try {
+      wallet = requireAuth(body, ['vincular-avisos']).wallet;
+    } catch (error) {
+      json(res, error.message === 'wallet' ? 400 : 401, { error: error.message || 'auth' });
+      return;
+    }
+    if (String(body.purpose) !== 'vincular-avisos') {
+      json(res, 401, { error: 'purpose' });
+      return;
+    }
+    const key = String(wallet).toLowerCase();
+    const offer = liveTelegramOffer(key);
+    if (path === '/telegram/reject') {
+      if (store.telegramOffers) delete store.telegramOffers[key];
+      saveStore(store);
+      json(res, 200, { ok: true });
+      return;
+    }
+    if (!offer) {
+      json(res, 400, { error: 'offer' });
+      return;
+    }
+    bindTelegram(key, offer.chatId);
+    delete store.telegramOffers[key];
+    saveStore(store);
+    json(res, 200, { linked: true });
     return;
   }
   if (path === '/telegram/prepare') {
@@ -1701,6 +1787,8 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       return;
     }
     const code = randomBytes(6).toString('hex');
+    store.telegramOffers = store.telegramOffers || {};
+    delete store.telegramOffers[walletKey];
     store.pendingBinds[code] = { wallet, exp: now + 10 * 60 * 1000 };
     await persist();
     json(res, 200, { code });
@@ -1791,21 +1879,26 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       json(res, 400, { error: 'expired' });
       return;
     }
-    pending.attempts = Number(pending.attempts || 0) + 1;
-    if (pending.attempts > 5) {
-      delete store.otps[wallet];
-      await persist();
-      json(res, 429, { error: 'rate' });
-      return;
-    }
-    const usesTwilioVerify = pending.via === 'twilio-verify';
-    const codeOk = usesTwilioVerify
-      ? await checkTwilioVerify(phone, code)
-      : sameHash(pending.codeHash, hashOtp(code, phoneHash, wallet));
-    if (!codeOk) {
-      await persist();
-      json(res, 401, { error: 'code' });
-      return;
+    const alreadyVerified = pending.verified === true;
+    if (!alreadyVerified) {
+      pending.attempts = Number(pending.attempts || 0) + 1;
+      if (pending.attempts > 5) {
+        delete store.otps[wallet];
+        await persist();
+        json(res, 429, { error: 'rate' });
+        return;
+      }
+      const usesTwilioVerify = pending.via === 'twilio-verify';
+      const codeOk = usesTwilioVerify
+        ? await checkTwilioVerify(phone, code)
+        : sameHash(pending.codeHash, hashOtp(code, phoneHash, wallet));
+      if (!codeOk) {
+        await persist();
+        json(res, 401, { error: 'code' });
+        return;
+      }
+      pending.verified = true;
+      pending.attempts = Math.max(0, Number(pending.attempts || 0) - 1);
     }
     try {
       const attestation = await attestIdentity(wallet, phoneHash, deviceHash);
@@ -1819,7 +1912,6 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       store.phoneClaims[phoneHash] = { wallet, exp: now + IDENTITY_CLAIM_MS };
       const prev = store.profiles[wallet] || {};
       store.profiles[wallet] = { ...prev, verifiedPhone: phone, phoneReleased: false };
-      delete store.otps[wallet];
       await persist();
       json(res, 200, attestation);
     } catch {
@@ -1909,17 +2001,22 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
       json(res, 400, { error: 'expired' });
       return;
     }
-    pending.attempts = Number(pending.attempts || 0) + 1;
-    if (pending.attempts > 5) {
-      delete store.emailOtps[wallet];
-      await persist();
-      json(res, 429, { error: 'rate' });
-      return;
-    }
-    if (!sameHash(pending.codeHash, hashOtp(code, emailHash, wallet))) {
-      await persist();
-      json(res, 401, { error: 'code' });
-      return;
+    const alreadyVerified = pending.verified === true;
+    if (!alreadyVerified) {
+      pending.attempts = Number(pending.attempts || 0) + 1;
+      if (pending.attempts > 5) {
+        delete store.emailOtps[wallet];
+        await persist();
+        json(res, 429, { error: 'rate' });
+        return;
+      }
+      if (!sameHash(pending.codeHash, hashOtp(code, emailHash, wallet))) {
+        await persist();
+        json(res, 401, { error: 'code' });
+        return;
+      }
+      pending.verified = true;
+      pending.attempts = Math.max(0, Number(pending.attempts || 0) - 1);
     }
     const prevEmail = store.profiles[wallet]?.email;
     if (prevEmail) {
@@ -1931,7 +2028,6 @@ const server = createServer(async (req, res) => { // NOSONAR javascript:S5332
     store.emailClaims[emailHash] = { wallet, exp: now + IDENTITY_CLAIM_MS };
     const prev = store.profiles[wallet] || {};
     store.profiles[wallet] = { ...prev, email, emailReleased: false };
-    delete store.emailOtps[wallet];
     await persist();
     json(res, 200, { ok: true });
     return;

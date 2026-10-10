@@ -1,8 +1,19 @@
 import { Linking } from 'react-native';
-import { isHttpsUrl } from '../utils/sanitize';
 import { notifyJsonBody } from './notifyClient';
 import { loadAppWallet } from './appWallet';
 import { signedAuthBody } from './walletAuth';
+
+export function isSumsubHttps(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') return false;
+    if (url.username || url.password) return false;
+    const host = url.hostname.toLowerCase();
+    return host === 'sumsub.com' || host.endsWith('.sumsub.com');
+  } catch {
+    return false;
+  }
+}
 
 export async function notifyKycProviderReady(): Promise<boolean> {
   try {
@@ -25,7 +36,7 @@ export async function openKycProvider(walletAddress: string): Promise<void> {
     timeoutMs: 20_000,
   });
   const url = String(body.url || '');
-  if (!response.ok || !isHttpsUrl(url)) {
+  if (!response.ok || !isSumsubHttps(url)) {
     throw new Error(body.error || 'provider');
   }
   const opened = await Linking.canOpenURL(url);
