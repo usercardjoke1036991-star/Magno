@@ -43,7 +43,7 @@ describe('referral earnings', function () {
     expect(next.earnedWei).to.equal(one.toString());
   });
 
-  it('creates the direct from the bonus event and scans recent blocks first', function () {
+  it('creates the direct from the bonus event and asks for yesterday before the recent blocks', function () {
     const network = fs.readFileSync(path.join(__dirname, '..', 'services', 'referralNetwork.ts'), 'utf8');
     const earnings = fs.readFileSync(path.join(__dirname, '..', 'utils', 'referralEarnings.ts'), 'utf8');
     expect(earnings).to.include('export function creditDirectWei');
@@ -51,6 +51,17 @@ describe('referral earnings', function () {
     expect(network).to.include("addEarned(referido, amount, 'bonus', event.blockNumber || 0, true)");
     expect(network).to.include('const RECENT_SPAN = 50_000');
     expect(network).to.include('const SCAN_BUDGET_MS = 18_000');
+    expect(network).to.include('const DIRECT_SCAN_BUDGET_MS = 28_000');
+    expect(network).to.include('const YESTERDAY_TO_S = 36 * 60 * 60');
+    expect(network).to.include('const PRIORITY_FROM_S = 24 * 60 * 60');
+    expect(network).to.include('const DIRECT_CHUNK = 20_000');
+    expect(network).to.include('pending.unshift([mid, end], [start, mid - 1])');
+    const priority = network.indexOf('chunkRanges(priorityStart, priorityEnd, DIRECT_CHUNK)');
+    const recent = network.indexOf('chunkRanges(recentFrom, toBlock, DIRECT_CHUNK)');
+    expect(priority).to.be.greaterThan(0);
+    expect(priority).to.be.lessThan(recent);
+    expect(network).to.include('queryFilterRanges');
+    expect(network.indexOf('queryFilterRanges')).to.be.lessThan(network.indexOf('const commissionPack'));
     expect(network).to.include('queryFilterReliable');
     expect(network).to.not.include('CHUNK_CONCURRENCY');
     expect(network).to.include('withTimeout(provider.getBlock(blockNumber), CHUNK_TIMEOUT_MS)');

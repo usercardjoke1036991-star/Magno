@@ -12,8 +12,16 @@ const RECENT_SPAN = 50_000;
 const CHUNK_ATTEMPTS = 2;
 const CHUNK_TIMEOUT_MS = 6_000;
 const SCAN_BUDGET_MS = 18_000;
+const DIRECT_SCAN_BUDGET_MS = 28_000;
 const DEFAULT_LOOKBACK = 80_000;
 const MAX_SCAN_SPAN = 120_000; // RPC públicos no aguantan el rango completo desde el deploy.
+const FALLBACK_BLOCK_SECONDS = 0.45;
+const YESTERDAY_FROM_S = 18 * 60 * 60;
+const YESTERDAY_TO_S = 36 * 60 * 60;
+const PRIORITY_FROM_S = 24 * 60 * 60;
+const PRIORITY_TO_S = 30 * 60 * 60;
+const WEEK_S = 7 * 24 * 60 * 60;
+const DIRECT_CHUNK = 20_000;
 
 export interface ReferralChild {
   address: string;
@@ -191,6 +199,115 @@ function mergeLogPacks(packs: LogPack[]): LogPack {
       if (seen.has(id)) continue;
       seen.add(id);
       events.push(event);
+    }
+  }
+  return { events, failed, cut };
+}
+
+async function secondsPerBlock(provider: AbstractProvider, latest: number): Promise<number> {
+  const behind = Math.max(0, latest - 3_000);
+  if (behind >= latest) return FALLBACK_BLOCK_SECONDS;
+  try {
+    const [head, prev] = await Promise.all([
+      withTimeout(provider.getBlock(latest), CHUNK_TIMEOUT_MS),
+      withTimeout(provider.getBlock(behind), CHUNK_TIMEOUT_MS),
+    ]);
+    const elapsed = Number(head?.timestamp || 0) - Number(prev?.timestamp || 0);
+    const span = latest - behind;
+    if (elapsed > 0 && span > 0) return elapsed / span;
+  } catch {
+    // Si el ritmo no se lee, se usa el de la red rápida actual.
+  }
+  return FALLBACK_BLOCK_SECONDS;
+}
+
+function blocksAgo(latest: number, seconds: number, perBlock: number): number {
+  const step = perBlock > 0 ? perBlock : FALLBACK_BLOCK_SECONDS;
+  return Math.max(0, latest - Math.ceil(seconds / step));
+}
+
+function chunkRanges(fromBlock: number, toBlock: number, step = CHUNK): Array<[number, number]> {
+  if (fromBlock > toBlock) return [];
+  const size = step > 0 ? step : CHUNK;
+  const ranges: Array<[number, number]> = [];
+  for (let end = toBlock; end >= fromBlock; end -= size) {
+    ranges.push([Math.max(fromBlock, end - size + 1), end]);
+  }
+  return ranges;
+}
+
+function logId(event: object): string {
+  const row = event as { transactionHash?: string; index?: number; blockNumber?: number };
+  return `${row.transactionHash || ''}:${row.index ?? ''}:${row.blockNumber || 0}`;
+}
+
+function eventName(event: object): string {
+  if ('eventName' in event && (event as { eventName?: unknown }).eventName) {
+    return String((event as { eventName?: unknown }).eventName);
+  }
+  const fragment = 'fragment' in event ? (event as { fragment?: { name?: string } }).fragment : undefined;
+  return fragment?.name ? String(fragment.name) : '';
+}
+
+/** La franja de ayer va primero. Si un trozo ancho no cabe en el nodo, se parte. */
+async function queryFilterRanges(
+  contract: Contract,
+  filters: unknown[],
+  ranges: Array<[number, number]>,
+  deadline: number
+): Promise<LogPack> {
+  const events: LogPack['events'] = [];
+  const seen = new Set<string>();
+  let failed = 0;
+  let cut = false;
+  const pending: Array<[number, number]> = ranges.filter(([start, end]) => start <= end);
+  while (pending.length > 0) {
+    if (Date.now() > deadline) {
+      cut = true;
+      break;
+    }
+    const next = pending.shift();
+    if (!next) break;
+    const [start, end] = next;
+    let split = false;
+    for (const filter of filters) {
+      if (!filter) continue;
+      if (Date.now() > deadline) {
+        cut = true;
+        break;
+      }
+      let got = false;
+      for (let attempt = 0; attempt < CHUNK_ATTEMPTS; attempt += 1) {
+        try {
+          const page = await withTimeout(
+            contract.queryFilter(filter as Parameters<Contract['queryFilter']>[0], start, end),
+            CHUNK_TIMEOUT_MS
+          );
+          for (const event of page) {
+            const id = logId(event);
+            if (seen.has(id)) continue;
+            seen.add(id);
+            events.push(event);
+          }
+          got = true;
+          break;
+        } catch {
+          if (attempt < CHUNK_ATTEMPTS - 1) await pause(200);
+        }
+      }
+      if (!got) {
+        const span = end - start + 1;
+        if (span > CHUNK) {
+          const mid = start + Math.floor(span / 2);
+          pending.unshift([mid, end], [start, mid - 1]);
+          split = true;
+          break;
+        }
+        failed += 1;
+      }
+    }
+    if (cut || split) {
+      if (cut) break;
     }
   }
   return { events, failed, cut };
@@ -427,14 +544,10 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const contract = new Contract(contractAddress, CONTRACT_ABI, provider);
   const cacheKey = snapshotCacheKey(self);
   const previous = snapshotCache.get(cacheKey);
-  let fromBlock = 0;
   let toBlock = 0;
-  let lookbackPartial = false;
   try {
     const range = await resolveStartBlock(provider, contractAddress);
-    fromBlock = range.fromBlock;
     toBlock = range.toBlock;
-    lookbackPartial = range.partial;
   } catch {
     if (previous && previous.directs.length > 0) return { ...previous, partial: true };
     return { ...EMPTY, partial: true };
@@ -445,12 +558,37 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
   const bonusFilter = eventFilter(contract, 'BonoActivacionPagado', self);
   const commissionFilter = eventFilter(contract, 'ComisionGeneracional', self);
 
-  const deadline = Date.now() + SCAN_BUDGET_MS;
-  const bonusPack = await queryFilterReliable(contract, bonusFilter, fromBlock, toBlock, deadline);
-  const signupPack = await queryFilterReliable(contract, signupFilter, fromBlock, toBlock, deadline);
-  const commissionPack = await queryFilterReliable(contract, commissionFilter, fromBlock, toBlock, deadline);
-  const signups = signupPack.events;
-  const bonuses = bonusPack.events;
+  const perBlock = await secondsPerBlock(provider, toBlock);
+  const floor = Math.max(0, getKnownStartBlock(contractAddress));
+  const recentFrom = Math.max(floor, toBlock - RECENT_SPAN);
+  const yesterdayEnd = Math.min(blocksAgo(toBlock, YESTERDAY_FROM_S, perBlock), recentFrom - 1);
+  const yesterdayStart = Math.max(floor, blocksAgo(toBlock, YESTERDAY_TO_S, perBlock));
+  const priorityEnd = Math.min(yesterdayEnd, blocksAgo(toBlock, PRIORITY_FROM_S, perBlock));
+  const priorityStart = Math.max(yesterdayStart, blocksAgo(toBlock, PRIORITY_TO_S, perBlock));
+  const weekFrom = Math.max(floor, blocksAgo(toBlock, WEEK_S, perBlock));
+  const ranges = [
+    ...chunkRanges(priorityStart, priorityEnd, DIRECT_CHUNK),
+    ...chunkRanges(priorityEnd + 1, yesterdayEnd, DIRECT_CHUNK),
+    ...chunkRanges(yesterdayStart, priorityStart - 1, DIRECT_CHUNK),
+    ...chunkRanges(recentFrom, toBlock, DIRECT_CHUNK),
+    ...chunkRanges(yesterdayEnd + 1, recentFrom - 1, DIRECT_CHUNK),
+    ...chunkRanges(weekFrom, yesterdayStart - 1, DIRECT_CHUNK),
+  ];
+  const peoplePack = await queryFilterRanges(
+    contract,
+    [signupFilter, bonusFilter],
+    ranges,
+    Date.now() + DIRECT_SCAN_BUDGET_MS
+  );
+  const commissionPack = await queryFilterReliable(
+    contract,
+    commissionFilter,
+    recentFrom,
+    toBlock,
+    Date.now() + SCAN_BUDGET_MS
+  );
+  const signups = peoplePack.events.filter((event) => eventName(event) === 'AfiliadoRegistrado');
+  const bonuses = peoplePack.events.filter((event) => eventName(event) === 'BonoActivacionPagado');
   const commissions = commissionPack.events;
 
   const directSet = new Set<string>();
@@ -495,7 +633,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     ensureDirect(asText(argValue(args, 'usuario', 0)), event.blockNumber || 0);
   }
 
-  const failed = signupPack.failed + bonusPack.failed + commissionPack.failed;
+  const failed = peoplePack.failed + commissionPack.failed;
 
   const parentCache = new Map<string, string>();
   parentCache.set(self.toLowerCase(), ZERO);
@@ -614,7 +752,7 @@ export async function loadReferralNetwork(walletAddress: string): Promise<Referr
     bonusTotalWei: totals.bonusWei.toString(),
     bonusTotalLabel: formatToken(totals.bonusWei),
     activity,
-    partial: lookbackPartial || failed > 0 || signupPack.cut || bonusPack.cut || commissionPack.cut,
+    partial: peoplePack.cut || commissionPack.cut || failed > 0,
   };
   const emptyFail = failed > 0 && directs.length === 0;
   if (emptyFail && previous && previous.directs.length > 0) {
